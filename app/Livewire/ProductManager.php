@@ -110,13 +110,25 @@ class ProductManager extends Component
 
     public function updatedPrice(): void
     {
-        $this->calculateModal();
+        // When price changes, we prioritize keeping modal_price and updating profit
+        if (is_numeric($this->price) && is_numeric($this->modal_price)) {
+            $this->profit_per_unit = (int)$this->price - (int)$this->modal_price;
+        }
         $this->updateLabel();
     }
 
     public function updatedProfitPerUnit(): void
     {
-        $this->calculateModal();
+        if (is_numeric($this->price) && is_numeric($this->profit_per_unit)) {
+            $this->modal_price = (int)$this->price - (int)$this->profit_per_unit;
+        }
+    }
+
+    public function updatedModalPrice(): void
+    {
+        if (is_numeric($this->price) && is_numeric($this->modal_price)) {
+            $this->profit_per_unit = (int)$this->price - (int)$this->modal_price;
+        }
     }
 
     public function updatedName(): void
@@ -126,10 +138,10 @@ class ProductManager extends Component
 
     protected function calculateModal(): void
     {
+        // This is now handled in updated hooks for better control, 
+        // but kept for saveProduct fallback if needed
         if (is_numeric($this->price) && is_numeric($this->profit_per_unit)) {
             $this->modal_price = (int)$this->price - (int)$this->profit_per_unit;
-        } else {
-            $this->modal_price = 0;
         }
     }
 

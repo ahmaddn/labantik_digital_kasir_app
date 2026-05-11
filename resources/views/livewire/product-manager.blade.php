@@ -77,9 +77,10 @@
                     </div>
 
                     <div class="p-6 bg-gray-50 dark:bg-gray-900 rounded-2xl border border-dashed border-gray-200 dark:border-gray-700">
-                        <div class="flex justify-between items-center text-[10px] font-black uppercase tracking-widest text-gray-400">
-                            <span>Estimasi Harga Modal</span>
-                            <span class="text-gray-800 dark:text-white">Rp{{ number_format($modal_price, 0, ',', '.') }}</span>
+                        <label class="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-3 ml-2 italic">Estimasi Harga Modal</label>
+                        <div class="relative">
+                            <span class="absolute left-6 inset-y-0 flex items-center text-[10px] font-black text-gray-400">Rp</span>
+                            <input type="number" wire:model.live="modal_price" class="w-full pl-12 pr-6 py-4 bg-white dark:bg-gray-800 border-none rounded-xl focus:ring-4 focus:ring-primary-blue/10 font-black text-sm text-gray-800 dark:text-white">
                         </div>
                     </div>
 
