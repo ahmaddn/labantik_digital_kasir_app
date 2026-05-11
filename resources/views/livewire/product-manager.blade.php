@@ -1,0 +1,294 @@
+<div class="p-6">
+    <div class="flex flex-col md:flex-row md:items-center justify-between mb-10 gap-6">
+        <div>
+            <h1 class="text-4xl font-black italic uppercase tracking-tighter text-primary-blue dark:text-primary-blue-light">Katalog Produk</h1>
+            <p class="text-gray-400 font-bold text-xs uppercase tracking-[0.2em] italic">Manajemen Inventaris Digital</p>
+        </div>
+        
+        <div class="flex flex-wrap items-center gap-4">
+            <div class="flex items-center bg-white dark:bg-gray-800 px-6 py-2 rounded-2xl shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-800">
+                <button wire:click="$set('tab', 'products')" class="px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all {{ $tab === 'products' ? 'bg-primary-blue text-white shadow-lg shadow-blue-900/20' : 'text-gray-400 hover:text-gray-600' }}">Daftar Produk</button>
+                <button wire:click="$set('tab', 'stock')" class="px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all {{ $tab === 'stock' ? 'bg-primary-blue text-white shadow-lg shadow-blue-900/20' : 'text-gray-400 hover:text-gray-600' }}">Input Stok Awal</button>
+            </div>
+        </div>
+    </div>
+
+    @if($tab === 'products')
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
+        <!-- Form Section -->
+        <div class="lg:col-span-1">
+            <div class="bg-white dark:bg-gray-800 rounded-[3rem] p-10 shadow-2xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 sticky top-10">
+                <div class="flex items-center mb-8">
+                    <div class="w-12 h-12 bg-primary-red rounded-2xl flex items-center justify-center text-white mr-4 shadow-lg shadow-red-900/20">
+                        <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.27 6.96 8.73 5.04 8.73-5.04"/><path d="M12 22.08V12"/></svg>
+                    </div>
+                    <h2 class="text-xl font-black italic uppercase tracking-tighter text-gray-800 dark:text-white">
+                        {{ $editingId ? 'Edit Produk' : 'Produk Baru' }}
+                    </h2>
+                </div>
+
+                <form wire:submit.prevent="saveProduct" class="space-y-6">
+                    <div>
+                        <label class="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-3 ml-2 italic">Nama Produk</label>
+                        <input type="text" wire:model.blur="name" class="w-full px-6 py-4 bg-gray-50 dark:bg-gray-900 border-none rounded-2xl focus:ring-4 focus:ring-primary-blue/10 font-black text-sm text-gray-800 dark:text-white uppercase tracking-tight">
+                        @error('name') <span class="text-[10px] font-bold text-primary-red mt-2 ml-2 block uppercase italic">{{ $message }}</span> @enderror
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-3 ml-2 italic">Kategori</label>
+                            <select wire:model="category_id" class="w-full px-6 py-4 bg-gray-50 dark:bg-gray-900 border-none rounded-2xl focus:ring-4 focus:ring-primary-blue/10 font-black text-xs text-gray-800 dark:text-white">
+                                <option value="">Pilih Kategori</option>
+                                @foreach($categories as $cat)
+                                    <option value="{{ $cat->id }}">{{ $cat->name }}</option>
+                                @endforeach
+                            </select>
+                            @error('category_id') <span class="text-[10px] font-bold text-primary-red mt-2 ml-2 block uppercase italic">{{ $message }}</span> @enderror
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-3 ml-2 italic">Status</label>
+                            <div class="flex items-center h-[52px] bg-gray-50 dark:bg-gray-900 px-6 rounded-2xl">
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" wire:model="is_active" class="sr-only peer">
+                                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary-blue"></div>
+                                    <span class="ml-3 text-[10px] font-black text-gray-400 uppercase tracking-widest">Aktif</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-3 ml-2 italic">Harga Jual</label>
+                            <div class="relative">
+                                <span class="absolute left-6 inset-y-0 flex items-center text-[10px] font-black text-gray-400">Rp</span>
+                                <input type="number" wire:model.live="price" class="w-full pl-12 pr-6 py-4 bg-gray-50 dark:bg-gray-900 border-none rounded-2xl focus:ring-4 focus:ring-primary-blue/10 font-black text-sm text-gray-800 dark:text-white">
+                            </div>
+                            @error('price') <span class="text-[10px] font-bold text-primary-red mt-2 ml-2 block uppercase italic">{{ $message }}</span> @enderror
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-3 ml-2 italic">Profit/Unit</label>
+                            <div class="relative">
+                                <span class="absolute left-6 inset-y-0 flex items-center text-[10px] font-black text-gray-400">Rp</span>
+                                <input type="number" wire:model.live="profit_per_unit" class="w-full pl-12 pr-6 py-4 bg-gray-50 dark:bg-gray-900 border-none rounded-2xl focus:ring-4 focus:ring-primary-blue/10 font-black text-sm text-gray-800 dark:text-white">
+                            </div>
+                            @error('profit_per_unit') <span class="text-[10px] font-bold text-primary-red mt-2 ml-2 block uppercase italic">{{ $message }}</span> @enderror
+                        </div>
+                    </div>
+
+                    <div class="p-6 bg-gray-50 dark:bg-gray-900 rounded-2xl border border-dashed border-gray-200 dark:border-gray-700">
+                        <div class="flex justify-between items-center text-[10px] font-black uppercase tracking-widest text-gray-400">
+                            <span>Estimasi Harga Modal</span>
+                            <span class="text-gray-800 dark:text-white">Rp{{ number_format($modal_price, 0, ',', '.') }}</span>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-4 pt-4">
+                        <button type="submit" class="flex-1 py-5 bg-primary-red text-white rounded-[2rem] shadow-2xl shadow-red-900/20 font-black italic uppercase tracking-wider transform hover:-translate-y-1 transition-all">
+                            {{ $editingId ? 'Simpan Perubahan' : 'Tambah Produk' }}
+                        </button>
+                        @if($editingId)
+                        <button type="button" wire:click="cancelEdit" class="p-5 bg-gray-100 dark:bg-gray-900 text-gray-400 rounded-[2rem] hover:text-primary-blue transition-all">
+                            <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                        </button>
+                        @endif
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- List Section -->
+        <div class="lg:col-span-2">
+            <div class="bg-white dark:bg-gray-800 rounded-[3.5rem] shadow-2xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 overflow-hidden">
+                <div class="p-8 border-b border-gray-100 dark:border-gray-700 flex flex-col md:flex-row justify-between items-center gap-4">
+                    <div class="flex flex-wrap items-center gap-4 w-full md:w-auto">
+                        <div class="relative group flex-1 md:w-64">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                <svg class="w-3 h-3 text-gray-400" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                            </div>
+                            <input type="text" wire:model.live="search" placeholder="Cari produk..." class="w-full pl-10 pr-4 py-2 bg-gray-50 dark:bg-gray-900 border-none rounded-xl focus:ring-2 focus:ring-primary-blue/20 font-black text-[10px] text-gray-800 dark:text-white uppercase tracking-widest placeholder:text-gray-300">
+                        </div>
+                        <div class="flex items-center bg-gray-50 dark:bg-gray-900 px-4 py-2 rounded-xl border border-gray-100 dark:border-gray-800">
+                            <svg class="w-3 h-3 text-gray-400 mr-2" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+                            <select wire:model.live="filterCategory" class="bg-transparent border-none p-0 focus:ring-0 text-[10px] font-black uppercase tracking-widest text-gray-500">
+                                <option value="">Semua Kategori</option>
+                                @foreach($categories as $cat)
+                                    <option value="{{ $cat->id }}">{{ $cat->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-6">
+                        @if(count($selectedProducts) > 0)
+                            <div class="flex items-center bg-primary-blue/5 px-6 py-2 rounded-2xl border border-primary-blue/10 animate-fade-in">
+                                <span class="text-[10px] font-black text-primary-blue uppercase tracking-widest mr-6">{{ count($selectedProducts) }} Dipilih</span>
+                                <div class="flex gap-2">
+                                    <button wire:click="bulkToggleStatus" class="px-4 py-2 bg-white dark:bg-gray-900 text-primary-blue rounded-xl text-[9px] font-black uppercase tracking-widest shadow-sm hover:bg-primary-blue hover:text-white transition-all border border-primary-blue/20">Ganti Status</button>
+                                    <button onclick="confirm('Hapus ' + {{ count($selectedProducts) }} + ' produk?') || event.stopImmediatePropagation()" wire:click="bulkDelete" class="px-4 py-2 bg-primary-red text-white rounded-xl text-[9px] font-black uppercase tracking-widest shadow-lg shadow-red-500/20 hover:scale-105 transition-all">Hapus Semua</button>
+                                </div>
+                            </div>
+                        @endif
+                        <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest">{{ $products->total() }} Produk Ditemukan</span>
+                    </div>
+
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead class="bg-gray-50 dark:bg-gray-900/50">
+                            <tr>
+                                <th class="px-10 py-6 w-10">
+                                    <input type="checkbox" wire:model.live="selectAll" class="w-4 h-4 rounded border-gray-300 text-primary-blue focus:ring-primary-blue dark:bg-gray-900 dark:border-gray-700">
+                                </th>
+                                <th class="px-10 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">Produk</th>
+
+                                <th class="px-10 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">Kategori</th>
+                                <th class="px-10 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">Harga</th>
+                                <th class="px-10 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">Status</th>
+                                <th class="px-10 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right">Opsi</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-50 dark:divide-gray-700">
+                            @forelse($products as $product)
+                            <tr class="hover:bg-gray-50 dark:hover:bg-gray-900/30 transition-colors group {{ in_array($product->id, $selectedProducts) ? 'bg-primary-blue/5 dark:bg-primary-blue/10' : '' }}">
+                                <td class="px-10 py-8">
+                                    <input type="checkbox" wire:model.live="selectedProducts" value="{{ $product->id }}" class="w-4 h-4 rounded border-gray-300 text-primary-blue focus:ring-primary-blue dark:bg-gray-900 dark:border-gray-700">
+                                </td>
+                                <td class="px-10 py-8">
+                                    <div class="text-base font-black text-gray-800 dark:text-white uppercase tracking-tight italic">{{ $product->name }}</div>
+                                    <div class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mt-1">ID: #{{ str_pad($product->id, 4, '0', STR_PAD_LEFT) }}</div>
+                                </td>
+                                <td class="px-10 py-8">
+                                    <span class="px-3 py-1 bg-gray-100 dark:bg-gray-900 rounded-lg text-[9px] font-black text-gray-500 uppercase tracking-widest">
+                                        {{ $product->category->name }}
+                                    </span>
+                                </td>
+                                <td class="px-10 py-8">
+                                    <div class="text-base font-black text-primary-red italic">Rp{{ number_format($product->price, 0, ',', '.') }}</div>
+                                    <div class="flex flex-col gap-1 mt-1">
+                                        <div class="text-[9px] font-bold text-gray-400 italic uppercase tracking-widest">Modal: Rp{{ number_format($product->modal_price, 0, ',', '.') }}</div>
+                                        <div class="text-[9px] font-black text-green-500 italic uppercase tracking-widest">Profit: Rp{{ number_format($product->profit, 0, ',', '.') }}</div>
+                                    </div>
+                                </td>
+                                <td class="px-10 py-8">
+                                    @if($product->is_active)
+                                        <span class="flex items-center text-[9px] font-black text-green-500 uppercase tracking-widest">
+                                            <span class="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></span>
+                                            Aktif
+                                        </span>
+                                    @else
+                                        <span class="flex items-center text-[9px] font-black text-gray-400 uppercase tracking-widest">
+                                            <span class="w-2 h-2 bg-gray-400 rounded-full mr-2"></span>
+                                            Nonaktif
+                                        </span>
+                                    @endif
+                                </td>
+                                <td class="px-10 py-8 text-right">
+                                    <div class="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <button wire:click="editProduct({{ $product->id }})" class="p-3 bg-white dark:bg-gray-800 text-primary-blue rounded-xl shadow-sm hover:scale-110 transition-transform">
+                                            <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
+                                        </button>
+                                        <button wire:click="confirmDelete({{ $product->id }})" class="p-3 bg-white dark:bg-gray-800 text-primary-red rounded-xl shadow-sm hover:scale-110 transition-transform">
+                                            <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            @empty
+                            <tr>
+                                <td colspan="6" class="px-10 py-32 text-center opacity-20">
+                                    <p class="text-xs font-black uppercase tracking-widest italic">Belum ada produk</p>
+                                </td>
+                            </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+                <div class="px-10 py-8 bg-gray-50 dark:bg-gray-900/50">
+                    {{ $products->links('livewire.custom-pagination') }}
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
+
+    @if($tab === 'stock')
+    <div class="max-w-4xl mx-auto">
+        <div class="bg-white dark:bg-gray-800 rounded-[3rem] p-12 shadow-2xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700">
+            <div class="flex items-center mb-10">
+                <div class="w-14 h-14 bg-primary-blue rounded-2xl flex items-center justify-center text-white mr-6 shadow-lg shadow-blue-900/20">
+                    <svg class="w-7 h-7" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.27 6.96 8.73 5.04 8.73-5.04"/><path d="M12 22.08V12"/></svg>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-black italic uppercase tracking-tighter text-gray-800 dark:text-white">Input Stok Awal Harian</h2>
+                    <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">Tentukan stok produk saat membuka toko</p>
+                </div>
+            </div>
+
+            <form wire:submit.prevent="saveStock" class="space-y-8">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div>
+                        <label class="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-3 ml-2 italic">Tanggal Stok</label>
+                        <input type="date" wire:model="stock_date" class="w-full px-6 py-4 bg-gray-50 dark:bg-gray-900 border-none rounded-2xl focus:ring-4 focus:ring-primary-blue/10 font-black text-sm text-gray-800 dark:text-white">
+                        @error('stock_date') <span class="text-[10px] font-bold text-primary-red mt-2 ml-2 block uppercase italic">{{ $message }}</span> @enderror
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-3 ml-2 italic">Pilih Produk</label>
+                        <select wire:model="stock_product_id" class="w-full px-6 py-4 bg-gray-50 dark:bg-gray-900 border-none rounded-2xl focus:ring-4 focus:ring-primary-blue/10 font-black text-sm text-gray-800 dark:text-white">
+                            <option value="">Pilih Produk</option>
+                            @foreach(\App\Models\Product::orderBy('name')->get() as $p)
+                                <option value="{{ $p->id }}">{{ $p->name }}</option>
+                            @endforeach
+                        </select>
+                        @error('stock_product_id') <span class="text-[10px] font-bold text-primary-red mt-2 ml-2 block uppercase italic">{{ $message }}</span> @enderror
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-3 ml-2 italic">Jumlah Stok Awal</label>
+                    <input type="number" wire:model="opening_stock" class="w-full px-8 py-6 bg-gray-50 dark:bg-gray-900 border-none rounded-2xl focus:ring-4 focus:ring-primary-blue/10 font-black text-3xl text-primary-blue text-center tracking-tighter">
+                    @error('opening_stock') <span class="text-[10px] font-bold text-primary-red mt-2 ml-2 block uppercase italic">{{ $message }}</span> @enderror
+                </div>
+
+                <button type="submit" class="w-full py-6 bg-primary-blue text-white rounded-[2.5rem] shadow-2xl shadow-blue-900/30 font-black italic uppercase tracking-widest transform hover:-translate-y-1 transition-all text-lg">
+                    Simpan Stok Awal
+                </button>
+            </form>
+        </div>
+    </div>
+    @endif
+
+    <!-- Delete Modal -->
+    <div 
+        x-data="{ show: @entangle('showDeleteModal') }" 
+        x-show="show" 
+        x-cloak
+        class="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/60 backdrop-blur-sm"
+        x-transition:enter="transition ease-out duration-300"
+        x-transition:enter-start="opacity-0"
+        x-transition:enter-end="opacity-100"
+        x-transition:leave="transition ease-in duration-200"
+        x-transition:leave-start="opacity-100"
+        x-transition:leave-end="opacity-0"
+    >
+        <div 
+            @click.away="show = false"
+            class="bg-white dark:bg-gray-800 rounded-[3rem] p-12 max-w-md w-full shadow-2xl text-center"
+            x-transition:enter="transition ease-out duration-500"
+            x-transition:enter-start="opacity-0 scale-90 translate-y-10"
+            x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+            x-transition:leave="transition ease-in duration-300"
+            x-transition:leave-start="opacity-100 scale-100 translate-y-0"
+            x-transition:leave-end="opacity-0 scale-95 translate-y-10"
+        >
+            <div class="w-20 h-20 bg-primary-red/10 text-primary-red rounded-full flex items-center justify-center mx-auto mb-8">
+                <svg class="w-10 h-10" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
+            </div>
+            <h3 class="text-2xl font-black italic uppercase tracking-tighter text-gray-800 dark:text-white mb-4">Hapus Produk?</h3>
+            <p class="text-gray-400 font-bold text-xs uppercase tracking-widest mb-10 leading-relaxed">Tindakan ini tidak dapat dibatalkan. Seluruh data terkait produk ini akan dihapus permanen.</p>
+            <div class="flex gap-4">
+                <button wire:click="cancelDelete" class="flex-1 py-4 bg-gray-100 dark:bg-gray-900 text-gray-400 rounded-2xl font-black uppercase text-[10px] tracking-widest hover:text-gray-600 transition-all">Batal</button>
+                <button wire:click="deleteProduct" class="flex-1 py-4 bg-primary-red text-white rounded-2xl font-black uppercase text-[10px] tracking-widest shadow-lg shadow-red-500/30 hover:scale-105 transition-all">Ya, Hapus</button>
+            </div>
+        </div>
+    </div>
+</div>
