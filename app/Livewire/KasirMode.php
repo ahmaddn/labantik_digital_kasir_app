@@ -188,6 +188,8 @@ class KasirMode extends Component
                 'unit_price' => $item['price'],
                 'unit_profit' => $item['profit'],
                 'total_price' => $item['price'] * $item['quantity'],
+                'debt_amount' => in_array($this->status, ['belum_menerima_uang', 'uang_dipinjam']) ? ($item['price'] * $item['quantity']) : 0,
+                'change_due' => ($this->status === 'belum_kembalian') ? $this->change : 0,
                 'status' => $this->status,
                 'note' => $this->note ?: ($this->change > 0 ? 'Kembalian: Rp' . number_format($this->change, 0, ',', '.') : null),
             ]);

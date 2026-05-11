@@ -19,6 +19,8 @@ class Transaction extends Model
         'unit_price',
         'unit_profit',
         'total_price',
+        'debt_amount',
+        'change_due',
         'status',
         'note'
     ];
@@ -35,5 +37,15 @@ class Transaction extends Model
     public function supplier(): BelongsTo
     {
         return $this->belongsTo(Supplier::class);
+    }
+
+    public function scopeDebt($query)
+    {
+        return $query->whereIn('status', ['belum_menerima_uang', 'uang_dipinjam']);
+    }
+
+    public function scopeUnreturnedChange($query)
+    {
+        return $query->where('status', 'belum_kembalian');
     }
 }

@@ -29,6 +29,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/yearly-recap', YearlyRecapView::class)->name('yearly-recap');
     Route::get('/inventory-report', \App\Livewire\InventoryReportView::class)->name('inventory-report');
     Route::get('/supplier-report', \App\Livewire\SupplierReportView::class)->name('supplier-report');
+    Route::get('/debts', \App\Livewire\DebtManagement::class)->name('debts');
 });
 
 
