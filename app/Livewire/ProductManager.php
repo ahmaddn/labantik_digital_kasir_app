@@ -20,6 +20,7 @@ class ProductManager extends Component
     public $profit_per_unit = '';
     public $modal_price = 0; // Displayed in UI
     public $category_id = '';
+    public $supplier_id = '';
     public bool $is_active = true;
     public ?int $editingId = null;
 
@@ -30,6 +31,7 @@ class ProductManager extends Component
 
     // State
     public $categories = [];
+    public $suppliers = [];
     public string $successMessage = '';
     public string $tab = 'products'; // 'products' | 'stock'
     public bool $showDeleteModal = false;
@@ -43,6 +45,7 @@ class ProductManager extends Component
     public function mount(): void
     {
         $this->categories = ProductCategory::all();
+        $this->suppliers = \App\Models\Supplier::all();
         $this->stock_date = today()->toDateString();
     }
 
@@ -159,6 +162,7 @@ class ProductManager extends Component
             'price'           => 'required|numeric|min:1',
             'profit_per_unit' => 'required|numeric|min:0',
             'category_id'     => 'required|exists:product_categories,id',
+            'supplier_id'     => 'nullable|exists:suppliers,id',
         ]);
 
         $this->calculateModal();
@@ -170,6 +174,7 @@ class ProductManager extends Component
             'price'       => (int)$this->price,
             'modal_price' => $this->modal_price,
             'category_id' => (int)$this->category_id,
+            'supplier_id' => $this->supplier_id ? (int)$this->supplier_id : null,
             'is_active'   => (bool)$this->is_active,
         ];
 
@@ -184,7 +189,7 @@ class ProductManager extends Component
             $this->dispatch('toast', message: 'Produk berhasil ditambahkan.');
         }
 
-        $this->reset(['name', 'label', 'price', 'profit_per_unit', 'modal_price', 'category_id', 'is_active', 'editingId']);
+        $this->reset(['name', 'label', 'price', 'profit_per_unit', 'modal_price', 'category_id', 'supplier_id', 'is_active', 'editingId']);
         $this->is_active = true;
     }
 
@@ -198,6 +203,7 @@ class ProductManager extends Component
         $this->profit_per_unit = $product->price - $product->modal_price;
         $this->modal_price     = $product->modal_price;
         $this->category_id     = $product->category_id;
+        $this->supplier_id     = $product->supplier_id;
         $this->is_active       = (bool)$product->is_active;
     }
 
@@ -255,7 +261,7 @@ class ProductManager extends Component
 
     public function render()
     {
-        $query = Product::with('category')->orderBy('name');
+        $query = Product::with(['category', 'supplier'])->orderBy('name');
         
         if ($this->filterCategory) {
             $query->where('category_id', $this->filterCategory);
@@ -264,7 +270,10 @@ class ProductManager extends Component
         if ($this->search) {
             $query->where(function($q) {
                 $q->where('name', 'like', '%' . $this->search . '%')
-                  ->orWhere('label', 'like', '%' . $this->search . '%');
+                  ->orWhere('label', 'like', '%' . $this->search . '%')
+                  ->orWhereHas('supplier', function($sq) {
+                      $sq->where('name', 'like', '%' . $this->search . '%');
+                  });
             });
         }
 

@@ -1,0 +1,44 @@
+<?php
+
+namespace App\Livewire;
+
+use App\Models\Supplier;
+use App\Models\Transaction;
+use Livewire\Component;
+use Livewire\WithPagination;
+
+class SupplierReportView extends Component
+{
+    use WithPagination;
+
+    public $dateFrom;
+    public $dateTo;
+    public $supplierId = '';
+
+    public function mount()
+    {
+        $this->dateFrom = now()->startOfMonth()->toDateString();
+        $this->dateTo = now()->toDateString();
+    }
+
+    public function render()
+    {
+        $query = Transaction::query()
+            ->whereBetween('transacted_at', [$this->dateFrom . ' 00:00:00', $this->dateTo . ' 23:59:59'])
+            ->whereNotNull('supplier_id');
+
+        if ($this->supplierId) {
+            $query->where('supplier_id', $this->supplierId);
+        }
+
+        $reports = $query->with('supplier', 'product')
+            ->selectRaw('supplier_id, SUM(quantity) as total_qty, SUM(total_price) as total_sales, SUM(quantity * (unit_price - unit_profit)) as total_supplier_share, SUM(quantity * unit_profit) as total_shop_profit')
+            ->groupBy('supplier_id')
+            ->get();
+
+        return view('livewire.supplier-report-view', [
+            'reports' => $reports,
+            'suppliers' => Supplier::all()
+        ])->layout('layouts.app', ['title' => 'Laporan Supplier']);
+    }
+}

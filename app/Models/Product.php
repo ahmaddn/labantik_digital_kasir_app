@@ -10,6 +10,7 @@ class Product extends Model
 {
     protected $fillable = [
         'category_id',
+        'supplier_id',
         'name',
         'label',
         'price',
@@ -41,5 +42,10 @@ class Product extends Model
     public function transactions(): HasMany
     {
         return $this->hasMany(Transaction::class);
+    }
+
+    public function supplier(): BelongsTo
+    {
+        return $this->belongsTo(Supplier::class);
     }
 }

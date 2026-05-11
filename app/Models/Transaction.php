@@ -12,6 +12,7 @@ class Transaction extends Model
 {
     protected $fillable = [
         'product_id',
+        'supplier_id',
         'transacted_at',
         'buyer_name',
         'quantity',
@@ -29,5 +30,10 @@ class Transaction extends Model
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);
+    }
+
+    public function supplier(): BelongsTo
+    {
+        return $this->belongsTo(Supplier::class);
     }
 }

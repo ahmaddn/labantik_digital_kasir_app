@@ -20,6 +20,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/transactions', TransactionForm::class)->name('transactions');
     Route::get('/products', ProductManager::class)->name('products');
     Route::get('/categories', CategoryManager::class)->name('categories');
+    Route::get('/suppliers', \App\Livewire\SupplierManager::class)->name('suppliers');
     Route::get('/kasir', KasirMode::class)->name('kasir');
 
     // Recaps
@@ -27,6 +28,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/monthly-recap', MonthlyRecapView::class)->name('monthly-recap');
     Route::get('/yearly-recap', YearlyRecapView::class)->name('yearly-recap');
     Route::get('/inventory-report', \App\Livewire\InventoryReportView::class)->name('inventory-report');
+    Route::get('/supplier-report', \App\Livewire\SupplierReportView::class)->name('supplier-report');
 });
 
 

@@ -22,6 +22,10 @@ class KasirMode extends Component
     public $buyer_name = '';
     public $status = 'uang_diterima';
     public $note = '';
+    
+    // Modal filtering
+    public $modalSearch = '';
+    public $modalCategory = null;
 
     // Stock Management Properties
     public $showOpeningStockModal = false;
@@ -42,6 +46,8 @@ class KasirMode extends Component
         $exists = \App\Models\StockEntry::where('date', $today)->exists();
 
         if (!$exists) {
+            $this->modalSearch = '';
+            $this->modalCategory = null;
             $this->allProducts = Product::where('is_active', true)->orderBy('name')->get();
             foreach ($this->allProducts as $p) {
                 $this->stockItems[$p->id] = 0;
@@ -67,6 +73,8 @@ class KasirMode extends Component
 
     public function finishSession(): void
     {
+        $this->modalSearch = '';
+        $this->modalCategory = null;
         $this->allProducts = Product::where('is_active', true)->orderBy('name')->get();
         $today = now()->toDateString();
         
@@ -124,6 +132,7 @@ class KasirMode extends Component
                 'price' => $product->price,
                 'modal_price' => $product->modal_price,
                 'profit' => $product->profit,
+                'supplier_id' => $product->supplier_id,
                 'quantity' => 1,
             ];
         }
@@ -172,6 +181,7 @@ class KasirMode extends Component
         foreach ($this->cart as $item) {
             Transaction::create([
                 'product_id' => $item['id'],
+                'supplier_id' => $item['supplier_id'] ?? null,
                 'transacted_at' => now(),
                 'buyer_name' => $this->buyer_name ?: null,
                 'quantity' => $item['quantity'],

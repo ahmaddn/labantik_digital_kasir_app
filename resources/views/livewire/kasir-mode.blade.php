@@ -281,14 +281,26 @@
                     <h2 class="text-3xl font-black italic uppercase tracking-tighter text-gray-800 dark:text-white">Stok Awal Hari Ini</h2>
                     <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-2">Mohon masukkan jumlah stok awal untuk setiap produk</p>
                 </div>
-                <a href="{{ route('dashboard') }}" class="px-6 py-3 bg-gray-50 dark:bg-gray-800 text-[10px] font-black text-gray-400 uppercase tracking-widest rounded-xl hover:text-primary-red transition-all">
-                    Kembali ke Dashboard
-                </a>
+                <div class="flex items-center gap-4">
+                    <div class="relative">
+                        <input type="text" wire:model.live="modalSearch" placeholder="Cari..." class="pl-10 pr-4 py-2 bg-gray-50 dark:bg-gray-800 border-none rounded-xl focus:ring-2 focus:ring-primary-blue/20 text-[10px] font-black uppercase tracking-widest">
+                        <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-400" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                    </div>
+                    <select wire:model.live="modalCategory" class="pl-4 pr-10 py-2 bg-gray-50 dark:bg-gray-800 border-none rounded-xl focus:ring-2 focus:ring-primary-blue/20 text-[10px] font-black uppercase tracking-widest text-gray-400">
+                        <option value="">Semua</option>
+                        @foreach($categories as $cat)
+                            <option value="{{ $cat->id }}">{{ $cat->name }}</option>
+                        @endforeach
+                    </select>
+                    <a href="{{ route('dashboard') }}" class="px-6 py-3 bg-gray-50 dark:bg-gray-800 text-[10px] font-black text-gray-400 uppercase tracking-widest rounded-xl hover:text-primary-red transition-all">
+                        Kembali
+                    </a>
+                </div>
             </div>
             
             <div class="flex-1 overflow-y-auto p-10 scrollbar-hide">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    @foreach($allProducts as $p)
+                    @foreach($allProducts->when($modalSearch, fn($c) => $c->filter(fn($p) => str_contains(strtolower($p->name), strtolower($modalSearch))))->when($modalCategory, fn($c) => $c->where('category_id', $modalCategory)) as $p)
                     <div class="flex items-center justify-between p-6 bg-gray-50 dark:bg-gray-800/50 rounded-2xl border border-transparent hover:border-primary-blue/20 transition-all">
                         <div class="min-w-0">
                             <h4 class="text-sm font-black text-gray-800 dark:text-white uppercase tracking-tight line-clamp-1">{{ $p->name }}</h4>
@@ -337,12 +349,24 @@
                     <h2 class="text-3xl font-black italic uppercase tracking-tighter text-gray-800 dark:text-white text-primary-red">Akhiri Sesi</h2>
                     <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-2">Masukkan jumlah stok akhir (sisa) hari ini</p>
                 </div>
-                <button wire:click="$set('showClosingStockModal', false)" class="text-[10px] font-black text-gray-400 uppercase hover:text-primary-red transition-colors">Batal</button>
+                <div class="flex items-center gap-4">
+                    <div class="relative">
+                        <input type="text" wire:model.live="modalSearch" placeholder="Cari..." class="pl-10 pr-4 py-2 bg-gray-50 dark:bg-gray-800 border-none rounded-xl focus:ring-2 focus:ring-primary-red/20 text-[10px] font-black uppercase tracking-widest">
+                        <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-400" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                    </div>
+                    <select wire:model.live="modalCategory" class="pl-4 pr-10 py-2 bg-gray-50 dark:bg-gray-800 border-none rounded-xl focus:ring-2 focus:ring-primary-red/20 text-[10px] font-black uppercase tracking-widest text-gray-400">
+                        <option value="">Semua</option>
+                        @foreach($categories as $cat)
+                            <option value="{{ $cat->id }}">{{ $cat->name }}</option>
+                        @endforeach
+                    </select>
+                    <button wire:click="$set('showClosingStockModal', false)" class="text-[10px] font-black text-gray-400 uppercase hover:text-primary-red transition-colors">Batal</button>
+                </div>
             </div>
             
             <div class="flex-1 overflow-y-auto p-10 scrollbar-hide">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    @foreach($allProducts as $p)
+                    @foreach($allProducts->when($modalSearch, fn($c) => $c->filter(fn($p) => str_contains(strtolower($p->name), strtolower($modalSearch))))->when($modalCategory, fn($c) => $c->where('category_id', $modalCategory)) as $p)
                     <div class="flex items-center justify-between p-6 bg-gray-50 dark:bg-gray-800/50 rounded-2xl border border-transparent hover:border-primary-red/20 transition-all">
                         <div class="min-w-0">
                             <h4 class="text-sm font-black text-gray-800 dark:text-white uppercase tracking-tight line-clamp-1">{{ $p->name }}</h4>

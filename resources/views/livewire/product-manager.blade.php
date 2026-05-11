@@ -14,7 +14,7 @@
     </div>
 
     @if($tab === 'products')
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-10">
         <!-- Form Section -->
         <div class="lg:col-span-1">
             <div class="bg-white dark:bg-gray-800 rounded-[3rem] p-10 shadow-2xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 sticky top-10">
@@ -55,6 +55,16 @@
                                 </label>
                             </div>
                         </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-3 ml-2 italic">Supplier / Penitip (Opsional)</label>
+                        <select wire:model="supplier_id" class="w-full px-6 py-4 bg-gray-50 dark:bg-gray-900 border-none rounded-2xl focus:ring-4 focus:ring-primary-blue/10 font-black text-xs text-gray-800 dark:text-white">
+                            <option value="">Pilih Supplier</option>
+                            @foreach($suppliers as $sup)
+                                <option value="{{ $sup->id }}">{{ $sup->name }}</option>
+                            @endforeach
+                        </select>
                     </div>
 
                     <div class="grid grid-cols-2 gap-4">
@@ -99,7 +109,7 @@
         </div>
 
         <!-- List Section -->
-        <div class="lg:col-span-2">
+        <div class="lg:col-span-3">
             <div class="bg-white dark:bg-gray-800 rounded-[3.5rem] shadow-2xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 overflow-hidden">
                 <div class="p-8 border-b border-gray-100 dark:border-gray-700 flex flex-col md:flex-row justify-between items-center gap-4">
                     <div class="flex flex-wrap items-center gap-4 w-full md:w-auto">
@@ -143,6 +153,7 @@
                                 <th class="px-10 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">Produk</th>
 
                                 <th class="px-10 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">Kategori</th>
+                                <th class="px-10 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">Supplier</th>
                                 <th class="px-10 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">Harga</th>
                                 <th class="px-10 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">Status</th>
                                 <th class="px-10 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right">Opsi</th>
@@ -150,47 +161,73 @@
                         </thead>
                         <tbody class="divide-y divide-gray-50 dark:divide-gray-700">
                             @forelse($products as $product)
-                            <tr class="hover:bg-gray-50 dark:hover:bg-gray-900/30 transition-colors group {{ in_array($product->id, $selectedProducts) ? 'bg-primary-blue/5 dark:bg-primary-blue/10' : '' }}">
-                                <td class="px-10 py-8">
-                                    <input type="checkbox" wire:model.live="selectedProducts" value="{{ $product->id }}" class="w-4 h-4 rounded border-gray-300 text-primary-blue focus:ring-primary-blue dark:bg-gray-900 dark:border-gray-700">
-                                </td>
-                                <td class="px-10 py-8">
-                                    <div class="text-base font-black text-gray-800 dark:text-white uppercase tracking-tight italic">{{ $product->name }}</div>
-                                    <div class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mt-1">ID: #{{ str_pad($product->id, 4, '0', STR_PAD_LEFT) }}</div>
-                                </td>
-                                <td class="px-10 py-8">
-                                    <span class="px-3 py-1 bg-gray-100 dark:bg-gray-900 rounded-lg text-[9px] font-black text-gray-500 uppercase tracking-widest">
-                                        {{ $product->category->name }}
-                                    </span>
-                                </td>
-                                <td class="px-10 py-8">
-                                    <div class="text-base font-black text-primary-red italic">Rp{{ number_format($product->price, 0, ',', '.') }}</div>
-                                    <div class="flex flex-col gap-1 mt-1">
-                                        <div class="text-[9px] font-bold text-gray-400 italic uppercase tracking-widest">Modal: Rp{{ number_format($product->modal_price, 0, ',', '.') }}</div>
-                                        <div class="text-[9px] font-black text-green-500 italic uppercase tracking-widest">Profit: Rp{{ number_format($product->profit, 0, ',', '.') }}</div>
-                                    </div>
-                                </td>
-                                <td class="px-10 py-8">
-                                    @if($product->is_active)
-                                        <span class="flex items-center text-[9px] font-black text-green-500 uppercase tracking-widest">
-                                            <span class="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></span>
-                                            Aktif
-                                        </span>
-                                    @else
-                                        <span class="flex items-center text-[9px] font-black text-gray-400 uppercase tracking-widest">
-                                            <span class="w-2 h-2 bg-gray-400 rounded-full mr-2"></span>
-                                            Nonaktif
-                                        </span>
-                                    @endif
-                                </td>
-                                <td class="px-10 py-8 text-right">
-                                    <div class="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                        <button wire:click="editProduct({{ $product->id }})" class="p-3 bg-white dark:bg-gray-800 text-primary-blue rounded-xl shadow-sm hover:scale-110 transition-transform">
-                                            <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
-                                        </button>
-                                        <button wire:click="confirmDelete({{ $product->id }})" class="p-3 bg-white dark:bg-gray-800 text-primary-red rounded-xl shadow-sm hover:scale-110 transition-transform">
-                                            <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
-                                        </button>
+                            <tr class="group transition-all duration-300">
+                                <td colspan="7" class="p-4">
+                                    <div class="flex items-center bg-white dark:bg-gray-800/50 p-4 rounded-[2.5rem] border border-transparent group-hover:border-primary-blue/20 group-hover:shadow-xl group-hover:shadow-blue-900/5 transition-all {{ in_array($product->id, $selectedProducts) ? 'border-primary-blue/30 bg-primary-blue/5' : '' }}">
+                                        <!-- Checkbox -->
+                                        <div class="px-6">
+                                            <input type="checkbox" wire:model.live="selectedProducts" value="{{ $product->id }}" class="w-5 h-5 rounded-lg border-gray-200 text-primary-blue focus:ring-primary-blue dark:bg-gray-900 dark:border-gray-700">
+                                        </div>
+
+                                        <!-- Product Info -->
+                                        <div class="flex-1 px-4 min-w-[200px]">
+                                            <div class="text-base font-black text-gray-800 dark:text-white uppercase tracking-tight italic">{{ $product->name }}</div>
+                                            <div class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mt-1">ID: #{{ str_pad($product->id, 4, '0', STR_PAD_LEFT) }}</div>
+                                        </div>
+
+                                        <!-- Category -->
+                                        <div class="w-40 px-4">
+                                            <span class="px-4 py-2 bg-gray-100 dark:bg-gray-900 rounded-xl text-[9px] font-black text-gray-500 uppercase tracking-widest block text-center">
+                                                {{ $product->category->name }}
+                                            </span>
+                                        </div>
+
+                                        <!-- Supplier -->
+                                        <div class="w-48 px-4 text-center">
+                                            @if($product->supplier_id)
+                                            <span class="px-4 py-2 bg-primary-blue/5 rounded-xl text-[9px] font-black text-primary-blue uppercase tracking-widest italic border border-primary-blue/10">
+                                                {{ $product->supplier->name }}
+                                            </span>
+                                            @else
+                                            <span class="text-[9px] font-bold text-gray-300 uppercase tracking-widest italic">Internal</span>
+                                            @endif
+                                        </div>
+
+                                        <!-- Price & Profit -->
+                                        <div class="w-48 px-4">
+                                            <div class="text-lg font-black text-primary-red italic">Rp{{ number_format($product->price, 0, ',', '.') }}</div>
+                                            <div class="flex items-center gap-2 mt-1">
+                                                <span class="text-[9px] font-bold text-gray-400 italic uppercase tracking-widest">M: Rp{{ number_format($product->modal_price, 0, ',', '.') }}</span>
+                                                <span class="text-[9px] font-black text-green-500 italic uppercase tracking-widest">P: Rp{{ number_format($product->profit, 0, ',', '.') }}</span>
+                                            </div>
+                                        </div>
+
+                                        <!-- Status -->
+                                        <div class="w-32 px-4">
+                                            @if($product->is_active)
+                                                <span class="flex items-center justify-center text-[9px] font-black text-green-500 uppercase tracking-widest bg-green-50 dark:bg-green-500/10 py-2 rounded-xl">
+                                                    <span class="w-1.5 h-1.5 bg-green-500 rounded-full mr-2 animate-pulse"></span>
+                                                    Aktif
+                                                </span>
+                                            @else
+                                                <span class="flex items-center justify-center text-[9px] font-black text-gray-400 uppercase tracking-widest bg-gray-50 dark:bg-gray-900 py-2 rounded-xl">
+                                                    <span class="w-1.5 h-1.5 bg-gray-400 rounded-full mr-2"></span>
+                                                    Nonaktif
+                                                </span>
+                                            @endif
+                                        </div>
+
+                                        <!-- Options -->
+                                        <div class="px-6">
+                                            <div class="flex gap-2">
+                                                <button wire:click="editProduct({{ $product->id }})" class="p-3 bg-white dark:bg-gray-700 text-primary-blue rounded-xl shadow-sm hover:scale-110 transition-transform border border-gray-100 dark:border-gray-600">
+                                                    <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
+                                                </button>
+                                                <button wire:click="confirmDelete({{ $product->id }})" class="p-3 bg-white dark:bg-gray-700 text-primary-red rounded-xl shadow-sm hover:scale-110 transition-transform border border-gray-100 dark:border-gray-600">
+                                                    <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
+                                                </button>
+                                            </div>
+                                        </div>
                                     </div>
                                 </td>
                             </tr>

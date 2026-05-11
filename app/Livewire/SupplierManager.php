@@ -1,0 +1,76 @@
+<?php
+
+namespace App\Livewire;
+
+use App\Models\Supplier;
+use Livewire\Component;
+use Livewire\WithPagination;
+
+class SupplierManager extends Component
+{
+    use WithPagination;
+
+    public string $name = '';
+    public string $contact = '';
+    public string $address = '';
+    public string $note = '';
+    public ?int $editingId = null;
+    public string $search = '';
+
+    public function saveSupplier(): void
+    {
+        $this->validate([
+            'name' => 'required|string|max:100',
+            'contact' => 'nullable|string|max:20',
+            'address' => 'nullable|string',
+            'note' => 'nullable|string',
+        ]);
+
+        $data = [
+            'name' => $this->name,
+            'contact' => $this->contact,
+            'address' => $this->address,
+            'note' => $this->note,
+        ];
+
+        if ($this->editingId) {
+            Supplier::find($this->editingId)?->update($data);
+            $this->dispatch('toast', message: 'Supplier berhasil diperbarui.');
+        } else {
+            Supplier::create($data);
+            $this->dispatch('toast', message: 'Supplier berhasil ditambahkan.');
+        }
+
+        $this->reset(['name', 'contact', 'address', 'note', 'editingId']);
+    }
+
+    public function editSupplier(int $id): void
+    {
+        $supplier = Supplier::findOrFail($id);
+        $this->editingId = $id;
+        $this->name = $supplier->name;
+        $this->contact = $supplier->contact;
+        $this->address = $supplier->address;
+        $this->note = $supplier->note;
+    }
+
+    public function cancelEdit(): void
+    {
+        $this->reset(['name', 'contact', 'address', 'note', 'editingId']);
+    }
+
+    public function deleteSupplier(int $id): void
+    {
+        Supplier::destroy($id);
+        $this->dispatch('toast', message: 'Supplier berhasil dihapus.');
+    }
+
+    public function render()
+    {
+        return view('livewire.supplier-manager', [
+            'suppliers' => Supplier::where('name', 'like', '%' . $this->search . '%')
+                ->orderBy('name')
+                ->paginate(10)
+        ])->layout('layouts.app', ['title' => 'Manajemen Supplier']);
+    }
+}
