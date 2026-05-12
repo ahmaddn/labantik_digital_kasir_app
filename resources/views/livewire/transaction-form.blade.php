@@ -29,6 +29,7 @@
                 <thead class="bg-gray-50 dark:bg-gray-900/50">
                     <tr>
                         <th class="px-10 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">Waktu</th>
+                        <th class="px-10 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">Pembeli</th>
                         <th class="px-10 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">Produk</th>
                         <th class="px-10 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">Detail</th>
                         <th class="px-10 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">Total</th>
@@ -42,6 +43,16 @@
                         <td class="px-10 py-8">
                             <div class="text-sm font-black text-gray-800 dark:text-white uppercase tracking-tight">{{ $tx->transacted_at->format('d M Y') }}</div>
                             <div class="text-[10px] font-bold text-gray-400 mt-1 uppercase tracking-widest">{{ $tx->transacted_at->format('H:i') }}</div>
+                        </td>
+                        <td class="px-10 py-8">
+                            <div class="flex items-center">
+                                <div class="w-8 h-8 rounded-lg bg-gray-50 dark:bg-gray-900 flex items-center justify-center text-[10px] font-black text-primary-blue border border-gray-100 dark:border-gray-800 mr-3">
+                                    {{ substr($tx->buyer_name ?? 'G', 0, 1) }}
+                                </div>
+                                <span class="text-sm font-black italic uppercase tracking-tighter text-gray-700 dark:text-gray-300">
+                                    {{ $tx->buyer_name ?? 'Guest Customer' }}
+                                </span>
+                            </div>
                         </td>
                         <td class="px-10 py-8">
                             <div class="text-base font-black text-gray-800 dark:text-white uppercase tracking-tight italic">{{ $tx->product->name }}</div>
@@ -81,8 +92,8 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="6" class="px-10 py-32 text-center opacity-20">
-                            <p class="text-xs font-black uppercase tracking-widest italic">Belum ada transaksi</p>
+                        <td colspan="8" class="px-10 py-32 text-center opacity-20">
+                            <p class="text-xs font-black uppercase tracking-widest italic">Tidak ada transaksi ditemukan</p>
                         </td>
                     </tr>
                     @endforelse
