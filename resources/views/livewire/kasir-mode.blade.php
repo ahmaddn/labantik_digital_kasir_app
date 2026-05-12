@@ -45,6 +45,11 @@
                         </div>
                     </div>
                     
+                    <button wire:click="editOpeningStock" class="flex items-center gap-3 bg-white dark:bg-gray-900 px-6 py-3 rounded-2xl shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-800 hover:bg-gray-50 transition-all active:scale-95 group">
+                        <svg class="w-5 h-5 text-gray-400 group-hover:text-primary-blue transition-colors" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m16 6 4 14"/><path d="M12 6v14"/><path d="M8 8v12"/><path d="M4 4v16"/></svg>
+                        <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest group-hover:text-primary-blue">Update Stok Awal</span>
+                    </button>
+                    
                     <button wire:click="finishSession" class="flex items-center gap-3 bg-primary-red hover:bg-red-600 text-white px-6 py-3 rounded-2xl shadow-xl shadow-red-500/20 transition-all active:scale-95 group">
                         <span class="text-[10px] font-black uppercase tracking-widest">Selesaikan Sesi</span>
                         <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>

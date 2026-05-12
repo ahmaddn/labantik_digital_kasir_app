@@ -40,6 +40,21 @@ class KasirMode extends Component
         $this->checkOpeningStock();
     }
 
+    public function editOpeningStock(): void
+    {
+        $this->modalSearch = '';
+        $this->modalCategory = null;
+        $this->allProducts = Product::where('is_active', true)->orderBy('name')->get();
+        $today = now()->toDateString();
+        
+        foreach ($this->allProducts as $p) {
+            $entry = \App\Models\StockEntry::where('product_id', $p->id)->where('date', $today)->first();
+            $this->stockItems[$p->id] = $entry ? $entry->opening_stock : 0;
+        }
+        
+        $this->showOpeningStockModal = true;
+    }
+
     protected function checkOpeningStock(): void
     {
         $today = now()->toDateString();
@@ -60,14 +75,23 @@ class KasirMode extends Component
     {
         $today = now()->toDateString();
         foreach ($this->stockItems as $productId => $qty) {
-            \App\Models\StockEntry::updateOrCreate(
+            $entry = \App\Models\StockEntry::updateOrCreate(
                 ['product_id' => $productId, 'date' => $today],
                 ['opening_stock' => $qty ?? 0]
             );
+
+            // Recalculate closing stock based on sales today
+            $totalSold = Transaction::where('product_id', $productId)
+                ->whereDate('transacted_at', $today)
+                ->sum('quantity');
+            
+            $entry->update([
+                'closing_stock' => $entry->opening_stock - $totalSold
+            ]);
         }
         $this->showOpeningStockModal = false;
         $this->stockItems = [];
-        $this->dispatch('toast', message: 'Stok awal berhasil disimpan.');
+        $this->dispatch('toast', message: 'Stok awal berhasil diperbarui.');
         $this->dispatch('stock-saved');
     }
 
