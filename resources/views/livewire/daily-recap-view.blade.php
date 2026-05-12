@@ -325,13 +325,23 @@
 
                 <div class="space-y-2">
                     <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest ml-2">Status Pembayaran</label>
-                    <select wire:model="editStatus" class="w-full px-6 py-4 bg-gray-50 dark:bg-gray-800 border-none rounded-2xl font-black text-xs uppercase tracking-widest focus:ring-4 focus:ring-primary-blue/10">
+                    <select wire:model.live="editStatus" class="w-full px-6 py-4 bg-gray-50 dark:bg-gray-800 border-none rounded-2xl font-black text-xs uppercase tracking-widest focus:ring-4 focus:ring-primary-blue/10">
                         <option value="uang_diterima">Uang Diterima</option>
                         <option value="belum_kembalian">Belum Kembalian</option>
                         <option value="belum_menerima_uang">Belum Bayar (Hutang)</option>
                         <option value="uang_dipinjam">Uang Dipinjam</option>
                     </select>
                 </div>
+
+                @if($editStatus === 'belum_kembalian')
+                <div class="space-y-2 animate-in fade-in slide-in-from-top-2 duration-300">
+                    <label class="text-[9px] font-black text-primary-red uppercase tracking-widest ml-2">Sisa Kembalian (Belum Diberikan)</label>
+                    <div class="relative">
+                        <span class="absolute left-6 inset-y-0 flex items-center text-[10px] font-black text-gray-400">Rp</span>
+                        <input type="number" wire:model="editChangeDue" class="w-full pl-14 pr-6 py-4 bg-red-50 dark:bg-red-900/10 border border-primary-red/20 rounded-2xl font-black text-sm text-primary-red focus:ring-4 focus:ring-primary-red/10">
+                    </div>
+                </div>
+                @endif
 
                 <div class="space-y-2">
                     <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest ml-2">Catatan</label>

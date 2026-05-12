@@ -16,6 +16,15 @@ class TransactionForm extends Component
     public $filterStatus = '';
     public $successMessage = '';
 
+    // Edit Transaction
+    public $showEditModal = false;
+    public $editingTransaction = null;
+    public $editQty = 0;
+    public $editStatus = '';
+    public $editNote = '';
+    public $editBuyer = '';
+    public $editChangeDue = 0;
+
     protected $queryString = ['search', 'filterStatus'];
 
     public function updatedSearch()
@@ -37,11 +46,39 @@ class TransactionForm extends Component
         }
     }
 
-    public function edit($id)
+    public function editTransaction($id): void
     {
-        // For now, redirect to kasir or just a placeholder for editing
-        // Usually, in a POS, editing is rare, but we can implement it if needed
-        $this->dispatch('toast', message: 'Fitur edit transaksi sedang dalam pengembangan.', type: 'info');
+        $this->editingTransaction = Transaction::find($id);
+        if (!$this->editingTransaction) return;
+
+        $this->editQty = $this->editingTransaction->quantity;
+        $this->editStatus = $this->editingTransaction->status;
+        $this->editNote = $this->editingTransaction->note ?? '';
+        $this->editBuyer = $this->editingTransaction->buyer_name ?? '';
+        $this->editChangeDue = $this->editingTransaction->change_due ?? 0;
+        $this->showEditModal = true;
+    }
+
+    public function updateTransaction(): void
+    {
+        if (!$this->editingTransaction) return;
+
+        $totalPrice = $this->editingTransaction->unit_price * $this->editQty;
+        $debt = in_array($this->editStatus, ['belum_menerima_uang', 'uang_dipinjam']) ? $totalPrice : 0;
+        $changeDue = ($this->editStatus === 'belum_kembalian') ? $this->editChangeDue : 0;
+
+        $this->editingTransaction->update([
+            'quantity' => $this->editQty,
+            'total_price' => $totalPrice,
+            'status' => $this->editStatus,
+            'note' => $this->editNote,
+            'buyer_name' => $this->editBuyer ?: null,
+            'debt_amount' => $debt,
+            'change_due' => $changeDue
+        ]);
+
+        $this->showEditModal = false;
+        $this->dispatch('toast', message: 'Transaksi berhasil diperbarui!');
     }
 
     public function render()

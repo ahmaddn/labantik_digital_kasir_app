@@ -28,6 +28,7 @@ class DailyRecapView extends Component
     public $editStatus = '';
     public $editNote = '';
     public $editBuyer = '';
+    public $editChangeDue = 0;
 
 
     public function mount($date = null): void
@@ -158,6 +159,7 @@ class DailyRecapView extends Component
         $this->editStatus = $this->editingTransaction->status;
         $this->editNote = $this->editingTransaction->note ?? '';
         $this->editBuyer = $this->editingTransaction->buyer_name ?? '';
+        $this->editChangeDue = $this->editingTransaction->change_due ?? 0;
         $this->showEditModal = true;
     }
 
@@ -167,7 +169,7 @@ class DailyRecapView extends Component
 
         $totalPrice = $this->editingTransaction->unit_price * $this->editQty;
         $debt = in_array($this->editStatus, ['belum_menerima_uang', 'uang_dipinjam']) ? $totalPrice : 0;
-        $changeDue = ($this->editStatus === 'belum_kembalian') ? $this->editingTransaction->change_due : 0;
+        $changeDue = ($this->editStatus === 'belum_kembalian') ? $this->editChangeDue : 0;
 
         $this->editingTransaction->update([
             'quantity' => $this->editQty,

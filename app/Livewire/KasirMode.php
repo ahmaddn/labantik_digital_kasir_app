@@ -42,6 +42,7 @@ class KasirMode extends Component
     public $editStatus = '';
     public $editNote = '';
     public $editBuyer = '';
+    public $editChangeDue = 0;
 
 
     public function mount(): void
@@ -251,6 +252,7 @@ class KasirMode extends Component
         $this->editStatus = $this->editingTransaction->status;
         $this->editNote = $this->editingTransaction->note ?? '';
         $this->editBuyer = $this->editingTransaction->buyer_name ?? '';
+        $this->editChangeDue = $this->editingTransaction->change_due ?? 0;
         $this->showEditModal = true;
     }
 
@@ -260,14 +262,8 @@ class KasirMode extends Component
 
         $totalPrice = $this->editingTransaction->unit_price * $this->editQty;
         
-        // Basic recalculation for debt/change
-        // This is a simplified logic similar to checkout
         $debt = in_array($this->editStatus, ['belum_menerima_uang', 'uang_dipinjam']) ? $totalPrice : 0;
-        
-        // Note: Change due is harder to recalculate without knowing payment_amount at that time.
-        // We'll keep the old change_due if status is still belum_kembalian and qty hasn't changed.
-        // If qty changed, we might need to reset or just let user manually edit note.
-        $changeDue = ($this->editStatus === 'belum_kembalian') ? $this->editingTransaction->change_due : 0;
+        $changeDue = ($this->editStatus === 'belum_kembalian') ? $this->editChangeDue : 0;
 
         $this->editingTransaction->update([
             'quantity' => $this->editQty,

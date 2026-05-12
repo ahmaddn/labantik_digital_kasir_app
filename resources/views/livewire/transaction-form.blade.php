@@ -69,12 +69,12 @@
                             </span>
                         </td>
                         <td class="px-10 py-8 text-right">
-                            <div class="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                <button wire:click="edit({{ $tx->id }})" class="p-3 bg-white dark:bg-gray-800 text-primary-blue rounded-xl shadow-sm hover:scale-110 transition-transform">
-                                    <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
+                            <div class="flex items-center justify-end gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <button wire:click="editTransaction({{ $tx->id }})" class="p-4 bg-gray-50 dark:bg-gray-900 text-gray-400 hover:text-primary-blue rounded-2xl transition-all hover:scale-110 active:scale-95">
+                                    <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
                                 </button>
-                                <button @click="$dispatch('open-delete-transaction', { id: {{ $tx->id }} })" class="p-3 bg-white dark:bg-gray-800 text-primary-red rounded-xl shadow-sm hover:scale-110 transition-transform">
-                                    <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
+                                <button @click="$dispatch('open-delete-transaction', { id: {{ $tx->id }} })" class="p-4 bg-gray-50 dark:bg-gray-900 text-gray-400 hover:text-primary-red rounded-2xl transition-all hover:scale-110 active:scale-95">
+                                    <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
                                 </button>
                             </div>
                         </td>
@@ -142,6 +142,77 @@
                 <button @click="close()" class="flex-1 py-4 bg-gray-100 dark:bg-gray-900 text-gray-400 rounded-2xl font-black uppercase text-[10px] tracking-widest hover:text-gray-600 transition-all">Batal</button>
                 <button @click="confirm()" class="flex-1 py-4 bg-primary-red text-white rounded-2xl font-black uppercase text-[10px] tracking-widest shadow-lg shadow-red-500/30 hover:scale-105 transition-all">Ya, Hapus</button>
             </div>
+        </div>
+    </div>
+
+    <!-- Edit Transaction Modal -->
+    <div 
+        x-data="{ show: @entangle('showEditModal') }" 
+        x-show="show" 
+        x-cloak
+        class="fixed inset-0 z-[150] flex items-center justify-center p-6 bg-gray-900/60 backdrop-blur-sm"
+        x-transition:enter="transition ease-out duration-300"
+        x-transition:enter-start="opacity-0"
+        x-transition:enter-end="opacity-100"
+        x-transition:leave="transition ease-in duration-200"
+        x-transition:leave-start="opacity-100"
+        x-transition:leave-end="opacity-0"
+    >
+        <div 
+            @click.away="show = false"
+            class="bg-white dark:bg-gray-800 w-full max-w-lg rounded-[3rem] shadow-2xl flex flex-col p-10 gap-8"
+        >
+            <div class="flex justify-between items-start">
+                <div>
+                    <h2 class="text-2xl font-black italic uppercase tracking-tighter text-primary-blue">Edit Transaksi</h2>
+                    <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1">Koreksi kesalahan input data</p>
+                </div>
+                <button @click="show = false" class="text-gray-300 hover:text-primary-red transition-colors">
+                    <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                </button>
+            </div>
+
+            <div class="space-y-6">
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="space-y-2">
+                        <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest ml-2">Pembeli</label>
+                        <input type="text" wire:model="editBuyer" class="w-full px-6 py-4 bg-gray-50 dark:bg-gray-800 border-none rounded-2xl font-black text-xs uppercase tracking-tight focus:ring-4 focus:ring-primary-blue/10">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest ml-2">Quantity</label>
+                        <input type="number" wire:model="editQty" class="w-full px-6 py-4 bg-gray-50 dark:bg-gray-800 border-none rounded-2xl font-black text-sm text-center focus:ring-4 focus:ring-primary-blue/10">
+                    </div>
+                </div>
+
+                <div class="space-y-2">
+                    <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest ml-2">Status Pembayaran</label>
+                    <select wire:model.live="editStatus" class="w-full px-6 py-4 bg-gray-50 dark:bg-gray-800 border-none rounded-2xl font-black text-xs uppercase tracking-widest focus:ring-4 focus:ring-primary-blue/10">
+                        <option value="uang_diterima">Uang Diterima</option>
+                        <option value="belum_kembalian">Belum Kembalian</option>
+                        <option value="belum_menerima_uang">Belum Bayar (Hutang)</option>
+                        <option value="uang_dipinjam">Uang Dipinjam</option>
+                    </select>
+                </div>
+
+                @if($editStatus === 'belum_kembalian')
+                <div class="space-y-2 animate-in fade-in slide-in-from-top-2 duration-300">
+                    <label class="text-[9px] font-black text-primary-red uppercase tracking-widest ml-2">Sisa Kembalian (Belum Diberikan)</label>
+                    <div class="relative">
+                        <span class="absolute left-6 inset-y-0 flex items-center text-[10px] font-black text-gray-400">Rp</span>
+                        <input type="number" wire:model="editChangeDue" class="w-full pl-14 pr-6 py-4 bg-red-50 dark:bg-red-900/10 border border-primary-red/20 rounded-2xl font-black text-sm text-primary-red focus:ring-4 focus:ring-primary-red/10">
+                    </div>
+                </div>
+                @endif
+
+                <div class="space-y-2">
+                    <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest ml-2">Catatan</label>
+                    <textarea wire:model="editNote" rows="3" class="w-full px-6 py-4 bg-gray-50 dark:bg-gray-800 border-none rounded-2xl font-bold text-xs focus:ring-4 focus:ring-primary-blue/10"></textarea>
+                </div>
+            </div>
+
+            <button wire:click="updateTransaction" class="w-full py-5 bg-primary-blue text-white rounded-2xl shadow-xl shadow-blue-500/20 font-black italic uppercase text-xs tracking-widest hover:scale-[1.02] active:scale-95 transition-all">
+                Simpan Perubahan
+            </button>
         </div>
     </div>
 </div>
