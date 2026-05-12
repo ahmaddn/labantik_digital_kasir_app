@@ -231,6 +231,7 @@
                         <th class="px-10 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">Qty</th>
                         <th class="px-10 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">Total</th>
                         <th class="px-10 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right">Status</th>
+                        <th class="px-10 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-50 dark:divide-gray-700">
@@ -253,10 +254,15 @@
                                 {{ str_replace('_', ' ', $tx->status) }}
                             </span>
                         </td>
+                        <td class="px-10 py-8 text-right">
+                            <button wire:click="editTransaction({{ $tx->id }})" class="p-3 bg-gray-50 dark:bg-gray-900 text-gray-400 hover:text-primary-blue rounded-xl transition-all">
+                                <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
+                            </button>
+                        </td>
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="6" class="px-10 py-32 text-center opacity-20">
+                        <td colspan="7" class="px-10 py-32 text-center opacity-20">
                             <p class="text-xs font-black uppercase tracking-widest italic">Tidak ada transaksi ditemukan</p>
                         </td>
                     </tr>
@@ -277,4 +283,65 @@
         <p class="text-gray-400 font-bold text-sm mt-4 uppercase tracking-[0.3em] italic">Tidak ada aktivitas transaksi pada {{ \Carbon\Carbon::parse($selectedDate)->translatedFormat('d F Y') }}</p>
     </div>
     @endif
+
+    <!-- Edit Transaction Modal -->
+    <div 
+        x-data="{ show: @entangle('showEditModal') }" 
+        x-show="show" 
+        x-cloak
+        class="fixed inset-0 z-[300] flex items-center justify-center p-6 bg-gray-900/60 backdrop-blur-sm"
+        x-transition:enter="transition ease-out duration-300"
+        x-transition:enter-start="opacity-0"
+        x-transition:enter-end="opacity-100"
+        x-transition:leave="transition ease-in duration-200"
+        x-transition:leave-start="opacity-100"
+        x-transition:leave-end="opacity-0"
+    >
+        <div 
+            @click.away="show = false"
+            class="bg-white dark:bg-gray-900 w-full max-w-lg rounded-[3rem] shadow-2xl flex flex-col p-10 gap-8"
+        >
+            <div class="flex justify-between items-start">
+                <div>
+                    <h2 class="text-2xl font-black italic uppercase tracking-tighter text-primary-blue">Edit Transaksi</h2>
+                    <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1">Koreksi kesalahan input data</p>
+                </div>
+                <button @click="show = false" class="text-gray-300 hover:text-primary-red transition-colors">
+                    <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                </button>
+            </div>
+
+            <div class="space-y-6">
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="space-y-2">
+                        <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest ml-2">Pembeli</label>
+                        <input type="text" wire:model="editBuyer" class="w-full px-6 py-4 bg-gray-50 dark:bg-gray-800 border-none rounded-2xl font-black text-xs uppercase tracking-tight focus:ring-4 focus:ring-primary-blue/10">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest ml-2">Quantity</label>
+                        <input type="number" wire:model="editQty" class="w-full px-6 py-4 bg-gray-50 dark:bg-gray-800 border-none rounded-2xl font-black text-sm text-center focus:ring-4 focus:ring-primary-blue/10">
+                    </div>
+                </div>
+
+                <div class="space-y-2">
+                    <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest ml-2">Status Pembayaran</label>
+                    <select wire:model="editStatus" class="w-full px-6 py-4 bg-gray-50 dark:bg-gray-800 border-none rounded-2xl font-black text-xs uppercase tracking-widest focus:ring-4 focus:ring-primary-blue/10">
+                        <option value="uang_diterima">Uang Diterima</option>
+                        <option value="belum_kembalian">Belum Kembalian</option>
+                        <option value="belum_menerima_uang">Belum Bayar (Hutang)</option>
+                        <option value="uang_dipinjam">Uang Dipinjam</option>
+                    </select>
+                </div>
+
+                <div class="space-y-2">
+                    <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest ml-2">Catatan</label>
+                    <textarea wire:model="editNote" rows="3" class="w-full px-6 py-4 bg-gray-50 dark:bg-gray-800 border-none rounded-2xl font-bold text-xs focus:ring-4 focus:ring-primary-blue/10"></textarea>
+                </div>
+            </div>
+
+            <button wire:click="updateTransaction" class="w-full py-5 bg-primary-blue text-white rounded-2xl shadow-xl shadow-blue-500/20 font-black italic uppercase text-xs tracking-widest hover:scale-[1.02] active:scale-95 transition-all">
+                Simpan Perubahan
+            </button>
+        </div>
+    </div>
 </div>

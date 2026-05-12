@@ -29,7 +29,7 @@
                     <div class="absolute inset-y-0 left-0 pl-8 flex items-center pointer-events-none">
                         <svg class="w-5 h-5 text-gray-400 group-focus-within:text-primary-blue transition-colors" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
                     </div>
-                    <input type="text" wire:model.live="search" placeholder="Cari menu favorit..." class="w-full pl-16 pr-8 py-5 bg-white dark:bg-gray-900 rounded-[2.5rem] border-none shadow-2xl shadow-blue-900/5 focus:ring-4 focus:ring-primary-blue/10 font-black text-lg text-gray-800 dark:text-white placeholder:text-gray-300 placeholder:italic transition-all">
+                    <input type="text" wire:model.live.debounce.300ms="search" placeholder="Cari menu favorit..." class="w-full pl-16 pr-8 py-5 bg-white dark:bg-gray-900 rounded-[2.5rem] border-none shadow-2xl shadow-blue-900/5 focus:ring-4 focus:ring-primary-blue/10 font-black text-lg text-gray-800 dark:text-white placeholder:text-gray-300 placeholder:italic transition-all">
                 </div>
                 
                 <div class="hidden lg:flex items-center gap-6">
@@ -130,14 +130,21 @@
 
     <!-- 3. Right Sidebar (Cart & Checkout) -->
     <div class="w-[450px] bg-white dark:bg-gray-900 border-l border-gray-100 dark:border-gray-800 flex flex-col shadow-[-20px_0_60px_-15px_rgba(0,0,0,0.05)] z-40">
+        <!-- Cart Tabs -->
+        <div class="p-2 mx-8 mt-8 bg-gray-50 dark:bg-gray-950 rounded-2xl flex border border-gray-100 dark:border-gray-800 shadow-inner">
+            <button wire:click="setRightSidebarTab('cart')" class="flex-1 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all {{ $rightSidebarTab === 'cart' ? 'bg-white dark:bg-gray-800 text-primary-blue shadow-sm' : 'text-gray-400 hover:text-primary-blue' }}">Pesanan</button>
+            <button wire:click="setRightSidebarTab('history')" class="flex-1 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all {{ $rightSidebarTab === 'history' ? 'bg-white dark:bg-gray-800 text-primary-red shadow-sm' : 'text-gray-400 hover:text-primary-red' }}">History</button>
+        </div>
+
+        @if($rightSidebarTab === 'cart')
         <!-- Cart Header -->
-        <div class="p-10 border-b border-gray-50 dark:border-gray-800 flex justify-between items-center">
+        <div class="px-10 py-8 flex justify-between items-center animate-in fade-in duration-300">
             <div>
-                <h2 class="text-3xl font-black italic uppercase tracking-tighter text-gray-800 dark:text-white">Pesanan</h2>
-                <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1">{{ count($cart) }} Menu Dipilih</p>
+                <h2 class="text-2xl font-black italic uppercase tracking-tighter text-gray-800 dark:text-white">Isi Keranjang</h2>
+                <p class="text-[9px] font-black text-gray-400 uppercase tracking-widest mt-1">{{ count($cart) }} Item Dipilih</p>
             </div>
-            <button wire:click="clearCart" class="p-4 bg-gray-50 dark:bg-gray-800 text-gray-400 rounded-2xl hover:text-primary-red hover:bg-primary-red/5 transition-all">
-                <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
+            <button wire:click="clearCart" class="p-3 bg-gray-50 dark:bg-gray-800 text-gray-400 rounded-xl hover:text-primary-red hover:bg-primary-red/5 transition-all">
+                <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
             </button>
         </div>
 
@@ -167,6 +174,32 @@
             </div>
             @endforelse
         </div>
+        @else
+        <!-- History Section -->
+        <div class="flex-1 overflow-y-auto p-10 space-y-6 scrollbar-hide animate-in slide-in-from-right duration-500">
+            <h2 class="text-2xl font-black italic uppercase tracking-tighter text-gray-800 dark:text-white mb-8">Transaksi Terakhir</h2>
+            @foreach($this->recentTransactions as $history)
+            <div class="flex items-center gap-6 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-[2rem] border border-transparent hover:border-primary-blue/20 transition-all group">
+                <div class="w-12 h-12 bg-white dark:bg-gray-900 rounded-2xl flex items-center justify-center text-primary-blue text-[10px] font-black italic shadow-sm">
+                    {{ $history->transacted_at->format('H:i') }}
+                </div>
+                <div class="flex-1 min-w-0">
+                    <h4 class="text-xs font-black text-gray-800 dark:text-white uppercase tracking-tight line-clamp-1">{{ $history->product->name }}</h4>
+                    <div class="flex items-center gap-2 mt-1">
+                        <span class="text-[9px] font-black {{ $history->status === 'uang_diterima' ? 'text-green-500' : 'text-primary-red' }} uppercase tracking-widest">{{ str_replace('_', ' ', $history->status) }}</span>
+                        <span class="text-[9px] font-bold text-gray-400">× {{ $history->quantity }}</span>
+                    </div>
+                </div>
+                <div class="flex flex-col items-end gap-2">
+                    <p class="text-xs font-black text-gray-800 dark:text-white italic">Rp{{ number_format($history->total_price, 0, ',', '.') }}</p>
+                    <button wire:click="editTransaction({{ $history->id }})" class="p-2 bg-white dark:bg-gray-900 text-gray-300 hover:text-primary-blue rounded-xl border border-gray-100 dark:border-gray-800 shadow-sm transition-all group-hover:scale-110">
+                        <svg class="w-3.5 h-3.5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
+                    </button>
+                </div>
+            </div>
+            @endforeach
+        </div>
+        @endif
 
         <!-- Checkout Section -->
         <div class="p-10 bg-gray-50 dark:bg-gray-950 border-t border-gray-100 dark:border-gray-800 space-y-8 rounded-t-[4rem] shadow-[0_-15px_40px_-10px_rgba(0,0,0,0.05)]">
@@ -229,7 +262,7 @@
 
     <!-- 4. Success Overlay (Enhanced) -->
     <div x-data="{ show: false }" 
-         x-on:transaction-complete.window="show = true; setTimeout(() => show = false, 2500)"
+         x-on:transaction-complete.window="show = true; setTimeout(() => show = false, 1200)"
          x-show="show"
          x-cloak
          x-transition:enter="transition ease-out duration-500"
@@ -306,13 +339,13 @@
             <div class="flex-1 overflow-y-auto p-10 scrollbar-hide">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     @foreach(collect($allProducts)->when($modalSearch, fn($c) => $c->filter(fn($p) => str_contains(strtolower($p->name), strtolower($modalSearch))))->when($modalCategory, fn($c) => $c->where('category_id', $modalCategory)) as $p)
-                    <div class="flex items-center justify-between p-6 bg-gray-50 dark:bg-gray-800/50 rounded-2xl border border-transparent hover:border-primary-blue/20 transition-all">
+                    <div wire:key="opening-stock-{{ $p->id }}" class="flex items-center justify-between p-6 bg-gray-50 dark:bg-gray-800/50 rounded-2xl border border-transparent hover:border-primary-blue/20 transition-all">
                         <div class="min-w-0">
                             <h4 class="text-sm font-black text-gray-800 dark:text-white uppercase tracking-tight line-clamp-1">{{ $p->name }}</h4>
                             <p class="text-[9px] font-black text-gray-400 uppercase tracking-widest mt-1">{{ $p->category ? $p->category->name : 'No Category' }}</p>
                         </div>
                         <div class="w-32">
-                            <input type="number" wire:model.defer="stockItems.{{ $p->id }}" class="w-full px-4 py-3 bg-white dark:bg-gray-900 border-none rounded-xl focus:ring-4 focus:ring-primary-blue/10 font-black text-sm text-center">
+                            <input type="number" wire:model.blur="stockItems.{{ $p->id }}" class="w-full px-4 py-3 bg-white dark:bg-gray-900 border-none rounded-xl focus:ring-4 focus:ring-primary-blue/10 font-black text-sm text-center">
                         </div>
                     </div>
                     @endforeach
@@ -372,13 +405,13 @@
             <div class="flex-1 overflow-y-auto p-10 scrollbar-hide">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     @foreach(collect($allProducts)->when($modalSearch, fn($c) => $c->filter(fn($p) => str_contains(strtolower($p->name), strtolower($modalSearch))))->when($modalCategory, fn($c) => $c->where('category_id', $modalCategory)) as $p)
-                    <div class="flex items-center justify-between p-6 bg-gray-50 dark:bg-gray-800/50 rounded-2xl border border-transparent hover:border-primary-red/20 transition-all">
+                    <div wire:key="closing-stock-{{ $p->id }}" class="flex items-center justify-between p-6 bg-gray-50 dark:bg-gray-800/50 rounded-2xl border border-transparent hover:border-primary-red/20 transition-all">
                         <div class="min-w-0">
                             <h4 class="text-sm font-black text-gray-800 dark:text-white uppercase tracking-tight line-clamp-1">{{ $p->name }}</h4>
                             <p class="text-[9px] font-black text-gray-400 uppercase tracking-widest mt-1">{{ $p->category ? $p->category->name : 'No Category' }}</p>
                         </div>
                         <div class="w-32">
-                            <input type="number" wire:model.defer="stockItems.{{ $p->id }}" class="w-full px-4 py-3 bg-white dark:bg-gray-900 border-none rounded-xl focus:ring-4 focus:ring-primary-red/10 font-black text-sm text-center">
+                            <input type="number" wire:model.blur="stockItems.{{ $p->id }}" class="w-full px-4 py-3 bg-white dark:bg-gray-900 border-none rounded-xl focus:ring-4 focus:ring-primary-red/10 font-black text-sm text-center">
                         </div>
                     </div>
                     @endforeach
@@ -392,4 +425,74 @@
             </div>
         </div>
     </div>
+    
+    <!-- 7. Edit Transaction Modal -->
+    <div 
+        x-data="{ show: @entangle('showEditModal') }" 
+        x-show="show" 
+        x-cloak
+        class="fixed inset-0 z-[300] flex items-center justify-center p-6 bg-gray-900/60 backdrop-blur-sm"
+        x-transition:enter="transition ease-out duration-300"
+        x-transition:enter-start="opacity-0"
+        x-transition:enter-end="opacity-100"
+        x-transition:leave="transition ease-in duration-200"
+        x-transition:leave-start="opacity-100"
+        x-transition:leave-end="opacity-0"
+    >
+        <div 
+            @click.away="show = false"
+            class="bg-white dark:bg-gray-900 w-full max-w-lg rounded-[3rem] shadow-2xl flex flex-col p-10 gap-8"
+        >
+            <div class="flex justify-between items-start">
+                <div>
+                    <h2 class="text-2xl font-black italic uppercase tracking-tighter text-primary-blue">Edit Transaksi</h2>
+                    <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1">Koreksi kesalahan input data</p>
+                </div>
+                <button @click="show = false" class="text-gray-300 hover:text-primary-red transition-colors">
+                    <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                </button>
+            </div>
+
+            <div class="space-y-6">
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="space-y-2">
+                        <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest ml-2">Pembeli</label>
+                        <input type="text" wire:model="editBuyer" class="w-full px-6 py-4 bg-gray-50 dark:bg-gray-800 border-none rounded-2xl font-black text-xs uppercase tracking-tight focus:ring-4 focus:ring-primary-blue/10">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest ml-2">Quantity</label>
+                        <input type="number" wire:model="editQty" class="w-full px-6 py-4 bg-gray-50 dark:bg-gray-800 border-none rounded-2xl font-black text-sm text-center focus:ring-4 focus:ring-primary-blue/10">
+                    </div>
+                </div>
+
+                <div class="space-y-2">
+                    <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest ml-2">Status Pembayaran</label>
+                    <select wire:model="editStatus" class="w-full px-6 py-4 bg-gray-50 dark:bg-gray-800 border-none rounded-2xl font-black text-xs uppercase tracking-widest focus:ring-4 focus:ring-primary-blue/10">
+                        <option value="uang_diterima">Uang Diterima</option>
+                        <option value="belum_kembalian">Belum Kembalian</option>
+                        <option value="belum_menerima_uang">Belum Bayar (Hutang)</option>
+                        <option value="uang_dipinjam">Uang Dipinjam</option>
+                    </select>
+                </div>
+
+                <div class="space-y-2">
+                    <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest ml-2">Catatan</label>
+                    <textarea wire:model="editNote" rows="3" class="w-full px-6 py-4 bg-gray-50 dark:bg-gray-800 border-none rounded-2xl font-bold text-xs focus:ring-4 focus:ring-primary-blue/10"></textarea>
+                </div>
+            </div>
+
+            <button wire:click="updateTransaction" class="w-full py-5 bg-primary-blue text-white rounded-2xl shadow-xl shadow-blue-500/20 font-black italic uppercase text-xs tracking-widest hover:scale-[1.02] active:scale-95 transition-all">
+                Simpan Perubahan
+            </button>
+        </div>
+    </div>
+
+    <script>
+        window.addEventListener('transaction-complete', () => {
+            setTimeout(() => {
+                const searchInput = document.querySelector('input[placeholder*="Cari menu"]');
+                if (searchInput) searchInput.focus();
+            }, 1000);
+        });
+    </script>
 </div>

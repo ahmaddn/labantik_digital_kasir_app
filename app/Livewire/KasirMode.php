@@ -7,6 +7,7 @@ use App\Models\Transaction;
 use App\Models\ProductCategory;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Livewire\Attributes\Computed;
 
 class KasirMode extends Component
 {
@@ -26,12 +27,21 @@ class KasirMode extends Component
     // Modal filtering
     public $modalSearch = '';
     public $modalCategory = null;
+    public $rightSidebarTab = 'cart'; // 'cart' or 'history'
 
     // Stock Management Properties
     public $showOpeningStockModal = false;
     public $showClosingStockModal = false;
     public $stockItems = []; // Array to hold stock input values [product_id => quantity]
     public $allProducts = []; // For the stock modals
+
+    // Edit Transaction Properties
+    public $showEditModal = false;
+    public $editingTransaction = null;
+    public $editQty = 0;
+    public $editStatus = '';
+    public $editNote = '';
+    public $editBuyer = '';
 
 
     public function mount(): void
@@ -225,6 +235,62 @@ class KasirMode extends Component
         $this->note = '';
         $this->dispatch('toast', message: 'Transaksi berhasil disimpan!');
         $this->dispatch('transaction-complete');
+    }
+
+    public function setRightSidebarTab(string $tab): void
+    {
+        $this->rightSidebarTab = $tab;
+    }
+
+    public function editTransaction($id): void
+    {
+        $this->editingTransaction = Transaction::find($id);
+        if (!$this->editingTransaction) return;
+
+        $this->editQty = $this->editingTransaction->quantity;
+        $this->editStatus = $this->editingTransaction->status;
+        $this->editNote = $this->editingTransaction->note ?? '';
+        $this->editBuyer = $this->editingTransaction->buyer_name ?? '';
+        $this->showEditModal = true;
+    }
+
+    public function updateTransaction(): void
+    {
+        if (!$this->editingTransaction) return;
+
+        $totalPrice = $this->editingTransaction->unit_price * $this->editQty;
+        
+        // Basic recalculation for debt/change
+        // This is a simplified logic similar to checkout
+        $debt = in_array($this->editStatus, ['belum_menerima_uang', 'uang_dipinjam']) ? $totalPrice : 0;
+        
+        // Note: Change due is harder to recalculate without knowing payment_amount at that time.
+        // We'll keep the old change_due if status is still belum_kembalian and qty hasn't changed.
+        // If qty changed, we might need to reset or just let user manually edit note.
+        $changeDue = ($this->editStatus === 'belum_kembalian') ? $this->editingTransaction->change_due : 0;
+
+        $this->editingTransaction->update([
+            'quantity' => $this->editQty,
+            'total_price' => $totalPrice,
+            'status' => $this->editStatus,
+            'note' => $this->editNote,
+            'buyer_name' => $this->editBuyer ?: null,
+            'debt_amount' => $debt,
+            'change_due' => $changeDue
+        ]);
+
+        $this->showEditModal = false;
+        $this->dispatch('toast', message: 'Transaksi berhasil diperbarui!');
+    }
+
+    // Computed Property for recent transactions
+    #[Computed]
+    public function recentTransactions()
+    {
+        return Transaction::with('product')
+            ->latest('transacted_at')
+            ->limit(10)
+            ->get();
     }
 
     public function render()

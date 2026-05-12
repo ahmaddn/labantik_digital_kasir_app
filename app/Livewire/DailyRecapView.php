@@ -21,6 +21,14 @@ class DailyRecapView extends Component
     public $actualCash = 0;
     public $cashNote = '';
 
+    // Edit Transaction
+    public $showEditModal = false;
+    public $editingTransaction = null;
+    public $editQty = 0;
+    public $editStatus = '';
+    public $editNote = '';
+    public $editBuyer = '';
+
 
     public function mount($date = null): void
     {
@@ -139,5 +147,39 @@ class DailyRecapView extends Component
     public function exportCSV()
     {
         $this->dispatch('toast', message: 'Fitur ekspor CSV sedang dalam pengembangan.', type: 'info');
+    }
+
+    public function editTransaction($id): void
+    {
+        $this->editingTransaction = Transaction::find($id);
+        if (!$this->editingTransaction) return;
+
+        $this->editQty = $this->editingTransaction->quantity;
+        $this->editStatus = $this->editingTransaction->status;
+        $this->editNote = $this->editingTransaction->note ?? '';
+        $this->editBuyer = $this->editingTransaction->buyer_name ?? '';
+        $this->showEditModal = true;
+    }
+
+    public function updateTransaction(): void
+    {
+        if (!$this->editingTransaction) return;
+
+        $totalPrice = $this->editingTransaction->unit_price * $this->editQty;
+        $debt = in_array($this->editStatus, ['belum_menerima_uang', 'uang_dipinjam']) ? $totalPrice : 0;
+        $changeDue = ($this->editStatus === 'belum_kembalian') ? $this->editingTransaction->change_due : 0;
+
+        $this->editingTransaction->update([
+            'quantity' => $this->editQty,
+            'total_price' => $totalPrice,
+            'status' => $this->editStatus,
+            'note' => $this->editNote,
+            'buyer_name' => $this->editBuyer ?: null,
+            'debt_amount' => $debt,
+            'change_due' => $changeDue
+        ]);
+
+        $this->showEditModal = false;
+        $this->dispatch('toast', message: 'Transaksi berhasil diperbarui!');
     }
 }
