@@ -305,7 +305,7 @@
             
             <div class="flex-1 overflow-y-auto p-10 scrollbar-hide">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    @foreach($allProducts->when($modalSearch, fn($c) => $c->filter(fn($p) => str_contains(strtolower($p->name), strtolower($modalSearch))))->when($modalCategory, fn($c) => $c->where('category_id', $modalCategory)) as $p)
+                    @foreach(collect($allProducts)->when($modalSearch, fn($c) => $c->filter(fn($p) => str_contains(strtolower($p->name), strtolower($modalSearch))))->when($modalCategory, fn($c) => $c->where('category_id', $modalCategory)) as $p)
                     <div class="flex items-center justify-between p-6 bg-gray-50 dark:bg-gray-800/50 rounded-2xl border border-transparent hover:border-primary-blue/20 transition-all">
                         <div class="min-w-0">
                             <h4 class="text-sm font-black text-gray-800 dark:text-white uppercase tracking-tight line-clamp-1">{{ $p->name }}</h4>
@@ -371,7 +371,7 @@
             
             <div class="flex-1 overflow-y-auto p-10 scrollbar-hide">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    @foreach($allProducts->when($modalSearch, fn($c) => $c->filter(fn($p) => str_contains(strtolower($p->name), strtolower($modalSearch))))->when($modalCategory, fn($c) => $c->where('category_id', $modalCategory)) as $p)
+                    @foreach(collect($allProducts)->when($modalSearch, fn($c) => $c->filter(fn($p) => str_contains(strtolower($p->name), strtolower($modalSearch))))->when($modalCategory, fn($c) => $c->where('category_id', $modalCategory)) as $p)
                     <div class="flex items-center justify-between p-6 bg-gray-50 dark:bg-gray-800/50 rounded-2xl border border-transparent hover:border-primary-red/20 transition-all">
                         <div class="min-w-0">
                             <h4 class="text-sm font-black text-gray-800 dark:text-white uppercase tracking-tight line-clamp-1">{{ $p->name }}</h4>
