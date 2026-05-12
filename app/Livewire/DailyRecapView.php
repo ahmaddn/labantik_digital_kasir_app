@@ -86,11 +86,11 @@ class DailyRecapView extends Component
 
     public function render()
     {
-        $allTransactions = Transaction::with('product')
+        $allTransactions = Transaction::with(['product.category'])
             ->whereDate('transacted_at', $this->selectedDate)
             ->get();
 
-        $query = Transaction::with('product')
+        $query = Transaction::with(['product.category'])
             ->whereDate('transacted_at', $this->selectedDate)
             ->orderByDesc('transacted_at');
 
@@ -136,11 +136,21 @@ class DailyRecapView extends Component
             'generated_at' => now(),
         ];
 
+        $categoryRecap = $allTransactions->groupBy(fn($tx) => $tx->product->category->name ?? 'Tanpa Kategori')
+            ->map(function($group) {
+                return (object) [
+                    'revenue' => $group->sum('total_price'),
+                    'profit' => $group->sum(fn($tx) => $tx->unit_profit * $tx->quantity),
+                    'modal' => $group->sum(fn($tx) => ($tx->unit_price - $tx->unit_profit) * $tx->quantity),
+                    'qty' => $group->sum('quantity'),
+                ];
+            })->sortByDesc('revenue');
+
         return view('livewire.daily-recap-view', [
             'recap' => $recap,
+            'categoryRecap' => $categoryRecap,
             'transactions' => $query->paginate(15),
             'categories' => \App\Models\ProductCategory::orderBy('name')->get()
-
         ])->layout('layouts.app', ['title' => 'Rekap Harian']);
 
     }

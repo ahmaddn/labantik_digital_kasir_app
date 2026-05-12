@@ -1,266 +1,317 @@
-<div class="flex h-screen w-full bg-[#f8fafc] dark:bg-gray-950 overflow-hidden font-outfit">
-    <!-- 1. Nano Sidebar (Navigation) -->
-    <div class="w-20 bg-white dark:bg-gray-900 border-r border-gray-100 dark:border-gray-800 flex flex-col items-center py-8 z-30">
-        <a href="{{ route('dashboard') }}" class="w-12 h-12 bg-primary-red rounded-2xl flex items-center justify-center text-white shadow-lg shadow-red-500/20 hover:scale-110 active:scale-95 transition-all mb-10">
-            <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-        </a>
+<div x-data="{ 
+    showCart: false, 
+    darkMode: localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches),
+    toggleTheme() {
+        this.darkMode = !this.darkMode;
+        if (this.darkMode) {
+            document.documentElement.classList.add('dark');
+            localStorage.setItem('theme', 'dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+            localStorage.setItem('theme', 'light');
+        }
+    }
+}" x-init="if (darkMode) document.documentElement.classList.add('dark'); else document.documentElement.classList.remove('dark')" class="flex flex-col lg:flex-row h-screen w-full bg-[#f8fafc] dark:bg-gray-950 overflow-hidden font-outfit relative">
+    <style>
+        /* Custom Global Scrollbar */
+        * {
+            scrollbar-width: thin;
+            scrollbar-color: #3b82f6 transparent;
+        }
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #3b82f6; /* primary-blue */
+            border-radius: 20px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #2563eb;
+        }
+        .dark ::-webkit-scrollbar-thumb {
+            background: #3b82f6;
+        }
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+    </style>
+    <!-- 1. Main Content Area (Search + Products) -->
+    <div class="flex-1 flex flex-col min-w-0 bg-gray-50/50 dark:bg-gray-950/50 z-10 overflow-hidden">
         
-        <div class="flex-1 flex flex-col items-center gap-6">
-            <button wire:click="selectCategory(null)" class="group relative p-4 rounded-2xl transition-all {{ is_null($selectedCategory) ? 'bg-primary-blue text-white shadow-xl shadow-blue-500/20' : 'text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-primary-blue' }}">
-                <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></svg>
-                <span class="absolute left-full ml-4 px-3 py-1 bg-gray-800 text-white text-[10px] font-black rounded-lg opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50 uppercase tracking-widest">Semua Kategori</span>
-            </button>
-
-            @foreach($categories as $cat)
-            <button wire:click="selectCategory({{ $cat->id }})" class="group relative p-4 rounded-2xl transition-all {{ $selectedCategory == $cat->id ? 'bg-primary-blue text-white shadow-xl shadow-blue-500/20' : 'text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-primary-blue' }}">
-                <div class="w-6 h-6 flex items-center justify-center text-[10px] font-black uppercase tracking-tighter">{{ substr($cat->name, 0, 2) }}</div>
-                <span class="absolute left-full ml-4 px-3 py-1 bg-gray-800 text-white text-[10px] font-black rounded-lg opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50 uppercase tracking-widest">{{ $cat->name }}</span>
-            </button>
-            @endforeach
-        </div>
-    </div>
-
-    <!-- 2. Main Content Area (Search + Products) -->
-    <div class="flex-1 flex flex-col min-w-0 bg-gray-50/50 dark:bg-gray-950/50 z-10">
-        <!-- Sticky Header with Search -->
-        <div class="p-8 pb-4 bg-gray-50/80 dark:bg-gray-950/80 backdrop-blur-xl z-20">
-            <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
-                <div class="flex-1 max-w-2xl relative group">
-                    <div class="absolute inset-y-0 left-0 pl-8 flex items-center pointer-events-none">
-                        <svg class="w-5 h-5 text-gray-400 group-focus-within:text-primary-blue transition-colors" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-                    </div>
-                    <input type="text" wire:model.live.debounce.300ms="search" placeholder="Cari menu favorit..." class="w-full pl-16 pr-8 py-5 bg-white dark:bg-gray-900 rounded-[2.5rem] border-none shadow-2xl shadow-blue-900/5 focus:ring-4 focus:ring-primary-blue/10 font-black text-lg text-gray-800 dark:text-white placeholder:text-gray-300 placeholder:italic transition-all">
-                </div>
-                
-                <div class="hidden lg:flex items-center gap-6">
-                    <a href="{{ route('dashboard') }}" class="flex items-center gap-3 bg-white dark:bg-gray-900 px-6 py-3 rounded-2xl shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-800 hover:bg-gray-50 transition-all active:scale-95 group">
-                        <svg class="w-5 h-5 text-gray-400 group-hover:text-primary-blue transition-colors" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-                        <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest group-hover:text-primary-blue">Dashboard</span>
-                    </a>
-
-                    <div class="flex items-center gap-4 bg-white dark:bg-gray-900 px-6 py-3 rounded-2xl shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-800">
-                        <div class="flex flex-col items-end">
-                            <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">{{ now()->translatedFormat('l, d F Y') }}</p>
-                            <p class="text-xs font-black text-primary-blue uppercase tracking-tighter" id="real-time-clock"></p>
+        <!-- Header Section -->
+        <div class="px-6 lg:px-10 py-6 lg:py-8 bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 z-20 shadow-sm">
+            <div class="flex flex-col md:flex-row items-center justify-between gap-6 lg:gap-10">
+                <div class="flex items-center justify-between w-full md:w-auto gap-6">
+                    <div class="flex items-center gap-4 lg:gap-6">
+                        <a href="{{ route('dashboard') }}" class="w-12 h-12 lg:w-14 lg:h-14 bg-primary-red rounded-[1.2rem] lg:rounded-[1.5rem] flex items-center justify-center text-white shadow-xl shadow-red-500/20 hover:scale-110 hover:rotate-3 transition-all">
+                            <svg class="w-6 h-6 lg:w-7 lg:h-7" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                        </a>
+                        <div class="h-10 lg:h-12 w-[1px] bg-gray-100 dark:bg-gray-800"></div>
+                        <div>
+                            <h1 class="text-xl lg:text-2xl font-black italic uppercase tracking-tighter text-gray-800 dark:text-white leading-tight">LABANTIK POS</h1>
+                            <p class="text-[9px] lg:text-[10px] font-black text-primary-blue uppercase tracking-[0.2em]">{{ now()->translatedFormat('d F Y') }}</p>
                         </div>
                     </div>
                     
-                    <button wire:click="editOpeningStock" class="flex items-center gap-3 bg-white dark:bg-gray-900 px-6 py-3 rounded-2xl shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-800 hover:bg-gray-50 transition-all active:scale-95 group">
-                        <svg class="w-5 h-5 text-gray-400 group-hover:text-primary-blue transition-colors" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m16 6 4 14"/><path d="M12 6v14"/><path d="M8 8v12"/><path d="M4 4v16"/></svg>
-                        <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest group-hover:text-primary-blue">Update Stok Awal</span>
+                    <!-- Mobile Cart Toggle -->
+                    <button @click="showCart = true" class="lg:hidden p-4 bg-primary-blue text-white rounded-2xl shadow-xl relative">
+                        <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.56-7.43H5.12"/></svg>
+                        @if(count($cart) > 0)
+                        <span class="absolute -top-1 -right-1 w-5 h-5 bg-primary-red text-[10px] font-black rounded-full flex items-center justify-center border-2 border-white dark:border-gray-900">{{ count($cart) }}</span>
+                        @endif
                     </button>
-                    
-                    <button wire:click="finishSession" class="flex items-center gap-3 bg-primary-red hover:bg-red-600 text-white px-6 py-3 rounded-2xl shadow-xl shadow-red-500/20 transition-all active:scale-95 group">
-                        <span class="text-[10px] font-black uppercase tracking-widest">Selesaikan Sesi</span>
-                        <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-                    </button>
-                    
-                    <script>
-                        function updateClock() {
-                            const now = new Date();
-                            const el = document.getElementById('real-time-clock');
-                            if (el) el.innerText = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-                        }
-                        setInterval(updateClock, 1000);
-                        updateClock();
-                    </script>
                 </div>
 
+                <div class="flex-1 w-full max-w-2xl relative group">
+                    <div class="absolute inset-y-0 left-0 pl-7 flex items-center pointer-events-none">
+                        <svg class="w-5 h-5 text-gray-400 group-focus-within:text-primary-blue transition-colors" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                    </div>
+                    <input type="text" wire:model.live.debounce.300ms="search" placeholder="Cari menu..." class="w-full pl-16 pr-8 py-4 lg:py-5 bg-gray-50 dark:bg-gray-800 rounded-[1.5rem] lg:rounded-[2rem] border-none focus:ring-4 focus:ring-primary-blue/10 font-black text-sm lg:text-base text-gray-800 dark:text-white placeholder:text-gray-300 placeholder:italic transition-all">
+                </div>
+
+                <div class="flex items-center gap-3 lg:gap-5">
+                    <!-- Theme Toggle -->
+                    <button @click="toggleTheme()" class="p-4 lg:p-5 bg-gray-50 dark:bg-gray-800 text-gray-400 rounded-2xl hover:text-primary-blue hover:bg-primary-blue/5 transition-all active:scale-95 shadow-sm">
+                        <svg x-show="!darkMode" class="w-5 h-5 lg:w-6 lg:h-6" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+                        <svg x-show="darkMode" class="w-5 h-5 lg:w-6 lg:h-6" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+                    </button>
+
+                    <button wire:click="editOpeningStock" class="p-4 lg:p-5 bg-gray-50 dark:bg-gray-800 text-gray-400 rounded-2xl hover:text-primary-blue hover:bg-primary-blue/5 transition-all active:scale-95 shadow-sm">
+                        <svg class="w-5 h-5 lg:w-6 lg:h-6" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m16 6 4 14"/><path d="M12 6v14"/><path d="M8 8v12"/><path d="M4 4v16"/></svg>
+                    </button>
+
+                    <div class="h-8 w-[1px] bg-gray-100 dark:bg-gray-800 hidden md:block mx-1"></div>
+
+                    <div class="hidden md:flex items-center gap-3">
+                        <button wire:click="finishSession" class="flex items-center gap-4 bg-gray-900 dark:bg-white dark:text-gray-900 text-white px-6 lg:px-8 py-4 lg:py-5 rounded-[1.2rem] lg:rounded-[1.5rem] shadow-2xl transition-all active:scale-95 font-black text-[10px] lg:text-[11px] uppercase tracking-[0.2em]">
+                            Selesai
+                        </button>
+
+                        <form method="POST" action="{{ route('logout') }}">
+                            @csrf
+                            <button type="submit" class="p-4 lg:p-5 bg-gray-50 dark:bg-gray-800 text-gray-400 rounded-2xl hover:text-primary-red hover:bg-primary-red/5 transition-all active:scale-95 shadow-sm group">
+                                <svg class="w-5 h-5 lg:w-6 lg:h-6 group-hover:translate-x-1 transition-transform" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1-2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
+                            </button>
+                        </form>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <!-- Scrollable Product Grid -->
-        <div class="flex-1 overflow-y-auto px-8 pb-12 scrollbar-hide">
+        <!-- Category Navigation -->
+        <div class="px-6 lg:px-10 py-4 lg:py-6 bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 flex items-center gap-3 lg:gap-4 overflow-x-auto scrollbar-hide">
+            <button wire:click="selectCategory(null)" class="px-6 lg:px-8 py-3 lg:py-3.5 rounded-xl lg:rounded-2xl whitespace-nowrap text-[10px] lg:text-[11px] font-black uppercase tracking-widest transition-all {{ is_null($selectedCategory) ? 'bg-primary-blue text-white shadow-xl shadow-blue-500/30 scale-105' : 'bg-gray-50 dark:bg-gray-800 text-gray-400 hover:text-primary-blue hover:bg-primary-blue/5' }}">
+                Semua Menu
+            </button>
+            @foreach($this->categories as $cat)
+            <button wire:click="selectCategory({{ $cat->id }})" class="px-6 lg:px-8 py-3 lg:py-3.5 rounded-xl lg:rounded-2xl whitespace-nowrap text-[10px] lg:text-[11px] font-black uppercase tracking-widest transition-all {{ $selectedCategory == $cat->id ? 'bg-primary-blue text-white shadow-xl shadow-blue-500/30 scale-105' : 'bg-gray-50 dark:bg-gray-800 text-gray-400 hover:text-primary-blue hover:bg-primary-blue/5' }}">
+                {{ $cat->name }}
+            </button>
+            @endforeach
+        </div>
+
+        <!-- Product Grid Section -->
+        <div class="flex-1 overflow-y-auto px-6 lg:px-8 py-6 lg:py-8 scrollbar-hide bg-gray-50/30 dark:bg-gray-950/30">
             @if($products->isEmpty())
-                <div class="h-full flex flex-col items-center justify-center opacity-30 py-32">
-                    <div class="w-32 h-32 bg-white dark:bg-gray-900 rounded-[3rem] flex items-center justify-center mb-10 shadow-inner">
-                        <svg class="w-16 h-16 text-gray-200" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+                <div class="h-full flex flex-col items-center justify-center opacity-30 py-20 lg:py-32">
+                    <div class="w-32 h-32 lg:w-40 lg:h-40 bg-white dark:bg-gray-900 rounded-[3rem] lg:rounded-[4rem] flex items-center justify-center mb-8 lg:mb-10 shadow-inner">
+                        <svg class="w-16 h-16 lg:w-20 lg:h-20 text-gray-200" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
                     </div>
-                    <h3 class="text-3xl font-black italic uppercase tracking-tighter text-gray-800 dark:text-white">Tidak Ada Menu</h3>
-                    <p class="text-gray-400 font-bold text-sm mt-4 uppercase tracking-[0.3em] italic">Coba kata kunci atau kategori lain</p>
+                    <h3 class="text-3xl lg:text-4xl font-black italic uppercase tracking-tighter text-gray-800 dark:text-white">Kosong</h3>
+                    <p class="text-gray-400 font-bold text-sm lg:text-base mt-4 uppercase tracking-[0.4em] italic text-center">Menu tidak ditemukan</p>
                 </div>
             @else
-                <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-8">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 3xl:grid-cols-5 gap-4 lg:gap-6">
                     @foreach($products as $product)
-                    <button wire:click="addToCart({{ $product->id }})" class="group relative bg-white dark:bg-gray-900 rounded-[3rem] p-8 text-left shadow-xl shadow-blue-900/5 border border-transparent hover:border-primary-blue hover:-translate-y-2 transition-all duration-300 flex flex-col h-full">
-                        <!-- Card Decorative Background -->
-                        <div class="absolute -right-8 -top-8 w-24 h-24 bg-primary-blue/5 rounded-full group-hover:scale-[10] transition-transform duration-700 pointer-events-none"></div>
-                        
+                    <button wire:click="addToCart({{ $product->id }})" class="group relative bg-white dark:bg-gray-900 rounded-[2rem] lg:rounded-[2.5rem] p-5 lg:p-6 text-left shadow-xl shadow-blue-900/5 border-2 border-transparent hover:border-primary-blue/30 hover:-translate-y-1 lg:hover:-translate-y-2 hover:shadow-2xl hover:shadow-primary-blue/20 transition-all duration-500 flex flex-col h-full overflow-hidden">
                         <div class="relative z-10 flex flex-col h-full">
-                            <!-- Product Icon/Placeholder -->
-                            <div class="w-16 h-16 bg-gray-50 dark:bg-gray-800 rounded-[1.5rem] flex items-center justify-center text-gray-400 group-hover:bg-primary-blue group-hover:text-white transition-all duration-300 mb-8 shadow-sm">
-                                <span class="text-2xl font-black italic uppercase">{{ substr($product->name, 0, 1) }}</span>
+                            <div class="w-12 h-12 lg:w-14 lg:h-14 bg-gray-50 dark:bg-gray-800 rounded-xl lg:rounded-2xl flex items-center justify-center text-gray-400 group-hover:bg-primary-blue group-hover:text-white transition-all duration-500 mb-4 lg:mb-6 shadow-sm">
+                                <span class="text-lg lg:text-xl font-black italic uppercase">{{ substr($product->name, 0, 1) }}</span>
                             </div>
-
-                            <div class="mb-6 flex-1">
-                                <h3 class="text-base font-black text-gray-800 dark:text-white uppercase tracking-tight leading-tight group-hover:text-white transition-colors duration-300 line-clamp-2">
+                            <div class="mb-4 flex-1">
+                                <h3 class="text-xs lg:text-sm font-black text-gray-800 dark:text-white uppercase tracking-tight leading-tight transition-colors duration-300 line-clamp-2">
                                     {{ $product->name }}
                                 </h3>
-                                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-2 group-hover:text-white/60 transition-colors duration-300">
+                                <p class="text-[8px] lg:text-[9px] font-bold text-gray-400 uppercase tracking-widest mt-1.5 group-hover:text-primary-blue transition-colors duration-300">
                                     {{ $product->category->name }}
                                 </p>
                             </div>
-
                             <div class="flex items-center justify-between mt-auto">
-                                <p class="text-xl font-black text-primary-red italic group-hover:text-white transition-colors duration-300">
+                                <span class="text-sm lg:text-base font-black text-primary-red italic group-hover:scale-105 transition-transform">
                                     Rp{{ number_format($product->price, 0, ',', '.') }}
-                                </p>
-                                
-                                @if(isset($cart[$product->id]))
-                                <div class="w-10 h-10 bg-primary-red text-white rounded-2xl flex items-center justify-center text-xs font-black shadow-lg shadow-red-500/30 group-hover:bg-white group-hover:text-primary-red transition-all">
-                                    {{ $cart[$product->id]['quantity'] }}
+                                </span>
+                                <div class="w-7 h-7 lg:w-8 lg:h-8 bg-gray-50 dark:bg-gray-800 rounded-lg lg:rounded-xl flex items-center justify-center text-gray-300 group-hover:bg-primary-blue group-hover:text-white group-hover:rotate-90 transition-all duration-500">
+                                    <svg class="w-3 h-3 lg:w-4 lg:h-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
                                 </div>
-                                @else
-                                <div class="w-10 h-10 bg-gray-50 dark:bg-gray-800 rounded-2xl flex items-center justify-center text-gray-300 group-hover:bg-white/20 group-hover:text-white transition-all">
-                                    <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
-                                </div>
-                                @endif
                             </div>
+                        </div>
+                        <div class="absolute top-5 lg:top-6 right-5 lg:right-6 px-2.5 lg:px-3 h-5 lg:h-6 bg-gray-50 dark:bg-gray-900 rounded-full group-hover:bg-primary-blue/10 transition-all flex items-center justify-center">
+                            <span class="text-[7px] lg:text-[8px] font-black text-gray-400 group-hover:text-primary-blue uppercase tracking-[0.2em] leading-none">Tersedia</span>
                         </div>
                     </button>
                     @endforeach
                 </div>
-                
-                <div class="mt-16">
+                <div class="mt-10 lg:mt-12">
                     {{ $products->links('livewire.custom-pagination') }}
                 </div>
             @endif
         </div>
     </div>
 
-    <!-- 3. Right Sidebar (Cart & Checkout) -->
-    <div class="w-[450px] bg-white dark:bg-gray-900 border-l border-gray-100 dark:border-gray-800 flex flex-col shadow-[-20px_0_60px_-15px_rgba(0,0,0,0.05)] z-40">
-        <!-- Cart Tabs -->
-        <div class="p-2 mx-8 mt-8 bg-gray-50 dark:bg-gray-950 rounded-2xl flex border border-gray-100 dark:border-gray-800 shadow-inner">
-            <button wire:click="setRightSidebarTab('cart')" class="flex-1 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all {{ $rightSidebarTab === 'cart' ? 'bg-white dark:bg-gray-800 text-primary-blue shadow-sm' : 'text-gray-400 hover:text-primary-blue' }}">Pesanan</button>
-            <button wire:click="setRightSidebarTab('history')" class="flex-1 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all {{ $rightSidebarTab === 'history' ? 'bg-white dark:bg-gray-800 text-primary-red shadow-sm' : 'text-gray-400 hover:text-primary-red' }}">History</button>
-        </div>
-
-        @if($rightSidebarTab === 'cart')
-        <!-- Cart Header -->
-        <div class="px-10 py-8 flex justify-between items-center animate-in fade-in duration-300">
-            <div>
-                <h2 class="text-2xl font-black italic uppercase tracking-tighter text-gray-800 dark:text-white">Isi Keranjang</h2>
-                <p class="text-[9px] font-black text-gray-400 uppercase tracking-widest mt-1">{{ count($cart) }} Item Dipilih</p>
-            </div>
-            <button wire:click="clearCart" class="p-3 bg-gray-50 dark:bg-gray-800 text-gray-400 rounded-xl hover:text-primary-red hover:bg-primary-red/5 transition-all">
-                <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
+    <!-- 2. Enhanced Right Sidebar (Cart & Checkout) -->
+    <div 
+        x-show="window.innerWidth >= 1024 || showCart"
+        x-transition:enter="transition ease-out duration-300" 
+        x-transition:enter-start="translate-x-full" 
+        x-transition:enter-end="translate-x-0"
+        x-transition:leave="transition ease-in duration-200"
+        x-transition:leave-start="translate-x-0"
+        x-transition:leave-end="translate-x-full"
+        @resize.window="if(window.innerWidth >= 1024) showCart = false"
+        class="fixed inset-y-0 right-0 w-full md:w-[500px] bg-white dark:bg-gray-900 border-l border-gray-100 dark:border-gray-800 flex flex-col shadow-2xl z-[100] lg:static lg:flex lg:w-[500px] lg:shadow-none lg:translate-x-0"
+        style="display: none;" {{-- Initial hide to prevent flicker, handled by Alpine --}}
+        x-cloak
+    >
+        <!-- Mobile Header (Only visible on mobile) -->
+        <div class="lg:hidden p-6 flex justify-between items-center border-b dark:border-gray-800 bg-white dark:bg-gray-900">
+            <h2 class="text-xl font-black italic uppercase tracking-tighter text-gray-800 dark:text-white">Pesanan Saya</h2>
+            <button @click="showCart = false" class="p-3 bg-gray-50 dark:bg-gray-800 rounded-xl text-gray-400">
+                <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
             </button>
         </div>
 
+        <div x-data="{ tab: 'cart' }" class="flex flex-col h-full overflow-hidden bg-white dark:bg-gray-900">
+            <!-- Sidebar Tabs -->
+            <div class="p-2 mx-6 lg:mx-8 mt-6 lg:mt-8 bg-gray-50 dark:bg-gray-950 rounded-[1.5rem] lg:rounded-[1.8rem] flex border border-gray-100 dark:border-gray-800 shadow-inner flex-shrink-0">
+                <button @click="tab = 'cart'" :class="tab === 'cart' ? 'bg-white dark:bg-gray-800 text-primary-blue shadow-lg scale-[1.02]' : 'text-gray-400 hover:text-primary-blue'" class="flex-1 py-3 lg:py-3.5 rounded-xl lg:rounded-[1.3rem] text-[9px] lg:text-[10px] font-black uppercase tracking-[0.2em] transition-all">Keranjang</button>
+                <button @click="tab = 'history'" :class="tab === 'history' ? 'bg-white dark:bg-gray-800 text-primary-red shadow-lg scale-[1.02]' : 'text-gray-400 hover:text-primary-red'" class="flex-1 py-3 lg:py-3.5 rounded-xl lg:rounded-[1.3rem] text-[9px] lg:text-[10px] font-black uppercase tracking-[0.2em] transition-all">Riwayat</button>
+            </div>
+
         <!-- Cart Items List -->
-        <div class="flex-1 overflow-y-auto p-10 space-y-8 scrollbar-hide">
+        <div x-show="tab === 'cart'" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-x-10" x-transition:enter-end="opacity-100 translate-x-0" class="flex-1 overflow-y-auto p-8 space-y-6 scrollbar-hide min-h-0">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-black italic uppercase tracking-tighter text-gray-800 dark:text-white">Pesanan</h2>
+                <button wire:click="clearCart" class="text-[9px] font-black text-gray-400 hover:text-primary-red uppercase tracking-widest transition-colors">Kosongkan</button>
+            </div>
+            
             @forelse($cart as $item)
-            <div class="flex items-center gap-6 group animate-in slide-in-from-right duration-300">
-                <div class="w-14 h-14 bg-gray-50 dark:bg-gray-800 rounded-2xl flex items-center justify-center text-primary-blue text-sm font-black italic shadow-sm group-hover:scale-110 transition-transform">
+            <div class="flex items-center gap-4 group animate-in slide-in-from-right duration-300 bg-gray-50/50 dark:bg-gray-800/30 p-5 rounded-[2rem] border border-transparent hover:border-primary-blue/20 transition-all shadow-sm">
+                <div class="w-12 h-12 bg-white dark:bg-gray-900 rounded-2xl flex items-center justify-center text-primary-blue text-xs font-black italic shadow-md group-hover:scale-110 transition-transform">
                     {{ substr($item['name'], 0, 2) }}
                 </div>
                 <div class="flex-1 min-w-0">
-                    <h4 class="text-sm font-black text-gray-800 dark:text-white uppercase tracking-tight line-clamp-1">{{ $item['name'] }}</h4>
-                    <p class="text-xs font-black text-primary-red italic mt-1">Rp{{ number_format($item['price'], 0, ',', '.') }}</p>
+                    <h4 class="text-xs font-black text-gray-800 dark:text-white uppercase tracking-tight line-clamp-1">{{ $item['name'] }}</h4>
+                    <p class="text-[10px] font-black text-primary-red italic mt-0.5">Rp{{ number_format($item['price'], 0, ',', '.') }}</p>
                 </div>
-                <div class="flex items-center bg-gray-50 dark:bg-gray-800 rounded-2xl p-1.5 shadow-inner">
-                    <button wire:click="removeFromCart({{ $item['id'] }})" class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-primary-red transition-colors font-black">-</button>
-                    <span class="w-10 text-center text-xs font-black text-gray-800 dark:text-white">{{ $item['quantity'] }}</span>
-                    <button wire:click="addToCart({{ $item['id'] }})" class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-primary-blue transition-colors font-black">+</button>
+                <div class="flex items-center bg-white dark:bg-gray-900 rounded-xl p-1 shadow-md border border-gray-100 dark:border-gray-800">
+                    <button wire:click="removeFromCart({{ $item['id'] }})" class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-primary-red transition-colors font-black text-base">-</button>
+                    <span class="w-10 text-center text-[10px] font-black text-gray-800 dark:text-white">{{ $item['quantity'] }}</span>
+                    <button wire:click="addToCart({{ $item['id'] }})" class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-primary-blue transition-colors font-black text-base">+</button>
                 </div>
             </div>
             @empty
-            <div class="h-full flex flex-col items-center justify-center py-20">
-                <div class="w-40 h-40 bg-gray-50 dark:bg-gray-950 rounded-[4rem] flex items-center justify-center mb-8 shadow-inner opacity-20">
-                    <svg class="w-20 h-20" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.56-7.43H5.12"/></svg>
-                </div>
-                <p class="text-xs font-black uppercase tracking-[0.3em] italic text-gray-300">Keranjang Masih Kosong</p>
+            <div class="h-full flex flex-col items-center justify-center py-20 opacity-20">
+                <svg class="w-24 h-24 mb-6" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.56-7.43H5.12"/></svg>
+                <p class="text-[10px] font-black uppercase tracking-[0.4em] italic">Belum ada pesanan</p>
             </div>
             @endforelse
         </div>
-        @else
+
         <!-- History Section -->
-        <div class="flex-1 overflow-y-auto p-10 space-y-6 scrollbar-hide animate-in slide-in-from-right duration-500">
-            <h2 class="text-2xl font-black italic uppercase tracking-tighter text-gray-800 dark:text-white mb-8">Transaksi Terakhir</h2>
+        <div x-show="tab === 'history'" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-x-10" x-transition:enter-end="opacity-100 translate-x-0" class="flex-1 overflow-y-auto p-8 space-y-5 scrollbar-hide min-h-0">
+            <h2 class="text-xl font-black italic uppercase tracking-tighter text-gray-800 dark:text-white mb-6">History</h2>
             @foreach($this->recentTransactions as $history)
-            <div class="flex items-center gap-6 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-[2rem] border border-transparent hover:border-primary-blue/20 transition-all group">
-                <div class="w-12 h-12 bg-white dark:bg-gray-900 rounded-2xl flex items-center justify-center text-primary-blue text-[10px] font-black italic shadow-sm">
+            <div class="flex items-center gap-5 p-5 bg-gray-50/50 dark:bg-gray-800/30 rounded-[2rem] border border-transparent hover:border-primary-blue/20 transition-all group">
+                <div class="w-12 h-12 bg-white dark:bg-gray-900 rounded-xl flex items-center justify-center text-primary-blue text-[9px] font-black italic shadow-md">
                     {{ $history->transacted_at->format('H:i') }}
                 </div>
                 <div class="flex-1 min-w-0">
-                    <h4 class="text-xs font-black text-gray-800 dark:text-white uppercase tracking-tight line-clamp-1">{{ $history->product->name }}</h4>
-                    <div class="flex items-center gap-2 mt-1">
-                        <span class="text-[9px] font-black {{ $history->status === 'uang_diterima' ? 'text-green-500' : 'text-primary-red' }} uppercase tracking-widest">{{ str_replace('_', ' ', $history->status) }}</span>
-                        <span class="text-[9px] font-bold text-gray-400">× {{ $history->quantity }}</span>
+                    <h4 class="text-[11px] font-black text-gray-800 dark:text-white uppercase tracking-tight line-clamp-1">{{ $history->product->name }}</h4>
+                    <div class="flex items-center gap-2 mt-0.5">
+                        <span class="text-[8px] font-black {{ $history->status === 'uang_diterima' ? 'text-green-500' : 'text-primary-red' }} uppercase tracking-[0.2em]">{{ str_replace('_', ' ', $history->status) }}</span>
                     </div>
                 </div>
-                <div class="flex flex-col items-end gap-2">
-                    <p class="text-xs font-black text-gray-800 dark:text-white italic">Rp{{ number_format($history->total_price, 0, ',', '.') }}</p>
-                    <button wire:click="editTransaction({{ $history->id }})" class="p-2 bg-white dark:bg-gray-900 text-gray-300 hover:text-primary-blue rounded-xl border border-gray-100 dark:border-gray-800 shadow-sm transition-all group-hover:scale-110">
-                        <svg class="w-3.5 h-3.5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
-                    </button>
+                <div class="text-right">
+                    <p class="text-[11px] font-black text-gray-800 dark:text-white italic">Rp{{ number_format($history->total_price, 0, ',', '.') }}</p>
+                    <button wire:click="editTransaction({{ $history->id }})" class="mt-1 text-[8px] font-black text-gray-300 hover:text-primary-blue uppercase tracking-widest transition-colors">Edit</button>
                 </div>
             </div>
             @endforeach
         </div>
-        @endif
 
         <!-- Checkout Section -->
-        <div class="p-10 bg-gray-50 dark:bg-gray-950 border-t border-gray-100 dark:border-gray-800 space-y-8 rounded-t-[4rem] shadow-[0_-15px_40px_-10px_rgba(0,0,0,0.05)]">
-            <div class="flex justify-between items-end">
-                <div>
-                    <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-2">Total Pembayaran</span>
-                    <span class="text-4xl font-black italic text-primary-blue tracking-tighter">Rp{{ number_format($total, 0, ',', '.') }}</span>
+        <div class="p-8 bg-white dark:bg-gray-950 border-t-2 border-gray-50 dark:border-gray-800 space-y-6 shadow-[0_-30px_80px_-20px_rgba(0,0,0,0.06)] flex-shrink-0">
+            
+            <!-- Summary Stats -->
+            <div class="bg-gray-50 dark:bg-gray-900/50 p-6 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 flex flex-col gap-1">
+                <span class="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em]">Total Tagihan</span>
+                <div class="flex items-baseline gap-2">
+                    <span class="text-base font-black italic text-primary-blue tracking-tighter">Rp</span>
+                    <span class="text-5xl font-black italic text-primary-blue tracking-tighter leading-none">{{ number_format($total, 0, ',', '.') }}</span>
                 </div>
             </div>
 
-            <div class="space-y-6">
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="relative group">
-                        <label class="block text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 ml-3">Pembeli</label>
-                        <input type="text" wire:model="buyer_name" placeholder="Guest Customer" class="w-full px-6 py-4 bg-white dark:bg-gray-900 border-none rounded-2xl focus:ring-4 focus:ring-primary-blue/10 font-black text-xs text-gray-800 dark:text-white uppercase tracking-tight placeholder:text-gray-300">
-                    </div>
-                    <div class="relative group">
-                        <label class="block text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 ml-3">Uang Diterima</label>
-                        <div class="relative">
-                            <span class="absolute left-5 inset-y-0 flex items-center text-[10px] font-black text-gray-300">Rp</span>
-                            <input type="number" wire:model.live="payment_amount" class="w-full pl-12 pr-6 py-4 bg-white dark:bg-gray-900 border-none rounded-2xl focus:ring-4 focus:ring-primary-blue/10 font-black text-sm text-gray-800 dark:text-white">
-                        </div>
-                    </div>
+            <!-- Enhanced Input Group -->
+            <div class="grid grid-cols-2 gap-4">
+                <div class="space-y-2">
+                    <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest ml-5">Nama Pembeli</label>
+                    <input type="text" wire:model="buyer_name" placeholder="Guest" class="w-full px-6 py-4 bg-gray-50 dark:bg-gray-800 border-none rounded-[1.5rem] focus:ring-4 focus:ring-primary-blue/10 font-black text-xs uppercase tracking-tight text-gray-800 dark:text-white">
                 </div>
-
-                @if($payment_amount > 0)
-                <div class="flex justify-between items-center px-8 py-4 {{ $change < 0 ? 'bg-red-500/10' : 'bg-primary-blue/5' }} dark:bg-opacity-20 rounded-2xl animate-in fade-in slide-in-from-bottom-2 duration-300">
-                    <div class="flex items-center">
-                        <div class="w-2 h-2 rounded-full {{ $change < 0 ? 'bg-primary-red' : 'bg-primary-blue' }} mr-3 animate-pulse"></div>
-                        <span class="text-[10px] font-black {{ $change < 0 ? 'text-primary-red' : 'text-primary-blue' }} uppercase tracking-widest">{{ $change < 0 ? 'Kurang Bayar' : 'Uang Kembalian' }}</span>
+                <div class="space-y-2">
+                    <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest ml-5">Nominal Bayar</label>
+                    <div class="relative">
+                        <span class="absolute left-6 inset-y-0 flex items-center text-[10px] font-black text-gray-300 italic">Rp</span>
+                        <input type="number" wire:model.live="payment_amount" class="w-full pl-14 pr-6 py-4 bg-gray-50 dark:bg-gray-800 border-none rounded-[1.5rem] focus:ring-4 focus:ring-primary-blue/10 font-black text-xl text-primary-blue dark:text-primary-blue-light italic">
                     </div>
-                    <span class="text-xl font-black italic {{ $change < 0 ? 'text-primary-red' : 'text-primary-blue' }}">Rp{{ number_format(abs($change), 0, ',', '.') }}</span>
-                </div>
-                @endif
-
-                <div class="flex gap-3">
-                    @php
-                        $statuses = [
-                            'uang_diterima' => ['label' => 'LUNAS', 'color' => 'bg-green-500', 'icon' => 'M20 6 9 17 4 12'],
-                            'belum_kembalian' => ['label' => 'PENDING', 'color' => 'bg-primary-blue', 'icon' => 'M12 8v4l3 3'],
-                            'belum_menerima_uang' => ['label' => 'HUTANG', 'color' => 'bg-primary-red', 'icon' => 'M12 9v4m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z'],
-                        ];
-                    @endphp
-                    @foreach($statuses as $val => $cfg)
-                    <button wire:click="$set('status', '{{ $val }}')" class="flex-1 py-4 rounded-2xl flex flex-col items-center gap-2 transition-all {{ $status === $val ? $cfg['color'] . ' text-white shadow-xl shadow-' . explode('-', $cfg['color'])[1] . '-500/30 scale-105' : 'bg-white dark:bg-gray-900 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800' }}">
-                        <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="{{ $cfg['icon'] }}"/></svg>
-                        <span class="text-[8px] font-black uppercase tracking-[0.2em]">{{ $cfg['label'] }}</span>
-                    </button>
-                    @endforeach
                 </div>
             </div>
 
-            <button wire:click="checkout" @if(empty($cart) || $change < 0) disabled @endif class="w-full py-8 bg-primary-red text-white rounded-[2.5rem] shadow-2xl shadow-red-500/30 font-black italic uppercase tracking-[0.2em] transform hover:-translate-y-2 active:scale-95 transition-all text-xl disabled:opacity-30 disabled:transform-none group relative overflow-hidden">
-                <span class="relative z-10">Konfirmasi Pesanan</span>
-                <div class="absolute inset-0 bg-white/10 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
-            </button>
+            <!-- Payment Status Selector -->
+            <div class="flex gap-2">
+                @php
+                    $statuses = [
+                        'uang_diterima' => ['label' => 'LUNAS', 'color' => 'bg-green-500', 'icon' => 'M20 6 9 17 4 12'],
+                        'belum_kembalian' => ['label' => 'PENDING', 'color' => 'bg-primary-blue', 'icon' => 'M12 8v4l3 3'],
+                        'belum_menerima_uang' => ['label' => 'HUTANG', 'color' => 'bg-primary-red', 'icon' => 'M12 9v4m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z'],
+                    ];
+                @endphp
+                @foreach($statuses as $val => $cfg)
+                <button wire:click="$set('status', '{{ $val }}')" class="flex-1 py-4 rounded-[1.5rem] flex items-center justify-center gap-3 transition-all {{ $status === $val ? $cfg['color'] . ' text-white shadow-2xl scale-[1.02]' : 'bg-gray-50 dark:bg-gray-900 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800' }}">
+                    <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="{{ $cfg['icon'] }}"/></svg>
+                    <span class="text-[9px] font-black uppercase tracking-[0.2em]">{{ $cfg['label'] }}</span>
+                </button>
+                @endforeach
+            </div>
 
+            <!-- Change/Due Indicator -->
+            @if($payment_amount > 0)
+            <div class="px-6 py-4 {{ $change < 0 ? 'bg-red-500/10' : 'bg-green-500/10' }} rounded-[1.5rem] flex justify-between items-center animate-in slide-in-from-top-4 duration-500 border border-transparent {{ $change < 0 ? 'border-red-500/10' : 'border-green-500/10' }}">
+                <div class="flex items-center gap-3">
+                    <div class="w-2 h-2 rounded-full {{ $change < 0 ? 'bg-primary-red' : 'bg-green-500' }} animate-pulse"></div>
+                    <span class="text-[9px] font-black {{ $change < 0 ? 'text-primary-red' : 'text-green-600' }} uppercase tracking-[0.3em]">{{ $change < 0 ? 'Kurang Bayar' : 'Uang Kembalian' }}</span>
+                </div>
+                <span class="text-2xl font-black italic {{ $change < 0 ? 'text-primary-red' : 'text-green-600' }}">Rp{{ number_format(abs($change), 0, ',', '.') }}</span>
+            </div>
+            @endif
+
+            <!-- Final Action -->
+            <div class="space-y-4 pt-1">
+                <textarea wire:model="note" rows="2" placeholder="Catatan transaksi..." class="w-full px-6 py-4 bg-gray-50 dark:bg-gray-800 border-none rounded-[1.5rem] focus:ring-4 focus:ring-primary-blue/10 font-bold text-xs text-gray-800 dark:text-white placeholder:text-gray-300"></textarea>
+                <button wire:click="checkout" @if(empty($cart) || $change < 0) disabled @endif class="w-full py-6 bg-primary-blue text-white rounded-[2rem] shadow-[0_30px_80px_-20px_rgba(59,130,246,0.5)] hover:scale-[1.02] active:scale-95 transition-all font-black italic uppercase text-base tracking-[0.3em] flex items-center justify-center gap-5 group disabled:opacity-30 disabled:scale-100 disabled:shadow-none overflow-hidden relative">
+                    <span class="relative z-10">Proses Pesanan</span>
+                    <svg class="w-5 h-5 group-hover:translate-x-3 transition-transform relative z-10" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                    <div class="absolute inset-0 bg-white/10 translate-y-full group-hover:translate-y-0 transition-transform duration-500"></div>
+                </button>
+            </div>
         </div>
     </div>
+</div>
 
-    <!-- 4. Success Overlay (Enhanced) -->
+<!-- Success Overlay -->
     <div x-data="{ show: false }" 
          x-on:transaction-complete.window="show = true; setTimeout(() => show = false, 1200)"
          x-show="show"
@@ -280,220 +331,147 @@
             x-transition:leave="transition ease-in duration-300"
             x-transition:leave-start="opacity-100 scale-100 translate-y-0"
             x-transition:leave-end="opacity-0 scale-95 translate-y-10"
-            class="bg-white dark:bg-gray-900 p-16 rounded-[5rem] shadow-[0_40px_100px_-20px_rgba(0,0,0,0.3)] flex flex-col items-center gap-8 border-t-8 border-green-500"
+            class="bg-white dark:bg-gray-900 p-20 rounded-[6rem] shadow-[0_50px_150px_-30px_rgba(0,0,0,0.4)] flex flex-col items-center gap-10 border-t-8 border-green-500"
         >
-            <div class="w-32 h-32 bg-green-500 text-white rounded-full flex items-center justify-center shadow-2xl shadow-green-500/40 animate-bounce">
-                <svg class="w-16 h-16" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            <div class="w-36 h-36 bg-green-500 text-white rounded-full flex items-center justify-center shadow-2xl shadow-green-500/40 animate-bounce">
+                <svg class="w-20 h-20" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
             </div>
             <div class="text-center">
-                <h3 class="text-4xl font-black italic uppercase tracking-tighter text-gray-800 dark:text-white">Selesai!</h3>
-                <p class="text-gray-400 font-bold text-sm mt-3 uppercase tracking-[0.3em] italic">Transaksi Berhasil Dicatat</p>
+                <h3 class="text-5xl font-black italic uppercase tracking-tighter text-gray-800 dark:text-white leading-none">BERHASIL!</h3>
+                <p class="text-gray-400 font-bold text-base mt-5 uppercase tracking-[0.4em] italic">Transaksi Telah Dicatat</p>
             </div>
         </div>
     </div>
 
-    <!-- 5. Opening Stock Modal -->
-    <div 
-        x-data="{ show: @entangle('showOpeningStockModal') }" 
-        x-show="show" 
-        x-cloak
-        class="fixed inset-0 z-[300] flex items-center justify-center p-6 bg-gray-900/60 backdrop-blur-sm"
-        x-transition:enter="transition ease-out duration-300"
-        x-transition:enter-start="opacity-0"
-        x-transition:enter-end="opacity-100"
-        x-transition:leave="transition ease-in duration-200"
-        x-transition:leave-start="opacity-100"
-        x-transition:leave-end="opacity-0"
-    >
-        <div 
-            class="bg-white dark:bg-gray-900 w-full max-w-4xl max-h-[80vh] overflow-hidden rounded-[3rem] shadow-2xl flex flex-col"
-            x-transition:enter="transition ease-out duration-500"
-            x-transition:enter-start="opacity-0 scale-90 translate-y-10"
-            x-transition:enter-end="opacity-100 scale-100 translate-y-0"
-            x-transition:leave="transition ease-in duration-300"
-            x-transition:leave-start="opacity-100 scale-100 translate-y-0"
-            x-transition:leave-end="opacity-0 scale-95 translate-y-10"
-        >
-            <div class="p-10 border-b border-gray-50 dark:border-gray-800 flex justify-between items-center">
-                <div>
-                    <h2 class="text-3xl font-black italic uppercase tracking-tighter text-gray-800 dark:text-white">Stok Awal Hari Ini</h2>
-                    <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-2">Mohon masukkan jumlah stok awal untuk setiap produk</p>
-                </div>
-                <div class="flex items-center gap-4">
-                    <div class="relative">
-                        <input type="text" wire:model.live="modalSearch" placeholder="Cari..." class="pl-10 pr-4 py-2 bg-gray-50 dark:bg-gray-800 border-none rounded-xl focus:ring-2 focus:ring-primary-blue/20 text-[10px] font-black uppercase tracking-widest">
-                        <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-400" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-                    </div>
-                    <select wire:model.live="modalCategory" class="pl-4 pr-10 py-2 bg-gray-50 dark:bg-gray-800 border-none rounded-xl focus:ring-2 focus:ring-primary-blue/20 text-[10px] font-black uppercase tracking-widest text-gray-400">
-                        <option value="">Semua</option>
-                        @foreach($categories as $cat)
-                            <option value="{{ $cat->id }}">{{ $cat->name }}</option>
-                        @endforeach
-                    </select>
-                    <a href="{{ route('dashboard') }}" class="px-6 py-3 bg-gray-50 dark:bg-gray-800 text-[10px] font-black text-gray-400 uppercase tracking-widest rounded-xl hover:text-primary-red transition-all">
-                        Kembali
-                    </a>
-                </div>
-            </div>
-            
-            <div class="flex-1 overflow-y-auto p-10 scrollbar-hide">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    @foreach(collect($allProducts)->when($modalSearch, fn($c) => $c->filter(fn($p) => str_contains(strtolower($p->name), strtolower($modalSearch))))->when($modalCategory, fn($c) => $c->where('category_id', $modalCategory)) as $p)
-                    <div wire:key="opening-stock-{{ $p->id }}" class="flex items-center justify-between p-6 bg-gray-50 dark:bg-gray-800/50 rounded-2xl border border-transparent hover:border-primary-blue/20 transition-all">
-                        <div class="min-w-0">
-                            <h4 class="text-sm font-black text-gray-800 dark:text-white uppercase tracking-tight line-clamp-1">{{ $p->name }}</h4>
-                            <p class="text-[9px] font-black text-gray-400 uppercase tracking-widest mt-1">{{ $p->category ? $p->category->name : 'No Category' }}</p>
-                        </div>
-                        <div class="w-32">
-                            <input type="number" wire:model.blur="stockItems.{{ $p->id }}" class="w-full px-4 py-3 bg-white dark:bg-gray-900 border-none rounded-xl focus:ring-4 focus:ring-primary-blue/10 font-black text-sm text-center">
-                        </div>
-                    </div>
-                    @endforeach
-                </div>
-            </div>
- 
-            <div class="p-10 bg-gray-50 dark:bg-gray-950 border-t border-gray-100 dark:border-gray-800">
-                <button wire:click="saveOpeningStock" class="w-full py-6 bg-primary-blue text-white rounded-2xl shadow-xl shadow-blue-500/20 font-black italic uppercase tracking-widest hover:-translate-y-1 transition-all">
-                    Simpan Stok Awal & Mulai Jualan
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- 6. Closing Stock Modal -->
-    <div 
-        x-data="{ show: @entangle('showClosingStockModal') }" 
-        x-show="show" 
-        x-cloak
-        class="fixed inset-0 z-[300] flex items-center justify-center p-6 bg-gray-900/60 backdrop-blur-sm"
-        x-transition:enter="transition ease-out duration-300"
-        x-transition:enter-start="opacity-0"
-        x-transition:enter-end="opacity-100"
-        x-transition:leave="transition ease-in duration-200"
-        x-transition:leave-start="opacity-100"
-        x-transition:leave-end="opacity-0"
-    >
-        <div 
-            class="bg-white dark:bg-gray-900 w-full max-w-4xl max-h-[80vh] overflow-hidden rounded-[3rem] shadow-2xl flex flex-col"
-            x-transition:enter="transition ease-out duration-500"
-            x-transition:enter-start="opacity-0 scale-90 translate-y-10"
-            x-transition:enter-end="opacity-100 scale-100 translate-y-0"
-            x-transition:leave="transition ease-in duration-300"
-            x-transition:leave-start="opacity-100 scale-100 translate-y-0"
-            x-transition:leave-end="opacity-0 scale-95 translate-y-10"
-        >
-            <div class="p-10 border-b border-gray-50 dark:border-gray-800 flex justify-between items-end">
-                <div>
-                    <h2 class="text-3xl font-black italic uppercase tracking-tighter text-gray-800 dark:text-white text-primary-red">Akhiri Sesi</h2>
-                    <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-2">Masukkan jumlah stok akhir (sisa) hari ini</p>
-                </div>
-                <div class="flex items-center gap-4">
-                    <div class="relative">
-                        <input type="text" wire:model.live="modalSearch" placeholder="Cari..." class="pl-10 pr-4 py-2 bg-gray-50 dark:bg-gray-800 border-none rounded-xl focus:ring-2 focus:ring-primary-red/20 text-[10px] font-black uppercase tracking-widest">
-                        <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-400" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-                    </div>
-                    <select wire:model.live="modalCategory" class="pl-4 pr-10 py-2 bg-gray-50 dark:bg-gray-800 border-none rounded-xl focus:ring-2 focus:ring-primary-red/20 text-[10px] font-black uppercase tracking-widest text-gray-400">
-                        <option value="">Semua</option>
-                        @foreach($categories as $cat)
-                            <option value="{{ $cat->id }}">{{ $cat->name }}</option>
-                        @endforeach
-                    </select>
-                    <button wire:click="$set('showClosingStockModal', false)" class="text-[10px] font-black text-gray-400 uppercase hover:text-primary-red transition-colors">Batal</button>
-                </div>
-            </div>
-            
-            <div class="flex-1 overflow-y-auto p-10 scrollbar-hide">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    @foreach(collect($allProducts)->when($modalSearch, fn($c) => $c->filter(fn($p) => str_contains(strtolower($p->name), strtolower($modalSearch))))->when($modalCategory, fn($c) => $c->where('category_id', $modalCategory)) as $p)
-                    <div wire:key="closing-stock-{{ $p->id }}" class="flex items-center justify-between p-6 bg-gray-50 dark:bg-gray-800/50 rounded-2xl border border-transparent hover:border-primary-red/20 transition-all">
-                        <div class="min-w-0">
-                            <h4 class="text-sm font-black text-gray-800 dark:text-white uppercase tracking-tight line-clamp-1">{{ $p->name }}</h4>
-                            <p class="text-[9px] font-black text-gray-400 uppercase tracking-widest mt-1">{{ $p->category ? $p->category->name : 'No Category' }}</p>
-                        </div>
-                        <div class="w-32">
-                            <input type="number" wire:model.blur="stockItems.{{ $p->id }}" class="w-full px-4 py-3 bg-white dark:bg-gray-900 border-none rounded-xl focus:ring-4 focus:ring-primary-red/10 font-black text-sm text-center">
-                        </div>
-                    </div>
-                    @endforeach
-                </div>
-            </div>
-
-            <div class="p-10 bg-gray-50 dark:bg-gray-950 border-t border-gray-100 dark:border-gray-800">
-                <button wire:click="saveClosingStock" class="w-full py-6 bg-primary-red text-white rounded-2xl shadow-xl shadow-red-500/20 font-black italic uppercase tracking-widest hover:-translate-y-1 transition-all">
-                    Simpan Stok Akhir & Selesaikan Hari
-                </button>
-            </div>
-        </div>
-    </div>
+    <!-- Modals Section -->
     
-    <!-- 7. Edit Transaction Modal -->
-    <div 
-        x-data="{ show: @entangle('showEditModal') }" 
-        x-show="show" 
-        x-cloak
-        class="fixed inset-0 z-[300] flex items-center justify-center p-6 bg-gray-900/60 backdrop-blur-sm"
-        x-transition:enter="transition ease-out duration-300"
-        x-transition:enter-start="opacity-0"
-        x-transition:enter-end="opacity-100"
-        x-transition:leave="transition ease-in duration-200"
-        x-transition:leave-start="opacity-100"
-        x-transition:leave-end="opacity-0"
-    >
-        <div 
-            @click.away="show = false"
-            class="bg-white dark:bg-gray-900 w-full max-w-lg rounded-[3rem] shadow-2xl flex flex-col p-10 gap-8"
-        >
-            <div class="flex justify-between items-start">
+    <!-- Opening Stock Modal -->
+    <div x-data="{ show: @entangle('showOpeningStockModal') }" x-show="show" x-cloak class="fixed inset-0 z-[300] flex items-center justify-center p-6 bg-gray-900/60 backdrop-blur-sm" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">
+        <div class="bg-white dark:bg-gray-900 w-full max-w-5xl max-h-[85vh] overflow-hidden rounded-[4rem] shadow-2xl flex flex-col relative" x-transition:enter="transition ease-out duration-500" x-transition:enter-start="opacity-0 scale-90 translate-y-10" x-transition:enter-end="opacity-100 scale-100 translate-y-0">
+            <!-- Close Button -->
+            <button @click="show = false" class="absolute top-10 right-10 w-12 h-12 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center text-gray-400 hover:text-primary-red hover:bg-primary-red/10 transition-all z-50 group">
+                <svg class="w-6 h-6 group-hover:rotate-90 transition-transform duration-300" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+            </button>
+            <div class="p-12 border-b border-gray-50 dark:border-gray-800 flex justify-between items-center bg-gray-50/30 dark:bg-gray-950/30">
                 <div>
-                    <h2 class="text-2xl font-black italic uppercase tracking-tighter text-primary-blue">Edit Transaksi</h2>
-                    <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1">Koreksi kesalahan input data</p>
+                    <h2 class="text-4xl font-black italic uppercase tracking-tighter text-gray-800 dark:text-white">Stok Awal Hari Ini</h2>
+                    <p class="text-sm font-bold text-gray-400 uppercase tracking-widest mt-3">Silakan verifikasi jumlah stok sebelum mulai berjualan</p>
                 </div>
-                <button @click="show = false" class="text-gray-300 hover:text-primary-red transition-colors">
-                    <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
-                </button>
+                <div class="flex items-center gap-6 pr-16">
+                    <div class="relative">
+                        <input type="text" wire:model.live="modalSearch" placeholder="Cari menu..." class="pl-12 pr-6 py-4 bg-white dark:bg-gray-800 border-none rounded-2xl focus:ring-4 focus:ring-primary-blue/10 text-xs font-black uppercase tracking-widest shadow-sm">
+                        <svg class="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                    </div>
+                </div>
+            </div>
+            <div class="flex-1 overflow-y-auto p-12 scrollbar-hide">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    @foreach(collect($allProducts)->when($modalSearch, fn($c) => $c->filter(fn($p) => str_contains(strtolower($p->name), strtolower($modalSearch))))->when($modalCategory, fn($c) => $c->where('category_id', $modalCategory)) as $p)
+                    <div wire:key="opening-stock-{{ $p->id }}" class="flex items-center justify-between p-8 bg-gray-50 dark:bg-gray-800/50 rounded-[2.5rem] border-2 border-transparent hover:border-primary-blue/20 transition-all shadow-sm">
+                        <div class="min-w-0">
+                            <h4 class="text-base font-black text-gray-800 dark:text-white uppercase tracking-tight line-clamp-1">{{ $p->name }}</h4>
+                            <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-2">{{ $p->category ? $p->category->name : 'No Category' }}</p>
+                        </div>
+                        <div class="w-36">
+                            <input type="number" wire:model.blur="stockItems.{{ $p->id }}" class="w-full px-6 py-4 bg-white dark:bg-gray-900 border-none rounded-2xl focus:ring-4 focus:ring-primary-blue/10 font-black text-lg text-center shadow-inner text-gray-800 dark:text-white">
+                        </div>
+                    </div>
+                    @endforeach
+                </div>
+            </div>
+            <div class="p-12 bg-white dark:bg-gray-950 border-t border-gray-100 dark:border-gray-800">
+                <button wire:click="saveOpeningStock" class="w-full py-7 bg-primary-blue text-white rounded-[2rem] shadow-2xl shadow-blue-500/30 font-black italic uppercase tracking-[0.3em] text-lg hover:-translate-y-2 transition-all">SIMPAN & MULAI JUALAN</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Closing Stock Modal -->
+    <div x-data="{ show: @entangle('showClosingStockModal') }" x-show="show" x-cloak class="fixed inset-0 z-[300] flex items-center justify-center p-6 bg-gray-900/60 backdrop-blur-sm" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">
+        <div class="bg-white dark:bg-gray-900 w-full max-w-5xl max-h-[85vh] overflow-hidden rounded-[4rem] shadow-2xl flex flex-col relative" x-transition:enter="transition ease-out duration-500" x-transition:enter-start="opacity-0 scale-90 translate-y-10" x-transition:enter-end="opacity-100 scale-100 translate-y-0">
+            <!-- Close Button -->
+            <button @click="show = false" class="absolute top-10 right-10 w-12 h-12 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center text-gray-400 hover:text-primary-red hover:bg-primary-red/10 transition-all z-50 group">
+                <svg class="w-6 h-6 group-hover:rotate-90 transition-transform duration-300" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+            </button>
+            <div class="p-12 border-b border-gray-50 dark:border-gray-800 flex justify-between items-center bg-gray-50/30 dark:bg-gray-950/30">
+                <div>
+                    <h2 class="text-4xl font-black italic uppercase tracking-tighter text-primary-red">Akhiri Sesi Hari Ini</h2>
+                    <p class="text-sm font-bold text-gray-400 uppercase tracking-widest mt-3">Input jumlah stok sisa untuk perhitungan laporan harian</p>
+                </div>
+            </div>
+            <div class="flex-1 overflow-y-auto p-12 scrollbar-hide">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    @foreach(collect($allProducts)->when($modalSearch, fn($c) => $c->filter(fn($p) => str_contains(strtolower($p->name), strtolower($modalSearch))))->when($modalCategory, fn($c) => $c->where('category_id', $modalCategory)) as $p)
+                    <div wire:key="closing-stock-{{ $p->id }}" class="flex items-center justify-between p-8 bg-gray-50 dark:bg-gray-800/50 rounded-[2.5rem] border-2 border-transparent hover:border-primary-red/20 transition-all shadow-sm">
+                        <div class="min-w-0">
+                            <h4 class="text-base font-black text-gray-800 dark:text-white uppercase tracking-tight line-clamp-1">{{ $p->name }}</h4>
+                            <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-2">{{ $p->category ? $p->category->name : 'No Category' }}</p>
+                        </div>
+                        <div class="w-36">
+                            <input type="number" wire:model.blur="stockItems.{{ $p->id }}" class="w-full px-6 py-4 bg-white dark:bg-gray-900 border-none rounded-2xl focus:ring-4 focus:ring-primary-red/10 font-black text-lg text-center shadow-inner text-gray-800 dark:text-white">
+                        </div>
+                    </div>
+                    @endforeach
+                </div>
+            </div>
+            <div class="p-12 bg-white dark:bg-gray-950 border-t border-gray-100 dark:border-gray-800">
+                <button wire:click="saveClosingStock" class="w-full py-7 bg-primary-red text-white rounded-[2rem] shadow-2xl shadow-red-500/30 font-black italic uppercase tracking-[0.3em] text-lg hover:-translate-y-2 transition-all">SIMPAN & TUTUP KASIR</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Transaction Modal -->
+    <div x-data="{ show: @entangle('showEditModal') }" x-show="show" x-cloak class="fixed inset-0 z-[300] flex items-center justify-center p-6 bg-gray-900/60 backdrop-blur-sm" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">
+        <div @click.away="show = false" class="bg-white dark:bg-gray-900 w-full max-w-2xl rounded-[4rem] shadow-2xl flex flex-col p-12 gap-10 relative" x-transition:enter="transition ease-out duration-500" x-transition:enter-start="opacity-0 scale-90 translate-y-10" x-transition:enter-end="opacity-100 scale-100 translate-y-0">
+            <!-- Close Button -->
+            <button @click="show = false" class="absolute top-10 right-10 w-12 h-12 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center text-gray-400 hover:text-primary-red hover:bg-primary-red/10 transition-all z-50 group">
+                <svg class="w-6 h-6 group-hover:rotate-90 transition-transform duration-300" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+            </button>
+            <div class="flex justify-between items-start pr-16">
+                <div>
+                    <h2 class="text-3xl font-black italic uppercase tracking-tighter text-primary-blue leading-none">Edit Transaksi</h2>
+                    <p class="text-[11px] font-black text-gray-400 uppercase tracking-[0.2em] mt-4">Koreksi data transaksi yang salah input</p>
+                </div>
             </div>
 
-            <div class="space-y-6">
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="space-y-2">
-                        <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest ml-2">Pembeli</label>
-                        <input type="text" wire:model="editBuyer" class="w-full px-6 py-4 bg-gray-50 dark:bg-gray-800 border-none rounded-2xl font-black text-xs uppercase tracking-tight focus:ring-4 focus:ring-primary-blue/10">
+            <div class="space-y-8">
+                <div class="grid grid-cols-2 gap-6">
+                    <div class="space-y-3">
+                        <label class="text-[11px] font-black text-gray-400 uppercase tracking-widest ml-6">Pembeli</label>
+                        <input type="text" wire:model="editBuyer" class="w-full px-8 py-6 bg-gray-50 dark:bg-gray-800 border-none rounded-[1.8rem] font-black text-sm uppercase tracking-tight focus:ring-4 focus:ring-primary-blue/10 text-gray-800 dark:text-white">
                     </div>
-                    <div class="space-y-2">
-                        <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest ml-2">Quantity</label>
-                        <input type="number" wire:model="editQty" class="w-full px-6 py-4 bg-gray-50 dark:bg-gray-800 border-none rounded-2xl font-black text-sm text-center focus:ring-4 focus:ring-primary-blue/10">
+                    <div class="space-y-3">
+                        <label class="text-[11px] font-black text-gray-400 uppercase tracking-widest ml-6">Jumlah Item</label>
+                        <input type="number" wire:model="editQty" class="w-full px-8 py-6 bg-gray-50 dark:bg-gray-800 border-none rounded-[1.8rem] font-black text-lg text-center focus:ring-4 focus:ring-primary-blue/10 text-primary-blue">
                     </div>
                 </div>
 
-                <div class="space-y-2">
-                    <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest ml-2">Status Pembayaran</label>
-                    <select wire:model.live="editStatus" class="w-full px-6 py-4 bg-gray-50 dark:bg-gray-800 border-none rounded-2xl font-black text-xs uppercase tracking-widest focus:ring-4 focus:ring-primary-blue/10">
-                        <option value="uang_diterima">Uang Diterima</option>
-                        <option value="belum_kembalian">Belum Kembalian</option>
-                        <option value="belum_menerima_uang">Belum Bayar (Hutang)</option>
-                        <option value="uang_dipinjam">Uang Dipinjam</option>
+                <div class="space-y-3">
+                    <label class="text-[11px] font-black text-gray-400 uppercase tracking-widest ml-6">Status Pembayaran</label>
+                    <select wire:model.live="editStatus" class="w-full px-8 py-6 bg-gray-50 dark:bg-gray-800 border-none rounded-[1.8rem] font-black text-xs uppercase tracking-widest focus:ring-4 focus:ring-primary-blue/10 appearance-none text-gray-800 dark:text-white">
+                        <option value="uang_diterima">Lunas (Uang Diterima)</option>
+                        <option value="belum_kembalian">Pending (Belum Kembalian)</option>
+                        <option value="belum_menerima_uang">Hutang (Belum Bayar)</option>
+                        <option value="uang_dipinjam">Pinjaman</option>
                     </select>
                 </div>
 
                 @if($editStatus === 'belum_kembalian')
-                <div class="space-y-2 animate-in fade-in slide-in-from-top-2 duration-300">
-                    <label class="text-[9px] font-black text-primary-red uppercase tracking-widest ml-2">Sisa Kembalian (Belum Diberikan)</label>
+                <div class="space-y-3 animate-in fade-in slide-in-from-top-4 duration-500">
+                    <label class="text-[11px] font-black text-primary-red uppercase tracking-widest ml-6">Sisa Kembalian Terhutang</label>
                     <div class="relative">
-                        <span class="absolute left-6 inset-y-0 flex items-center text-[10px] font-black text-gray-400">Rp</span>
-                        <input type="number" wire:model="editChangeDue" class="w-full pl-14 pr-6 py-4 bg-red-50 dark:bg-red-900/10 border border-primary-red/20 rounded-2xl font-black text-sm text-primary-red focus:ring-4 focus:ring-primary-red/10">
+                        <span class="absolute left-8 inset-y-0 flex items-center text-xs font-black text-gray-400 italic">Rp</span>
+                        <input type="number" wire:model="editChangeDue" class="w-full pl-16 pr-8 py-6 bg-red-50 dark:bg-red-900/10 border-2 border-primary-red/10 rounded-[1.8rem] font-black text-lg text-primary-red focus:ring-4 focus:ring-primary-red/10 shadow-sm">
                     </div>
                 </div>
                 @endif
 
-                <div class="space-y-2">
-                    <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest ml-2">Catatan</label>
-                    <textarea wire:model="editNote" rows="3" class="w-full px-6 py-4 bg-gray-50 dark:bg-gray-800 border-none rounded-2xl font-bold text-xs focus:ring-4 focus:ring-primary-blue/10"></textarea>
+                <div class="space-y-3">
+                    <label class="text-[11px] font-black text-gray-400 uppercase tracking-widest ml-6">Catatan Admin</label>
+                    <textarea wire:model="editNote" rows="3" class="w-full px-8 py-6 bg-gray-50 dark:bg-gray-800 border-none rounded-[1.8rem] font-bold text-sm focus:ring-4 focus:ring-primary-blue/10 placeholder:text-gray-300 text-gray-800 dark:text-white"></textarea>
                 </div>
             </div>
 
-            <button wire:click="updateTransaction" class="w-full py-5 bg-primary-blue text-white rounded-2xl shadow-xl shadow-blue-500/20 font-black italic uppercase text-xs tracking-widest hover:scale-[1.02] active:scale-95 transition-all">
-                Simpan Perubahan
-            </button>
+            <button wire:click="updateTransaction" class="w-full py-7 bg-primary-blue text-white rounded-[2rem] shadow-2xl shadow-blue-500/30 font-black italic uppercase text-sm tracking-[0.3em] hover:scale-[1.02] active:scale-95 transition-all">SIMPAN PERUBAHAN</button>
         </div>
     </div>
 

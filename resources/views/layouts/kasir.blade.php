@@ -13,10 +13,20 @@
 
         @vite(['resources/css/app.css', 'resources/js/app.js'])
         @livewireStyles
+
+        <script>
+            // Synchronize theme with Admin preference
+            if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark')
+            }
+        </script>
     </head>
     <body class="h-full overflow-hidden bg-bone-white dark:bg-dark-soft">
         {{ $slot }}
         @include('partials.toasts')
+        @include('partials.global-loading')
         @livewireScripts
     </body>
 </html>

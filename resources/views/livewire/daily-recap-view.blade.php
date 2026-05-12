@@ -17,9 +17,9 @@
             </a>
 
             @if($recap)
-            <button wire:click="exportCSV" class="px-8 py-4 bg-primary-red text-white rounded-2xl shadow-xl shadow-red-500/20 font-black italic uppercase text-xs tracking-widest transform hover:-translate-y-1 transition-all flex items-center">
+            <button onclick="exportDailyExcel('Rekap_Harian_{{ $selectedDate }}')" class="px-8 py-4 bg-primary-red text-white rounded-2xl shadow-xl shadow-red-500/20 font-black italic uppercase text-xs tracking-widest transform hover:-translate-y-1 transition-all flex items-center">
                 <svg class="w-4 h-4 mr-3" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
-                Export CSV
+                Export XLSX
             </button>
             @endif
 
@@ -98,8 +98,8 @@
         <div class="lg:col-span-2 bg-white dark:bg-gray-800 rounded-[3rem] p-10 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700">
             <div class="flex items-center justify-between mb-8">
                 <div>
-                    <h2 class="text-2xl font-black italic uppercase tracking-tighter text-gray-800 dark:text-white">Audit Uang Kas</h2>
-                    <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1">Bandingkan Uang Fisik vs Sistem</p>
+                    <h2 class="text-2xl font-black italic uppercase tracking-tighter text-gray-800 dark:text-white leading-none">Audit Uang Kas</h2>
+                    <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-2">Bandingkan Uang Fisik vs Sistem</p>
                 </div>
                 <div class="p-4 bg-primary-blue/5 rounded-2xl">
                     <svg class="w-6 h-6 text-primary-blue" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
@@ -183,6 +183,54 @@
                     <p class="text-sm font-black italic">Rp{{ number_format($recap->total_revenue_real, 0, ',', '.') }}</p>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <!-- Category Performance Section -->
+    <div class="bg-white dark:bg-gray-800 rounded-[3.5rem] p-10 mb-12 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-200">
+        <div class="flex items-center justify-between mb-10">
+            <div>
+                <h2 class="text-2xl font-black italic uppercase tracking-tighter text-gray-800 dark:text-white leading-none">Performa Per Kategori</h2>
+                <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-2">Rekap Modal & Keuntungan Berdasarkan Jenis Produk Hari Ini</p>
+            </div>
+            <div class="p-4 bg-primary-red/5 rounded-2xl text-primary-red">
+                <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
+            </div>
+        </div>
+
+        <div class="overflow-x-auto no-scrollbar">
+            <table class="w-full text-left">
+                <thead>
+                    <tr class="border-b border-gray-50 dark:border-gray-700">
+                        <th class="pb-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">Kategori</th>
+                        <th class="pb-6 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Volume</th>
+                        <th class="pb-6 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right">Total Modal (HPP)</th>
+                        <th class="pb-6 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right">Keuntungan</th>
+                        <th class="pb-6 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right">Omzet</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-50 dark:divide-gray-700">
+                    @foreach($categoryRecap as $catName => $stats)
+                    <tr class="group hover:bg-gray-50/50 dark:hover:bg-gray-900/50 transition-all">
+                        <td class="py-8">
+                            <span class="text-base font-black text-gray-800 dark:text-white uppercase tracking-tight group-hover:text-primary-blue transition-colors">{{ $catName }}</span>
+                        </td>
+                        <td class="py-8 text-center">
+                            <span class="text-sm font-black text-gray-800 dark:text-white">{{ $stats->qty }} <span class="text-[9px] text-gray-400 uppercase ml-1">Unit</span></span>
+                        </td>
+                        <td class="py-8 text-right">
+                            <span class="text-sm font-bold text-gray-400 italic">Rp{{ number_format($stats->modal, 0, ',', '.') }}</span>
+                        </td>
+                        <td class="py-8 text-right">
+                            <span class="text-lg font-black text-primary-red italic tracking-tighter">Rp{{ number_format($stats->profit, 0, ',', '.') }}</span>
+                        </td>
+                        <td class="py-8 text-right">
+                            <span class="text-lg font-black text-primary-blue italic tracking-tighter">Rp{{ number_format($stats->revenue, 0, ',', '.') }}</span>
+                        </td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
         </div>
     </div>
 
@@ -354,4 +402,58 @@
             </button>
         </div>
     </div>
+</div>
+
+    @if($recap)
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+    <script>
+        function exportDailyExcel(filename) {
+            const wb = XLSX.utils.book_new();
+            
+            // 1. Sheet Summary
+            const summaryData = [
+                ["LAPORAN REKAP HARIAN - LABANTIK"],
+                ["Tanggal", "{{ \Carbon\Carbon::parse($selectedDate)->translatedFormat('d F Y') }}"],
+                [""],
+                ["RINGKASAN UTAMA"],
+                ["Total Omzet Tunai", {{ $recap->total_revenue_real ?? 0 }}],
+                ["Total Omzet Kotor", {{ $recap->total_revenue_all ?? 0 }}],
+                ["Total Keuntungan", {{ $recap->total_profit ?? 0 }}],
+                ["Total Modal", {{ $recap->total_modal ?? 0 }}],
+                [""],
+                ["PERFORMA PER KATEGORI"],
+                ["Kategori", "Volume", "Modal", "Keuntungan", "Omzet"]
+            ];
+            
+            @foreach($categoryRecap as $catName => $stats)
+                summaryData.push(["{{ $catName }}", {{ $stats->qty }}, {{ $stats->modal }}, {{ $stats->profit }}, {{ $stats->revenue }}]);
+            @endforeach
+            
+            const wsSummary = XLSX.utils.aoa_to_sheet(summaryData);
+            XLSX.utils.book_append_sheet(wb, wsSummary, "Ringkasan");
+            
+            // 2. Sheet Detailed Transactions
+            const transData = [
+                ["Jam", "Produk", "Pembeli", "Harga", "Qty", "Total", "Status"]
+            ];
+            
+            @foreach($transactions as $tx)
+                transData.push([
+                    "{{ $tx->transacted_at->format('H:i') }}",
+                    "{{ $tx->product->name }}",
+                    "{{ $tx->buyer_name ?? 'Guest' }}",
+                    {{ $tx->unit_price }},
+                    {{ $tx->quantity }},
+                    {{ $tx->total_price }},
+                    "{{ str_replace('_', ' ', $tx->status) }}"
+                ]);
+            @endforeach
+            
+            const wsTrans = XLSX.utils.aoa_to_sheet(transData);
+            XLSX.utils.book_append_sheet(wb, wsTrans, "Detail Transaksi");
+            
+            XLSX.writeFile(wb, filename + ".xlsx");
+        }
+    </script>
+    @endif
 </div>

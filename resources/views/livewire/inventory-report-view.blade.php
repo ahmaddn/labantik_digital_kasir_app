@@ -13,8 +13,14 @@
                 <div class="relative">
                     <input type="date" wire:model.live="selectedDate" class="bg-white dark:bg-gray-900 border-none rounded-2xl px-6 py-3 text-sm font-black text-gray-700 dark:text-gray-200 shadow-xl shadow-blue-900/5 focus:ring-4 focus:ring-primary-blue/10">
                 </div>
-                <a href="{{ route('kasir') }}" class="bg-primary-red text-white px-6 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-red-500/20 hover:scale-105 transition-all">
-                    Kembali ke Kasir
+                
+                <button onclick="exportInventoryExcel('Laporan_Stok_{{ $selectedDate }}')" class="bg-primary-red text-white px-6 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-red-500/20 hover:scale-105 transition-all flex items-center">
+                    <svg class="w-4 h-4 mr-3" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+                    Export XLSX
+                </button>
+
+                <a href="{{ route('kasir') }}" class="bg-gray-800 text-white px-6 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-gray-900/20 hover:scale-105 transition-all">
+                    Kembali
                 </a>
             </div>
         </div>
@@ -171,4 +177,46 @@
             </div>
         </div>
     </div>
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+    <script>
+        function exportInventoryExcel(filename) {
+            const wb = XLSX.utils.book_new();
+            
+            // 1. Summary Sheet
+            const summaryData = [
+                ["LAPORAN AUDIT STOK - LABANTIK"],
+                ["Tanggal", "{{ $dateFormatted }}"],
+                [""],
+                ["RINGKASAN AUDIT"],
+                ["Total Unit Terjual", {{ $totalSold }}],
+                ["Total Selisih Fisik", {{ $totalDiscrepancy }}],
+                ["Produk dengan Selisih", {{ $itemsWithIssue }}],
+                [""]
+            ];
+            const wsSummary = XLSX.utils.aoa_to_sheet(summaryData);
+            XLSX.utils.book_append_sheet(wb, wsSummary, "Ringkasan");
+            
+            // 2. Data Sheet
+            const reportData = [
+                ["Produk", "Kategori", "Stok Awal", "Terjual", "Ekspektasi Sistem", "Stok Fisik", "Selisih"]
+            ];
+            
+            @foreach($reportData as $row)
+                reportData.push([
+                    "{{ $row->name }}",
+                    "{{ $row->category }}",
+                    {{ $row->opening }},
+                    {{ $row->sold }},
+                    {{ $row->expected }},
+                    {{ $row->closing }},
+                    {{ $row->discrepancy }}
+                ]);
+            @endforeach
+            
+            const wsData = XLSX.utils.aoa_to_sheet(reportData);
+            XLSX.utils.book_append_sheet(wb, wsData, "Audit Detail");
+            
+            XLSX.writeFile(wb, filename + ".xlsx");
+        }
+    </script>
 </div>

@@ -29,7 +29,7 @@ class YearlyRecapView extends Component
 
     public function render()
     {
-        $query = Transaction::with('product')
+        $query = Transaction::with(['product.category'])
             ->whereYear('transacted_at', $this->selectedYear);
 
         $allTransactions = $query->get();
@@ -43,8 +43,8 @@ class YearlyRecapView extends Component
 
         $totalRevenueAll = $allTransactions->sum('total_price');
         $totalRevenueReal = $allTransactions->where('status', 'uang_diterima')->sum('total_price');
-        $totalProfit = $allTransactions->sum(fn($tx) => ($tx->unit_price - $tx->product->modal_price) * $tx->quantity);
-        $totalModal = $allTransactions->sum(fn($tx) => $tx->product->modal_price * $tx->quantity);
+        $totalProfit = $allTransactions->sum(fn($tx) => $tx->unit_profit * $tx->quantity);
+        $totalModal = $allTransactions->sum(fn($tx) => ($tx->unit_price - $tx->unit_profit) * $tx->quantity);
         $monthsCount = $allTransactions->pluck('transacted_at')->map(fn($date) => Carbon::parse($date)->format('Y-m'))->unique()->count();
 
         $recap = (object) [
@@ -64,13 +64,24 @@ class YearlyRecapView extends Component
                     'month' => $m,
                     'total_transactions' => $monthTransactions->count(),
                     'total_revenue_real' => $monthTransactions->where('status', 'uang_diterima')->sum('total_price'),
-                    'total_profit' => $monthTransactions->sum(fn($tx) => ($tx->unit_price - $tx->product->modal_price) * $tx->quantity)
+                    'total_profit' => $monthTransactions->sum(fn($tx) => $tx->unit_profit * $tx->quantity)
                 ];
             }
         }
 
+        $categoryRecap = $allTransactions->groupBy(fn($tx) => $tx->product->category->name ?? 'Tanpa Kategori')
+            ->map(function($group) {
+                return (object) [
+                    'revenue' => $group->sum('total_price'),
+                    'profit' => $group->sum(fn($tx) => $tx->unit_profit * $tx->quantity),
+                    'modal' => $group->sum(fn($tx) => ($tx->unit_price - $tx->unit_profit) * $tx->quantity),
+                    'qty' => $group->sum('quantity'),
+                ];
+            })->sortByDesc('revenue');
+
         return view('livewire.yearly-recap-view', [
             'recap' => $recap,
+            'categoryRecap' => $categoryRecap,
             'monthlyBreakdown' => $monthlyBreakdown
         ])->layout('layouts.app', ['title' => 'Rekap Tahunan']);
     }

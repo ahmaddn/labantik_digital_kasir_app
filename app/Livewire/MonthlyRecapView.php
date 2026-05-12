@@ -31,7 +31,7 @@ class MonthlyRecapView extends Component
 
     public function render()
     {
-        $query = Transaction::with('product')
+        $query = Transaction::with(['product.category'])
             ->whereMonth('transacted_at', $this->selectedMonth)
             ->whereYear('transacted_at', $this->selectedYear);
 
@@ -40,6 +40,7 @@ class MonthlyRecapView extends Component
         if ($allTransactions->isEmpty()) {
             return view('livewire.monthly-recap-view', [
                 'recap' => null,
+                'categoryRecap' => [],
                 'dailyBreakdown' => []
             ])->layout('layouts.app', ['title' => 'Rekap Bulanan']);
         }
@@ -78,8 +79,19 @@ class MonthlyRecapView extends Component
             $day->month_week = Carbon::parse($day->date)->weekOfMonth;
         }
 
+        $categoryRecap = $allTransactions->groupBy(fn($tx) => $tx->product->category->name ?? 'Tanpa Kategori')
+            ->map(function($group) {
+                return (object) [
+                    'revenue' => $group->sum('total_price'),
+                    'profit' => $group->sum(fn($tx) => $tx->unit_profit * $tx->quantity),
+                    'modal' => $group->sum(fn($tx) => ($tx->unit_price - $tx->unit_profit) * $tx->quantity),
+                    'qty' => $group->sum('quantity'),
+                ];
+            })->sortByDesc('revenue');
+
         return view('livewire.monthly-recap-view', [
             'recap' => $recap,
+            'categoryRecap' => $categoryRecap,
             'dailyBreakdown' => $dailyBreakdown
         ])->layout('layouts.app', ['title' => 'Rekap Bulanan']);
     }

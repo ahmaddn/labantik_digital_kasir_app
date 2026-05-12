@@ -31,11 +31,22 @@
 
 <body x-data="{
     sidebarOpen: localStorage.getItem('sidebar-open') !== 'false',
+    darkMode: localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches),
     toggleSidebar() {
         this.sidebarOpen = !this.sidebarOpen;
         localStorage.setItem('sidebar-open', this.sidebarOpen);
+    },
+    toggleTheme() {
+        this.darkMode = !this.darkMode;
+        if (this.darkMode) {
+            document.documentElement.classList.add('dark');
+            localStorage.setItem('color-theme', 'dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+            localStorage.setItem('color-theme', 'light');
+        }
     }
-}"
+}" x-init="if (darkMode) document.documentElement.classList.add('dark'); else document.documentElement.classList.remove('dark')"
     class="bg-bone-white dark:bg-dark-soft text-slate-900 dark:text-bone-white antialiased transition-colors duration-300">
     <div class="flex h-screen overflow-hidden">
         <!-- Sidebar -->
@@ -256,14 +267,14 @@
 
 
                     <div class="pt-10">
-                        <button id="theme-toggle"
+                        <button @click="toggleTheme()"
                             class="w-full flex items-center justify-between px-8 py-5 bg-gray-50 dark:bg-gray-800 rounded-[2rem] border border-gray-100 dark:border-gray-700 shadow-inner group transition-all">
                             <span
                                 class="text-xs font-black uppercase tracking-widest text-gray-400 group-hover:text-primary-blue transition-colors">Tema
                                 Sistem</span>
                             <div class="flex items-center space-x-3">
-                                <div id="theme-toggle-light-icon"
-                                    class="hidden p-2 bg-white dark:bg-gray-900 rounded-xl shadow-sm text-yellow-500">
+                                <div x-show="!darkMode"
+                                    class="p-2 bg-white dark:bg-gray-900 rounded-xl shadow-sm text-yellow-500">
                                     <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" width="24"
                                         height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                         stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -278,8 +289,8 @@
                                         <path d="m19.07 4.93-1.41 1.41" />
                                     </svg>
                                 </div>
-                                <div id="theme-toggle-dark-icon"
-                                    class="hidden p-2 bg-white dark:bg-gray-900 rounded-xl shadow-sm text-primary-blue">
+                                <div x-show="darkMode"
+                                    class="p-2 bg-white dark:bg-gray-900 rounded-xl shadow-sm text-primary-blue">
                                     <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" width="24"
                                         height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                         stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -329,70 +340,48 @@
         <!-- Main Content -->
         <main
             class="flex-1 overflow-y-auto relative no-scrollbar bg-bone-white dark:bg-dark-bg transition-all duration-500">
-            <!-- Floating Toggle Button (Visible when sidebar is closed) -->
-            <button x-show="!sidebarOpen" @click="toggleSidebar"
-                x-transition:enter="transition ease-out duration-300"
-                x-transition:enter-start="opacity-0 -translate-x-10"
-                x-transition:enter-end="opacity-100 translate-x-0"
-                class="fixed left-6 top-6 z-[60] hidden md:flex w-12 h-12 bg-white dark:bg-gray-800 rounded-2xl items-center justify-center text-primary-blue shadow-2xl shadow-blue-900/10 border border-gray-100 dark:border-gray-700 hover:scale-110 transition-all">
-                <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
-                    stroke-linecap="round" stroke-linejoin="round">
-                    <path d="m9 18 6-6-6-6" />
-                </svg>
-            </button>
-
-            <!-- Mobile Header -->
-            <header
-                class="md:hidden flex items-center justify-between p-8 bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 sticky top-0 z-[60]">
-                <div class="flex items-center">
-                    <div
-                        class="w-12 h-12 bg-primary-blue rounded-xl flex items-center justify-center text-white font-black italic shadow-lg border-2 border-white dark:border-gray-800">
-                        LA</div>
-                    <span
-                        class="ml-4 font-black italic uppercase text-lg tracking-tighter text-primary-blue dark:text-white">LabAntik</span>
+            
+            <!-- Global Admin Top Navbar -->
+            <header class="sticky top-0 z-40 w-full bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-100 dark:border-gray-800 px-8 py-4 flex items-center justify-between shadow-sm">
+                <div class="flex items-center gap-4">
+                    <!-- Sidebar Toggle (Desktop) -->
+                    <button @click="toggleSidebar" class="hidden md:flex p-3 bg-gray-50 dark:bg-gray-800 text-gray-400 rounded-xl hover:text-primary-blue transition-all">
+                        <svg x-show="sidebarOpen" class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+                        <svg x-show="!sidebarOpen" class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+                    </button>
+                    <!-- Page Context (Mobile Branding) -->
+                    <div class="md:hidden flex items-center gap-3">
+                        <div class="w-10 h-10 bg-primary-blue rounded-xl flex items-center justify-center text-white font-black italic shadow-lg">LA</div>
+                        <span class="font-black italic uppercase text-sm text-primary-blue dark:text-white">Admin</span>
+                    </div>
                 </div>
-                <div class="flex items-center space-x-3">
-                    <button id="theme-toggle-mobile"
-                        class="w-12 h-12 bg-gray-50 dark:bg-gray-800 rounded-xl flex items-center justify-center text-gray-500 shadow-inner">
-                        <div id="theme-toggle-light-icon-mobile" class="hidden text-yellow-500">
-                            <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-                                stroke-linecap="round" stroke-linejoin="round">
-                                <circle cx="12" cy="12" r="4" />
-                                <path d="M12 2v2" />
-                                <path d="M12 20v2" />
-                                <path d="m4.93 4.93 1.41 1.41" />
-                                <path d="m17.66 17.66 1.41 1.41" />
-                                <path d="M2 12h2" />
-                                <path d="M20 12h2" />
-                                <path d="m6.34 17.66-1.41 1.41" />
-                                <path d="m19.07 4.93-1.41 1.41" />
-                            </svg>
-                        </div>
-                        <div id="theme-toggle-dark-icon-mobile" class="hidden text-primary-blue">
-                            <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-                                stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
-                            </svg>
-                        </div>
+
+                <div class="flex items-center gap-4">
+                    <!-- Theme Toggle -->
+                    <button @click="toggleTheme()" class="p-3.5 bg-gray-50 dark:bg-gray-800 text-gray-400 rounded-xl hover:text-primary-blue hover:bg-primary-blue/5 transition-all shadow-sm">
+                        <svg x-show="!darkMode" class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+                        <svg x-show="darkMode" class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
                     </button>
-                    <button
-                        class="w-12 h-12 bg-gray-50 dark:bg-gray-800 rounded-xl flex items-center justify-center text-gray-500 shadow-inner">
-                        <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-                            stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M4 12h16" />
-                            <path d="M4 6h16" />
-                            <path d="M4 18h16" />
-                        </svg>
-                    </button>
+
+                    <div class="h-6 w-px bg-gray-100 dark:bg-gray-800 mx-1"></div>
+
+                    <!-- User Profile & Logout -->
+                    <div class="flex items-center gap-4">
+                        <div class="hidden sm:flex flex-col items-end mr-2">
+                            <span class="text-xs font-black text-gray-800 dark:text-white uppercase tracking-tighter">{{ auth()->user()->name ?? 'Admin' }}</span>
+                            <span class="text-[8px] font-black text-gray-400 uppercase tracking-widest">Administrator</span>
+                        </div>
+                        <form method="POST" action="{{ route('logout') }}">
+                            @csrf
+                            <button type="submit" class="p-3.5 bg-gray-50 dark:bg-gray-800 text-gray-400 rounded-xl hover:text-primary-red hover:bg-primary-red/5 transition-all shadow-sm group">
+                                <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                            </button>
+                        </form>
+                    </div>
                 </div>
             </header>
 
-            <div class="w-full px-6 md:px-10 min-h-screen pb-20 transition-all duration-500"
-                :class="!sidebarOpen ? 'md:pl-14' : ''">
+            <div class="w-full px-6 md:px-10 min-h-screen pb-20 transition-all duration-500">
                 {{ $slot }}
             </div>
 
@@ -400,58 +389,8 @@
         </main>
     </div>
 
+    @include('partials.global-loading')
     @livewireScripts
-    <script>
-        var themeToggleDarkIcon = document.getElementById('theme-toggle-dark-icon');
-        var themeToggleLightIcon = document.getElementById('theme-toggle-light-icon');
-        var themeToggleDarkIconMobile = document.getElementById('theme-toggle-dark-icon-mobile');
-        var themeToggleLightIconMobile = document.getElementById('theme-toggle-light-icon-mobile');
-
-        // Change the icons inside the button based on previous settings
-        if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia(
-                '(prefers-color-scheme: dark)').matches)) {
-            themeToggleLightIcon.classList.remove('hidden');
-            themeToggleLightIconMobile.classList.remove('hidden');
-        } else {
-            themeToggleDarkIcon.classList.remove('hidden');
-            themeToggleDarkIconMobile.classList.remove('hidden');
-        }
-
-        var themeToggleBtn = document.getElementById('theme-toggle');
-        var themeToggleBtnMobile = document.getElementById('theme-toggle-mobile');
-
-        function toggleTheme() {
-            // toggle icons inside button
-            themeToggleDarkIcon.classList.toggle('hidden');
-            themeToggleLightIcon.classList.toggle('hidden');
-            themeToggleDarkIconMobile.classList.toggle('hidden');
-            themeToggleLightIconMobile.classList.toggle('hidden');
-
-            // if set via local storage previously
-            if (localStorage.getItem('color-theme')) {
-                if (localStorage.getItem('color-theme') === 'light') {
-                    document.documentElement.classList.add('dark');
-                    localStorage.setItem('color-theme', 'dark');
-                } else {
-                    document.documentElement.classList.remove('dark');
-                    localStorage.setItem('color-theme', 'light');
-                }
-
-                // if NOT set via local storage previously
-            } else {
-                if (document.documentElement.classList.contains('dark')) {
-                    document.documentElement.classList.remove('dark');
-                    localStorage.setItem('color-theme', 'light');
-                } else {
-                    document.documentElement.classList.add('dark');
-                    localStorage.setItem('color-theme', 'dark');
-                }
-            }
-        }
-
-        themeToggleBtn.addEventListener('click', toggleTheme);
-        themeToggleBtnMobile.addEventListener('click', toggleTheme);
-    </script>
 </body>
 
 </html>

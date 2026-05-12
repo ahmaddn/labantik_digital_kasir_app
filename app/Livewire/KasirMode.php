@@ -13,7 +13,6 @@ class KasirMode extends Component
 {
     use WithPagination;
 
-    public $categories = [];
     public $cart = [];
     public $search = '';
     public $selectedCategory = null;
@@ -47,7 +46,6 @@ class KasirMode extends Component
 
     public function mount(): void
     {
-        $this->categories = ProductCategory::all();
         $this->checkOpeningStock();
     }
 
@@ -279,6 +277,12 @@ class KasirMode extends Component
         $this->dispatch('toast', message: 'Transaksi berhasil diperbarui!');
     }
 
+    #[Computed]
+    public function categories()
+    {
+        return ProductCategory::all();
+    }
+
     // Computed Property for recent transactions
     #[Computed]
     public function recentTransactions()
@@ -291,7 +295,13 @@ class KasirMode extends Component
 
     public function render()
     {
-        $query = Product::where('is_active', true);
+        $today = now()->toDateString();
+        $query = Product::with('category')
+            ->where('is_active', true)
+            ->whereHas('stockEntries', function($q) use ($today) {
+                $q->where('date', $today)->where('opening_stock', '>', 0);
+            });
+
         if ($this->selectedCategory) {
             $query->where('category_id', $this->selectedCategory);
         }
@@ -300,7 +310,7 @@ class KasirMode extends Component
         }
 
         return view('livewire.kasir-mode', [
-            'products' => $query->orderBy('name')->paginate(20)
+            'products' => $query->orderBy('name')->paginate(24)
         ])->layout('layouts.kasir');
     }
 }

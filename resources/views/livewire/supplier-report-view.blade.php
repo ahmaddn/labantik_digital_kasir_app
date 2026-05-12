@@ -4,6 +4,19 @@
             <h1 class="text-4xl font-black italic uppercase tracking-tighter text-primary-blue dark:text-primary-blue-light">Laporan Bagi Hasil Supplier</h1>
             <p class="text-gray-400 font-bold text-xs uppercase tracking-[0.2em] italic">Rekap Penjualan Barang Titipan</p>
         </div>
+        
+        <div class="flex items-center gap-4">
+            @if($reports->count() > 0)
+            <button onclick="exportSupplierExcel('Laporan_Supplier_{{ $dateFrom }}_ke_{{ $dateTo }}')" class="bg-primary-red text-white px-8 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-red-500/20 hover:scale-105 transition-all flex items-center">
+                <svg class="w-4 h-4 mr-3" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+                Export XLSX
+            </button>
+            @endif
+
+            <a href="{{ route('kasir') }}" class="bg-gray-800 text-white px-8 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-gray-900/20 hover:scale-105 transition-all">
+                Kembali
+            </a>
+        </div>
     </div>
 
     <!-- Filters -->
@@ -89,4 +102,42 @@
             </table>
         </div>
     </div>
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+    <script>
+        function exportSupplierExcel(filename) {
+            const wb = XLSX.utils.book_new();
+            
+            // 1. Data Sheet
+            const reportData = [
+                ["LAPORAN BAGI HASIL SUPPLIER - LABANTIK"],
+                ["Periode", "{{ $dateFrom }} s/d {{ $dateTo }}"],
+                [""],
+                ["Supplier", "Total Qty", "Total Omzet", "Hak Supplier (Modal)", "Profit Toko"]
+            ];
+            
+            @foreach($reports as $report)
+                reportData.push([
+                    "{{ $report->supplier->name ?? 'Unknown' }}",
+                    {{ $report->total_qty }},
+                    {{ $report->total_sales }},
+                    {{ $report->total_supplier_share }},
+                    {{ $report->total_shop_profit }}
+                ]);
+            @endforeach
+            
+            reportData.push([""]);
+            reportData.push([
+                "TOTAL KESELURUHAN",
+                {{ $reports->sum('total_qty') }},
+                {{ $reports->sum('total_sales') }},
+                {{ $reports->sum('total_supplier_share') }},
+                {{ $reports->sum('total_shop_profit') }}
+            ]);
+            
+            const wsData = XLSX.utils.aoa_to_sheet(reportData);
+            XLSX.utils.book_append_sheet(wb, wsData, "Laporan Supplier");
+            
+            XLSX.writeFile(wb, filename + ".xlsx");
+        }
+    </script>
 </div>
