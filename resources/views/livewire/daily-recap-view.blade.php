@@ -91,6 +91,8 @@
                 Sync: {{ $recap->generated_at->format('H:i:s') }}
             </div>
         </div>
+    </div>
+
     <!-- Cash Reconciliation (Audit Uang Kas) -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
         <div class="lg:col-span-2 bg-white dark:bg-gray-800 rounded-[3rem] p-10 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700">
