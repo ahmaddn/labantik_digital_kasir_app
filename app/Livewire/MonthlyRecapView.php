@@ -46,17 +46,25 @@ class MonthlyRecapView extends Component
         }
 
         $totalRevenueAll = $allTransactions->sum('total_price');
-        $totalRevenueReal = $allTransactions->where('status', 'uang_diterima')->sum('total_price');
-        $totalProfit = $allTransactions->sum(fn($tx) => $tx->unit_profit * $tx->quantity);
-        $totalModal = $allTransactions->sum(fn($tx) => ($tx->unit_price - $tx->unit_profit) * $tx->quantity);
+        $totalRevenueReal = $allTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->sum('total_price');
+        
+        $totalSupplierHak = $allTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])
+            ->whereNotNull('supplier_id')
+            ->sum(fn($tx) => ($tx->unit_price - $tx->unit_profit) * $tx->quantity);
+            
+        $totalInternalRevenue = $totalRevenueReal - $totalSupplierHak;
+
+        $totalProfit = $allTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->sum(fn($tx) => $tx->unit_profit * $tx->quantity);
+        $totalModal = $allTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->sum(fn($tx) => ($tx->unit_price - $tx->unit_profit) * $tx->quantity);
         $daysCount = $allTransactions->pluck('transacted_at')->map(fn($date) => Carbon::parse($date)->format('Y-m-d'))->unique()->count();
 
         $recap = (object) [
             'total_revenue_all' => $totalRevenueAll,
             'total_revenue_real' => $totalRevenueReal,
+            'total_internal_revenue' => $totalInternalRevenue,
             'total_profit' => $totalProfit,
             'total_modal' => $totalModal,
-            'total_transactions' => $allTransactions->count(),
+            'total_transactions' => $allTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->count(),
             'days_count' => $daysCount ?: 1
         ];
 
@@ -64,7 +72,7 @@ class MonthlyRecapView extends Component
                 DATE(transacted_at) as date,
                 COUNT(*) as total_transactions,
                 SUM(total_price) as total_revenue_all,
-                SUM(CASE WHEN status = "uang_diterima" THEN total_price ELSE 0 END) as total_revenue_real
+                SUM(CASE WHEN status IN ("uang_diterima", "belum_kembalian") THEN total_price ELSE 0 END) as total_revenue_real
             ')
             ->whereMonth('transacted_at', $this->selectedMonth)
             ->whereYear('transacted_at', $this->selectedYear)
@@ -74,12 +82,12 @@ class MonthlyRecapView extends Component
 
         // Add profit manually to breakdown
         foreach ($dailyBreakdown as $day) {
-            $dayTransactions = Transaction::whereDate('transacted_at', $day->date)->get();
+            $dayTransactions = Transaction::whereDate('transacted_at', $day->date)->whereIn('status', ['uang_diterima', 'belum_kembalian'])->get();
             $day->total_profit = $dayTransactions->sum(fn($tx) => $tx->unit_profit * $tx->quantity);
             $day->month_week = Carbon::parse($day->date)->weekOfMonth;
         }
 
-        $categoryRecap = $allTransactions->groupBy(fn($tx) => $tx->product->category->name ?? 'Tanpa Kategori')
+        $categoryRecap = $allTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->groupBy(fn($tx) => $tx->product->category->name ?? 'Tanpa Kategori')
             ->map(function($group) {
                 return (object) [
                     'revenue' => $group->sum('total_price'),

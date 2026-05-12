@@ -42,17 +42,25 @@ class YearlyRecapView extends Component
         }
 
         $totalRevenueAll = $allTransactions->sum('total_price');
-        $totalRevenueReal = $allTransactions->where('status', 'uang_diterima')->sum('total_price');
-        $totalProfit = $allTransactions->sum(fn($tx) => $tx->unit_profit * $tx->quantity);
-        $totalModal = $allTransactions->sum(fn($tx) => ($tx->unit_price - $tx->unit_profit) * $tx->quantity);
+        $totalRevenueReal = $allTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->sum('total_price');
+        
+        $totalSupplierHak = $allTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])
+            ->whereNotNull('supplier_id')
+            ->sum(fn($tx) => ($tx->unit_price - $tx->unit_profit) * $tx->quantity);
+            
+        $totalInternalRevenue = $totalRevenueReal - $totalSupplierHak;
+
+        $totalProfit = $allTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->sum(fn($tx) => $tx->unit_profit * $tx->quantity);
+        $totalModal = $allTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->sum(fn($tx) => ($tx->unit_price - $tx->unit_profit) * $tx->quantity);
         $monthsCount = $allTransactions->pluck('transacted_at')->map(fn($date) => Carbon::parse($date)->format('Y-m'))->unique()->count();
 
         $recap = (object) [
             'total_revenue_all' => $totalRevenueAll,
             'total_revenue_real' => $totalRevenueReal,
+            'total_internal_revenue' => $totalInternalRevenue,
             'total_profit' => $totalProfit,
             'total_modal' => $totalModal,
-            'total_transactions' => $allTransactions->count(),
+            'total_transactions' => $allTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->count(),
             'months_count' => $monthsCount ?: 1
         ];
 
@@ -62,14 +70,14 @@ class YearlyRecapView extends Component
             if ($monthTransactions->isNotEmpty()) {
                 $monthlyBreakdown[] = (object) [
                     'month' => $m,
-                    'total_transactions' => $monthTransactions->count(),
-                    'total_revenue_real' => $monthTransactions->where('status', 'uang_diterima')->sum('total_price'),
-                    'total_profit' => $monthTransactions->sum(fn($tx) => $tx->unit_profit * $tx->quantity)
+                    'total_transactions' => $monthTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->count(),
+                    'total_revenue_real' => $monthTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->sum('total_price'),
+                    'total_profit' => $monthTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->sum(fn($tx) => $tx->unit_profit * $tx->quantity)
                 ];
             }
         }
 
-        $categoryRecap = $allTransactions->groupBy(fn($tx) => $tx->product->category->name ?? 'Tanpa Kategori')
+        $categoryRecap = $allTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->groupBy(fn($tx) => $tx->product->category->name ?? 'Tanpa Kategori')
             ->map(function($group) {
                 return (object) [
                     'revenue' => $group->sum('total_price'),

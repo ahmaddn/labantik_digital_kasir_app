@@ -17,12 +17,17 @@ class Dashboard extends Component
         $todayTransactions = Transaction::with('product')->whereDate('transacted_at', $today)->get();
         $yesterdayTransactions = Transaction::with('product')->whereDate('transacted_at', $yesterday)->get();
 
-        $todayRevenue = $todayTransactions->where('status', 'uang_diterima')->sum('total_price');
-        $yesterdayRevenue = $yesterdayTransactions->where('status', 'uang_diterima')->sum('total_price');
+        $todayRevenue = $todayTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->sum('total_price');
+        $yesterdayRevenue = $yesterdayTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->sum('total_price');
         $revenueChange = $yesterdayRevenue > 0 ? (($todayRevenue - $yesterdayRevenue) / $yesterdayRevenue) * 100 : 100;
 
-        $todayProfit = $todayTransactions->sum(fn($tx) => $tx->unit_profit * $tx->quantity);
-        $yesterdayProfit = $yesterdayTransactions->sum(fn($tx) => $tx->unit_profit * $tx->quantity);
+        $todaySupplierHak = $todayTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])
+            ->whereNotNull('supplier_id')
+            ->sum(fn($tx) => ($tx->unit_price - $tx->unit_profit) * $tx->quantity);
+        $todayInternalRevenue = $todayRevenue - $todaySupplierHak;
+
+        $todayProfit = $todayTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->sum(fn($tx) => $tx->unit_profit * $tx->quantity);
+        $yesterdayProfit = $yesterdayTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->sum(fn($tx) => $tx->unit_profit * $tx->quantity);
         $profitChange = $yesterdayProfit > 0 ? (($todayProfit - $yesterdayProfit) / $yesterdayProfit) * 100 : 100;
 
         $todayCount = $todayTransactions->count();
@@ -31,6 +36,7 @@ class Dashboard extends Component
 
         $stats = (object) [
             'today_revenue' => $todayRevenue,
+            'today_internal_revenue' => $todayInternalRevenue,
             'revenue_change' => $revenueChange,
             'today_profit' => $todayProfit,
             'profit_change' => $profitChange,
@@ -46,8 +52,8 @@ class Dashboard extends Component
             $dayTxs = Transaction::whereDate('transacted_at', $date)->get();
             $weeklyData[] = [
                 'day' => $date->translatedFormat('D'),
-                'revenue' => $dayTxs->where('status', 'uang_diterima')->sum('total_price'),
-                'profit' => $dayTxs->sum(fn($tx) => $tx->unit_profit * $tx->quantity)
+                'revenue' => $dayTxs->whereIn('status', ['uang_diterima', 'belum_kembalian'])->sum('total_price'),
+                'profit' => $dayTxs->whereIn('status', ['uang_diterima', 'belum_kembalian'])->sum(fn($tx) => $tx->unit_profit * $tx->quantity)
             ];
         }
 

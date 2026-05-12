@@ -24,12 +24,18 @@
                 </div>
                 <span class="text-[10px] font-black uppercase tracking-widest text-white/60 bg-white/5 px-4 py-2 rounded-full">Omzet</span>
             </div>
-            <h3 class="text-white/60 text-[10px] font-black uppercase tracking-widest mb-1">Pendapatan Tunai</h3>
+            <h3 class="text-white/60 text-[10px] font-black uppercase tracking-widest mb-1">Total Omzet Tunai</h3>
             <p class="text-4xl font-black text-white italic tracking-tighter">Rp{{ number_format($stats->today_revenue, 0, ',', '.') }}</p>
-            <div class="mt-4 flex items-center">
-                <span class="text-[9px] font-black uppercase px-2 py-1 rounded-md bg-white/20 text-white">
-                    {{ $stats->revenue_change >= 0 ? '+' : '' }}{{ number_format($stats->revenue_change, 1) }}% vs Kemarin
-                </span>
+            <div class="mt-4 pt-4 border-t border-white/10 flex flex-col gap-2">
+                <div class="flex justify-between items-center">
+                    <span class="text-[9px] font-bold text-white/40 uppercase tracking-widest">Murni Jurusan:</span>
+                    <span class="text-xs font-black text-white italic">Rp{{ number_format($stats->today_internal_revenue, 0, ',', '.') }}</span>
+                </div>
+                <div class="flex items-center">
+                    <span class="text-[9px] font-black uppercase px-2 py-1 rounded-md bg-white/20 text-white">
+                        {{ $stats->revenue_change >= 0 ? '+' : '' }}{{ number_format($stats->revenue_change, 1) }}% vs Kemarin
+                    </span>
+                </div>
             </div>
         </div>
 

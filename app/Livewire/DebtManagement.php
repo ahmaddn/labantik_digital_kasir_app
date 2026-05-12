@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Models\Transaction;
+use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -38,30 +39,27 @@ class DebtManagement extends Component
         $this->resetPage();
     }
 
-    public function settle($transactionId)
+    public function settle($reference)
     {
-        $transaction = Transaction::findOrFail($transactionId);
-        
-        // If it was debt, mark as paid. If it was unreturned change, mark as paid.
-        // Both cases result in 'uang_diterima' status in this context
-        $transaction->update([
+        Transaction::where('reference', $reference)->update([
             'status' => 'uang_diterima',
             'debt_amount' => 0,
             'change_due' => 0,
-            'note' => $transaction->note . ' (Selesai pada ' . now()->format('d/m/Y H:i') . ')'
+            'transacted_at' => now(), // Move to today to count as today's profit
+            'note' => DB::raw("CONCAT(COALESCE(note, ''), ' (Lunas pd ' , DATE_FORMAT(NOW(), '%d/%m/%Y %H:%i'), ')')")
         ]);
 
-        $this->dispatch('toast', message: 'Transaksi berhasil diselesaikan.');
+        $this->dispatch('toast', message: 'Seluruh nota berhasil diselesaikan.');
     }
 
     public function render()
     {
-        $query = Transaction::with(['product', 'supplier'])
+        $query = Transaction::query()
             ->when($this->activeTab === 'debt', function ($q) {
-                return $q->debt();
+                return $q->whereIn('status', ['belum_menerima_uang', 'uang_dipinjam']);
             })
             ->when($this->activeTab === 'change', function ($q) {
-                return $q->unreturnedChange();
+                return $q->where('status', 'belum_kembalian');
             });
 
         if ($this->search) {
@@ -76,13 +74,18 @@ class DebtManagement extends Component
             $query->whereDate('transacted_at', '<=', $this->endDate);
         }
 
+        $transactions = $query->selectRaw('reference, buyer_name, status, transacted_at, SUM(total_price) as total_price, SUM(debt_amount) as debt_amount, SUM(change_due) as change_due, COUNT(*) as items_count')
+            ->groupBy('reference', 'buyer_name', 'status', 'transacted_at')
+            ->orderByDesc('transacted_at')
+            ->paginate(15);
+
         $summary = [
-            'total_debt' => Transaction::debt()->sum('debt_amount'),
-            'total_change' => Transaction::unreturnedChange()->sum('change_due'),
+            'total_debt' => Transaction::whereIn('status', ['belum_menerima_uang', 'uang_dipinjam'])->sum('debt_amount'),
+            'total_change' => Transaction::where('status', 'belum_kembalian')->sum('change_due'),
         ];
 
         return view('livewire.debt-management', [
-            'transactions' => $query->latest('transacted_at')->paginate(15),
+            'transactions' => $transactions,
             'summary' => $summary
         ])->layout('layouts.app', ['title' => 'Manajemen Hutang & Kembalian']);
     }

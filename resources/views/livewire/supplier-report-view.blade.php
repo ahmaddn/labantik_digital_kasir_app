@@ -65,7 +65,7 @@
                     @forelse($reports as $report)
                     <tr class="hover:bg-gray-50 dark:hover:bg-gray-900/30 transition-colors group">
                         <td class="px-10 py-8">
-                            <div class="text-base font-black text-gray-800 dark:text-white uppercase tracking-tight italic">{{ $report->supplier->name ?? 'Unknown' }}</div>
+                            <div class="text-base font-black text-gray-800 dark:text-white uppercase tracking-tight italic">{{ $report->supplier_name }}</div>
                         </td>
                         <td class="px-10 py-8 text-center font-black text-gray-600 dark:text-gray-400">
                             {{ number_format($report->total_qty, 0, ',', '.') }}
@@ -99,45 +99,111 @@
                     </tr>
                 </tfoot>
                 @endif
-            </table>
+        </div>
+    <!-- Export Options -->
+    <div class="fixed bottom-10 right-10 z-[100]" x-data="{ open: false }">
+        <button @click="open = !open" class="px-10 py-5 bg-primary-red text-white rounded-[2rem] shadow-2xl shadow-red-500/40 font-black italic uppercase text-sm tracking-[0.2em] transform hover:-translate-y-2 hover:scale-105 transition-all flex items-center gap-4 group">
+            <svg class="w-6 h-6 group-hover:rotate-12 transition-transform" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            <span>Export Data</span>
+        </button>
+        
+        <div x-show="open" @click.away="open = false" x-cloak x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4 scale-95" x-transition:enter-end="opacity-100 translate-y-0 scale-100" class="absolute bottom-full right-0 mb-6 w-72 bg-white dark:bg-gray-900 rounded-[2.5rem] shadow-2xl border border-gray-100 dark:border-gray-800 p-4 flex flex-col gap-2">
+            <button @click="exportSupplierData('xlsx'); open = false" class="flex items-center gap-4 px-6 py-4 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-2xl transition-all text-left group">
+                <div class="w-12 h-12 bg-green-100 dark:bg-green-900/30 text-green-600 rounded-xl flex items-center justify-center font-black italic text-xs">XLSX</div>
+                <div>
+                    <p class="text-xs font-black text-gray-800 dark:text-white uppercase tracking-wider">Microsoft Excel</p>
+                    <p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mt-0.5">Format Tabel Berwarna</p>
+                </div>
+            </button>
+            <button @click="exportSupplierData('csv'); open = false" class="flex items-center gap-4 px-6 py-4 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-2xl transition-all text-left group">
+                <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 text-blue-600 rounded-xl flex items-center justify-center font-black italic text-xs">CSV</div>
+                <div>
+                    <p class="text-xs font-black text-gray-800 dark:text-white uppercase tracking-wider">Comma Separated</p>
+                    <p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mt-0.5">Format Data Mentah</p>
+                </div>
+            </button>
         </div>
     </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
     <script>
-        function exportSupplierExcel(filename) {
-            const wb = XLSX.utils.book_new();
-            
-            // 1. Data Sheet
-            const reportData = [
-                ["LAPORAN BAGI HASIL SUPPLIER - LABANTIK"],
-                ["Periode", "{{ $dateFrom }} s/d {{ $dateTo }}"],
-                [""],
-                ["Supplier", "Total Qty", "Total Omzet", "Hak Supplier (Modal)", "Profit Toko"]
+        async function exportSupplierData(format = 'xlsx') {
+            const filename = `Laporan_Bagi_Hasil_{{ $dateFrom }}_sd_{{ $dateTo }}`;
+
+            if (format === 'csv') {
+                const wb = XLSX.utils.book_new();
+                const summaryData = [
+                    ["LAPORAN BAGI HASIL SUPPLIER - LABANTIK"],
+                    ["Periode", "{{ $dateFrom }} s/d {{ $dateTo }}"],
+                    ["Supplier", "Qty", "Omzet", "Hak Supplier", "Profit Toko"]
+                ];
+                const ws = XLSX.utils.aoa_to_sheet(summaryData);
+                XLSX.utils.book_append_sheet(wb, ws, "Rekap");
+                XLSX.writeFile(wb, `${filename}.csv`, { bookType: 'csv' });
+                return;
+            }
+
+            // ExcelJS for Styled XLSX
+            const workbook = new ExcelJS.Workbook();
+            const sheet = workbook.addWorksheet('Laporan Supplier');
+
+            sheet.columns = [
+                { header: 'Supplier', key: 'name', width: 35 },
+                { header: 'Total Qty', key: 'qty', width: 15 },
+                { header: 'Total Omzet', key: 'sales', width: 20 },
+                { header: 'Hak Supplier', key: 'share', width: 20 },
+                { header: 'Profit Toko', key: 'profit', width: 20 }
             ];
-            
+
+            // 1. Header
+            const titleRow = sheet.insertRow(1, ['LAPORAN BAGI HASIL SUPPLIER - LABANTIK']);
+            titleRow.font = { name: 'Arial Black', size: 16, italic: true, color: { argb: 'FF1E40AF' } };
+            sheet.insertRow(2, ['Periode', "{{ $dateFrom }} s/d {{ $dateTo }}"]);
+            sheet.insertRow(3, ['Dicetak Pada', new Date().toLocaleString('id-ID')]);
+            sheet.insertRow(4, []);
+
+            const headerRow = sheet.getRow(5);
+            headerRow.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+            headerRow.eachCell(cell => {
+                cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFEF4444' } };
+                cell.alignment = { horizontal: 'center' };
+                cell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
+            });
+
             @foreach($reports as $report)
-                reportData.push([
-                    "{{ $report->supplier->name ?? 'Unknown' }}",
-                    {{ $report->total_qty }},
-                    {{ $report->total_sales }},
-                    {{ $report->total_supplier_share }},
-                    {{ $report->total_shop_profit }}
-                ]);
+                {
+                    sheet.addRow([
+                        "{{ $report->supplier_name }}",
+                        {{ $report->total_qty }},
+                        {{ $report->total_sales }},
+                        {{ $report->total_supplier_share }},
+                        {{ $report->total_shop_profit }}
+                    ]).eachCell((cell, colNumber) => {
+                        if (colNumber > 2) cell.numFmt = '#,##0';
+                        cell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
+                    });
+                }
             @endforeach
-            
-            reportData.push([""]);
-            reportData.push([
+
+            const totalRow = sheet.addRow([
                 "TOTAL KESELURUHAN",
                 {{ $reports->sum('total_qty') }},
                 {{ $reports->sum('total_sales') }},
                 {{ $reports->sum('total_supplier_share') }},
                 {{ $reports->sum('total_shop_profit') }}
             ]);
-            
-            const wsData = XLSX.utils.aoa_to_sheet(reportData);
-            XLSX.utils.book_append_sheet(wb, wsData, "Laporan Supplier");
-            
-            XLSX.writeFile(wb, filename + ".xlsx");
+            totalRow.font = { bold: true };
+            totalRow.eachCell((cell, colNumber) => {
+                if (colNumber > 2) cell.numFmt = '#,##0';
+                cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF9FAFB' } };
+                cell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
+            });
+
+            const buffer = await workbook.xlsx.writeBuffer();
+            saveAs(new Blob([buffer]), `${filename}.xlsx`);
         }
     </script>
+</div>
 </div>

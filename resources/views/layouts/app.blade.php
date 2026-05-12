@@ -7,6 +7,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <title>{{ $title ?? config('app.name', 'Kasir LabAntik') }}</title>
+    <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}">
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -57,10 +58,8 @@
                 <!-- Brand -->
                 <div class="p-10 flex items-center justify-between">
                     <div class="flex items-center overflow-hidden">
-                        <div
-                            class="w-14 h-14 bg-primary-blue rounded-[1.25rem] flex items-center justify-center text-white font-black italic shadow-2xl shadow-blue-900/20 text-xl border-4 border-white dark:border-gray-800 flex-shrink-0">
-                            LA
-                        </div>
+                        <img src="{{ asset('favicon.png') }}" 
+                            class="w-14 h-14 bg-white rounded-[1.25rem] p-2 flex items-center justify-center shadow-2xl shadow-blue-900/20 border-4 border-white dark:border-gray-800 flex-shrink-0 object-contain">
                         <div class="ml-5 whitespace-nowrap">
                             <h1
                                 class="text-2xl font-black tracking-tighter leading-none text-primary-blue dark:text-primary-blue-light uppercase italic">
@@ -70,13 +69,6 @@
                                 System</span>
                         </div>
                     </div>
-                    <button @click="toggleSidebar" class="p-2 text-gray-400 hover:text-primary-blue transition-colors">
-                        <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-                            stroke-linecap="round" stroke-linejoin="round">
-                            <path d="m15 18-6-6 6-6" />
-                        </svg>
-                    </button>
                 </div>
 
                 <!-- Nav -->
@@ -265,75 +257,22 @@
                         Laporan Bagi Hasil Supplier
                     </a>
 
+                    <a href="{{ route('bagi-hasil') }}"
+                        class="flex items-center px-6 py-4 text-sm font-black rounded-2xl transition-all {{ request()->routeIs('bagi-hasil') ? 'bg-primary-blue text-white shadow-xl shadow-blue-900/20' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
+                        <svg class="w-5 h-5 mr-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                            <circle cx="9" cy="7" r="4" />
+                            <path d="M19 8v2" />
+                            <path d="M20 18v2" />
+                            <rect width="20" height="14" x="2" y="6" rx="2" />
+                        </svg>
+                        Bagi Hasil Mingguan
+                    </a>
 
-                    <div class="pt-10">
-                        <button @click="toggleTheme()"
-                            class="w-full flex items-center justify-between px-8 py-5 bg-gray-50 dark:bg-gray-800 rounded-[2rem] border border-gray-100 dark:border-gray-700 shadow-inner group transition-all">
-                            <span
-                                class="text-xs font-black uppercase tracking-widest text-gray-400 group-hover:text-primary-blue transition-colors">Tema
-                                Sistem</span>
-                            <div class="flex items-center space-x-3">
-                                <div x-show="!darkMode"
-                                    class="p-2 bg-white dark:bg-gray-900 rounded-xl shadow-sm text-yellow-500">
-                                    <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" width="24"
-                                        height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                        stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                        <circle cx="12" cy="12" r="4" />
-                                        <path d="M12 2v2" />
-                                        <path d="M12 20v2" />
-                                        <path d="m4.93 4.93 1.41 1.41" />
-                                        <path d="m17.66 17.66 1.41 1.41" />
-                                        <path d="M2 12h2" />
-                                        <path d="M20 12h2" />
-                                        <path d="m6.34 17.66-1.41 1.41" />
-                                        <path d="m19.07 4.93-1.41 1.41" />
-                                    </svg>
-                                </div>
-                                <div x-show="darkMode"
-                                    class="p-2 bg-white dark:bg-gray-900 rounded-xl shadow-sm text-primary-blue">
-                                    <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" width="24"
-                                        height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                        stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
-                                    </svg>
-                                </div>
-                            </div>
-                        </button>
-                    </div>
+                    <div class="h-10"></div>
                 </nav>
-
-                <!-- User Footer -->
-                <div class="p-8 border-t border-gray-100 dark:border-gray-800">
-                    <div
-                        class="p-5 bg-gray-50 dark:bg-gray-800 rounded-[2rem] flex items-center justify-between border border-gray-100 dark:border-gray-700 shadow-inner group">
-                        <div class="flex items-center overflow-hidden">
-                            <div
-                                class="w-12 h-12 rounded-2xl bg-primary-blue text-white flex items-center justify-center font-black text-lg shadow-lg group-hover:scale-110 transition-transform">
-                                {{ substr(auth()->user()->name ?? 'A', 0, 1) }}
-                            </div>
-                            <div class="ml-4 overflow-hidden">
-                                <p
-                                    class="text-sm font-black truncate text-gray-800 dark:text-white uppercase italic tracking-tighter">
-                                    {{ auth()->user()->name ?? 'Admin' }}</p>
-                                <p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Administrator
-                                </p>
-                            </div>
-                        </div>
-                        <form method="POST" action="{{ route('logout') }}">
-                            @csrf
-                            <button type="submit"
-                                class="p-3 text-gray-400 hover:text-primary-red hover:bg-white dark:hover:bg-gray-900 rounded-xl transition-all shadow-sm">
-                                <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" width="24"
-                                    height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                    stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-                                    <polyline points="16 17 21 12 16 7" />
-                                    <line x1="21" y1="12" x2="9" y2="12" />
-                                </svg>
-                            </button>
-                        </form>
-                    </div>
-                </div>
             </div>
         </aside>
 

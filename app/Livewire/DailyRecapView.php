@@ -21,14 +21,10 @@ class DailyRecapView extends Component
     public $actualCash = 0;
     public $cashNote = '';
 
-    // Edit Transaction
-    public $showEditModal = false;
-    public $editingTransaction = null;
-    public $editQty = 0;
-    public $editStatus = '';
-    public $editNote = '';
-    public $editBuyer = '';
-    public $editChangeDue = 0;
+    // Details Modal
+    public $showDetailsModal = false;
+    public $detailReference = null;
+
 
 
     public function mount($date = null): void
@@ -90,13 +86,16 @@ class DailyRecapView extends Component
             ->whereDate('transacted_at', $this->selectedDate)
             ->get();
 
-        $query = Transaction::with(['product.category'])
-            ->whereDate('transacted_at', $this->selectedDate)
-            ->orderByDesc('transacted_at');
+        $query = Transaction::query()
+            ->whereDate('transacted_at', $this->selectedDate);
 
         if ($this->search) {
-            $query->whereHas('product', function($q) {
-                $q->where('name', 'like', '%' . $this->search . '%');
+            $query->where(function($q) {
+                $q->where('reference', 'like', '%' . $this->search . '%')
+                  ->orWhere('buyer_name', 'like', '%' . $this->search . '%')
+                  ->orWhereHas('product', function($pq) {
+                      $pq->where('name', 'like', '%' . $this->search . '%');
+                  });
             });
         }
 
@@ -110,33 +109,46 @@ class DailyRecapView extends Component
             });
         }
 
+        $transactions = $query->selectRaw('reference, buyer_name, status, transacted_at, SUM(total_price) as total_amount, SUM(quantity) as total_qty, COUNT(*) as unique_items')
+            ->groupBy('reference', 'buyer_name', 'status', 'transacted_at')
+            ->orderByDesc('transacted_at')
+            ->paginate(15);
+
 
         if ($allTransactions->isEmpty()) {
             return view('livewire.daily-recap-view', [
                 'recap' => null,
-                'transactions' => $query->paginate(15)
+                'transactions' => $transactions
             ])->layout('layouts.app', ['title' => 'Rekap Harian']);
         }
 
         $totalRevenueAll = $allTransactions->sum('total_price');
-        $totalRevenueReal = $allTransactions->where('status', 'uang_diterima')->sum('total_price');
-        $totalProfit = $allTransactions->sum(fn($tx) => $tx->unit_profit * $tx->quantity);
-        $totalModal = $allTransactions->sum(fn($tx) => ($tx->unit_price - $tx->unit_profit) * $tx->quantity);
+        $totalRevenueReal = $allTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->sum('total_price');
+        
+        $totalSupplierHak = $allTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])
+            ->whereNotNull('supplier_id')
+            ->sum(fn($tx) => ($tx->unit_price - $tx->unit_profit) * $tx->quantity);
+            
+        $totalInternalRevenue = $totalRevenueReal - $totalSupplierHak;
+
+        $totalProfit = $allTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->sum(fn($tx) => $tx->unit_profit * $tx->quantity);
+        $totalModal = $allTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->sum(fn($tx) => ($tx->unit_price - $tx->unit_profit) * $tx->quantity);
 
         $recap = (object) [
             'total_revenue_all' => $totalRevenueAll,
             'total_revenue_real' => $totalRevenueReal,
+            'total_internal_revenue' => $totalInternalRevenue,
             'total_profit' => $totalProfit,
             'total_modal' => $totalModal,
-            'count_received' => $allTransactions->where('status', 'uang_diterima')->count(),
+            'count_received' => $allTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->count(),
             'count_unpaid_change' => $allTransactions->where('status', 'belum_kembalian')->count(),
-            'count_no_payment' => $allTransactions->where('status', 'belum_menerima_uang')->count(),
+            'count_no_payment' => $allTransactions->whereIn('status', ['belum_menerima_uang', 'uang_dipinjam'])->count(),
             'month_name' => Carbon::parse($this->selectedDate)->translatedFormat('F Y'),
             'month_week' => Carbon::parse($this->selectedDate)->weekOfMonth,
             'generated_at' => now(),
         ];
 
-        $categoryRecap = $allTransactions->groupBy(fn($tx) => $tx->product->category->name ?? 'Tanpa Kategori')
+        $categoryRecap = $allTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->groupBy(fn($tx) => $tx->product->category->name ?? 'Tanpa Kategori')
             ->map(function($group) {
                 return (object) [
                     'revenue' => $group->sum('total_price'),
@@ -149,10 +161,22 @@ class DailyRecapView extends Component
         return view('livewire.daily-recap-view', [
             'recap' => $recap,
             'categoryRecap' => $categoryRecap,
-            'transactions' => $query->paginate(15),
+            'transactions' => $transactions,
             'categories' => \App\Models\ProductCategory::orderBy('name')->get()
         ])->layout('layouts.app', ['title' => 'Rekap Harian']);
 
+    }
+
+    public function viewDetails($reference): void
+    {
+        $this->detailReference = $reference;
+        $this->showDetailsModal = true;
+    }
+
+    public function getDetailItemsProperty()
+    {
+        if (!$this->detailReference) return collect();
+        return Transaction::with('product')->where('reference', $this->detailReference)->get();
     }
 
     public function exportCSV()
@@ -160,38 +184,4 @@ class DailyRecapView extends Component
         $this->dispatch('toast', message: 'Fitur ekspor CSV sedang dalam pengembangan.', type: 'info');
     }
 
-    public function editTransaction($id): void
-    {
-        $this->editingTransaction = Transaction::find($id);
-        if (!$this->editingTransaction) return;
-
-        $this->editQty = $this->editingTransaction->quantity;
-        $this->editStatus = $this->editingTransaction->status;
-        $this->editNote = $this->editingTransaction->note ?? '';
-        $this->editBuyer = $this->editingTransaction->buyer_name ?? '';
-        $this->editChangeDue = $this->editingTransaction->change_due ?? 0;
-        $this->showEditModal = true;
-    }
-
-    public function updateTransaction(): void
-    {
-        if (!$this->editingTransaction) return;
-
-        $totalPrice = $this->editingTransaction->unit_price * $this->editQty;
-        $debt = in_array($this->editStatus, ['belum_menerima_uang', 'uang_dipinjam']) ? $totalPrice : 0;
-        $changeDue = ($this->editStatus === 'belum_kembalian') ? $this->editChangeDue : 0;
-
-        $this->editingTransaction->update([
-            'quantity' => $this->editQty,
-            'total_price' => $totalPrice,
-            'status' => $this->editStatus,
-            'note' => $this->editNote,
-            'buyer_name' => $this->editBuyer ?: null,
-            'debt_amount' => $debt,
-            'change_due' => $changeDue
-        ]);
-
-        $this->showEditModal = false;
-        $this->dispatch('toast', message: 'Transaksi berhasil diperbarui!');
-    }
 }

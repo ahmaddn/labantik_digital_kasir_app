@@ -12,6 +12,20 @@
         }
     }
 }" x-init="if (darkMode) document.documentElement.classList.add('dark'); else document.documentElement.classList.remove('dark')" class="flex flex-col lg:flex-row h-screen w-full bg-[#f8fafc] dark:bg-gray-950 overflow-hidden font-outfit relative">
+    
+    <!-- Global Loading Indicator -->
+    <div wire:loading.flex class="fixed inset-0 z-[9999] bg-gray-950/60 backdrop-blur-[2px] items-center justify-center flex-col gap-6 transition-all animate-in fade-in duration-300">
+        <div class="relative">
+            <div class="w-20 h-20 border-[6px] border-primary-blue/20 rounded-full animate-spin border-t-primary-blue shadow-2xl shadow-blue-500/20"></div>
+            <div class="absolute inset-0 flex items-center justify-center">
+                <div class="w-10 h-10 bg-primary-blue rounded-xl animate-pulse"></div>
+            </div>
+        </div>
+        <div class="flex flex-col items-center">
+            <p class="text-white font-black italic uppercase tracking-[0.4em] text-sm animate-pulse">Processing</p>
+            <p class="text-blue-400 text-[10px] font-black uppercase tracking-widest mt-1 opacity-60">LABANTIK POS SYSTEM</p>
+        </div>
+    </div>
     <style>
         /* Custom Global Scrollbar */
         * {
@@ -47,13 +61,23 @@
             <div class="flex flex-col md:flex-row items-center justify-between gap-6 lg:gap-10">
                 <div class="flex items-center justify-between w-full md:w-auto gap-6">
                     <div class="flex items-center gap-4 lg:gap-6">
-                        <a href="{{ route('dashboard') }}" class="w-12 h-12 lg:w-14 lg:h-14 bg-primary-red rounded-[1.2rem] lg:rounded-[1.5rem] flex items-center justify-center text-white shadow-xl shadow-red-500/20 hover:scale-110 hover:rotate-3 transition-all">
-                            <svg class="w-6 h-6 lg:w-7 lg:h-7" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                        <a href="{{ route('dashboard') }}" class="w-12 h-12 lg:w-14 lg:h-14 bg-white rounded-[1.2rem] lg:rounded-[1.5rem] flex items-center justify-center shadow-xl shadow-blue-500/10 hover:scale-110 hover:rotate-3 transition-all p-2 overflow-hidden border border-gray-100 dark:border-gray-800">
+                            <img src="{{ asset('favicon.png') }}" class="w-full h-full object-contain">
                         </a>
                         <div class="h-10 lg:h-12 w-[1px] bg-gray-100 dark:bg-gray-800"></div>
-                        <div>
+                        <div x-data="{ 
+                            currentTime: '',
+                            updateTime() {
+                                const now = new Date();
+                                this.currentTime = now.toLocaleTimeString('id-ID', { hour12: false });
+                            }
+                        }" x-init="updateTime(); setInterval(() => updateTime(), 1000)">
                             <h1 class="text-xl lg:text-2xl font-black italic uppercase tracking-tighter text-gray-800 dark:text-white leading-tight">LABANTIK POS</h1>
-                            <p class="text-[9px] lg:text-[10px] font-black text-primary-blue uppercase tracking-[0.2em]">{{ now()->translatedFormat('d F Y') }}</p>
+                            <div class="flex items-center gap-2">
+                                <p class="text-[9px] lg:text-[10px] font-black text-primary-blue uppercase tracking-[0.2em]">{{ now()->translatedFormat('d F Y') }}</p>
+                                <span class="w-1 h-1 rounded-full bg-gray-300 dark:bg-gray-700"></span>
+                                <p x-text="currentTime" class="text-[9px] lg:text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.2em]"></p>
+                            </div>
                         </div>
                     </div>
                     
@@ -221,23 +245,23 @@
             @endforelse
         </div>
 
-        <!-- History Section -->
         <div x-show="tab === 'history'" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-x-10" x-transition:enter-end="opacity-100 translate-x-0" class="flex-1 overflow-y-auto p-8 space-y-5 scrollbar-hide min-h-0">
             <h2 class="text-xl font-black italic uppercase tracking-tighter text-gray-800 dark:text-white mb-6">History</h2>
             @foreach($this->recentTransactions as $history)
             <div class="flex items-center gap-5 p-5 bg-gray-50/50 dark:bg-gray-800/30 rounded-[2rem] border border-transparent hover:border-primary-blue/20 transition-all group">
                 <div class="w-12 h-12 bg-white dark:bg-gray-900 rounded-xl flex items-center justify-center text-primary-blue text-[9px] font-black italic shadow-md">
-                    {{ $history->transacted_at->format('H:i') }}
+                    {{ \Carbon\Carbon::parse($history->transacted_at)->format('H:i') }}
                 </div>
                 <div class="flex-1 min-w-0">
-                    <h4 class="text-[11px] font-black text-gray-800 dark:text-white uppercase tracking-tight line-clamp-1">{{ $history->product->name }}</h4>
+                    <h4 class="text-[11px] font-black text-gray-800 dark:text-white uppercase tracking-tight line-clamp-1">{{ $history->reference }}</h4>
                     <div class="flex items-center gap-2 mt-0.5">
                         <span class="text-[8px] font-black {{ $history->status === 'uang_diterima' ? 'text-green-500' : 'text-primary-red' }} uppercase tracking-[0.2em]">{{ str_replace('_', ' ', $history->status) }}</span>
+                        <span class="text-[8px] font-bold text-gray-400 uppercase">• {{ $history->total_qty }} Items</span>
                     </div>
                 </div>
                 <div class="text-right">
-                    <p class="text-[11px] font-black text-gray-800 dark:text-white italic">Rp{{ number_format($history->total_price, 0, ',', '.') }}</p>
-                    <button wire:click="editTransaction({{ $history->id }})" class="mt-1 text-[8px] font-black text-gray-300 hover:text-primary-blue uppercase tracking-widest transition-colors">Edit</button>
+                    <p class="text-[11px] font-black text-gray-800 dark:text-white italic">Rp{{ number_format($history->total_amount, 0, ',', '.') }}</p>
+                    <button wire:click="viewDetails('{{ $history->reference }}')" class="mt-1 text-[8px] font-black text-gray-300 hover:text-primary-blue uppercase tracking-widest transition-colors">Detail</button>
                 </div>
             </div>
             @endforeach
@@ -419,61 +443,6 @@
         </div>
     </div>
 
-    <!-- Edit Transaction Modal -->
-    <div x-data="{ show: @entangle('showEditModal') }" x-show="show" x-cloak class="fixed inset-0 z-[300] flex items-center justify-center p-6 bg-gray-900/60 backdrop-blur-sm" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">
-        <div @click.away="show = false" class="bg-white dark:bg-gray-900 w-full max-w-2xl rounded-[4rem] shadow-2xl flex flex-col p-12 gap-10 relative" x-transition:enter="transition ease-out duration-500" x-transition:enter-start="opacity-0 scale-90 translate-y-10" x-transition:enter-end="opacity-100 scale-100 translate-y-0">
-            <!-- Close Button -->
-            <button @click="show = false" class="absolute top-10 right-10 w-12 h-12 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center text-gray-400 hover:text-primary-red hover:bg-primary-red/10 transition-all z-50 group">
-                <svg class="w-6 h-6 group-hover:rotate-90 transition-transform duration-300" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
-            </button>
-            <div class="flex justify-between items-start pr-16">
-                <div>
-                    <h2 class="text-3xl font-black italic uppercase tracking-tighter text-primary-blue leading-none">Edit Transaksi</h2>
-                    <p class="text-[11px] font-black text-gray-400 uppercase tracking-[0.2em] mt-4">Koreksi data transaksi yang salah input</p>
-                </div>
-            </div>
-
-            <div class="space-y-8">
-                <div class="grid grid-cols-2 gap-6">
-                    <div class="space-y-3">
-                        <label class="text-[11px] font-black text-gray-400 uppercase tracking-widest ml-6">Pembeli</label>
-                        <input type="text" wire:model="editBuyer" class="w-full px-8 py-6 bg-gray-50 dark:bg-gray-800 border-none rounded-[1.8rem] font-black text-sm uppercase tracking-tight focus:ring-4 focus:ring-primary-blue/10 text-gray-800 dark:text-white">
-                    </div>
-                    <div class="space-y-3">
-                        <label class="text-[11px] font-black text-gray-400 uppercase tracking-widest ml-6">Jumlah Item</label>
-                        <input type="number" wire:model="editQty" class="w-full px-8 py-6 bg-gray-50 dark:bg-gray-800 border-none rounded-[1.8rem] font-black text-lg text-center focus:ring-4 focus:ring-primary-blue/10 text-primary-blue">
-                    </div>
-                </div>
-
-                <div class="space-y-3">
-                    <label class="text-[11px] font-black text-gray-400 uppercase tracking-widest ml-6">Status Pembayaran</label>
-                    <select wire:model.live="editStatus" class="w-full px-8 py-6 bg-gray-50 dark:bg-gray-800 border-none rounded-[1.8rem] font-black text-xs uppercase tracking-widest focus:ring-4 focus:ring-primary-blue/10 appearance-none text-gray-800 dark:text-white">
-                        <option value="uang_diterima">Lunas (Uang Diterima)</option>
-                        <option value="belum_kembalian">Pending (Belum Kembalian)</option>
-                        <option value="belum_menerima_uang">Hutang (Belum Bayar)</option>
-                        <option value="uang_dipinjam">Pinjaman</option>
-                    </select>
-                </div>
-
-                @if($editStatus === 'belum_kembalian')
-                <div class="space-y-3 animate-in fade-in slide-in-from-top-4 duration-500">
-                    <label class="text-[11px] font-black text-primary-red uppercase tracking-widest ml-6">Sisa Kembalian Terhutang</label>
-                    <div class="relative">
-                        <span class="absolute left-8 inset-y-0 flex items-center text-xs font-black text-gray-400 italic">Rp</span>
-                        <input type="number" wire:model="editChangeDue" class="w-full pl-16 pr-8 py-6 bg-red-50 dark:bg-red-900/10 border-2 border-primary-red/10 rounded-[1.8rem] font-black text-lg text-primary-red focus:ring-4 focus:ring-primary-red/10 shadow-sm">
-                    </div>
-                </div>
-                @endif
-
-                <div class="space-y-3">
-                    <label class="text-[11px] font-black text-gray-400 uppercase tracking-widest ml-6">Catatan Admin</label>
-                    <textarea wire:model="editNote" rows="3" class="w-full px-8 py-6 bg-gray-50 dark:bg-gray-800 border-none rounded-[1.8rem] font-bold text-sm focus:ring-4 focus:ring-primary-blue/10 placeholder:text-gray-300 text-gray-800 dark:text-white"></textarea>
-                </div>
-            </div>
-
-            <button wire:click="updateTransaction" class="w-full py-7 bg-primary-blue text-white rounded-[2rem] shadow-2xl shadow-blue-500/30 font-black italic uppercase text-sm tracking-[0.3em] hover:scale-[1.02] active:scale-95 transition-all">SIMPAN PERUBAHAN</button>
-        </div>
-    </div>
 
     <script>
         window.addEventListener('transaction-complete', () => {
@@ -483,4 +452,60 @@
             }, 1000);
         });
     </script>
+
+    <!-- Transaction Detail Modal -->
+    <div 
+        x-data="{ show: @entangle('showDetailsModal') }" 
+        x-show="show" 
+        x-cloak
+        class="fixed inset-0 z-[400] flex items-center justify-center p-6 bg-gray-900/60 backdrop-blur-sm"
+        x-transition:enter="transition ease-out duration-300"
+        x-transition:enter-start="opacity-0"
+        x-transition:enter-end="opacity-100"
+        x-transition:leave="transition ease-in duration-200"
+        x-transition:leave-start="opacity-100"
+        x-transition:leave-end="opacity-0"
+    >
+        <div 
+            @click.away="show = false"
+            class="bg-white dark:bg-gray-900 w-full max-w-xl rounded-[3rem] shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-300"
+        >
+            <div class="p-8 bg-primary-blue text-white relative">
+                <div class="absolute right-8 top-8">
+                    <button @click="show = false" class="text-white/50 hover:text-white transition-colors">
+                        <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                    </button>
+                </div>
+                <h3 class="text-2xl font-black italic uppercase tracking-tighter mb-1">Rincian Belanja</h3>
+                <p class="text-[9px] font-bold uppercase tracking-[0.3em] opacity-60">REF: {{ $detailReference }}</p>
+            </div>
+
+            <div class="p-8 max-h-[50vh] overflow-y-auto no-scrollbar">
+                <div class="space-y-6">
+                    @foreach($this->detailItems as $item)
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <p class="text-xs font-black text-gray-800 dark:text-white uppercase tracking-tight">{{ $item->product->name }}</p>
+                            <p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mt-1">{{ $item->quantity }} x Rp{{ number_format($item->unit_price, 0, ',', '.') }}</p>
+                        </div>
+                        <p class="text-sm font-black text-gray-800 dark:text-white italic">Rp{{ number_format($item->total_price, 0, ',', '.') }}</p>
+                    </div>
+                    @endforeach
+                </div>
+            </div>
+
+            <div class="p-8 bg-gray-50 dark:bg-gray-950 border-t border-gray-100 dark:border-gray-800 flex justify-between items-center">
+                <div>
+                    <p class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Status</p>
+                    <span class="px-3 py-1 rounded-full text-[8px] font-black uppercase {{ ($this->detailItems->first()->status ?? '') === 'uang_diterima' ? 'bg-green-100 text-green-700' : 'bg-primary-red/10 text-primary-red' }}">
+                        {{ str_replace('_', ' ', $this->detailItems->first()->status ?? 'Unknown') }}
+                    </span>
+                </div>
+                <div class="text-right">
+                    <p class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Total</p>
+                    <p class="text-2xl font-black text-primary-blue italic tracking-tighter leading-none">Rp{{ number_format($this->detailItems->sum('total_price'), 0, ',', '.') }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>

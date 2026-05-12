@@ -92,11 +92,11 @@
             <table class="w-full text-left border-collapse">
                 <thead>
                     <tr class="border-b border-gray-50 dark:border-gray-800">
-                        <th class="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-gray-400">Tanggal & Waktu</th>
+                        <th class="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-gray-400">Nota / Referensi</th>
                         <th class="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-gray-400">Pembeli / Jurusan</th>
-                        <th class="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-gray-400">Produk</th>
-                        <th class="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-gray-400">Total</th>
-                        <th class="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-gray-400">Catatan</th>
+                        <th class="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-gray-400">Ringkasan</th>
+                        <th class="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-gray-400">Total Tagihan</th>
+                        <th class="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-gray-400">Status</th>
                         <th class="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-gray-400">Aksi</th>
                     </tr>
                 </thead>
@@ -105,8 +105,8 @@
                         <tr class="hover:bg-gray-50/50 dark:hover:bg-gray-800/30 transition-colors group">
                             <td class="px-8 py-6">
                                 <div class="flex flex-col">
-                                    <span class="text-sm font-bold text-gray-800 dark:text-white">{{ $trx->transacted_at->format('d/m/Y') }}</span>
-                                    <span class="text-[10px] font-black text-gray-400 uppercase tracking-tighter">{{ $trx->transacted_at->format('H:i') }} WIB</span>
+                                    <span class="text-xs font-black text-primary-blue uppercase italic tracking-tighter">{{ $trx->reference }}</span>
+                                    <span class="text-[9px] font-bold text-gray-400 uppercase mt-1">{{ $trx->transacted_at->format('d/m/Y H:i') }}</span>
                                 </div>
                             </td>
                             <td class="px-8 py-6">
@@ -121,33 +121,28 @@
                             </td>
                             <td class="px-8 py-6">
                                 <div class="flex flex-col">
-                                    <span class="text-sm font-bold text-gray-800 dark:text-white">{{ $trx->product->name }}</span>
-                                    <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{{ $trx->quantity }} Unit × Rp{{ number_format($trx->unit_price, 0, ',', '.') }}</span>
+                                    <span class="text-xs font-bold text-gray-800 dark:text-white">{{ $trx->items_count }} Jenis Produk</span>
+                                    <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Klik Detail untuk rincian</span>
                                 </div>
                             </td>
                             <td class="px-8 py-6">
                                 <span class="text-base font-black italic {{ $activeTab === 'change' ? 'text-primary-red' : 'text-primary-blue' }} dark:text-white tracking-tighter">
                                     Rp{{ number_format($activeTab === 'change' ? $trx->change_due : $trx->debt_amount, 0, ',', '.') }}
                                 </span>
-                                @if($activeTab === 'change')
-                                    <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">Total Belanja: Rp{{ number_format($trx->total_price, 0, ',', '.') }}</div>
-                                @endif
                             </td>
                             <td class="px-8 py-6">
-                                <div class="max-w-xs">
-                                    <p class="text-xs font-medium text-gray-500 dark:text-gray-400 italic">
-                                        {{ $trx->note ?: '-' }}
-                                    </p>
-                                </div>
+                                <span class="px-3 py-1 bg-gray-100 dark:bg-gray-800 text-[9px] font-black uppercase text-gray-400 rounded-full tracking-widest border border-gray-200 dark:border-gray-700">
+                                    {{ str_replace('_', ' ', $trx->status) }}
+                                </span>
                             </td>
                             <td class="px-8 py-6">
                                 <button 
-                                    wire:click="settle({{ $trx->id }})"
-                                    wire:confirm="Selesaikan transaksi ini?"
+                                    wire:click="settle('{{ $trx->reference }}')"
+                                    wire:confirm="Selesaikan seluruh nota ini?"
                                     class="flex items-center px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all bg-emerald-500 text-white shadow-lg shadow-emerald-500/20 hover:scale-105 active:scale-95"
                                 >
                                     <svg class="w-4 h-4 mr-2" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
-                                    Selesaikan
+                                    Lunaskan
                                 </button>
                             </td>
                         </tr>

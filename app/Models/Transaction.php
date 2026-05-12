@@ -11,8 +11,10 @@ use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 class Transaction extends Model
 {
     protected $fillable = [
+        'user_id',
         'product_id',
         'supplier_id',
+        'reference',
         'transacted_at',
         'buyer_name',
         'quantity',
@@ -37,6 +39,11 @@ class Transaction extends Model
     public function supplier(): BelongsTo
     {
         return $this->belongsTo(Supplier::class);
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
     }
 
     public function scopeDebt($query)

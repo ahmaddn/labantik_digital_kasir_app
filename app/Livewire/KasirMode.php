@@ -33,6 +33,8 @@ class KasirMode extends Component
     public $showClosingStockModal = false;
     public $stockItems = []; // Array to hold stock input values [product_id => quantity]
     public $allProducts = []; // For the stock modals
+    public $showDetailsModal = false;
+    public $detailReference = null;
 
     // Edit Transaction Properties
     public $showEditModal = false;
@@ -211,8 +213,14 @@ class KasirMode extends Component
     {
         if (empty($this->cart)) return;
 
+        $name = preg_replace('/[^A-Za-z0-9]/', '', $this->buyer_name ?: 'GUEST');
+        $initials = strtoupper(substr($name, 0, 2));
+        $reference = 'LBK-' . now()->format('Ymd') . '-' . $initials . strtoupper(bin2hex(random_bytes(2)));
+
         foreach ($this->cart as $item) {
             Transaction::create([
+                'reference' => $reference,
+                'user_id' => auth()->id(),
                 'product_id' => $item['id'],
                 'supplier_id' => $item['supplier_id'] ?? null,
                 'transacted_at' => now(),
@@ -241,41 +249,18 @@ class KasirMode extends Component
         $this->rightSidebarTab = $tab;
     }
 
-    public function editTransaction($id): void
+    public function viewDetails($reference): void
     {
-        $this->editingTransaction = Transaction::find($id);
-        if (!$this->editingTransaction) return;
-
-        $this->editQty = $this->editingTransaction->quantity;
-        $this->editStatus = $this->editingTransaction->status;
-        $this->editNote = $this->editingTransaction->note ?? '';
-        $this->editBuyer = $this->editingTransaction->buyer_name ?? '';
-        $this->editChangeDue = $this->editingTransaction->change_due ?? 0;
-        $this->showEditModal = true;
+        $this->detailReference = $reference;
+        $this->showDetailsModal = true;
     }
 
-    public function updateTransaction(): void
+    public function getDetailItemsProperty()
     {
-        if (!$this->editingTransaction) return;
-
-        $totalPrice = $this->editingTransaction->unit_price * $this->editQty;
-        
-        $debt = in_array($this->editStatus, ['belum_menerima_uang', 'uang_dipinjam']) ? $totalPrice : 0;
-        $changeDue = ($this->editStatus === 'belum_kembalian') ? $this->editChangeDue : 0;
-
-        $this->editingTransaction->update([
-            'quantity' => $this->editQty,
-            'total_price' => $totalPrice,
-            'status' => $this->editStatus,
-            'note' => $this->editNote,
-            'buyer_name' => $this->editBuyer ?: null,
-            'debt_amount' => $debt,
-            'change_due' => $changeDue
-        ]);
-
-        $this->showEditModal = false;
-        $this->dispatch('toast', message: 'Transaksi berhasil diperbarui!');
+        if (!$this->detailReference) return collect();
+        return Transaction::with('product')->where('reference', $this->detailReference)->get();
     }
+
 
     #[Computed]
     public function categories()
@@ -287,7 +272,10 @@ class KasirMode extends Component
     #[Computed]
     public function recentTransactions()
     {
-        return Transaction::with('product')
+        return Transaction::query()
+            ->whereDate('transacted_at', today())
+            ->selectRaw('reference, buyer_name, status, transacted_at, SUM(total_price) as total_amount, SUM(quantity) as total_qty')
+            ->groupBy('reference', 'buyer_name', 'status', 'transacted_at')
             ->latest('transacted_at')
             ->limit(10)
             ->get();
