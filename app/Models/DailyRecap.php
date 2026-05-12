@@ -18,6 +18,8 @@ class DailyRecap extends Model
         'count_unpaid_change',
         'count_no_payment',
         'count_borrowed',
+        'actual_cash',
+        'cash_note',
         'generated_at'
     ];
 

@@ -91,6 +91,97 @@
                 Sync: {{ $recap->generated_at->format('H:i:s') }}
             </div>
         </div>
+    <!-- Cash Reconciliation (Audit Uang Kas) -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
+        <div class="lg:col-span-2 bg-white dark:bg-gray-800 rounded-[3rem] p-10 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700">
+            <div class="flex items-center justify-between mb-8">
+                <div>
+                    <h2 class="text-2xl font-black italic uppercase tracking-tighter text-gray-800 dark:text-white">Audit Uang Kas</h2>
+                    <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1">Bandingkan Uang Fisik vs Sistem</p>
+                </div>
+                <div class="p-4 bg-primary-blue/5 rounded-2xl">
+                    <svg class="w-6 h-6 text-primary-blue" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="space-y-4">
+                    <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4">Uang Fisik di Laci (Cash on Hand)</label>
+                    <div class="relative group">
+                        <span class="absolute left-6 inset-y-0 flex items-center text-sm font-black text-gray-400 group-focus-within:text-primary-blue transition-colors">Rp</span>
+                        <input 
+                            type="number" 
+                            wire:model.live="actualCash"
+                            class="w-full pl-14 pr-8 py-5 bg-gray-50 dark:bg-gray-900 border-none rounded-[1.5rem] focus:ring-4 focus:ring-primary-blue/10 font-black text-lg text-gray-800 dark:text-white shadow-inner transition-all"
+                            placeholder="Masukkan jumlah uang tunai..."
+                        >
+                    </div>
+                </div>
+                <div class="space-y-4">
+                    <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4">Catatan Audit</label>
+                    <input 
+                        type="text" 
+                        wire:model.live="cashNote"
+                        class="w-full px-8 py-5 bg-gray-50 dark:bg-gray-900 border-none rounded-[1.5rem] focus:ring-4 focus:ring-primary-blue/10 font-black text-sm text-gray-800 dark:text-white shadow-inner transition-all"
+                        placeholder="Contoh: Selisih karena parkir..."
+                    >
+                </div>
+            </div>
+
+            <div class="mt-8 pt-8 border-t border-gray-50 dark:border-gray-700 flex flex-col md:flex-row items-center justify-between gap-6">
+                <div class="flex items-center gap-4">
+                    <div class="flex flex-col">
+                        <span class="text-[9px] font-black text-gray-400 uppercase tracking-widest">Status Audit</span>
+                        @php
+                            $diff = (float)$actualCash - (float)$recap->total_revenue_real;
+                        @endphp
+                        @if($actualCash == 0 && !$cashNote)
+                            <span class="text-xs font-black text-gray-300 uppercase tracking-tighter">BELUM DIAUDIT</span>
+                        @elseif($diff == 0)
+                            <span class="text-xs font-black text-green-500 uppercase tracking-tighter flex items-center">
+                                <svg class="w-3 h-3 mr-1" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                                MATCH / COCOK
+                            </span>
+                        @else
+                            <span class="text-xs font-black {{ $diff < 0 ? 'text-primary-red' : 'text-amber-500' }} uppercase tracking-tighter flex items-center">
+                                <svg class="w-3 h-3 mr-1" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" x2="12" y1="9" y2="13"/><line x1="12" x2="12" y1="17" y2="17"/></svg>
+                                ADA SELISIH
+                            </span>
+                        @endif
+                    </div>
+                </div>
+                
+                <button 
+                    wire:click="saveCashAudit"
+                    class="px-10 py-4 bg-gray-900 dark:bg-primary-blue text-white rounded-2xl shadow-xl hover:scale-105 active:scale-95 transition-all font-black italic uppercase text-xs tracking-widest"
+                >
+                    Simpan Hasil Audit
+                </button>
+            </div>
+        </div>
+
+        <div class="bg-gray-900 rounded-[3rem] p-10 text-white shadow-2xl shadow-gray-900/20 relative overflow-hidden flex flex-col justify-center border-t-8 border-primary-blue">
+            <h3 class="text-[10px] font-black uppercase tracking-[0.3em] opacity-40 mb-2">Selisih Uang Kas</h3>
+            @php
+                $diff = (float)$actualCash - (float)$recap->total_revenue_real;
+            @endphp
+            <p class="text-5xl font-black italic {{ $diff < 0 ? 'text-primary-red' : ($diff > 0 ? 'text-green-400' : 'text-white') }} tracking-tighter">
+                {{ $diff > 0 ? '+' : '' }}Rp{{ number_format($diff, 0, ',', '.') }}
+            </p>
+            <p class="text-[9px] font-black uppercase tracking-widest mt-4 opacity-40 leading-relaxed">
+                *Selisih dihitung dari Total Omzet Tunai di sistem vs Uang Fisik yang Anda input.
+            </p>
+            
+            <div class="mt-8 flex items-center gap-4">
+                <div class="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center">
+                    <svg class="w-6 h-6 text-primary-blue" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 15h2a2 2 0 1 0 0-4h-3c-.6 0-1.1.2-1.4.6L3 17"/><path d="m7 21 1.6-1.4c.3-.4.8-.6 1.4-.6h4c1.1 0 2.1-.4 2.8-1.2l4.6-5.4a2 2 0 0 0-2.8-2.8L12 15"/></svg>
+                </div>
+                <div>
+                    <p class="text-[10px] font-black uppercase tracking-widest opacity-60">Sistem (Expected)</p>
+                    <p class="text-sm font-black italic">Rp{{ number_format($recap->total_revenue_real, 0, ',', '.') }}</p>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Detail Table -->

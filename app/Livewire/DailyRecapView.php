@@ -16,11 +16,16 @@ class DailyRecapView extends Component
     public string $search = '';
     public string $filterStatus = '';
     public string $filterCategory = '';
+    
+    // Cash Audit
+    public $actualCash = 0;
+    public $cashNote = '';
 
 
     public function mount($date = null): void
     {
         $this->selectedDate = $date ?? today()->toDateString();
+        $this->loadCashAudit();
     }
 
     public function updatedSearch(): void
@@ -30,7 +35,33 @@ class DailyRecapView extends Component
 
     public function updatedSelectedDate(): void
     {
+        $this->loadCashAudit();
         $this->resetPage();
+    }
+
+    protected function loadCashAudit(): void
+    {
+        $recap = DailyRecap::where('date', $this->selectedDate)->first();
+        if ($recap) {
+            $this->actualCash = $recap->actual_cash;
+            $this->cashNote = $recap->cash_note ?? '';
+        } else {
+            $this->actualCash = 0;
+            $this->cashNote = '';
+        }
+    }
+
+    public function saveCashAudit(): void
+    {
+        DailyRecap::updateOrCreate(
+            ['date' => $this->selectedDate],
+            [
+                'actual_cash' => $this->actualCash,
+                'cash_note' => $this->cashNote,
+            ]
+        );
+
+        $this->dispatch('toast', message: 'Audit uang kas berhasil disimpan.');
     }
 
     public function updatedFilterStatus(): void
