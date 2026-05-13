@@ -7,10 +7,9 @@
     darkMode: localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches),
     
     get filteredProducts() {
-        if (!this.search && !this.selectedCategory) return this.products;
         return this.products.filter(p => {
-            const matchesSearch = p.name.toLowerCase().includes(this.search.toLowerCase());
-            const matchesCategory = !this.selectedCategory || p.category_id == this.selectedCategory;
+            const matchesSearch = !this.search || p.name.toLowerCase().includes(this.search.toLowerCase());
+            const matchesCategory = this.selectedCategory === null || String(p.category_id) === String(this.selectedCategory);
             return matchesSearch && matchesCategory;
         });
     },
