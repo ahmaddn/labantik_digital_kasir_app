@@ -1,15 +1,17 @@
 <?php
 
-namespace App\Livewire;
+namespace App\Livewire\Pos;
 
 use App\Models\Product;
 use App\Models\Transaction;
 use App\Models\ProductCategory;
+use App\Models\StockEntry;
+use App\Models\DailyRecap;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Livewire\Attributes\Computed;
 
-class KasirMode extends Component
+class Kasir extends Component
 {
     use WithPagination;
 
@@ -58,9 +60,25 @@ class KasirMode extends Component
         $this->allProducts = Product::where('is_active', true)->orderBy('name')->get();
         $today = now()->toDateString();
         
+        // Cari data terakhir dari hari sebelumnya untuk fallback jika belum ada data hari ini
+        $lastSessionDate = StockEntry::where('date', '<', $today)
+            ->orderBy('date', 'desc')
+            ->value('date');
+        
+        $lastStocks = [];
+        if ($lastSessionDate) {
+            $lastStocks = StockEntry::where('date', $lastSessionDate)
+                ->pluck('closing_stock', 'product_id')
+                ->toArray();
+        }
+
         foreach ($this->allProducts as $p) {
-            $entry = \App\Models\StockEntry::where('product_id', $p->id)->where('date', $today)->first();
-            $this->stockItems[$p->id] = $entry ? $entry->opening_stock : 0;
+            $entry = StockEntry::where('product_id', $p->id)->where('date', $today)->first();
+            if ($entry) {
+                $this->stockItems[$p->id] = $entry->opening_stock;
+            } else {
+                $this->stockItems[$p->id] = $lastStocks[$p->id] ?? 0;
+            }
         }
         
         $this->showOpeningStockModal = true;
@@ -69,14 +87,27 @@ class KasirMode extends Component
     protected function checkOpeningStock(): void
     {
         $today = now()->toDateString();
-        $exists = \App\Models\StockEntry::where('date', $today)->exists();
+        $exists = StockEntry::where('date', $today)->exists();
 
         if (!$exists) {
             $this->modalSearch = '';
             $this->modalCategory = null;
             $this->allProducts = Product::where('is_active', true)->orderBy('name')->get();
+            
+            // Cari data terakhir dari hari sebelumnya
+            $lastSessionDate = StockEntry::where('date', '<', $today)
+                ->orderBy('date', 'desc')
+                ->value('date');
+
+            $lastStocks = [];
+            if ($lastSessionDate) {
+                $lastStocks = StockEntry::where('date', $lastSessionDate)
+                    ->pluck('closing_stock', 'product_id')
+                    ->toArray();
+            }
+
             foreach ($this->allProducts as $p) {
-                $this->stockItems[$p->id] = 0;
+                $this->stockItems[$p->id] = $lastStocks[$p->id] ?? 0;
             }
             $this->showOpeningStockModal = true;
         }
@@ -86,7 +117,7 @@ class KasirMode extends Component
     {
         $today = now()->toDateString();
         foreach ($this->stockItems as $productId => $qty) {
-            $entry = \App\Models\StockEntry::updateOrCreate(
+            $entry = StockEntry::updateOrCreate(
                 ['product_id' => $productId, 'date' => $today],
                 ['opening_stock' => $qty ?? 0]
             );
@@ -114,7 +145,7 @@ class KasirMode extends Component
         $today = now()->toDateString();
         
         foreach ($this->allProducts as $p) {
-            $entry = \App\Models\StockEntry::where('product_id', $p->id)->where('date', $today)->first();
+            $entry = StockEntry::where('product_id', $p->id)->where('date', $today)->first();
             $this->stockItems[$p->id] = $entry ? $entry->closing_stock : 0;
         }
         
@@ -125,7 +156,7 @@ class KasirMode extends Component
     {
         $today = now()->toDateString();
         foreach ($this->stockItems as $productId => $qty) {
-            \App\Models\StockEntry::updateOrCreate(
+            StockEntry::updateOrCreate(
                 ['product_id' => $productId, 'date' => $today],
                 ['closing_stock' => $qty ?? 0]
             );
@@ -297,8 +328,14 @@ class KasirMode extends Component
             $query->where('name', 'like', '%' . $this->search . '%');
         }
 
-        return view('livewire.kasir-mode', [
-            'products' => $query->orderBy('name')->paginate(24)
+        // Check if session is finished (Daily Recap exists with actual cash)
+        $isSessionFinished = DailyRecap::where('date', $today)
+            ->where('actual_cash', '>', 0)
+            ->exists();
+
+        return view('livewire.pos.kasir', [
+            'products' => $query->orderBy('name')->paginate(24),
+            'isSessionFinished' => $isSessionFinished
         ])->layout('layouts.kasir');
     }
 }

@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Livewire;
+namespace App\Livewire\Management;
 
 use App\Models\ProductCategory;
 use Livewire\Component;
 use Livewire\WithPagination;
 
-class CategoryManager extends Component
+class Category extends Component
 {
     use WithPagination;
 
@@ -86,7 +86,7 @@ class CategoryManager extends Component
             ->orderBy('name')
             ->paginate(10);
 
-        return view('livewire.category-manager', [
+        return view('livewire.management.category', [
             'categories' => $categories
         ])->layout('layouts.app', ['title' => 'Kategori Produk']);
     }

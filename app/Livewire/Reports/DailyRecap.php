@@ -1,17 +1,19 @@
 <?php
 
-namespace App\Livewire;
+namespace App\Livewire\Reports;
 
-use App\Models\DailyRecap;
+use App\Models\DailyRecap as DailyRecapModel;
 use App\Models\Transaction;
 use Carbon\Carbon;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Livewire\Attributes\Url;
 
-class DailyRecapView extends Component
+class DailyRecap extends Component
 {
     use WithPagination;
 
+    #[Url]
     public string $selectedDate = '';
     public string $search = '';
     public string $filterStatus = '';
@@ -24,8 +26,6 @@ class DailyRecapView extends Component
     // Details Modal
     public $showDetailsModal = false;
     public $detailReference = null;
-
-
 
     public function mount($date = null): void
     {
@@ -46,7 +46,7 @@ class DailyRecapView extends Component
 
     protected function loadCashAudit(): void
     {
-        $recap = DailyRecap::where('date', $this->selectedDate)->first();
+        $recap = DailyRecapModel::where('date', $this->selectedDate)->first();
         if ($recap) {
             $this->actualCash = $recap->actual_cash;
             $this->cashNote = $recap->cash_note ?? '';
@@ -58,7 +58,7 @@ class DailyRecapView extends Component
 
     public function saveCashAudit(): void
     {
-        DailyRecap::updateOrCreate(
+        DailyRecapModel::updateOrCreate(
             ['date' => $this->selectedDate],
             [
                 'actual_cash' => $this->actualCash,
@@ -78,7 +78,6 @@ class DailyRecapView extends Component
     {
         $this->resetPage();
     }
-
 
     public function render()
     {
@@ -116,9 +115,11 @@ class DailyRecapView extends Component
 
 
         if ($allTransactions->isEmpty()) {
-            return view('livewire.daily-recap-view', [
+            return view('livewire.reports.daily-recap', [
                 'recap' => null,
-                'transactions' => $transactions
+                'categoryRecap' => collect(),
+                'transactions' => $transactions,
+                'categories' => \App\Models\ProductCategory::orderBy('name')->get()
             ])->layout('layouts.app', ['title' => 'Rekap Harian']);
         }
 
@@ -158,7 +159,7 @@ class DailyRecapView extends Component
                 ];
             })->sortByDesc('revenue');
 
-        return view('livewire.daily-recap-view', [
+        return view('livewire.reports.daily-recap', [
             'recap' => $recap,
             'categoryRecap' => $categoryRecap,
             'transactions' => $transactions,
@@ -183,5 +184,4 @@ class DailyRecapView extends Component
     {
         $this->dispatch('toast', message: 'Fitur ekspor CSV sedang dalam pengembangan.', type: 'info');
     }
-
 }

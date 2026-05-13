@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Livewire;
+namespace App\Livewire\Management;
 
-use App\Models\Supplier;
+use App\Models\Supplier as SupplierModel;
 use Livewire\Component;
 use Livewire\WithPagination;
 
-class SupplierManager extends Component
+class Supplier extends Component
 {
     use WithPagination;
 
@@ -34,10 +34,10 @@ class SupplierManager extends Component
         ];
 
         if ($this->editingId) {
-            Supplier::find($this->editingId)?->update($data);
+            SupplierModel::find($this->editingId)?->update($data);
             $this->dispatch('toast', message: 'Supplier berhasil diperbarui.');
         } else {
-            Supplier::create($data);
+            SupplierModel::create($data);
             $this->dispatch('toast', message: 'Supplier berhasil ditambahkan.');
         }
 
@@ -46,7 +46,7 @@ class SupplierManager extends Component
 
     public function editSupplier(int $id): void
     {
-        $supplier = Supplier::findOrFail($id);
+        $supplier = SupplierModel::findOrFail($id);
         $this->editingId = $id;
         $this->name = $supplier->name;
         $this->contact = $supplier->contact;
@@ -61,14 +61,14 @@ class SupplierManager extends Component
 
     public function deleteSupplier(int $id): void
     {
-        Supplier::destroy($id);
+        SupplierModel::destroy($id);
         $this->dispatch('toast', message: 'Supplier berhasil dihapus.');
     }
 
     public function render()
     {
-        return view('livewire.supplier-manager', [
-            'suppliers' => Supplier::where('name', 'like', '%' . $this->search . '%')
+        return view('livewire.management.supplier', [
+            'suppliers' => SupplierModel::where('name', 'like', '%' . $this->search . '%')
                 ->orderBy('name')
                 ->paginate(10)
         ])->layout('layouts.app', ['title' => 'Manajemen Supplier']);

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire;
+namespace App\Livewire\History;
 
 use App\Models\Product;
 use App\Models\Transaction;
@@ -8,7 +8,7 @@ use Carbon\Carbon;
 use Livewire\Component;
 use Livewire\WithPagination;
 
-class TransactionForm extends Component
+class Transactions extends Component
 {
     use WithPagination;
 
@@ -130,7 +130,7 @@ class TransactionForm extends Component
             ->orderByDesc('transacted_at')
             ->paginate(15);
 
-        return view('livewire.transaction-form', [
+        return view('livewire.history.transactions', [
             'transactions' => $transactions
         ])->layout('layouts.app', ['title' => 'Riwayat Transaksi']);
     }

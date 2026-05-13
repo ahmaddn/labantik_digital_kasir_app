@@ -277,14 +277,20 @@
             saveAs(new Blob([buffer]), `${filename}.xlsx`);
         }
     </script>
-
+    <script>
         document.addEventListener('livewire:navigated', function () {
-            const ctx = document.getElementById('monthlyTrendChart');
-            if (!ctx) return;
+            const canvas = document.getElementById('monthlyTrendChart');
+            if (!canvas) return;
+
+            // Destroy existing instance if it exists
+            const existingChart = Chart.getChart(canvas);
+            if (existingChart) {
+                existingChart.destroy();
+            }
 
             const breakdown = @json($dailyBreakdown);
             
-            new Chart(ctx, {
+            new Chart(canvas, {
                 type: 'bar',
                 data: {
                     labels: breakdown.map(d => d.date.split('-')[2]),
@@ -302,9 +308,7 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: {
-                            display: false
-                        },
+                        legend: { display: false },
                         tooltip: {
                             backgroundColor: 'rgba(17, 24, 39, 0.9)',
                             padding: 12,
@@ -341,13 +345,8 @@
                             }
                         },
                         x: {
-                            grid: {
-                                display: false
-                            },
-                            ticks: {
-                                font: { size: 10, weight: 'bold' },
-                                color: '#9ca3af'
-                            }
+                            grid: { display: false },
+                            ticks: { font: { size: 10, weight: 'bold' }, color: '#9ca3af' }
                         }
                     }
                 }

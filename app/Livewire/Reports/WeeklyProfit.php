@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire;
+namespace App\Livewire\Reports;
 
 use App\Models\Transaction;
 use App\Models\WeeklyProfitShare;
@@ -9,7 +9,7 @@ use Livewire\WithPagination;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
-class WeeklyProfitView extends Component
+class WeeklyProfit extends Component
 {
     use WithPagination;
 
@@ -132,7 +132,7 @@ class WeeklyProfitView extends Component
             ->orderByDesc(DB::raw('MAX(week_end)'))
             ->get();
 
-        return view('livewire.weekly-profit-view', [
+        return view('livewire.reports.weekly-profit', [
             'reports' => $reports,
             'monthlyReports' => $monthlyReports,
             'currentWeek' => [

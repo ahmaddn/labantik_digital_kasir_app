@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire;
+namespace App\Livewire\Reports;
 
 use App\Models\Product;
 use App\Models\StockEntry;
@@ -10,8 +10,7 @@ use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 use Livewire\WithPagination;
 
-
-class InventoryReportView extends Component
+class InventoryReport extends Component
 {
     use WithPagination;
 
@@ -156,7 +155,7 @@ class InventoryReportView extends Component
             if ($diff != 0) $itemsWithIssueGlobal++;
         }
 
-        return view('livewire.inventory-report-view', [
+        return view('livewire.reports.inventory-report', [
             'reportData' => $reportData,
             'products' => $products,
             'categories' => \App\Models\ProductCategory::orderBy('name')->get(),

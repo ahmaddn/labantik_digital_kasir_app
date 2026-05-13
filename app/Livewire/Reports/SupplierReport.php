@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Livewire;
+namespace App\Livewire\Reports;
 
 use App\Models\Supplier;
 use App\Models\Transaction;
 use Livewire\Component;
 use Livewire\WithPagination;
 
-class SupplierReportView extends Component
+class SupplierReport extends Component
 {
     use WithPagination;
 
@@ -43,7 +43,7 @@ class SupplierReportView extends Component
                 return $report;
             });
 
-        return view('livewire.supplier-report-view', [
+        return view('livewire.reports.supplier-report', [
             'reports' => $reports,
             'suppliers' => Supplier::all()
         ])->layout('layouts.app', ['title' => 'Laporan Supplier']);

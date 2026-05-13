@@ -2,13 +2,18 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Livewire\Dashboard;
-use App\Livewire\TransactionForm;
-use App\Livewire\ProductManager;
-use App\Livewire\CategoryManager;
-use App\Livewire\DailyRecapView;
-use App\Livewire\MonthlyRecapView;
-use App\Livewire\YearlyRecapView;
-use App\Livewire\KasirMode;
+use App\Livewire\History\Transactions;
+use App\Livewire\Management\Product;
+use App\Livewire\Management\Category;
+use App\Livewire\Management\Supplier;
+use App\Livewire\Management\Debt;
+use App\Livewire\Pos\Kasir;
+use App\Livewire\Reports\DailyRecap;
+use App\Livewire\Reports\MonthlyRecap;
+use App\Livewire\Reports\YearlyRecap;
+use App\Livewire\Reports\InventoryReport;
+use App\Livewire\Reports\SupplierReport;
+use App\Livewire\Reports\WeeklyProfit;
 
 Route::get('/', function () {
     return redirect()->route('dashboard');
@@ -17,20 +22,20 @@ Route::get('/', function () {
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard', Dashboard::class)->name('dashboard');
-    Route::get('/transactions', TransactionForm::class)->name('transactions');
-    Route::get('/products', ProductManager::class)->name('products');
-    Route::get('/categories', CategoryManager::class)->name('categories');
-    Route::get('/suppliers', \App\Livewire\SupplierManager::class)->name('suppliers');
-    Route::get('/kasir', KasirMode::class)->name('kasir');
+    Route::get('/transactions', Transactions::class)->name('transactions');
+    Route::get('/products', Product::class)->name('products');
+    Route::get('/categories', Category::class)->name('categories');
+    Route::get('/suppliers', Supplier::class)->name('suppliers');
+    Route::get('/kasir', Kasir::class)->name('kasir');
 
     // Recaps
-    Route::get('/daily-recap', DailyRecapView::class)->name('daily-recap');
-    Route::get('/monthly-recap', MonthlyRecapView::class)->name('monthly-recap');
-    Route::get('/yearly-recap', YearlyRecapView::class)->name('yearly-recap');
-    Route::get('/inventory-report', \App\Livewire\InventoryReportView::class)->name('inventory-report');
-    Route::get('/supplier-report', \App\Livewire\SupplierReportView::class)->name('supplier-report');
-    Route::get('/debts', \App\Livewire\DebtManagement::class)->name('debts');
-    Route::get('/bagi-hasil', \App\Livewire\WeeklyProfitView::class)->name('bagi-hasil');
+    Route::get('/daily-recap/{date?}', DailyRecap::class)->name('daily-recap');
+    Route::get('/monthly-recap', MonthlyRecap::class)->name('monthly-recap');
+    Route::get('/yearly-recap', YearlyRecap::class)->name('yearly-recap');
+    Route::get('/inventory-report', InventoryReport::class)->name('inventory-report');
+    Route::get('/supplier-report', SupplierReport::class)->name('supplier-report');
+    Route::get('/debts', Debt::class)->name('debts');
+    Route::get('/bagi-hasil', WeeklyProfit::class)->name('bagi-hasil');
 });
 
 

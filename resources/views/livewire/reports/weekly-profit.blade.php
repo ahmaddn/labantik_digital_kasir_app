@@ -157,7 +157,7 @@
                 </div>
 
                 <div class="mt-8">
-                    {{ $reports->links('livewire.custom-pagination') }}
+                    {{ $reports->links('livewire.partials.custom-pagination') }}
                 </div>
             </div>
         </div>

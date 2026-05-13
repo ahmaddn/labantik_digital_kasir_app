@@ -1,15 +1,16 @@
 <?php
 
-namespace App\Livewire;
+namespace App\Livewire\Management;
 
-use App\Models\Product;
+use App\Models\Product as ProductModel;
 use App\Models\ProductCategory;
 use App\Models\StockEntry;
+use App\Models\Supplier;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Carbon\Carbon;
 
-class ProductManager extends Component
+class Product extends Component
 {
     use WithPagination;
 
@@ -45,7 +46,7 @@ class ProductManager extends Component
     public function mount(): void
     {
         $this->categories = ProductCategory::all();
-        $this->suppliers = \App\Models\Supplier::all();
+        $this->suppliers = Supplier::all();
         $this->stock_date = today()->toDateString();
     }
 
@@ -64,7 +65,7 @@ class ProductManager extends Component
     public function updatedSelectAll($value): void
     {
         if ($value) {
-            $this->selectedProducts = Product::when($this->filterCategory, function($q) {
+            $this->selectedProducts = ProductModel::when($this->filterCategory, function($q) {
                     return $q->where('category_id', $this->filterCategory);
                 })
                 ->when($this->search, function($q) {
@@ -88,7 +89,7 @@ class ProductManager extends Component
     {
         if (empty($this->selectedProducts)) return;
         
-        Product::whereIn('id', $this->selectedProducts)->delete();
+        ProductModel::whereIn('id', $this->selectedProducts)->delete();
         $this->dispatch('toast', message: count($this->selectedProducts) . ' produk berhasil dihapus.');
         $this->resetSelection();
     }
@@ -97,13 +98,13 @@ class ProductManager extends Component
     {
         if (empty($this->selectedProducts)) return;
 
-        $products = Product::whereIn('id', $this->selectedProducts)->get();
+        $products = ProductModel::whereIn('id', $this->selectedProducts)->get();
         
         // If all are active, make them inactive. Otherwise, make them all active.
         $allActive = $products->every(fn($p) => $p->is_active);
         $newStatus = !$allActive;
 
-        Product::whereIn('id', $this->selectedProducts)->update(['is_active' => $newStatus]);
+        ProductModel::whereIn('id', $this->selectedProducts)->update(['is_active' => $newStatus]);
         
         $statusText = $newStatus ? 'diaktifkan' : 'dinonaktifkan';
         $this->dispatch('toast', message: count($this->selectedProducts) . " produk berhasil $statusText.");
@@ -179,13 +180,13 @@ class ProductManager extends Component
         ];
 
         if ($this->editingId) {
-            $product = Product::find($this->editingId);
+            $product = ProductModel::find($this->editingId);
             if ($product) {
                 $product->update($data);
                 $this->dispatch('toast', message: 'Produk berhasil diperbarui.');
             }
         } else {
-            Product::create($data);
+            ProductModel::create($data);
             $this->dispatch('toast', message: 'Produk berhasil ditambahkan.');
         }
 
@@ -195,7 +196,7 @@ class ProductManager extends Component
 
     public function editProduct(int $id): void
     {
-        $product = Product::findOrFail($id);
+        $product = ProductModel::findOrFail($id);
         $this->editingId       = $id;
         $this->name            = $product->name;
         $this->label           = $product->label;
@@ -222,7 +223,7 @@ class ProductManager extends Component
     public function deleteProduct(): void
     {
         if ($this->deleteId) {
-            Product::destroy($this->deleteId);
+            ProductModel::destroy($this->deleteId);
             $this->dispatch('toast', message: 'Produk berhasil dihapus.');
         }
         $this->showDeleteModal = false;
@@ -261,7 +262,7 @@ class ProductManager extends Component
 
     public function render()
     {
-        $query = Product::with(['category', 'supplier'])->orderBy('name');
+        $query = ProductModel::with(['category', 'supplier'])->orderBy('name');
         
         if ($this->filterCategory) {
             $query->where('category_id', $this->filterCategory);
@@ -277,7 +278,7 @@ class ProductManager extends Component
             });
         }
 
-        return view('livewire.product-manager', [
+        return view('livewire.management.product', [
             'products' => $query->paginate(10)
         ])->layout('layouts.app', ['title' => 'Katalog Produk']);
     }

@@ -95,7 +95,7 @@
             </table>
         </div>
         <div class="px-10 py-8 bg-gray-50 dark:bg-gray-900/50">
-            {{ $transactions->links('livewire.custom-pagination') }}
+            {{ $transactions->links('livewire.partials.custom-pagination') }}
         </div>
     </div>
 

@@ -191,7 +191,7 @@
 
             <!-- Pagination -->
             <div class="p-10 border-t border-gray-50 dark:border-gray-700/50">
-                {{ $products->links('livewire.custom-pagination') }}
+                {{ $products->links('livewire.partials.custom-pagination') }}
             </div>
         </div>
 

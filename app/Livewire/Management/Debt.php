@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Livewire;
+namespace App\Livewire\Management;
 
 use App\Models\Transaction;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 use Livewire\WithPagination;
 
-class DebtManagement extends Component
+class Debt extends Component
 {
     use WithPagination;
 
@@ -84,7 +84,7 @@ class DebtManagement extends Component
             'total_change' => Transaction::where('status', 'belum_kembalian')->sum('change_due'),
         ];
 
-        return view('livewire.debt-management', [
+        return view('livewire.management.debt', [
             'transactions' => $transactions,
             'summary' => $summary
         ])->layout('layouts.app', ['title' => 'Manajemen Hutang & Kembalian']);
