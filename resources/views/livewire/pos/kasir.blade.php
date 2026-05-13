@@ -1,6 +1,44 @@
 <div x-data="{
     showCart: false,
+    search: '',
+    selectedCategory: null,
+    products: @js($allProductsJson),
+    modalSearch: '',
     darkMode: localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches),
+    
+    get filteredProducts() {
+        if (!this.search && !this.selectedCategory) return this.products;
+        return this.products.filter(p => {
+            const matchesSearch = p.name.toLowerCase().includes(this.search.toLowerCase());
+            const matchesCategory = !this.selectedCategory || p.category_id == this.selectedCategory;
+            return matchesSearch && matchesCategory;
+        });
+    },
+
+    payment_amount: @entangle('payment_amount'),
+    
+    get total() {
+        // We use $wire.cart to ensure reactivity when items are added/removed
+        const cart = this.$wire.cart;
+        return Object.values(cart).reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    },
+
+    get change() {
+        if (this.payment_amount > 0) {
+            return this.payment_amount - this.total;
+        }
+        return 0;
+    },
+
+    formatRupiah(number) {
+        return new Intl.NumberFormat('id-ID', {
+            style: 'currency',
+            currency: 'IDR',
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0
+        }).format(number).replace('Rp', 'Rp ');
+    },
+
     toggleTheme() {
         this.darkMode = !this.darkMode;
         if (this.darkMode) {
@@ -65,6 +103,8 @@ else document.documentElement.classList.remove('dark')"
         .scrollbar-hide::-webkit-scrollbar {
             display: none;
         }
+
+        [x-cloak] { display: none !important; }
     </style>
     <!-- 1. Main Content Area (Search + Products) -->
     <div class="flex-1 flex flex-col min-w-0 bg-gray-50/50 dark:bg-gray-950/50 z-10 overflow-hidden">
@@ -131,7 +171,7 @@ else document.documentElement.classList.remove('dark')"
                             <path d="m21 21-4.3-4.3" />
                         </svg>
                     </div>
-                    <input type="text" wire:model.live.debounce.300ms="search" placeholder="Cari menu..."
+                    <input type="text" x-model="search" placeholder="Cari menu (Instan)..."
                         class="w-full pl-16 pr-8 py-4 lg:py-5 bg-gray-50 dark:bg-gray-800 rounded-[1.5rem] lg:rounded-[2rem] border-none focus:ring-4 focus:ring-primary-blue/10 font-black text-sm lg:text-base text-gray-800 dark:text-white placeholder:text-gray-300 placeholder:italic transition-all">
                 </div>
 
@@ -187,7 +227,7 @@ else document.documentElement.classList.remove('dark')"
                                     xmlns="http://www.w3.org/2000/svg" width="24" height="24"
                                     viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
                                     stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1-2-2h4" />
+                                    <path d="M9 21H5a2 2 0 0 1 2-2V5a2 2 0 0 1-2-2h4" />
                                     <polyline points="16 17 21 12 16 7" />
                                     <line x1="21" x2="9" y1="12" y2="12" />
                                 </svg>
@@ -201,13 +241,15 @@ else document.documentElement.classList.remove('dark')"
         <!-- Category Navigation -->
         <div
             class="px-6 lg:px-10 py-4 lg:py-6 bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 flex items-center gap-3 lg:gap-4 overflow-x-auto scrollbar-hide">
-            <button wire:click="selectCategory(null)"
-                class="px-6 lg:px-8 py-3 lg:py-3.5 rounded-xl lg:rounded-2xl whitespace-nowrap text-[10px] lg:text-[11px] font-black uppercase tracking-widest transition-all {{ is_null($selectedCategory) ? 'bg-primary-blue text-white shadow-xl shadow-blue-500/30 scale-105' : 'bg-gray-50 dark:bg-gray-800 text-gray-400 hover:text-primary-blue hover:bg-primary-blue/5' }}">
+            <button @click="selectedCategory = null"
+                :class="selectedCategory === null ? 'bg-primary-blue text-white shadow-xl shadow-blue-500/30 scale-105' : 'bg-gray-50 dark:bg-gray-800 text-gray-400 hover:text-primary-blue hover:bg-primary-blue/5'"
+                class="px-6 lg:px-8 py-3 lg:py-3.5 rounded-xl lg:rounded-2xl whitespace-nowrap text-[10px] lg:text-[11px] font-black uppercase tracking-widest transition-all">
                 Semua Menu
             </button>
             @foreach ($this->categories as $cat)
-                <button wire:click="selectCategory({{ $cat->id }})"
-                    class="px-6 lg:px-8 py-3 lg:py-3.5 rounded-xl lg:rounded-2xl whitespace-nowrap text-[10px] lg:text-[11px] font-black uppercase tracking-widest transition-all {{ $selectedCategory == $cat->id ? 'bg-primary-blue text-white shadow-xl shadow-blue-500/30 scale-105' : 'bg-gray-50 dark:bg-gray-800 text-gray-400 hover:text-primary-blue hover:bg-primary-blue/5' }}">
+                <button @click="selectedCategory = {{ $cat->id }}"
+                    :class="selectedCategory == {{ $cat->id }} ? 'bg-primary-blue text-white shadow-xl shadow-blue-500/30 scale-105' : 'bg-gray-50 dark:bg-gray-800 text-gray-400 hover:text-primary-blue hover:bg-primary-blue/5'"
+                    class="px-6 lg:px-8 py-3 lg:py-3.5 rounded-xl lg:rounded-2xl whitespace-nowrap text-[10px] lg:text-[11px] font-black uppercase tracking-widest transition-all">
                     {{ $cat->name }}
                 </button>
             @endforeach
@@ -215,76 +257,70 @@ else document.documentElement.classList.remove('dark')"
 
         <!-- Product Grid Section -->
         <div class="flex-1 overflow-y-auto px-6 lg:px-8 py-6 lg:py-8 scrollbar-hide bg-gray-50/30 dark:bg-gray-950/30">
-            @if ($products->isEmpty())
-                <div class="h-full flex flex-col items-center justify-center opacity-30 py-20 lg:py-32">
-                    <div
-                        class="w-32 h-32 lg:w-40 lg:h-40 bg-white dark:bg-gray-900 rounded-[3rem] lg:rounded-[4rem] flex items-center justify-center mb-8 lg:mb-10 shadow-inner">
-                        <svg class="w-16 h-16 lg:w-20 lg:h-20 text-gray-200" xmlns="http://www.w3.org/2000/svg"
-                            width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <circle cx="11" cy="11" r="8" />
-                            <path d="m21 21-4.3-4.3" />
-                            <line x1="8" y1="11" x2="14" y2="11" />
-                        </svg>
-                    </div>
-                    <h3
-                        class="text-3xl lg:text-4xl font-black italic uppercase tracking-tighter text-gray-800 dark:text-white">
-                        Kosong</h3>
-                    <p
-                        class="text-gray-400 font-bold text-sm lg:text-base mt-4 uppercase tracking-[0.4em] italic text-center">
-                        Menu tidak ditemukan</p>
-                </div>
-            @else
+            
+            <div x-show="filteredProducts.length === 0" x-cloak class="h-full flex flex-col items-center justify-center opacity-30 py-20 lg:py-32">
                 <div
-                    class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 3xl:grid-cols-5 gap-4 lg:gap-6">
-                    @foreach ($products as $product)
-                        <button wire:click="addToCart({{ $product->id }})"
-                            class="group relative bg-white dark:bg-gray-900 rounded-[2rem] lg:rounded-[2.5rem] p-5 lg:p-6 text-left shadow-xl shadow-blue-900/5 border-2 border-transparent hover:border-primary-blue/30 hover:-translate-y-1 lg:hover:-translate-y-2 hover:shadow-2xl hover:shadow-primary-blue/20 transition-all duration-500 flex flex-col h-full overflow-hidden">
-                            <div class="relative z-10 flex flex-col h-full">
-                                <div
-                                    class="w-12 h-12 lg:w-14 lg:h-14 bg-gray-50 dark:bg-gray-800 rounded-xl lg:rounded-2xl flex items-center justify-center text-gray-400 group-hover:bg-primary-blue group-hover:text-white transition-all duration-500 mb-4 lg:mb-6 shadow-sm">
-                                    <span
-                                        class="text-lg lg:text-xl font-black italic uppercase">{{ substr($product->name, 0, 1) }}</span>
-                                </div>
-                                <div class="mb-4 flex-1">
-                                    <h3
-                                        class="text-xs lg:text-sm font-black text-gray-800 dark:text-white uppercase tracking-tight leading-tight transition-colors duration-300 line-clamp-2">
-                                        {{ $product->name }}
-                                    </h3>
-                                    <p
-                                        class="text-[8px] lg:text-[9px] font-bold text-gray-400 uppercase tracking-widest mt-1.5 group-hover:text-primary-blue transition-colors duration-300">
-                                        {{ $product->category->name }}
-                                    </p>
-                                </div>
-                                <div class="flex items-center justify-between mt-auto">
-                                    <span
-                                        class="text-sm lg:text-base font-black text-primary-red italic group-hover:scale-105 transition-transform">
-                                        Rp{{ number_format($product->price, 0, ',', '.') }}
-                                    </span>
-                                    <div
-                                        class="w-7 h-7 lg:w-8 lg:h-8 bg-gray-50 dark:bg-gray-800 rounded-lg lg:rounded-xl flex items-center justify-center text-gray-300 group-hover:bg-primary-blue group-hover:text-white group-hover:rotate-90 transition-all duration-500">
-                                        <svg class="w-3 h-3 lg:w-4 lg:h-4" xmlns="http://www.w3.org/2000/svg"
-                                            width="24" height="24" viewBox="0 0 24 24" fill="none"
-                                            stroke="currentColor" stroke-width="4" stroke-linecap="round"
-                                            stroke-linejoin="round">
-                                            <path d="M5 12h14" />
-                                            <path d="M12 5v14" />
-                                        </svg>
-                                    </div>
-                                </div>
-                            </div>
+                    class="w-32 h-32 lg:w-40 lg:h-40 bg-white dark:bg-gray-900 rounded-[3rem] lg:rounded-[4rem] flex items-center justify-center mb-8 lg:mb-10 shadow-inner">
+                    <svg class="w-16 h-16 lg:w-20 lg:h-20 text-gray-200" xmlns="http://www.w3.org/2000/svg"
+                        width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="8" />
+                        <path d="m21 21-4.3-4.3" />
+                        <line x1="8" y1="11" x2="14" y2="11" />
+                    </svg>
+                </div>
+                <h3
+                    class="text-3xl lg:text-4xl font-black italic uppercase tracking-tighter text-gray-800 dark:text-white">
+                    Kosong</h3>
+                <p
+                    class="text-gray-400 font-bold text-sm lg:text-base mt-4 uppercase tracking-[0.4em] italic text-center">
+                    Menu tidak ditemukan</p>
+            </div>
+
+            <div x-show="filteredProducts.length > 0"
+                class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 3xl:grid-cols-5 gap-4 lg:gap-6">
+                
+                <template x-for="product in filteredProducts" :key="product.id">
+                    <button @click="$wire.addToCart(product.id)"
+                        class="group relative bg-white dark:bg-gray-900 rounded-[2rem] lg:rounded-[2.5rem] p-5 lg:p-6 text-left shadow-xl shadow-blue-900/5 border-2 border-transparent hover:border-primary-blue/30 hover:-translate-y-1 lg:hover:-translate-y-2 hover:shadow-2xl hover:shadow-primary-blue/20 transition-all duration-500 flex flex-col h-full overflow-hidden">
+                        <div class="relative z-10 flex flex-col h-full">
                             <div
-                                class="absolute top-5 lg:top-6 right-5 lg:right-6 px-2.5 lg:px-3 h-5 lg:h-6 bg-gray-50 dark:bg-gray-900 rounded-full group-hover:bg-primary-blue/10 transition-all flex items-center justify-center">
-                                <span
-                                    class="text-[7px] lg:text-[8px] font-black text-gray-400 group-hover:text-primary-blue uppercase tracking-[0.2em] leading-none">Tersedia</span>
+                                class="w-12 h-12 lg:w-14 lg:h-14 bg-gray-50 dark:bg-gray-800 rounded-xl lg:rounded-2xl flex items-center justify-center text-gray-400 group-hover:bg-primary-blue group-hover:text-white transition-all duration-500 mb-4 lg:mb-6 shadow-sm">
+                                <span x-text="product.initial"
+                                    class="text-lg lg:text-xl font-black italic uppercase"></span>
                             </div>
-                        </button>
-                    @endforeach
-                </div>
-                <div class="mt-10 lg:mt-12">
-                    {{ $products->links('livewire.partials.custom-pagination') }}
-                </div>
-            @endif
+                            <div class="mb-4 flex-1">
+                                <h3 x-text="product.name"
+                                    class="text-xs lg:text-sm font-black text-gray-800 dark:text-white uppercase tracking-tight leading-tight transition-colors duration-300 line-clamp-2">
+                                </h3>
+                                <p x-text="product.category_name"
+                                    class="text-[8px] lg:text-[9px] font-bold text-gray-400 uppercase tracking-widest mt-1.5 group-hover:text-primary-blue transition-colors duration-300">
+                                </p>
+                            </div>
+                            <div class="flex items-center justify-between mt-auto">
+                                <span x-text="formatRupiah(product.price)"
+                                    class="text-sm lg:text-base font-black text-primary-red italic group-hover:scale-105 transition-transform">
+                                </span>
+                                <div
+                                    class="w-7 h-7 lg:w-8 lg:h-8 bg-gray-50 dark:bg-gray-800 rounded-lg lg:rounded-xl flex items-center justify-center text-gray-300 group-hover:bg-primary-blue group-hover:text-white group-hover:rotate-90 transition-all duration-500">
+                                    <svg class="w-3 h-3 lg:w-4 lg:h-4" xmlns="http://www.w3.org/2000/svg"
+                                        width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor" stroke-width="4" stroke-linecap="round"
+                                        stroke-linejoin="round">
+                                        <path d="M5 12h14" />
+                                        <path d="M12 5v14" />
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+                        <div
+                            class="absolute top-5 lg:top-6 right-5 lg:right-6 px-2.5 lg:px-3 h-5 lg:h-6 bg-gray-50 dark:bg-gray-900 rounded-full group-hover:bg-primary-blue/10 transition-all flex items-center justify-center">
+                            <span
+                                class="text-[7px] lg:text-[8px] font-black text-gray-400 group-hover:text-primary-blue uppercase tracking-[0.2em] leading-none">Tersedia</span>
+                        </div>
+                    </button>
+                </template>
+            </div>
         </div>
     </div>
 
@@ -294,7 +330,7 @@ else document.documentElement.classList.remove('dark')"
         x-transition:leave="transition ease-in duration-200" x-transition:leave-start="translate-x-0"
         x-transition:leave-end="translate-x-full" @resize.window="if(window.innerWidth >= 1024) showCart = false"
         class="fixed inset-y-0 right-0 w-full md:w-[500px] bg-white dark:bg-gray-900 border-l border-gray-100 dark:border-gray-800 flex flex-col shadow-2xl z-[100] lg:static lg:flex lg:w-[500px] lg:shadow-none lg:translate-x-0"
-        style="display: none;" {{-- Initial hide to prevent flicker, handled by Alpine --}} x-cloak>
+        style="display: none;" x-cloak>
         <!-- Mobile Header (Only visible on mobile) -->
         <div
             class="lg:hidden p-6 flex justify-between items-center border-b dark:border-gray-800 bg-white dark:bg-gray-900">
@@ -417,8 +453,8 @@ else document.documentElement.classList.remove('dark')"
                     <span class="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em]">Total Tagihan</span>
                     <div class="flex items-baseline gap-2">
                         <span class="text-base font-black italic text-primary-blue tracking-tighter">Rp</span>
-                        <span
-                            class="text-5xl font-black italic text-primary-blue tracking-tighter leading-none">{{ number_format($total, 0, ',', '.') }}</span>
+                        <span x-text="formatRupiah(total).replace('Rp', '').trim()"
+                            class="text-5xl font-black italic text-primary-blue tracking-tighter leading-none"></span>
                     </div>
                 </div>
 
@@ -436,7 +472,7 @@ else document.documentElement.classList.remove('dark')"
                         <div class="relative">
                             <span
                                 class="absolute left-6 inset-y-0 flex items-center text-[10px] font-black text-gray-300 italic">Rp</span>
-                            <input type="number" wire:model.live="payment_amount"
+                            <input type="number" x-model.number="payment_amount"
                                 class="w-full pl-14 pr-6 py-4 bg-gray-50 dark:bg-gray-800 border-none rounded-[1.5rem] focus:ring-4 focus:ring-primary-blue/10 font-black text-xl text-primary-blue dark:text-primary-blue-light italic">
                         </div>
                     </div>
@@ -478,26 +514,30 @@ else document.documentElement.classList.remove('dark')"
                 </div>
 
                 <!-- Change/Due Indicator -->
-                @if ($payment_amount > 0)
+                <template x-if="payment_amount > 0">
                     <div
-                        class="px-6 py-4 {{ $change < 0 ? 'bg-red-500/10' : 'bg-green-500/10' }} rounded-[1.5rem] flex justify-between items-center animate-in slide-in-from-top-4 duration-500 border border-transparent {{ $change < 0 ? 'border-red-500/10' : 'border-green-500/10' }}">
+                        class="px-6 py-4 rounded-[1.5rem] flex justify-between items-center animate-in slide-in-from-top-4 duration-500 border border-transparent"
+                        :class="change < 0 ? 'bg-red-500/10 border-red-500/10' : 'bg-green-500/10 border-green-500/10'">
                         <div class="flex items-center gap-3">
                             <div
-                                class="w-2 h-2 rounded-full {{ $change < 0 ? 'bg-primary-red' : 'bg-green-500' }} animate-pulse">
+                                class="w-2 h-2 rounded-full animate-pulse"
+                                :class="change < 0 ? 'bg-primary-red' : 'bg-green-500'">
                             </div>
-                            <span
-                                class="text-[9px] font-black {{ $change < 0 ? 'text-primary-red' : 'text-green-600' }} uppercase tracking-[0.3em]">{{ $change < 0 ? 'Kurang Bayar' : 'Uang Kembalian' }}</span>
+                            <span x-text="change < 0 ? 'Kurang Bayar' : 'Uang Kembalian'"
+                                class="text-[9px] font-black uppercase tracking-[0.3em]"
+                                :class="change < 0 ? 'text-primary-red' : 'text-green-600'"></span>
                         </div>
-                        <span
-                            class="text-2xl font-black italic {{ $change < 0 ? 'text-primary-red' : 'text-green-600' }}">Rp{{ number_format(abs($change), 0, ',', '.') }}</span>
+                        <span x-text="formatRupiah(Math.abs(change))"
+                            class="text-2xl font-black italic"
+                            :class="change < 0 ? 'text-primary-red' : 'text-green-600'"></span>
                     </div>
-                @endif
+                </template>
 
                 <!-- Final Action -->
                 <div class="space-y-4 pt-1">
                     <textarea wire:model="note" rows="2" placeholder="Catatan transaksi..."
                         class="w-full px-6 py-4 bg-gray-50 dark:bg-gray-800 border-none rounded-[1.5rem] focus:ring-4 focus:ring-primary-blue/10 font-bold text-xs text-gray-800 dark:text-white placeholder:text-gray-300"></textarea>
-                    <button wire:click="checkout" @if (empty($cart) || $change < 0) disabled @endif
+                    <button wire:click="checkout" :disabled="!Object.keys($wire.cart).length || change < 0"
                         class="w-full py-6 bg-primary-blue text-white rounded-[2rem] shadow-[0_30px_80px_-20px_rgba(59,130,246,0.5)] hover:scale-[1.02] active:scale-95 transition-all font-black italic uppercase text-base tracking-[0.3em] flex items-center justify-center gap-5 group disabled:opacity-30 disabled:scale-100 disabled:shadow-none overflow-hidden relative">
                         <span class="relative z-10">Proses Pesanan</span>
                         <svg class="w-5 h-5 group-hover:translate-x-3 transition-transform relative z-10"
@@ -581,7 +621,7 @@ else document.documentElement.classList.remove('dark')"
                 </div>
                 <div class="flex items-center gap-6 pr-16">
                     <div class="relative">
-                        <input type="text" wire:model.live="modalSearch" placeholder="Cari menu..."
+                        <input type="text" x-model="modalSearch" placeholder="Cari menu..."
                             class="pl-12 pr-6 py-4 bg-white dark:bg-gray-800 border-none rounded-2xl focus:ring-4 focus:ring-primary-blue/10 text-xs font-black uppercase tracking-widest shadow-sm">
                         <svg class="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
                             xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
@@ -595,8 +635,8 @@ else document.documentElement.classList.remove('dark')"
             </div>
             <div class="flex-1 overflow-y-auto p-12 scrollbar-hide">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    @foreach (collect($allProducts)->when($modalSearch, fn($c) => $c->filter(fn($p) => str_contains(strtolower($p->name), strtolower($modalSearch))))->when($modalCategory, fn($c) => $c->where('category_id', $modalCategory)) as $p)
-                        <div wire:key="opening-stock-{{ $p->id }}"
+                    @foreach (\App\Models\Product::where('is_active', true)->orderBy('name')->get() as $p)
+                        <div wire:key="opening-stock-{{ $p->id }}" x-show="'{{ strtolower($p->name) }}'.includes(modalSearch.toLowerCase())"
                             class="flex items-center justify-between p-8 bg-gray-50 dark:bg-gray-800/50 rounded-[2.5rem] border-2 border-transparent hover:border-primary-blue/20 transition-all shadow-sm">
                             <div class="min-w-0">
                                 <h4
@@ -605,34 +645,10 @@ else document.documentElement.classList.remove('dark')"
                                 <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-2">
                                     {{ $p->category ? $p->category->name : 'No Category' }}</p>
                             </div>
-                            <div class="w-36" x-data="{
-                                readonly: false,
-                                timer: null,
-                                handleInput(val) {
-                                    if (!val || val === '0') return;
-                                    clearTimeout(this.timer);
-                                    this.timer = setTimeout(() => {
-                                        this.readonly = true;
-                                    }, 2000);
-                                }
-                            }">
+                            <div class="w-36">
                                 <div class="relative group">
                                     <input type="number" wire:model.blur="stockItems.{{ $p->id }}"
-                                        :readonly="readonly" @input="handleInput($event.target.value)"
-                                        :class="readonly ? 'bg-gray-100 dark:bg-gray-800 opacity-60 cursor-not-allowed' :
-                                            'bg-white dark:bg-gray-900'"
-                                        class="w-full px-6 py-4 border-none rounded-2xl focus:ring-4 focus:ring-primary-blue/10 font-black text-lg text-center shadow-inner text-gray-800 dark:text-white transition-all">
-
-                                    <div x-show="readonly"
-                                        class="absolute -right-2 -top-2 w-6 h-6 bg-primary-blue text-white rounded-full flex items-center justify-center shadow-lg animate-in zoom-in duration-300">
-                                        <svg class="w-3 h-3" xmlns="http://www.w3.org/2000/svg" width="24"
-                                            height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                            stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
-                                            <rect width="18" height="11" x="3" y="11" rx="2"
-                                                ry="2" />
-                                            <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-                                        </svg>
-                                    </div>
+                                        class="w-full px-6 py-4 bg-white dark:bg-gray-900 border-none rounded-2xl focus:ring-4 focus:ring-primary-blue/10 font-black text-lg text-center shadow-inner text-gray-800 dark:text-white transition-all">
                                 </div>
                             </div>
                         </div>
@@ -676,11 +692,24 @@ else document.documentElement.classList.remove('dark')"
                     <p class="text-sm font-bold text-gray-400 uppercase tracking-widest mt-3">Input jumlah stok sisa
                         untuk perhitungan laporan harian</p>
                 </div>
+                <div class="flex items-center gap-6 pr-16">
+                    <div class="relative">
+                        <input type="text" x-model="modalSearch" placeholder="Cari menu..."
+                            class="pl-12 pr-6 py-4 bg-white dark:bg-gray-800 border-none rounded-2xl focus:ring-4 focus:ring-primary-blue/10 text-xs font-black uppercase tracking-widest shadow-sm">
+                        <svg class="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
+                            xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                            fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"
+                            stroke-linejoin="round">
+                            <circle cx="11" cy="11" r="8" />
+                            <path d="m21 21-4.3-4.3" />
+                        </svg>
+                    </div>
+                </div>
             </div>
             <div class="flex-1 overflow-y-auto p-12 scrollbar-hide">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    @foreach (collect($allProducts)->when($modalSearch, fn($c) => $c->filter(fn($p) => str_contains(strtolower($p->name), strtolower($modalSearch))))->when($modalCategory, fn($c) => $c->where('category_id', $modalCategory)) as $p)
-                        <div wire:key="closing-stock-{{ $p->id }}"
+                    @foreach (\App\Models\Product::where('is_active', true)->orderBy('name')->get() as $p)
+                        <div wire:key="closing-stock-{{ $p->id }}" x-show="'{{ strtolower($p->name) }}'.includes(modalSearch.toLowerCase())"
                             class="flex items-center justify-between p-8 bg-gray-50 dark:bg-gray-800/50 rounded-[2.5rem] border-2 border-transparent hover:border-primary-red/20 transition-all shadow-sm">
                             <div class="min-w-0">
                                 <h4
@@ -689,34 +718,10 @@ else document.documentElement.classList.remove('dark')"
                                 <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-2">
                                     {{ $p->category ? $p->category->name : 'No Category' }}</p>
                             </div>
-                            <div class="w-36" x-data="{
-                                readonly: false,
-                                timer: null,
-                                handleInput(val) {
-                                    if (!val || val === '0') return;
-                                    clearTimeout(this.timer);
-                                    this.timer = setTimeout(() => {
-                                        this.readonly = true;
-                                    }, 2000);
-                                }
-                            }">
+                            <div class="w-36">
                                 <div class="relative group">
                                     <input type="number" wire:model.blur="stockItems.{{ $p->id }}"
-                                        :readonly="readonly" @input="handleInput($event.target.value)"
-                                        :class="readonly ? 'bg-gray-100 dark:bg-gray-800 opacity-60 cursor-not-allowed' :
-                                            'bg-white dark:bg-gray-900'"
-                                        class="w-full px-6 py-4 border-none rounded-2xl focus:ring-4 focus:ring-primary-red/10 font-black text-lg text-center shadow-inner text-gray-800 dark:text-white transition-all">
-
-                                    <div x-show="readonly"
-                                        class="absolute -right-2 -top-2 w-6 h-6 bg-primary-red text-white rounded-full flex items-center justify-center shadow-lg animate-in zoom-in duration-300">
-                                        <svg class="w-3 h-3" xmlns="http://www.w3.org/2000/svg" width="24"
-                                            height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                            stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
-                                            <rect width="18" height="11" x="3" y="11" rx="2"
-                                                ry="2" />
-                                            <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-                                        </svg>
-                                    </div>
+                                        class="w-full px-6 py-4 bg-white dark:bg-gray-900 border-none rounded-2xl focus:ring-4 focus:ring-primary-red/10 font-black text-lg text-center shadow-inner text-gray-800 dark:text-white transition-all">
                                 </div>
                             </div>
                         </div>
@@ -766,18 +771,20 @@ else document.documentElement.classList.remove('dark')"
 
             <div class="p-8 max-h-[50vh] overflow-y-auto no-scrollbar">
                 <div class="space-y-6">
-                    @foreach ($this->detailItems as $item)
-                        <div class="flex justify-between items-center">
-                            <div>
-                                <p class="text-xs font-black text-gray-800 dark:text-white uppercase tracking-tight">
-                                    {{ $item->product->name }}</p>
-                                <p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mt-1">
-                                    {{ $item->quantity }} x Rp{{ number_format($item->unit_price, 0, ',', '.') }}</p>
+                    @if($this->detailItems)
+                        @foreach ($this->detailItems as $item)
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <p class="text-xs font-black text-gray-800 dark:text-white uppercase tracking-tight">
+                                        {{ $item->product->name }}</p>
+                                    <p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mt-1">
+                                        {{ $item->quantity }} x Rp{{ number_format($item->unit_price, 0, ',', '.') }}</p>
+                                </div>
+                                <p class="text-sm font-black text-gray-800 dark:text-white italic">
+                                    Rp{{ number_format($item->total_price, 0, ',', '.') }}</p>
                             </div>
-                            <p class="text-sm font-black text-gray-800 dark:text-white italic">
-                                Rp{{ number_format($item->total_price, 0, ',', '.') }}</p>
-                        </div>
-                    @endforeach
+                        @endforeach
+                    @endif
                 </div>
             </div>
 

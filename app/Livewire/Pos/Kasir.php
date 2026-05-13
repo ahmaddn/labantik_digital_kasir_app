@@ -16,8 +16,6 @@ class Kasir extends Component
     use WithPagination;
 
     public $cart = [];
-    public $search = '';
-    public $selectedCategory = null;
     public $total = 0;
     public $payment_amount = 0;
     public $change = 0;
@@ -25,28 +23,15 @@ class Kasir extends Component
     public $status = 'uang_diterima';
     public $note = '';
     
-    // Modal filtering
-    public $modalSearch = '';
-    public $modalCategory = null;
+    // UI State (Moved to Alpine but kept here for initial sync if needed)
     public $rightSidebarTab = 'cart'; // 'cart' or 'history'
 
     // Stock Management Properties
     public $showOpeningStockModal = false;
     public $showClosingStockModal = false;
     public $stockItems = []; // Array to hold stock input values [product_id => quantity]
-    public $allProducts = []; // For the stock modals
     public $showDetailsModal = false;
     public $detailReference = null;
-
-    // Edit Transaction Properties
-    public $showEditModal = false;
-    public $editingTransaction = null;
-    public $editQty = 0;
-    public $editStatus = '';
-    public $editNote = '';
-    public $editBuyer = '';
-    public $editChangeDue = 0;
-
 
     public function mount(): void
     {
@@ -55,9 +40,6 @@ class Kasir extends Component
 
     public function editOpeningStock(): void
     {
-        $this->modalSearch = '';
-        $this->modalCategory = null;
-        $this->allProducts = Product::where('is_active', true)->orderBy('name')->get();
         $today = now()->toDateString();
         
         // Cari data terakhir dari hari sebelumnya untuk fallback jika belum ada data hari ini
@@ -72,7 +54,8 @@ class Kasir extends Component
                 ->toArray();
         }
 
-        foreach ($this->allProducts as $p) {
+        $allProducts = Product::where('is_active', true)->get();
+        foreach ($allProducts as $p) {
             $entry = StockEntry::where('product_id', $p->id)->where('date', $today)->first();
             if ($entry) {
                 $this->stockItems[$p->id] = $entry->opening_stock;
@@ -90,10 +73,6 @@ class Kasir extends Component
         $exists = StockEntry::where('date', $today)->exists();
 
         if (!$exists) {
-            $this->modalSearch = '';
-            $this->modalCategory = null;
-            $this->allProducts = Product::where('is_active', true)->orderBy('name')->get();
-            
             // Cari data terakhir dari hari sebelumnya
             $lastSessionDate = StockEntry::where('date', '<', $today)
                 ->orderBy('date', 'desc')
@@ -106,7 +85,8 @@ class Kasir extends Component
                     ->toArray();
             }
 
-            foreach ($this->allProducts as $p) {
+            $allProducts = Product::where('is_active', true)->get();
+            foreach ($allProducts as $p) {
                 $this->stockItems[$p->id] = $lastStocks[$p->id] ?? 0;
             }
             $this->showOpeningStockModal = true;
@@ -139,12 +119,9 @@ class Kasir extends Component
 
     public function finishSession(): void
     {
-        $this->modalSearch = '';
-        $this->modalCategory = null;
-        $this->allProducts = Product::where('is_active', true)->orderBy('name')->get();
         $today = now()->toDateString();
-        
-        foreach ($this->allProducts as $p) {
+        $allProducts = Product::where('is_active', true)->get();
+        foreach ($allProducts as $p) {
             $entry = StockEntry::where('product_id', $p->id)->where('date', $today)->first();
             $this->stockItems[$p->id] = $entry ? $entry->closing_stock : 0;
         }
@@ -165,18 +142,6 @@ class Kasir extends Component
         $this->stockItems = [];
         $this->dispatch('toast', message: 'Sesi kasir berhasil diselesaikan.');
         $this->dispatch('session-finished');
-    }
-
-
-    public function updatedSearch(): void
-    {
-        $this->resetPage();
-    }
-
-    public function selectCategory($id): void
-    {
-        $this->selectedCategory = $id;
-        $this->resetPage();
     }
 
     public function updatedPaymentAmount(): void
@@ -275,11 +240,6 @@ class Kasir extends Component
         $this->dispatch('transaction-complete');
     }
 
-    public function setRightSidebarTab(string $tab): void
-    {
-        $this->rightSidebarTab = $tab;
-    }
-
     public function viewDetails($reference): void
     {
         $this->detailReference = $reference;
@@ -292,14 +252,12 @@ class Kasir extends Component
         return Transaction::with('product')->where('reference', $this->detailReference)->get();
     }
 
-
     #[Computed]
     public function categories()
     {
-        return ProductCategory::all();
+        return ProductCategory::orderBy('name')->get();
     }
 
-    // Computed Property for recent transactions
     #[Computed]
     public function recentTransactions()
     {
@@ -315,26 +273,32 @@ class Kasir extends Component
     public function render()
     {
         $today = now()->toDateString();
-        $query = Product::with('category')
+        
+        // Get ALL products for JS filtering
+        $allProducts = Product::with('category')
             ->where('is_active', true)
             ->whereHas('stockEntries', function($q) use ($today) {
                 $q->where('date', $today)->where('opening_stock', '>', 0);
+            })
+            ->orderBy('name')
+            ->get()
+            ->map(function($p) {
+                return [
+                    'id' => $p->id,
+                    'name' => $p->name,
+                    'price' => (int)$p->price,
+                    'category_id' => $p->category_id,
+                    'category_name' => $p->category->name ?? 'Uncategorized',
+                    'initial' => substr($p->name, 0, 1),
+                ];
             });
 
-        if ($this->selectedCategory) {
-            $query->where('category_id', $this->selectedCategory);
-        }
-        if ($this->search) {
-            $query->where('name', 'like', '%' . $this->search . '%');
-        }
-
-        // Check if session is finished (Daily Recap exists with actual cash)
         $isSessionFinished = DailyRecap::where('date', $today)
             ->where('actual_cash', '>', 0)
             ->exists();
 
         return view('livewire.pos.kasir', [
-            'products' => $query->orderBy('name')->paginate(24),
+            'allProductsJson' => $allProducts,
             'isSessionFinished' => $isSessionFinished
         ])->layout('layouts.kasir');
     }
