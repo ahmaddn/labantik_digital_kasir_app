@@ -15,16 +15,8 @@ class Kasir extends Component
 {
     use WithPagination;
 
-    public $cart = [];
-    public $total = 0;
-    public $payment_amount = 0;
-    public $change = 0;
-    public $buyer_name = '';
-    public $status = 'uang_diterima';
-    public $note = '';
-    
-    // UI State (Moved to Alpine but kept here for initial sync if needed)
-    public $rightSidebarTab = 'cart'; // 'cart' or 'history'
+    // UI State
+    public $rightSidebarTab = 'cart';
 
     // Stock Management Properties
     public $showOpeningStockModal = false;
@@ -42,7 +34,6 @@ class Kasir extends Component
     {
         $today = now()->toDateString();
         
-        // Cari data terakhir dari hari sebelumnya untuk fallback jika belum ada data hari ini
         $lastSessionDate = StockEntry::where('date', '<', $today)
             ->orderBy('date', 'desc')
             ->value('date');
@@ -73,7 +64,6 @@ class Kasir extends Component
         $exists = StockEntry::where('date', $today)->exists();
 
         if (!$exists) {
-            // Cari data terakhir dari hari sebelumnya
             $lastSessionDate = StockEntry::where('date', '<', $today)
                 ->orderBy('date', 'desc')
                 ->value('date');
@@ -102,7 +92,6 @@ class Kasir extends Component
                 ['opening_stock' => $qty ?? 0]
             );
 
-            // Recalculate closing stock based on sales today
             $totalSold = Transaction::where('product_id', $productId)
                 ->whereDate('transacted_at', $today)
                 ->sum('quantity');
@@ -123,7 +112,11 @@ class Kasir extends Component
         $allProducts = Product::where('is_active', true)->get();
         foreach ($allProducts as $p) {
             $entry = StockEntry::where('product_id', $p->id)->where('date', $today)->first();
-            $this->stockItems[$p->id] = $entry ? $entry->closing_stock : 0;
+            $sold = Transaction::where('product_id', $p->id)
+                ->whereDate('transacted_at', $today)
+                ->sum('quantity');
+            
+            $this->stockItems[$p->id] = $entry ? ($entry->opening_stock - $sold) : 0;
         }
         
         $this->showClosingStockModal = true;
@@ -144,98 +137,33 @@ class Kasir extends Component
         $this->dispatch('session-finished');
     }
 
-    public function updatedPaymentAmount(): void
+    public function checkout($cart, $total, $change, $buyer_name, $status, $note): void
     {
-        $this->calculateChange();
-    }
+        if (empty($cart)) return;
 
-    public function addToCart($productId): void
-    {
-        $product = Product::find($productId);
-        if (!$product) return;
-
-        if (isset($this->cart[$productId])) {
-            $this->cart[$productId]['quantity']++;
-        } else {
-            $this->cart[$productId] = [
-                'id' => $product->id,
-                'name' => $product->name,
-                'price' => $product->price,
-                'modal_price' => $product->modal_price,
-                'profit' => $product->profit,
-                'supplier_id' => $product->supplier_id,
-                'quantity' => 1,
-            ];
-        }
-        $this->calculateTotal();
-    }
-
-    public function removeFromCart($productId): void
-    {
-        if (isset($this->cart[$productId])) {
-            if ($this->cart[$productId]['quantity'] > 1) {
-                $this->cart[$productId]['quantity']--;
-            } else {
-                unset($this->cart[$productId]);
-            }
-        }
-        $this->calculateTotal();
-    }
-
-    public function clearCart(): void
-    {
-        $this->cart = [];
-        $this->total = 0;
-        $this->payment_amount = 0;
-        $this->change = 0;
-    }
-
-    protected function calculateTotal(): void
-    {
-        $this->total = collect($this->cart)->sum(fn($item) => $item['price'] * $item['quantity']);
-        $this->calculateChange();
-    }
-
-    protected function calculateChange(): void
-    {
-        if ($this->payment_amount > 0) {
-            $this->change = $this->payment_amount - $this->total;
-        } else {
-            $this->change = 0;
-        }
-    }
-
-    public function checkout(): void
-    {
-        if (empty($this->cart)) return;
-
-        $name = preg_replace('/[^A-Za-z0-9]/', '', $this->buyer_name ?: 'GUEST');
-        $initials = strtoupper(substr($name, 0, 2));
+        $cleanName = preg_replace('/[^A-Za-z0-9]/', '', $buyer_name ?: 'GUEST');
+        $initials = strtoupper(substr($cleanName, 0, 2));
         $reference = 'LBK-' . now()->format('Ymd') . '-' . $initials . strtoupper(bin2hex(random_bytes(2)));
 
-        foreach ($this->cart as $item) {
+        foreach ($cart as $item) {
             Transaction::create([
                 'reference' => $reference,
                 'user_id' => auth()->id(),
                 'product_id' => $item['id'],
                 'supplier_id' => $item['supplier_id'] ?? null,
                 'transacted_at' => now(),
-                'buyer_name' => $this->buyer_name ?: null,
+                'buyer_name' => $buyer_name ?: null,
                 'quantity' => $item['quantity'],
                 'unit_price' => $item['price'],
                 'unit_profit' => $item['profit'],
                 'total_price' => $item['price'] * $item['quantity'],
-                'debt_amount' => in_array($this->status, ['belum_menerima_uang', 'uang_dipinjam']) ? ($item['price'] * $item['quantity']) : 0,
-                'change_due' => ($this->status === 'belum_kembalian') ? $this->change : 0,
-                'status' => $this->status,
-                'note' => $this->note ?: ($this->change > 0 ? 'Kembalian: Rp' . number_format($this->change, 0, ',', '.') : null),
+                'debt_amount' => in_array($status, ['belum_menerima_uang', 'uang_dipinjam']) ? ($item['price'] * $item['quantity']) : 0,
+                'change_due' => ($status === 'belum_kembalian') ? $change : 0,
+                'status' => $status,
+                'note' => $note ?: ($change > 0 ? 'Kembalian: Rp' . number_format($change, 0, ',', '.') : null),
             ]);
         }
 
-        $this->clearCart();
-        $this->buyer_name = '';
-        $this->status = 'uang_diterima';
-        $this->note = '';
         $this->dispatch('toast', message: 'Transaksi berhasil disimpan!');
         $this->dispatch('transaction-complete');
     }
@@ -270,11 +198,38 @@ class Kasir extends Component
             ->get();
     }
 
+    #[Computed]
+    public function stockComparison()
+    {
+        $today = now()->toDateString();
+        return Product::where('is_active', true)
+            ->whereHas('stockEntries', function($q) use ($today) {
+                $q->where('date', $today)->where('opening_stock', '>', 0);
+            })
+            ->with(['stockEntries' => fn($q) => $q->where('date', $today)])
+            ->get()
+            ->map(function($p) use ($today) {
+                $entry = $p->stockEntries->first();
+                $sold = Transaction::where('product_id', $p->id)
+                    ->whereDate('transacted_at', $today)
+                    ->sum('quantity');
+                
+                return [
+                    'id' => $p->id,
+                    'name' => $p->name,
+                    'category' => $p->category->name ?? 'Uncategorized',
+                    'opening' => $entry ? $entry->opening_stock : 0,
+                    'sold' => $sold,
+                    'expected' => ($entry ? $entry->opening_stock : 0) - $sold,
+                    'actual' => $entry ? $entry->closing_stock : 0,
+                ];
+            });
+    }
+
     public function render()
     {
         $today = now()->toDateString();
         
-        // Get ALL products for JS filtering
         $allProducts = Product::with('category')
             ->where('is_active', true)
             ->whereHas('stockEntries', function($q) use ($today) {
@@ -287,6 +242,8 @@ class Kasir extends Component
                     'id' => $p->id,
                     'name' => $p->name,
                     'price' => (int)$p->price,
+                    'profit' => (int)$p->profit,
+                    'supplier_id' => $p->supplier_id,
                     'category_id' => $p->category_id,
                     'category_name' => $p->category->name ?? 'Uncategorized',
                     'initial' => substr($p->name, 0, 1),
