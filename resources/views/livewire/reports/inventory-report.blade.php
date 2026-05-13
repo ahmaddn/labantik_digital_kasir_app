@@ -25,7 +25,10 @@
                     Export XLSX
                 </button>
 
-                <a href="{{ route('kasir') }}" class="bg-gray-800 text-white px-6 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-gray-900/20 hover:scale-105 transition-all">
+                @php
+                    $isSessionFinished = \App\Models\DailyRecap::whereDate('date', now())->where('actual_cash', '>', 0)->exists();
+                @endphp
+                <a href="{{ $isSessionFinished ? route('dashboard') : route('kasir') }}" class="bg-gray-800 text-white px-6 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-gray-900/20 hover:scale-105 transition-all">
                     Kembali
                 </a>
             </div>

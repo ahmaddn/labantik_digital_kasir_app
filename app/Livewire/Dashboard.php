@@ -109,7 +109,7 @@ class Dashboard extends Component
         }
 
         // Check if session is finished (Daily Recap exists with actual cash)
-        $isSessionFinished = \App\Models\DailyRecap::where('date', $today->toDateString())
+        $isSessionFinished = \App\Models\DailyRecap::whereDate('date', now())
             ->where('actual_cash', '>', 0)
             ->exists();
 

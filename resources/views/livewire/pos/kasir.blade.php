@@ -250,9 +250,9 @@ else document.documentElement.classList.remove('dark')"
                     <div class="h-8 w-[1px] bg-gray-100 dark:bg-gray-800 hidden md:block mx-1"></div>
 
                     <div class="hidden md:flex items-center gap-3">
-                        <button wire:click="finishSession"
-                            class="flex items-center gap-4 bg-gray-900 dark:bg-white dark:text-gray-900 text-white px-6 lg:px-8 py-4 lg:py-5 rounded-[1.2rem] lg:rounded-[1.5rem] shadow-2xl transition-all active:scale-95 font-black text-[10px] lg:text-[11px] uppercase tracking-[0.2em]">
-                            Selesai
+                        <button wire:click="finishSession" {{ $isSessionFinished ? 'disabled' : '' }}
+                            class="flex items-center gap-4 {{ $isSessionFinished ? 'bg-gray-400 dark:bg-gray-700 cursor-not-allowed' : 'bg-gray-900 dark:bg-white dark:text-gray-900' }} text-white px-6 lg:px-8 py-4 lg:py-5 rounded-[1.2rem] lg:rounded-[1.5rem] shadow-2xl transition-all active:scale-95 font-black text-[10px] lg:text-[11px] uppercase tracking-[0.2em]">
+                            {{ $isSessionFinished ? 'Sesi Berakhir' : 'Selesai' }}
                         </button>
 
                         <form method="POST" action="{{ route('logout') }}">
@@ -317,7 +317,8 @@ else document.documentElement.classList.remove('dark')"
                 class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 3xl:grid-cols-5 gap-4 lg:gap-6">
                 
                 <template x-for="product in filteredProducts" :key="product.id">
-                    <button @click="addToCart(product)"
+                    <button @click="addToCart(product)" :disabled="{{ $isSessionFinished ? 'true' : 'false' }}"
+                        :class="{{ $isSessionFinished ? 'true' : 'false' }} ? 'opacity-50 grayscale cursor-not-allowed' : ''"
                         class="group relative bg-white dark:bg-gray-900 rounded-[2rem] lg:rounded-[2.5rem] p-5 lg:p-6 text-left shadow-xl shadow-blue-900/5 border-2 border-transparent hover:border-primary-blue/30 hover:-translate-y-1 lg:hover:-translate-y-2 hover:shadow-2xl hover:shadow-primary-blue/20 transition-all duration-500 flex flex-col h-full overflow-hidden">
                         <div class="relative z-10 flex flex-col h-full">
                             <div
@@ -571,8 +572,8 @@ else document.documentElement.classList.remove('dark')"
                 <div class="space-y-4 pt-1">
                     <textarea x-model="note" rows="2" placeholder="Catatan transaksi..."
                         class="w-full px-6 py-4 bg-gray-50 dark:bg-gray-800 border-none rounded-[1.5rem] focus:ring-4 focus:ring-primary-blue/10 font-bold text-xs text-gray-800 dark:text-white placeholder:text-gray-300"></textarea>
-                    <button @click="checkout()" :disabled="cart.length === 0 || (payment_amount < total && status === 'uang_diterima')"
-                        class="w-full py-6 bg-primary-blue text-white rounded-[2rem] shadow-[0_30px_80px_-20px_rgba(59,130,246,0.5)] hover:scale-[1.02] active:scale-95 transition-all font-black italic uppercase text-base tracking-[0.3em] flex items-center justify-center gap-5 group disabled:opacity-30 disabled:scale-100 disabled:shadow-none overflow-hidden relative">
+                    <button @click="checkout()" :disabled="{{ $isSessionFinished ? 'true' : 'false' }} || cart.length === 0 || (payment_amount < total && status === 'uang_diterima')"
+                        class="w-full py-6 {{ $isSessionFinished ? 'bg-gray-400' : 'bg-primary-blue' }} text-white rounded-[2rem] shadow-[0_30px_80px_-20px_rgba(59,130,246,0.5)] hover:scale-[1.02] active:scale-95 transition-all font-black italic uppercase text-base tracking-[0.3em] flex items-center justify-center gap-5 group disabled:opacity-30 disabled:scale-100 disabled:shadow-none overflow-hidden relative">
                         <span class="relative z-10">Proses Pesanan</span>
                         <svg class="w-5 h-5 group-hover:translate-x-3 transition-transform relative z-10"
                             xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"

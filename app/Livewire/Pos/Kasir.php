@@ -27,6 +27,17 @@ class Kasir extends Component
 
     public function mount(): void
     {
+        // Check if session for today is already finished
+        $isSessionFinished = DailyRecap::whereDate('date', now())
+            ->where('actual_cash', '>', 0)
+            ->exists();
+
+        if ($isSessionFinished) {
+            session()->flash('error', 'Sesi kasir hari ini telah berakhir. Anda tidak dapat melakukan transaksi lagi.');
+            $this->redirectRoute('dashboard', navigate: true);
+            return;
+        }
+
         $this->checkOpeningStock();
     }
 
@@ -131,10 +142,18 @@ class Kasir extends Component
                 ['closing_stock' => $qty ?? 0]
             );
         }
+
+        // Mark session as finished in DailyRecap
+        DailyRecap::updateOrCreate(
+            ['date' => $today],
+            ['actual_cash' => 1] // Set a placeholder value to mark as finished
+        );
+
         $this->showClosingStockModal = false;
         $this->stockItems = [];
-        $this->dispatch('toast', message: 'Sesi kasir berhasil diselesaikan.');
-        $this->dispatch('session-finished');
+        
+        session()->flash('toast', 'Sesi kasir berhasil diselesaikan.');
+        $this->redirectRoute('dashboard', navigate: true);
     }
 
     public function checkout($cart, $total, $change, $buyer_name, $status, $note): void

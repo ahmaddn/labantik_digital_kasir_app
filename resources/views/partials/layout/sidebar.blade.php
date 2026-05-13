@@ -29,11 +29,24 @@
                 Dashboard Overview
             </a>
 
-            <a href="{{ route('kasir') }}"
-                class="flex items-center px-6 py-5 text-sm font-black rounded-[2rem] bg-primary-red text-white shadow-2xl shadow-red-500/30 hover:scale-105 active:scale-95 transition-all uppercase italic tracking-wider">
-                <svg class="w-6 h-6 mr-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" /><path d="M3 6h18" /><path d="M16 10a4 4 0 0 1-8 0" /></svg>
-                Buka Mode Kasir
-            </a>
+            @php
+                $isSessionFinished = \App\Models\DailyRecap::whereDate('date', now())
+                    ->where('actual_cash', '>', 0)
+                    ->exists();
+            @endphp
+
+            @if($isSessionFinished)
+                <div class="flex items-center px-6 py-5 text-sm font-black rounded-[2rem] bg-gray-400 dark:bg-gray-800 text-white shadow-xl opacity-80 cursor-not-allowed uppercase italic tracking-wider">
+                    <svg class="w-6 h-6 mr-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" /><path d="M3 6h18" /><path d="M16 10a4 4 0 0 1-8 0" /></svg>
+                    Sesi Kasir Berakhir
+                </div>
+            @else
+                <a href="{{ route('kasir') }}"
+                    class="flex items-center px-6 py-5 text-sm font-black rounded-[2rem] bg-primary-red text-white shadow-2xl shadow-red-500/30 hover:scale-105 active:scale-95 transition-all uppercase italic tracking-wider">
+                    <svg class="w-6 h-6 mr-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" /><path d="M3 6h18" /><path d="M16 10a4 4 0 0 1-8 0" /></svg>
+                    Buka Mode Kasir
+                </a>
+            @endif
 
             <div class="h-px bg-gray-100 dark:bg-gray-800 my-8 mx-4"></div>
 

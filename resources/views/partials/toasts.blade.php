@@ -24,6 +24,14 @@
             setTimeout(() => remove(id), 500);
         }, 5000);
     "
+    x-init="
+        @if (session()->has('toast'))
+            $dispatch('toast', { message: '{{ session('toast') }}', type: 'success' });
+        @endif
+        @if (session()->has('error'))
+            $dispatch('toast', { message: '{{ session('error') }}', type: 'error' });
+        @endif
+    "
     class="fixed top-10 right-10 z-[1000] flex flex-col gap-4 pointer-events-none"
 >
     <template x-for="msg in messages" :key="msg.id">
