@@ -26,9 +26,44 @@ class InventoryReportView extends Component
     ];
 
 
+    public $editingProductId = null;
+    public $newOpeningStock;
+    public $newClosingStock;
+
     public function mount($date = null)
     {
         $this->selectedDate = $date ?? now()->toDateString();
+    }
+
+    public function editStock($productId, $opening, $closing)
+    {
+        $this->editingProductId = $productId;
+        $this->newOpeningStock = $opening;
+        $this->newClosingStock = $closing;
+    }
+
+    public function cancelEdit()
+    {
+        $this->editingProductId = null;
+    }
+
+    public function updateStock()
+    {
+        $this->validate([
+            'newOpeningStock' => 'required|numeric|min:0',
+            'newClosingStock' => 'required|numeric|min:0',
+        ]);
+
+        StockEntry::updateOrCreate(
+            ['product_id' => $this->editingProductId, 'date' => $this->selectedDate],
+            [
+                'opening_stock' => $this->newOpeningStock,
+                'closing_stock' => $this->newClosingStock
+            ]
+        );
+
+        $this->editingProductId = null;
+        session()->flash('success', 'Data stok berhasil diperbarui.');
     }
 
     public function updatingSearch()
@@ -79,6 +114,7 @@ class InventoryReportView extends Component
             $discrepancy = $closing - $expected;
 
             $reportData[] = (object) [
+                'id' => $product->id,
                 'name' => $product->name,
                 'category' => $product->category->name ?? '-',
                 'opening' => $opening,

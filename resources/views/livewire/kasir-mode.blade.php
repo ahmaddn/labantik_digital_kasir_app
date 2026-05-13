@@ -396,8 +396,29 @@
                             <h4 class="text-base font-black text-gray-800 dark:text-white uppercase tracking-tight line-clamp-1">{{ $p->name }}</h4>
                             <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-2">{{ $p->category ? $p->category->name : 'No Category' }}</p>
                         </div>
-                        <div class="w-36">
-                            <input type="number" wire:model.blur="stockItems.{{ $p->id }}" class="w-full px-6 py-4 bg-white dark:bg-gray-900 border-none rounded-2xl focus:ring-4 focus:ring-primary-blue/10 font-black text-lg text-center shadow-inner text-gray-800 dark:text-white">
+                        <div class="w-36" x-data="{ 
+                            readonly: false, 
+                            timer: null,
+                            handleInput(val) {
+                                if (!val || val === '0') return;
+                                clearTimeout(this.timer);
+                                this.timer = setTimeout(() => {
+                                    this.readonly = true;
+                                }, 2000);
+                            }
+                        }">
+                            <div class="relative group">
+                                <input type="number" 
+                                    wire:model.blur="stockItems.{{ $p->id }}" 
+                                    :readonly="readonly"
+                                    @input="handleInput($event.target.value)"
+                                    :class="readonly ? 'bg-gray-100 dark:bg-gray-800 opacity-60 cursor-not-allowed' : 'bg-white dark:bg-gray-900'"
+                                    class="w-full px-6 py-4 border-none rounded-2xl focus:ring-4 focus:ring-primary-blue/10 font-black text-lg text-center shadow-inner text-gray-800 dark:text-white transition-all">
+                                
+                                <div x-show="readonly" class="absolute -right-2 -top-2 w-6 h-6 bg-primary-blue text-white rounded-full flex items-center justify-center shadow-lg animate-in zoom-in duration-300">
+                                    <svg class="w-3 h-3" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     @endforeach
@@ -430,8 +451,29 @@
                             <h4 class="text-base font-black text-gray-800 dark:text-white uppercase tracking-tight line-clamp-1">{{ $p->name }}</h4>
                             <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-2">{{ $p->category ? $p->category->name : 'No Category' }}</p>
                         </div>
-                        <div class="w-36">
-                            <input type="number" wire:model.blur="stockItems.{{ $p->id }}" class="w-full px-6 py-4 bg-white dark:bg-gray-900 border-none rounded-2xl focus:ring-4 focus:ring-primary-red/10 font-black text-lg text-center shadow-inner text-gray-800 dark:text-white">
+                        <div class="w-36" x-data="{ 
+                            readonly: false, 
+                            timer: null,
+                            handleInput(val) {
+                                if (!val || val === '0') return;
+                                clearTimeout(this.timer);
+                                this.timer = setTimeout(() => {
+                                    this.readonly = true;
+                                }, 2000);
+                            }
+                        }">
+                            <div class="relative group">
+                                <input type="number" 
+                                    wire:model.blur="stockItems.{{ $p->id }}" 
+                                    :readonly="readonly"
+                                    @input="handleInput($event.target.value)"
+                                    :class="readonly ? 'bg-gray-100 dark:bg-gray-800 opacity-60 cursor-not-allowed' : 'bg-white dark:bg-gray-900'"
+                                    class="w-full px-6 py-4 border-none rounded-2xl focus:ring-4 focus:ring-primary-red/10 font-black text-lg text-center shadow-inner text-gray-800 dark:text-white transition-all">
+                                
+                                <div x-show="readonly" class="absolute -right-2 -top-2 w-6 h-6 bg-primary-red text-white rounded-full flex items-center justify-center shadow-lg animate-in zoom-in duration-300">
+                                    <svg class="w-3 h-3" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     @endforeach

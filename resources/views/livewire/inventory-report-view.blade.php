@@ -8,6 +8,12 @@
                 </h1>
                 <p class="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] mt-2">Inventory Audit & Discrepancy Analysis</p>
             </div>
+
+            @if (session()->has('success'))
+                <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 3000)" class="bg-green-500 text-white px-8 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-green-500/20 animate-in fade-in slide-in-from-top-4 duration-500">
+                    {{ session('success') }}
+                </div>
+            @endif
             
             <div class="flex items-center gap-4">
                 <div class="relative">
@@ -103,12 +109,13 @@
                             <th class="px-6 py-6 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] text-center">Terjual</th>
                             <th class="px-6 py-6 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] text-center">Sistem</th>
                             <th class="px-6 py-6 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] text-center">Fisik</th>
-                            <th class="px-10 py-6 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] text-right">Selisih</th>
+                            <th class="px-6 py-6 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] text-right">Selisih</th>
+                            <th class="px-10 py-6 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] text-right">Aksi</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-50 dark:divide-gray-700/50">
                         @forelse($reportData as $row)
-                        <tr class="group hover:bg-gray-50/30 dark:hover:bg-gray-800/30 transition-all">
+                        <tr wire:key="inventory-row-{{ $row->id }}" class="group hover:bg-gray-50/30 dark:hover:bg-gray-800/30 transition-all">
                             <td class="px-10 py-6">
                                 <span class="text-sm font-black text-gray-800 dark:text-white uppercase tracking-tight group-hover:text-primary-blue transition-colors">{{ $row->name }}</span>
                             </td>
@@ -116,7 +123,11 @@
                                 <span class="px-4 py-2 bg-gray-100 dark:bg-gray-900 rounded-xl text-[9px] font-black text-gray-500 uppercase tracking-widest">{{ $row->category }}</span>
                             </td>
                             <td class="px-6 py-6 text-center">
-                                <span class="text-sm font-black text-gray-600 dark:text-gray-400">{{ $row->opening }}</span>
+                                @if($editingProductId == $row->id)
+                                    <input type="number" wire:model="newOpeningStock" class="w-20 px-3 py-2 bg-gray-50 dark:bg-gray-900 border-2 border-primary-blue rounded-xl text-sm font-black text-center focus:ring-0">
+                                @else
+                                    <span class="text-sm font-black text-gray-600 dark:text-gray-400">{{ $row->opening }}</span>
+                                @endif
                             </td>
                             <td class="px-6 py-6 text-center">
                                 <span class="inline-flex items-center justify-center px-3 py-1 bg-blue-50 dark:bg-blue-900/20 text-primary-blue rounded-lg text-xs font-black">
@@ -127,9 +138,13 @@
                                 <span class="text-sm font-black text-gray-600 dark:text-gray-400 italic">{{ $row->expected }}</span>
                             </td>
                             <td class="px-6 py-6 text-center">
-                                <span class="text-sm font-black text-gray-800 dark:text-white">{{ $row->closing }}</span>
+                                @if($editingProductId == $row->id)
+                                    <input type="number" wire:model="newClosingStock" class="w-24 px-3 py-2 bg-gray-50 dark:bg-gray-900 border-2 border-primary-blue rounded-xl text-sm font-black text-center focus:ring-0">
+                                @else
+                                    <span class="text-sm font-black text-gray-800 dark:text-white">{{ $row->closing }}</span>
+                                @endif
                             </td>
-                            <td class="px-10 py-6 text-right">
+                            <td class="px-6 py-6 text-right">
                                 @if($row->discrepancy == 0)
                                     <span class="text-[10px] font-black text-green-500 uppercase tracking-widest">Cocok</span>
                                 @else
@@ -141,6 +156,22 @@
                                             {{ $row->discrepancy < 0 ? 'Hilang/Kurang' : 'Lebih' }}
                                         </span>
                                     </div>
+                                @endif
+                            </td>
+                            <td class="px-10 py-6 text-right">
+                                @if($editingProductId == $row->id)
+                                    <div class="flex items-center justify-end gap-2">
+                                        <button wire:click="updateStock" wire:loading.attr="disabled" class="p-2 bg-green-500 text-white rounded-lg hover:scale-110 transition-all shadow-lg shadow-green-500/20">
+                                            <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                                        </button>
+                                        <button wire:click="cancelEdit" wire:loading.attr="disabled" class="p-2 bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-lg hover:scale-110 transition-all">
+                                            <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                                        </button>
+                                    </div>
+                                @else
+                                    <button wire:click="editStock('{{ $row->id }}', {{ $row->opening }}, {{ $row->closing }})" class="p-3 bg-gray-50 dark:bg-gray-900 text-gray-400 hover:text-primary-blue hover:bg-primary-blue/5 rounded-xl transition-all opacity-0 group-hover:opacity-100">
+                                        <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>
+                                    </button>
                                 @endif
                             </td>
                         </tr>
