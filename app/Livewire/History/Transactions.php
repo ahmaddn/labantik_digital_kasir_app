@@ -125,8 +125,8 @@ class Transactions extends Component
             $query->where('status', $this->filterStatus);
         }
 
-        $transactions = $query->selectRaw('reference, buyer_name, status, transacted_at, SUM(total_price) as total_amount, SUM(quantity) as total_qty, COUNT(*) as unique_items')
-            ->groupBy('reference', 'buyer_name', 'status', 'transacted_at')
+        $transactions = $query->selectRaw('reference, MAX(buyer_name) as buyer_name, MAX(status) as status, MAX(transacted_at) as transacted_at, SUM(total_price) as total_amount, SUM(quantity) as total_qty, COUNT(*) as unique_items')
+            ->groupBy('reference')
             ->orderByDesc('transacted_at')
             ->paginate(15);
 
