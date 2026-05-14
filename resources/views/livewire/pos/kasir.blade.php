@@ -673,12 +673,20 @@ else document.documentElement.classList.remove('dark')"
                     @foreach (\App\Models\Product::where('is_active', true)->orderBy('name')->get() as $p)
                         <div wire:key="opening-stock-{{ $p->id }}" x-show="'{{ strtolower($p->name) }}'.includes(modalSearch.toLowerCase())"
                             class="flex items-center justify-between p-8 bg-gray-50 dark:bg-gray-800/50 rounded-[2.5rem] border-2 border-transparent hover:border-primary-blue/20 transition-all shadow-sm">
-                            <div class="min-w-0">
+                            <div class="min-w-0 flex-1">
                                 <h4
                                     class="text-base font-black text-gray-800 dark:text-white uppercase tracking-tight line-clamp-1">
                                     {{ $p->name }}</h4>
-                                <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-2">
-                                    {{ $p->category ? $p->category->name : 'No Category' }}</p>
+                                <div class="flex items-center gap-3 mt-2">
+                                    <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                                        {{ $p->category ? $p->category->name : 'No Category' }}</p>
+                                    @if(isset($lastClosingStocks[$p->id]))
+                                        <span class="w-1 h-1 rounded-full bg-gray-300 dark:bg-gray-600"></span>
+                                        <span class="text-[9px] font-black text-primary-blue uppercase tracking-widest bg-primary-blue/5 px-3 py-1.5 rounded-xl border border-primary-blue/10">
+                                            Stok Kemarin: {{ $lastClosingStocks[$p->id] }}
+                                        </span>
+                                    @endif
+                                </div>
                             </div>
                             <div class="w-36">
                                 <div class="relative group">

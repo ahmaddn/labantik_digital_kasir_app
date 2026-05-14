@@ -22,6 +22,7 @@ class Kasir extends Component
     public $showOpeningStockModal = false;
     public $showClosingStockModal = false;
     public $stockItems = []; // Array to hold stock input values [product_id => quantity]
+    public $lastClosingStocks = []; // Array to hold yesterday's closing stock [product_id => quantity]
     public $showDetailsModal = false;
     public $detailReference = null;
 
@@ -57,6 +58,8 @@ class Kasir extends Component
         }
 
         $allProducts = Product::where('is_active', true)->get();
+        $this->lastClosingStocks = $lastStocks;
+
         foreach ($allProducts as $p) {
             $entry = StockEntry::where('product_id', $p->id)->where('date', $today)->first();
             if ($entry) {
@@ -87,6 +90,8 @@ class Kasir extends Component
             }
 
             $allProducts = Product::where('is_active', true)->get();
+            $this->lastClosingStocks = $lastStocks;
+            
             foreach ($allProducts as $p) {
                 $this->stockItems[$p->id] = $lastStocks[$p->id] ?? 0;
             }
