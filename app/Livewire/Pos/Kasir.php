@@ -119,7 +119,7 @@ class Kasir extends Component
         $this->showOpeningStockModal = false;
         $this->stockItems = [];
         $this->dispatch('toast', message: 'Stok awal berhasil diperbarui.');
-        $this->dispatch('stock-saved');
+        $this->dispatch('stock-saved', products: $this->getProductsForAlpine());
     }
 
     public function finishSession(): void
@@ -250,11 +250,10 @@ class Kasir extends Component
             });
     }
 
-    public function render()
+    protected function getProductsForAlpine()
     {
         $today = now()->toDateString();
-        
-        $allProducts = Product::with('category')
+        return Product::with('category')
             ->where('is_active', true)
             ->whereHas('stockEntries', function($q) use ($today) {
                 $q->where('date', $today)->where('opening_stock', '>', 0);
@@ -273,6 +272,13 @@ class Kasir extends Component
                     'initial' => substr($p->name, 0, 1),
                 ];
             });
+    }
+
+    public function render()
+    {
+        $today = now()->toDateString();
+        
+        $allProducts = $this->getProductsForAlpine();
 
         $isSessionFinished = DailyRecap::where('date', $today)
             ->where('actual_cash', '>', 0)

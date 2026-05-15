@@ -4,6 +4,7 @@
     selectedCategory: null,
     products: @js($allProductsJson),
     cart: [],
+    loading: false,
     modalSearch: '',
     darkMode: localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches),
     
@@ -83,13 +84,19 @@
     },
 
     checkout() {
+        if (this.loading) return;
+        this.loading = true;
         this.$wire.checkout(this.cart, this.total, this.change, this.buyer_name, this.status, this.note).then(() => {
             this.clearCart();
+            this.loading = false;
+        }).catch(() => {
+            this.loading = false;
         });
     }
 }" x-init="if (darkMode) document.documentElement.classList.add('dark');
 else document.documentElement.classList.remove('dark')"
-    class="flex flex-col lg:flex-row h-screen w-full bg-[#f8fafc] dark:bg-gray-950 overflow-hidden font-outfit relative">
+    class="flex flex-col lg:flex-row h-screen w-full bg-[#f8fafc] dark:bg-gray-950 overflow-hidden font-outfit relative"
+    x-on:stock-saved.window="products = $event.detail.products">
 
     <!-- Global Loading Indicator -->
     <div wire:loading.flex
@@ -572,16 +579,25 @@ else document.documentElement.classList.remove('dark')"
                 <div class="space-y-4 pt-1">
                     <textarea x-model="note" rows="2" placeholder="Catatan transaksi..."
                         class="w-full px-6 py-4 bg-gray-50 dark:bg-gray-800 border-none rounded-[1.5rem] focus:ring-4 focus:ring-primary-blue/10 font-bold text-xs text-gray-800 dark:text-white placeholder:text-gray-300"></textarea>
-                    <button @click="checkout()" :disabled="{{ $isSessionFinished ? 'true' : 'false' }} || cart.length === 0 || (payment_amount < total && status === 'uang_diterima')"
+                    <button @click="checkout()" :disabled="{{ $isSessionFinished ? 'true' : 'false' }} || cart.length === 0 || (payment_amount < total && status === 'uang_diterima') || loading"
                         class="w-full py-6 {{ $isSessionFinished ? 'bg-gray-400' : 'bg-primary-blue' }} text-white rounded-[2rem] shadow-[0_30px_80px_-20px_rgba(59,130,246,0.5)] hover:scale-[1.02] active:scale-95 transition-all font-black italic uppercase text-base tracking-[0.3em] flex items-center justify-center gap-5 group disabled:opacity-30 disabled:scale-100 disabled:shadow-none overflow-hidden relative">
-                        <span class="relative z-10">Proses Pesanan</span>
-                        <svg class="w-5 h-5 group-hover:translate-x-3 transition-transform relative z-10"
-                            xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
-                            fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"
-                            stroke-linejoin="round">
-                            <path d="M5 12h14" />
-                            <path d="m12 5 7 7-7 7" />
-                        </svg>
+                        <span x-show="!loading" class="relative z-10 flex items-center gap-5">
+                            Proses Pesanan
+                            <svg class="w-5 h-5 group-hover:translate-x-3 transition-transform"
+                                xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"
+                                stroke-linejoin="round">
+                                <path d="M5 12h14" />
+                                <path d="m12 5 7 7-7 7" />
+                            </svg>
+                        </span>
+                        <span x-show="loading" x-cloak class="relative z-10 flex items-center gap-3">
+                            <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            Memproses...
+                        </span>
                         <div
                             class="absolute inset-0 bg-white/10 translate-y-full group-hover:translate-y-0 transition-transform duration-500">
                         </div>
@@ -699,9 +715,17 @@ else document.documentElement.classList.remove('dark')"
                 </div>
             </div>
             <div class="p-12 bg-white dark:bg-gray-950 border-t border-gray-100 dark:border-gray-800">
-                <button wire:click="saveOpeningStock"
-                    class="w-full py-7 bg-primary-blue text-white rounded-[2rem] shadow-2xl shadow-blue-500/30 font-black italic uppercase tracking-[0.3em] text-lg hover:-translate-y-2 transition-all">SIMPAN
-                    & MULAI JUALAN</button>
+                <button wire:click="saveOpeningStock" wire:loading.attr="disabled"
+                    class="w-full py-7 bg-primary-blue text-white rounded-[2rem] shadow-2xl shadow-blue-500/30 font-black italic uppercase tracking-[0.3em] text-lg hover:-translate-y-2 transition-all flex items-center justify-center gap-3 disabled:opacity-50">
+                    <span wire:loading.remove wire:target="saveOpeningStock">SIMPAN & MULAI JUALAN</span>
+                    <span wire:loading wire:target="saveOpeningStock" class="flex items-center gap-3">
+                        <svg class="animate-spin h-6 w-6 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        MENYIMPAN...
+                    </span>
+                </button>
             </div>
         </div>
     </div>
@@ -785,9 +809,17 @@ else document.documentElement.classList.remove('dark')"
                 </div>
             </div>
             <div class="p-12 bg-white dark:bg-gray-950 border-t border-gray-100 dark:border-gray-800">
-                <button wire:click="saveClosingStock"
-                    class="w-full py-7 bg-primary-red text-white rounded-[2rem] shadow-2xl shadow-red-500/30 font-black italic uppercase tracking-[0.3em] text-lg hover:-translate-y-2 transition-all">SIMPAN
-                    & TUTUP KASIR</button>
+                <button wire:click="saveClosingStock" wire:loading.attr="disabled"
+                    class="w-full py-7 bg-primary-red text-white rounded-[2rem] shadow-2xl shadow-red-500/30 font-black italic uppercase tracking-[0.3em] text-lg hover:-translate-y-2 transition-all flex items-center justify-center gap-3 disabled:opacity-50">
+                    <span wire:loading.remove wire:target="saveClosingStock">SIMPAN & TUTUP KASIR</span>
+                    <span wire:loading wire:target="saveClosingStock" class="flex items-center gap-3">
+                        <svg class="animate-spin h-6 w-6 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        MEMPROSES...
+                    </span>
+                </button>
             </div>
         </div>
     </div>
