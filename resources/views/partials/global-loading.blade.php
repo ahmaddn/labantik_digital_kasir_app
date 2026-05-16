@@ -1,8 +1,8 @@
-<div wire:loading.delay.longest class="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm transition-all duration-300">
-    <div class="nb-card p-12 bg-white dark:bg-slate-900 flex flex-col items-center gap-8 animate-in zoom-in-95 duration-300">
+<div wire:loading.delay.longest class="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-md transition-all duration-300">
+    <div class="nb-card p-12 bg-white dark:bg-dark-soft flex flex-col items-center gap-8 animate-brutal-bounce">
         <div class="relative w-24 h-24">
             <div class="absolute inset-0 border-[6px] border-black/10 dark:border-white/10 rounded-none"></div>
-            <div class="absolute inset-0 border-[6px] border-primary-blue border-t-transparent rounded-none animate-spin shadow-[4px_4px_0_0_black] dark:shadow-[4px_4px_0_0_white]"></div>
+            <div class="absolute inset-0 border-[6px] border-primary-blue border-t-transparent rounded-none animate-brutal-spin shadow-[4px_4px_0_0_black] dark:shadow-[4px_4px_0_0_white]"></div>
         </div>
         <div class="text-center">
             <h3 class="text-3xl font-black italic uppercase tracking-tighter text-black dark:text-white leading-none">MEMPROSES...</h3>

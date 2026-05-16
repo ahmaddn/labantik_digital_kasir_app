@@ -111,10 +111,17 @@ else document.documentElement.classList.remove('dark')"
 
     <!-- Global Loading Indicator -->
     <div wire:loading.flex
-        class="fixed inset-0 z-[9999] bg-white/10 dark:bg-black/10 backdrop-blur-sm items-center justify-center flex-col gap-6">
-        <div class="nb-card p-10 bg-white dark:bg-dark-soft flex flex-col items-center gap-6">
-            <div class="w-16 h-16 border-[var(--nb-border)] border-black dark:border-white rounded-none animate-spin border-t-primary-blue"></div>
-            <p class="text-black dark:text-white font-black italic uppercase tracking-[0.4em] text-xs">PROCESSING...</p>
+        class="fixed inset-0 z-[9999] bg-white/40 dark:bg-black/60 backdrop-blur-md items-center justify-center flex-col gap-6">
+        <div class="nb-card p-12 bg-white dark:bg-dark-soft flex flex-col items-center gap-8 animate-brutal-bounce">
+            <div class="relative w-24 h-24">
+                <div class="absolute inset-0 border-4 border-black dark:border-white opacity-20"></div>
+                <div class="absolute inset-0 border-4 border-black dark:border-white border-t-primary-blue animate-brutal-spin shadow-[4px_4px_0_0_rgba(0,0,0,1)] dark:shadow-[4px_4px_0_0_rgba(255,255,255,0.2)]"></div>
+                <div class="absolute -top-2 -right-2 w-6 h-6 bg-primary-red border-2 border-black animate-pulse"></div>
+            </div>
+            <div class="text-center">
+                <h3 class="text-2xl font-black italic uppercase tracking-tighter text-black dark:text-white leading-none">MEMPROSES...</h3>
+                <p class="text-[9px] font-black text-gray-400 uppercase tracking-[0.6em] mt-3">SEDANG MENCATAT TRANSAKSI</p>
+            </div>
         </div>
     </div>
 
@@ -308,8 +315,8 @@ else document.documentElement.classList.remove('dark')"
                         <svg class="w-5 h-5 group-hover:translate-x-2 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
                     </span>
                     <span x-show="loading" x-cloak class="flex items-center justify-center gap-3">
-                        <svg class="animate-spin h-5 w-5 text-white" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                        LOADING...
+                        <div class="w-5 h-5 border-2 border-white border-t-transparent animate-brutal-spin"></div>
+                        PROCESSING...
                     </span>
                 </button>
             </div>
@@ -352,11 +359,11 @@ else document.documentElement.classList.remove('dark')"
         <div class="nb-card bg-white dark:bg-dark-soft w-full max-w-5xl max-h-[90vh] flex flex-col overflow-hidden animate-in slide-in-from-bottom-10 duration-500 border-4">
             <div class="p-6 bg-primary-blue text-white border-b-4 border-black flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
-                    <h2 class="text-2xl font-black uppercase italic leading-none">OPENING STOCK</h2>
-                    <p class="text-[9px] font-black uppercase tracking-widest mt-1.5 opacity-80 italic">Verify physical items in store</p>
+                    <h2 class="text-2xl font-black uppercase italic leading-none">STOK AWAL</h2>
+                    <p class="text-[10px] font-black uppercase tracking-widest mt-1.5 opacity-80 italic">Verifikasi barang fisik di toko</p>
                 </div>
                 <div class="flex items-center gap-3 w-full md:w-auto">
-                    <input type="text" x-model="modalSearch" placeholder="SEARCH..." class="nb-input bg-white text-black p-2 text-[10px] flex-1 md:w-48 shadow-none border-2">
+                    <input type="text" x-model="modalSearch" placeholder="CARI BARANG..." class="nb-input bg-white text-black p-2 text-[10px] flex-1 md:w-48 shadow-none border-2">
                     <button @click="show = false" class="nb-btn bg-white text-black p-2 shadow-none border-2">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M6 18L18 6M6 6l12 12"/></svg>
                     </button>
@@ -368,22 +375,22 @@ else document.documentElement.classList.remove('dark')"
                         <div x-show="'{{ strtolower($p->name) }}'.includes(modalSearch.toLowerCase())"
                             class="nb-card p-5 flex items-center justify-between bg-white dark:bg-dark-soft shadow-none border-2">
                             <div class="flex-1">
-                                <h4 class="font-black uppercase text-xs dark:text-white">{{ $p->name }}</h4>
+                                <h4 class="font-black uppercase text-sm dark:text-white">{{ $p->name }}</h4>
                                 <div class="flex items-center gap-2 mt-2">
-                                    <span class="text-[8px] font-black bg-black text-white px-2 py-0.5 uppercase tracking-widest border border-white">{{ $p->category->name ?? '' }}</span>
+                                    <span class="text-[9px] font-black bg-black text-white px-2 py-0.5 uppercase tracking-widest border border-white">{{ $p->category->name ?? '' }}</span>
                                     @if(isset($lastClosingStocks[$p->id]))
-                                        <span class="text-[8px] font-black border-2 border-black dark:border-white px-2 py-0.5 uppercase tracking-widest text-primary-blue">YESTERDAY: {{ $lastClosingStocks[$p->id] }}</span>
+                                        <span class="text-[9px] font-black border-2 border-primary-blue dark:border-primary-blue-light px-2 py-0.5 uppercase tracking-widest text-primary-blue dark:text-primary-blue-light">KEMARIN: {{ $lastClosingStocks[$p->id] }}</span>
                                     @endif
                                 </div>
                             </div>
                             <input type="number" wire:model.blur="stockItems.{{ $p->id }}"
-                                class="nb-input w-24 text-center text-base p-2 shadow-none border-2 bg-white dark:bg-black">
+                                class="nb-input w-24 text-center text-lg p-2 shadow-none border-2 bg-white dark:bg-black">
                         </div>
                     @endforeach
                 </div>
             </div>
             <div class="p-6 bg-white dark:bg-dark-soft border-t-4 border-black">
-                <button wire:click="saveOpeningStock" class="nb-btn w-full bg-primary-blue text-white text-lg py-5">SAVE & START SELLING</button>
+                <button wire:click="saveOpeningStock" class="nb-btn w-full bg-primary-blue text-white text-lg py-5">SIMPAN & MULAI JUALAN</button>
             </div>
         </div>
     </div>
@@ -397,11 +404,11 @@ else document.documentElement.classList.remove('dark')"
         <div class="nb-card bg-white dark:bg-dark-soft w-full max-w-5xl max-h-[90vh] flex flex-col overflow-hidden border-4">
             <div class="p-6 bg-primary-red text-white border-b-4 border-black flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
-                    <h2 class="text-2xl font-black uppercase italic leading-none text-white">DAILY RECAP</h2>
-                    <p class="text-[9px] font-black uppercase tracking-widest mt-1.5 opacity-80 italic">Input remaining items in store</p>
+                    <h2 class="text-2xl font-black uppercase italic leading-none text-white">REKAP HARIAN</h2>
+                    <p class="text-[10px] font-black uppercase tracking-widest mt-1.5 opacity-80 italic">Input sisa barang di toko hari ini</p>
                 </div>
                 <div class="flex items-center gap-3 w-full md:w-auto">
-                    <input type="text" x-model="modalSearch" placeholder="SEARCH..." class="nb-input bg-white text-black p-2 text-[10px] flex-1 md:w-48 shadow-none border-2">
+                    <input type="text" x-model="modalSearch" placeholder="CARI BARANG..." class="nb-input bg-white text-black p-2 text-[10px] flex-1 md:w-48 shadow-none border-2">
                     <button @click="show = false" class="nb-btn bg-white text-black p-2 shadow-none border-2">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M6 18L18 6M6 6l12 12"/></svg>
                     </button>
@@ -412,22 +419,31 @@ else document.documentElement.classList.remove('dark')"
                     @foreach ($this->stockComparison as $item)
                         <div x-show="'{{ strtolower($item['name']) }}'.includes(modalSearch.toLowerCase())"
                             class="nb-card p-5 flex flex-col bg-white dark:bg-dark-soft shadow-none border-2">
-                            <h4 class="font-black uppercase text-xs dark:text-white mb-3">{{ $item['name'] }}</h4>
-                            <div class="flex items-center gap-2 mb-4">
-                                <span class="text-[7px] font-black border-2 border-black dark:border-white px-1.5 py-0.5 uppercase tracking-widest">START: {{ $item['opening'] }}</span>
-                                <span class="text-[7px] font-black bg-primary-blue text-white px-1.5 py-0.5 uppercase tracking-widest">SOLD: {{ $item['sold'] }}</span>
-                                <span class="text-[7px] font-black bg-green-500 text-white px-1.5 py-0.5 uppercase tracking-widest">EXP: {{ $item['expected'] }}</span>
+                            <h4 class="font-black uppercase text-sm dark:text-white mb-4">{{ $item['name'] }}</h4>
+                            <div class="flex flex-wrap items-center gap-3 mb-5">
+                                <div class="flex flex-col">
+                                    <span class="text-[9px] font-black uppercase text-gray-400 mb-1">AWAL</span>
+                                    <span class="text-xs font-black border-2 border-black dark:border-white px-3 py-1 uppercase tracking-widest dark:text-white bg-gray-100 dark:bg-slate-800">{{ $item['opening'] }}</span>
+                                </div>
+                                <div class="flex flex-col">
+                                    <span class="text-[9px] font-black uppercase text-primary-blue mb-1">LAKU</span>
+                                    <span class="text-xs font-black bg-primary-blue text-white px-3 py-1 uppercase tracking-widest">{{ $item['sold'] }}</span>
+                                </div>
+                                <div class="flex flex-col">
+                                    <span class="text-[9px] font-black uppercase text-green-600 mb-1">SISA</span>
+                                    <span class="text-xs font-black bg-green-500 text-white px-3 py-1 uppercase tracking-widest">{{ $item['expected'] }}</span>
+                                </div>
                             </div>
                             <div class="space-y-1">
-                                <label class="text-[8px] font-black uppercase tracking-widest dark:text-gray-400">ACTUAL STOCK</label>
-                                <input type="number" wire:model.blur="stockItems.{{ $item['id'] }}" class="nb-input w-full text-center text-lg p-2 shadow-none border-2 bg-white dark:bg-black">
+                                <label class="text-[10px] font-black uppercase tracking-widest dark:text-gray-400">STOK FISIK SEKARANG</label>
+                                <input type="number" wire:model.blur="stockItems.{{ $item['id'] }}" class="nb-input w-full text-center text-2xl p-3 shadow-none border-2 bg-white dark:bg-black">
                             </div>
                         </div>
                     @endforeach
                 </div>
             </div>
             <div class="p-6 bg-white dark:bg-dark-soft border-t-4 border-black">
-                <button wire:click="saveClosingStock" class="nb-btn w-full bg-primary-red text-white text-lg py-5">FINISH DAILY SESSION</button>
+                <button wire:click="saveClosingStock" class="nb-btn w-full bg-primary-red text-white text-lg py-5">SELESAIKAN SESI HARI INI</button>
             </div>
         </div>
     </div>
@@ -476,15 +492,30 @@ else document.documentElement.classList.remove('dark')"
     </div>
 
     <!-- Success Overlay -->
-    <div x-data="{ show: false }" x-on:transaction-complete.window="show = true; setTimeout(() => show = false, 1500)"
-        x-show="show" x-cloak
-        class="fixed inset-0 z-[700] flex items-center justify-center bg-white/20 dark:bg-black/40 backdrop-blur-md">
-        <div class="nb-card bg-white p-12 text-center animate-in zoom-in-125 duration-300 border-8">
-            <div class="w-32 h-32 bg-green-500 border-4 border-black flex items-center justify-center mx-auto mb-8 shadow-[var(--nb-shadow)]">
-                <svg class="w-20 h-20 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="6" d="M5 13l4 4L19 7"/></svg>
+    <div x-data="{ show: false }" x-on:transaction-complete.window="show = true; setTimeout(() => show = false, 2500)"
+        x-show="show" 
+        x-transition:enter="transition ease-out duration-300"
+        x-transition:enter-start="opacity-0"
+        x-transition:enter-end="opacity-100"
+        x-transition:leave="transition ease-in duration-300"
+        x-transition:leave-start="opacity-100"
+        x-transition:leave-end="opacity-0"
+        x-cloak
+        class="fixed inset-0 z-[700] flex items-center justify-center bg-black/60 backdrop-blur-xl">
+        <div class="nb-card bg-white dark:bg-dark-soft p-16 text-center animate-success-pop border-[10px] border-black dark:border-white shadow-[20px_20px_0_0_rgba(0,0,0,1)] dark:shadow-[20px_20px_0_0_rgba(255,255,255,0.1)]">
+            <div class="w-32 h-32 bg-green-500 border-4 border-black dark:border-white flex items-center justify-center mx-auto mb-10 shadow-[8px_8px_0_0_rgba(0,0,0,1)]">
+                <svg class="w-20 h-20 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path class="animate-success-check" stroke-linecap="round" stroke-linejoin="round" stroke-width="6" d="M5 13l4 4L19 7"/>
+                </svg>
             </div>
-            <h3 class="text-5xl font-black uppercase italic leading-none">SUCCESS!</h3>
-            <p class="text-lg font-black uppercase tracking-[0.4em] mt-5 italic">TRANSACTION RECORDED</p>
+            <h3 class="text-6xl font-black uppercase italic leading-none text-black dark:text-white">BERHASIL!</h3>
+            <p class="text-xl font-black uppercase tracking-[0.5em] mt-6 italic text-primary-blue dark:text-primary-blue-light">TRANSAKSI TERSIMPAN</p>
+            
+            <div class="mt-10 flex items-center justify-center gap-2">
+                <div class="h-2 w-24 bg-gray-100 dark:bg-slate-800 border-2 border-black dark:border-white overflow-hidden">
+                    <div class="h-full bg-primary-blue animate-[progress-brutal_2s_ease-in-out_forwards]"></div>
+                </div>
+            </div>
         </div>
     </div>
 
