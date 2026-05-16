@@ -149,11 +149,11 @@
                         <div class="col-span-1 flex justify-center">
                             <input type="checkbox" wire:model.live="selectAll" class="w-4 h-4 rounded border-gray-300 text-primary-blue focus:ring-primary-blue dark:bg-gray-900 dark:border-gray-700">
                         </div>
-                        <div class="col-span-4 px-4">Produk</div>
+                        <div class="col-span-3 px-4">Produk</div>
                         <div class="col-span-2 px-4 text-center">Kategori</div>
                         <div class="col-span-1 px-4 text-center">Supplier</div>
                         <div class="col-span-2 px-4 text-center">Harga</div>
-                        <div class="col-span-1 px-4 text-center">Status</div>
+                        <div class="col-span-2 px-4 text-center">Status</div>
                         <div class="col-span-1 px-4 text-right">Opsi</div>
                     </div>
 
@@ -161,14 +161,14 @@
                     <div class="space-y-4">
                         @forelse($products as $product)
                         <div class="group transition-all duration-300">
-                            <div class="grid grid-cols-12 items-center bg-white dark:bg-gray-800/50 p-4 rounded-[2.5rem] border border-transparent group-hover:border-primary-blue/20 group-hover:shadow-xl group-hover:shadow-blue-900/5 transition-all {{ in_array($product->id, $selectedProducts) ? 'border-primary-blue/30 bg-primary-blue/5' : '' }}">
+                            <div class="grid grid-cols-12 items-center p-4 rounded-[2.5rem] border-2 transition-all duration-500 {{ $highlight == $product->id ? 'bg-amber-400/10 border-amber-400 animate-highlight-breath z-10 relative' : 'bg-white dark:bg-gray-800/50 border-transparent group-hover:border-primary-blue/20' }} {{ in_array($product->id, $selectedProducts) ? 'border-primary-blue/30 bg-primary-blue/5' : '' }}">
                                 <!-- Checkbox -->
                                 <div class="col-span-1 flex justify-center">
                                     <input type="checkbox" wire:model.live="selectedProducts" value="{{ $product->id }}" class="w-5 h-5 rounded-lg border-gray-200 text-primary-blue focus:ring-primary-blue dark:bg-gray-900 dark:border-gray-700">
                                 </div>
  
                                 <!-- Product Info -->
-                                <div class="col-span-4 px-4 min-w-0">
+                                <div class="col-span-3 px-4 min-w-0">
                                     <div class="text-base font-black text-gray-800 dark:text-white uppercase tracking-tight italic truncate">{{ $product->name }}</div>
                                     <div class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mt-1">ID: #{{ str_pad($product->id, 4, '0', STR_PAD_LEFT) }}</div>
                                 </div>
@@ -211,14 +211,14 @@
                                 </div>
  
                                 <!-- Status -->
-                                <div class="col-span-1 px-4">
+                                <div class="col-span-2 px-4">
                                     @if($product->is_active)
-                                        <span class="flex items-center justify-center text-[9px] font-black text-green-500 uppercase tracking-widest bg-green-50 dark:bg-green-500/10 py-1.5 rounded-xl border border-green-100 dark:border-green-500/20">
+                                        <span class="w-fit mx-auto flex items-center justify-center text-[9px] font-black text-green-500 uppercase tracking-widest bg-green-50 dark:bg-green-500/10 py-1.5 px-4 rounded-xl border border-green-100 dark:border-green-500/20">
                                             <span class="w-1.5 h-1.5 bg-green-500 rounded-full mr-2 animate-pulse"></span>
                                             Aktif
                                         </span>
                                     @else
-                                        <span class="flex items-center justify-center text-[9px] font-black text-gray-400 uppercase tracking-widest bg-gray-50 dark:bg-gray-900 py-1.5 rounded-xl border border-gray-100 dark:border-gray-800">
+                                        <span class="w-fit mx-auto flex items-center justify-center text-[9px] font-black text-gray-400 uppercase tracking-widest bg-gray-50 dark:bg-gray-900 py-1.5 px-4 rounded-xl border border-gray-100 dark:border-gray-800">
                                             <span class="w-1.5 h-1.5 bg-gray-400 rounded-full mr-2"></span>
                                             Nonaktif
                                         </span>

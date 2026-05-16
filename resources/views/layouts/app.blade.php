@@ -49,6 +49,7 @@
     }
 }" x-init="if (darkMode) document.documentElement.classList.add('dark'); else document.documentElement.classList.remove('dark')"
     class="bg-bone-white dark:bg-dark-soft text-slate-900 dark:text-bone-white antialiased transition-colors duration-300">
+    @livewire('global-search')
     <div class="flex h-screen overflow-hidden">
         
         @include('partials.layout.sidebar')

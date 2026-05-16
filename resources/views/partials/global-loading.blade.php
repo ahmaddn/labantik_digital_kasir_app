@@ -1,12 +1,12 @@
-<div wire:loading.delay.longest class="fixed inset-0 z-[9999] flex items-center justify-center bg-gray-900/40 backdrop-blur-[2px] transition-all duration-300">
-    <div class="flex flex-col items-center gap-6 p-10 bg-white dark:bg-gray-900 rounded-[3rem] shadow-[0_40px_100px_-20px_rgba(0,0,0,0.3)] border-t-4 border-primary-blue animate-in zoom-in duration-300">
-        <div class="relative w-20 h-20">
-            <div class="absolute inset-0 border-4 border-gray-100 dark:border-gray-800 rounded-full"></div>
-            <div class="absolute inset-0 border-4 border-primary-blue border-t-transparent rounded-full animate-spin"></div>
+<div wire:loading.delay.longest class="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm transition-all duration-300">
+    <div class="nb-card p-12 bg-white dark:bg-slate-900 flex flex-col items-center gap-8 animate-in zoom-in-95 duration-300">
+        <div class="relative w-24 h-24">
+            <div class="absolute inset-0 border-[6px] border-black/10 dark:border-white/10 rounded-none"></div>
+            <div class="absolute inset-0 border-[6px] border-primary-blue border-t-transparent rounded-none animate-spin shadow-[4px_4px_0_0_black] dark:shadow-[4px_4px_0_0_white]"></div>
         </div>
         <div class="text-center">
-            <h3 class="text-xl font-black italic uppercase tracking-tighter text-gray-800 dark:text-white">Memproses...</h3>
-            <p class="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] mt-2">Mohon Tunggu Sebentar</p>
+            <h3 class="text-3xl font-black italic uppercase tracking-tighter text-black dark:text-white leading-none">MEMPROSES...</h3>
+            <p class="text-[10px] font-black text-primary-red dark:text-primary-blue uppercase tracking-[0.5em] mt-4">JANGAN TUTUP HALAMAN</p>
         </div>
     </div>
 </div>

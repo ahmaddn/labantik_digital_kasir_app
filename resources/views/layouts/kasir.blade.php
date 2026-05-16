@@ -24,8 +24,10 @@
             }
         </script>
     </head>
-    <body class="h-full overflow-hidden bg-bone-white dark:bg-dark-soft">
-        {{ $slot }}
+    <body class="h-full overflow-hidden antialiased bg-[#e0e0e0] dark:bg-black">
+        <div class="h-full w-full">
+            {{ $slot }}
+        </div>
         @include('partials.toasts')
         @include('partials.global-loading')
         @livewireScripts

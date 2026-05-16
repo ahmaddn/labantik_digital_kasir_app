@@ -80,7 +80,7 @@
                         </thead>
                         <tbody class="divide-y divide-gray-50 dark:divide-gray-700">
                             @forelse($suppliers as $supplier)
-                            <tr class="hover:bg-gray-50 dark:hover:bg-gray-900/30 transition-colors group">
+                            <tr class="transition-all duration-500 group {{ $highlight == $supplier->id ? 'bg-amber-400/10 border-2 border-amber-400 animate-highlight-breath z-10 relative' : 'hover:bg-gray-50 dark:hover:bg-gray-900/30' }}">
                                 <td class="px-10 py-8">
                                     <div class="text-base font-black text-gray-800 dark:text-white uppercase tracking-tight italic">{{ $supplier->name }}</div>
                                     <div class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mt-1">{{ $supplier->address ?: 'Tidak ada alamat' }}</div>

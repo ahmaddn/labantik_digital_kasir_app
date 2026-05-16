@@ -3,23 +3,63 @@
 @variant dark (&:where(.dark, .dark *));
 
 @theme {
-    --color-primary-blue: #1e40af;
-    --color-primary-blue-light: #3b82f6;
-    --color-primary-red: #dc2626;
-    --color-primary-yellow: #fef3c7;
-    --color-accent-yellow: #fbbf24;
-    --color-bone-white: #f8fafc;
-    --color-dark-bg: #0f172a;
+    --color-primary-blue: #2563eb;
+    --color-primary-blue-dark: #1e3a8a;
+    --color-primary-red: #ef4444;
+    --color-primary-red-dark: #991b1b;
+    --color-primary-yellow: #facc15; /* Sparing usage */
+    --color-accent-yellow: #fde047;
+    --color-bone-white: #ffffff;
+    --color-dark-bg: #020617; /* Deep Slate Blue */
     --color-dark-soft: #1e293b;
+    --color-neutral-bg: #f8fafc;
+    --color-dark-neutral: #0f172a;
+    
+    /* Neo-brutalism specific */
+    --nb-border: 3px;
+    --nb-shadow: 6px 6px 0px 0px rgba(0, 0, 0, 1);
+    --nb-shadow-sm: 3px 3px 0px 0px rgba(0, 0, 0, 1);
+    --nb-shadow-hover: 10px 10px 0px 0px rgba(0, 0, 0, 1);
+    --nb-shadow-active: 0px 0px 0px 0px rgba(0, 0, 0, 1);
+    
+    --font-outfit: "Outfit", sans-serif;
 }
 
 @layer base {
     body {
-        @apply bg-bone-white text-slate-900;
+        @apply bg-[#e0e0e0] text-black font-outfit;
     }
 }
 
 @layer components {
+    .nb-card {
+        @apply bg-white border-[var(--nb-border)] border-black shadow-[var(--nb-shadow)] transition-all;
+    }
+    
+    .nb-card-hover {
+        @apply hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[var(--nb-shadow-hover)] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none;
+    }
+
+    .nb-btn {
+        @apply border-[var(--nb-border)] border-black shadow-[var(--nb-shadow-sm)] font-black uppercase tracking-widest px-6 py-3 transition-all active:translate-x-0.5 active:translate-y-0.5 active:shadow-none;
+    }
+
+    .nb-btn-blue {
+        @apply bg-primary-blue text-white hover:bg-primary-blue-dark;
+    }
+
+    .nb-btn-red {
+        @apply bg-primary-red text-white hover:bg-primary-red-dark;
+    }
+
+    .nb-input {
+        @apply border-[var(--nb-border)] border-black p-4 focus:ring-4 focus:ring-black/5 focus:outline-none font-bold text-black bg-white shadow-[var(--nb-shadow-sm)];
+    }
+
+    .nb-card-flat {
+        @apply bg-white border-[var(--nb-border)] border-black;
+    }
+
     .no-scrollbar::-webkit-scrollbar {
         display: none;
     }
@@ -28,11 +68,29 @@
         scrollbar-width: none;
     }
 
-    .btn-primary-blue {
-        @apply bg-primary-blue text-white hover:bg-blue-900 transition-all active:scale-95;
+    /* Dark Mode Neo-brutalism Refined (Less Crowded) */
+    .dark .nb-card {
+        @apply bg-slate-950 border-slate-700 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)];
     }
-    
-    .btn-primary-red {
-        @apply bg-primary-red text-white hover:bg-red-700 transition-all active:scale-95;
+    .dark .nb-card-hover:hover {
+        @apply border-white shadow-[6px_6px_0px_0px_var(--color-primary-blue)];
+    }
+    .dark .nb-card-flat {
+        @apply bg-slate-950 border-slate-700;
+    }
+    .dark .nb-btn {
+        @apply border-slate-700 shadow-[2px_2px_0px_0px_black] text-slate-300;
+    }
+    .dark .nb-btn:hover {
+        @apply border-white shadow-[4px_4px_0px_0px_white] text-white;
+    }
+    .dark .nb-btn-blue {
+        @apply bg-primary-blue/20 text-primary-blue border-primary-blue/50 hover:bg-primary-blue hover:text-white hover:border-white;
+    }
+    .dark .nb-input {
+        @apply border-slate-700 bg-slate-900 text-white shadow-none focus:border-primary-blue focus:ring-0;
+    }
+    .dark .nb-input::placeholder {
+        @apply text-slate-600;
     }
 }

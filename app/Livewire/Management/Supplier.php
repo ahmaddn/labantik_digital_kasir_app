@@ -9,6 +9,9 @@ use Livewire\WithPagination;
 class Supplier extends Component
 {
     use WithPagination;
+    
+    #[Livewire\Attributes\Url]
+    public $highlight = '';
 
     public string $name = '';
     public string $contact = '';
@@ -67,10 +70,16 @@ class Supplier extends Component
 
     public function render()
     {
+        $query = SupplierModel::query();
+        
+        if ($this->highlight && !$this->search) {
+            $query->where('id', $this->highlight);
+        } elseif ($this->search) {
+            $query->where('name', 'like', '%' . $this->search . '%');
+        }
+
         return view('livewire.management.supplier', [
-            'suppliers' => SupplierModel::where('name', 'like', '%' . $this->search . '%')
-                ->orderBy('name')
-                ->paginate(10)
+            'suppliers' => $query->orderBy('name')->paginate(10)
         ])->layout('layouts.app', ['title' => 'Manajemen Supplier']);
     }
 }

@@ -40,7 +40,7 @@
             <div class="space-y-4">
                 @forelse($transactions as $tx)
                 <div class="group transition-all duration-300">
-                    <div class="grid grid-cols-12 items-center bg-white dark:bg-gray-800/50 p-6 rounded-[2.5rem] border border-transparent group-hover:border-primary-blue/20 group-hover:shadow-xl group-hover:shadow-blue-900/5 transition-all">
+                    <div class="grid grid-cols-12 items-center p-6 rounded-[2.5rem] border-2 transition-all duration-500 {{ $highlight == $tx->reference ? 'bg-amber-400/10 border-amber-400 animate-highlight-breath z-10 relative' : 'bg-white dark:bg-gray-800/50 border-transparent group-hover:border-primary-blue/20' }}">
                         <!-- Waktu -->
                         <div class="col-span-2 px-4">
                             <div class="text-sm font-black text-gray-800 dark:text-white uppercase tracking-tight">{{ \Carbon\Carbon::parse($tx->transacted_at)->format('d M Y') }}</div>

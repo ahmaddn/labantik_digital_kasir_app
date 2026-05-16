@@ -1,11 +1,22 @@
 <!-- Global Admin Top Navbar -->
 <header class="sticky top-0 z-40 w-full bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-100 dark:border-gray-800 px-8 py-4 flex items-center justify-between shadow-sm">
-    <div class="flex items-center gap-4">
+    <div class="flex items-center gap-4 flex-1">
         <!-- Sidebar Toggle (Desktop) -->
         <button @click="toggleSidebar" class="hidden md:flex p-3 bg-gray-50 dark:bg-gray-800 text-gray-400 rounded-xl hover:text-primary-blue transition-all">
             <svg x-show="sidebarOpen" class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
             <svg x-show="!sidebarOpen" class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
         </button>
+
+        <!-- Global Search Trigger -->
+        <button @click="console.log('Dispatching open-global-search'); $dispatch('open-global-search')" class="hidden md:flex items-center gap-3 px-4 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl text-gray-400 hover:bg-white dark:hover:bg-gray-700 hover:border-primary-blue/30 transition-all group flex-1 max-w-md">
+            <svg class="w-4 h-4 group-hover:text-primary-blue" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+            <span class="text-sm font-medium">Cari apa saja...</span>
+            <div class="ml-auto flex items-center gap-1">
+                <kbd class="px-1.5 py-0.5 text-[10px] font-black bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-600 rounded-md shadow-sm">Ctrl</kbd>
+                <kbd class="px-1.5 py-0.5 text-[10px] font-black bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-600 rounded-md shadow-sm">K</kbd>
+            </div>
+        </button>
+
         <!-- Page Context (Mobile Branding) -->
         <div class="md:hidden flex items-center gap-3">
             <div class="w-10 h-10 bg-primary-blue rounded-xl flex items-center justify-center text-white font-black italic shadow-lg">LA</div>

@@ -13,6 +13,9 @@ use Carbon\Carbon;
 class Product extends Component
 {
     use WithPagination;
+    
+    #[\Livewire\Attributes\Url]
+    public $highlight = '';
 
     // Form produk
     public string $name = '';
@@ -264,7 +267,9 @@ class Product extends Component
     {
         $query = ProductModel::with(['category', 'supplier'])->orderBy('name');
         
-        if ($this->filterCategory) {
+        if ($this->highlight && !$this->search) {
+            $query->where('id', $this->highlight);
+        } elseif ($this->filterCategory) {
             $query->where('category_id', $this->filterCategory);
         }
 

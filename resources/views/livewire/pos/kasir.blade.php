@@ -83,6 +83,17 @@
         }
     },
 
+    getCategoryColor(name) {
+        const colors = {
+            'SNACK': 'bg-primary-yellow text-black border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]',
+            'MINUMAN': 'bg-primary-blue text-white border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]',
+            'MAKANAN': 'bg-primary-red text-white border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]',
+            'ESKRIM': 'bg-purple-500 text-white border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]',
+            'DEFAULT': 'bg-white text-black border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]'
+        };
+        return colors[name.toUpperCase()] || colors['DEFAULT'];
+    },
+
     checkout() {
         if (this.loading) return;
         this.loading = true;
@@ -95,272 +106,102 @@
     }
 }" x-init="if (darkMode) document.documentElement.classList.add('dark');
 else document.documentElement.classList.remove('dark')"
-    class="flex flex-col lg:flex-row h-screen w-full bg-[#f8fafc] dark:bg-gray-950 overflow-hidden font-outfit relative"
+    class="flex flex-col lg:flex-row h-screen w-full bg-slate-50 dark:bg-dark-bg overflow-hidden font-outfit relative"
     x-on:stock-saved.window="products = $event.detail.products">
 
     <!-- Global Loading Indicator -->
     <div wire:loading.flex
-        class="fixed inset-0 z-[9999] bg-gray-950/60 backdrop-blur-[2px] items-center justify-center flex-col gap-6 transition-all animate-in fade-in duration-300">
-        <div class="relative">
-            <div
-                class="w-20 h-20 border-[6px] border-primary-blue/20 rounded-full animate-spin border-t-primary-blue shadow-2xl shadow-blue-500/20">
-            </div>
-            <div class="absolute inset-0 flex items-center justify-center">
-                <div class="w-10 h-10 bg-primary-blue rounded-xl animate-pulse"></div>
-            </div>
-        </div>
-        <div class="flex flex-col items-center">
-            <p class="text-white font-black italic uppercase tracking-[0.4em] text-sm animate-pulse">Processing</p>
-            <p class="text-blue-400 text-[10px] font-black uppercase tracking-widest mt-1 opacity-60">LABANTIK POS
-                SYSTEM</p>
+        class="fixed inset-0 z-[9999] bg-white/10 dark:bg-black/10 backdrop-blur-sm items-center justify-center flex-col gap-6">
+        <div class="nb-card p-10 bg-white dark:bg-dark-soft flex flex-col items-center gap-6">
+            <div class="w-16 h-16 border-[var(--nb-border)] border-black dark:border-white rounded-none animate-spin border-t-primary-blue"></div>
+            <p class="text-black dark:text-white font-black italic uppercase tracking-[0.4em] text-xs">PROCESSING...</p>
         </div>
     </div>
-    <style>
-        /* Custom Global Scrollbar */
-        * {
-            scrollbar-width: thin;
-            scrollbar-color: #3b82f6 transparent;
-        }
 
-        ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: transparent;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: #3b82f6;
-            /* primary-blue */
-            border-radius: 20px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: #2563eb;
-        }
-
-        .dark ::-webkit-scrollbar-thumb {
-            background: #3b82f6;
-        }
-
-        .scrollbar-hide::-webkit-scrollbar {
-            display: none;
-        }
-
-        [x-cloak] { display: none !important; }
-    </style>
-    <!-- 1. Main Content Area (Search + Products) -->
-    <div class="flex-1 flex flex-col min-w-0 bg-gray-50/50 dark:bg-gray-950/50 z-10 overflow-hidden">
+    <!-- 1. Main Content Area -->
+    <div class="flex-1 flex flex-col min-w-0 z-10 overflow-hidden lg:border-r-[var(--nb-border)] border-black dark:border-slate-800">
 
         <!-- Header Section -->
-        <div
-            class="px-6 lg:px-10 py-6 lg:py-8 bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 z-20 shadow-sm">
-            <div class="flex flex-col md:flex-row items-center justify-between gap-6 lg:gap-10">
-                <div class="flex items-center justify-between w-full md:w-auto gap-6">
-                    <div class="flex items-center gap-4 lg:gap-6">
-                        <a href="{{ route('dashboard') }}"
-                            class="w-12 h-12 lg:w-14 lg:h-14 bg-white rounded-[1.2rem] lg:rounded-[1.5rem] flex items-center justify-center shadow-xl shadow-blue-500/10 hover:scale-110 hover:rotate-3 transition-all p-2 overflow-hidden border border-gray-100 dark:border-gray-800">
-                            <img src="{{ asset('favicon.png') }}" class="w-full h-full object-contain">
-                        </a>
-                        <div class="h-10 lg:h-12 w-[1px] bg-gray-100 dark:bg-gray-800"></div>
-                        <div x-data="{
-                            currentTime: '',
-                            updateTime() {
-                                const now = new Date();
-                                this.currentTime = now.toLocaleTimeString('id-ID', { hour12: false });
-                            }
-                        }" x-init="updateTime();
-                        setInterval(() => updateTime(), 1000)">
-                            <h1
-                                class="text-xl lg:text-2xl font-black italic uppercase tracking-tighter text-gray-800 dark:text-white leading-tight">
-                                LABANTIK POS</h1>
-                            <div class="flex items-center gap-2">
-                                <p
-                                    class="text-[9px] lg:text-[10px] font-black text-primary-blue uppercase tracking-[0.2em]">
-                                    {{ now()->translatedFormat('d F Y') }}</p>
-                                <span class="w-1 h-1 rounded-full bg-gray-300 dark:bg-gray-700"></span>
-                                <p x-text="currentTime"
-                                    class="text-[9px] lg:text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.2em]">
-                                </p>
-                            </div>
+        <div class="px-6 lg:px-10 py-5 bg-primary-blue dark:bg-slate-900 border-b-[var(--nb-border)] border-black dark:border-slate-800 shadow-[0_4px_0_0_rgba(0,0,0,1)] dark:shadow-[0_4px_0_0_rgba(0,0,0,0.5)]">
+            <div class="flex flex-col md:flex-row items-center justify-between gap-6">
+                <div class="flex items-center gap-6">
+                    <a href="{{ route('dashboard') }}" class="nb-card-flat p-2 w-14 h-14 bg-white flex items-center justify-center hover:scale-110 transition-transform">
+                        <img src="{{ asset('favicon.png') }}" class="w-full h-full object-contain">
+                    </a>
+                    <div>
+                        <h1 class="text-xl lg:text-2xl font-black uppercase tracking-tighter text-white leading-none">LABANTIK POS</h1>
+                        <div class="flex items-center gap-2 mt-1.5">
+                            <span class="text-[9px] font-black bg-black text-white px-2 py-0.5 uppercase tracking-widest border border-white">{{ now()->translatedFormat('d F Y') }}</span>
+                            <span x-data="{ time: '' }" x-init="setInterval(() => time = new Date().toLocaleTimeString('id-ID', { hour12: false }), 1000)" x-text="time" class="text-[9px] font-black bg-white text-black px-2 py-0.5 uppercase tracking-widest border border-black"></span>
                         </div>
                     </div>
-
-                    <!-- Mobile Cart Toggle -->
-                    <button @click="showCart = true"
-                        class="lg:hidden p-4 bg-primary-blue text-white rounded-2xl shadow-xl relative">
-                        <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
-                            stroke-linecap="round" stroke-linejoin="round">
-                            <circle cx="8" cy="21" r="1" />
-                            <circle cx="19" cy="21" r="1" />
-                            <path
-                                d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.56-7.43H5.12" />
-                        </svg>
-                        <span x-show="cart.length > 0"
-                            class="absolute -top-1 -right-1 w-5 h-5 bg-primary-red text-[10px] font-black rounded-full flex items-center justify-center border-2 border-white dark:border-gray-900" x-text="cart.length"></span>
-                    </button>
                 </div>
 
-                <div class="flex-1 w-full max-w-2xl relative group">
-                    <div class="absolute inset-y-0 left-0 pl-7 flex items-center pointer-events-none">
-                        <svg class="w-5 h-5 text-gray-400 group-focus-within:text-primary-blue transition-colors"
-                            xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
-                            fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"
-                            stroke-linejoin="round">
-                            <circle cx="11" cy="11" r="8" />
-                            <path d="m21 21-4.3-4.3" />
-                        </svg>
-                    </div>
-                    <input type="text" x-model="search" placeholder="Cari menu (Instan)..."
-                        class="w-full pl-16 pr-8 py-4 lg:py-5 bg-gray-50 dark:bg-gray-800 rounded-[1.5rem] lg:rounded-[2rem] border-none focus:ring-4 focus:ring-primary-blue/10 font-black text-sm lg:text-base text-gray-800 dark:text-white placeholder:text-gray-300 placeholder:italic transition-all">
+                <div class="flex-1 w-full max-w-lg">
+                    <input type="text" x-model="search" placeholder="CARI MENU (INSTAN)..."
+                        class="nb-input w-full p-3 text-sm uppercase placeholder:text-gray-400 bg-white dark:bg-slate-800 border-white shadow-none focus:ring-0">
                 </div>
 
-                <div class="flex items-center gap-3 lg:gap-5">
-                    <!-- Theme Toggle -->
-                    <button @click="toggleTheme()"
-                        class="p-4 lg:p-5 bg-gray-50 dark:bg-gray-800 text-gray-400 rounded-2xl hover:text-primary-blue hover:bg-primary-blue/5 transition-all active:scale-95 shadow-sm">
-                        <svg x-show="!darkMode" class="w-5 h-5 lg:w-6 lg:h-6" xmlns="http://www.w3.org/2000/svg"
-                            width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
-                        </svg>
-                        <svg x-show="darkMode" class="w-5 h-5 lg:w-6 lg:h-6" xmlns="http://www.w3.org/2000/svg"
-                            width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-                            <circle cx="12" cy="12" r="4" />
-                            <path d="M12 2v2" />
-                            <path d="M12 20v2" />
-                            <path d="m4.93 4.93 1.41 1.41" />
-                            <path d="m17.66 17.66 1.41 1.41" />
-                            <path d="M2 12h2" />
-                            <path d="M20 12h2" />
-                            <path d="m6.34 17.66-1.41 1.41" />
-                            <path d="m19.07 4.93-1.41 1.41" />
-                        </svg>
+                <div class="flex items-center gap-3">
+                    <button @click="toggleTheme()" class="nb-btn p-3 bg-white dark:bg-dark-soft shadow-none border-2">
+                        <svg x-show="!darkMode" class="w-5 h-5 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
+                        <svg x-show="darkMode" x-cloak class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707M16.95 17.95l.707.707M7.05 7.05l.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z"/></svg>
                     </button>
-
-                    <button wire:click="editOpeningStock"
-                        class="p-4 lg:p-5 bg-gray-50 dark:bg-gray-800 text-gray-400 rounded-2xl hover:text-primary-blue hover:bg-primary-blue/5 transition-all active:scale-95 shadow-sm">
-                        <svg class="w-5 h-5 lg:w-6 lg:h-6" xmlns="http://www.w3.org/2000/svg" width="24"
-                            height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
-                            stroke-linecap="round" stroke-linejoin="round">
-                            <path d="m16 6 4 14" />
-                            <path d="M12 6v14" />
-                            <path d="M8 8v12" />
-                            <path d="M4 4v16" />
-                        </svg>
+                    <button wire:click="editOpeningStock" class="nb-btn py-3 px-4 bg-white text-black text-xs shadow-none border-2">STOK</button>
+                    <button wire:click="finishSession" {{ $isSessionFinished ? 'disabled' : '' }}
+                        class="nb-btn py-3 px-4 {{ $isSessionFinished ? 'bg-gray-400' : 'bg-black text-white' }} text-xs shadow-none border-2">
+                        {{ $isSessionFinished ? 'OFF' : 'SELESAI' }}
                     </button>
-
-                    <div class="h-8 w-[1px] bg-gray-100 dark:bg-gray-800 hidden md:block mx-1"></div>
-
-                    <div class="hidden md:flex items-center gap-3">
-                        <button wire:click="finishSession" {{ $isSessionFinished ? 'disabled' : '' }}
-                            class="flex items-center gap-4 {{ $isSessionFinished ? 'bg-gray-400 dark:bg-gray-700 cursor-not-allowed' : 'bg-gray-900 dark:bg-white dark:text-gray-900' }} text-white px-6 lg:px-8 py-4 lg:py-5 rounded-[1.2rem] lg:rounded-[1.5rem] shadow-2xl transition-all active:scale-95 font-black text-[10px] lg:text-[11px] uppercase tracking-[0.2em]">
-                            {{ $isSessionFinished ? 'Sesi Berakhir' : 'Selesai' }}
+                    <form method="POST" action="{{ route('logout') }}">
+                        @csrf
+                        <button type="submit" class="nb-btn p-3 bg-primary-red text-white shadow-none border-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
                         </button>
-
-                        <form method="POST" action="{{ route('logout') }}">
-                            @csrf
-                            <button type="submit"
-                                class="p-4 lg:p-5 bg-gray-50 dark:bg-gray-800 text-gray-400 rounded-2xl hover:text-primary-red hover:bg-primary-red/5 transition-all active:scale-95 shadow-sm group">
-                                <svg class="w-5 h-5 lg:w-6 lg:h-6 group-hover:translate-x-1 transition-transform"
-                                    xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
-                                    stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M9 21H5a2 2 0 0 1 2-2V5a2 2 0 0 1-2-2h4" />
-                                    <polyline points="16 17 21 12 16 7" />
-                                    <line x1="21" x2="9" y1="12" y2="12" />
-                                </svg>
-                            </button>
-                        </form>
-                    </div>
+                    </form>
                 </div>
             </div>
         </div>
 
         <!-- Category Navigation -->
-        <div
-            class="px-6 lg:px-10 py-4 lg:py-6 bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 flex items-center gap-3 lg:gap-4 overflow-x-auto scrollbar-hide">
+        <div class="px-6 lg:px-10 py-4 bg-white dark:bg-slate-950 border-b-[var(--nb-border)] border-black dark:border-slate-800 flex items-center gap-3 overflow-x-auto no-scrollbar">
             <button @click="selectedCategory = null"
-                :class="selectedCategory === null ? 'bg-primary-blue text-white shadow-xl shadow-blue-500/30 scale-105' : 'bg-gray-50 dark:bg-gray-800 text-gray-400 hover:text-primary-blue hover:bg-primary-blue/5'"
-                class="px-6 lg:px-8 py-3 lg:py-3.5 rounded-xl lg:rounded-2xl whitespace-nowrap text-[10px] lg:text-[11px] font-black uppercase tracking-widest transition-all">
-                Semua Menu
-            </button>
+                :class="selectedCategory === null ? 'bg-primary-blue text-white' : 'bg-gray-100 text-black dark:bg-dark-soft dark:text-white'"
+                class="nb-btn text-[10px] py-1.5 px-4 shadow-none border-2">SEMUA</button>
             @foreach ($this->categories as $cat)
                 <button @click="selectedCategory = {{ $cat->id }}"
-                    :class="selectedCategory == {{ $cat->id }} ? 'bg-primary-blue text-white shadow-xl shadow-blue-500/30 scale-105' : 'bg-gray-50 dark:bg-gray-800 text-gray-400 hover:text-primary-blue hover:bg-primary-blue/5'"
-                    class="px-6 lg:px-8 py-3 lg:py-3.5 rounded-xl lg:rounded-2xl whitespace-nowrap text-[10px] lg:text-[11px] font-black uppercase tracking-widest transition-all">
-                    {{ $cat->name }}
-                </button>
+                    :class="selectedCategory == {{ $cat->id }} ? 'bg-primary-blue text-white' : 'bg-gray-100 text-black dark:bg-dark-soft dark:text-white'"
+                    class="nb-btn text-[10px] py-1.5 px-4 whitespace-nowrap shadow-none border-2">{{ $cat->name }}</button>
             @endforeach
         </div>
 
-        <!-- Product Grid Section -->
-        <div class="flex-1 overflow-y-auto px-6 lg:px-8 py-6 lg:py-8 scrollbar-hide bg-gray-50/30 dark:bg-gray-950/30">
-            
-            <div x-show="filteredProducts.length === 0" x-cloak class="h-full flex flex-col items-center justify-center opacity-30 py-20 lg:py-32">
-                <div
-                    class="w-32 h-32 lg:w-40 lg:h-40 bg-white dark:bg-gray-900 rounded-[3rem] lg:rounded-[4rem] flex items-center justify-center mb-8 lg:mb-10 shadow-inner">
-                    <svg class="w-16 h-16 lg:w-20 lg:h-20 text-gray-200" xmlns="http://www.w3.org/2000/svg"
-                        width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="11" cy="11" r="8" />
-                        <path d="m21 21-4.3-4.3" />
-                        <line x1="8" y1="11" x2="14" y2="11" />
-                    </svg>
+        <!-- Product Grid -->
+        <div class="flex-1 overflow-y-auto px-6 lg:px-10 py-8 no-scrollbar bg-slate-100 dark:bg-dark-bg">
+            <div x-show="filteredProducts.length === 0" x-cloak class="h-full flex flex-col items-center justify-center opacity-30">
+                <div class="nb-card p-12 bg-white dark:bg-dark-soft text-center border-dashed">
+                    <h3 class="text-3xl font-black uppercase italic dark:text-white">KOSONG</h3>
+                    <p class="text-[10px] font-bold mt-2 uppercase tracking-widest">Pencarian tidak ditemukan</p>
                 </div>
-                <h3
-                    class="text-3xl lg:text-4xl font-black italic uppercase tracking-tighter text-gray-800 dark:text-white">
-                    Kosong</h3>
-                <p
-                    class="text-gray-400 font-bold text-sm lg:text-base mt-4 uppercase tracking-[0.4em] italic text-center">
-                    Menu tidak ditemukan</p>
             </div>
 
             <div x-show="filteredProducts.length > 0"
-                class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 3xl:grid-cols-5 gap-4 lg:gap-6">
-                
+                class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
                 <template x-for="product in filteredProducts" :key="product.id">
                     <button @click="addToCart(product)" :disabled="{{ $isSessionFinished ? 'true' : 'false' }}"
-                        :class="{{ $isSessionFinished ? 'true' : 'false' }} ? 'opacity-50 grayscale cursor-not-allowed' : ''"
-                        class="group relative bg-white dark:bg-gray-900 rounded-[2rem] lg:rounded-[2.5rem] p-5 lg:p-6 text-left shadow-xl shadow-blue-900/5 border-2 border-transparent hover:border-primary-blue/30 hover:-translate-y-1 lg:hover:-translate-y-2 hover:shadow-2xl hover:shadow-primary-blue/20 transition-all duration-500 flex flex-col h-full overflow-hidden">
-                        <div class="relative z-10 flex flex-col h-full">
-                            <div
-                                class="w-12 h-12 lg:w-14 lg:h-14 bg-gray-50 dark:bg-gray-800 rounded-xl lg:rounded-2xl flex items-center justify-center text-gray-400 group-hover:bg-primary-blue group-hover:text-white transition-all duration-500 mb-4 lg:mb-6 shadow-sm">
-                                <span x-text="product.initial"
-                                    class="text-lg lg:text-xl font-black italic uppercase"></span>
-                            </div>
-                            <div class="mb-4 flex-1">
-                                <h3 x-text="product.name"
-                                    class="text-xs lg:text-sm font-black text-gray-800 dark:text-white uppercase tracking-tight leading-tight transition-colors duration-300 line-clamp-2">
-                                </h3>
-                                <p x-text="product.category_name"
-                                    class="text-[8px] lg:text-[9px] font-bold text-gray-400 uppercase tracking-widest mt-1.5 group-hover:text-primary-blue transition-colors duration-300">
-                                </p>
-                            </div>
-                            <div class="flex items-center justify-between mt-auto">
-                                <span x-text="formatRupiah(product.price)"
-                                    class="text-sm lg:text-base font-black text-primary-red italic group-hover:scale-105 transition-transform">
-                                </span>
-                                <div
-                                    class="w-7 h-7 lg:w-8 lg:h-8 bg-gray-50 dark:bg-gray-800 rounded-lg lg:rounded-xl flex items-center justify-center text-gray-300 group-hover:bg-primary-blue group-hover:text-white group-hover:rotate-90 transition-all duration-500">
-                                    <svg class="w-3 h-3 lg:w-4 lg:h-4" xmlns="http://www.w3.org/2000/svg"
-                                        width="24" height="24" viewBox="0 0 24 24" fill="none"
-                                        stroke="currentColor" stroke-width="4" stroke-linecap="round"
-                                        stroke-linejoin="round">
-                                        <path d="M5 12h14" />
-                                        <path d="M12 5v14" />
-                                    </svg>
-                                </div>
+                        class="nb-card nb-card-hover group p-0 text-left overflow-hidden flex flex-col h-full bg-white dark:bg-slate-900">
+                        <div class="p-3 bg-gray-50 dark:bg-slate-800 border-b-[var(--nb-border)] border-black dark:border-slate-800 flex items-center justify-between">
+                            <span :class="getCategoryColor(product.category_name)" class="text-[9px] font-black px-2 py-0.5 uppercase tracking-widest border-2" x-text="product.category_name"></span>
+                            <span class="text-[8px] font-black border-2 border-black dark:border-slate-700 px-2 py-0.5 uppercase tracking-widest dark:text-slate-400">READY</span>
+                        </div>
+                        <div class="p-5 flex-1">
+                            <h3 x-text="product.name" class="text-sm font-black uppercase leading-tight mb-3 dark:text-white line-clamp-2"></h3>
+                            <div class="flex items-baseline gap-1">
+                                <span class="text-[9px] font-black italic text-primary-red dark:text-rose-400 uppercase">IDR</span>
+                                <span x-text="formatRupiah(product.price).replace('Rp', '').trim()" class="text-xl font-black italic text-primary-red dark:text-rose-400 leading-none"></span>
                             </div>
                         </div>
-                        <div
-                            class="absolute top-5 lg:top-6 right-5 lg:right-6 px-2.5 lg:px-3 h-5 lg:h-6 bg-gray-50 dark:bg-gray-900 rounded-full group-hover:bg-primary-blue/10 transition-all flex items-center justify-center">
-                            <span
-                                class="text-[7px] lg:text-[8px] font-black text-gray-400 group-hover:text-primary-blue uppercase tracking-[0.2em] leading-none">Tersedia</span>
+                        <div class="p-3 bg-black dark:bg-slate-800 text-white group-hover:bg-primary-blue transition-colors flex items-center justify-center gap-3 border-t-[var(--nb-border)] border-black dark:border-slate-800">
+                            <span class="font-black text-[10px] uppercase tracking-[0.2em]">TAMBAH KE CART</span>
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M12 4v16m8-8H4"/></svg>
                         </div>
                     </button>
                 </template>
@@ -368,583 +209,291 @@ else document.documentElement.classList.remove('dark')"
         </div>
     </div>
 
-    <!-- 2. Enhanced Right Sidebar (Cart & Checkout) -->
-    <div x-show="window.innerWidth >= 1024 || showCart" x-transition:enter="transition ease-out duration-300"
-        x-transition:enter-start="translate-x-full" x-transition:enter-end="translate-x-0"
-        x-transition:leave="transition ease-in duration-200" x-transition:leave-start="translate-x-0"
-        x-transition:leave-end="translate-x-full" @resize.window="if(window.innerWidth >= 1024) showCart = false"
-        class="fixed inset-y-0 right-0 w-full md:w-[500px] bg-white dark:bg-gray-900 border-l border-gray-100 dark:border-gray-800 flex flex-col shadow-2xl z-[100] lg:static lg:flex lg:w-[500px] lg:shadow-none lg:translate-x-0"
-        style="display: none;" x-cloak>
-        <!-- Mobile Header (Only visible on mobile) -->
-        <div
-            class="lg:hidden p-6 flex justify-between items-center border-b dark:border-gray-800 bg-white dark:bg-gray-900">
-            <h2 class="text-xl font-black italic uppercase tracking-tighter text-gray-800 dark:text-white">Pesanan Saya
-            </h2>
-            <button @click="showCart = false" class="p-3 bg-gray-50 dark:bg-gray-800 rounded-xl text-gray-400">
-                <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4"
-                    stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M18 6 6 18" />
-                    <path d="m6 6 12 12" />
-                </svg>
+    <!-- 2. Right Sidebar (Cart) -->
+    <div x-show="window.innerWidth >= 1024 || showCart"
+        class="fixed inset-y-0 right-0 w-full md:w-[420px] bg-white dark:bg-slate-900 lg:static lg:flex lg:w-[420px] flex flex-col z-[100] border-l-[var(--nb-border)] border-black dark:border-slate-800">
+        
+        <div class="p-5 bg-primary-red text-white border-b-[var(--nb-border)] border-black flex justify-between items-center shadow-[inset_0_-4px_0_0_rgba(0,0,0,0.2)]">
+            <h2 class="text-xl font-black uppercase italic tracking-tighter">ORDER CART</h2>
+            <button @click="showCart = false" class="lg:hidden nb-btn bg-white text-black p-2 shadow-none border-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M6 18L18 6M6 6l12 12"/></svg>
             </button>
         </div>
 
-        <div x-data="{ tab: 'cart' }" class="flex flex-col h-full overflow-hidden bg-white dark:bg-gray-900">
+        <div x-data="{ tab: 'cart' }" class="flex flex-col h-full overflow-hidden bg-white dark:bg-slate-950">
             <!-- Sidebar Tabs -->
-            <div
-                class="p-2 mx-6 lg:mx-8 mt-6 lg:mt-8 bg-gray-50 dark:bg-gray-950 rounded-[1.5rem] lg:rounded-[1.8rem] flex border border-gray-100 dark:border-gray-800 shadow-inner flex-shrink-0">
-                <button @click="tab = 'cart'"
-                    :class="tab === 'cart' ? 'bg-white dark:bg-gray-800 text-primary-blue shadow-lg scale-[1.02]' :
-                        'text-gray-400 hover:text-primary-blue'"
-                    class="flex-1 py-3 lg:py-3.5 rounded-xl lg:rounded-[1.3rem] text-[9px] lg:text-[10px] font-black uppercase tracking-[0.2em] transition-all">Keranjang</button>
-                <button @click="tab = 'history'"
-                    :class="tab === 'history' ? 'bg-white dark:bg-gray-800 text-primary-red shadow-lg scale-[1.02]' :
-                        'text-gray-400 hover:text-primary-red'"
-                    class="flex-1 py-3 lg:py-3.5 rounded-xl lg:rounded-[1.3rem] text-[9px] lg:text-[10px] font-black uppercase tracking-[0.2em] transition-all">Riwayat</button>
+            <div class="p-3 flex gap-3 bg-gray-50 dark:bg-dark-neutral border-b-[var(--nb-border)] border-black dark:border-slate-800">
+                <button @click="tab = 'cart'" :class="tab === 'cart' ? 'bg-primary-blue text-white' : 'bg-white text-black dark:bg-dark-soft dark:text-white'" class="nb-btn flex-1 py-1.5 text-xs shadow-none border-2">CART</button>
+                <button @click="tab = 'history'" :class="tab === 'history' ? 'bg-primary-red text-white' : 'bg-white text-black dark:bg-dark-soft dark:text-white'" class="nb-btn flex-1 py-1.5 text-xs shadow-none border-2">HISTORY</button>
             </div>
 
-            <!-- Cart Items List -->
-            <div x-show="tab === 'cart'" x-transition:enter="transition ease-out duration-300"
-                x-transition:enter-start="opacity-0 translate-x-10" x-transition:enter-end="opacity-100 translate-x-0"
-                class="flex-1 overflow-y-auto p-8 space-y-6 scrollbar-hide min-h-0">
-                <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-xl font-black italic uppercase tracking-tighter text-gray-800 dark:text-white">
-                        Pesanan</h2>
-                    <button @click="clearCart()"
-                        class="text-[9px] font-black text-gray-400 hover:text-primary-red uppercase tracking-widest transition-colors">Kosongkan</button>
-                </div>
-
+            <!-- Cart Content -->
+            <div x-show="tab === 'cart'" class="flex-1 overflow-y-auto p-5 space-y-3 no-scrollbar">
                 <template x-for="item in cart" :key="item.id">
-                    <div
-                        class="flex items-center gap-4 group animate-in slide-in-from-right duration-300 bg-gray-50/50 dark:bg-gray-800/30 p-5 rounded-[2rem] border border-transparent hover:border-primary-blue/20 transition-all shadow-sm">
-                        <div
-                            class="w-12 h-12 bg-white dark:bg-gray-900 rounded-2xl flex items-center justify-center text-primary-blue text-xs font-black italic shadow-md group-hover:scale-110 transition-transform">
-                            <span x-text="item.name.substring(0, 2)"></span>
+                    <div class="nb-card p-3 flex items-center gap-3 bg-white dark:bg-dark-soft hover:shadow-none transition-shadow border-2">
+                        <div class="w-9 h-9 bg-black text-white flex items-center justify-center font-black text-[10px] italic border-2 border-white" x-text="item.name.substring(0, 2).toUpperCase()"></div>
+                        <div class="flex-1">
+                            <h4 x-text="item.name" class="text-[10px] font-black uppercase dark:text-white line-clamp-1"></h4>
+                            <p class="text-[10px] font-black text-primary-red" x-text="formatRupiah(item.price)"></p>
                         </div>
-                        <div class="flex-1 min-w-0">
-                            <h4 x-text="item.name"
-                                class="text-xs font-black text-gray-800 dark:text-white uppercase tracking-tight line-clamp-1">
-                            </h4>
-                            <p class="text-[10px] font-black text-primary-red italic mt-0.5" x-text="formatRupiah(item.price)"></p>
-                        </div>
-                        <div
-                            class="flex items-center bg-white dark:bg-gray-900 rounded-xl p-1 shadow-md border border-gray-100 dark:border-gray-800">
-                            <button @click="removeFromCart(item.id)"
-                                class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-primary-red transition-colors font-black text-base">-</button>
-                            <span x-text="item.quantity"
-                                class="w-10 text-center text-[10px] font-black text-gray-800 dark:text-white"></span>
-                            <button @click="addToCart(item)"
-                                class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-primary-blue transition-colors font-black text-base">+</button>
+                        <div class="flex items-center border-2 border-black dark:border-white bg-white dark:bg-black">
+                            <button @click="removeFromCart(item.id)" class="px-2 py-0.5 font-black hover:bg-gray-100 dark:hover:bg-gray-800 border-r-2 border-black dark:border-white text-black dark:text-white">-</button>
+                            <span x-text="item.quantity" class="px-2 text-[10px] font-black text-black dark:text-white"></span>
+                            <button @click="addToCart(item)" class="px-2 py-0.5 font-black hover:bg-gray-100 dark:hover:bg-gray-800 border-l-2 border-black dark:border-white text-black dark:text-white">+</button>
                         </div>
                     </div>
                 </template>
-
-                <div x-show="cart.length === 0" class="h-full flex flex-col items-center justify-center py-20 opacity-20">
-                    <svg class="w-24 h-24 mb-6" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="8" cy="21" r="1" />
-                        <circle cx="19" cy="21" r="1" />
-                        <path
-                            d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.56-7.43H5.12" />
-                    </svg>
-                    <p class="text-[10px] font-black uppercase tracking-[0.4em] italic">Belum ada pesanan</p>
+                <div x-show="cart.length === 0" class="h-full flex flex-col items-center justify-center opacity-20 italic font-black uppercase tracking-widest text-center text-[10px] py-20">
+                    <p>BELUM ADA PESANAN</p>
                 </div>
             </div>
 
-            <div x-show="tab === 'history'" x-transition:enter="transition ease-out duration-300"
-                x-transition:enter-start="opacity-0 translate-x-10" x-transition:enter-end="opacity-100 translate-x-0"
-                class="flex-1 overflow-y-auto p-8 space-y-5 scrollbar-hide min-h-0">
-                <h2 class="text-xl font-black italic uppercase tracking-tighter text-gray-800 dark:text-white mb-6">
-                    History</h2>
+            <div x-show="tab === 'history'" class="flex-1 overflow-y-auto p-5 space-y-3 no-scrollbar">
                 @foreach ($this->recentTransactions as $history)
-                    <div
-                        class="flex items-center gap-5 p-5 bg-gray-50/50 dark:bg-gray-800/30 rounded-[2rem] border border-transparent hover:border-primary-blue/20 transition-all group">
-                        <div
-                            class="w-12 h-12 bg-white dark:bg-gray-900 rounded-xl flex items-center justify-center text-primary-blue text-[9px] font-black italic shadow-md">
-                            {{ \Carbon\Carbon::parse($history->transacted_at)->format('H:i') }}
+                    <div class="nb-card p-3 bg-white dark:bg-dark-soft border-2 hover:shadow-none transition-shadow">
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="text-[8px] font-black bg-black text-white px-2 py-0.5 uppercase tracking-widest border border-white">{{ \Carbon\Carbon::parse($history->transacted_at)->format('H:i') }}</span>
+                            <span class="text-[8px] font-black border-2 border-black dark:border-white px-2 py-0.5 uppercase tracking-widest dark:text-white">{{ str_replace('_', ' ', $history->status) }}</span>
                         </div>
-                        <div class="flex-1 min-w-0">
-                            <h4
-                                class="text-[11px] font-black text-gray-800 dark:text-white uppercase tracking-tight line-clamp-1">
-                                {{ $history->reference }}</h4>
-                            <div class="flex items-center gap-2 mt-0.5">
-                                <span
-                                    class="text-[8px] font-black {{ $history->status === 'uang_diterima' ? 'text-green-500' : 'text-primary-red' }} uppercase tracking-[0.2em]">{{ str_replace('_', ' ', $history->status) }}</span>
-                                <span class="text-[8px] font-bold text-gray-400 uppercase">• {{ $history->total_qty }}
-                                    Items</span>
+                        <h4 class="text-[10px] font-black uppercase dark:text-white tracking-tight line-clamp-1">{{ $history->reference }}</h4>
+                        <div class="flex justify-between items-end mt-3">
+                            <span class="text-[8px] font-bold text-gray-400 uppercase tracking-widest">{{ $history->total_qty }} ITEMS</span>
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs font-black italic text-primary-red">Rp{{ number_format($history->total_amount, 0, ',', '.') }}</span>
+                                <button wire:click="viewDetails('{{ $history->reference }}')" class="nb-btn text-[8px] py-1 px-2 bg-primary-blue text-white shadow-none border-2">DETAIL</button>
                             </div>
-                        </div>
-                        <div class="text-right">
-                            <p class="text-[11px] font-black text-gray-800 dark:text-white italic">
-                                Rp{{ number_format($history->total_amount, 0, ',', '.') }}</p>
-                            <button wire:click="viewDetails('{{ $history->reference }}')"
-                                class="mt-1 text-[8px] font-black text-gray-300 hover:text-primary-blue uppercase tracking-widest transition-colors">Detail</button>
                         </div>
                     </div>
                 @endforeach
             </div>
 
             <!-- Checkout Section -->
-            <div
-                class="p-8 bg-white dark:bg-gray-950 border-t-2 border-gray-50 dark:border-gray-800 space-y-6 shadow-[0_-30px_80px_-20px_rgba(0,0,0,0.06)] flex-shrink-0">
-
-                <!-- Summary Stats -->
-                <div
-                    class="bg-gray-50 dark:bg-gray-900/50 p-6 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 flex flex-col gap-1">
-                    <span class="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em]">Total Tagihan</span>
+            <div class="p-6 bg-white dark:bg-dark-neutral border-t-[var(--nb-border)] border-black dark:border-slate-800 space-y-4">
+                <div class="nb-card-flat bg-gray-50 dark:bg-dark-soft p-4 relative overflow-hidden border-2 shadow-[4px_4px_0_0_rgba(0,0,0,1)] dark:shadow-[4px_4px_0_0_rgba(255,255,255,1)]">
+                    <span class="text-[9px] font-black uppercase tracking-[0.3em] mb-1 block dark:text-gray-400">TOTAL BILL</span>
                     <div class="flex items-baseline gap-2">
-                        <span class="text-base font-black italic text-primary-blue tracking-tighter">Rp</span>
-                        <span x-text="formatRupiah(total).replace('Rp', '').trim()"
-                            class="text-5xl font-black italic text-primary-blue tracking-tighter leading-none"></span>
+                        <span class="text-lg font-black italic dark:text-white">RP</span>
+                        <span x-text="formatRupiah(total).replace('Rp', '').trim()" class="text-4xl font-black italic tracking-tighter leading-none dark:text-white"></span>
                     </div>
                 </div>
 
-                <!-- Enhanced Input Group -->
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="space-y-2">
-                        <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest ml-5">Nama
-                            Pembeli</label>
-                        <input type="text" x-model="buyer_name" placeholder="Guest"
-                            class="w-full px-6 py-4 bg-gray-50 dark:bg-gray-800 border-none rounded-[1.5rem] focus:ring-4 focus:ring-primary-blue/10 font-black text-xs uppercase tracking-tight text-gray-800 dark:text-white">
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="space-y-1">
+                        <label class="text-[8px] font-black uppercase tracking-widest ml-1 dark:text-gray-400">BUYER</label>
+                        <input type="text" x-model="buyer_name" placeholder="GUEST" class="nb-input w-full p-2.5 text-[10px] uppercase shadow-none border-2 bg-white dark:bg-black">
                     </div>
-                    <div class="space-y-2">
-                        <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest ml-5">Nominal
-                            Bayar</label>
-                        <div class="relative">
-                            <span
-                                class="absolute left-6 inset-y-0 flex items-center text-[10px] font-black text-gray-300 italic">Rp</span>
-                            <input type="number" x-model.number="payment_amount"
-                                class="w-full pl-14 pr-6 py-4 bg-gray-50 dark:bg-gray-800 border-none rounded-[1.5rem] focus:ring-4 focus:ring-primary-blue/10 font-black text-xl text-primary-blue dark:text-primary-blue-light italic">
-                        </div>
+                    <div class="space-y-1">
+                        <label class="text-[8px] font-black uppercase tracking-widest ml-1 dark:text-gray-400">CASH (RP)</label>
+                        <input type="number" x-model.number="payment_amount" class="nb-input w-full p-2.5 text-xs text-primary-blue italic shadow-none border-2 font-black bg-white dark:bg-black">
                     </div>
                 </div>
 
-                <!-- Payment Status Selector -->
                 <div class="flex gap-2">
-                    <button @click="status = 'uang_diterima'"
-                        :class="status === 'uang_diterima' ? 'bg-green-500 text-white shadow-2xl scale-[1.02]' : 'bg-gray-50 dark:bg-gray-900 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'"
-                        class="flex-1 py-4 rounded-[1.5rem] flex items-center justify-center gap-3 transition-all">
-                        <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4"
-                            stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M20 6 9 17 4 12" />
-                        </svg>
-                        <span class="text-[9px] font-black uppercase tracking-[0.2em]">LUNAS</span>
-                    </button>
-                    <button @click="status = 'belum_kembalian'"
-                        :class="status === 'belum_kembalian' ? 'bg-primary-blue text-white shadow-2xl scale-[1.02]' : 'bg-gray-50 dark:bg-gray-900 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'"
-                        class="flex-1 py-4 rounded-[1.5rem] flex items-center justify-center gap-3 transition-all">
-                        <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4"
-                            stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M12 8v4l3 3" />
-                        </svg>
-                        <span class="text-[9px] font-black uppercase tracking-[0.2em]">PENDING</span>
-                    </button>
-                    <button @click="status = 'belum_menerima_uang'"
-                        :class="status === 'belum_menerima_uang' ? 'bg-primary-red text-white shadow-2xl scale-[1.02]' : 'bg-gray-50 dark:bg-gray-900 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'"
-                        class="flex-1 py-4 rounded-[1.5rem] flex items-center justify-center gap-3 transition-all">
-                        <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4"
-                            stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M12 9v4m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                        </svg>
-                        <span class="text-[9px] font-black uppercase tracking-[0.2em]">HUTANG</span>
-                    </button>
+                    <button @click="status = 'uang_diterima'" :class="status === 'uang_diterima' ? 'bg-green-500 text-white' : 'bg-white dark:bg-dark-soft dark:text-white'" class="nb-btn flex-1 py-2 text-[9px] shadow-none border-2 font-black">LUNAS</button>
+                    <button @click="status = 'belum_kembalian'" :class="status === 'belum_kembalian' ? 'bg-primary-blue text-white' : 'bg-white dark:bg-dark-soft dark:text-white'" class="nb-btn flex-1 py-2 text-[9px] shadow-none border-2 font-black">PENDING</button>
+                    <button @click="status = 'belum_menerima_uang'" :class="status === 'belum_menerima_uang' ? 'bg-primary-red text-white' : 'bg-white dark:bg-dark-soft dark:text-white'" class="nb-btn flex-1 py-2 text-[9px] shadow-none border-2 font-black">HUTANG</button>
                 </div>
 
-                <!-- Change/Due Indicator -->
                 <template x-if="payment_amount > 0">
-                    <div
-                        class="px-6 py-4 rounded-[1.5rem] flex justify-between items-center animate-in slide-in-from-top-4 duration-500 border border-transparent"
-                        :class="change < 0 ? 'bg-red-500/10 border-red-500/10' : 'bg-green-500/10 border-green-500/10'">
-                        <div class="flex items-center gap-3">
-                            <div
-                                class="w-2 h-2 rounded-full animate-pulse"
-                                :class="change < 0 ? 'bg-primary-red' : 'bg-green-500'">
-                            </div>
-                            <span x-text="change < 0 ? 'Kurang Bayar' : 'Uang Kembalian'"
-                                class="text-[9px] font-black uppercase tracking-[0.3em]"
-                                :class="change < 0 ? 'text-primary-red' : 'text-green-600'"></span>
-                        </div>
-                        <span x-text="formatRupiah(Math.abs(change))"
-                            class="text-2xl font-black italic"
-                            :class="change < 0 ? 'text-primary-red' : 'text-green-600'"></span>
+                    <div class="nb-card p-3 flex justify-between items-center shadow-none border-2" :class="change < 0 ? 'bg-primary-red text-white' : 'bg-green-500 text-white'">
+                        <span x-text="change < 0 ? 'CURANG' : 'CHANGE'" class="text-[9px] font-black uppercase tracking-widest"></span>
+                        <span x-text="formatRupiah(Math.abs(change))" class="text-lg font-black italic"></span>
                     </div>
                 </template>
 
-                <!-- Final Action -->
-                <div class="space-y-4 pt-1">
-                    <textarea x-model="note" rows="2" placeholder="Catatan transaksi..."
-                        class="w-full px-6 py-4 bg-gray-50 dark:bg-gray-800 border-none rounded-[1.5rem] focus:ring-4 focus:ring-primary-blue/10 font-bold text-xs text-gray-800 dark:text-white placeholder:text-gray-300"></textarea>
-                    <button @click="checkout()" :disabled="{{ $isSessionFinished ? 'true' : 'false' }} || cart.length === 0 || (payment_amount < total && status === 'uang_diterima') || loading"
-                        class="w-full py-6 {{ $isSessionFinished ? 'bg-gray-400' : 'bg-primary-blue' }} text-white rounded-[2rem] shadow-[0_30px_80px_-20px_rgba(59,130,246,0.5)] hover:scale-[1.02] active:scale-95 transition-all font-black italic uppercase text-base tracking-[0.3em] flex items-center justify-center gap-5 group disabled:opacity-30 disabled:scale-100 disabled:shadow-none overflow-hidden relative">
-                        <span x-show="!loading" class="relative z-10 flex items-center gap-5">
-                            Proses Pesanan
-                            <svg class="w-5 h-5 group-hover:translate-x-3 transition-transform"
-                                xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
-                                fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"
-                                stroke-linejoin="round">
-                                <path d="M5 12h14" />
-                                <path d="m12 5 7 7-7 7" />
-                            </svg>
-                        </span>
-                        <span x-show="loading" x-cloak class="relative z-10 flex items-center gap-3">
-                            <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                            </svg>
-                            Memproses...
-                        </span>
-                        <div
-                            class="absolute inset-0 bg-white/10 translate-y-full group-hover:translate-y-0 transition-transform duration-500">
-                        </div>
-                    </button>
-                </div>
+                <button @click="checkout()" :disabled="{{ $isSessionFinished ? 'true' : 'false' }} || cart.length === 0 || (payment_amount < total && status === 'uang_diterima') || loading"
+                    class="nb-btn w-full py-5 text-lg bg-black text-white hover:bg-primary-blue disabled:bg-gray-400 disabled:opacity-50 group shadow-[4px_4px_0_0_rgba(37,99,235,0.4)] dark:shadow-[4px_4px_0_0_rgba(255,255,255,1)]">
+                    <span x-show="!loading" class="flex items-center justify-center gap-4">
+                        PROCESS NOW
+                        <svg class="w-5 h-5 group-hover:translate-x-2 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                    </span>
+                    <span x-show="loading" x-cloak class="flex items-center justify-center gap-3">
+                        <svg class="animate-spin h-5 w-5 text-white" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                        LOADING...
+                    </span>
+                </button>
             </div>
         </div>
     </div>
 
-    <!-- Success Overlay -->
-    <div x-data="{ show: false }" x-on:transaction-complete.window="show = true; setTimeout(() => show = false, 1200)"
-        x-show="show" x-cloak x-transition:enter="transition ease-out duration-500"
-        x-transition:enter-start="opacity-0 backdrop-blur-0" x-transition:enter-end="opacity-100 backdrop-blur-md"
-        x-transition:leave="transition ease-in duration-300" x-transition:leave-start="opacity-100 backdrop-blur-md"
-        x-transition:leave-end="opacity-0 backdrop-blur-0"
-        class="fixed inset-0 z-[100] flex items-center justify-center bg-gray-900/20">
-        <div x-show="show" x-transition:enter="transition ease-out duration-500 delay-100"
-            x-transition:enter-start="opacity-0 scale-50 translate-y-20"
-            x-transition:enter-end="opacity-100 scale-100 translate-y-0"
-            x-transition:leave="transition ease-in duration-300"
-            x-transition:leave-start="opacity-100 scale-100 translate-y-0"
-            x-transition:leave-end="opacity-0 scale-95 translate-y-10"
-            class="bg-white dark:bg-gray-900 p-20 rounded-[6rem] shadow-[0_50px_150px_-30px_rgba(0,0,0,0.4)] flex flex-col items-center gap-10 border-t-8 border-green-500">
-            <div
-                class="w-36 h-36 bg-green-500 text-white rounded-full flex items-center justify-center shadow-2xl shadow-green-500/40 animate-bounce">
-                <svg class="w-20 h-20" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="5"
-                    stroke-linecap="round" stroke-linejoin="round">
-                    <polyline points="20 6 9 17 4 12" />
-                </svg>
-            </div>
-            <div class="text-center">
-                <h3
-                    class="text-5xl font-black italic uppercase tracking-tighter text-gray-800 dark:text-white leading-none">
-                    BERHASIL!</h3>
-                <p class="text-gray-400 font-bold text-base mt-5 uppercase tracking-[0.4em] italic">Transaksi Telah
-                    Dicatat</p>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modals Section -->
+    <!-- Modals -->
 
     <!-- Recovery Modal -->
-    <div x-data="{ show: @entangle('showRecoveryModal') }" x-show="show" x-cloak
-        class="fixed inset-0 z-[500] flex items-center justify-center p-6 bg-gray-900/80 backdrop-blur-md"
-        x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0"
-        x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-200"
-        x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">
-        <div class="bg-white dark:bg-gray-900 w-full max-w-2xl rounded-[4rem] shadow-2xl flex flex-col overflow-hidden relative border-t-8 border-primary-red"
-            x-transition:enter="transition ease-out duration-500"
-            x-transition:enter-start="opacity-0 scale-90 translate-y-10"
-            x-transition:enter-end="opacity-100 scale-100 translate-y-0">
+    <div x-data="{ show: @entangle('showRecoveryModal') }" 
+        x-show="show" 
+        x-cloak
+        @keydown.window.escape="show = false"
+        class="fixed inset-0 z-[500] flex items-center justify-center p-6 bg-white/20 dark:bg-black/40 backdrop-blur-md">
+        <div class="nb-card bg-white dark:bg-dark-soft w-full max-w-xl p-10 text-center animate-in zoom-in-95 duration-300">
+            <div class="w-20 h-20 bg-primary-yellow border-2 border-black flex items-center justify-center mx-auto mb-6 shadow-[var(--nb-shadow-sm)]">
+                <svg class="w-10 h-10 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+            </div>
+            <h2 class="text-2xl font-black uppercase italic mb-3 dark:text-white">UNFINISHED SESSION</h2>
+            <p class="text-[11px] font-bold uppercase tracking-widest text-gray-500 mb-6 leading-relaxed">Session on <span class="text-primary-blue font-black">{{ $unfinishedSessionDate ? \Carbon\Carbon::parse($unfinishedSessionDate)->translatedFormat('d F Y') : '-' }}</span> was not closed.</p>
             
-            <div class="p-12 text-center">
-                <div class="w-24 h-24 bg-primary-red/10 text-primary-red rounded-3xl flex items-center justify-center mx-auto mb-8 animate-pulse">
-                    <svg class="w-12 h-12" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/>
-                        <path d="M12 9v4"/>
-                        <path d="M12 17h.01"/>
-                    </svg>
-                </div>
-                
-                <h2 class="text-4xl font-black italic uppercase tracking-tighter text-gray-800 dark:text-white mb-4">
-                    Sesi Belum Berakhir</h2>
-                <p class="text-gray-400 font-bold text-sm lg:text-base uppercase tracking-widest leading-relaxed">
-                    Sesi kasir pada tanggal <span class="text-primary-red">{{ $unfinishedSessionDate ? \Carbon\Carbon::parse($unfinishedSessionDate)->translatedFormat('d F Y') : '-' }}</span> belum ditutup.
-                </p>
-                
-                <div class="mt-10 p-8 bg-gray-50 dark:bg-gray-800/50 rounded-[2.5rem] border border-gray-100 dark:border-gray-800">
-                    <p class="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] mb-4">Solusi Otomatis</p>
-                    <p class="text-xs font-bold text-gray-500 dark:text-gray-400 leading-relaxed italic">
-                        Sistem akan menghitung sisa stok kemarin berdasarkan transaksi terakhir, menutup sesi tersebut, dan menggunakannya sebagai stok awal hari ini.
-                    </p>
-                </div>
+            <div class="nb-card-flat bg-gray-50 dark:bg-black p-5 mb-8 text-left border-2 shadow-none">
+                <p class="text-[9px] font-black uppercase mb-1 dark:text-gray-400">AUTO-FIX:</p>
+                <p class="text-[10px] font-bold italic leading-tight text-gray-600 dark:text-gray-400">System will calculate remaining stock and use it for today's opening.</p>
+            </div>
 
-                <div class="mt-12 flex flex-col gap-4">
-                    <button wire:click="fixUnfinishedSession" wire:loading.attr="disabled"
-                        class="w-full py-7 bg-primary-blue text-white rounded-[2rem] shadow-2xl shadow-blue-500/30 font-black italic uppercase tracking-[0.3em] text-lg hover:-translate-y-2 transition-all flex items-center justify-center gap-3">
-                        <span wire:loading.remove wire:target="fixUnfinishedSession">PULIHKAN & LANJUTKAN</span>
-                        <span wire:loading wire:target="fixUnfinishedSession" class="flex items-center gap-3">
-                            <svg class="animate-spin h-6 w-6 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                            </svg>
-                            MEMULIHKAN...
-                        </span>
-                    </button>
-                    
-                    <a href="{{ route('dashboard') }}" class="py-5 text-[10px] font-black text-gray-400 hover:text-gray-600 uppercase tracking-[0.4em] transition-colors">
-                        KEMBALI KE DASHBOARD
-                    </a>
-                </div>
+            <div class="space-y-3">
+                <button wire:click="fixUnfinishedSession" class="nb-btn w-full bg-primary-blue text-white text-base py-4">RECOVER & CONTINUE</button>
+                <a href="{{ route('dashboard') }}" class="nb-btn w-full bg-white text-black py-3 block text-xs">BACK TO DASHBOARD</a>
             </div>
         </div>
     </div>
 
     <!-- Opening Stock Modal -->
-    <div x-data="{ show: @entangle('showOpeningStockModal') }" x-show="show" x-cloak
-        class="fixed inset-0 z-[300] flex items-center justify-center p-6 bg-gray-900/60 backdrop-blur-sm"
-        x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0"
-        x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-200"
-        x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">
-        <div class="bg-white dark:bg-gray-900 w-full max-w-5xl max-h-[85vh] overflow-hidden rounded-[4rem] shadow-2xl flex flex-col relative"
-            x-transition:enter="transition ease-out duration-500"
-            x-transition:enter-start="opacity-0 scale-90 translate-y-10"
-            x-transition:enter-end="opacity-100 scale-100 translate-y-0">
-            <!-- Close Button -->
-            <button @click="show = false"
-                class="absolute top-10 right-10 w-12 h-12 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center text-gray-400 hover:text-primary-red hover:bg-primary-red/10 transition-all z-50 group">
-                <svg class="w-6 h-6 group-hover:rotate-90 transition-transform duration-300"
-                    xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
-                    fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"
-                    stroke-linejoin="round">
-                    <path d="M18 6 6 18" />
-                    <path d="m6 6 12 12" />
-                </svg>
-            </button>
-            <div
-                class="p-12 border-b border-gray-50 dark:border-gray-800 flex justify-between items-center bg-gray-50/30 dark:bg-gray-950/30">
+    <div x-data="{ show: @entangle('showOpeningStockModal') }" 
+        x-show="show" 
+        x-cloak
+        @keydown.window.escape="show = false"
+        class="fixed inset-0 z-[400] flex items-center justify-center p-6 bg-white/20 dark:bg-black/40 backdrop-blur-md">
+        <div class="nb-card bg-white dark:bg-dark-soft w-full max-w-5xl max-h-[90vh] flex flex-col overflow-hidden animate-in slide-in-from-bottom-10 duration-500 border-4">
+            <div class="p-6 bg-primary-blue text-white border-b-4 border-black flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
-                    <h2 class="text-4xl font-black italic uppercase tracking-tighter text-gray-800 dark:text-white">
-                        Stok Awal Hari Ini</h2>
-                    <p class="text-sm font-bold text-gray-400 uppercase tracking-widest mt-3">Silakan verifikasi jumlah
-                        stok sebelum mulai berjualan</p>
+                    <h2 class="text-2xl font-black uppercase italic leading-none">OPENING STOCK</h2>
+                    <p class="text-[9px] font-black uppercase tracking-widest mt-1.5 opacity-80 italic">Verify physical items in store</p>
                 </div>
-                <div class="flex items-center gap-6 pr-16">
-                    <div class="relative">
-                        <input type="text" x-model="modalSearch" placeholder="Cari menu..."
-                            class="pl-12 pr-6 py-4 bg-white dark:bg-gray-800 border-none rounded-2xl focus:ring-4 focus:ring-primary-blue/10 text-xs font-black uppercase tracking-widest shadow-sm">
-                        <svg class="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
-                            xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
-                            fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"
-                            stroke-linejoin="round">
-                            <circle cx="11" cy="11" r="8" />
-                            <path d="m21 21-4.3-4.3" />
-                        </svg>
-                    </div>
+                <div class="flex items-center gap-3 w-full md:w-auto">
+                    <input type="text" x-model="modalSearch" placeholder="SEARCH..." class="nb-input bg-white text-black p-2 text-[10px] flex-1 md:w-48 shadow-none border-2">
+                    <button @click="show = false" class="nb-btn bg-white text-black p-2 shadow-none border-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
                 </div>
             </div>
-            <div class="flex-1 overflow-y-auto p-12 scrollbar-hide">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div class="flex-1 overflow-y-auto p-6 no-scrollbar bg-gray-50 dark:bg-black">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     @foreach (\App\Models\Product::where('is_active', true)->orderBy('name')->get() as $p)
-                        <div wire:key="opening-stock-{{ $p->id }}" x-show="'{{ strtolower($p->name) }}'.includes(modalSearch.toLowerCase())"
-                            class="flex items-center justify-between p-8 bg-gray-50 dark:bg-gray-800/50 rounded-[2.5rem] border-2 border-transparent hover:border-primary-blue/20 transition-all shadow-sm">
-                            <div class="min-w-0 flex-1">
-                                <h4
-                                    class="text-base font-black text-gray-800 dark:text-white uppercase tracking-tight line-clamp-1">
-                                    {{ $p->name }}</h4>
-                                <div class="flex items-center gap-3 mt-2">
-                                    <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">
-                                        {{ $p->category ? $p->category->name : 'No Category' }}</p>
+                        <div x-show="'{{ strtolower($p->name) }}'.includes(modalSearch.toLowerCase())"
+                            class="nb-card p-5 flex items-center justify-between bg-white dark:bg-dark-soft shadow-none border-2">
+                            <div class="flex-1">
+                                <h4 class="font-black uppercase text-xs dark:text-white">{{ $p->name }}</h4>
+                                <div class="flex items-center gap-2 mt-2">
+                                    <span class="text-[8px] font-black bg-black text-white px-2 py-0.5 uppercase tracking-widest border border-white">{{ $p->category->name ?? '' }}</span>
                                     @if(isset($lastClosingStocks[$p->id]))
-                                        <span class="w-1 h-1 rounded-full bg-gray-300 dark:bg-gray-600"></span>
-                                        <span class="text-[9px] font-black text-primary-blue uppercase tracking-widest bg-primary-blue/5 px-3 py-1.5 rounded-xl border border-primary-blue/10">
-                                            Stok Kemarin: {{ $lastClosingStocks[$p->id] }}
-                                        </span>
+                                        <span class="text-[8px] font-black border-2 border-black dark:border-white px-2 py-0.5 uppercase tracking-widest text-primary-blue">YESTERDAY: {{ $lastClosingStocks[$p->id] }}</span>
                                     @endif
                                 </div>
                             </div>
-                            <div class="w-36">
-                                <div class="relative group">
-                                    <input type="number" wire:model.blur="stockItems.{{ $p->id }}"
-                                        class="w-full px-6 py-4 bg-white dark:bg-gray-900 border-none rounded-2xl focus:ring-4 focus:ring-primary-blue/10 font-black text-lg text-center shadow-inner text-gray-800 dark:text-white transition-all">
-                                </div>
-                            </div>
+                            <input type="number" wire:model.blur="stockItems.{{ $p->id }}"
+                                class="nb-input w-24 text-center text-base p-2 shadow-none border-2 bg-white dark:bg-black">
                         </div>
                     @endforeach
                 </div>
             </div>
-            <div class="p-12 bg-white dark:bg-gray-950 border-t border-gray-100 dark:border-gray-800">
-                <button wire:click="saveOpeningStock" wire:loading.attr="disabled"
-                    class="w-full py-7 bg-primary-blue text-white rounded-[2rem] shadow-2xl shadow-blue-500/30 font-black italic uppercase tracking-[0.3em] text-lg hover:-translate-y-2 transition-all flex items-center justify-center gap-3 disabled:opacity-50">
-                    <span wire:loading.remove wire:target="saveOpeningStock">SIMPAN & MULAI JUALAN</span>
-                    <span wire:loading wire:target="saveOpeningStock" class="flex items-center gap-3">
-                        <svg class="animate-spin h-6 w-6 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                        MENYIMPAN...
-                    </span>
-                </button>
+            <div class="p-6 bg-white dark:bg-dark-soft border-t-4 border-black">
+                <button wire:click="saveOpeningStock" class="nb-btn w-full bg-primary-blue text-white text-lg py-5">SAVE & START SELLING</button>
             </div>
         </div>
     </div>
 
     <!-- Closing Stock Modal -->
-    <div x-data="{ show: @entangle('showClosingStockModal') }" x-show="show" x-cloak
-        class="fixed inset-0 z-[300] flex items-center justify-center p-6 bg-gray-900/60 backdrop-blur-sm"
-        x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0"
-        x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-200"
-        x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">
-        <div class="bg-white dark:bg-gray-900 w-full max-w-5xl max-h-[85vh] overflow-hidden rounded-[4rem] shadow-2xl flex flex-col relative"
-            x-transition:enter="transition ease-out duration-500"
-            x-transition:enter-start="opacity-0 scale-90 translate-y-10"
-            x-transition:enter-end="opacity-100 scale-100 translate-y-0">
-            <!-- Close Button -->
-            <button @click="show = false"
-                class="absolute top-10 right-10 w-12 h-12 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center text-gray-400 hover:text-primary-red hover:bg-primary-red/10 transition-all z-50 group">
-                <svg class="w-6 h-6 group-hover:rotate-90 transition-transform duration-300"
-                    xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
-                    fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"
-                    stroke-linejoin="round">
-                    <path d="M18 6 6 18" />
-                    <path d="m6 6 12 12" />
-                </svg>
-            </button>
-            <div
-                class="p-12 border-b border-gray-50 dark:border-gray-800 flex justify-between items-center bg-gray-50/30 dark:bg-gray-950/30">
+    <div x-data="{ show: @entangle('showClosingStockModal') }" 
+        x-show="show" 
+        x-cloak
+        @keydown.window.escape="show = false"
+        class="fixed inset-0 z-[400] flex items-center justify-center p-6 bg-white/20 dark:bg-black/40 backdrop-blur-md">
+        <div class="nb-card bg-white dark:bg-dark-soft w-full max-w-5xl max-h-[90vh] flex flex-col overflow-hidden border-4">
+            <div class="p-6 bg-primary-red text-white border-b-4 border-black flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
-                    <h2 class="text-4xl font-black italic uppercase tracking-tighter text-primary-red">Akhiri Sesi Hari
-                        Ini</h2>
-                    <p class="text-sm font-bold text-gray-400 uppercase tracking-widest mt-3">Input jumlah stok sisa
-                        untuk perhitungan laporan harian</p>
+                    <h2 class="text-2xl font-black uppercase italic leading-none text-white">DAILY RECAP</h2>
+                    <p class="text-[9px] font-black uppercase tracking-widest mt-1.5 opacity-80 italic">Input remaining items in store</p>
                 </div>
-                <div class="flex items-center gap-6 pr-16">
-                    <div class="relative">
-                        <input type="text" x-model="modalSearch" placeholder="Cari menu..."
-                            class="pl-12 pr-6 py-4 bg-white dark:bg-gray-800 border-none rounded-2xl focus:ring-4 focus:ring-primary-blue/10 text-xs font-black uppercase tracking-widest shadow-sm">
-                        <svg class="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
-                            xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
-                            fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"
-                            stroke-linejoin="round">
-                            <circle cx="11" cy="11" r="8" />
-                            <path d="m21 21-4.3-4.3" />
-                        </svg>
-                    </div>
+                <div class="flex items-center gap-3 w-full md:w-auto">
+                    <input type="text" x-model="modalSearch" placeholder="SEARCH..." class="nb-input bg-white text-black p-2 text-[10px] flex-1 md:w-48 shadow-none border-2">
+                    <button @click="show = false" class="nb-btn bg-white text-black p-2 shadow-none border-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
                 </div>
             </div>
-            <div class="flex-1 overflow-y-auto p-12 scrollbar-hide">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div class="flex-1 overflow-y-auto p-6 no-scrollbar bg-gray-50 dark:bg-black">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     @foreach ($this->stockComparison as $item)
-                        <div wire:key="closing-stock-{{ $item['id'] }}" x-show="'{{ strtolower($item['name']) }}'.includes(modalSearch.toLowerCase())"
-                            class="flex flex-col sm:flex-row sm:items-center justify-between p-8 bg-gray-50 dark:bg-gray-800/50 rounded-[2.5rem] border-2 border-transparent hover:border-primary-red/20 transition-all shadow-sm gap-6">
-                            <div class="min-w-0 flex-1">
-                                <h4 class="text-base font-black text-gray-800 dark:text-white uppercase tracking-tight line-clamp-1">
-                                    {{ $item['name'] }}</h4>
-                                <div class="flex flex-wrap items-center gap-2 mt-3">
-                                    <span class="text-[8px] lg:text-[9px] font-black text-gray-400 uppercase tracking-widest bg-white dark:bg-gray-900 px-3 py-1.5 rounded-xl border border-gray-100 dark:border-gray-800">
-                                        Stok Awal: <span class="text-gray-800 dark:text-white ml-1">{{ $item['opening'] }}</span>
-                                    </span>
-                                    <span class="text-[8px] lg:text-[9px] font-black text-primary-blue uppercase tracking-widest bg-primary-blue/5 px-3 py-1.5 rounded-xl border border-primary-blue/10">
-                                        Terjual: <span class="ml-1">{{ $item['sold'] }}</span>
-                                    </span>
-                                    <div class="h-4 w-px bg-gray-200 dark:bg-gray-700 hidden sm:block mx-1"></div>
-                                    <span class="text-[8px] lg:text-[9px] font-black text-green-500 uppercase tracking-widest bg-green-500/5 px-3 py-1.5 rounded-xl border border-green-500/10">
-                                        Sisa Seharusnya: <span class="ml-1">{{ $item['expected'] }}</span>
-                                    </span>
-                                </div>
+                        <div x-show="'{{ strtolower($item['name']) }}'.includes(modalSearch.toLowerCase())"
+                            class="nb-card p-5 flex flex-col bg-white dark:bg-dark-soft shadow-none border-2">
+                            <h4 class="font-black uppercase text-xs dark:text-white mb-3">{{ $item['name'] }}</h4>
+                            <div class="flex items-center gap-2 mb-4">
+                                <span class="text-[7px] font-black border-2 border-black dark:border-white px-1.5 py-0.5 uppercase tracking-widest">START: {{ $item['opening'] }}</span>
+                                <span class="text-[7px] font-black bg-primary-blue text-white px-1.5 py-0.5 uppercase tracking-widest">SOLD: {{ $item['sold'] }}</span>
+                                <span class="text-[7px] font-black bg-green-500 text-white px-1.5 py-0.5 uppercase tracking-widest">EXP: {{ $item['expected'] }}</span>
                             </div>
-                            <div class="w-full sm:w-40 flex flex-col gap-2">
-                                <label class="text-[8px] font-black text-gray-400 uppercase tracking-widest ml-4">Stok Fisik (Aktual)</label>
-                                <div class="relative group">
-                                    <input type="number" wire:model.blur="stockItems.{{ $item['id'] }}"
-                                        class="w-full px-6 py-4 bg-white dark:bg-gray-900 border-none rounded-2xl focus:ring-4 focus:ring-primary-red/10 font-black text-lg text-center shadow-inner text-gray-800 dark:text-white transition-all">
-                                    <div class="absolute inset-y-0 right-4 flex items-center pointer-events-none opacity-20 group-focus-within:opacity-100 transition-opacity">
-                                        <svg class="w-4 h-4 text-primary-red" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4Z"/></svg>
-                                    </div>
-                                </div>
+                            <div class="space-y-1">
+                                <label class="text-[8px] font-black uppercase tracking-widest dark:text-gray-400">ACTUAL STOCK</label>
+                                <input type="number" wire:model.blur="stockItems.{{ $item['id'] }}" class="nb-input w-full text-center text-lg p-2 shadow-none border-2 bg-white dark:bg-black">
                             </div>
                         </div>
                     @endforeach
                 </div>
             </div>
-            <div class="p-12 bg-white dark:bg-gray-950 border-t border-gray-100 dark:border-gray-800">
-                <button wire:click="saveClosingStock" wire:loading.attr="disabled"
-                    class="w-full py-7 bg-primary-red text-white rounded-[2rem] shadow-2xl shadow-red-500/30 font-black italic uppercase tracking-[0.3em] text-lg hover:-translate-y-2 transition-all flex items-center justify-center gap-3 disabled:opacity-50">
-                    <span wire:loading.remove wire:target="saveClosingStock">SIMPAN & TUTUP KASIR</span>
-                    <span wire:loading wire:target="saveClosingStock" class="flex items-center gap-3">
-                        <svg class="animate-spin h-6 w-6 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                        MEMPROSES...
-                    </span>
-                </button>
+            <div class="p-6 bg-white dark:bg-dark-soft border-t-4 border-black">
+                <button wire:click="saveClosingStock" class="nb-btn w-full bg-primary-red text-white text-lg py-5">FINISH DAILY SESSION</button>
             </div>
         </div>
     </div>
 
-
-    <script>
-        window.addEventListener('transaction-complete', () => {
-            setTimeout(() => {
-                const searchInput = document.querySelector('input[placeholder*="Cari menu"]');
-                if (searchInput) searchInput.focus();
-            }, 1000);
-        });
-    </script>
-
     <!-- Transaction Detail Modal -->
-    <div x-data="{ show: @entangle('showDetailsModal') }" x-show="show" x-cloak
-        class="fixed inset-0 z-[400] flex items-center justify-center p-6 bg-gray-900/60 backdrop-blur-sm"
-        x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0"
-        x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-200"
-        x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">
-        <div @click.away="show = false"
-            class="bg-white dark:bg-gray-900 w-full max-w-xl rounded-[3rem] shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-300">
-            <div class="p-8 bg-primary-blue text-white relative">
-                <div class="absolute right-8 top-8">
-                    <button @click="show = false" class="text-white/50 hover:text-white transition-colors">
-                        <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
-                            stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M18 6 6 18" />
-                            <path d="m6 6 12 12" />
-                        </svg>
-                    </button>
-                </div>
-                <h3 class="text-2xl font-black italic uppercase tracking-tighter mb-1">Rincian Belanja</h3>
-                <p class="text-[9px] font-bold uppercase tracking-[0.3em] opacity-60">REF: {{ $detailReference }}</p>
+    <div x-data="{ show: @entangle('showDetailsModal') }" 
+        x-show="show" 
+        x-cloak
+        @keydown.window.escape="show = false"
+        class="fixed inset-0 z-[600] flex items-center justify-center p-6 bg-white/20 dark:bg-black/40 backdrop-blur-md">
+        <div @click.away="show = false" class="nb-card bg-white dark:bg-dark-soft w-full max-w-lg flex flex-col overflow-hidden animate-in zoom-in-95 duration-300 border-4">
+            <div class="p-6 bg-primary-blue text-white border-b-4 border-black relative">
+                <button @click="show = false" class="absolute right-6 top-6 nb-btn bg-white text-black p-2 shadow-none border-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+                <h3 class="text-xl font-black uppercase italic tracking-tighter">ORDER DETAILS</h3>
+                <p class="text-[8px] font-black uppercase tracking-[0.3em] mt-1.5 opacity-60">REF: {{ $detailReference }}</p>
             </div>
 
-            <div class="p-8 max-h-[50vh] overflow-y-auto no-scrollbar">
-                <div class="space-y-6">
+            <div class="p-6 max-h-[50vh] overflow-y-auto no-scrollbar bg-white dark:bg-black">
+                <div class="space-y-4">
                     @if($this->detailItems)
                         @foreach ($this->detailItems as $item)
-                            <div class="flex justify-between items-center">
+                            <div class="flex justify-between items-center border-b-2 border-black/5 dark:border-white/5 pb-3 last:border-0">
                                 <div>
-                                    <p class="text-xs font-black text-gray-800 dark:text-white uppercase tracking-tight">
-                                        {{ $item->product->name }}</p>
-                                    <p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mt-1">
-                                        {{ $item->quantity }} x Rp{{ number_format($item->unit_price, 0, ',', '.') }}</p>
+                                    <p class="text-[11px] font-black uppercase dark:text-white">{{ $item->product->name }}</p>
+                                    <p class="text-[9px] font-bold uppercase tracking-widest mt-0.5 text-gray-400">{{ $item->quantity }} X Rp{{ number_format($item->unit_price, 0, ',', '.') }}</p>
                                 </div>
-                                <p class="text-sm font-black text-gray-800 dark:text-white italic">
-                                    Rp{{ number_format($item->total_price, 0, ',', '.') }}</p>
+                                <p class="text-xs font-black italic dark:text-white">Rp{{ number_format($item->total_price, 0, ',', '.') }}</p>
                             </div>
                         @endforeach
                     @endif
                 </div>
             </div>
 
-            <div
-                class="p-8 bg-gray-50 dark:bg-gray-950 border-t border-gray-100 dark:border-gray-800 flex justify-between items-center">
+            <div class="p-6 bg-gray-50 dark:bg-dark-soft text-black border-t-4 border-black flex justify-between items-center">
                 <div>
-                    <p class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Status</p>
-                    <span
-                        class="px-3 py-1 rounded-full text-[8px] font-black uppercase {{ ($this->detailItems->first()->status ?? '') === 'uang_diterima' ? 'bg-green-100 text-green-700' : 'bg-primary-red/10 text-primary-red' }}">
-                        {{ str_replace('_', ' ', $this->detailItems->first()->status ?? 'Unknown') }}
-                    </span>
+                    <span class="text-[9px] font-black bg-black text-white px-2 py-1 uppercase tracking-widest border border-white">{{ $this->detailItems->first()->status ?? '' }}</span>
                 </div>
                 <div class="text-right">
-                    <p class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Total</p>
-                    <p class="text-2xl font-black text-primary-blue italic tracking-tighter leading-none">
-                        Rp{{ number_format($this->detailItems->sum('total_price'), 0, ',', '.') }}</p>
+                    <p class="text-[8px] font-black uppercase tracking-widest mb-1 opacity-60 dark:text-gray-400">GRAND TOTAL</p>
+                    <p class="text-2xl font-black italic tracking-tighter text-primary-blue leading-none dark:text-primary-blue-light">Rp{{ number_format($this->detailItems->sum('total_price'), 0, ',', '.') }}</p>
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- Success Overlay -->
+    <div x-data="{ show: false }" x-on:transaction-complete.window="show = true; setTimeout(() => show = false, 1500)"
+        x-show="show" x-cloak
+        class="fixed inset-0 z-[700] flex items-center justify-center bg-white/20 dark:bg-black/40 backdrop-blur-md">
+        <div class="nb-card bg-white p-12 text-center animate-in zoom-in-125 duration-300 border-8">
+            <div class="w-32 h-32 bg-green-500 border-4 border-black flex items-center justify-center mx-auto mb-8 shadow-[var(--nb-shadow)]">
+                <svg class="w-20 h-20 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="6" d="M5 13l4 4L19 7"/></svg>
+            </div>
+            <h3 class="text-5xl font-black uppercase italic leading-none">SUCCESS!</h3>
+            <p class="text-lg font-black uppercase tracking-[0.4em] mt-5 italic">TRANSACTION RECORDED</p>
+        </div>
+    </div>
+
+    <script>
+        window.addEventListener('transaction-complete', () => {
+            setTimeout(() => {
+                const searchInput = document.querySelector('input[placeholder*="CARI"]');
+                if (searchInput) searchInput.focus();
+            }, 1000);
+        });
+    </script>
 </div>

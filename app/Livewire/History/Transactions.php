@@ -11,6 +11,9 @@ use Livewire\WithPagination;
 class Transactions extends Component
 {
     use WithPagination;
+    
+    #[Livewire\Attributes\Url]
+    public $highlight = '';
 
     public $search = '';
     public $filterStatus = '';
@@ -111,7 +114,9 @@ class Transactions extends Component
     {
         $query = Transaction::query();
 
-        if ($this->search) {
+        if ($this->highlight && !$this->search) {
+            $query->where('reference', $this->highlight);
+        } elseif ($this->search) {
             $query->where(function($q) {
                 $q->where('reference', 'like', '%' . $this->search . '%')
                   ->orWhere('buyer_name', 'like', '%' . $this->search . '%')
