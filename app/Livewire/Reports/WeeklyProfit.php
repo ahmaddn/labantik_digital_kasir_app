@@ -13,14 +13,16 @@ class WeeklyProfit extends Component
 {
     use WithPagination;
 
-    public $selectedDate;
+    public $startDate;
+    public $endDate;
     public $viewMode = 'weekly'; 
     public $showDeleteModal = false;
     public $reportToDeleteId = null;
     
     public function mount()
     {
-        $this->selectedDate = now()->toDateString();
+        $this->startDate = now()->startOfWeek(Carbon::MONDAY)->toDateString();
+        $this->endDate = now()->startOfWeek(Carbon::MONDAY)->addDays(4)->toDateString();
     }
 
     public function confirmDelete($id)
@@ -47,11 +49,8 @@ class WeeklyProfit extends Component
             return;
         }
 
-        $date = Carbon::parse($this->selectedDate);
-        
-        // Monday to Friday cycle
-        $weekStart = $date->copy()->startOfWeek(Carbon::MONDAY);
-        $weekEnd = $date->copy()->startOfWeek(Carbon::MONDAY)->addDays(4); // Friday
+        $weekStart = Carbon::parse($this->startDate);
+        $weekEnd = Carbon::parse($this->endDate);
         
         $weekNumber = $weekEnd->weekOfMonth;
         $monthName = $weekEnd->translatedFormat('F Y');
@@ -91,9 +90,8 @@ class WeeklyProfit extends Component
     {
         $reports = WeeklyProfitShare::orderByDesc('week_end')->paginate(10);
         
-        $date = Carbon::parse($this->selectedDate);
-        $weekStart = $date->copy()->startOfWeek(Carbon::MONDAY);
-        $weekEnd = $weekStart->copy()->addDays(4); // Friday
+        $weekStart = Carbon::parse($this->startDate);
+        $weekEnd = Carbon::parse($this->endDate);
 
         $weeklyData = Transaction::whereBetween('transacted_at', [
                 $weekStart->startOfDay()->toDateTimeString(), 

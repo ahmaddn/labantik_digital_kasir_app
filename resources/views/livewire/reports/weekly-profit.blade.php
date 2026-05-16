@@ -8,25 +8,35 @@
                 <button wire:click="$set('viewMode', 'monthly')" class="px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all {{ $viewMode === 'monthly' ? 'bg-primary-blue text-white shadow-lg' : 'bg-gray-100 text-gray-400 dark:bg-gray-800' }}">Rekap Bulanan</button>
             </div>
         </div>
-        <div class="flex items-center gap-4">
+        <div class="flex items-center gap-6">
             @if($viewMode === 'weekly')
-            <div class="bg-white dark:bg-gray-900 px-8 py-4 rounded-[2rem] shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-800 flex items-center gap-6">
-                <div class="text-right">
-                    <p class="text-[9px] font-black text-gray-400 uppercase tracking-widest">Pilih Minggu Acuan</p>
-                    <p class="text-xs font-black text-gray-800 dark:text-white uppercase mt-1">{{ \Carbon\Carbon::parse($selectedDate)->translatedFormat('d F Y') }}</p>
+            <div class="flex items-center bg-white dark:bg-gray-900 p-2 rounded-[2rem] shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-800">
+                <div class="px-6 py-2">
+                    <p class="text-[8px] font-black text-primary-blue uppercase tracking-widest mb-1">DARI TANGGAL</p>
+                    <input type="date" wire:model.live="startDate" 
+                        class="bg-transparent border-none p-0 text-[11px] font-black text-gray-800 dark:text-white focus:ring-0 cursor-pointer">
                 </div>
-                <input type="date" wire:model.live="selectedDate" class="w-12 h-12 rounded-xl bg-gray-50 dark:bg-gray-800 border-none cursor-pointer focus:ring-4 focus:ring-primary-blue/10">
+                
+                <div class="w-10 h-10 flex items-center justify-center">
+                    <svg class="w-4 h-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                </div>
+
+                <div class="px-6 py-2">
+                    <p class="text-[8px] font-black text-primary-red uppercase tracking-widest mb-1">SAMPAI TANGGAL</p>
+                    <input type="date" wire:model.live="endDate" 
+                        class="bg-transparent border-none p-0 text-[11px] font-black text-gray-800 dark:text-white focus:ring-0 cursor-pointer">
+                </div>
             </div>
             
             @if($canProcess)
-            <button wire:click="generateReport" class="px-10 py-5 bg-primary-blue text-white rounded-[2rem] shadow-2xl shadow-blue-500/20 font-black italic uppercase text-xs tracking-widest hover:scale-[1.02] active:scale-95 transition-all flex items-center gap-3">
-                <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
-                Proses Bagi Hasil
+            <button wire:click="generateReport" class="px-10 py-6 bg-primary-blue text-white rounded-[2rem] shadow-2xl shadow-blue-500/20 font-black italic uppercase text-xs tracking-widest hover:scale-[1.02] active:scale-95 transition-all flex items-center gap-4">
+                <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                PROSES BAGI HASIL
             </button>
             @else
-            <button disabled class="px-10 py-5 bg-gray-200 dark:bg-gray-800 text-gray-400 rounded-[2rem] font-black italic uppercase text-xs tracking-widest cursor-not-allowed flex items-center gap-3">
-                <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-                Belum Waktunya (Jumat-Minggu)
+            <button disabled class="px-10 py-6 bg-gray-200 dark:bg-gray-800 text-gray-400 rounded-[2rem] font-black italic uppercase text-xs tracking-widest cursor-not-allowed flex items-center gap-4 opacity-50">
+                <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                JUMAT - MINGGU
             </button>
             @endif
             @endif
