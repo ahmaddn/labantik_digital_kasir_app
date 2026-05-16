@@ -25,20 +25,86 @@ class Kasir extends Component
     public $lastClosingStocks = []; // Array to hold yesterday's closing stock [product_id => quantity]
     public $showDetailsModal = false;
     public $detailReference = null;
+    public $showRecoveryModal = false;
+    public $unfinishedSessionDate = null;
 
     public function mount(): void
     {
         // Check if session for today is already finished
-        $isSessionFinished = DailyRecap::whereDate('date', now())
+        $isTodayFinished = DailyRecap::whereDate('date', now())
             ->where('actual_cash', '>', 0)
             ->exists();
 
-        if ($isSessionFinished) {
+        if ($isTodayFinished) {
             session()->flash('error', 'Sesi kasir hari ini telah berakhir. Anda tidak dapat melakukan transaksi lagi.');
             $this->redirectRoute('dashboard', navigate: true);
             return;
         }
 
+        // Detect if there's an unfinished session from a previous day
+        $this->detectUnfinishedSession();
+        
+        if (!$this->showRecoveryModal) {
+            $this->checkOpeningStock();
+        }
+    }
+
+    protected function detectUnfinishedSession(): void
+    {
+        $today = now()->toDateString();
+        
+        // Find the most recent date with stock entries before today
+        $lastSessionDate = StockEntry::where('date', '<', $today)
+            ->orderBy('date', 'desc')
+            ->value('date');
+
+        if ($lastSessionDate) {
+            // Check if this last session was finished
+            $isFinished = DailyRecap::where('date', $lastSessionDate)
+                ->where('actual_cash', '>', 0)
+                ->exists();
+
+            if (!$isFinished) {
+                $this->unfinishedSessionDate = $lastSessionDate;
+                $this->showRecoveryModal = true;
+            }
+        }
+    }
+
+    public function fixUnfinishedSession(): void
+    {
+        if (!$this->unfinishedSessionDate) return;
+
+        $date = $this->unfinishedSessionDate;
+        $allProducts = Product::where('is_active', true)->get();
+
+        foreach ($allProducts as $p) {
+            $entry = StockEntry::where('product_id', $p->id)->where('date', $date)->first();
+            if ($entry) {
+                $sold = Transaction::where('product_id', $p->id)
+                    ->whereDate('transacted_at', $date)
+                    ->sum('quantity');
+                
+                $entry->update([
+                    'closing_stock' => $entry->opening_stock - $sold
+                ]);
+            }
+        }
+
+        // Mark as finished in DailyRecap
+        DailyRecap::updateOrCreate(
+            ['date' => $date],
+            [
+                'actual_cash' => 1,
+                'cash_note' => 'Auto-finished by system (Forgot to click finish)'
+            ]
+        );
+
+        $this->showRecoveryModal = false;
+        $this->unfinishedSessionDate = null;
+        $this->dispatch('toast', message: 'Sesi sebelumnya berhasil dipulihkan & ditutup.');
+        
+        // Now proceed to today's opening stock
         $this->checkOpeningStock();
     }
 
