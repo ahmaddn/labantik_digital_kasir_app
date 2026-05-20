@@ -7,17 +7,24 @@ use App\Models\Transaction;
 use Carbon\Carbon;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Livewire\WithFileUploads;
 use Livewire\Attributes\Url;
+use App\Exports\DailyDataExport;
+use App\Imports\DailyDataImport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class DailyRecap extends Component
 {
-    use WithPagination;
+    use WithPagination, WithFileUploads;
 
     #[Url]
     public string $selectedDate = '';
     public string $search = '';
     public string $filterStatus = '';
     public string $filterCategory = '';
+    
+    public $importFile;
+    public bool $reopenSession = true;
     
     // Cash Audit
     public $actualCash = 0;
@@ -183,5 +190,39 @@ class DailyRecap extends Component
     public function exportCSV()
     {
         $this->dispatch('toast', message: 'Fitur ekspor CSV sedang dalam pengembangan.', type: 'info');
+    }
+
+    public function exportExcel()
+    {
+        $fileName = 'Rekap_Harian_' . $this->selectedDate . '.xlsx';
+        return Excel::download(new DailyDataExport($this->selectedDate), $fileName);
+    }
+
+    public function importExcel()
+    {
+        $this->validate([
+            'importFile' => 'required|mimes:xlsx,xls'
+        ]);
+
+        try {
+            Excel::import(new DailyDataImport, $this->importFile);
+            
+            // Reopen the cashier session for the imported date by resetting actual_cash
+            if ($this->reopenSession) {
+                $recap = DailyRecapModel::where('date', $this->selectedDate)->first();
+                if ($recap) {
+                    $recap->update(['actual_cash' => 0, 'cash_note' => 'Sesi dibuka kembali setelah proses import data dari device lain.']);
+                }
+            }
+
+            $message = $this->reopenSession 
+                ? 'Data berhasil diimpor dan Sesi Kasir telah dibuka kembali!' 
+                : 'Data berhasil diimpor!';
+            $this->dispatch('toast', message: $message);
+            $this->reset('importFile');
+            $this->loadCashAudit();
+        } catch (\Exception $e) {
+            $this->dispatch('toast', message: 'Gagal mengimpor data: ' . $e->getMessage(), type: 'error');
+        }
     }
 }
