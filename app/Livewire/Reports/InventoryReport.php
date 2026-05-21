@@ -81,6 +81,12 @@ class InventoryReport extends Component
     }
 
 
+    public function exportExcel()
+    {
+        $filename = 'Laporan_Stok_' . Carbon::parse($this->selectedDate)->format('Ymd') . '.xlsx';
+        return \Maatwebsite\Excel\Facades\Excel::download(new \App\Exports\InventoryReportExport($this->selectedDate, $this->search, $this->filterCategory), $filename);
+    }
+
     public function render()
     {
         $query = Product::with('category')->where('is_active', true);

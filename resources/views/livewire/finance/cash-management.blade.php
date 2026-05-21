@@ -12,6 +12,12 @@
                 <input type="month" wire:model.live="filterMonth" class="border-none p-0 focus:ring-0 font-black text-sm bg-transparent dark:text-white">
             </div>
 
+            <button wire:click="exportExcel" wire:loading.attr="disabled" class="px-8 py-4 bg-green-500 text-white rounded-2xl shadow-xl shadow-green-500/20 font-black italic uppercase text-xs tracking-widest transform hover:-translate-y-1 transition-all flex items-center">
+                <svg class="w-4 h-4 mr-3" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+                <span wire:loading.remove wire:target="exportExcel">Export Excel</span>
+                <span wire:loading wire:target="exportExcel">Mengekspor...</span>
+            </button>
+
             <button wire:click="openModal" class="px-8 py-4 bg-primary-blue text-white rounded-2xl shadow-xl shadow-blue-500/20 font-black italic uppercase text-xs tracking-widest transform hover:-translate-y-1 transition-all flex items-center">
                 <svg class="w-4 h-4 mr-3" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
                 Catat Kas Baru
@@ -69,6 +75,7 @@
                 <thead class="bg-gray-50 dark:bg-gray-900/50">
                     <tr>
                         <th class="px-10 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">Tanggal</th>
+                        <th class="px-10 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">Kas / Rekening</th>
                         <th class="px-10 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">Keterangan</th>
                         <th class="px-10 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">Jenis</th>
                         <th class="px-10 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right">Nominal</th>
@@ -82,8 +89,13 @@
                             <span class="text-sm font-black text-gray-800 dark:text-white uppercase">{{ \Carbon\Carbon::parse($tx->date)->translatedFormat('d M Y') }}</span>
                         </td>
                         <td class="px-10 py-8">
+                            <div class="text-sm font-black text-gray-800 dark:text-white uppercase tracking-tight mb-2">{{ $tx->name ?? '-' }}</div>
+                            <span class="px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest {{ $tx->cash_type === 'modal' ? 'bg-primary-blue/10 text-primary-blue' : 'bg-green-500/10 text-green-500' }}">
+                                {{ $tx->cash_type === 'modal' ? 'Kas Modal' : 'Kas Keuntungan' }}
+                            </span>
+                        </td>
+                        <td class="px-10 py-8">
                             <div class="text-sm font-black text-gray-800 dark:text-white tracking-tight">{{ $tx->description }}</div>
-                            <div class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mt-1">Sumber/Tujuan: <span class="text-primary-blue">{{ $tx->cash_type }}</span></div>
                         </td>
                         <td class="px-10 py-8">
                             @if($tx->type === 'income')
@@ -97,11 +109,17 @@
                                 {{ $tx->type === 'income' ? '+' : '-' }}Rp{{ number_format($tx->amount, 0, ',', '.') }}
                             </span>
                         </td>
-                        <td class="px-10 py-8 text-right">
+                        <td class="px-10 py-8 text-right flex justify-end gap-2">
+                            <button 
+                                wire:click="editTransaction({{ $tx->id }})"
+                                class="p-3 bg-white dark:bg-gray-700 text-primary-blue rounded-xl shadow-sm hover:scale-110 transition-transform border border-gray-100 dark:border-gray-600"
+                            >
+                                <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
+                            </button>
                             <button 
                                 wire:click="deleteTransaction({{ $tx->id }})"
                                 wire:confirm="Apakah Anda yakin ingin menghapus catatan kas ini?"
-                                class="p-3 bg-red-50 dark:bg-red-900/20 text-red-400 hover:text-red-600 rounded-xl transition-all"
+                                class="p-3 bg-red-50 dark:bg-red-900/20 text-red-400 hover:text-red-600 rounded-xl hover:scale-110 transition-transform"
                             >
                                 <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
                             </button>
@@ -109,7 +127,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="5" class="px-10 py-32 text-center opacity-20">
+                        <td colspan="6" class="px-10 py-32 text-center opacity-20">
                             <p class="text-xs font-black uppercase tracking-widest italic">Tidak ada catatan kas bulan ini</p>
                         </td>
                     </tr>
@@ -145,7 +163,7 @@
                         <svg class="w-8 h-8" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
                     </button>
                 </div>
-                <h3 class="text-3xl font-black italic uppercase tracking-tighter mb-1">Catat Kas Baru</h3>
+                <h3 class="text-3xl font-black italic uppercase tracking-tighter mb-1">{{ $editingId ? 'Edit Kas' : 'Catat Kas Baru' }}</h3>
             </div>
 
             <div class="p-10 space-y-6">
@@ -153,20 +171,29 @@
                 <div>
                     <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4 mb-2">Sumber / Tujuan Kas</label>
                     <div class="grid grid-cols-2 gap-4">
-                        <label class="cursor-pointer relative">
+                        <label class="cursor-pointer relative h-full">
                             <input type="radio" wire:model="cashType" value="modal" class="peer sr-only">
-                            <div class="text-center px-4 py-4 rounded-2xl border-2 border-gray-100 dark:border-gray-800 text-gray-400 font-black uppercase text-xs tracking-widest peer-checked:border-primary-blue peer-checked:bg-primary-blue/10 peer-checked:text-primary-blue transition-all">
-                                Kas Modal
+                            <div class="flex flex-col items-center justify-center text-center px-4 py-4 rounded-2xl border-2 border-gray-100 dark:border-gray-800 text-gray-400 font-black uppercase text-xs tracking-widest peer-checked:border-primary-blue peer-checked:bg-primary-blue/10 peer-checked:text-primary-blue transition-all h-full">
+                                <span>Kas Modal</span>
+                                <span class="text-[9px] font-bold opacity-70 mt-1 normal-case tracking-normal">(Uang Belanja Stok)</span>
                             </div>
                         </label>
-                        <label class="cursor-pointer relative">
+                        <label class="cursor-pointer relative h-full">
                             <input type="radio" wire:model="cashType" value="keuntungan" class="peer sr-only">
-                            <div class="text-center px-4 py-4 rounded-2xl border-2 border-gray-100 dark:border-gray-800 text-gray-400 font-black uppercase text-xs tracking-widest peer-checked:border-primary-blue peer-checked:bg-primary-blue/10 peer-checked:text-primary-blue transition-all">
-                                Kas Keuntungan
+                            <div class="flex flex-col items-center justify-center text-center px-4 py-4 rounded-2xl border-2 border-gray-100 dark:border-gray-800 text-gray-400 font-black uppercase text-xs tracking-widest peer-checked:border-primary-blue peer-checked:bg-primary-blue/10 peer-checked:text-primary-blue transition-all h-full">
+                                <span>Kas Keuntungan</span>
+                                <span class="text-[9px] font-bold opacity-70 mt-1 normal-case tracking-normal">(Laba Bersih Toko)</span>
                             </div>
                         </label>
                     </div>
                     @error('cashType') <span class="text-primary-red text-xs mt-1 block ml-4">{{ $message }}</span> @enderror
+                </div>
+
+                <!-- Nama Kas -->
+                <div>
+                    <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4 mb-2">Nama Kas / Rekening</label>
+                    <input type="text" wire:model="name" class="w-full px-6 py-4 bg-gray-50 dark:bg-gray-800 border-none rounded-2xl focus:ring-4 focus:ring-primary-blue/10 font-black text-gray-800 dark:text-white" placeholder="Contoh: Kas Laci, Rekening BCA, dll">
+                    @error('name') <span class="text-primary-red text-xs mt-1 block ml-4">{{ $message }}</span> @enderror
                 </div>
 
                 <!-- Tipe -->
@@ -213,7 +240,7 @@
 
             <div class="p-10 bg-gray-50 dark:bg-gray-800/50 flex justify-end">
                 <button wire:click="saveTransaction" class="px-10 py-4 bg-primary-blue text-white rounded-2xl font-black italic uppercase text-xs tracking-widest shadow-xl shadow-blue-500/30 hover:scale-105 active:scale-95 transition-all">
-                    Simpan Data Kas
+                    {{ $editingId ? 'Simpan Perubahan' : 'Simpan Data Kas' }}
                 </button>
             </div>
         </div>

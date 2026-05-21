@@ -29,6 +29,67 @@ class MonthlyRecap extends Component
         }
     }
 
+    public function exportExcel()
+    {
+        $query = Transaction::with(['product.category'])
+            ->whereMonth('transacted_at', $this->selectedMonth)
+            ->whereYear('transacted_at', $this->selectedYear);
+
+        $allTransactions = $query->get();
+
+        $totalRevenueAll = $allTransactions->sum('total_price');
+        $totalRevenueReal = $allTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->sum('total_price');
+        $totalSupplierHak = $allTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])
+            ->whereNotNull('supplier_id')
+            ->sum(fn($tx) => ($tx->unit_price - $tx->unit_profit) * $tx->quantity);
+        $totalInternalRevenue = $totalRevenueReal - $totalSupplierHak;
+        $totalProfit = $allTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->sum(fn($tx) => $tx->unit_profit * $tx->quantity);
+        $totalModal = $allTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->sum(fn($tx) => ($tx->unit_price - $tx->unit_profit) * $tx->quantity);
+        $daysCount = $allTransactions->pluck('transacted_at')->map(fn($date) => Carbon::parse($date)->format('Y-m-d'))->unique()->count();
+
+        $recap = (object) [
+            'total_revenue_all' => $totalRevenueAll,
+            'total_revenue_real' => $totalRevenueReal,
+            'total_internal_revenue' => $totalInternalRevenue,
+            'total_profit' => $totalProfit,
+            'total_modal' => $totalModal,
+            'total_transactions' => $allTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->count(),
+            'days_count' => $daysCount ?: 1
+        ];
+
+        $dailyBreakdown = Transaction::selectRaw('
+                DATE(transacted_at) as date,
+                COUNT(*) as total_transactions,
+                SUM(total_price) as total_revenue_all,
+                SUM(CASE WHEN status IN ("uang_diterima", "belum_kembalian") THEN total_price ELSE 0 END) as total_revenue_real
+            ')
+            ->whereMonth('transacted_at', $this->selectedMonth)
+            ->whereYear('transacted_at', $this->selectedYear)
+            ->groupBy('date')
+            ->orderBy('date', 'desc')
+            ->get();
+
+        foreach ($dailyBreakdown as $day) {
+            $dayTransactions = Transaction::whereDate('transacted_at', $day->date)->whereIn('status', ['uang_diterima', 'belum_kembalian'])->get();
+            $day->total_profit = $dayTransactions->sum(fn($tx) => $tx->unit_profit * $tx->quantity);
+        }
+
+        $categoryRecap = $allTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->groupBy(fn($tx) => $tx->product->category->name ?? 'Tanpa Kategori')
+            ->map(function($group) {
+                return (object) [
+                    'revenue' => $group->sum('total_price'),
+                    'profit' => $group->sum(fn($tx) => $tx->unit_profit * $tx->quantity),
+                    'modal' => $group->sum(fn($tx) => ($tx->unit_price - $tx->unit_profit) * $tx->quantity),
+                    'qty' => $group->sum('quantity'),
+                ];
+            })->sortByDesc('revenue');
+
+        $monthName = \Carbon\Carbon::create(null, $this->selectedMonth)->translatedFormat('F') . ' ' . $this->selectedYear;
+        $filename = 'Rekap_Bulanan_' . str_replace(' ', '_', $monthName) . '.xlsx';
+
+        return \Maatwebsite\Excel\Facades\Excel::download(new \App\Exports\MonthlyRecapExport($recap, $categoryRecap, $dailyBreakdown, $monthName), $filename);
+    }
+
     public function render()
     {
         $query = Transaction::with(['product.category'])

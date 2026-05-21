@@ -16,9 +16,10 @@
             </div>
 
             @if($recap)
-            <button onclick="exportYearlyExcel('Rekap_Tahunan_{{ $selectedYear }}')" class="px-8 py-4 bg-primary-red text-white rounded-2xl shadow-xl shadow-red-500/20 font-black italic uppercase text-xs tracking-widest transform hover:-translate-y-1 transition-all flex items-center">
+            <button wire:click="exportExcel" wire:loading.attr="disabled" class="px-8 py-4 bg-primary-red text-white rounded-2xl shadow-xl shadow-red-500/20 font-black italic uppercase text-xs tracking-widest transform hover:-translate-y-1 transition-all flex items-center">
                 <svg class="w-4 h-4 mr-3" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
-                Export XLSX
+                <span wire:loading.remove wire:target="exportExcel">Export XLSX</span>
+                <span wire:loading wire:target="exportExcel">Mengekspor...</span>
             </button>
             @endif
         </div>
@@ -159,142 +160,7 @@
             </table>
         </div>
 
-    <!-- Export Options -->
-    <div class="fixed bottom-10 right-10 z-[100]" x-data="{ open: false }">
-        <button @click="open = !open" class="px-10 py-5 bg-primary-red text-white rounded-[2rem] shadow-2xl shadow-red-500/40 font-black italic uppercase text-sm tracking-[0.2em] transform hover:-translate-y-2 hover:scale-105 transition-all flex items-center gap-4 group">
-            <svg class="w-6 h-6 group-hover:rotate-12 transition-transform" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            <span>Export Data</span>
-        </button>
-        
-        <div x-show="open" @click.away="open = false" x-cloak x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4 scale-95" x-transition:enter-end="opacity-100 translate-y-0 scale-100" class="absolute bottom-full right-0 mb-6 w-72 bg-white dark:bg-gray-900 rounded-[2.5rem] shadow-2xl border border-gray-100 dark:border-gray-800 p-4 flex flex-col gap-2">
-            <button @click="exportYearlyData('xlsx'); open = false" class="flex items-center gap-4 px-6 py-4 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-2xl transition-all text-left group">
-                <div class="w-12 h-12 bg-green-100 dark:bg-green-900/30 text-green-600 rounded-xl flex items-center justify-center font-black italic text-xs">XLSX</div>
-                <div>
-                    <p class="text-xs font-black text-gray-800 dark:text-white uppercase tracking-wider">Microsoft Excel</p>
-                    <p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mt-0.5">Format Tabel Berwarna</p>
-                </div>
-            </button>
-            <button @click="exportYearlyData('csv'); open = false" class="flex items-center gap-4 px-6 py-4 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-2xl transition-all text-left group">
-                <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 text-blue-600 rounded-xl flex items-center justify-center font-black italic text-xs">CSV</div>
-                <div>
-                    <p class="text-xs font-black text-gray-800 dark:text-white uppercase tracking-wider">Comma Separated</p>
-                    <p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mt-0.5">Format Data Mentah</p>
-                </div>
-            </button>
-        </div>
-    </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
-    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
-    <script>
-        async function exportYearlyData(format = 'xlsx') {
-            const filename = `Rekap_Tahunan_{{ $selectedYear }}`;
-
-            if (format === 'csv') {
-                const wb = XLSX.utils.book_new();
-                const summaryData = [
-                    ["LAPORAN REKAP TAHUNAN - LABANTIK"],
-                    ["Tahun", "{{ $selectedYear }}"],
-                    ["Total Omzet", {{ $recap->total_revenue_real ?? 0 }}],
-                    ["Total Profit", {{ $recap->total_profit ?? 0 }}]
-                ];
-                const ws = XLSX.utils.aoa_to_sheet(summaryData);
-                XLSX.utils.book_append_sheet(wb, ws, "Rekap");
-                XLSX.writeFile(wb, `${filename}.csv`, { bookType: 'csv' });
-                return;
-            }
-
-            // ExcelJS for Styled XLSX
-            const workbook = new ExcelJS.Workbook();
-            const sheet = workbook.addWorksheet('Ringkasan');
-
-            sheet.columns = [
-                { header: '', key: 'col1', width: 35 },
-                { header: '', key: 'col2', width: 25 },
-                { header: '', key: 'col3', width: 20 },
-                { header: '', key: 'col4', width: 20 },
-                { header: '', key: 'col5', width: 20 }
-            ];
-
-            // 1. Header
-            const titleRow = sheet.addRow(['LAPORAN REKAP TAHUNAN - LABANTIK']);
-            titleRow.font = { name: 'Arial Black', size: 16, italic: true, color: { argb: 'FF1E40AF' } };
-            sheet.addRow(['Tahun', "{{ $selectedYear }}"]);
-            sheet.addRow(['Dicetak Pada', new Date().toLocaleString('id-ID')]);
-            sheet.addRow([]);
-
-            // 2. Summary Table
-            const summaryHeader = sheet.addRow(['RINGKASAN UTAMA']);
-            summaryHeader.font = { bold: true, color: { argb: 'FFFFFFFF' } };
-            summaryHeader.getCell(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1E40AF' } };
-
-            const dataRows = [
-                ["Total Omzet Tahunan", {{ $recap->total_revenue_real ?? 0 }}],
-                ["Omzet Internal (Murni Jurusan)", {{ $recap->total_internal_revenue ?? 0 }}],
-                ["Total Omzet Kotor", {{ $recap->total_revenue_all ?? 0 }}],
-                ["Total Keuntungan", {{ $recap->total_profit ?? 0 }}],
-                ["Total Modal Berjalan", {{ $recap->total_modal ?? 0 }}],
-                ["Total Transaksi", {{ $recap->total_transactions ?? 0 }}]
-            ];
-
-            dataRows.forEach(row => {
-                const r = sheet.addRow(row);
-                r.getCell(2).numFmt = '#,##0';
-            });
-
-            sheet.addRow([]);
-
-            // 3. Category Table
-            const catHeader = sheet.addRow(['Kategori', 'Volume', 'Modal', 'Keuntungan', 'Omzet']);
-            catHeader.eachCell(cell => {
-                cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
-                cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFEF4444' } };
-                cell.alignment = { horizontal: 'center' };
-                cell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
-            });
-
-            @foreach($categoryRecap as $catName => $stats)
-                {
-                    const catRow = sheet.addRow(["{{ $catName }}", {{ $stats->qty }}, {{ $stats->modal }}, {{ $stats->profit }}, {{ $stats->revenue }}]);
-                    catRow.eachCell((cell, colNumber) => {
-                        if (colNumber > 2) cell.numFmt = '#,##0';
-                        cell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
-                    });
-                }
-            @endforeach
-
-            // 4. Monthly Trend Sheet
-            const trendSheet = workbook.addWorksheet('Tren Bulanan');
-            trendSheet.columns = [
-                { header: 'Bulan', key: 'month', width: 25 },
-                { header: 'Transaksi', key: 'tx', width: 15 },
-                { header: 'Pendapatan', key: 'rev', width: 25 },
-                { header: 'Profit', key: 'profit', width: 25 }
-            ];
-
-            const tHeader = trendSheet.getRow(1);
-            tHeader.font = { bold: true, color: { argb: 'FFFFFFFF' } };
-            tHeader.eachCell(cell => {
-                cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1E40AF' } };
-                cell.alignment = { horizontal: 'center' };
-            });
-
-            @foreach($monthlyBreakdown as $month)
-                trendSheet.addRow([
-                    "{{ \Carbon\Carbon::create(null, $month->month)->translatedFormat('F') }}",
-                    {{ $month->total_transactions }},
-                    {{ $month->total_revenue_real }},
-                    {{ $month->total_profit }}
-                ]).eachCell((cell, colNumber) => {
-                    if (colNumber > 2) cell.numFmt = '#,##0';
-                });
-            @endforeach
-
-            const buffer = await workbook.xlsx.writeBuffer();
-            saveAs(new Blob([buffer]), `${filename}.xlsx`);
-        }
-    </script>
     @else
     <div class="bg-white dark:bg-gray-800 rounded-[4rem] p-32 border border-gray-100 dark:border-gray-700 text-center flex flex-col items-center shadow-xl shadow-blue-900/5">
         <div class="w-32 h-32 bg-gray-50 dark:bg-gray-900 rounded-[2.5rem] flex items-center justify-center mb-10 text-gray-200 dark:text-gray-700 shadow-inner">

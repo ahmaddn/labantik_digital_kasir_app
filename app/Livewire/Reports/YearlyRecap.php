@@ -27,6 +27,63 @@ class YearlyRecap extends Component
         }
     }
 
+    public function exportExcel()
+    {
+        $query = Transaction::with(['product.category'])
+            ->whereYear('transacted_at', $this->selectedYear);
+
+        $allTransactions = $query->get();
+
+        $totalRevenueAll = $allTransactions->sum('total_price');
+        $totalRevenueReal = $allTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->sum('total_price');
+        
+        $totalSupplierHak = $allTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])
+            ->whereNotNull('supplier_id')
+            ->sum(fn($tx) => ($tx->unit_price - $tx->unit_profit) * $tx->quantity);
+            
+        $totalInternalRevenue = $totalRevenueReal - $totalSupplierHak;
+
+        $totalProfit = $allTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->sum(fn($tx) => $tx->unit_profit * $tx->quantity);
+        $totalModal = $allTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->sum(fn($tx) => ($tx->unit_price - $tx->unit_profit) * $tx->quantity);
+        $monthsCount = $allTransactions->pluck('transacted_at')->map(fn($date) => Carbon::parse($date)->format('Y-m'))->unique()->count();
+
+        $recap = (object) [
+            'total_revenue_all' => $totalRevenueAll,
+            'total_revenue_real' => $totalRevenueReal,
+            'total_internal_revenue' => $totalInternalRevenue,
+            'total_profit' => $totalProfit,
+            'total_modal' => $totalModal,
+            'total_transactions' => $allTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->count(),
+            'months_count' => $monthsCount ?: 1
+        ];
+
+        $monthlyBreakdown = [];
+        for ($m = 1; $m <= 12; $m++) {
+            $monthTransactions = $allTransactions->filter(fn($tx) => Carbon::parse($tx->transacted_at)->month == $m);
+            if ($monthTransactions->isNotEmpty()) {
+                $monthlyBreakdown[] = (object) [
+                    'month' => $m,
+                    'total_transactions' => $monthTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->count(),
+                    'total_revenue_real' => $monthTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->sum('total_price'),
+                    'total_profit' => $monthTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->sum(fn($tx) => $tx->unit_profit * $tx->quantity)
+                ];
+            }
+        }
+
+        $categoryRecap = $allTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->groupBy(fn($tx) => $tx->product->category->name ?? 'Tanpa Kategori')
+            ->map(function($group) {
+                return (object) [
+                    'revenue' => $group->sum('total_price'),
+                    'profit' => $group->sum(fn($tx) => $tx->unit_profit * $tx->quantity),
+                    'modal' => $group->sum(fn($tx) => ($tx->unit_price - $tx->unit_profit) * $tx->quantity),
+                    'qty' => $group->sum('quantity'),
+                ];
+            })->sortByDesc('revenue');
+
+        $filename = 'Rekap_Tahunan_' . $this->selectedYear . '.xlsx';
+        return \Maatwebsite\Excel\Facades\Excel::download(new \App\Exports\YearlyRecapExport($recap, $categoryRecap, $monthlyBreakdown, $this->selectedYear), $filename);
+    }
+
     public function render()
     {
         $query = Transaction::with(['product.category'])

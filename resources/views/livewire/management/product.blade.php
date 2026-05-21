@@ -152,8 +152,10 @@
                         <div class="col-span-3 px-4">Produk</div>
                         <div class="col-span-2 px-4 text-center">Kategori</div>
                         <div class="col-span-1 px-4 text-center">Supplier</div>
-                        <div class="col-span-2 px-4 text-center">Harga</div>
-                        <div class="col-span-2 px-4 text-center">Status</div>
+                        <div class="col-span-1 px-2 text-center">Harga</div>
+                        <div class="col-span-1 px-2 text-center">Modal</div>
+                        <div class="col-span-1 px-2 text-center">Profit</div>
+                        <div class="col-span-1 px-2 text-center">Status</div>
                         <div class="col-span-1 px-4 text-right">Opsi</div>
                     </div>
 
@@ -201,25 +203,27 @@
                                     @endif
                                 </div>
  
-                                <!-- Price & Profit -->
-                                <div class="col-span-2 px-4 text-center">
-                                    <div class="text-lg font-black text-primary-red italic">Rp{{ number_format($product->price, 0, ',', '.') }}</div>
-                                    <div class="flex items-center justify-center gap-2 mt-1">
-                                        <span class="text-[8px] font-bold text-gray-400 italic uppercase tracking-widest">M: Rp{{ number_format($product->modal_price, 0, ',', '.') }}</span>
-                                        <span class="text-[8px] font-black text-green-500 italic uppercase tracking-widest">P: Rp{{ number_format($product->profit_per_unit, 0, ',', '.') }}</span>
-                                    </div>
+                                <!-- Keuangan -->
+                                <div class="col-span-1 px-2 text-center truncate">
+                                    <div class="text-sm font-black text-primary-red italic truncate">Rp{{ number_format($product->price, 0, ',', '.') }}</div>
+                                </div>
+                                <div class="col-span-1 px-2 text-center truncate">
+                                    <div class="text-xs font-black text-gray-500 dark:text-gray-400 truncate">Rp{{ number_format($product->modal_price, 0, ',', '.') }}</div>
+                                </div>
+                                <div class="col-span-1 px-2 text-center truncate">
+                                    <div class="text-xs font-black text-green-500 truncate">Rp{{ number_format($product->price - $product->modal_price, 0, ',', '.') }}</div>
                                 </div>
  
                                 <!-- Status -->
-                                <div class="col-span-2 px-4">
+                                <div class="col-span-1 px-2">
                                     @if($product->is_active)
-                                        <span class="w-fit mx-auto flex items-center justify-center text-[9px] font-black text-green-500 uppercase tracking-widest bg-green-50 dark:bg-green-500/10 py-1.5 px-4 rounded-xl border border-green-100 dark:border-green-500/20">
-                                            <span class="w-1.5 h-1.5 bg-green-500 rounded-full mr-2 animate-pulse"></span>
+                                        <span class="w-fit mx-auto flex items-center justify-center text-[9px] font-black text-green-500 uppercase tracking-widest bg-green-50 dark:bg-green-500/10 py-1.5 px-2 rounded-xl border border-green-100 dark:border-green-500/20">
+                                            <span class="w-1.5 h-1.5 bg-green-500 rounded-full mr-1 animate-pulse"></span>
                                             Aktif
                                         </span>
                                     @else
-                                        <span class="w-fit mx-auto flex items-center justify-center text-[9px] font-black text-gray-400 uppercase tracking-widest bg-gray-50 dark:bg-gray-900 py-1.5 px-4 rounded-xl border border-gray-100 dark:border-gray-800">
-                                            <span class="w-1.5 h-1.5 bg-gray-400 rounded-full mr-2"></span>
+                                        <span class="w-fit mx-auto flex items-center justify-center text-[9px] font-black text-gray-400 uppercase tracking-widest bg-gray-50 dark:bg-gray-900 py-1.5 px-2 rounded-xl border border-gray-100 dark:border-gray-800">
+                                            <span class="w-1.5 h-1.5 bg-gray-400 rounded-full mr-1"></span>
                                             Nonaktif
                                         </span>
                                     @endif

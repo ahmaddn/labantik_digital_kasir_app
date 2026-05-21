@@ -17,9 +17,7 @@
         <div class="w-full max-w-md">
             <!-- Logo -->
             <div class="text-center mb-10">
-                <div class="inline-flex w-20 h-20 bg-primary-blue rounded-3xl items-center justify-center text-primary-yellow font-black text-4xl italic shadow-2xl shadow-blue-900/30 mb-4 transform -rotate-6">
-                    LA
-                </div>
+                <img src="{{ asset('favicon.png') }}" alt="LabAntik Logo" class="inline-flex w-20 h-20 mb-4 drop-shadow-2xl">
                 <h1 class="text-3xl font-black italic uppercase tracking-tighter text-primary-blue dark:text-primary-yellow">LabAntik</h1>
                 <p class="text-gray-400 font-bold text-xs uppercase tracking-widest mt-1">Sistem Kasir Digital Jurusan</p>
             </div>
