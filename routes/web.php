@@ -14,6 +14,7 @@ use App\Livewire\Reports\YearlyRecap;
 use App\Livewire\Reports\InventoryReport;
 use App\Livewire\Reports\SupplierReport;
 use App\Livewire\Reports\WeeklyProfit;
+use App\Livewire\Finance\CashManagement;
 
 Route::get('/', function () {
     return redirect()->route('dashboard');
@@ -26,7 +27,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/products', Product::class)->name('products');
     Route::get('/categories', Category::class)->name('categories');
     Route::get('/suppliers', Supplier::class)->name('suppliers');
-    Route::get('/kasir', Kasir::class)->name('kasir');
+    Route::get('/cashier', Kasir::class)->name('kasir');
 
     // Recaps
     Route::get('/daily-recap/{date?}', DailyRecap::class)->name('daily-recap');
@@ -35,7 +36,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/inventory-report', InventoryReport::class)->name('inventory-report');
     Route::get('/supplier-report', SupplierReport::class)->name('supplier-report');
     Route::get('/debts', Debt::class)->name('debts');
-    Route::get('/bagi-hasil', WeeklyProfit::class)->name('bagi-hasil');
+    Route::get('/profit-sharing', WeeklyProfit::class)->name('bagi-hasil');
+    
+    // Finance
+    Route::get('/cash-management', CashManagement::class)->name('buku-kas');
 });
 
 

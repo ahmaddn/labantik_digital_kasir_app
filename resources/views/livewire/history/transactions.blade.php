@@ -26,34 +26,34 @@
     <div class="bg-white dark:bg-gray-800 rounded-[3.5rem] shadow-2xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 overflow-hidden">
         <div class="px-10 py-6">
             <!-- Header Grid -->
-            <div class="grid grid-cols-12 items-center px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest bg-gray-50 dark:bg-gray-900/50 rounded-2xl mb-6">
-                <div class="col-span-2 px-4">Waktu</div>
-                <div class="col-span-2 px-4">No. Ref</div>
-                <div class="col-span-3 px-4">Pembeli</div>
-                <div class="col-span-1 px-4 text-center">Items</div>
-                <div class="col-span-2 px-4">Total Bayar</div>
-                <div class="col-span-1 px-4 text-center">Status</div>
-                <div class="col-span-1 px-4 text-right">Aksi</div>
+            <div class="grid grid-cols-[1.5fr_1.5fr_2fr_1fr_1.5fr_1.5fr_130px] items-center px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest bg-gray-50 dark:bg-gray-900/50 rounded-2xl mb-6">
+                <div class="px-4">Waktu</div>
+                <div class="px-4">No. Ref</div>
+                <div class="px-4">Pembeli</div>
+                <div class="px-4 text-center">Items</div>
+                <div class="px-4">Total Bayar</div>
+                <div class="px-4 text-center">Status</div>
+                <div class="px-4 text-right">Aksi</div>
             </div>
 
             <!-- List of Transactions -->
             <div class="space-y-4">
                 @forelse($transactions as $tx)
                 <div class="group transition-all duration-300">
-                    <div class="grid grid-cols-12 items-center p-6 rounded-[2.5rem] border-2 transition-all duration-500 {{ $highlight == $tx->reference ? 'bg-amber-400/10 border-amber-400 animate-highlight-breath z-10 relative' : 'bg-white dark:bg-gray-800/50 border-transparent group-hover:border-primary-blue/20' }}">
+                    <div class="grid grid-cols-[1.5fr_1.5fr_2fr_1fr_1.5fr_1.5fr_130px] items-center p-6 rounded-[2.5rem] border-2 transition-all duration-500 {{ $highlight == $tx->reference ? 'bg-amber-400/10 border-amber-400 animate-highlight-breath z-10 relative' : 'bg-white dark:bg-gray-800/50 border-transparent group-hover:border-primary-blue/20' }}">
                         <!-- Waktu -->
-                        <div class="col-span-2 px-4">
+                        <div class="px-4">
                             <div class="text-sm font-black text-gray-800 dark:text-white uppercase tracking-tight">{{ \Carbon\Carbon::parse($tx->transacted_at)->format('d M Y') }}</div>
                             <div class="text-[10px] font-bold text-gray-400 mt-1 uppercase tracking-widest">{{ \Carbon\Carbon::parse($tx->transacted_at)->format('H:i') }}</div>
                         </div>
 
                         <!-- No Ref -->
-                        <div class="col-span-2 px-4">
+                        <div class="px-4 min-w-0">
                             <div class="text-sm font-black text-primary-blue uppercase tracking-tight truncate">{{ $tx->reference }}</div>
                         </div>
 
                         <!-- Pembeli -->
-                        <div class="col-span-3 px-4">
+                        <div class="px-4 min-w-0">
                             <div class="flex items-center">
                                 <div class="w-8 h-8 rounded-lg bg-gray-50 dark:bg-gray-900 flex items-center justify-center text-[10px] font-black text-primary-blue border border-gray-100 dark:border-gray-800 mr-3 shrink-0">
                                     {{ substr($tx->buyer_name ?? 'G', 0, 1) }}
@@ -65,20 +65,20 @@
                         </div>
 
                         <!-- Items Count -->
-                        <div class="col-span-1 px-4 text-center">
+                        <div class="px-4 text-center">
                             <span class="px-3 py-1.5 bg-gray-100 dark:bg-gray-900 rounded-xl text-[10px] font-black text-gray-500 uppercase tracking-widest border border-gray-100 dark:border-gray-800">
                                 {{ $tx->total_qty }} <span class="text-[8px] opacity-50 ml-0.5">U</span>
                             </span>
                         </div>
 
                         <!-- Total Bayar -->
-                        <div class="col-span-2 px-4">
+                        <div class="px-4">
                             <div class="text-lg font-black text-primary-red italic">Rp{{ number_format($tx->total_amount, 0, ',', '.') }}</div>
                             <div class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mt-0.5">{{ $tx->unique_items }} Jenis Produk</div>
                         </div>
 
                         <!-- Status -->
-                        <div class="col-span-1 px-4 text-center">
+                        <div class="px-4 text-center min-w-0">
                             @php
                                 $statusColor = match($tx->status) {
                                     'uang_diterima' => 'bg-green-50 text-green-600 border-green-100 dark:bg-green-500/10 dark:text-green-500 dark:border-green-500/20',
@@ -86,13 +86,13 @@
                                     default => 'bg-red-50 text-red-600 border-red-100 dark:bg-red-500/10 dark:text-red-500 dark:border-red-500/20'
                                 };
                             @endphp
-                            <span class="px-3 py-1.5 {{ $statusColor }} border rounded-full text-[8px] font-black uppercase tracking-widest block truncate">
+                            <span class="py-1.5 {{ $statusColor }} border rounded-full text-[8px] font-black uppercase tracking-widest inline-block w-28 text-center truncate">
                                 {{ str_replace('_', ' ', $tx->status) }}
                             </span>
                         </div>
 
                         <!-- Aksi -->
-                        <div class="col-span-1 px-4 text-right flex justify-end gap-2">
+                        <div class="px-4 text-right flex justify-end gap-2">
                             <button wire:click="viewDetails('{{ $tx->reference }}')" class="p-2.5 bg-white dark:bg-gray-700 text-primary-blue rounded-xl shadow-sm hover:scale-110 transition-transform border border-gray-100 dark:border-gray-600">
                                 <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
                             </button>

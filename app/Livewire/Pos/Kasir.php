@@ -184,8 +184,8 @@ class Kasir extends Component
         }
         $this->showOpeningStockModal = false;
         $this->stockItems = [];
-        $this->dispatch('toast', message: 'Stok awal berhasil diperbarui.');
-        $this->dispatch('stock-saved', products: $this->getProductsForAlpine());
+        session()->flash('toast', 'Stok awal berhasil diperbarui.');
+        $this->redirectRoute('kasir', navigate: true);
     }
 
     public function finishSession(): void

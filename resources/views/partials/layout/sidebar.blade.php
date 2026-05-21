@@ -52,6 +52,12 @@
 
             <p class="text-[9px] font-black text-gray-400 uppercase tracking-[0.3em] mb-4 ml-5">Aktivitas Harian</p>
 
+            <a href="{{ route('buku-kas') }}"
+                class="flex items-center px-6 py-4 text-sm font-black rounded-2xl transition-all {{ request()->routeIs('buku-kas') ? 'bg-primary-blue text-white shadow-xl shadow-blue-900/20' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
+                <svg class="w-5 h-5 mr-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10h12"/><path d="M4 14h9"/><path d="M19 6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V8l-2-2Z"/></svg>
+                Buku Kas Internal
+            </a>
+
             <a href="{{ route('daily-recap') }}"
                 class="flex items-center px-6 py-4 text-sm font-black rounded-2xl transition-all {{ request()->routeIs('daily-recap') ? 'bg-primary-blue text-white shadow-xl shadow-blue-900/20' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
                 <svg class="w-5 h-5 mr-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" /><path d="M14 2v4a2 2 0 0 0 2 2h4" /><path d="M9 15h6" /><path d="M9 11h6" /><path d="M9 19h6" /></svg>

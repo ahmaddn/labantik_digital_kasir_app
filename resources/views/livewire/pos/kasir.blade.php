@@ -492,9 +492,9 @@ else document.documentElement.classList.remove('dark')"
     </div>
 
     <!-- Success Overlay -->
-    <div x-data="{ show: false }" x-on:transaction-complete.window="show = true; setTimeout(() => show = false, 2500)"
+    <div x-data="{ show: false }" x-on:transaction-complete.window="show = true; setTimeout(() => show = false, 1000)"
         x-show="show" 
-        x-transition:enter="transition ease-out duration-300"
+        x-transition:enter="transition ease-out duration-200"
         x-transition:enter-start="opacity-0"
         x-transition:enter-end="opacity-100"
         x-transition:leave="transition ease-in duration-300"
@@ -513,7 +513,7 @@ else document.documentElement.classList.remove('dark')"
             
             <div class="mt-10 flex items-center justify-center gap-2">
                 <div class="h-2 w-24 bg-gray-100 dark:bg-slate-800 border-2 border-black dark:border-white overflow-hidden">
-                    <div class="h-full bg-primary-blue animate-[progress-brutal_2s_ease-in-out_forwards]"></div>
+                    <div class="h-full bg-primary-blue animate-[progress-brutal_1s_ease-in-out_forwards]"></div>
                 </div>
             </div>
         </div>

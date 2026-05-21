@@ -1,0 +1,221 @@
+<div class="p-6">
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between mb-10 gap-6">
+        <div>
+            <h1 class="text-4xl font-black italic uppercase tracking-tighter text-primary-blue dark:text-primary-blue-light">Buku Kas Internal</h1>
+            <p class="text-gray-400 font-bold text-xs uppercase tracking-[0.2em] italic">Pencatatan Uang Riil & Operasional</p>
+        </div>
+        
+        <div class="flex items-center gap-4">
+            <div class="flex items-center bg-white dark:bg-gray-800 px-6 py-3 rounded-2xl shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-800 transition-all">
+                <svg class="w-4 h-4 text-primary-blue mr-3" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
+                <input type="month" wire:model.live="filterMonth" class="border-none p-0 focus:ring-0 font-black text-sm bg-transparent dark:text-white">
+            </div>
+
+            <button wire:click="openModal" class="px-8 py-4 bg-primary-blue text-white rounded-2xl shadow-xl shadow-blue-500/20 font-black italic uppercase text-xs tracking-widest transform hover:-translate-y-1 transition-all flex items-center">
+                <svg class="w-4 h-4 mr-3" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+                Catat Kas Baru
+            </button>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+        <!-- Saldo Modal Card -->
+        <div class="bg-gray-900 rounded-[3rem] p-10 text-white shadow-2xl shadow-gray-900/20 relative overflow-hidden group border-b-8 border-primary-blue">
+            <div class="absolute -right-6 -bottom-6 opacity-10 group-hover:scale-110 transition-transform duration-700">
+                <svg class="w-40 h-40 text-white" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg>
+            </div>
+            <h3 class="text-[10px] font-black uppercase tracking-[0.3em] opacity-60 mb-3">Saldo Kas Modal</h3>
+            <p class="text-3xl font-black italic text-white {{ $currentModalBalance < 0 ? 'text-primary-red' : '' }}">Rp{{ number_format($currentModalBalance, 0, ',', '.') }}</p>
+        </div>
+
+        <!-- Saldo Keuntungan Card -->
+        <div class="bg-primary-blue rounded-[3rem] p-10 text-white shadow-2xl shadow-blue-900/20 relative overflow-hidden group border-b-8 border-white/20">
+            <div class="absolute -right-6 -bottom-6 opacity-10 group-hover:scale-110 transition-transform duration-700">
+                <svg class="w-40 h-40 text-white" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m16 12-4-4-4 4"/><path d="M12 16V8"/></svg>
+            </div>
+            <h3 class="text-[10px] font-black uppercase tracking-[0.3em] opacity-80 mb-3">Saldo Kas Keuntungan</h3>
+            <p class="text-3xl font-black italic text-white {{ $currentProfitBalance < 0 ? 'text-red-300' : '' }}">Rp{{ number_format($currentProfitBalance, 0, ',', '.') }}</p>
+        </div>
+
+        <!-- Pemasukan Card -->
+        <div class="bg-white dark:bg-gray-800 rounded-[3rem] p-10 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 relative overflow-hidden group">
+            <div class="absolute -right-6 -bottom-6 opacity-5 group-hover:scale-110 transition-transform duration-700">
+                <svg class="w-40 h-40 text-green-500" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+            </div>
+            <h3 class="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 mb-3">Pemasukan (Bulan Ini)</h3>
+            <p class="text-3xl font-black italic text-green-500">Rp{{ number_format($monthlyIncome, 0, ',', '.') }}</p>
+        </div>
+
+        <!-- Pengeluaran Card -->
+        <div class="bg-white dark:bg-gray-800 rounded-[3rem] p-10 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 relative overflow-hidden group">
+            <div class="absolute -right-6 -bottom-6 opacity-5 group-hover:scale-110 transition-transform duration-700">
+                <svg class="w-40 h-40 text-primary-red" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 17 13.5 8.5 8.5 13.5 2 7"/><polyline points="16 17 22 17 22 11"/></svg>
+            </div>
+            <h3 class="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 mb-3">Pengeluaran (Bulan Ini)</h3>
+            <p class="text-3xl font-black italic text-primary-red">Rp{{ number_format($monthlyExpense, 0, ',', '.') }}</p>
+        </div>
+    </div>
+
+    <!-- Table -->
+    <div class="bg-white dark:bg-gray-800 rounded-[3.5rem] shadow-2xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 overflow-hidden mb-12">
+        <div class="p-10 border-b border-gray-100 dark:border-gray-700">
+            <h2 class="text-2xl font-black italic uppercase tracking-tighter text-gray-800 dark:text-white">Riwayat Transaksi Kas</h2>
+        </div>
+        
+        <div class="overflow-x-auto">
+            <table class="w-full text-left">
+                <thead class="bg-gray-50 dark:bg-gray-900/50">
+                    <tr>
+                        <th class="px-10 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">Tanggal</th>
+                        <th class="px-10 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">Keterangan</th>
+                        <th class="px-10 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">Jenis</th>
+                        <th class="px-10 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right">Nominal</th>
+                        <th class="px-10 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-50 dark:divide-gray-700">
+                    @forelse($transactions as $tx)
+                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-900/30 transition-colors">
+                        <td class="px-10 py-8">
+                            <span class="text-sm font-black text-gray-800 dark:text-white uppercase">{{ \Carbon\Carbon::parse($tx->date)->translatedFormat('d M Y') }}</span>
+                        </td>
+                        <td class="px-10 py-8">
+                            <div class="text-sm font-black text-gray-800 dark:text-white tracking-tight">{{ $tx->description }}</div>
+                            <div class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mt-1">Sumber/Tujuan: <span class="text-primary-blue">{{ $tx->cash_type }}</span></div>
+                        </td>
+                        <td class="px-10 py-8">
+                            @if($tx->type === 'income')
+                                <span class="px-4 py-1.5 bg-green-100 text-green-700 rounded-full text-[9px] font-black uppercase tracking-widest">Masuk</span>
+                            @else
+                                <span class="px-4 py-1.5 bg-red-100 text-red-700 rounded-full text-[9px] font-black uppercase tracking-widest">Keluar</span>
+                            @endif
+                        </td>
+                        <td class="px-10 py-8 text-right">
+                            <span class="text-lg font-black italic {{ $tx->type === 'income' ? 'text-green-500' : 'text-primary-red' }}">
+                                {{ $tx->type === 'income' ? '+' : '-' }}Rp{{ number_format($tx->amount, 0, ',', '.') }}
+                            </span>
+                        </td>
+                        <td class="px-10 py-8 text-right">
+                            <button 
+                                wire:click="deleteTransaction({{ $tx->id }})"
+                                wire:confirm="Apakah Anda yakin ingin menghapus catatan kas ini?"
+                                class="p-3 bg-red-50 dark:bg-red-900/20 text-red-400 hover:text-red-600 rounded-xl transition-all"
+                            >
+                                <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+                            </button>
+                        </td>
+                    </tr>
+                    @empty
+                    <tr>
+                        <td colspan="5" class="px-10 py-32 text-center opacity-20">
+                            <p class="text-xs font-black uppercase tracking-widest italic">Tidak ada catatan kas bulan ini</p>
+                        </td>
+                    </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+        <div class="px-10 py-8 bg-gray-50 dark:bg-gray-900/50">
+            {{ $transactions->links('livewire.partials.custom-pagination') }}
+        </div>
+    </div>
+
+    <!-- Modal Form -->
+    <div 
+        x-data="{ show: @entangle('showModal') }" 
+        x-show="show" 
+        x-cloak
+        class="fixed inset-0 z-[300] flex items-center justify-center p-6 bg-gray-900/60 backdrop-blur-sm"
+        x-transition:enter="transition ease-out duration-300"
+        x-transition:enter-start="opacity-0"
+        x-transition:enter-end="opacity-100"
+        x-transition:leave="transition ease-in duration-200"
+        x-transition:leave-start="opacity-100"
+        x-transition:leave-end="opacity-0"
+    >
+        <div 
+            @click.away="show = false"
+            class="bg-white dark:bg-gray-900 w-full max-w-lg rounded-[3rem] shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-300"
+        >
+            <div class="p-10 bg-primary-blue text-white relative">
+                <div class="absolute right-10 top-10">
+                    <button @click="show = false" class="text-white/50 hover:text-white transition-colors">
+                        <svg class="w-8 h-8" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                    </button>
+                </div>
+                <h3 class="text-3xl font-black italic uppercase tracking-tighter mb-1">Catat Kas Baru</h3>
+            </div>
+
+            <div class="p-10 space-y-6">
+                <!-- Sumber/Tujuan Kas -->
+                <div>
+                    <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4 mb-2">Sumber / Tujuan Kas</label>
+                    <div class="grid grid-cols-2 gap-4">
+                        <label class="cursor-pointer relative">
+                            <input type="radio" wire:model="cashType" value="modal" class="peer sr-only">
+                            <div class="text-center px-4 py-4 rounded-2xl border-2 border-gray-100 dark:border-gray-800 text-gray-400 font-black uppercase text-xs tracking-widest peer-checked:border-primary-blue peer-checked:bg-primary-blue/10 peer-checked:text-primary-blue transition-all">
+                                Kas Modal
+                            </div>
+                        </label>
+                        <label class="cursor-pointer relative">
+                            <input type="radio" wire:model="cashType" value="keuntungan" class="peer sr-only">
+                            <div class="text-center px-4 py-4 rounded-2xl border-2 border-gray-100 dark:border-gray-800 text-gray-400 font-black uppercase text-xs tracking-widest peer-checked:border-primary-blue peer-checked:bg-primary-blue/10 peer-checked:text-primary-blue transition-all">
+                                Kas Keuntungan
+                            </div>
+                        </label>
+                    </div>
+                    @error('cashType') <span class="text-primary-red text-xs mt-1 block ml-4">{{ $message }}</span> @enderror
+                </div>
+
+                <!-- Tipe -->
+                <div>
+                    <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4 mb-2">Jenis Transaksi</label>
+                    <div class="grid grid-cols-2 gap-4">
+                        <label class="cursor-pointer relative">
+                            <input type="radio" wire:model="type" value="income" class="peer sr-only">
+                            <div class="text-center px-4 py-4 rounded-2xl border-2 border-gray-100 dark:border-gray-800 text-gray-400 font-black uppercase text-xs tracking-widest peer-checked:border-green-500 peer-checked:bg-green-500/10 peer-checked:text-green-500 transition-all">
+                                Pemasukan
+                            </div>
+                        </label>
+                        <label class="cursor-pointer relative">
+                            <input type="radio" wire:model="type" value="expense" class="peer sr-only">
+                            <div class="text-center px-4 py-4 rounded-2xl border-2 border-gray-100 dark:border-gray-800 text-gray-400 font-black uppercase text-xs tracking-widest peer-checked:border-primary-red peer-checked:bg-primary-red/10 peer-checked:text-primary-red transition-all">
+                                Pengeluaran
+                            </div>
+                        </label>
+                    </div>
+                    @error('type') <span class="text-primary-red text-xs mt-1 block ml-4">{{ $message }}</span> @enderror
+                </div>
+
+                <!-- Tanggal -->
+                <div>
+                    <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4 mb-2">Tanggal</label>
+                    <input type="date" wire:model="date" class="w-full px-6 py-4 bg-gray-50 dark:bg-gray-800 border-none rounded-2xl focus:ring-4 focus:ring-primary-blue/10 font-black text-gray-800 dark:text-white">
+                    @error('date') <span class="text-primary-red text-xs mt-1 block ml-4">{{ $message }}</span> @enderror
+                </div>
+
+                <!-- Nominal -->
+                <div>
+                    <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4 mb-2">Nominal (Rp)</label>
+                    <input type="number" wire:model="amount" class="w-full px-6 py-4 bg-gray-50 dark:bg-gray-800 border-none rounded-2xl focus:ring-4 focus:ring-primary-blue/10 font-black text-2xl text-gray-800 dark:text-white" placeholder="0">
+                    @error('amount') <span class="text-primary-red text-xs mt-1 block ml-4">{{ $message }}</span> @enderror
+                </div>
+
+                <!-- Keterangan -->
+                <div>
+                    <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4 mb-2">Keterangan / Deskripsi</label>
+                    <input type="text" wire:model="description" class="w-full px-6 py-4 bg-gray-50 dark:bg-gray-800 border-none rounded-2xl focus:ring-4 focus:ring-primary-blue/10 font-black text-gray-800 dark:text-white" placeholder="Contoh: Beli Galon & Kopi">
+                    @error('description') <span class="text-primary-red text-xs mt-1 block ml-4">{{ $message }}</span> @enderror
+                </div>
+            </div>
+
+            <div class="p-10 bg-gray-50 dark:bg-gray-800/50 flex justify-end">
+                <button wire:click="saveTransaction" class="px-10 py-4 bg-primary-blue text-white rounded-2xl font-black italic uppercase text-xs tracking-widest shadow-xl shadow-blue-500/30 hover:scale-105 active:scale-95 transition-all">
+                    Simpan Data Kas
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

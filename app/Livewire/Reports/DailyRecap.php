@@ -215,12 +215,10 @@ class DailyRecap extends Component
                 }
             }
 
-            $message = $this->reopenSession 
+            session()->flash('toast', $this->reopenSession 
                 ? 'Data berhasil diimpor dan Sesi Kasir telah dibuka kembali!' 
-                : 'Data berhasil diimpor!';
-            $this->dispatch('toast', message: $message);
-            $this->reset('importFile');
-            $this->loadCashAudit();
+                : 'Data berhasil diimpor!');
+            return $this->redirect(route('daily-recap', ['date' => $this->selectedDate]), navigate: true);
         } catch (\Exception $e) {
             $this->dispatch('toast', message: 'Gagal mengimpor data: ' . $e->getMessage(), type: 'error');
         }
