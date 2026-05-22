@@ -15,6 +15,8 @@ class Kasir extends Component
 {
     use WithPagination;
 
+    public $transactionDate;
+
     // UI State
     public $rightSidebarTab = 'cart';
 
@@ -30,6 +32,8 @@ class Kasir extends Component
 
     public function mount(): void
     {
+        $this->transactionDate = now()->toDateString();
+        
         // Check if session for today is already finished
         $isTodayFinished = DailyRecap::whereDate('date', now())
             ->where('actual_cash', '>', 0)
@@ -110,7 +114,7 @@ class Kasir extends Component
 
     public function editOpeningStock(): void
     {
-        $today = now()->toDateString();
+        $today = $this->transactionDate ?: now()->toDateString();
         
         $lastSessionDate = StockEntry::where('date', '<', $today)
             ->orderBy('date', 'desc')
@@ -167,7 +171,7 @@ class Kasir extends Component
 
     public function saveOpeningStock(): void
     {
-        $today = now()->toDateString();
+        $today = $this->transactionDate ?: now()->toDateString();
         foreach ($this->stockItems as $productId => $qty) {
             $entry = StockEntry::updateOrCreate(
                 ['product_id' => $productId, 'date' => $today],
@@ -190,7 +194,7 @@ class Kasir extends Component
 
     public function finishSession(): void
     {
-        $today = now()->toDateString();
+        $today = $this->transactionDate ?: now()->toDateString();
         $allProducts = Product::where('is_active', true)->get();
         foreach ($allProducts as $p) {
             $entry = StockEntry::where('product_id', $p->id)->where('date', $today)->first();
@@ -206,7 +210,7 @@ class Kasir extends Component
 
     public function saveClosingStock(): void
     {
-        $today = now()->toDateString();
+        $today = $this->transactionDate ?: now()->toDateString();
         foreach ($this->stockItems as $productId => $qty) {
             StockEntry::updateOrCreate(
                 ['product_id' => $productId, 'date' => $today],
@@ -227,9 +231,15 @@ class Kasir extends Component
         $this->redirectRoute('dashboard', navigate: true);
     }
 
-    public function checkout($cart, $total, $change, $buyer_name, $status, $note): void
+    public function checkout($cart, $total, $change, $buyer_name, $status, $note, $transactionDate = null): void
     {
         if (empty($cart)) return;
+
+        $tDate = $transactionDate ?: now()->toDateString();
+        $isBackdate = $tDate < now()->toDateString();
+        
+        // Ensure time is preserved if it's today, otherwise use current time on that past date
+        $transactedAt = $tDate === now()->toDateString() ? now() : \Carbon\Carbon::parse($tDate . ' ' . now()->format('H:i:s'));
 
         $cleanName = preg_replace('/[^A-Za-z0-9]/', '', $buyer_name ?: 'GUEST');
         $initials = strtoupper(substr($cleanName, 0, 2));
@@ -241,7 +251,7 @@ class Kasir extends Component
                 'user_id' => auth()->id(),
                 'product_id' => $item['id'],
                 'supplier_id' => $item['supplier_id'] ?? null,
-                'transacted_at' => now(),
+                'transacted_at' => $transactedAt,
                 'buyer_name' => $buyer_name ?: null,
                 'quantity' => $item['quantity'],
                 'unit_price' => $item['price'],
@@ -252,6 +262,27 @@ class Kasir extends Component
                 'status' => $status,
                 'note' => $note ?: ($change > 0 ? 'Kembalian: Rp' . number_format($change, 0, ',', '.') : null),
             ]);
+
+            // Cascading stock reduction if backdating
+            if ($isBackdate) {
+                // Find all StockEntry from this date to today
+                $entries = StockEntry::where('product_id', $item['id'])
+                    ->where('date', '>=', $tDate)
+                    ->orderBy('date', 'asc')
+                    ->get();
+                
+                foreach ($entries as $entry) {
+                    if ($entry->date === $tDate) {
+                        // For the transaction date, only reduce the closing stock
+                        $entry->closing_stock -= $item['quantity'];
+                    } else {
+                        // For subsequent dates, reduce both opening and closing stock
+                        $entry->opening_stock -= $item['quantity'];
+                        $entry->closing_stock -= $item['quantity'];
+                    }
+                    $entry->save();
+                }
+            }
         }
 
         $this->dispatch('toast', message: 'Transaksi berhasil disimpan!');
@@ -279,8 +310,9 @@ class Kasir extends Component
     #[Computed]
     public function recentTransactions()
     {
+        $today = $this->transactionDate ?: now()->toDateString();
         return Transaction::query()
-            ->whereDate('transacted_at', today())
+            ->whereDate('transacted_at', $today)
             ->selectRaw('reference, buyer_name, status, transacted_at, SUM(total_price) as total_amount, SUM(quantity) as total_qty')
             ->groupBy('reference', 'buyer_name', 'status', 'transacted_at')
             ->latest('transacted_at')
@@ -291,7 +323,7 @@ class Kasir extends Component
     #[Computed]
     public function stockComparison()
     {
-        $today = now()->toDateString();
+        $today = $this->transactionDate ?: now()->toDateString();
         return Product::where('is_active', true)
             ->whereHas('stockEntries', function($q) use ($today) {
                 $q->where('date', $today)->where('opening_stock', '>', 0);

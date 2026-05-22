@@ -17,6 +17,7 @@ class Transactions extends Component
 
     public $search = '';
     public $filterStatus = '';
+    public $filterDate = '';
     public $successMessage = '';
 
     // Details Modal
@@ -31,7 +32,7 @@ class Transactions extends Component
     public $editItems = []; // Array of transaction items for editing
 
 
-    protected $queryString = ['search', 'filterStatus'];
+    protected $queryString = ['search', 'filterStatus', 'filterDate'];
 
     public function updatedSearch()
     {
@@ -43,8 +44,41 @@ class Transactions extends Component
         $this->resetPage();
     }
 
+    public function updatedFilterDate()
+    {
+        $this->resetPage();
+    }
+
+    private function cascadeStockUpdate($productId, $date, $quantityDiff)
+    {
+        $tDate = Carbon::parse($date)->toDateString();
+        $isBackdate = $tDate < now()->toDateString();
+        
+        if ($isBackdate) {
+            $entries = \App\Models\StockEntry::where('product_id', $productId)
+                ->where('date', '>=', $tDate)
+                ->orderBy('date', 'asc')
+                ->get();
+            
+            foreach ($entries as $entry) {
+                if ($entry->date === $tDate) {
+                    $entry->closing_stock -= $quantityDiff;
+                } else {
+                    $entry->opening_stock -= $quantityDiff;
+                    $entry->closing_stock -= $quantityDiff;
+                }
+                $entry->save();
+            }
+        }
+    }
+
     public function delete($reference)
     {
+        $transactions = Transaction::where('reference', $reference)->get();
+        foreach ($transactions as $tx) {
+            $this->cascadeStockUpdate($tx->product_id, $tx->transacted_at, -$tx->quantity);
+        }
+        
         Transaction::where('reference', $reference)->delete();
         $this->dispatch('toast', message: 'Seluruh transaksi berhasil dihapus.');
     }
@@ -95,13 +129,16 @@ class Transactions extends Component
         foreach ($this->editItems as $item) {
             $tx = Transaction::find($item['id']);
             if ($tx) {
+                $qtyDiff = $item['quantity'] - $tx->quantity;
+                if ($qtyDiff != 0) {
+                    $this->cascadeStockUpdate($tx->product_id, $tx->transacted_at, $qtyDiff);
+                }
+
                 $tx->update([
                     'buyer_name' => $this->editBuyerName,
                     'status' => $this->editStatus,
                     'quantity' => $item['quantity'],
                     'total_price' => $tx->unit_price * $item['quantity'],
-                    // Note: debt_amount and change_due might need adjustment if they were set,
-                    // but for simplicity we keep original logic or reset based on status.
                 ]);
             }
         }
@@ -128,6 +165,10 @@ class Transactions extends Component
 
         if ($this->filterStatus) {
             $query->where('status', $this->filterStatus);
+        }
+
+        if ($this->filterDate) {
+            $query->whereDate('transacted_at', $this->filterDate);
         }
 
         $transactions = $query->selectRaw('reference, MAX(buyer_name) as buyer_name, MAX(status) as status, MAX(transacted_at) as transacted_at, SUM(total_price) as total_amount, SUM(quantity) as total_qty, COUNT(*) as unique_items')

@@ -20,6 +20,11 @@
                     <option value="belum_menerima_uang">Hutang</option>
                 </select>
             </div>
+
+            <div class="flex items-center bg-white dark:bg-gray-800 px-6 py-3 rounded-2xl shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-800">
+                <svg class="w-4 h-4 text-primary-red mr-3" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
+                <input type="date" wire:model.live="filterDate" class="border-none p-0 focus:ring-0 font-black text-xs bg-transparent dark:text-white uppercase tracking-widest cursor-pointer">
+            </div>
         </div>
     </div>
 
@@ -39,17 +44,24 @@
             <!-- List of Transactions -->
             <div class="space-y-4">
                 @forelse($transactions as $tx)
-                <div class="group transition-all duration-300">
-                    <div class="grid grid-cols-[1.5fr_1.5fr_2fr_1fr_1.5fr_1.5fr_130px] items-center p-6 rounded-[2.5rem] border-2 transition-all duration-500 {{ $highlight == $tx->reference ? 'bg-amber-400/10 border-amber-400 animate-highlight-breath z-10 relative' : 'bg-white dark:bg-gray-800/50 border-transparent group-hover:border-primary-blue/20' }}">
+                @php
+                    $isActive = ($detailReference == $tx->reference && $showDetailsModal) || ($editingReference == $tx->reference && $showEditModal) || ($highlight == $tx->reference);
+                    $productNames = \App\Models\Transaction::where('reference', $tx->reference)->with('product')->get()->pluck('product.name')->implode(', ');
+                @endphp
+                <div class="group transition-all duration-300 {{ $isActive ? 'z-50 relative' : '' }}">
+                    <div class="grid grid-cols-[1.5fr_1.5fr_2fr_1fr_1.5fr_1.5fr_130px] items-center p-6 rounded-[2.5rem] border-2 transition-all duration-500 {{ $isActive ? 'bg-white dark:bg-gray-800/50 border-amber-400 shadow-[0_0_25px_rgba(245,158,11,0.4)] ring-4 ring-amber-400/20 scale-[1.01]' : 'bg-white dark:bg-gray-800/50 border-transparent group-hover:border-primary-blue/20' }}">
                         <!-- Waktu -->
                         <div class="px-4">
                             <div class="text-sm font-black text-gray-800 dark:text-white uppercase tracking-tight">{{ \Carbon\Carbon::parse($tx->transacted_at)->format('d M Y') }}</div>
                             <div class="text-[10px] font-bold text-gray-400 mt-1 uppercase tracking-widest">{{ \Carbon\Carbon::parse($tx->transacted_at)->format('H:i') }}</div>
                         </div>
 
-                        <!-- No Ref -->
+                        <!-- No Ref & Produk -->
                         <div class="px-4 min-w-0">
                             <div class="text-sm font-black text-primary-blue uppercase tracking-tight truncate">{{ $tx->reference }}</div>
+                            <div class="text-[9px] font-bold text-gray-400 mt-1 uppercase tracking-widest truncate" title="{{ $productNames }}">
+                                {{ $productNames }}
+                            </div>
                         </div>
 
                         <!-- Pembeli -->

@@ -97,7 +97,7 @@
     checkout() {
         if (this.loading) return;
         this.loading = true;
-        this.$wire.checkout(this.cart, this.total, this.change, this.buyer_name, this.status, this.note).then(() => {
+        this.$wire.checkout(this.cart, this.total, this.change, this.buyer_name, this.status, this.note, this.$wire.transactionDate).then(() => {
             this.clearCart();
             this.loading = false;
         }).catch(() => {
@@ -154,6 +154,7 @@ else document.documentElement.classList.remove('dark')"
                         <svg x-show="!darkMode" class="w-5 h-5 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
                         <svg x-show="darkMode" x-cloak class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707M16.95 17.95l.707.707M7.05 7.05l.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z"/></svg>
                     </button>
+                    <a href="{{ route('inventory-report') }}" wire:navigate class="nb-btn py-3 px-4 bg-primary-yellow text-black text-xs shadow-none border-2 hidden md:block">SELISIH</a>
                     <button wire:click="editOpeningStock" class="nb-btn py-3 px-4 bg-white text-black text-xs shadow-none border-2">STOK</button>
                     <button wire:click="finishSession" {{ $isSessionFinished ? 'disabled' : '' }}
                         class="nb-btn py-3 px-4 {{ $isSessionFinished ? 'bg-gray-400' : 'bg-black text-white' }} text-xs shadow-none border-2">
@@ -276,6 +277,11 @@ else document.documentElement.classList.remove('dark')"
 
             <!-- Checkout Section -->
             <div class="p-6 bg-white dark:bg-dark-neutral border-t-[var(--nb-border)] border-black dark:border-slate-800 space-y-4">
+                <div x-show="$wire.transactionDate < '{{ now()->toDateString() }}'" x-cloak class="nb-card p-3 bg-primary-yellow border-2 shadow-none flex items-center justify-center gap-2 animate-pulse">
+                    <svg class="w-4 h-4 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                    <span class="text-[10px] font-black uppercase tracking-widest text-black">Mode Susulan Aktif</span>
+                </div>
+
                 <div class="nb-card-flat bg-gray-50 dark:bg-dark-soft p-4 relative overflow-hidden border-2 shadow-[4px_4px_0_0_rgba(0,0,0,1)] dark:shadow-[4px_4px_0_0_rgba(255,255,255,1)]">
                     <span class="text-[9px] font-black uppercase tracking-[0.3em] mb-1 block dark:text-gray-400">TOTAL BILL</span>
                     <div class="flex items-baseline gap-2">
@@ -286,13 +292,18 @@ else document.documentElement.classList.remove('dark')"
 
                 <div class="grid grid-cols-2 gap-3">
                     <div class="space-y-1">
+                        <label class="text-[8px] font-black uppercase tracking-widest ml-1 dark:text-gray-400">TANGGAL TRANSAKSI</label>
+                        <input type="date" wire:model.live="transactionDate" max="{{ now()->toDateString() }}" class="nb-input w-full p-2.5 text-[10px] uppercase shadow-none border-2 bg-white dark:bg-black font-bold">
+                    </div>
+                    <div class="space-y-1">
                         <label class="text-[8px] font-black uppercase tracking-widest ml-1 dark:text-gray-400">BUYER</label>
                         <input type="text" x-model="buyer_name" placeholder="GUEST" class="nb-input w-full p-2.5 text-[10px] uppercase shadow-none border-2 bg-white dark:bg-black">
                     </div>
-                    <div class="space-y-1">
-                        <label class="text-[8px] font-black uppercase tracking-widest ml-1 dark:text-gray-400">CASH (RP)</label>
-                        <input type="number" x-model.number="payment_amount" class="nb-input w-full p-2.5 text-xs text-primary-blue italic shadow-none border-2 font-black bg-white dark:bg-black">
-                    </div>
+                </div>
+
+                <div class="space-y-1">
+                    <label class="text-[8px] font-black uppercase tracking-widest ml-1 dark:text-gray-400">CASH (RP)</label>
+                    <input type="number" x-model.number="payment_amount" class="nb-input w-full p-2.5 text-xs text-primary-blue italic shadow-none border-2 font-black bg-white dark:bg-black">
                 </div>
 
                 <div class="flex gap-2">
@@ -359,7 +370,10 @@ else document.documentElement.classList.remove('dark')"
         <div class="nb-card bg-white dark:bg-dark-soft w-full max-w-5xl max-h-[90vh] flex flex-col overflow-hidden animate-in slide-in-from-bottom-10 duration-500 border-4">
             <div class="p-6 bg-primary-blue text-white border-b-4 border-black flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
-                    <h2 class="text-2xl font-black uppercase italic leading-none">STOK AWAL</h2>
+                    <h2 class="text-2xl font-black uppercase italic leading-none flex items-center gap-3">
+                        STOK AWAL 
+                        <span class="text-[10px] bg-white text-primary-blue px-3 py-1 rounded-full not-italic tracking-widest">{{ \Carbon\Carbon::parse($transactionDate)->translatedFormat('d M Y') }}</span>
+                    </h2>
                     <p class="text-[10px] font-black uppercase tracking-widest mt-1.5 opacity-80 italic">Verifikasi barang fisik di toko</p>
                 </div>
                 <div class="flex items-center gap-3 w-full md:w-auto">
@@ -371,6 +385,9 @@ else document.documentElement.classList.remove('dark')"
             </div>
             <div class="flex-1 overflow-y-auto p-6 no-scrollbar bg-gray-50 dark:bg-black">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    @php
+                        $awalNames = \App\Models\Product::where('is_active', true)->pluck('name')->toArray();
+                    @endphp
                     @foreach (\App\Models\Product::where('is_active', true)->orderBy('name')->get() as $p)
                         <div x-show="'{{ strtolower($p->name) }}'.includes(modalSearch.toLowerCase())"
                             class="nb-card p-5 flex items-center justify-between bg-white dark:bg-dark-soft shadow-none border-2">
@@ -387,6 +404,13 @@ else document.documentElement.classList.remove('dark')"
                                 class="nb-input w-24 text-center text-lg p-2 shadow-none border-2 bg-white dark:bg-black">
                         </div>
                     @endforeach
+                    
+                    <div x-show="{{ json_encode($awalNames) }}.filter(name => name.toLowerCase().includes(modalSearch.toLowerCase())).length === 0" x-cloak
+                         class="col-span-full py-16 flex flex-col items-center justify-center bg-gray-50 dark:bg-black/50 border-2 border-dashed border-gray-200 dark:border-gray-800">
+                        <svg class="w-12 h-12 text-gray-300 dark:text-gray-700 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        <div class="text-gray-400 font-bold text-xs uppercase tracking-widest italic mb-1">PRODUK TIDAK DITEMUKAN</div>
+                        <div class="text-gray-300 dark:text-gray-600 font-black text-2xl uppercase tracking-tighter">"<span x-text="modalSearch"></span>"</div>
+                    </div>
                 </div>
             </div>
             <div class="p-6 bg-white dark:bg-dark-soft border-t-4 border-black">
@@ -404,7 +428,10 @@ else document.documentElement.classList.remove('dark')"
         <div class="nb-card bg-white dark:bg-dark-soft w-full max-w-5xl max-h-[90vh] flex flex-col overflow-hidden border-4">
             <div class="p-6 bg-primary-red text-white border-b-4 border-black flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
-                    <h2 class="text-2xl font-black uppercase italic leading-none text-white">REKAP HARIAN</h2>
+                    <h2 class="text-2xl font-black uppercase italic leading-none text-white flex items-center gap-3">
+                        REKAP HARIAN
+                        <span class="text-[10px] bg-white text-primary-red px-3 py-1 rounded-full not-italic tracking-widest">{{ \Carbon\Carbon::parse($transactionDate)->translatedFormat('d M Y') }}</span>
+                    </h2>
                     <p class="text-[10px] font-black uppercase tracking-widest mt-1.5 opacity-80 italic">Input sisa barang di toko hari ini</p>
                 </div>
                 <div class="flex items-center gap-3 w-full md:w-auto">
@@ -416,6 +443,9 @@ else document.documentElement.classList.remove('dark')"
             </div>
             <div class="flex-1 overflow-y-auto p-6 no-scrollbar bg-gray-50 dark:bg-black">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    @php
+                        $rekapNames = collect($this->stockComparison)->pluck('name')->toArray();
+                    @endphp
                     @foreach ($this->stockComparison as $item)
                         <div x-show="'{{ strtolower($item['name']) }}'.includes(modalSearch.toLowerCase())"
                             class="nb-card p-5 flex flex-col bg-white dark:bg-dark-soft shadow-none border-2">
@@ -440,6 +470,13 @@ else document.documentElement.classList.remove('dark')"
                             </div>
                         </div>
                     @endforeach
+                    
+                    <div x-show="{{ json_encode($rekapNames) }}.filter(name => name.toLowerCase().includes(modalSearch.toLowerCase())).length === 0" x-cloak
+                         class="col-span-full py-16 flex flex-col items-center justify-center bg-gray-50 dark:bg-black/50 border-2 border-dashed border-gray-200 dark:border-gray-800">
+                        <svg class="w-12 h-12 text-gray-300 dark:text-gray-700 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        <div class="text-gray-400 font-bold text-xs uppercase tracking-widest italic mb-1">PRODUK TIDAK DITEMUKAN</div>
+                        <div class="text-gray-300 dark:text-gray-600 font-black text-2xl uppercase tracking-tighter">"<span x-text="modalSearch"></span>"</div>
+                    </div>
                 </div>
             </div>
             <div class="p-6 bg-white dark:bg-dark-soft border-t-4 border-black">
@@ -491,40 +528,13 @@ else document.documentElement.classList.remove('dark')"
         </div>
     </div>
 
-    <!-- Success Overlay -->
-    <div x-data="{ show: false }" x-on:transaction-complete.window="show = true; setTimeout(() => show = false, 1000)"
-        x-show="show" 
-        x-transition:enter="transition ease-out duration-200"
-        x-transition:enter-start="opacity-0"
-        x-transition:enter-end="opacity-100"
-        x-transition:leave="transition ease-in duration-300"
-        x-transition:leave-start="opacity-100"
-        x-transition:leave-end="opacity-0"
-        x-cloak
-        class="fixed inset-0 z-[700] flex items-center justify-center bg-black/60 backdrop-blur-xl">
-        <div class="nb-card bg-white dark:bg-dark-soft p-16 text-center animate-success-pop border-[10px] border-black dark:border-white shadow-[20px_20px_0_0_rgba(0,0,0,1)] dark:shadow-[20px_20px_0_0_rgba(255,255,255,0.1)]">
-            <div class="w-32 h-32 bg-green-500 border-4 border-black dark:border-white flex items-center justify-center mx-auto mb-10 shadow-[8px_8px_0_0_rgba(0,0,0,1)]">
-                <svg class="w-20 h-20 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path class="animate-success-check" stroke-linecap="round" stroke-linejoin="round" stroke-width="6" d="M5 13l4 4L19 7"/>
-                </svg>
-            </div>
-            <h3 class="text-6xl font-black uppercase italic leading-none text-black dark:text-white">BERHASIL!</h3>
-            <p class="text-xl font-black uppercase tracking-[0.5em] mt-6 italic text-primary-blue dark:text-primary-blue-light">TRANSAKSI TERSIMPAN</p>
-            
-            <div class="mt-10 flex items-center justify-center gap-2">
-                <div class="h-2 w-24 bg-gray-100 dark:bg-slate-800 border-2 border-black dark:border-white overflow-hidden">
-                    <div class="h-full bg-primary-blue animate-[progress-brutal_1s_ease-in-out_forwards]"></div>
-                </div>
-            </div>
-        </div>
-    </div>
 
     <script>
         window.addEventListener('transaction-complete', () => {
             setTimeout(() => {
                 const searchInput = document.querySelector('input[placeholder*="CARI"]');
                 if (searchInput) searchInput.focus();
-            }, 1000);
+            }, 100);
         });
     </script>
 </div>

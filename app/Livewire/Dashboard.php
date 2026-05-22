@@ -124,4 +124,10 @@ class Dashboard extends Component
             'isSessionFinished' => $isSessionFinished
         ])->layout('layouts.app', ['title' => 'Dashboard Overview']);
     }
+
+    public function emergencyReactivateSession()
+    {
+        \App\Models\DailyRecap::whereDate('date', now())->delete();
+        $this->redirect(route('dashboard'), navigate: true);
+    }
 }
