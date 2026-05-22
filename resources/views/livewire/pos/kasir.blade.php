@@ -37,16 +37,16 @@
         const index = this.cart.findIndex(item => item.id === product.id);
         if (index !== -1) {
             if (this.cart[index].quantity < product.available_stock) {
-                this.cart[index].quantity++;
+                this.cart[index].quantity = this.cart[index].quantity + 1;
             } else {
                 this.stockAlert = { title: 'STOK TERBATAS', message: 'Sisa stok ' + product.name + ' tinggal ' + product.available_stock + ' item.' };
             }
         } else {
             if (product.available_stock > 0) {
-                this.cart.push({
+                this.cart = [...this.cart, {
                     ...product,
                     quantity: 1
-                });
+                }];
             } else {
                 this.stockAlert = { title: 'STOK HABIS', message: 'Maaf, stok ' + product.name + ' sudah habis hari ini.' };
             }
@@ -204,7 +204,7 @@ else document.documentElement.classList.remove('dark')"
             <div x-show="filteredProducts.length > 0"
                 class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
                 <template x-for="product in filteredProducts" :key="product.id">
-                    <button @click="addToCart(product)" :disabled="{{ $isSessionFinished ? 'true' : 'false' }}"
+                    <button type="button" @click.stop="addToCart(product)" :disabled="{{ $isSessionFinished ? 'true' : 'false' }}"
                         class="nb-card nb-card-hover group p-0 text-left overflow-hidden flex flex-col h-full bg-white dark:bg-slate-900">
                         <div class="p-3 bg-gray-50 dark:bg-slate-800 border-b-[var(--nb-border)] border-black dark:border-slate-800 flex items-center justify-between">
                             <span :class="getCategoryColor(product.category_name)" class="text-[9px] font-black px-2 py-0.5 uppercase tracking-widest border-2" x-text="product.category_name"></span>
