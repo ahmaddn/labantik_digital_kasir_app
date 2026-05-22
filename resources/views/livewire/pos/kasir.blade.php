@@ -6,6 +6,7 @@
     cart: [],
     loading: false,
     modalSearch: '',
+    stockAlert: null,
     darkMode: localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches),
     
     payment_amount: 0,
@@ -35,12 +36,20 @@
     addToCart(product) {
         const index = this.cart.findIndex(item => item.id === product.id);
         if (index !== -1) {
-            this.cart[index].quantity++;
+            if (this.cart[index].quantity < product.available_stock) {
+                this.cart[index].quantity++;
+            } else {
+                this.stockAlert = { title: 'STOK TERBATAS', message: 'Sisa stok ' + product.name + ' tinggal ' + product.available_stock + ' item.' };
+            }
         } else {
-            this.cart.push({
-                ...product,
-                quantity: 1
-            });
+            if (product.available_stock > 0) {
+                this.cart.push({
+                    ...product,
+                    quantity: 1
+                });
+            } else {
+                this.stockAlert = { title: 'STOK HABIS', message: 'Maaf, stok ' + product.name + ' sudah habis hari ini.' };
+            }
         }
     },
 
@@ -184,10 +193,11 @@ else document.documentElement.classList.remove('dark')"
 
         <!-- Product Grid -->
         <div class="flex-1 overflow-y-auto px-6 lg:px-10 py-8 no-scrollbar bg-slate-100 dark:bg-dark-bg">
-            <div x-show="filteredProducts.length === 0" x-cloak class="h-full flex flex-col items-center justify-center opacity-30">
-                <div class="nb-card p-12 bg-white dark:bg-dark-soft text-center border-dashed">
-                    <h3 class="text-3xl font-black uppercase italic dark:text-white">KOSONG</h3>
-                    <p class="text-[10px] font-bold mt-2 uppercase tracking-widest">Pencarian tidak ditemukan</p>
+            <div x-show="filteredProducts.length === 0" x-cloak class="h-full flex flex-col items-center justify-center p-6">
+                <div class="nb-card p-12 bg-transparent dark:bg-transparent text-center border-dashed border-4 border-gray-300 dark:border-slate-700 shadow-none max-w-lg w-full flex flex-col items-center">
+                    <svg class="w-20 h-20 mb-6 text-gray-300 dark:text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/></svg>
+                    <h3 class="text-3xl font-black uppercase italic text-gray-400 dark:text-slate-500 mb-3">PRODUK KOSONG</h3>
+                    <p class="text-xs font-bold uppercase tracking-[0.2em] text-gray-400 dark:text-slate-500 leading-relaxed">Produk tidak ditemukan pada pencarian atau kategori ini.</p>
                 </div>
             </div>
 
@@ -233,6 +243,9 @@ else document.documentElement.classList.remove('dark')"
             <div class="p-3 flex gap-3 bg-gray-50 dark:bg-dark-neutral border-b-[var(--nb-border)] border-black dark:border-slate-800">
                 <button @click="tab = 'cart'" :class="tab === 'cart' ? 'bg-primary-blue text-white' : 'bg-white text-black dark:bg-dark-soft dark:text-white'" class="nb-btn flex-1 py-1.5 text-xs shadow-none border-2">CART</button>
                 <button @click="tab = 'history'" :class="tab === 'history' ? 'bg-primary-red text-white' : 'bg-white text-black dark:bg-dark-soft dark:text-white'" class="nb-btn flex-1 py-1.5 text-xs shadow-none border-2">HISTORY</button>
+                <button x-show="tab === 'cart' && cart.length > 0" @click="clearCart()" class="nb-btn py-1.5 px-3 text-xs bg-white text-primary-red dark:bg-dark-soft shadow-none border-2 hover:bg-red-50" title="Clear Cart">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                </button>
             </div>
 
             <!-- Cart Content -->
@@ -528,6 +541,42 @@ else document.documentElement.classList.remove('dark')"
         </div>
     </div>
 
+
+    <!-- Stock Alert Modal -->
+    <div x-show="stockAlert !== null" 
+        x-cloak
+        @keydown.window.escape="stockAlert = null"
+        class="fixed inset-0 z-[600] flex items-center justify-center p-6">
+        
+        <!-- Backdrop -->
+        <div x-show="stockAlert !== null"
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0"
+             class="absolute inset-0 bg-white/20 dark:bg-black/40 backdrop-blur-md"></div>
+
+        <!-- Modal Box -->
+        <div x-show="stockAlert !== null"
+             @click.away="stockAlert = null" 
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0 scale-95"
+             x-transition:enter-end="opacity-100 scale-100"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="opacity-100 scale-100"
+             x-transition:leave-end="opacity-0 scale-95"
+             class="nb-card bg-white dark:bg-dark-soft w-full max-w-sm p-10 text-center relative z-10">
+            <div class="w-20 h-20 bg-primary-yellow border-2 border-black flex items-center justify-center mx-auto mb-6 shadow-[var(--nb-shadow-sm)]">
+                <svg class="w-10 h-10 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+            </div>
+            <h2 class="text-2xl font-black uppercase italic mb-3 dark:text-white" x-text="stockAlert?.title"></h2>
+            <p class="text-xs font-bold uppercase tracking-widest text-gray-500 mb-8 leading-relaxed" x-text="stockAlert?.message"></p>
+            
+            <button @click="stockAlert = null" class="nb-btn w-full bg-black text-white text-base py-4">MENGERTI</button>
+        </div>
+    </div>
 
     <script>
         window.addEventListener('transaction-complete', () => {

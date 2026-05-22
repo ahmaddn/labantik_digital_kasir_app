@@ -12,10 +12,15 @@ class CashTransaction extends Model
     protected $fillable = [
         'date',
         'cash_type',
-        'name',
+        'cash_category_id',
         'type',
         'amount',
         'description',
         'reference'
     ];
+
+    public function cashCategory()
+    {
+        return $this->belongsTo(CashCategory::class, 'cash_category_id');
+    }
 }

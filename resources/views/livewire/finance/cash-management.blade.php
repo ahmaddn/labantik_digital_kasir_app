@@ -64,6 +64,39 @@
         </div>
     </div>
 
+    <!-- Category Stats Cards -->
+    <div class="mb-12">
+        <h2 class="text-2xl font-black italic uppercase tracking-tighter text-gray-800 dark:text-white mb-6">Ringkasan Per Kategori</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            @forelse($categoryStats as $stat)
+            <div class="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 relative overflow-hidden group">
+                <div class="absolute -right-4 -bottom-4 opacity-5 group-hover:scale-110 transition-transform duration-500">
+                    <svg class="w-24 h-24 text-primary-blue" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                </div>
+                <h3 class="text-sm font-black uppercase tracking-widest text-gray-800 dark:text-white mb-4">{{ $stat['name'] }}</h3>
+                <div class="space-y-2">
+                    <div class="flex justify-between items-center text-xs">
+                        <span class="text-gray-400 font-bold uppercase tracking-widest">Pemasukan</span>
+                        <span class="font-black text-green-500">+Rp{{ number_format($stat['income'], 0, ',', '.') }}</span>
+                    </div>
+                    <div class="flex justify-between items-center text-xs">
+                        <span class="text-gray-400 font-bold uppercase tracking-widest">Pengeluaran</span>
+                        <span class="font-black text-primary-red">-Rp{{ number_format($stat['expense'], 0, ',', '.') }}</span>
+                    </div>
+                    <div class="pt-2 mt-2 border-t border-gray-100 dark:border-gray-700 flex justify-between items-center">
+                        <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Saldo</span>
+                        <span class="text-lg font-black italic {{ $stat['balance'] >= 0 ? 'text-primary-blue' : 'text-primary-red' }}">Rp{{ number_format($stat['balance'], 0, ',', '.') }}</span>
+                    </div>
+                </div>
+            </div>
+            @empty
+            <div class="col-span-full bg-white dark:bg-gray-800 rounded-3xl p-8 text-center border border-gray-100 dark:border-gray-700">
+                <p class="text-sm font-black text-gray-400 uppercase tracking-widest italic">Belum ada kategori kas.</p>
+            </div>
+            @endforelse
+        </div>
+    </div>
+
     <!-- Table -->
     <div class="bg-white dark:bg-gray-800 rounded-[3.5rem] shadow-2xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 overflow-hidden mb-12">
         <div class="p-10 border-b border-gray-100 dark:border-gray-700">
@@ -75,7 +108,7 @@
                 <thead class="bg-gray-50 dark:bg-gray-900/50">
                     <tr>
                         <th class="px-10 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">Tanggal</th>
-                        <th class="px-10 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">Kas / Rekening</th>
+                        <th class="px-10 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">Kategori Kas</th>
                         <th class="px-10 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">Keterangan</th>
                         <th class="px-10 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">Jenis</th>
                         <th class="px-10 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right">Nominal</th>
@@ -89,7 +122,7 @@
                             <span class="text-sm font-black text-gray-800 dark:text-white uppercase">{{ \Carbon\Carbon::parse($tx->date)->translatedFormat('d M Y') }}</span>
                         </td>
                         <td class="px-10 py-8">
-                            <div class="text-sm font-black text-gray-800 dark:text-white uppercase tracking-tight mb-2">{{ $tx->name ?? '-' }}</div>
+                            <div class="text-sm font-black text-gray-800 dark:text-white uppercase tracking-tight mb-2">{{ $tx->cashCategory->name ?? '-' }}</div>
                             <span class="px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest {{ $tx->cash_type === 'modal' ? 'bg-primary-blue/10 text-primary-blue' : 'bg-green-500/10 text-green-500' }}">
                                 {{ $tx->cash_type === 'modal' ? 'Kas Modal' : 'Kas Keuntungan' }}
                             </span>
@@ -190,10 +223,29 @@
                 </div>
 
                 <!-- Nama Kas -->
-                <div>
-                    <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4 mb-2">Nama Kas / Rekening</label>
-                    <input type="text" wire:model="name" class="w-full px-6 py-4 bg-gray-50 dark:bg-gray-800 border-none rounded-2xl focus:ring-4 focus:ring-primary-blue/10 font-black text-gray-800 dark:text-white" placeholder="Contoh: Kas Laci, Rekening BCA, dll">
-                    @error('name') <span class="text-primary-red text-xs mt-1 block ml-4">{{ $message }}</span> @enderror
+                <div x-data="{ isAddingNew: false }">
+                    <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4 mb-2">Kategori Kas</label>
+                    <div x-show="!isAddingNew" class="relative">
+                        <select wire:model="cashCategoryId" class="w-full px-6 py-4 bg-gray-50 dark:bg-gray-800 border-none rounded-2xl focus:ring-4 focus:ring-primary-blue/10 font-black text-gray-800 dark:text-white appearance-none">
+                            <option value="">-- Pilih Kategori --</option>
+                            @foreach($categories as $cat)
+                            <option value="{{ $cat->id }}">{{ $cat->name }}</option>
+                            @endforeach
+                        </select>
+                        <div class="absolute inset-y-0 right-6 flex items-center pointer-events-none">
+                            <svg class="w-4 h-4 text-gray-400" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                        </div>
+                        <div class="mt-2 text-right">
+                            <button type="button" @click="isAddingNew = true" class="text-[10px] font-black text-primary-blue uppercase tracking-widest hover:underline">+ Buat Kategori Baru</button>
+                        </div>
+                    </div>
+                    <div x-show="isAddingNew" x-cloak class="flex items-center gap-2">
+                        <input type="text" wire:model="newCategoryName" class="w-full px-6 py-4 bg-gray-50 dark:bg-gray-800 border-none rounded-2xl focus:ring-4 focus:ring-primary-blue/10 font-black text-gray-800 dark:text-white" placeholder="Nama Kategori Baru">
+                        <button type="button" wire:click="saveCategory" @click="isAddingNew = false" class="px-6 py-4 bg-green-500 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:scale-105 transition-transform shadow-xl shadow-green-500/20">Simpan</button>
+                        <button type="button" @click="isAddingNew = false" class="px-4 py-4 bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-300 rounded-2xl font-black text-xs uppercase hover:scale-105 transition-transform">Batal</button>
+                    </div>
+                    @error('cashCategoryId') <span class="text-primary-red text-xs mt-1 block ml-4">{{ $message }}</span> @enderror
+                    @error('newCategoryName') <span class="text-primary-red text-xs mt-1 block ml-4">{{ $message }}</span> @enderror
                 </div>
 
                 <!-- Tipe -->

@@ -15,8 +15,42 @@
                     </button>
                 @endif
 
-                {{-- Pagination Elements --}}
-                @foreach ($elements as $element)
+                {{-- Pagination Elements Logic --}}
+                @php
+                    $lastPage = $paginator->lastPage();
+                    $currentPage = $paginator->currentPage();
+                    $customElements = [];
+
+                    $formatRange = function($range) {
+                        $arr = [];
+                        foreach($range as $p) {
+                            $arr[$p] = '#';
+                        }
+                        return $arr;
+                    };
+
+                    if ($lastPage <= 10) {
+                        $customElements[] = $formatRange(range(1, $lastPage));
+                    } else {
+                        if ($currentPage <= 5) {
+                            $customElements[] = $formatRange(range(1, 7));
+                            $customElements[] = '...';
+                            $customElements[] = $formatRange([$lastPage]);
+                        } elseif ($currentPage > $lastPage - 4) {
+                            $customElements[] = $formatRange([1]);
+                            $customElements[] = '...';
+                            $customElements[] = $formatRange(range($lastPage - 6, $lastPage));
+                        } else {
+                            $customElements[] = $formatRange([1]);
+                            $customElements[] = '...';
+                            $customElements[] = $formatRange(range($currentPage - 2, $currentPage + 2));
+                            $customElements[] = '...';
+                            $customElements[] = $formatRange([$lastPage]);
+                        }
+                    }
+                @endphp
+
+                @foreach ($customElements as $element)
                     {{-- "Three Dots" Separator --}}
                     @if (is_string($element))
                         <span class="px-4 py-3 text-[10px] font-black text-gray-300 border-r border-gray-100 dark:border-gray-700">{{ $element }}</span>

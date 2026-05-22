@@ -59,7 +59,7 @@
                         <!-- No Ref & Produk -->
                         <div class="px-4 min-w-0">
                             <div class="text-sm font-black text-primary-blue uppercase tracking-tight truncate">{{ $tx->reference }}</div>
-                            <div class="text-[9px] font-bold text-gray-400 mt-1 uppercase tracking-widest truncate" title="{{ $productNames }}">
+                            <div class="text-[9px] font-bold text-gray-400 mt-1 uppercase tracking-widest leading-relaxed">
                                 {{ $productNames }}
                             </div>
                         </div>

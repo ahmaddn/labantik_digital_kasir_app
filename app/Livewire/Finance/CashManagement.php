@@ -17,7 +17,8 @@ class CashManagement extends Component
     // Form inputs
     public string $date = '';
     public string $cashType = 'modal';
-    public string $name = '';
+    public $cashCategoryId = '';
+    public string $newCategoryName = '';
     public string $type = 'expense';
     public $amount;
     public string $description = '';
@@ -40,7 +41,7 @@ class CashManagement extends Component
     public function openModal()
     {
         $this->resetValidation();
-        $this->reset(['type', 'cashType', 'name', 'amount', 'description', 'editingId']);
+        $this->reset(['type', 'cashType', 'cashCategoryId', 'newCategoryName', 'amount', 'description', 'editingId']);
         $this->date = now()->format('Y-m-d');
         $this->type = 'expense';
         $this->cashType = 'modal';
@@ -52,7 +53,7 @@ class CashManagement extends Component
         $this->validate([
             'date' => 'required|date',
             'cashType' => 'required|in:modal,keuntungan',
-            'name' => 'required|string|max:100',
+            'cashCategoryId' => 'required|exists:cash_categories,id',
             'type' => 'required|in:income,expense',
             'amount' => 'required|numeric|min:1',
             'description' => 'required|string|max:255',
@@ -64,7 +65,7 @@ class CashManagement extends Component
                 $transaction->update([
                     'date' => $this->date,
                     'cash_type' => $this->cashType,
-                    'name' => $this->name,
+                    'cash_category_id' => $this->cashCategoryId,
                     'type' => $this->type,
                     'amount' => $this->amount,
                     'description' => $this->description,
@@ -75,7 +76,7 @@ class CashManagement extends Component
             CashTransaction::create([
                 'date' => $this->date,
                 'cash_type' => $this->cashType,
-                'name' => $this->name,
+                'cash_category_id' => $this->cashCategoryId,
                 'type' => $this->type,
                 'amount' => $this->amount,
                 'description' => $this->description,
@@ -95,12 +96,27 @@ class CashManagement extends Component
             $this->editingId = $transaction->id;
             $this->date = $transaction->date;
             $this->cashType = $transaction->cash_type;
-            $this->name = $transaction->name ?? '';
+            $this->cashCategoryId = $transaction->cash_category_id;
             $this->type = $transaction->type;
             $this->amount = $transaction->amount;
             $this->description = $transaction->description;
             $this->showModal = true;
         }
+    }
+
+    public function saveCategory()
+    {
+        $this->validate([
+            'newCategoryName' => 'required|string|max:100|unique:cash_categories,name',
+        ]);
+
+        $category = \App\Models\CashCategory::create([
+            'name' => $this->newCategoryName
+        ]);
+
+        $this->cashCategoryId = $category->id;
+        $this->newCategoryName = '';
+        $this->dispatch('toast', message: 'Kategori berhasil ditambahkan!');
     }
 
     public function deleteTransaction($id)
@@ -136,6 +152,20 @@ class CashManagement extends Component
         $monthlyIncome = (clone $monthlyTransactions)->where('type', 'income')->sum('amount');
         $monthlyExpense = (clone $monthlyTransactions)->where('type', 'expense')->sum('amount');
 
+        // Category Stats
+        $categories = \App\Models\CashCategory::all();
+        $categoryStats = [];
+        foreach ($categories as $category) {
+            $catIncome = CashTransaction::where('cash_category_id', $category->id)->where('type', 'income')->sum('amount');
+            $catExpense = CashTransaction::where('cash_category_id', $category->id)->where('type', 'expense')->sum('amount');
+            $categoryStats[] = [
+                'name' => $category->name,
+                'income' => $catIncome,
+                'expense' => $catExpense,
+                'balance' => $catIncome - $catExpense,
+            ];
+        }
+
         // Paginated Data
         $transactions = $monthlyTransactions->orderBy('date', 'desc')->orderBy('id', 'desc')->paginate(15);
 
@@ -145,6 +175,8 @@ class CashManagement extends Component
             'currentProfitBalance' => $currentProfitBalance,
             'monthlyIncome' => $monthlyIncome,
             'monthlyExpense' => $monthlyExpense,
+            'categories' => $categories,
+            'categoryStats' => collect($categoryStats),
         ])->layout('layouts.app', ['title' => 'Buku Kas Internal']);
     }
 }

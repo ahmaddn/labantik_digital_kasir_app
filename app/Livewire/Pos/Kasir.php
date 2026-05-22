@@ -351,14 +351,20 @@ class Kasir extends Component
     protected function getProductsForAlpine()
     {
         $today = now()->toDateString();
-        return Product::with('category')
+        return Product::with(['category', 'stockEntries' => fn($q) => $q->where('date', $today)])
             ->where('is_active', true)
             ->whereHas('stockEntries', function($q) use ($today) {
                 $q->where('date', $today)->where('opening_stock', '>', 0);
             })
             ->orderBy('name')
             ->get()
-            ->map(function($p) {
+            ->map(function($p) use ($today) {
+                $entry = $p->stockEntries->first();
+                $sold = Transaction::where('product_id', $p->id)
+                    ->whereDate('transacted_at', $today)
+                    ->sum('quantity');
+                $available_stock = ($entry ? $entry->opening_stock : 0) - $sold;
+
                 return [
                     'id' => $p->id,
                     'name' => $p->name,
@@ -368,6 +374,7 @@ class Kasir extends Component
                     'category_id' => $p->category_id,
                     'category_name' => $p->category->name ?? 'Uncategorized',
                     'initial' => substr($p->name, 0, 1),
+                    'available_stock' => $available_stock,
                 ];
             });
     }
