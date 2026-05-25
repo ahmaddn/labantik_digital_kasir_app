@@ -53,6 +53,16 @@
         }
     },
 
+    handleProductClick(e) {
+        if (e.target.closest('button[data-add-to-cart]')) {
+            const productId = e.target.closest('button').dataset.productId;
+            const product = this.products.find(p => p.id === parseInt(productId));
+            if (product) {
+                this.addToCart(product);
+            }
+        }
+    },
+
     removeFromCart(productId) {
         const index = this.cart.findIndex(item => item.id === productId);
         if (index !== -1) {
@@ -112,11 +122,39 @@
         }).catch(() => {
             this.loading = false;
         });
+    },
+
+    handleCheckoutKeydown(e) {
+        if (e.key === 'Enter' && !e.ctrlKey && !e.shiftKey && !e.altKey) {
+            if (this.cart.length > 0 && !(this.payment_amount < this.total && this.status === 'uang_diterima') && !this.loading) {
+                e.preventDefault();
+                this.checkout();
+            }
+        }
     }
-}" x-init="if (darkMode) document.documentElement.classList.add('dark');
-else document.documentElement.classList.remove('dark')"
+}" x-init="
+if (darkMode) document.documentElement.classList.add('dark');
+else document.documentElement.classList.remove('dark');
+
+// Setup event listeners that persist even after idle
+const gridContainer = document.querySelector('[data-product-grid]');
+if (gridContainer) {
+    gridContainer.addEventListener('click', (e) => $dispatch('product-click', {event: e}));
+}
+
+// Setup keydown listener for checkout
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.ctrlKey && !e.shiftKey && !e.altKey) {
+        const activeElement = document.activeElement;
+        if (activeElement.name === 'payment_amount' || activeElement.classList.contains('checkout-trigger')) {
+            this.handleCheckoutKeydown(e);
+        }
+    }
+});
+"
     class="flex flex-col lg:flex-row h-screen w-full bg-slate-50 dark:bg-dark-bg overflow-hidden font-outfit relative"
-    x-on:stock-saved.window="products = $event.detail.products">
+    x-on:stock-saved.window="products = $event.detail.products"
+    x-on:product-click="handleProductClick($event.detail.event)">
 
     <!-- Global Loading Indicator -->
     <div wire:loading.flex
@@ -192,7 +230,7 @@ else document.documentElement.classList.remove('dark')"
         </div>
 
         <!-- Product Grid -->
-        <div class="flex-1 overflow-y-auto px-6 lg:px-10 py-8 no-scrollbar bg-slate-100 dark:bg-dark-bg">
+        <div class="flex-1 overflow-y-auto px-6 lg:px-10 py-8 no-scrollbar bg-slate-100 dark:bg-dark-bg" data-product-grid>
             <div x-show="filteredProducts.length === 0" x-cloak class="h-full flex flex-col items-center justify-center p-6">
                 <div class="nb-card p-12 bg-transparent dark:bg-transparent text-center border-dashed border-4 border-gray-300 dark:border-slate-700 shadow-none max-w-lg w-full flex flex-col items-center">
                     <svg class="w-20 h-20 mb-6 text-gray-300 dark:text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/></svg>
@@ -204,7 +242,7 @@ else document.documentElement.classList.remove('dark')"
             <div x-show="filteredProducts.length > 0"
                 class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
                 <template x-for="product in filteredProducts" :key="product.id">
-                    <button type="button" @click.stop="addToCart(product)" :disabled="{{ $isSessionFinished ? 'true' : 'false' }}"
+                    <button type="button" data-add-to-cart :data-product-id="product.id" :disabled="{{ $isSessionFinished ? 'true' : 'false' }}"
                         class="nb-card nb-card-hover group p-0 text-left overflow-hidden flex flex-col h-full bg-white dark:bg-slate-900">
                         <div class="p-3 bg-gray-50 dark:bg-slate-800 border-b-[var(--nb-border)] border-black dark:border-slate-800 flex items-center justify-between">
                             <span :class="getCategoryColor(product.category_name)" class="text-[9px] font-black px-2 py-0.5 uppercase tracking-widest border-2" x-text="product.category_name"></span>
@@ -316,7 +354,7 @@ else document.documentElement.classList.remove('dark')"
 
                 <div class="space-y-1">
                     <label class="text-[8px] font-black uppercase tracking-widest ml-1 dark:text-gray-400">CASH (RP)</label>
-                    <input type="number" x-model.number="payment_amount" class="nb-input w-full p-2.5 text-xs text-primary-blue italic shadow-none border-2 font-black bg-white dark:bg-black">
+                    <input type="number" x-model.number="payment_amount" @keydown.enter="handleCheckoutKeydown($event)" class="nb-input w-full p-2.5 text-xs text-primary-blue italic shadow-none border-2 font-black bg-white dark:bg-black">
                 </div>
 
                 <div class="flex gap-2">
@@ -333,7 +371,8 @@ else document.documentElement.classList.remove('dark')"
                 </template>
 
                 <button @click="checkout()" :disabled="{{ $isSessionFinished ? 'true' : 'false' }} || cart.length === 0 || (payment_amount < total && status === 'uang_diterima') || loading"
-                    class="nb-btn w-full py-5 text-lg bg-black text-white hover:bg-primary-blue disabled:bg-gray-400 disabled:opacity-50 group shadow-[4px_4px_0_0_rgba(37,99,235,0.4)] dark:shadow-[4px_4px_0_0_rgba(255,255,255,1)]">
+                    @keydown.enter="handleCheckoutKeydown($event)"
+                    class="nb-btn checkout-trigger w-full py-5 text-lg bg-black text-white hover:bg-primary-blue disabled:bg-gray-400 disabled:opacity-50 group shadow-[4px_4px_0_0_rgba(37,99,235,0.4)] dark:shadow-[4px_4px_0_0_rgba(255,255,255,1)]">
                     <span x-show="!loading" class="flex items-center justify-center gap-4">
                         PROCESS NOW
                         <svg class="w-5 h-5 group-hover:translate-x-2 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
@@ -584,6 +623,19 @@ else document.documentElement.classList.remove('dark')"
                 const searchInput = document.querySelector('input[placeholder*="CARI"]');
                 if (searchInput) searchInput.focus();
             }, 100);
+        });
+
+        // Re-setup event listeners when Livewire updates
+        document.addEventListener('livewire:updated', () => {
+            const gridContainer = document.querySelector('[data-product-grid]');
+            if (gridContainer) {
+                gridContainer.addEventListener('click', (e) => {
+                    const alpine = document.querySelector('[x-data]').__alpine_$1;
+                    if (alpine) {
+                        alpine.handleProductClick(e);
+                    }
+                });
+            }
         });
     </script>
 </div>
