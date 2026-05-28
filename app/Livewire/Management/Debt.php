@@ -111,18 +111,26 @@ class Debt extends Component
             ];
 
             if ($newAmount <= 0) {
-                // If this specific row is now fully settled
-                if ($this->activeTab === 'change') {
-                    // It was belum_kembalian, now it's fully received/returned
-                    $updates['status'] = 'uang_diterima';
-                } else {
-                    // It was belum_menerima_uang or uang_dipinjam, now it's received
-                    $updates['status'] = 'uang_diterima';
-                }
-                $updates['transacted_at'] = now(); // Move to today to count profit/cash today
+                $updates['transacted_at'] = now();
             }
 
             $trx->update($updates);
+        }
+
+        // Check if the entire transaction is now fully settled
+        $totalRemaining = Transaction::where('reference', $this->selectedReference)
+            ->sum($this->activeTab === 'change' ? 'change_due' : 'debt_amount');
+            
+        if ($totalRemaining <= 0) {
+            $allTrx = Transaction::where('reference', $this->selectedReference)->get();
+            foreach ($allTrx as $t) {
+                if ($t->status !== 'uang_diterima') {
+                    $t->update([
+                        'status' => 'uang_diterima',
+                        'transacted_at' => now(),
+                    ]);
+                }
+            }
         }
 
         // Create new transactions if 'dijajankan'

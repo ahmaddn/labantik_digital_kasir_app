@@ -245,6 +245,7 @@ class Kasir extends Component
         $initials = strtoupper(substr($cleanName, 0, 2));
         $reference = 'LBK-' . now()->format('Ymd') . '-' . $initials . strtoupper(bin2hex(random_bytes(2)));
 
+        $first = true;
         foreach ($cart as $item) {
             Transaction::create([
                 'reference' => $reference,
@@ -258,10 +259,11 @@ class Kasir extends Component
                 'unit_profit' => $item['profit'],
                 'total_price' => $item['price'] * $item['quantity'],
                 'debt_amount' => in_array($status, ['belum_menerima_uang', 'uang_dipinjam']) ? ($item['price'] * $item['quantity']) : 0,
-                'change_due' => ($status === 'belum_kembalian') ? $change : 0,
+                'change_due' => ($status === 'belum_kembalian' && $first) ? $change : 0,
                 'status' => $status,
-                'note' => $note ?: ($change > 0 ? 'Kembalian: Rp' . number_format($change, 0, ',', '.') : null),
+                'note' => $note ?: ($change > 0 && $first ? 'Kembalian: Rp' . number_format($change, 0, ',', '.') : null),
             ]);
+            $first = false;
 
             // Cascading stock reduction if backdating
             if ($isBackdate) {
