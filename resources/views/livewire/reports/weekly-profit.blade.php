@@ -6,6 +6,7 @@
             <div class="flex items-center gap-4 mt-6">
                 <button wire:click="$set('viewMode', 'weekly')" class="px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all {{ $viewMode === 'weekly' ? 'bg-primary-blue text-white shadow-lg' : 'bg-gray-100 text-gray-400 dark:bg-gray-800' }}">Laporan Mingguan</button>
                 <button wire:click="$set('viewMode', 'monthly')" class="px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all {{ $viewMode === 'monthly' ? 'bg-primary-blue text-white shadow-lg' : 'bg-gray-100 text-gray-400 dark:bg-gray-800' }}">Rekap Bulanan</button>
+                <button wire:click="$set('viewMode', 'yearly')" class="px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all {{ $viewMode === 'yearly' ? 'bg-primary-blue text-white shadow-lg' : 'bg-gray-100 text-gray-400 dark:bg-gray-800' }}">Rekap Tahunan</button>
             </div>
         </div>
         <div class="flex items-center gap-6">
@@ -39,6 +40,26 @@
                 JUMAT - MINGGU
             </button>
             @endif
+            @elseif($viewMode === 'monthly')
+            <div class="flex items-center bg-white dark:bg-gray-900 p-2 rounded-[2rem] shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-800">
+                <div class="px-6 py-2">
+                    <p class="text-[8px] font-black text-primary-blue uppercase tracking-widest mb-1">PILIH BULAN</p>
+                    <select wire:model.live="selectedMonth" class="bg-transparent border-none p-0 text-[11px] font-black text-gray-800 dark:text-white focus:ring-0 cursor-pointer">
+                        <option value="1">Januari</option>
+                        <option value="2">Februari</option>
+                        <option value="3">Maret</option>
+                        <option value="4">April</option>
+                        <option value="5">Mei</option>
+                        <option value="6">Juni</option>
+                        <option value="7">Juli</option>
+                        <option value="8">Agustus</option>
+                        <option value="9">September</option>
+                        <option value="10">Oktober</option>
+                        <option value="11">November</option>
+                        <option value="12">Desember</option>
+                    </select>
+                </div>
+            </div>
             @endif
         </div>
     </div>
@@ -145,6 +166,7 @@
                             <div>
                                 <span class="px-4 py-1.5 bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400 rounded-full text-[8px] font-black uppercase tracking-widest">Minggu {{ $report->week_number }}</span>
                                 <h4 class="text-sm font-black text-gray-800 dark:text-white uppercase tracking-tight mt-3">{{ $report->month_name }}</h4>
+                                <p class="text-[8px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mt-2">{{ $report->created_at->translatedFormat('d M Y H:i') }}</p>
                             </div>
                         </div>
                         <div class="h-px bg-gray-100 dark:bg-gray-700 mb-6"></div>
@@ -182,6 +204,7 @@
                     <div>
                         <h3 class="text-2xl font-black italic uppercase tracking-tighter text-gray-800 dark:text-white">{{ $mReport->month_name }}</h3>
                         <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1">{{ $mReport->weeks_count }} Laporan Mingguan</p>
+                        <p class="text-[8px] font-bold text-gray-300 dark:text-gray-600 uppercase tracking-widest mt-2">{{ $mReport->created_at->translatedFormat('d M Y H:i') }}</p>
                     </div>
                     <div class="w-12 h-12 bg-primary-blue/10 rounded-2xl flex items-center justify-center text-primary-blue">
                         <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/></svg>
@@ -208,10 +231,94 @@
         </div>
         @empty
         <div class="col-span-3 py-32 bg-white dark:bg-gray-900 rounded-[4rem] text-center opacity-20 border border-dashed border-gray-300">
-            <p class="text-xs font-black uppercase tracking-widest italic">Belum ada data bulanan</p>
+            <p class="text-xs font-black uppercase tracking-widest italic">Belum ada data untuk bulan ini</p>
         </div>
         @endforelse
     </div>
+    @elseif($viewMode === 'yearly')
+    <!-- Yearly Recap Mode -->
+    @if($yearlyData && $yearlyData->total_profit > 0)
+    <div class="grid grid-cols-1 gap-10">
+        <!-- Main Yearly Summary Card -->
+        <div class="bg-white dark:bg-gray-900 rounded-[4rem] p-16 shadow-2xl shadow-blue-900/5 border border-gray-50 dark:border-gray-800 relative overflow-hidden group">
+            <div class="absolute top-0 right-0 p-20 opacity-[0.03] group-hover:scale-110 transition-transform duration-700 pointer-events-none">
+                <svg class="w-64 h-64 text-primary-blue" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18"/><path d="M3 9h18"/></svg>
+            </div>
+
+            <div class="relative z-10">
+                <div class="flex justify-between items-start mb-16">
+                    <div>
+                        <span class="px-5 py-2 bg-blue-50 dark:bg-blue-900/20 text-primary-blue rounded-full text-[10px] font-black uppercase tracking-widest">Rekap Tahunan</span>
+                        <h2 class="text-5xl font-black italic uppercase tracking-tighter text-gray-800 dark:text-white mt-6">Tahun {{ $currentYear }}</h2>
+                        <p class="text-sm font-bold text-gray-400 mt-3 italic uppercase">{{ $yearlyData->total_months }} Bulan • {{ $yearlyData->total_weeks }} Minggu</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-3">Total Keuntungan Tahunan</p>
+                        <p class="text-6xl font-black text-primary-blue italic tracking-tighter">Rp{{ number_format($yearlyData->total_profit, 0, ',', '.') }}</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="bg-gray-50 dark:bg-gray-800/50 rounded-[3rem] p-12 border border-gray-100 dark:border-gray-700/50">
+                        <div class="flex items-center gap-4 mb-8">
+                            <div class="w-14 h-14 bg-primary-red/10 rounded-2xl flex items-center justify-center text-primary-red">
+                                <svg class="w-7 h-7" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                            </div>
+                            <div>
+                                <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Kas Jurusan (50%)</p>
+                                <p class="text-3xl font-black text-gray-800 dark:text-white italic tracking-tighter mt-2">Rp{{ number_format($yearlyData->total_kas, 0, ',', '.') }}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-primary-blue rounded-[3rem] p-12 text-white shadow-2xl shadow-blue-500/20 relative overflow-hidden">
+                        <div class="flex items-center gap-4 mb-8 relative z-10">
+                            <div class="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center">
+                                <svg class="w-7 h-7" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+                            </div>
+                            <div>
+                                <p class="text-[10px] font-black text-white/60 uppercase tracking-widest">Bagi Hasil Admin (50%)</p>
+                                <p class="text-3xl font-black italic tracking-tighter mt-2">Rp{{ number_format($yearlyData->total_shared, 0, ',', '.') }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Monthly Breakdown -->
+                <div class="mt-16 pt-16 border-t border-gray-100 dark:border-gray-800">
+                    <h3 class="text-2xl font-black italic uppercase tracking-tighter text-gray-800 dark:text-white mb-10">Rincian Per Bulan</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                        @forelse($allMonthlyData as $mData)
+                        <div class="bg-gray-50 dark:bg-gray-800/50 rounded-[2rem] p-8 border border-gray-100 dark:border-gray-700/50 hover:border-primary-blue/30 transition-all">
+                            <h4 class="text-sm font-black text-gray-800 dark:text-white uppercase tracking-tight mb-6">{{ $mData->month_name }}</h4>
+                            <div class="space-y-4">
+                                <div class="flex justify-between items-center">
+                                    <p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Profit</p>
+                                    <p class="text-sm font-black text-primary-blue italic">Rp{{ number_format($mData->total_profit, 0, ',', '.') }}</p>
+                                </div>
+                                <div class="h-px bg-gray-200 dark:bg-gray-700"></div>
+                                <div class="flex justify-between items-center">
+                                    <p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Kas</p>
+                                    <p class="text-sm font-black text-gray-800 dark:text-white italic">Rp{{ number_format($mData->total_kas, 0, ',', '.') }}</p>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Bagian</p>
+                                    <p class="text-sm font-black text-green-500 italic">Rp{{ number_format($mData->total_shared, 0, ',', '.') }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        @empty
+                        @endforelse
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    @else
+    <div class="py-32 bg-white dark:bg-gray-900 rounded-[4rem] text-center opacity-20 border border-dashed border-gray-300">
+        <p class="text-xs font-black uppercase tracking-widest italic">Belum ada data untuk tahun ini</p>
+    </div>
+    @endif
     @endif
 
     <!-- Delete Confirmation Modal -->
