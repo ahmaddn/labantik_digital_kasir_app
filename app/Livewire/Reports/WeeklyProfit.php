@@ -133,14 +133,15 @@ class WeeklyProfit extends Component
 
         // Monthly Summary Logic - Filter by month and current year
         $monthName = Carbon::createFromDate($this->currentYear, $this->selectedMonth, 1)->translatedFormat('F Y');
-        $monthlyReports = WeeklyProfitShare::select('month_name',
+        $monthlyReports = WeeklyProfitShare::select(
+            'month_name',
             DB::raw('SUM(total_profit) as total_profit'),
             DB::raw('SUM(kas_amount) as total_kas'),
             DB::raw('SUM(shared_amount) as total_shared'),
             DB::raw('COUNT(*) as weeks_count'),
             DB::raw('MIN(created_at) as created_at')
         )
-            ->where('month_name', 'like', '%'.$monthName.'%')
+            ->where('month_name', 'like', '%' . $monthName . '%')
             ->groupBy('month_name')
             ->orderByDesc(DB::raw('MAX(week_end)'))
             ->get();
@@ -163,7 +164,8 @@ class WeeklyProfit extends Component
             ->get();
 
         // Get all monthly data for yearly breakdown
-        $allMonthlyData = WeeklyProfitShare::select('month_name',
+        $allMonthlyData = WeeklyProfitShare::select(
+            'month_name',
             DB::raw('SUM(total_profit) as total_profit'),
             DB::raw('SUM(kas_amount) as total_kas'),
             DB::raw('SUM(shared_amount) as total_shared')
