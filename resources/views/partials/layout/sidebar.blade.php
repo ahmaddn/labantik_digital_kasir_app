@@ -13,7 +13,7 @@
                         class="text-2xl font-black tracking-tighter leading-none text-primary-blue dark:text-primary-blue-light uppercase italic">
                         LabAntik</h1>
                     <span
-                        class="text-[10px] font-black text-primary-red tracking-[0.3em] uppercase italic">Digital
+                        class="text-[10px] font-black text-primary-red tracking-[0.3em] uppercase italic">POS Digital
                         System</span>
                 </div>
             </div>
