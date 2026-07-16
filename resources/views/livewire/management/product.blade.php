@@ -122,7 +122,7 @@
                                             default => 'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400 border-gray-200 dark:border-gray-700'
                                         };
                                     @endphp
-                                    <span class="px-3 py-1.5 {{ $catColor }} rounded-xl text-[9px] font-black uppercase tracking-widest block text-center truncate border shadow-sm">
+                                    <span class="w-fit mx-auto px-3 py-1.5 {{ $catColor }} rounded-xl text-[9px] font-black uppercase tracking-widest block text-center truncate border shadow-sm">
                                         {{ $product->category->name }}
                                     </span>
                                 </div>
@@ -130,7 +130,7 @@
                                 <!-- Supplier -->
                                 <div class="col-span-1 px-4 text-center">
                                     @if($product->supplier_id)
-                                    <span class="px-3 py-1.5 bg-primary-blue/5 rounded-xl text-[9px] font-black text-primary-blue uppercase tracking-widest italic border border-primary-blue/10 block truncate">
+                                    <span class="w-fit mx-auto px-3 py-1.5 bg-primary-blue/5 rounded-xl text-[9px] font-black text-primary-blue uppercase tracking-widest italic border border-primary-blue/10 block truncate">
                                         {{ $product->supplier->name }}
                                     </span>
                                     @else
