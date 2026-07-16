@@ -2,15 +2,19 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use App\Observers\TransactionObserver;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 #[ObservedBy([TransactionObserver::class])]
 class Transaction extends Model
 {
+    use HasUuids;
+
     protected $fillable = [
+        'jurusan_id',
         'user_id',
         'product_id',
         'supplier_id',
@@ -24,8 +28,13 @@ class Transaction extends Model
         'debt_amount',
         'change_due',
         'status',
-        'note'
+        'note',
     ];
+
+    public function jurusan(): BelongsTo
+    {
+        return $this->belongsTo(Jurusan::class);
+    }
 
     protected $casts = [
         'transacted_at' => 'datetime',

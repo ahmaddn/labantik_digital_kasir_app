@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Jurusan;
 use App\Models\Product;
 use App\Models\ProductCategory;
 use Illuminate\Database\Seeder;
@@ -25,6 +26,7 @@ class ProductSeeder extends Seeder
                 ['Kue Sus', 3000, 200],
                 ['Cromboloni', 3000, 200],
                 ['Roti Fatih', 3000, 200],
+                ['Buah Mangga', 5000, 500],
             ],
             'Eskrim' => [
                 ['Eskrim Milo', 2000, 400],
@@ -37,7 +39,7 @@ class ProductSeeder extends Seeder
                 ['Eskrim Semangka', 2000, 450],
                 ['Eskrim Grape', 2000, 400],
                 ['Eskrim Yoghurt', 3000, 600],
-                ['Eskrim Strawberry Crispy', 4000, 840],
+                ['Eskrim Strawbery Crispy', 4000, 840],
                 ['Eskrim Melon', 2000, 625],
                 ['Eskrim Jeruk', 2000, 440],
             ],
@@ -48,7 +50,7 @@ class ProductSeeder extends Seeder
                 ['Le Minerale & TGM', 3000, 1700],
                 ['Aquviva', 3000, 1042],
                 ['Mountea', 1000, 188],
-                ['Ale-ale', 1000, 167],
+                ['Ale - ale', 1000, 167],
                 ['Power F', 1000, 167],
                 ['Kopi Naga', 1000, 188],
                 ['Cleo', 3000, 646],
@@ -68,8 +70,8 @@ class ProductSeeder extends Seeder
                 ['SIIP', 500, 50],
                 ['All Ciki', 2000, 444],
                 ['Permen & Go Potato', 500, 360],
-                ['Malkis 2', 1000, 150],
-                ['Malkis 3', 2000, 1100],
+                ['Malkis Dua', 1000, 150],
+                ['Malkis Tiga', 2000, 1100],
                 ['Ritz', 1000, 250],
                 ['Kalpa', 1000, 250],
                 ['Yupi', 500, 63],
@@ -82,7 +84,7 @@ class ProductSeeder extends Seeder
                 ['Nextar', 1500, 385],
                 ['Dilan', 1000, 250],
                 ['Slay Olay', 1000, 250],
-                ['Choki-Choki', 500, 100],
+                ['Choki', 500, 100],
                 ['Apetito', 1000, 250],
                 ['Good Time', 1000, 250],
                 ['Kacang Koro', 500, 100],
@@ -92,13 +94,17 @@ class ProductSeeder extends Seeder
             ],
         ];
 
+        $rplJurusan = Jurusan::where('name', 'RPL')->first();
+        $jurusanId = $rplJurusan ? $rplJurusan->id : (Jurusan::first() ? Jurusan::first()->id : null);
+
         foreach ($data as $categoryName => $products) {
             $category = ProductCategory::where('name', $categoryName)->first();
             foreach ($products as $p) {
                 Product::create([
+                    'jurusan_id' => $jurusanId,
                     'category_id' => $category->id,
                     'name' => $p[0],
-                    'label' => $p[0] . ' - Rp' . number_format($p[1], 0, ',', '.'),
+                    'label' => $p[0].' - Rp'.number_format($p[1], 0, ',', '.'),
                     'price' => $p[1],
                     'modal_price' => $p[1] - $p[2],
                     'profit' => $p[2],

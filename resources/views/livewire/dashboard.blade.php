@@ -4,29 +4,43 @@
             <h1 class="text-5xl font-black italic uppercase tracking-tighter text-primary-blue dark:text-primary-blue-light">Dashboard Digital</h1>
             <p class="text-gray-400 font-bold text-xs uppercase tracking-[0.3em] italic">{{ \Carbon\Carbon::parse($today)->translatedFormat('l, d F Y') }}</p>
         </div>
-        <div class="flex space-x-4">
-            @if($isSessionFinished)
-                <div class="flex items-center space-x-2">
-                    <button disabled class="px-10 py-5 bg-gray-400 text-white rounded-[2rem] shadow-xl font-black italic uppercase tracking-wider cursor-not-allowed flex flex-col items-center leading-tight">
-                        <div class="flex items-center">
-                            <svg class="w-6 h-6 mr-3" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-                            Sesi Selesai
-                        </div>
-                        <span class="text-[8px] font-black uppercase tracking-widest mt-1 opacity-60">Data hari ini telah dikunci</span>
-                    </button>
-                    <button wire:click="emergencyReactivateSession" wire:confirm="Anda yakin ingin mengaktifkan kembali sesi ini? Data rekap hari ini akan dihapus dan Anda harus melakukan tutup kasir ulang nantinya." class="px-6 py-5 bg-red-600 hover:bg-red-700 text-white rounded-[2rem] shadow-xl shadow-red-600/30 font-black italic uppercase tracking-wider flex flex-col items-center leading-tight transition transform hover:-translate-y-1 active:scale-95">
-                        <div class="flex items-center">
-                            <svg class="w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
-                            Darurat
-                        </div>
-                        <span class="text-[8px] font-black uppercase tracking-widest mt-1 opacity-90">Aktifkan Sesi</span>
-                    </button>
-                </div>
-            @else
-                <a href="{{ route('kasir') }}" class="px-10 py-5 bg-primary-red text-white rounded-[2rem] shadow-2xl shadow-red-500/30 font-black italic uppercase tracking-wider transition transform hover:-translate-y-2 active:scale-95 flex items-center">
-                    <svg class="w-6 h-6 mr-3" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
-                    Buka Kasir
-                </a>
+        <div class="flex space-x-4 items-center">
+            @if(!session('active_jurusan_id'))
+            <div class="flex items-center bg-white dark:bg-gray-800 px-6 py-4 rounded-2xl shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-800">
+                <svg class="w-5 h-5 text-primary-blue mr-3" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
+                <select wire:model.live="filterJurusan" class="border-none p-0 focus:ring-0 font-black text-sm bg-transparent dark:text-white uppercase tracking-widest cursor-pointer">
+                    <option value="">Semua Jurusan / Global</option>
+                    @foreach($jurusans as $jur)
+                        <option value="{{ $jur->id }}">TEFA {{ $jur->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+            @endif
+
+            @if(session('active_role_name') !== 'superadmin')
+                @if($isSessionFinished)
+                    <div class="flex items-center space-x-2">
+                        <button disabled class="px-10 py-5 bg-gray-400 text-white rounded-[2rem] shadow-xl font-black italic uppercase tracking-wider cursor-not-allowed flex flex-col items-center leading-tight">
+                            <div class="flex items-center">
+                                <svg class="w-6 h-6 mr-3" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                                Sesi Selesai
+                            </div>
+                            <span class="text-[8px] font-black uppercase tracking-widest mt-1 opacity-60">Data hari ini telah dikunci</span>
+                        </button>
+                        <button wire:click="emergencyReactivateSession" wire:confirm="Anda yakin ingin mengaktifkan kembali sesi ini? Data rekap hari ini akan dihapus dan Anda harus melakukan tutup kasir ulang nantinya." class="px-6 py-5 bg-red-600 hover:bg-red-700 text-white rounded-[2rem] shadow-xl shadow-red-600/30 font-black italic uppercase tracking-wider flex flex-col items-center leading-tight transition transform hover:-translate-y-1 active:scale-95">
+                            <div class="flex items-center">
+                                <svg class="w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+                                Darurat
+                            </div>
+                            <span class="text-[8px] font-black uppercase tracking-widest mt-1 opacity-90">Aktifkan Sesi</span>
+                        </button>
+                    </div>
+                @else
+                    <a href="{{ route('kasir') }}" class="px-10 py-5 bg-primary-red text-white rounded-[2rem] shadow-2xl shadow-red-500/30 font-black italic uppercase tracking-wider transition transform hover:-translate-y-2 active:scale-95 flex items-center">
+                        <svg class="w-6 h-6 mr-3" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+                        Buka Kasir
+                    </a>
+                @endif
             @endif
         </div>
     </div>

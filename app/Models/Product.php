@@ -2,13 +2,17 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Product extends Model
 {
+    use HasUuids;
+
     protected $fillable = [
+        'jurusan_id',
         'category_id',
         'supplier_id',
         'name',
@@ -16,8 +20,13 @@ class Product extends Model
         'price',
         'modal_price',
         'profit',
-        'is_active'
+        'is_active',
     ];
+
+    public function jurusan(): BelongsTo
+    {
+        return $this->belongsTo(Jurusan::class);
+    }
 
     protected static function boot()
     {
@@ -25,7 +34,7 @@ class Product extends Model
 
         static::saving(function ($product) {
             $product->profit = $product->price - $product->modal_price;
-            $product->label = $product->name . ' - Rp' . number_format($product->price, 0, ',', '.');
+            $product->label = $product->name.' - Rp'.number_format($product->price, 0, ',', '.');
         });
     }
 

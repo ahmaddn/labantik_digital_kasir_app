@@ -56,7 +56,7 @@
     handleProductClick(e) {
         if (e.target.closest('button[data-add-to-cart]')) {
             const productId = e.target.closest('button').dataset.productId;
-            const product = this.products.find(p => p.id === parseInt(productId));
+            const product = this.products.find(p => p.id === productId);
             if (product) {
                 this.addToCart(product);
             }
@@ -531,7 +531,7 @@ document.addEventListener('keydown', (e) => {
     </div>
 
     <!-- Opening Stock Modal -->
-    <div x-data="{ show: @entangle('showOpeningStockModal') }" x-show="show" x-cloak @keydown.window.escape="show = false"
+    <div x-data="{ show: @entangle('showOpeningStockModal'), modalSearch: '' }" x-show="show" x-cloak @keydown.window.escape="show = false"
         class="fixed inset-0 z-[400] flex items-center justify-center p-6 bg-white/20 dark:bg-black/40 backdrop-blur-md">
         <div
             class="nb-card bg-white dark:bg-dark-soft w-full max-w-5xl max-h-[90vh] flex flex-col overflow-hidden animate-in slide-in-from-bottom-10 duration-500 border-4">
@@ -560,10 +560,18 @@ document.addEventListener('keydown', (e) => {
             <div class="flex-1 overflow-y-auto p-6 no-scrollbar bg-gray-50 dark:bg-black">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     @php
-                        $awalNames = \App\Models\Product::where('is_active', true)->pluck('name')->toArray();
+                        $activeJurusanId = session('active_jurusan_id');
+                        $openingProducts = \App\Models\Product::where('is_active', true)
+                            ->when($activeJurusanId, function ($q) use ($activeJurusanId) {
+                                return $q->where('jurusan_id', $activeJurusanId);
+                            })
+                            ->orderBy('name')
+                            ->get();
+                        $awalNames = $openingProducts->pluck('name')->toArray();
                     @endphp
-                    @foreach (\App\Models\Product::where('is_active', true)->orderBy('name')->get() as $p)
+                    @foreach ($openingProducts as $p)
                         <div x-show="'{{ strtolower($p->name) }}'.includes(modalSearch.toLowerCase())"
+                            wire:key="opening-stock-{{ $p->id }}"
                             class="nb-card p-5 flex items-center justify-between bg-white dark:bg-dark-soft shadow-none border-2">
                             <div class="flex-1">
                                 <h4 class="font-black uppercase text-sm dark:text-white">{{ $p->name }}</h4>
@@ -577,7 +585,7 @@ document.addEventListener('keydown', (e) => {
                                     @endif
                                 </div>
                             </div>
-                            <input type="number" wire:model.blur="stockItems.{{ $p->id }}"
+                            <input type="number" wire:model="stockItems.{{ $p->id }}"
                                 class="nb-input w-24 text-center text-lg p-2 shadow-none border-2 bg-white dark:bg-black">
                         </div>
                     @endforeach
@@ -605,7 +613,7 @@ document.addEventListener('keydown', (e) => {
     </div>
 
     <!-- Closing Stock Modal -->
-    <div x-data="{ show: @entangle('showClosingStockModal') }" x-show="show" x-cloak @keydown.window.escape="show = false"
+    <div x-data="{ show: @entangle('showClosingStockModal'), modalSearch: '' }" x-show="show" x-cloak @keydown.window.escape="show = false"
         class="fixed inset-0 z-[400] flex items-center justify-center p-6 bg-white/20 dark:bg-black/40 backdrop-blur-md">
         <div
             class="nb-card bg-white dark:bg-dark-soft w-full max-w-5xl max-h-[90vh] flex flex-col overflow-hidden border-4">
@@ -638,6 +646,7 @@ document.addEventListener('keydown', (e) => {
                     @endphp
                     @foreach ($this->stockComparison as $item)
                         <div x-show="'{{ strtolower($item['name']) }}'.includes(modalSearch.toLowerCase())"
+                            wire:key="closing-stock-{{ $item['id'] }}"
                             class="nb-card p-5 flex flex-col bg-white dark:bg-dark-soft shadow-none border-2">
                             <h4 class="font-black uppercase text-sm dark:text-white mb-4">{{ $item['name'] }}</h4>
                             <div class="flex flex-wrap items-center gap-3 mb-5">
@@ -660,7 +669,7 @@ document.addEventListener('keydown', (e) => {
                             <div class="space-y-1">
                                 <label class="text-[10px] font-black uppercase tracking-widest dark:text-gray-400">STOK
                                     FISIK SEKARANG</label>
-                                <input type="number" wire:model.blur="stockItems.{{ $item['id'] }}"
+                                <input type="number" wire:model="stockItems.{{ $item['id'] }}"
                                     class="nb-input w-full text-center text-2xl p-3 shadow-none border-2 bg-white dark:bg-black">
                             </div>
                         </div>

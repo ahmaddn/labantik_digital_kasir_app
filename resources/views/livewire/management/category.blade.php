@@ -5,12 +5,23 @@
             <p class="text-gray-400 font-bold text-xs uppercase tracking-[0.2em] italic">Klasifikasi Inventaris Digital</p>
         </div>
         
-        <div class="w-full md:w-96">
-            <div class="relative group">
+        <div class="flex flex-col md:flex-row gap-4 items-center w-full md:w-auto">
+            @if(!session('active_jurusan_id'))
+            <div class="relative w-full md:w-48 bg-white dark:bg-gray-850 rounded-2xl border border-gray-100 dark:border-gray-800 px-4 py-3 flex items-center shadow-lg shadow-blue-900/5">
+                <svg class="w-4 h-4 text-gray-400 mr-2" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
+                <select wire:model.live="filterJurusan" class="bg-transparent border-none p-0 focus:ring-0 text-[10px] font-black uppercase tracking-widest text-gray-500 w-full">
+                    <option value="">Semua Jurusan</option>
+                    @foreach($jurusans as $jur)
+                        <option value="{{ $jur->id }}">{{ $jur->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+            @endif
+            <div class="relative group w-full md:w-80">
                 <div class="absolute inset-y-0 left-0 pl-6 flex items-center pointer-events-none">
                     <svg class="w-4 h-4 text-gray-400 group-focus-within:text-primary-blue transition-colors" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
                 </div>
-                <input type="text" wire:model.live="search" placeholder="Cari kategori..." class="w-full pl-14 pr-6 py-4 bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 focus:ring-4 focus:ring-primary-blue/10 focus:border-primary-blue transition-all font-black text-sm text-gray-800 dark:text-white placeholder:text-gray-300 placeholder:italic">
+                <input type="text" wire:model.live="search" placeholder="Cari kategori..." class="w-full pl-14 pr-6 py-4 bg-white dark:bg-gray-850 rounded-2xl border border-gray-100 dark:border-gray-800 focus:ring-4 focus:ring-primary-blue/10 focus:border-primary-blue transition-all font-black text-sm text-gray-800 dark:text-white placeholder:text-gray-300 placeholder:italic">
             </div>
         </div>
     </div>
@@ -39,6 +50,18 @@
                         <label class="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-3 ml-2 italic">Deskripsi (Opsional)</label>
                         <textarea wire:model="description" rows="4" class="w-full px-6 py-4 bg-gray-50 dark:bg-gray-900 border-none rounded-2xl focus:ring-4 focus:ring-primary-blue/10 font-black text-sm text-gray-800 dark:text-white placeholder:text-gray-300"></textarea>
                     </div>
+
+                    @if(!session('active_jurusan_id'))
+                    <div>
+                        <label class="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-3 ml-2 italic">Jurusan / Unit TEFA</label>
+                        <select wire:model="jurusan_id" class="w-full px-6 py-4 bg-gray-50 dark:bg-gray-900 border-none rounded-2xl focus:ring-4 focus:ring-primary-blue/10 font-black text-xs text-gray-800 dark:text-white">
+                            <option value="">Kategori Global</option>
+                            @foreach($jurusans as $jur)
+                                <option value="{{ $jur->id }}">{{ $jur->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    @endif
 
                     <div class="flex items-center gap-4 pt-4">
                         <button type="submit" class="flex-1 py-5 bg-primary-blue text-white rounded-[2rem] shadow-2xl shadow-blue-900/20 font-black italic uppercase tracking-wider transform hover:-translate-y-1 transition-all">
@@ -70,7 +93,18 @@
                             @forelse($categories as $category)
                             <tr class="hover:bg-gray-50 dark:hover:bg-gray-900/30 transition-colors group">
                                 <td class="px-10 py-8">
-                                    <div class="text-base font-black text-gray-800 dark:text-white uppercase tracking-tight italic">{{ $category->name }}</div>
+                                    <div class="flex items-center gap-3">
+                                        <div class="text-base font-black text-gray-800 dark:text-white uppercase tracking-tight italic">{{ $category->name }}</div>
+                                        @if($category->jurusan)
+                                            <span class="px-1.5 py-0.5 text-[8px] font-black rounded uppercase tracking-wider bg-primary-red/10 text-primary-red">
+                                                TEFA {{ $category->jurusan->name }}
+                                            </span>
+                                        @else
+                                            <span class="px-1.5 py-0.5 text-[8px] font-black rounded uppercase tracking-wider bg-gray-100 text-gray-600 dark:bg-gray-900 dark:text-gray-350">
+                                                GLOBAL
+                                            </span>
+                                        @endif
+                                    </div>
                                     <div class="text-[10px] font-medium text-gray-400 mt-1 line-clamp-1">{{ $category->description ?? 'Tidak ada deskripsi' }}</div>
                                 </td>
                                 <td class="px-10 py-8">

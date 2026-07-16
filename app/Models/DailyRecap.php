@@ -2,11 +2,16 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class DailyRecap extends Model
 {
+    use HasUuids;
+
     protected $fillable = [
+        'jurusan_id',
         'date',
         'month_week',
         'month_name',
@@ -19,12 +24,18 @@ class DailyRecap extends Model
         'count_no_payment',
         'count_borrowed',
         'actual_cash',
+        'retained_change_cash',
         'cash_note',
-        'generated_at'
+        'generated_at',
     ];
+
+    public function jurusan(): BelongsTo
+    {
+        return $this->belongsTo(Jurusan::class);
+    }
 
     protected $casts = [
         'date' => 'date',
-        'generated_at' => 'datetime'
+        'generated_at' => 'datetime',
     ];
 }

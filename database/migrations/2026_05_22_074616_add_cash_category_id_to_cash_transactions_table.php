@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('cash_transactions', function (Blueprint $table) {
-            $table->foreignId('cash_category_id')->nullable()->constrained('cash_categories')->nullOnDelete();
+            $table->foreignUuid('cash_category_id')->nullable()->constrained('cash_categories')->nullOnDelete();
             if (Schema::hasColumn('cash_transactions', 'name')) {
                 $table->dropColumn('name');
             }

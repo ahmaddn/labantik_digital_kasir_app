@@ -74,6 +74,30 @@
     body {
         @apply bg-[#e0e0e0] text-black font-outfit;
     }
+
+    button, 
+    a, 
+    select, 
+    option,
+    input[type="submit"], 
+    input[type="button"],
+    input[type="checkbox"],
+    input[type="radio"],
+    [role="button"] {
+        cursor: pointer !important;
+    }
+
+    button, a {
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    button:hover, a:hover {
+        filter: brightness(1.08);
+    }
+
+    button:active, a:active {
+        transform: scale(0.97);
+    }
 }
 
 @layer components {
@@ -137,5 +161,34 @@
     }
     .dark .nb-input::placeholder {
         @apply text-slate-600;
+    }
+
+    /* Theme Styles Support */
+    .theme-glassmorphism .bg-white, 
+    .theme-glassmorphism .bg-gray-50 {
+        background-color: rgba(255, 255, 255, 0.6) !important;
+        backdrop-filter: blur(16px) !important;
+        -webkit-backdrop-filter: blur(16px) !important;
+        border: 1px solid rgba(255, 255, 255, 0.3) !important;
+    }
+    .theme-glassmorphism.dark .bg-gray-800, 
+    .theme-glassmorphism.dark .bg-gray-850, 
+    .theme-glassmorphism.dark .bg-gray-900 {
+        background-color: rgba(15, 23, 42, 0.6) !important;
+        backdrop-filter: blur(16px) !important;
+        -webkit-backdrop-filter: blur(16px) !important;
+        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    }
+
+    .theme-neon-cyberpunk .bg-white,
+    .theme-neon-cyberpunk .bg-gray-50 {
+        background-color: #030712 !important;
+        border: 2px solid var(--color-primary-blue) !important;
+    }
+    .theme-neon-cyberpunk.dark .bg-gray-800,
+    .theme-neon-cyberpunk.dark .bg-gray-850,
+    .theme-neon-cyberpunk.dark .bg-gray-900 {
+        background-color: #000000 !important;
+        border: 2px solid var(--color-primary-blue) !important;
     }
 }

@@ -26,6 +26,8 @@ class CashManagement extends Component
     // Modal state
     public bool $showModal = false;
     public $editingId = null;
+    public bool $showDeleteConfirmation = false;
+    public $confirmingDeleteId = null;
 
     public function mount()
     {
@@ -119,12 +121,22 @@ class CashManagement extends Component
         $this->dispatch('toast', message: 'Kategori berhasil ditambahkan!');
     }
 
-    public function deleteTransaction($id)
+    public function confirmDelete($id)
     {
-        $transaction = CashTransaction::find($id);
-        if ($transaction) {
-            $transaction->delete();
-            $this->dispatch('toast', message: 'Catatan kas berhasil dihapus.');
+        $this->confirmingDeleteId = $id;
+        $this->showDeleteConfirmation = true;
+    }
+
+    public function deleteTransaction()
+    {
+        if ($this->confirmingDeleteId) {
+            $transaction = CashTransaction::find($this->confirmingDeleteId);
+            if ($transaction) {
+                $transaction->delete();
+                $this->dispatch('toast', message: 'Catatan kas berhasil dihapus.');
+            }
+            $this->showDeleteConfirmation = false;
+            $this->confirmingDeleteId = null;
         }
     }
 

@@ -9,7 +9,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('weekly_profit_shares', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('id')->primary();
             $table->string('month_name');
             $table->integer('week_number');  // minggu ke-berapa dalam bulan
             $table->date('week_start');

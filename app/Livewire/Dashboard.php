@@ -2,20 +2,39 @@
 
 namespace App\Livewire;
 
+use App\Models\DailyRecap;
+use App\Models\Jurusan;
 use App\Models\Transaction;
-use App\Models\Product;
-use Carbon\Carbon;
 use Livewire\Component;
 
 class Dashboard extends Component
 {
+    public $filterJurusan = '';
+
+    public function updatedFilterJurusan()
+    {
+        // No action needed, page will re-render
+    }
+
     public function render()
     {
         $today = today();
         $yesterday = today()->subDay();
+        $activeJurusanId = session('active_jurusan_id') ?: ($this->filterJurusan ?: null);
 
-        $todayTransactions = Transaction::with('product')->whereDate('transacted_at', $today)->get();
-        $yesterdayTransactions = Transaction::with('product')->whereDate('transacted_at', $yesterday)->get();
+        $todayTransactions = Transaction::with('product')
+            ->whereDate('transacted_at', $today)
+            ->when($activeJurusanId, function ($q) use ($activeJurusanId) {
+                return $q->where('jurusan_id', $activeJurusanId);
+            })
+            ->get();
+
+        $yesterdayTransactions = Transaction::with('product')
+            ->whereDate('transacted_at', $yesterday)
+            ->when($activeJurusanId, function ($q) use ($activeJurusanId) {
+                return $q->where('jurusan_id', $activeJurusanId);
+            })
+            ->get();
 
         $todayRevenue = $todayTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->sum('total_price');
         $yesterdayRevenue = $yesterdayTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->sum('total_price');
@@ -23,11 +42,11 @@ class Dashboard extends Component
 
         $todaySupplierHak = $todayTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])
             ->whereNotNull('supplier_id')
-            ->sum(fn($tx) => ($tx->unit_price - $tx->unit_profit) * $tx->quantity);
+            ->sum(fn ($tx) => ($tx->unit_price - $tx->unit_profit) * $tx->quantity);
         $todayInternalRevenue = $todayRevenue - $todaySupplierHak;
 
-        $todayProfit = $todayTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->sum(fn($tx) => $tx->unit_profit * $tx->quantity);
-        $yesterdayProfit = $yesterdayTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->sum(fn($tx) => $tx->unit_profit * $tx->quantity);
+        $todayProfit = $todayTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->sum(fn ($tx) => $tx->unit_profit * $tx->quantity);
+        $yesterdayProfit = $yesterdayTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->sum(fn ($tx) => $tx->unit_profit * $tx->quantity);
         $profitChange = $yesterdayProfit > 0 ? (($todayProfit - $yesterdayProfit) / $yesterdayProfit) * 100 : 100;
 
         $todayCount = $todayTransactions->count();
@@ -35,13 +54,24 @@ class Dashboard extends Component
         $countChange = $yesterdayCount > 0 ? (($todayCount - $yesterdayCount) / $yesterdayCount) * 100 : 100;
 
         // General Stats (All Time)
-        $allTimeBase = Transaction::whereIn('status', ['uang_diterima', 'belum_kembalian']);
+        $allTimeBase = Transaction::whereIn('status', ['uang_diterima', 'belum_kembalian'])
+            ->when($activeJurusanId, function ($q) use ($activeJurusanId) {
+                return $q->where('jurusan_id', $activeJurusanId);
+            });
         $totalAllTimeProfit = $allTimeBase->sum(\DB::raw('unit_profit * quantity'));
         $totalAllTimeRevenue = $allTimeBase->sum('total_price');
         $totalAllTimeTransactions = $allTimeBase->count();
-        
-        $totalAuditCash = \App\Models\DailyRecap::sum('actual_cash');
-        $totalOutstandingDebt = Transaction::whereIn('status', ['belum_menerima_uang', 'uang_dipinjam'])->sum('total_price');
+
+        $totalAuditCash = DailyRecap::when($activeJurusanId, function ($q) use ($activeJurusanId) {
+            return $q->where('jurusan_id', $activeJurusanId);
+        })
+            ->sum('actual_cash');
+
+        $totalOutstandingDebt = Transaction::whereIn('status', ['belum_menerima_uang', 'uang_dipinjam'])
+            ->when($activeJurusanId, function ($q) use ($activeJurusanId) {
+                return $q->where('jurusan_id', $activeJurusanId);
+            })
+            ->sum('total_price');
 
         $stats = (object) [
             'today_revenue' => $todayRevenue,
@@ -52,7 +82,7 @@ class Dashboard extends Component
             'today_transactions' => $todayCount,
             'transactions_change' => $countChange,
             'avg_transaction' => $todayCount > 0 ? $todayRevenue / $todayCount : 0,
-            
+
             // New General Stats
             'total_all_time_profit' => $totalAllTimeProfit,
             'total_all_time_revenue' => $totalAllTimeRevenue,
@@ -66,20 +96,31 @@ class Dashboard extends Component
         $weeklyData = [];
         for ($i = 6; $i >= 0; $i--) {
             $date = today()->subDays($i);
-            $dayTxs = Transaction::whereDate('transacted_at', $date)->get();
+            $dayTxs = Transaction::whereDate('transacted_at', $date)
+                ->when($activeJurusanId, function ($q) use ($activeJurusanId) {
+                    return $q->where('jurusan_id', $activeJurusanId);
+                })
+                ->get();
+
             $weeklyData[] = [
                 'day' => $date->translatedFormat('D'),
                 'revenue' => $dayTxs->whereIn('status', ['uang_diterima', 'belum_kembalian'])->sum('total_price'),
-                'profit' => $dayTxs->whereIn('status', ['uang_diterima', 'belum_kembalian'])->sum(fn($tx) => $tx->unit_profit * $tx->quantity)
+                'profit' => $dayTxs->whereIn('status', ['uang_diterima', 'belum_kembalian'])->sum(fn ($tx) => $tx->unit_profit * $tx->quantity),
             ];
         }
 
         $recentTransactions = Transaction::with('product')
+            ->when($activeJurusanId, function ($q) use ($activeJurusanId) {
+                return $q->where('jurusan_id', $activeJurusanId);
+            })
             ->orderByDesc('transacted_at')
             ->limit(5)
             ->get();
 
         $topProducts = Transaction::with('product')
+            ->when($activeJurusanId, function ($q) use ($activeJurusanId) {
+                return $q->where('jurusan_id', $activeJurusanId);
+            })
             ->selectRaw('product_id, SUM(quantity) as total_qty, SUM(total_price) as total_revenue')
             ->groupBy('product_id')
             ->orderByDesc('total_qty')
@@ -90,6 +131,9 @@ class Dashboard extends Component
         $categoryData = Transaction::join('products', 'transactions.product_id', '=', 'products.id')
             ->join('product_categories', 'products.category_id', '=', 'product_categories.id')
             ->whereIn('transactions.status', ['uang_diterima', 'belum_kembalian'])
+            ->when($activeJurusanId, function ($q) use ($activeJurusanId) {
+                return $q->where('transactions.jurusan_id', $activeJurusanId);
+            })
             ->selectRaw('product_categories.name as category_name, SUM(transactions.total_price) as total_revenue')
             ->groupBy('product_categories.name')
             ->orderByDesc('total_revenue')
@@ -104,12 +148,18 @@ class Dashboard extends Component
                 'revenue' => Transaction::whereMonth('transacted_at', $month->month)
                     ->whereYear('transacted_at', $month->year)
                     ->whereIn('status', ['uang_diterima', 'belum_kembalian'])
-                    ->sum('total_price')
+                    ->when($activeJurusanId, function ($q) use ($activeJurusanId) {
+                        return $q->where('jurusan_id', $activeJurusanId);
+                    })
+                    ->sum('total_price'),
             ];
         }
 
         // Check if session is finished (Daily Recap exists with actual cash)
-        $isSessionFinished = \App\Models\DailyRecap::whereDate('date', now())
+        $isSessionFinished = DailyRecap::whereDate('date', now())
+            ->when($activeJurusanId, function ($q) use ($activeJurusanId) {
+                return $q->where('jurusan_id', $activeJurusanId);
+            })
             ->where('actual_cash', '>', 0)
             ->exists();
 
@@ -121,13 +171,19 @@ class Dashboard extends Component
             'weeklyData' => $weeklyData,
             'categoryData' => $categoryData,
             'monthlyData' => $monthlyData,
-            'isSessionFinished' => $isSessionFinished
+            'isSessionFinished' => $isSessionFinished,
+            'jurusans' => Jurusan::all(),
         ])->layout('layouts.app', ['title' => 'Dashboard Overview']);
     }
 
     public function emergencyReactivateSession()
     {
-        \App\Models\DailyRecap::whereDate('date', now())->delete();
+        $activeJurusanId = session('active_jurusan_id');
+        DailyRecap::whereDate('date', now())
+            ->when($activeJurusanId, function ($q) use ($activeJurusanId) {
+                return $q->where('jurusan_id', $activeJurusanId);
+            })
+            ->delete();
         $this->redirect(route('dashboard'), navigate: true);
     }
 }

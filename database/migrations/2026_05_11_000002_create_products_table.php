@@ -9,8 +9,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('products', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('category_id')->constrained('product_categories');
+            $table->uuid('id')->primary();
+            $table->foreignUuid('category_id')->constrained('product_categories');
             $table->string('name');        // contoh: "Kerupuk"
             $table->string('label');       // contoh: "Kerupuk - Rp1000" (untuk dropdown)
             $table->integer('price');      // harga jual, contoh: 1000

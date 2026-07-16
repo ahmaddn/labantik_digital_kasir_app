@@ -1,0 +1,361 @@
+<div class="space-y-8 pt-6">
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+            <h1 class="text-3xl font-black italic uppercase tracking-tighter text-primary-blue dark:text-primary-yellow">Manajemen User</h1>
+            <p class="text-gray-400 text-sm font-semibold uppercase tracking-widest mt-1">Kelola Pengguna & Hak Akses TEFA</p>
+        </div>
+        <div>
+            <button wire:click="openCreateModal" class="inline-flex items-center px-6 py-4 bg-primary-blue hover:bg-blue-900 text-primary-yellow rounded-2xl font-black text-sm uppercase italic tracking-wider transition-all duration-300 shadow-xl shadow-blue-900/10 active:scale-95">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
+                Tambah Pengguna Baru
+            </button>
+        </div>
+    </div>
+
+    <!-- Table & Filters Container -->
+    <div class="bg-white dark:bg-gray-800 rounded-[2.5rem] shadow-2xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700/50 p-6 md:p-8">
+        <!-- Search & Filter -->
+        <div class="mb-6">
+            <div class="relative max-w-md">
+                <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-gray-400">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                </span>
+                <input wire:model.live="search" type="text" placeholder="Cari nama atau email pengguna..." class="w-full pl-12 pr-4 py-4 bg-gray-50 dark:bg-gray-900 border-none rounded-2xl focus:ring-2 focus:ring-primary-blue dark:text-white transition-all text-sm">
+            </div>
+        </div>
+
+        <!-- Desktop Table -->
+        <div class="hidden md:block overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="border-b border-gray-100 dark:border-gray-700">
+                        <th class="pb-4 text-xs font-black uppercase tracking-widest text-gray-400 pl-4">Pengguna</th>
+                        <th class="pb-4 text-xs font-black uppercase tracking-widest text-gray-400">Email</th>
+                        <th class="pb-4 text-xs font-black uppercase tracking-widest text-gray-400">Akses Unit TEFA / Role</th>
+                        <th class="pb-4 text-xs font-black uppercase tracking-widest text-gray-400 text-right pr-4 w-32">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-50 dark:divide-gray-700/50">
+                    @forelse($users as $user)
+                        <tr class="group hover:bg-gray-50/50 dark:hover:bg-gray-900/30 transition-colors">
+                            <td class="py-5 pl-4">
+                                <div class="flex items-center">
+                                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-black text-sm shadow-md">
+                                        {{ $user->initials() }}
+                                    </div>
+                                    <div class="ml-4">
+                                        <h3 class="font-bold text-gray-800 dark:text-white group-hover:text-primary-blue dark:group-hover:text-primary-yellow transition-colors">{{ $user->name }}</h3>
+                                        <span class="text-[10px] text-gray-400 font-semibold uppercase tracking-wider">ID: {{ substr($user->id, 0, 8) }}...</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="py-5 text-sm text-gray-500 dark:text-gray-400 font-medium">
+                                {{ $user->email }}
+                            </td>
+                            <td class="py-5">
+                                <div class="flex flex-wrap gap-2 max-w-xl">
+                                    @php
+                                        $userAccesses = $user->getAvailableAccesses();
+                                    @endphp
+                                    @forelse($userAccesses as $acc)
+                                        @php
+                                            $color = 'bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400';
+                                            if ($acc->role_name === 'superadmin') {
+                                                $color = 'bg-purple-50 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400';
+                                            } elseif ($acc->role_name === 'pengelola_jurusan') {
+                                                $color = 'bg-amber-50 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400';
+                                            } elseif ($acc->role_name === 'kasir') {
+                                                $color = 'bg-emerald-50 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400';
+                                            }
+                                        @endphp
+                                        <span class="inline-flex items-center px-3 py-1 text-xs font-black rounded-full uppercase tracking-wider {{ $color }}">
+                                            {{ $acc->role_label }} 
+                                            @if($acc->jurusan_name)
+                                                <span class="mx-1 text-gray-400">•</span> {{ $acc->jurusan_name }}
+                                            @endif
+                                        </span>
+                                    @empty
+                                        <span class="text-xs text-gray-400 italic">Belum ada hak akses</span>
+                                    @endforelse
+                                </div>
+                            </td>
+                            <td class="py-5 text-right pr-4">
+                                <div class="flex items-center justify-end gap-3">
+                                    <button wire:click="openEditModal('{{ $user->id }}')" class="p-2.5 text-gray-400 hover:text-primary-blue dark:hover:text-primary-yellow hover:bg-gray-100 dark:hover:bg-gray-900 rounded-xl transition-all">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                                    </button>
+                                    <button wire:click="confirmDelete('{{ $user->id }}')" class="p-2.5 text-gray-400 hover:text-primary-red hover:bg-red-50 dark:hover:bg-red-950/30 rounded-xl transition-all" @if($user->id === auth()->id()) disabled style="opacity: 0.3;" @endif>
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="4" class="py-10 text-center text-gray-400 font-semibold italic">
+                                Tidak ada data pengguna yang ditemukan.
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Mobile View (Cards) -->
+        <div class="block md:hidden space-y-4">
+            @forelse($users as $user)
+                <div class="p-6 bg-gray-50 dark:bg-gray-900 rounded-3xl border border-gray-100 dark:border-gray-800 space-y-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-black text-sm shadow-md">
+                            {{ $user->initials() }}
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-gray-800 dark:text-white">{{ $user->name }}</h3>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">{{ $user->email }}</p>
+                        </div>
+                    </div>
+
+                    <!-- User Access Tags on Mobile -->
+                    <div class="space-y-1">
+                        <p class="text-[10px] font-black uppercase text-gray-400 tracking-wider">Akses Unit / Role:</p>
+                        <div class="flex flex-wrap gap-2">
+                            @php
+                                $userAccesses = $user->getAvailableAccesses();
+                            @endphp
+                            @forelse($userAccesses as $acc)
+                                @php
+                                    $color = 'bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400';
+                                    if ($acc->role_name === 'superadmin') {
+                                        $color = 'bg-purple-50 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400';
+                                    } elseif ($acc->role_name === 'pengelola_jurusan') {
+                                        $color = 'bg-amber-50 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400';
+                                    } elseif ($acc->role_name === 'kasir') {
+                                        $color = 'bg-emerald-50 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400';
+                                    }
+                                @endphp
+                                <span class="inline-flex items-center px-3 py-1 text-[10px] font-black rounded-full uppercase tracking-wider {{ $color }}">
+                                    {{ $acc->role_label }} 
+                                    @if($acc->jurusan_name)
+                                        <span class="mx-1 text-gray-400">•</span> {{ $acc->jurusan_name }}
+                                    @endif
+                                </span>
+                            @empty
+                                <span class="text-xs text-gray-400 italic">Belum ada hak akses</span>
+                            @endforelse
+                        </div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="flex justify-end gap-2 pt-3 border-t border-gray-200 dark:border-gray-800">
+                        <button wire:click="openEditModal('{{ $user->id }}')" class="inline-flex items-center px-4 py-2.5 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 border border-gray-250 dark:border-gray-700 rounded-xl font-bold text-xs gap-2 transition-all">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                            Edit
+                        </button>
+                        <button wire:click="confirmDelete('{{ $user->id }}')" class="inline-flex items-center px-4 py-2.5 bg-red-50 hover:bg-red-100 text-primary-red border border-red-200 dark:bg-red-950/30 dark:border-red-900 rounded-xl font-bold text-xs gap-2 transition-all" @if($user->id === auth()->id()) disabled style="opacity: 0.3;" @endif>
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                            Hapus
+                        </button>
+                    </div>
+                </div>
+            @empty
+                <div class="py-10 text-center text-gray-400 font-semibold italic">
+                    Tidak ada data pengguna yang ditemukan.
+                </div>
+            @endforelse
+        </div>
+
+        <!-- Pagination -->
+        <div class="mt-6">
+            {{ $users->links() }}
+        </div>
+    </div>
+
+    <!-- Create/Edit Modal with Smooth Alpine Transition -->
+    <div x-data="{ show: @entangle('showModal') }" x-show="show" class="fixed inset-0 z-50 flex items-center justify-center p-4" x-cloak>
+        <!-- Backdrop -->
+        <div x-show="show" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 bg-black/60 backdrop-blur-xs" wire:click="$set('showModal', false)"></div>
+
+        <!-- Content -->
+        <div x-show="show" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95" class="relative w-full max-w-2xl bg-white dark:bg-gray-800 rounded-[2.5rem] shadow-2xl p-8 border border-gray-100 dark:border-gray-700 z-10 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-black text-gray-850 dark:text-white uppercase italic tracking-tight">
+                    {{ $userId ? 'Edit Pengguna' : 'Tambah Pengguna Baru' }}
+                </h2>
+                <button wire:click="$set('showModal', false)" class="text-gray-400 hover:text-gray-600 dark:hover:text-white transition-colors">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+
+            <form wire:submit.prevent="saveUser" class="space-y-6">
+                <!-- Basic Info Row -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">Nama Lengkap</label>
+                        <input wire:model="name" type="text" required placeholder="Contoh: Budi Santoso" class="w-full px-4 py-4 bg-gray-50 dark:bg-gray-900 border-none rounded-2xl focus:ring-2 focus:ring-primary-blue dark:text-white transition-all text-sm">
+                        @error('name') <span class="text-xs text-primary-red font-bold mt-1 block">{{ $message }}</span> @enderror
+                    </div>
+                    <div>
+                        <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">Email</label>
+                        <input wire:model="email" type="email" required placeholder="user@gmail.com" class="w-full px-4 py-4 bg-gray-50 dark:bg-gray-900 border-none rounded-2xl focus:ring-2 focus:ring-primary-blue dark:text-white transition-all text-sm">
+                        @error('email') <span class="text-xs text-primary-red font-bold mt-1 block">{{ $message }}</span> @enderror
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">
+                        Password {{ $userId ? '(Kosongkan jika tidak ingin diubah)' : '' }}
+                    </label>
+                    <input wire:model="password" type="password" placeholder="••••••••" class="w-full px-4 py-4 bg-gray-50 dark:bg-gray-900 border-none rounded-2xl focus:ring-2 focus:ring-primary-blue dark:text-white transition-all text-sm">
+                    @error('password') <span class="text-xs text-primary-red font-bold mt-1 block">{{ $message }}</span> @enderror
+                </div>
+
+                <!-- Access Settings Section -->
+                <div class="border-t border-gray-100 dark:border-gray-700/50 pt-6">
+                    <h3 class="text-sm font-black text-gray-800 dark:text-white uppercase tracking-widest mb-4">Pengaturan Hak Akses</h3>
+
+                    <!-- Add Access Panel -->
+                    <div class="bg-gray-50 dark:bg-gray-900/50 rounded-2xl p-4 mb-4">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 items-end">
+                            <div>
+                                <label class="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">Pilih Role</label>
+                                <div x-data="{ 
+                                    open: false, 
+                                    selectedLabel: '-- Pilih Role --' 
+                                }" 
+                                x-init="
+                                    $watch('$wire.selectedRoleId', val => {
+                                        if(!val) { selectedLabel = '-- Pilih Role --'; return; }
+                                        @this.roles.forEach(r => { if(r.id == val) selectedLabel = r.label; });
+                                    });
+                                    if($wire.selectedRoleId) {
+                                        @this.roles.forEach(r => { if(r.id == $wire.selectedRoleId) selectedLabel = r.label; });
+                                    }
+                                "
+                                class="relative">
+                                    <button type="button" @click="open = !open" class="w-full flex items-center justify-between px-4 py-3 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-semibold text-gray-700 dark:text-gray-200 transition-all focus:ring-2 focus:ring-primary-blue">
+                                        <span x-text="selectedLabel"></span>
+                                        <svg class="w-4 h-4 text-gray-400 transition-transform duration-200" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path></svg>
+                                    </button>
+                                    <div x-show="open" @click.away="open = false" x-transition class="absolute z-30 w-full mt-1 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl shadow-xl max-h-48 overflow-y-auto p-1.5">
+                                        <button type="button" @click="$wire.set('selectedRoleId', ''); selectedLabel = '-- Pilih Role --'; open = false" class="w-full text-left px-3 py-2 text-xs font-semibold text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg">
+                                            -- Pilih Role --
+                                        </button>
+                                        @foreach($roles as $role)
+                                            <button type="button" @click="$wire.set('selectedRoleId', '{{ $role->id }}'); selectedLabel = '{{ $role->label }}'; open = false" class="w-full text-left px-3 py-2 text-sm font-bold text-gray-750 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-primary-blue dark:hover:text-primary-yellow rounded-lg transition-colors">
+                                                {{ $role->label }}
+                                            </button>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">Pilih Jurusan / TEFA</label>
+                                <div x-data="{ 
+                                    open: false, 
+                                    selectedLabel: 'Superadmin / Global' 
+                                }" 
+                                x-init="
+                                    $watch('$wire.selectedJurusanId', val => {
+                                        if(!val) { selectedLabel = 'Superadmin / Global'; return; }
+                                        @this.jurusans.forEach(j => { if(j.id == val) selectedLabel = j.name; });
+                                    });
+                                    if($wire.selectedJurusanId) {
+                                        @this.jurusans.forEach(j => { if(j.id == $wire.selectedJurusanId) selectedLabel = j.name; });
+                                    }
+                                "
+                                class="relative">
+                                    <button type="button" @click="open = !open" class="w-full flex items-center justify-between px-4 py-3 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-semibold text-gray-700 dark:text-gray-200 transition-all focus:ring-2 focus:ring-primary-blue">
+                                        <span x-text="selectedLabel"></span>
+                                        <svg class="w-4 h-4 text-gray-400 transition-transform duration-200" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path></svg>
+                                    </button>
+                                    <div x-show="open" @click.away="open = false" x-transition class="absolute z-30 w-full mt-1 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl shadow-xl max-h-48 overflow-y-auto p-1.5">
+                                        <button type="button" @click="$wire.set('selectedJurusanId', ''); selectedLabel = 'Superadmin / Global'; open = false" class="w-full text-left px-3 py-2 text-sm font-bold text-gray-750 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-primary-blue dark:hover:text-primary-yellow rounded-lg transition-colors">
+                                            Superadmin / Global
+                                        </button>
+                                        @foreach($jurusans as $jur)
+                                            <button type="button" @click="$wire.set('selectedJurusanId', '{{ $jur->id }}'); selectedLabel = '{{ $jur->name }}'; open = false" class="w-full text-left px-3 py-2 text-sm font-bold text-gray-750 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-primary-blue dark:hover:text-primary-yellow rounded-lg transition-colors">
+                                                {{ $jur->name }}
+                                            </button>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <button type="button" wire:click="addAccess" class="w-full py-3 bg-gray-800 hover:bg-gray-900 text-white rounded-xl font-black text-xs uppercase tracking-wider transition-all">
+                                    Tambah Akses
+                                </button>
+                            </div>
+                        </div>
+                        @error('selectedRoleId') <span class="text-xs text-primary-red font-bold mt-1 block">{{ $message }}</span> @enderror
+                    </div>
+
+                    <!-- Active Access List -->
+                    <div class="space-y-2">
+                        <label class="block text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">Akses yang Diberikan</label>
+                        @if(count($assignedAccesses) > 0)
+                            <div class="divide-y divide-gray-100 dark:divide-gray-700 bg-gray-50/50 dark:bg-gray-900/30 rounded-2xl overflow-hidden border border-gray-100 dark:border-gray-700/50">
+                                @foreach($assignedAccesses as $index => $acc)
+                                    <div class="flex items-center justify-between px-4 py-3 text-sm">
+                                        <div class="flex items-center gap-2">
+                                            <span class="px-2 py-0.5 text-xs font-black bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-400 rounded uppercase">
+                                                {{ $acc['role_label'] }}
+                                            </span>
+                                            <span class="text-gray-400">di</span>
+                                            <span class="font-bold text-gray-700 dark:text-gray-300">
+                                                {{ $acc['jurusan_name'] }}
+                                            </span>
+                                        </div>
+                                        <button type="button" wire:click="removeAccess({{ $index }})" class="text-primary-red hover:text-red-700 font-bold text-xs uppercase tracking-wider">
+                                            Hapus
+                                        </button>
+                                    </div>
+                                @endforeach
+                            </div>
+                        @else
+                            <div class="text-xs text-gray-400 italic p-4 bg-gray-50 dark:bg-gray-900/30 rounded-2xl text-center">
+                                Belum ada hak akses yang ditambahkan. Gunakan panel di atas untuk menambahkan.
+                            </div>
+                        @endif
+                    </div>
+                </div>
+
+                <!-- Footer Actions -->
+                <div class="flex justify-end gap-3 pt-4 border-t border-gray-100 dark:border-gray-700/50">
+                    <button type="button" wire:click="$set('showModal', false)" class="px-6 py-4 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-650 text-gray-600 dark:text-white rounded-2xl font-black text-sm uppercase italic tracking-wider transition-all">
+                        Batal
+                    </button>
+                    <button type="submit" class="px-6 py-4 bg-primary-blue hover:bg-blue-900 text-primary-yellow rounded-2xl font-black text-sm uppercase italic tracking-wider transition-all shadow-xl shadow-blue-900/10">
+                        Simpan Perubahan
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal with Smooth Alpine Transition -->
+    <div x-data="{ showDelete: @entangle('showDeleteModal') }" x-show="showDelete" class="fixed inset-0 z-50 flex items-center justify-center p-4" x-cloak>
+        <!-- Backdrop -->
+        <div x-show="showDelete" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 bg-black/60 backdrop-blur-xs" wire:click="$set('showDeleteModal', false)"></div>
+
+        <!-- Content -->
+        <div x-show="showDelete" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95" class="relative w-full max-w-md bg-white dark:bg-gray-800 rounded-[2.5rem] shadow-2xl p-8 border border-gray-100 dark:border-gray-700 z-10 animate-fade-in-up">
+            <div class="text-center mb-6">
+                <div class="w-16 h-16 bg-red-50 dark:bg-red-950/30 text-primary-red rounded-3xl flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                </div>
+                <h2 class="text-2xl font-black text-gray-850 dark:text-white uppercase italic tracking-tight">Hapus Pengguna</h2>
+                <p class="text-gray-400 text-sm font-medium mt-2">Apakah Anda yakin ingin menghapus akun pengguna ini secara permanen? Tindakan ini tidak dapat dibatalkan.</p>
+            </div>
+
+            <div class="flex justify-center gap-3">
+                <button wire:click="$set('showDeleteModal', false)" class="flex-1 py-4 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-650 text-gray-600 dark:text-white rounded-2xl font-black text-sm uppercase italic tracking-wider transition-all">
+                    Batal
+                </button>
+                <button wire:click="deleteUser" class="flex-1 py-4 bg-primary-red hover:bg-red-700 text-white rounded-2xl font-black text-sm uppercase italic tracking-wider transition-all shadow-xl shadow-red-500/10">
+                    Ya, Hapus
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

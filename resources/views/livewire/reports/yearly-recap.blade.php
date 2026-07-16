@@ -123,7 +123,9 @@
                     <tr>
                         <th class="px-10 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">Bulan</th>
                         <th class="px-10 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">Volume</th>
-                        <th class="px-10 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">Pendapatan</th>
+                        <th class="px-10 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">Pendapatan (Sistem)</th>
+                        <th class="px-10 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">Kas Fisik (Riil)</th>
+                        <th class="px-10 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">Selisih</th>
                         <th class="px-10 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">Keuntungan</th>
                         <th class="px-10 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right">Opsi</th>
                     </tr>
@@ -142,6 +144,32 @@
                             <div class="w-full bg-gray-100 dark:bg-gray-900 h-1.5 rounded-full mt-2 overflow-hidden">
                                 <div class="bg-primary-blue h-full transition-all duration-1000" style="width: {{ ($recap->total_revenue_real > 0) ? ($month->total_revenue_real / $recap->total_revenue_real * 100) : 0 }}%"></div>
                             </div>
+                        </td>
+                        <td class="px-10 py-8 text-sm font-black text-gray-800 dark:text-white">
+                            @if($month->audited_days > 0)
+                                <div class="italic">Rp{{ number_format((float)$month->actual_cash - (float)$month->retained_change_cash, 0, ',', '.') }}</div>
+                                @if($month->retained_change_cash > 0)
+                                    <div class="text-[9px] font-bold text-primary-blue uppercase tracking-wider mt-1">Kembalian: Rp{{ number_format($month->retained_change_cash, 0, ',', '.') }}</div>
+                                @endif
+                            @else
+                                <span class="px-3 py-1 bg-gray-100 dark:bg-gray-900 rounded-lg text-[9px] font-black text-gray-400 uppercase tracking-widest">Belum Audit</span>
+                            @endif
+                        </td>
+                        <td class="px-10 py-8 text-sm font-black">
+                            @if($month->audited_days > 0)
+                                @php
+                                    $diff = ((float)$month->actual_cash - (float)$month->retained_change_cash) - (float)$month->total_revenue_real;
+                                @endphp
+                                @if($diff == 0)
+                                    <span class="text-green-500 uppercase text-xs font-black">Cocok</span>
+                                @elseif($diff < 0)
+                                    <span class="text-primary-red italic">-Rp{{ number_format(abs($diff), 0, ',', '.') }}</span>
+                                @else
+                                    <span class="text-amber-500 italic">+Rp{{ number_format($diff, 0, ',', '.') }}</span>
+                                @endif
+                            @else
+                                <span class="text-gray-300 dark:text-gray-600">-</span>
+                            @endif
                         </td>
                         <td class="px-10 py-8">
                             <div class="text-sm font-black text-primary-red italic">Rp{{ number_format($month->total_profit, 0, ',', '.') }}</div>

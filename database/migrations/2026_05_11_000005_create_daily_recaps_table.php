@@ -9,7 +9,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('daily_recaps', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('id')->primary();
             $table->date('date')->unique();  // 1 baris per hari
             $table->integer('month_week');   // minggu ke-berapa dalam bulan (1–5)
             $table->string('month_name');    // contoh: "Januari"

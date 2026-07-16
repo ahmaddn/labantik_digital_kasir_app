@@ -2,31 +2,31 @@
 
 namespace App\Observers;
 
-use App\Models\Transaction;
 use App\Models\DailyRecap;
 use App\Models\StockEntry;
+use App\Models\Transaction;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\DB;
 
 class TransactionObserver
 {
     public function saved(Transaction $transaction): void
     {
-        $this->recalculateDailyRecap($transaction->transacted_at->toDateString());
+        $this->recalculateDailyRecap($transaction->transacted_at->toDateString(), $transaction->jurusan_id);
         $this->updateStock($transaction->product_id, $transaction->transacted_at->toDateString());
     }
 
     public function deleted(Transaction $transaction): void
     {
-        $this->recalculateDailyRecap($transaction->transacted_at->toDateString());
+        $this->recalculateDailyRecap($transaction->transacted_at->toDateString(), $transaction->jurusan_id);
         $this->updateStock($transaction->product_id, $transaction->transacted_at->toDateString());
     }
 
-    protected function recalculateDailyRecap(string $date): void
+    protected function recalculateDailyRecap(string $date, ?string $jurusanId): void
     {
         $carbonDate = Carbon::parse($date);
-        
+
         $stats = Transaction::whereDate('transacted_at', $date)
+            ->where('jurusan_id', $jurusanId)
             ->selectRaw("
                 SUM(CASE WHEN status = 'uang_diterima' THEN total_price ELSE 0 END) as revenue_real,
                 SUM(total_price) as revenue_all,
@@ -40,7 +40,10 @@ class TransactionObserver
             ->first();
 
         DailyRecap::updateOrCreate(
-            ['date' => $date],
+            [
+                'date' => $date,
+                'jurusan_id' => $jurusanId,
+            ],
             [
                 'month_week' => ceil($carbonDate->day / 7),
                 'month_name' => $carbonDate->translatedFormat('F'),
@@ -57,7 +60,7 @@ class TransactionObserver
         );
     }
 
-    protected function updateStock(int $productId, string $date): void
+    protected function updateStock(string $productId, string $date): void
     {
         $totalSold = Transaction::where('product_id', $productId)
             ->whereDate('transacted_at', $date)
@@ -69,7 +72,7 @@ class TransactionObserver
 
         if ($stockEntry) {
             $stockEntry->update([
-                'closing_stock' => $stockEntry->opening_stock - $totalSold
+                'closing_stock' => $stockEntry->opening_stock - $totalSold,
             ]);
         }
     }

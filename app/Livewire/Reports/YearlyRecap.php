@@ -61,11 +61,19 @@ class YearlyRecap extends Component
         for ($m = 1; $m <= 12; $m++) {
             $monthTransactions = $allTransactions->filter(fn($tx) => Carbon::parse($tx->transacted_at)->month == $m);
             if ($monthTransactions->isNotEmpty()) {
+                $recapData = \App\Models\DailyRecap::whereYear('date', $this->selectedYear)
+                    ->whereMonth('date', $m)
+                    ->selectRaw('SUM(actual_cash) as total_actual, SUM(retained_change_cash) as total_retained, COUNT(CASE WHEN actual_cash > 0 THEN 1 END) as audited_days')
+                    ->first();
+
                 $monthlyBreakdown[] = (object) [
                     'month' => $m,
                     'total_transactions' => $monthTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->count(),
                     'total_revenue_real' => $monthTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->sum('total_price'),
-                    'total_profit' => $monthTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->sum(fn($tx) => $tx->unit_profit * $tx->quantity)
+                    'total_profit' => $monthTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->sum(fn($tx) => $tx->unit_profit * $tx->quantity),
+                    'actual_cash' => $recapData ? $recapData->total_actual : null,
+                    'retained_change_cash' => $recapData ? $recapData->total_retained : 0,
+                    'audited_days' => $recapData ? ($recapData->audited_days ?? 0) : 0,
                 ];
             }
         }
@@ -125,11 +133,19 @@ class YearlyRecap extends Component
         for ($m = 1; $m <= 12; $m++) {
             $monthTransactions = $allTransactions->filter(fn($tx) => Carbon::parse($tx->transacted_at)->month == $m);
             if ($monthTransactions->isNotEmpty()) {
+                $recapData = \App\Models\DailyRecap::whereYear('date', $this->selectedYear)
+                    ->whereMonth('date', $m)
+                    ->selectRaw('SUM(actual_cash) as total_actual, SUM(retained_change_cash) as total_retained, COUNT(CASE WHEN actual_cash > 0 THEN 1 END) as audited_days')
+                    ->first();
+
                 $monthlyBreakdown[] = (object) [
                     'month' => $m,
                     'total_transactions' => $monthTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->count(),
                     'total_revenue_real' => $monthTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->sum('total_price'),
-                    'total_profit' => $monthTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->sum(fn($tx) => $tx->unit_profit * $tx->quantity)
+                    'total_profit' => $monthTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->sum(fn($tx) => $tx->unit_profit * $tx->quantity),
+                    'actual_cash' => $recapData ? $recapData->total_actual : null,
+                    'retained_change_cash' => $recapData ? $recapData->total_retained : 0,
+                    'audited_days' => $recapData ? ($recapData->audited_days ?? 0) : 0,
                 ];
             }
         }

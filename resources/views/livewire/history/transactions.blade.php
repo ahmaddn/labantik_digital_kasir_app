@@ -21,6 +21,18 @@
                 </select>
             </div>
 
+            @if(!session('active_jurusan_id'))
+            <div class="flex items-center bg-white dark:bg-gray-800 px-6 py-3 rounded-2xl shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-800">
+                <svg class="w-4 h-4 text-primary-blue mr-3" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
+                <select wire:model.live="filterJurusan" class="border-none p-0 focus:ring-0 font-black text-xs bg-transparent dark:text-white uppercase tracking-widest">
+                    <option value="">Semua Jurusan</option>
+                    @foreach($jurusans as $jur)
+                        <option value="{{ $jur->id }}">{{ $jur->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+            @endif
+
             <div class="flex items-center bg-white dark:bg-gray-800 px-6 py-3 rounded-2xl shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-800">
                 <svg class="w-4 h-4 text-primary-red mr-3" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
                 <input type="date" wire:model.live="filterDate" class="border-none p-0 focus:ring-0 font-black text-xs bg-transparent dark:text-white uppercase tracking-widest cursor-pointer">
@@ -58,7 +70,21 @@
 
                         <!-- No Ref & Produk -->
                         <div class="px-4 min-w-0">
-                            <div class="text-sm font-black text-primary-blue uppercase tracking-tight truncate">{{ $tx->reference }}</div>
+                            <div class="flex items-center gap-2">
+                                <div class="text-sm font-black text-primary-blue uppercase tracking-tight truncate">{{ $tx->reference }}</div>
+                                @php
+                                    $txJurusan = $tx->jurusan_id ? $jurusans->firstWhere('id', $tx->jurusan_id) : null;
+                                @endphp
+                                @if($txJurusan)
+                                    <span class="px-1.5 py-0.5 text-[8px] font-black rounded uppercase tracking-wider bg-primary-red/10 text-primary-red">
+                                        {{ $txJurusan->name }}
+                                    </span>
+                                @else
+                                    <span class="px-1.5 py-0.5 text-[8px] font-black rounded uppercase tracking-wider bg-gray-100 text-gray-600 dark:bg-gray-900 dark:text-gray-300">
+                                        GLOBAL
+                                    </span>
+                                @endif
+                            </div>
                             <div class="text-[9px] font-bold text-gray-400 mt-1 uppercase tracking-widest leading-relaxed">
                                 {{ $productNames }}
                             </div>

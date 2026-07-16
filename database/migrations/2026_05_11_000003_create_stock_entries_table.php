@@ -9,8 +9,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('stock_entries', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('product_id')->constrained('products');
+            $table->uuid('id')->primary();
+            $table->foreignUuid('product_id')->constrained('products');
             $table->date('date');
             $table->integer('opening_stock')->default(0); // stok awal (input manual)
             $table->integer('closing_stock')->default(0); // stok sisa (otomatis = opening - terjual)

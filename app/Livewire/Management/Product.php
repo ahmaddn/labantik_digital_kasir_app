@@ -2,58 +2,98 @@
 
 namespace App\Livewire\Management;
 
+use App\Models\Jurusan;
 use App\Models\Product as ProductModel;
 use App\Models\ProductCategory;
 use App\Models\StockEntry;
 use App\Models\Supplier;
+use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
-use Carbon\Carbon;
 
 class Product extends Component
 {
     use WithPagination;
-    
-    #[\Livewire\Attributes\Url]
+
+    #[Url]
     public $highlight = '';
 
     // Form produk
     public string $name = '';
+
     public string $label = '';
+
     public $price = '';
+
     public $profit_per_unit = '';
+
     public $modal_price = 0; // Displayed in UI
+
     public $category_id = '';
+
     public $supplier_id = '';
+
     public bool $is_active = true;
-    public ?int $editingId = null;
+
+    public ?string $editingId = null;
 
     // Stok harian
     public $stock_product_id = '';
+
     public int $opening_stock = 0;
+
     public string $stock_date = '';
 
     // State
     public $categories = [];
+
     public $suppliers = [];
+
     public string $successMessage = '';
+
     public string $tab = 'products'; // 'products' | 'stock'
+
     public bool $showDeleteModal = false;
-    public ?int $deleteId = null;
+
+    public bool $showFormModal = false;
+
+    public ?string $deleteId = null;
+
     public string $filterCategory = '';
+
+    public string $filterJurusan = '';
+
     public string $search = '';
+
     public array $selectedProducts = [];
+
     public bool $selectAll = false;
 
+    public $jurusans = [];
+
+    public $jurusan_id = '';
 
     public function mount(): void
     {
-        $this->categories = ProductCategory::all();
+        $activeJurusanId = session('active_jurusan_id');
+        $this->categories = ProductCategory::where(function ($q) use ($activeJurusanId) {
+            $q->whereNull('jurusan_id');
+            if ($activeJurusanId) {
+                $q->orWhere('jurusan_id', $activeJurusanId);
+            }
+        })->get();
         $this->suppliers = Supplier::all();
+        $this->jurusans = Jurusan::all();
         $this->stock_date = today()->toDateString();
     }
 
     public function updatedFilterCategory(): void
+    {
+        $this->resetPage();
+        $this->resetSelection();
+    }
+
+    public function updatedFilterJurusan(): void
     {
         $this->resetPage();
         $this->resetSelection();
@@ -68,14 +108,14 @@ class Product extends Component
     public function updatedSelectAll($value): void
     {
         if ($value) {
-            $this->selectedProducts = ProductModel::when($this->filterCategory, function($q) {
-                    return $q->where('category_id', $this->filterCategory);
-                })
-                ->when($this->search, function($q) {
-                    return $q->where('name', 'like', '%' . $this->search . '%');
+            $this->selectedProducts = ProductModel::when($this->filterCategory, function ($q) {
+                return $q->where('category_id', $this->filterCategory);
+            })
+                ->when($this->search, function ($q) {
+                    return $q->where('name', 'like', '%'.$this->search.'%');
                 })
                 ->pluck('id')
-                ->map(fn($id) => (string)$id)
+                ->map(fn ($id) => (string) $id)
                 ->toArray();
         } else {
             $this->selectedProducts = [];
@@ -90,36 +130,39 @@ class Product extends Component
 
     public function bulkDelete(): void
     {
-        if (empty($this->selectedProducts)) return;
-        
+        if (empty($this->selectedProducts)) {
+            return;
+        }
+
         ProductModel::whereIn('id', $this->selectedProducts)->delete();
-        $this->dispatch('toast', message: count($this->selectedProducts) . ' produk berhasil dihapus.');
+        $this->dispatch('toast', message: count($this->selectedProducts).' produk berhasil dihapus.');
         $this->resetSelection();
     }
 
     public function bulkToggleStatus(): void
     {
-        if (empty($this->selectedProducts)) return;
+        if (empty($this->selectedProducts)) {
+            return;
+        }
 
         $products = ProductModel::whereIn('id', $this->selectedProducts)->get();
-        
+
         // If all are active, make them inactive. Otherwise, make them all active.
-        $allActive = $products->every(fn($p) => $p->is_active);
-        $newStatus = !$allActive;
+        $allActive = $products->every(fn ($p) => $p->is_active);
+        $newStatus = ! $allActive;
 
         ProductModel::whereIn('id', $this->selectedProducts)->update(['is_active' => $newStatus]);
-        
+
         $statusText = $newStatus ? 'diaktifkan' : 'dinonaktifkan';
-        $this->dispatch('toast', message: count($this->selectedProducts) . " produk berhasil $statusText.");
+        $this->dispatch('toast', message: count($this->selectedProducts)." produk berhasil $statusText.");
         $this->resetSelection();
     }
-
 
     public function updatedPrice(): void
     {
         // When price changes, we prioritize keeping modal_price and updating profit
         if (is_numeric($this->price) && is_numeric($this->modal_price)) {
-            $this->profit_per_unit = (int)$this->price - (int)$this->modal_price;
+            $this->profit_per_unit = (int) $this->price - (int) $this->modal_price;
         }
         $this->updateLabel();
     }
@@ -127,14 +170,14 @@ class Product extends Component
     public function updatedProfitPerUnit(): void
     {
         if (is_numeric($this->price) && is_numeric($this->profit_per_unit)) {
-            $this->modal_price = (int)$this->price - (int)$this->profit_per_unit;
+            $this->modal_price = (int) $this->price - (int) $this->profit_per_unit;
         }
     }
 
     public function updatedModalPrice(): void
     {
         if (is_numeric($this->price) && is_numeric($this->modal_price)) {
-            $this->profit_per_unit = (int)$this->price - (int)$this->modal_price;
+            $this->profit_per_unit = (int) $this->price - (int) $this->modal_price;
         }
     }
 
@@ -145,41 +188,44 @@ class Product extends Component
 
     protected function calculateModal(): void
     {
-        // This is now handled in updated hooks for better control, 
+        // This is now handled in updated hooks for better control,
         // but kept for saveProduct fallback if needed
         if (is_numeric($this->price) && is_numeric($this->profit_per_unit)) {
-            $this->modal_price = (int)$this->price - (int)$this->profit_per_unit;
+            $this->modal_price = (int) $this->price - (int) $this->profit_per_unit;
         }
     }
 
     protected function updateLabel(): void
     {
         if ($this->name && is_numeric($this->price)) {
-            $this->label = $this->name . ' - Rp' . number_format((int)$this->price, 0, ',', '.');
+            $this->label = $this->name.' - Rp'.number_format((int) $this->price, 0, ',', '.');
         }
     }
 
     public function saveProduct(): void
     {
         $this->validate([
-            'name'            => 'required|string|max:100',
-            'price'           => 'required|numeric|min:1',
+            'name' => 'required|string|max:100',
+            'price' => 'required|numeric|min:1',
             'profit_per_unit' => 'required|numeric|min:0',
-            'category_id'     => 'required|exists:product_categories,id',
-            'supplier_id'     => 'nullable|exists:suppliers,id',
+            'category_id' => 'required|exists:product_categories,id',
+            'supplier_id' => 'nullable|exists:suppliers,id',
+            'jurusan_id' => 'nullable|exists:jurusans,id',
         ]);
 
         $this->calculateModal();
         $this->updateLabel();
 
+        $activeJurusanId = session('active_jurusan_id');
         $data = [
-            'name'        => $this->name,
-            'label'       => $this->label,
-            'price'       => (int)$this->price,
+            'jurusan_id' => $activeJurusanId ?: ($this->jurusan_id ?: null),
+            'name' => $this->name,
+            'label' => $this->label,
+            'price' => (int) $this->price,
             'modal_price' => $this->modal_price,
-            'category_id' => (int)$this->category_id,
-            'supplier_id' => $this->supplier_id ? (int)$this->supplier_id : null,
-            'is_active'   => (bool)$this->is_active,
+            'category_id' => $this->category_id,
+            'supplier_id' => $this->supplier_id ?: null,
+            'is_active' => (bool) $this->is_active,
         ];
 
         if ($this->editingId) {
@@ -193,31 +239,42 @@ class Product extends Component
             $this->dispatch('toast', message: 'Produk berhasil ditambahkan.');
         }
 
-        $this->reset(['name', 'label', 'price', 'profit_per_unit', 'modal_price', 'category_id', 'supplier_id', 'is_active', 'editingId']);
+        $this->reset(['name', 'label', 'price', 'profit_per_unit', 'modal_price', 'category_id', 'supplier_id', 'is_active', 'editingId', 'jurusan_id']);
         $this->is_active = true;
+        $this->showFormModal = false;
     }
 
-    public function editProduct(int $id): void
+    public function openCreateModal(): void
+    {
+        $this->reset(['name', 'label', 'price', 'profit_per_unit', 'modal_price', 'category_id', 'supplier_id', 'editingId', 'jurusan_id']);
+        $this->is_active = true;
+        $this->showFormModal = true;
+    }
+
+    public function editProduct(string $id): void
     {
         $product = ProductModel::findOrFail($id);
-        $this->editingId       = $id;
-        $this->name            = $product->name;
-        $this->label           = $product->label;
-        $this->price           = $product->price;
+        $this->editingId = $id;
+        $this->name = $product->name;
+        $this->label = $product->label;
+        $this->price = $product->price;
         $this->profit_per_unit = $product->price - $product->modal_price;
-        $this->modal_price     = $product->modal_price;
-        $this->category_id     = $product->category_id;
-        $this->supplier_id     = $product->supplier_id;
-        $this->is_active       = (bool)$product->is_active;
+        $this->modal_price = $product->modal_price;
+        $this->category_id = $product->category_id;
+        $this->supplier_id = $product->supplier_id;
+        $this->jurusan_id = $product->jurusan_id;
+        $this->is_active = (bool) $product->is_active;
+        $this->showFormModal = true;
     }
 
     public function cancelEdit(): void
     {
-        $this->reset(['name', 'label', 'price', 'profit_per_unit', 'modal_price', 'category_id', 'editingId']);
+        $this->reset(['name', 'label', 'price', 'profit_per_unit', 'modal_price', 'category_id', 'editingId', 'jurusan_id']);
         $this->is_active = true;
+        $this->showFormModal = false;
     }
 
-    public function confirmDelete(int $id): void
+    public function confirmDelete(string $id): void
     {
         $this->deleteId = $id;
         $this->showDeleteModal = true;
@@ -243,14 +300,14 @@ class Product extends Component
     {
         $this->validate([
             'stock_product_id' => 'required|exists:products,id',
-            'opening_stock'    => 'required|integer|min:0',
-            'stock_date'       => 'required|date',
+            'opening_stock' => 'required|integer|min:0',
+            'stock_date' => 'required|date',
         ]);
 
         StockEntry::updateOrCreate(
             [
                 'product_id' => $this->stock_product_id,
-                'date'       => $this->stock_date,
+                'date' => $this->stock_date,
             ],
             [
                 'opening_stock' => $this->opening_stock,
@@ -265,26 +322,34 @@ class Product extends Component
 
     public function render()
     {
-        $query = ProductModel::with(['category', 'supplier'])->orderBy('name');
-        
-        if ($this->highlight && !$this->search) {
+        $activeJurusanId = session('active_jurusan_id');
+        $query = ProductModel::with(['category', 'supplier', 'jurusan'])
+            ->when($activeJurusanId, function ($q) use ($activeJurusanId) {
+                return $q->where('jurusan_id', $activeJurusanId);
+            })
+            ->when(! $activeJurusanId && $this->filterJurusan, function ($q) {
+                return $q->where('jurusan_id', $this->filterJurusan);
+            })
+            ->orderBy('name');
+
+        if ($this->highlight && ! $this->search) {
             $query->where('id', $this->highlight);
         } elseif ($this->filterCategory) {
             $query->where('category_id', $this->filterCategory);
         }
 
         if ($this->search) {
-            $query->where(function($q) {
-                $q->where('name', 'like', '%' . $this->search . '%')
-                  ->orWhere('label', 'like', '%' . $this->search . '%')
-                  ->orWhereHas('supplier', function($sq) {
-                      $sq->where('name', 'like', '%' . $this->search . '%');
-                  });
+            $query->where(function ($q) {
+                $q->where('name', 'like', '%'.$this->search.'%')
+                    ->orWhere('label', 'like', '%'.$this->search.'%')
+                    ->orWhereHas('supplier', function ($sq) {
+                        $sq->where('name', 'like', '%'.$this->search.'%');
+                    });
             });
         }
 
         return view('livewire.management.product', [
-            'products' => $query->paginate(10)
+            'products' => $query->paginate(10),
         ])->layout('layouts.app', ['title' => 'Katalog Produk']);
     }
 }

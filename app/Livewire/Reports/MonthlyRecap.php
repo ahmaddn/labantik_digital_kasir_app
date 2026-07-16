@@ -72,6 +72,11 @@ class MonthlyRecap extends Component
         foreach ($dailyBreakdown as $day) {
             $dayTransactions = Transaction::whereDate('transacted_at', $day->date)->whereIn('status', ['uang_diterima', 'belum_kembalian'])->get();
             $day->total_profit = $dayTransactions->sum(fn($tx) => $tx->unit_profit * $tx->quantity);
+            
+            // Load daily recap audit values
+            $recapModel = \App\Models\DailyRecap::whereDate('date', $day->date)->first();
+            $day->actual_cash = $recapModel ? $recapModel->actual_cash : null;
+            $day->retained_change_cash = $recapModel ? $recapModel->retained_change_cash : 0;
         }
 
         $categoryRecap = $allTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->groupBy(fn($tx) => $tx->product->category->name ?? 'Tanpa Kategori')
@@ -141,11 +146,16 @@ class MonthlyRecap extends Component
             ->orderBy('date', 'desc')
             ->get();
 
-        // Add profit manually to breakdown
+        // Add profit and physical cash audit data manually to breakdown
         foreach ($dailyBreakdown as $day) {
             $dayTransactions = Transaction::whereDate('transacted_at', $day->date)->whereIn('status', ['uang_diterima', 'belum_kembalian'])->get();
             $day->total_profit = $dayTransactions->sum(fn($tx) => $tx->unit_profit * $tx->quantity);
             $day->month_week = Carbon::parse($day->date)->weekOfMonth;
+
+            // Load daily recap audit values
+            $recapModel = \App\Models\DailyRecap::whereDate('date', $day->date)->first();
+            $day->actual_cash = $recapModel ? $recapModel->actual_cash : null;
+            $day->retained_change_cash = $recapModel ? $recapModel->retained_change_cash : 0;
         }
 
         $categoryRecap = $allTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->groupBy(fn($tx) => $tx->product->category->name ?? 'Tanpa Kategori')

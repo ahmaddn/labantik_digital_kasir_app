@@ -229,7 +229,9 @@
                     <tr>
                         <th class="px-10 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">Tanggal</th>
                         <th class="px-10 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">Total Transaksi</th>
-                        <th class="px-10 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">Pendapatan</th>
+                        <th class="px-10 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">Pendapatan (Sistem)</th>
+                        <th class="px-10 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">Kas Fisik (Riil)</th>
+                        <th class="px-10 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">Selisih</th>
                         <th class="px-10 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">Profit</th>
                         <th class="px-10 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right">Opsi</th>
                     </tr>
@@ -245,6 +247,32 @@
                             <span class="px-4 py-1 bg-gray-100 dark:bg-gray-900 rounded-full text-xs font-black text-gray-500 uppercase tracking-widest">{{ $day->total_transactions }} Transaksi</span>
                         </td>
                         <td class="px-10 py-8 text-sm font-black text-primary-blue italic">Rp{{ number_format($day->total_revenue_real, 0, ',', '.') }}</td>
+                        <td class="px-10 py-8 text-sm font-black text-gray-800 dark:text-white">
+                            @if($day->actual_cash !== null)
+                                <div class="italic">Rp{{ number_format((float)$day->actual_cash - (float)$day->retained_change_cash, 0, ',', '.') }}</div>
+                                @if($day->retained_change_cash > 0)
+                                    <div class="text-[9px] font-bold text-primary-blue uppercase tracking-wider mt-1">Kembalian: Rp{{ number_format($day->retained_change_cash, 0, ',', '.') }}</div>
+                                @endif
+                            @else
+                                <span class="px-3 py-1 bg-gray-100 dark:bg-gray-900 rounded-lg text-[9px] font-black text-gray-400 uppercase tracking-widest">Belum Audit</span>
+                            @endif
+                        </td>
+                        <td class="px-10 py-8 text-sm font-black">
+                            @if($day->actual_cash !== null)
+                                @php
+                                    $diff = ((float)$day->actual_cash - (float)$day->retained_change_cash) - (float)$day->total_revenue_real;
+                                @endphp
+                                @if($diff == 0)
+                                    <span class="text-green-500 uppercase text-xs font-black">Cocok</span>
+                                @elseif($diff < 0)
+                                    <span class="text-primary-red italic">-Rp{{ number_format(abs($diff), 0, ',', '.') }}</span>
+                                @else
+                                    <span class="text-amber-500 italic">+Rp{{ number_format($diff, 0, ',', '.') }}</span>
+                                @endif
+                            @else
+                                <span class="text-gray-300 dark:text-gray-600">-</span>
+                            @endif
+                        </td>
                         <td class="px-10 py-8 text-sm font-black text-primary-red italic">Rp{{ number_format($day->total_profit, 0, ',', '.') }}</td>
                         <td class="px-10 py-8 text-right">
                             <a href="{{ route('daily-recap', ['date' => $day->date]) }}" class="px-6 py-2.5 bg-gray-100 dark:bg-gray-900 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-primary-blue hover:text-white transition-all opacity-0 group-hover:opacity-100">

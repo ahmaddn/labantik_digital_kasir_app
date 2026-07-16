@@ -138,17 +138,23 @@ class MonthlyRecapDailySheet implements FromCollection, WithHeadings, WithTitle,
 
     public function map($row): array
     {
+        $kasFisik = $row->actual_cash !== null ? (float)$row->actual_cash - (float)$row->retained_change_cash : null;
+        $selisih = $row->actual_cash !== null ? $kasFisik - (float)$row->total_revenue_real : null;
+
         return [
             $row->date,
             $row->total_transactions,
             $row->total_revenue_real,
+            $row->actual_cash !== null ? $kasFisik : 'Belum Audit',
+            $row->actual_cash !== null ? $selisih : '-',
+            $row->retained_change_cash ?? 0,
             $row->total_profit,
         ];
     }
 
     public function headings(): array
     {
-        return ['Tanggal', 'Transaksi', 'Pendapatan', 'Profit'];
+        return ['Tanggal', 'Transaksi', 'Pendapatan (Sistem)', 'Kas Fisik (Riil)', 'Selisih', 'Uang Kembalian Ditahan', 'Profit'];
     }
 
     public function title(): string
@@ -162,14 +168,17 @@ class MonthlyRecapDailySheet implements FromCollection, WithHeadings, WithTitle,
         $sheet->getColumnDimension('B')->setWidth(15);
         $sheet->getColumnDimension('C')->setWidth(25);
         $sheet->getColumnDimension('D')->setWidth(25);
+        $sheet->getColumnDimension('E')->setWidth(20);
+        $sheet->getColumnDimension('F')->setWidth(25);
+        $sheet->getColumnDimension('G')->setWidth(25);
 
-        $sheet->getStyle('A1:D1')->getFont()->setBold(true)->getColor()->setARGB('FFFFFFFF');
-        $sheet->getStyle('A1:D1')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('FF1E40AF');
-        $sheet->getStyle('A1:D1')->getAlignment()->setHorizontal('center');
+        $sheet->getStyle('A1:G1')->getFont()->setBold(true)->getColor()->setARGB('FFFFFFFF');
+        $sheet->getStyle('A1:G1')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('FF1E40AF');
+        $sheet->getStyle('A1:G1')->getAlignment()->setHorizontal('center');
 
         $lastRow = $sheet->getHighestRow();
         if ($lastRow >= 2) {
-            $sheet->getStyle('B2:D' . $lastRow)->getNumberFormat()->setFormatCode('#,##0');
+            $sheet->getStyle('B2:G' . $lastRow)->getNumberFormat()->setFormatCode('#,##0');
         }
     }
 }

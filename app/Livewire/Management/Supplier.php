@@ -9,15 +9,20 @@ use Livewire\WithPagination;
 class Supplier extends Component
 {
     use WithPagination;
-    
+
     #[Livewire\Attributes\Url]
     public $highlight = '';
 
     public string $name = '';
+
     public string $contact = '';
+
     public string $address = '';
+
     public string $note = '';
-    public ?int $editingId = null;
+
+    public ?string $editingId = null;
+
     public string $search = '';
 
     public function saveSupplier(): void
@@ -47,7 +52,7 @@ class Supplier extends Component
         $this->reset(['name', 'contact', 'address', 'note', 'editingId']);
     }
 
-    public function editSupplier(int $id): void
+    public function editSupplier(string $id): void
     {
         $supplier = SupplierModel::findOrFail($id);
         $this->editingId = $id;
@@ -62,7 +67,7 @@ class Supplier extends Component
         $this->reset(['name', 'contact', 'address', 'note', 'editingId']);
     }
 
-    public function deleteSupplier(int $id): void
+    public function deleteSupplier(string $id): void
     {
         SupplierModel::destroy($id);
         $this->dispatch('toast', message: 'Supplier berhasil dihapus.');
@@ -71,15 +76,15 @@ class Supplier extends Component
     public function render()
     {
         $query = SupplierModel::query();
-        
-        if ($this->highlight && !$this->search) {
+
+        if ($this->highlight && ! $this->search) {
             $query->where('id', $this->highlight);
         } elseif ($this->search) {
-            $query->where('name', 'like', '%' . $this->search . '%');
+            $query->where('name', 'like', '%'.$this->search.'%');
         }
 
         return view('livewire.management.supplier', [
-            'suppliers' => $query->orderBy('name')->paginate(10)
+            'suppliers' => $query->orderBy('name')->paginate(10),
         ])->layout('layouts.app', ['title' => 'Manajemen Supplier']);
     }
 }
