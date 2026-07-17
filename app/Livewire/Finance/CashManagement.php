@@ -76,6 +76,7 @@ class CashManagement extends Component
             $message = 'Data kas berhasil diperbarui!';
         } else {
             CashTransaction::create([
+                'jurusan_id' => session('active_jurusan_id'),
                 'date' => $this->date,
                 'cash_type' => $this->cashType,
                 'cash_category_id' => $this->cashCategoryId,
@@ -108,12 +109,14 @@ class CashManagement extends Component
 
     public function saveCategory()
     {
+        $activeJurusanId = session('active_jurusan_id');
         $this->validate([
-            'newCategoryName' => 'required|string|max:100|unique:cash_categories,name',
+            'newCategoryName' => 'required|string|max:100|unique:cash_categories,name,NULL,id,jurusan_id,' . $activeJurusanId,
         ]);
 
         $category = \App\Models\CashCategory::create([
-            'name' => $this->newCategoryName
+            'name' => $this->newCategoryName,
+            'jurusan_id' => $activeJurusanId,
         ]);
 
         $this->cashCategoryId = $category->id;
@@ -148,28 +151,31 @@ class CashManagement extends Component
 
     public function render()
     {
+        $activeJurusanId = session('active_jurusan_id');
+
         // Global Balance
-        $modalIncome = CashTransaction::where('cash_type', 'modal')->where('type', 'income')->sum('amount');
-        $modalExpense = CashTransaction::where('cash_type', 'modal')->where('type', 'expense')->sum('amount');
+        $modalIncome = CashTransaction::where('jurusan_id', $activeJurusanId)->where('cash_type', 'modal')->where('type', 'income')->sum('amount');
+        $modalExpense = CashTransaction::where('jurusan_id', $activeJurusanId)->where('cash_type', 'modal')->where('type', 'expense')->sum('amount');
         $currentModalBalance = $modalIncome - $modalExpense;
 
-        $profitIncome = CashTransaction::where('cash_type', 'keuntungan')->where('type', 'income')->sum('amount');
-        $profitExpense = CashTransaction::where('cash_type', 'keuntungan')->where('type', 'expense')->sum('amount');
+        $profitIncome = CashTransaction::where('jurusan_id', $activeJurusanId)->where('cash_type', 'keuntungan')->where('type', 'income')->sum('amount');
+        $profitExpense = CashTransaction::where('jurusan_id', $activeJurusanId)->where('cash_type', 'keuntungan')->where('type', 'expense')->sum('amount');
         $currentProfitBalance = $profitIncome - $profitExpense;
 
         // Monthly Stats based on filter
-        $monthlyTransactions = CashTransaction::whereYear('date', Carbon::parse($this->filterMonth)->year)
+        $monthlyTransactions = CashTransaction::where('jurusan_id', $activeJurusanId)
+            ->whereYear('date', Carbon::parse($this->filterMonth)->year)
             ->whereMonth('date', Carbon::parse($this->filterMonth)->month);
 
         $monthlyIncome = (clone $monthlyTransactions)->where('type', 'income')->sum('amount');
         $monthlyExpense = (clone $monthlyTransactions)->where('type', 'expense')->sum('amount');
 
         // Category Stats
-        $categories = \App\Models\CashCategory::all();
+        $categories = \App\Models\CashCategory::where('jurusan_id', $activeJurusanId)->get();
         $categoryStats = [];
         foreach ($categories as $category) {
-            $catIncome = CashTransaction::where('cash_category_id', $category->id)->where('type', 'income')->sum('amount');
-            $catExpense = CashTransaction::where('cash_category_id', $category->id)->where('type', 'expense')->sum('amount');
+            $catIncome = CashTransaction::where('jurusan_id', $activeJurusanId)->where('cash_category_id', $category->id)->where('type', 'income')->sum('amount');
+            $catExpense = CashTransaction::where('jurusan_id', $activeJurusanId)->where('cash_category_id', $category->id)->where('type', 'expense')->sum('amount');
             $categoryStats[] = [
                 'name' => $category->name,
                 'income' => $catIncome,

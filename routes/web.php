@@ -48,6 +48,12 @@ Route::middleware(['auth', 'verified', EnsureRoleSelected::class])->group(functi
     Route::get('/inventory-report', InventoryReport::class)->name('inventory-report');
     Route::get('/supplier-report', SupplierReport::class)->name('supplier-report');
     Route::get('/debts', Debt::class)->name('debts');
+    Route::get('/management/debt/{storeDebt}/print-deletion', function (\App\Models\StoreDebt $storeDebt) {
+        if ($storeDebt->jurusan_id != session('active_jurusan_id')) {
+            abort(403);
+        }
+        return view('print.debt-deletion', ['debt' => $storeDebt]);
+    })->name('debts.print-deletion');
     Route::get('/profit-sharing', WeeklyProfit::class)->name('bagi-hasil');
 
     // Finance

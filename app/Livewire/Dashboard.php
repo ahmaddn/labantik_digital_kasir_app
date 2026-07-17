@@ -62,10 +62,9 @@ class Dashboard extends Component
         $totalAllTimeRevenue = $allTimeBase->sum('total_price');
         $totalAllTimeTransactions = $allTimeBase->count();
 
-        $totalAuditCash = DailyRecap::when($activeJurusanId, function ($q) use ($activeJurusanId) {
-            return $q->where('jurusan_id', $activeJurusanId);
-        })
-            ->sum('actual_cash');
+        $cashIncome = \App\Models\CashTransaction::where('jurusan_id', $activeJurusanId)->where('type', 'income')->sum('amount');
+        $cashExpense = \App\Models\CashTransaction::where('jurusan_id', $activeJurusanId)->where('type', 'expense')->sum('amount');
+        $totalAuditCash = $cashIncome - $cashExpense;
 
         $totalOutstandingDebt = Transaction::whereIn('status', ['belum_menerima_uang', 'uang_dipinjam'])
             ->when($activeJurusanId, function ($q) use ($activeJurusanId) {

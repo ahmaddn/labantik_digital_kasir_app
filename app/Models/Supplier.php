@@ -26,4 +26,9 @@ class Supplier extends Model
     {
         return $this->hasMany(Transaction::class);
     }
+
+    public function storeDebts(): HasMany
+    {
+        return $this->hasMany(StoreDebt::class);
+    }
 }

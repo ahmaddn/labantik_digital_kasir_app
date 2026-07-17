@@ -251,32 +251,7 @@ class DailyRecap extends Component
                 );
             }
 
-            // 5. Post Uang Cadangan Kembalian sebagai Pengeluaran Modal (jika ada)
-            $catKembalian = CashCategory::firstOrCreate(
-                ['name' => 'Uang Cadangan Kembalian', 'jurusan_id' => $activeJurusanId]
-            );
-
-            if ($this->retainedChangeCash > 0) {
-                CashTransaction::updateOrCreate(
-                    [
-                        'date' => $this->selectedDate,
-                        'jurusan_id' => $activeJurusanId,
-                        'description' => 'Uang Cadangan Kembalian (Sistem)',
-                    ],
-                    [
-                        'cash_type' => 'modal',
-                        'cash_category_id' => $catKembalian->id,
-                        'type' => 'expense',
-                        'amount' => $this->retainedChangeCash,
-                    ]
-                );
-            } else {
-                CashTransaction::where([
-                    'date' => $this->selectedDate,
-                    'jurusan_id' => $activeJurusanId,
-                    'description' => 'Uang Cadangan Kembalian (Sistem)',
-                ])->delete();
-            }
+            // 5. Uang Cadangan Kembalian tidak diposting sebagai pengeluaran karena uangnya masih ada di laci kasir (bukan pengeluaran riil) dan akan masuk kembali ke kas.
         });
 
         $this->isPosted = true;
