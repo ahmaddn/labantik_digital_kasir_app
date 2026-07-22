@@ -14,6 +14,7 @@ use App\Livewire\Management\Supplier;
 use App\Livewire\Management\ThemeCustomizer;
 use App\Livewire\Management\UserManagement;
 use App\Livewire\Pos\Kasir;
+use App\Livewire\Reports\CashierNotes;
 use App\Livewire\Reports\DailyRecap;
 use App\Livewire\Reports\InventoryReport;
 use App\Livewire\Reports\MonthlyRecap;
@@ -47,6 +48,7 @@ Route::middleware(['auth', 'verified', EnsureRoleSelected::class])->group(functi
     Route::get('/yearly-recap', YearlyRecap::class)->name('yearly-recap');
     Route::get('/inventory-report', InventoryReport::class)->name('inventory-report');
     Route::get('/supplier-report', SupplierReport::class)->name('supplier-report');
+    Route::get('/cashier-notes', CashierNotes::class)->name('cashier-notes');
     Route::get('/debts', Debt::class)->name('debts');
     Route::get('/management/debt/{storeDebt}/print-deletion', function (\App\Models\StoreDebt $storeDebt) {
         if ($storeDebt->jurusan_id != session('active_jurusan_id')) {

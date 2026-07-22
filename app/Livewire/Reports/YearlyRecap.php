@@ -34,16 +34,22 @@ class YearlyRecap extends Component
 
         $allTransactions = $query->get();
 
-        $totalRevenueAll = $allTransactions->sum('total_price');
-        $totalRevenueReal = $allTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->sum('total_price');
+        $activeJurusanId = session('active_jurusan_id');
+        $yearlyExpenses = \App\Models\CashTransaction::where('jurusan_id', $activeJurusanId)
+            ->whereYear('date', $this->selectedYear)
+            ->where('type', 'expense')
+            ->sum('amount');
+
+        $totalRevenueAll = max(0, $allTransactions->sum('total_price') - $yearlyExpenses);
+        $totalRevenueReal = max(0, $allTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->sum('total_price') - $yearlyExpenses);
         
         $totalSupplierHak = $allTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])
             ->whereNotNull('supplier_id')
             ->sum(fn($tx) => ($tx->unit_price - $tx->unit_profit) * $tx->quantity);
             
-        $totalInternalRevenue = $totalRevenueReal - $totalSupplierHak;
+        $totalInternalRevenue = max(0, $totalRevenueReal - $totalSupplierHak);
 
-        $totalProfit = $allTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->sum(fn($tx) => $tx->unit_profit * $tx->quantity);
+        $totalProfit = max(0, $allTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->sum(fn($tx) => $tx->unit_profit * $tx->quantity) - $yearlyExpenses);
         $totalModal = $allTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->sum(fn($tx) => ($tx->unit_price - $tx->unit_profit) * $tx->quantity);
         $monthsCount = $allTransactions->pluck('transacted_at')->map(fn($date) => Carbon::parse($date)->format('Y-m'))->unique()->count();
 
@@ -61,19 +67,47 @@ class YearlyRecap extends Component
         for ($m = 1; $m <= 12; $m++) {
             $monthTransactions = $allTransactions->filter(fn($tx) => Carbon::parse($tx->transacted_at)->month == $m);
             if ($monthTransactions->isNotEmpty()) {
-                $recapData = \App\Models\DailyRecap::whereYear('date', $this->selectedYear)
+                $recaps = \App\Models\DailyRecap::whereYear('date', $this->selectedYear)
                     ->whereMonth('date', $m)
-                    ->selectRaw('SUM(actual_cash) as total_actual, SUM(retained_change_cash) as total_retained, COUNT(CASE WHEN actual_cash > 0 THEN 1 END) as audited_days')
-                    ->first();
+                    ->orderBy('date')
+                    ->get();
+
+                $totalActual = 0;
+                $totalRetained = 0;
+                $totalStarting = 0;
+                $auditedDays = 0;
+                $hasData = false;
+
+                foreach ($recaps as $r) {
+                    if ($r->actual_cash > 0) {
+                        $totalActual += $r->actual_cash;
+                        $totalRetained += $r->retained_change_cash ?? 0;
+                        
+                        $prev = \App\Models\DailyRecap::where('jurusan_id', session('active_jurusan_id'))
+                            ->where('date', '<', $r->date)
+                            ->orderBy('date', 'desc')
+                            ->first();
+                        $totalStarting += $prev ? ($prev->retained_change_cash ?? 0) : 0;
+                        $auditedDays++;
+                        $hasData = true;
+                    }
+                }
+
+                $monthExpenses = \App\Models\CashTransaction::where('jurusan_id', $activeJurusanId)
+                    ->whereYear('date', $this->selectedYear)
+                    ->whereMonth('date', $m)
+                    ->where('type', 'expense')
+                    ->sum('amount');
 
                 $monthlyBreakdown[] = (object) [
                     'month' => $m,
                     'total_transactions' => $monthTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->count(),
-                    'total_revenue_real' => $monthTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->sum('total_price'),
-                    'total_profit' => $monthTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->sum(fn($tx) => $tx->unit_profit * $tx->quantity),
-                    'actual_cash' => $recapData ? $recapData->total_actual : null,
-                    'retained_change_cash' => $recapData ? $recapData->total_retained : 0,
-                    'audited_days' => $recapData ? ($recapData->audited_days ?? 0) : 0,
+                    'total_revenue_real' => max(0, $monthTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->sum('total_price') - $monthExpenses),
+                    'total_profit' => max(0, $monthTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->sum(fn($tx) => $tx->unit_profit * $tx->quantity) - $monthExpenses),
+                    'actual_cash' => $hasData ? $totalActual : null,
+                    'retained_change_cash' => $totalRetained,
+                    'starting_change_cash' => $totalStarting,
+                    'audited_days' => $auditedDays,
                 ];
             }
         }
@@ -106,16 +140,22 @@ class YearlyRecap extends Component
             ])->layout('layouts.app', ['title' => 'Rekap Tahunan']);
         }
 
-        $totalRevenueAll = $allTransactions->sum('total_price');
-        $totalRevenueReal = $allTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->sum('total_price');
+        $activeJurusanId = session('active_jurusan_id');
+        $yearlyExpenses = \App\Models\CashTransaction::where('jurusan_id', $activeJurusanId)
+            ->whereYear('date', $this->selectedYear)
+            ->where('type', 'expense')
+            ->sum('amount');
+
+        $totalRevenueAll = max(0, $allTransactions->sum('total_price') - $yearlyExpenses);
+        $totalRevenueReal = max(0, $allTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->sum('total_price') - $yearlyExpenses);
         
         $totalSupplierHak = $allTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])
             ->whereNotNull('supplier_id')
             ->sum(fn($tx) => ($tx->unit_price - $tx->unit_profit) * $tx->quantity);
             
-        $totalInternalRevenue = $totalRevenueReal - $totalSupplierHak;
+        $totalInternalRevenue = max(0, $totalRevenueReal - $totalSupplierHak);
 
-        $totalProfit = $allTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->sum(fn($tx) => $tx->unit_profit * $tx->quantity);
+        $totalProfit = max(0, $allTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->sum(fn($tx) => $tx->unit_profit * $tx->quantity) - $yearlyExpenses);
         $totalModal = $allTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->sum(fn($tx) => ($tx->unit_price - $tx->unit_profit) * $tx->quantity);
         $monthsCount = $allTransactions->pluck('transacted_at')->map(fn($date) => Carbon::parse($date)->format('Y-m'))->unique()->count();
 
@@ -133,19 +173,47 @@ class YearlyRecap extends Component
         for ($m = 1; $m <= 12; $m++) {
             $monthTransactions = $allTransactions->filter(fn($tx) => Carbon::parse($tx->transacted_at)->month == $m);
             if ($monthTransactions->isNotEmpty()) {
-                $recapData = \App\Models\DailyRecap::whereYear('date', $this->selectedYear)
+                $recaps = \App\Models\DailyRecap::whereYear('date', $this->selectedYear)
                     ->whereMonth('date', $m)
-                    ->selectRaw('SUM(actual_cash) as total_actual, SUM(retained_change_cash) as total_retained, COUNT(CASE WHEN actual_cash > 0 THEN 1 END) as audited_days')
-                    ->first();
+                    ->orderBy('date')
+                    ->get();
+
+                $totalActual = 0;
+                $totalRetained = 0;
+                $totalStarting = 0;
+                $auditedDays = 0;
+                $hasData = false;
+
+                foreach ($recaps as $r) {
+                    if ($r->actual_cash > 0) {
+                        $totalActual += $r->actual_cash;
+                        $totalRetained += $r->retained_change_cash ?? 0;
+                        
+                        $prev = \App\Models\DailyRecap::where('jurusan_id', session('active_jurusan_id'))
+                            ->where('date', '<', $r->date)
+                            ->orderBy('date', 'desc')
+                            ->first();
+                        $totalStarting += $prev ? ($prev->retained_change_cash ?? 0) : 0;
+                        $auditedDays++;
+                        $hasData = true;
+                    }
+                }
+
+                $monthExpenses = \App\Models\CashTransaction::where('jurusan_id', $activeJurusanId)
+                    ->whereYear('date', $this->selectedYear)
+                    ->whereMonth('date', $m)
+                    ->where('type', 'expense')
+                    ->sum('amount');
 
                 $monthlyBreakdown[] = (object) [
                     'month' => $m,
                     'total_transactions' => $monthTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->count(),
-                    'total_revenue_real' => $monthTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->sum('total_price'),
-                    'total_profit' => $monthTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->sum(fn($tx) => $tx->unit_profit * $tx->quantity),
-                    'actual_cash' => $recapData ? $recapData->total_actual : null,
-                    'retained_change_cash' => $recapData ? $recapData->total_retained : 0,
-                    'audited_days' => $recapData ? ($recapData->audited_days ?? 0) : 0,
+                    'total_revenue_real' => max(0, $monthTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->sum('total_price') - $monthExpenses),
+                    'total_profit' => max(0, $monthTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->sum(fn($tx) => $tx->unit_profit * $tx->quantity) - $monthExpenses),
+                    'actual_cash' => $hasData ? $totalActual : null,
+                    'retained_change_cash' => $totalRetained,
+                    'starting_change_cash' => $totalStarting,
+                    'audited_days' => $auditedDays,
                 ];
             }
         }

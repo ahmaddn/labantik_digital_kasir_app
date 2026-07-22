@@ -16,6 +16,8 @@ class Debt extends Component
     public $search = '';
     public $activeTab = 'debt'; // 'debt' or 'change'
     public $storeDebtSubTab = 'active'; // 'active' or 'history'
+    public $changeSubTab = 'active'; // 'active' or 'history'
+    public $debtSubTab = 'active'; // 'active' or 'history'
     public $startDate;
     public $endDate;
 
@@ -30,6 +32,9 @@ class Debt extends Component
     // Details Modal
     public $showDetailsModal = false;
     public $detailReference = null;
+
+    public $showCancelSettleModal = false;
+    public $cancelSettleReference = null;
 
     // 'Dijajankan' Feature Properties
     public $productSearch = '';
@@ -77,11 +82,26 @@ class Debt extends Component
         $this->resetPage();
     }
 
+    public function updatedStoreDebtSubTab()
+    {
+        $this->resetPage();
+    }
+
+    public function updatedChangeSubTab()
+    {
+        $this->resetPage();
+    }
+
+    public function updatedDebtSubTab()
+    {
+        $this->resetPage();
+    }
+
     public function updatedSettleMethod($value)
     {
         if ($value === 'dijajankan') {
             $this->calculateTotalSpent();
-        } else {
+        } elseif ($value === 'dibayarkan') {
             $this->settleAmount = $this->maxAmount;
         }
     }
@@ -184,6 +204,56 @@ class Debt extends Component
         $this->spentItems = [];
         $this->totalSpent = 0;
         $this->dispatch('toast', message: 'Pelunasan berhasil diproses.');
+    }
+
+    public function confirmCancelSettle($reference)
+    {
+        $this->cancelSettleReference = $reference;
+        $this->showCancelSettleModal = true;
+    }
+
+    public function cancelSettle()
+    {
+        if (!$this->cancelSettleReference) {
+            return;
+        }
+
+        $transactions = Transaction::where('reference', $this->cancelSettleReference)->get();
+        
+        $isChangeTrx = false;
+        foreach ($transactions as $t) {
+            if ($t->note && preg_match('/Kembalian:\s*Rp\s*([0-9.,]+)/i', $t->note)) {
+                $isChangeTrx = true;
+                break;
+            }
+        }
+
+        foreach ($transactions as $trx) {
+            if ($isChangeTrx) {
+                $originalAmount = 0;
+                if ($trx->note && preg_match('/Kembalian:\s*Rp\s*([0-9.,]+)/i', $trx->note, $matches)) {
+                    $originalAmount = (int) str_replace(['.', ','], '', $matches[1]);
+                }
+                
+                $trx->update([
+                    'status' => 'belum_kembalian',
+                    'change_due' => $originalAmount,
+                    'note' => $originalAmount > 0 ? 'Kembalian: Rp' . number_format($originalAmount, 0, ',', '.') : null,
+                    'transacted_at' => $trx->created_at,
+                ]);
+            } else {
+                $trx->update([
+                    'status' => 'belum_menerima_uang',
+                    'debt_amount' => $trx->total_price,
+                    'note' => null,
+                    'transacted_at' => $trx->created_at,
+                ]);
+            }
+        }
+        
+        $this->showCancelSettleModal = false;
+        $this->cancelSettleReference = null;
+        $this->dispatch('toast', message: 'Pelunasan berhasil dibatalkan dan status dikembalikan.');
     }
 
     public function viewDetails($reference)
@@ -470,10 +540,30 @@ class Debt extends Component
                     return $q->where('jurusan_id', $activeJurusanId);
                 })
                 ->when($this->activeTab === 'debt', function ($q) {
-                    return $q->whereIn('status', ['belum_menerima_uang', 'uang_dipinjam']);
+                    if ($this->debtSubTab === 'history') {
+                        return $q->where('status', 'uang_diterima')
+                            ->whereIn('reference', function ($sub) {
+                                $sub->select('reference')
+                                    ->from('transactions')
+                                    ->where('note', 'like', '%Pelunasan%')
+                                    ->where('note', 'not like', '%Kembalian%');
+                            });
+                    } else {
+                        return $q->whereIn('status', ['belum_menerima_uang', 'uang_dipinjam']);
+                    }
                 })
                 ->when($this->activeTab === 'change', function ($q) {
-                    return $q->where('status', 'belum_kembalian');
+                    if ($this->changeSubTab === 'history') {
+                        return $q->where('status', 'uang_diterima')
+                            ->whereIn('reference', function ($sub) {
+                                $sub->select('reference')
+                                    ->from('transactions')
+                                    ->where('note', 'like', '%Pelunasan%')
+                                    ->where('note', 'like', '%Kembalian%');
+                            });
+                    } else {
+                        return $q->where('status', 'belum_kembalian');
+                    }
                 });
 
             if ($this->search) {
@@ -488,7 +578,7 @@ class Debt extends Component
                 $query->whereDate('transacted_at', '<=', $this->endDate);
             }
 
-            $transactions = $query->selectRaw('reference, buyer_name, status, transacted_at, SUM(total_price) as total_price, SUM(debt_amount) as debt_amount, SUM(change_due) as change_due, COUNT(*) as items_count')
+            $transactions = $query->selectRaw('reference, buyer_name, status, transacted_at, MAX(note) as note, SUM(total_price) as total_price, SUM(debt_amount) as debt_amount, SUM(change_due) as change_due, COUNT(*) as items_count')
                 ->groupBy('reference', 'buyer_name', 'status', 'transacted_at')
                 ->orderByDesc('transacted_at')
                 ->paginate(15);

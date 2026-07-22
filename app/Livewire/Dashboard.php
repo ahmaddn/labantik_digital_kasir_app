@@ -36,17 +36,31 @@ class Dashboard extends Component
             })
             ->get();
 
-        $todayRevenue = $todayTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->sum('total_price');
-        $yesterdayRevenue = $yesterdayTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->sum('total_price');
+        $todayExpenses = \App\Models\CashTransaction::when($activeJurusanId, function ($q) use ($activeJurusanId) {
+                return $q->where('jurusan_id', $activeJurusanId);
+            })
+            ->whereDate('date', $today)
+            ->where('type', 'expense')
+            ->sum('amount');
+
+        $yesterdayExpenses = \App\Models\CashTransaction::when($activeJurusanId, function ($q) use ($activeJurusanId) {
+                return $q->where('jurusan_id', $activeJurusanId);
+            })
+            ->whereDate('date', $yesterday)
+            ->where('type', 'expense')
+            ->sum('amount');
+
+        $todayRevenue = (float) $todayTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->sum('total_price');
+        $yesterdayRevenue = (float) $yesterdayTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->sum('total_price');
         $revenueChange = $yesterdayRevenue > 0 ? (($todayRevenue - $yesterdayRevenue) / $yesterdayRevenue) * 100 : 100;
 
         $todaySupplierHak = $todayTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])
             ->whereNotNull('supplier_id')
             ->sum(fn ($tx) => ($tx->unit_price - $tx->unit_profit) * $tx->quantity);
-        $todayInternalRevenue = $todayRevenue - $todaySupplierHak;
+        $todayInternalRevenue = max(0, $todayRevenue - $todaySupplierHak);
 
-        $todayProfit = $todayTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->sum(fn ($tx) => $tx->unit_profit * $tx->quantity);
-        $yesterdayProfit = $yesterdayTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->sum(fn ($tx) => $tx->unit_profit * $tx->quantity);
+        $todayProfit = max(0, $todayTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->sum(fn ($tx) => $tx->unit_profit * $tx->quantity) - $todayExpenses);
+        $yesterdayProfit = max(0, $yesterdayTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->sum(fn ($tx) => $tx->unit_profit * $tx->quantity) - $yesterdayExpenses);
         $profitChange = $yesterdayProfit > 0 ? (($todayProfit - $yesterdayProfit) / $yesterdayProfit) * 100 : 100;
 
         $todayCount = $todayTransactions->count();
@@ -58,12 +72,28 @@ class Dashboard extends Component
             ->when($activeJurusanId, function ($q) use ($activeJurusanId) {
                 return $q->where('jurusan_id', $activeJurusanId);
             });
-        $totalAllTimeProfit = $allTimeBase->sum(\DB::raw('unit_profit * quantity'));
-        $totalAllTimeRevenue = $allTimeBase->sum('total_price');
+        $allTimeExpenses = \App\Models\CashTransaction::when($activeJurusanId, function ($q) use ($activeJurusanId) {
+                return $q->where('jurusan_id', $activeJurusanId);
+            })
+            ->where('type', 'expense')
+            ->sum('amount');
+
+        $totalAllTimeProfit = max(0, (float) $allTimeBase->sum(\DB::raw('unit_profit * quantity')) - $allTimeExpenses);
+        $totalAllTimeRevenue = (float) $allTimeBase->sum('total_price');
         $totalAllTimeTransactions = $allTimeBase->count();
 
-        $cashIncome = \App\Models\CashTransaction::where('jurusan_id', $activeJurusanId)->where('type', 'income')->sum('amount');
-        $cashExpense = \App\Models\CashTransaction::where('jurusan_id', $activeJurusanId)->where('type', 'expense')->sum('amount');
+        $cashIncome = \App\Models\CashTransaction::when($activeJurusanId, function ($q) use ($activeJurusanId) {
+                return $q->where('jurusan_id', $activeJurusanId);
+            })
+            ->where('type', 'income')
+            ->sum('amount');
+            
+        $cashExpense = \App\Models\CashTransaction::when($activeJurusanId, function ($q) use ($activeJurusanId) {
+                return $q->where('jurusan_id', $activeJurusanId);
+            })
+            ->where('type', 'expense')
+            ->sum('amount');
+            
         $totalAuditCash = $cashIncome - $cashExpense;
 
         $totalOutstandingDebt = Transaction::whereIn('status', ['belum_menerima_uang', 'uang_dipinjam'])
@@ -101,10 +131,17 @@ class Dashboard extends Component
                 })
                 ->get();
 
+            $dayExpenses = \App\Models\CashTransaction::when($activeJurusanId, function ($q) use ($activeJurusanId) {
+                    return $q->where('jurusan_id', $activeJurusanId);
+                })
+                ->whereDate('date', $date)
+                ->where('type', 'expense')
+                ->sum('amount');
+
             $weeklyData[] = [
                 'day' => $date->translatedFormat('D'),
-                'revenue' => $dayTxs->whereIn('status', ['uang_diterima', 'belum_kembalian'])->sum('total_price'),
-                'profit' => $dayTxs->whereIn('status', ['uang_diterima', 'belum_kembalian'])->sum(fn ($tx) => $tx->unit_profit * $tx->quantity),
+                'revenue' => max(0, $dayTxs->whereIn('status', ['uang_diterima', 'belum_kembalian'])->sum('total_price') - $dayExpenses),
+                'profit' => max(0, $dayTxs->whereIn('status', ['uang_diterima', 'belum_kembalian'])->sum(fn ($tx) => $tx->unit_profit * $tx->quantity) - $dayExpenses),
             ];
         }
 
@@ -142,15 +179,23 @@ class Dashboard extends Component
         $monthlyData = [];
         for ($i = 5; $i >= 0; $i--) {
             $month = today()->subMonths($i);
+            $monthExpenses = \App\Models\CashTransaction::when($activeJurusanId, function ($q) use ($activeJurusanId) {
+                    return $q->where('jurusan_id', $activeJurusanId);
+                })
+                ->whereMonth('date', $month->month)
+                ->whereYear('date', $month->year)
+                ->where('type', 'expense')
+                ->sum('amount');
+
             $monthlyData[] = [
                 'month' => $month->translatedFormat('M Y'),
-                'revenue' => Transaction::whereMonth('transacted_at', $month->month)
+                'revenue' => max(0, Transaction::whereMonth('transacted_at', $month->month)
                     ->whereYear('transacted_at', $month->year)
                     ->whereIn('status', ['uang_diterima', 'belum_kembalian'])
                     ->when($activeJurusanId, function ($q) use ($activeJurusanId) {
                         return $q->where('jurusan_id', $activeJurusanId);
                     })
-                    ->sum('total_price'),
+                    ->sum('total_price') - $monthExpenses),
             ];
         }
 

@@ -42,6 +42,8 @@ class DailyRecap extends Component
 
     public $cashNote = '';
 
+    public $startingChangeCash = 0;
+
     // Details Modal
     public bool $showDetailsModal = false;
 
@@ -82,13 +84,21 @@ class DailyRecap extends Component
             $this->cashNote = '';
         }
 
+        $previousRecap = DailyRecapModel::where('jurusan_id', $activeJurusanId)
+            ->where('date', '<', $this->selectedDate)
+            ->orderBy('date', 'desc')
+            ->first();
+        $this->startingChangeCash = $previousRecap ? ($previousRecap->retained_change_cash ?? 0) : 0;
+
         $this->isPosted = CashTransaction::where('date', $this->selectedDate)
             ->when($activeJurusanId, function ($q) use ($activeJurusanId) {
                 return $q->where('jurusan_id', $activeJurusanId);
             })
             ->where(function ($q) {
                 $q->where('description', 'like', '%Penjualan Harian (Sistem)%')
-                    ->orWhere('description', 'like', '%Bagi Hasil Supplier (Sistem)%');
+                    ->orWhere('description', 'like', '%Bagi Hasil Supplier (Sistem)%')
+                    ->orWhere('description', 'like', '%Modal Penjualan%')
+                    ->orWhere('description', 'like', '%Keuntungan Penjualan%');
             })
             ->exists();
     }
@@ -147,13 +157,29 @@ class DailyRecap extends Component
             ->whereNotNull('supplier_id')
             ->sum(fn ($tx) => ($tx->unit_price - $tx->unit_profit) * $tx->quantity);
 
-        // Hitung Selisih
+        // Fetch starting change cash from previous day's retained change
+        $previousRecap = DailyRecapModel::where('jurusan_id', $activeJurusanId)
+            ->where('date', '<', $this->selectedDate)
+            ->orderBy('date', 'desc')
+            ->first();
+        $startingChange = $previousRecap ? ($previousRecap->retained_change_cash ?? 0) : 0;
+
+        // Hitung Selisih dengan benar: (Uang Fisik - Kembalian Ditahan) - Omzet Sistem
         $diff = ((float) $recap->actual_cash - (float) ($recap->retained_change_cash ?? 0)) - (float) $totalRevenueReal;
 
         // Kelompokkan transaksi berdasarkan Kategori Produk
         $grouped = $allTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->groupBy('product.category_id');
 
         \DB::transaction(function () use ($grouped, $totalSupplierHak, $diff, $activeJurusanId) {
+            // Delete old system-posted entries for this day to avoid duplicate or orphaned entries
+            CashTransaction::where('date', $this->selectedDate)
+                ->where('jurusan_id', $activeJurusanId)
+                ->where(function ($q) {
+                    $q->where('description', 'like', '%(Sistem)%')
+                      ->orWhere('description', 'like', 'Penyesuaian Selisih%');
+                })
+                ->delete();
+
             foreach ($grouped as $categoryId => $txs) {
                 $firstTx = $txs->first();
                 $categoryName = $firstTx->product->category->name ?? 'Lainnya';
@@ -234,7 +260,8 @@ class DailyRecap extends Component
                 );
 
                 $type = $diff < 0 ? 'expense' : 'income';
-                $description = $diff < 0 ? 'Penyesuaian Selisih Kurang Uang Kas' : 'Penyesuaian Selisih Lebih Uang Kas';
+                $baseDescription = $diff < 0 ? 'Penyesuaian Selisih Kurang Uang Kas' : 'Penyesuaian Selisih Lebih Uang Kas';
+                $description = (!empty($recap->cash_note)) ? $baseDescription . ' (' . $recap->cash_note . ')' : $baseDescription;
 
                 CashTransaction::updateOrCreate(
                     [
@@ -254,8 +281,14 @@ class DailyRecap extends Component
             // 5. Uang Cadangan Kembalian tidak diposting sebagai pengeluaran karena uangnya masih ada di laci kasir (bukan pengeluaran riil) dan akan masuk kembali ke kas.
         });
 
+        $wasPosted = $this->isPosted;
         $this->isPosted = true;
-        $this->dispatch('toast', message: 'Data kas harian per kategori (termasuk bagi hasil supplier) berhasil diposting ke Buku Kas!');
+        
+        $message = $wasPosted 
+            ? 'Data kas harian berhasil diposting ulang (di-update) ke Buku Kas!' 
+            : 'Data kas harian per kategori (termasuk bagi hasil supplier) berhasil diposting ke Buku Kas!';
+            
+        $this->dispatch('toast', message: $message);
     }
 
     public function updatedFilterStatus(): void

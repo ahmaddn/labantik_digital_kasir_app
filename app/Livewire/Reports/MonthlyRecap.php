@@ -37,13 +37,20 @@ class MonthlyRecap extends Component
 
         $allTransactions = $query->get();
 
-        $totalRevenueAll = $allTransactions->sum('total_price');
-        $totalRevenueReal = $allTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->sum('total_price');
+        $activeJurusanId = session('active_jurusan_id');
+        $monthlyExpenses = \App\Models\CashTransaction::where('jurusan_id', $activeJurusanId)
+            ->whereYear('date', $this->selectedYear)
+            ->whereMonth('date', $this->selectedMonth)
+            ->where('type', 'expense')
+            ->sum('amount');
+
+        $totalRevenueAll = max(0, $allTransactions->sum('total_price') - $monthlyExpenses);
+        $totalRevenueReal = max(0, $allTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->sum('total_price') - $monthlyExpenses);
         $totalSupplierHak = $allTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])
             ->whereNotNull('supplier_id')
             ->sum(fn($tx) => ($tx->unit_price - $tx->unit_profit) * $tx->quantity);
-        $totalInternalRevenue = $totalRevenueReal - $totalSupplierHak;
-        $totalProfit = $allTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->sum(fn($tx) => $tx->unit_profit * $tx->quantity);
+        $totalInternalRevenue = max(0, $totalRevenueReal - $totalSupplierHak);
+        $totalProfit = max(0, $allTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->sum(fn($tx) => $tx->unit_profit * $tx->quantity) - $monthlyExpenses);
         $totalModal = $allTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->sum(fn($tx) => ($tx->unit_price - $tx->unit_profit) * $tx->quantity);
         $daysCount = $allTransactions->pluck('transacted_at')->map(fn($date) => Carbon::parse($date)->format('Y-m-d'))->unique()->count();
 
@@ -77,6 +84,12 @@ class MonthlyRecap extends Component
             $recapModel = \App\Models\DailyRecap::whereDate('date', $day->date)->first();
             $day->actual_cash = $recapModel ? $recapModel->actual_cash : null;
             $day->retained_change_cash = $recapModel ? $recapModel->retained_change_cash : 0;
+            
+            $previousRecap = \App\Models\DailyRecap::where('jurusan_id', session('active_jurusan_id'))
+                ->where('date', '<', $day->date)
+                ->orderBy('date', 'desc')
+                ->first();
+            $day->starting_change_cash = $previousRecap ? ($previousRecap->retained_change_cash ?? 0) : 0;
         }
 
         $categoryRecap = $allTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->groupBy(fn($tx) => $tx->product->category->name ?? 'Tanpa Kategori')
@@ -111,16 +124,23 @@ class MonthlyRecap extends Component
             ])->layout('layouts.app', ['title' => 'Rekap Bulanan']);
         }
 
-        $totalRevenueAll = $allTransactions->sum('total_price');
-        $totalRevenueReal = $allTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->sum('total_price');
+        $activeJurusanId = session('active_jurusan_id');
+        $monthlyExpenses = \App\Models\CashTransaction::where('jurusan_id', $activeJurusanId)
+            ->whereYear('date', $this->selectedYear)
+            ->whereMonth('date', $this->selectedMonth)
+            ->where('type', 'expense')
+            ->sum('amount');
+
+        $totalRevenueAll = max(0, $allTransactions->sum('total_price') - $monthlyExpenses);
+        $totalRevenueReal = max(0, $allTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->sum('total_price') - $monthlyExpenses);
         
         $totalSupplierHak = $allTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])
             ->whereNotNull('supplier_id')
             ->sum(fn($tx) => ($tx->unit_price - $tx->unit_profit) * $tx->quantity);
             
-        $totalInternalRevenue = $totalRevenueReal - $totalSupplierHak;
+        $totalInternalRevenue = max(0, $totalRevenueReal - $totalSupplierHak);
 
-        $totalProfit = $allTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->sum(fn($tx) => $tx->unit_profit * $tx->quantity);
+        $totalProfit = max(0, $allTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->sum(fn($tx) => $tx->unit_profit * $tx->quantity) - $monthlyExpenses);
         $totalModal = $allTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->sum(fn($tx) => ($tx->unit_price - $tx->unit_profit) * $tx->quantity);
         $daysCount = $allTransactions->pluck('transacted_at')->map(fn($date) => Carbon::parse($date)->format('Y-m-d'))->unique()->count();
 
@@ -156,6 +176,12 @@ class MonthlyRecap extends Component
             $recapModel = \App\Models\DailyRecap::whereDate('date', $day->date)->first();
             $day->actual_cash = $recapModel ? $recapModel->actual_cash : null;
             $day->retained_change_cash = $recapModel ? $recapModel->retained_change_cash : 0;
+
+            $previousRecap = \App\Models\DailyRecap::where('jurusan_id', session('active_jurusan_id'))
+                ->where('date', '<', $day->date)
+                ->orderBy('date', 'desc')
+                ->first();
+            $day->starting_change_cash = $previousRecap ? ($previousRecap->retained_change_cash ?? 0) : 0;
         }
 
         $categoryRecap = $allTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->groupBy(fn($tx) => $tx->product->category->name ?? 'Tanpa Kategori')

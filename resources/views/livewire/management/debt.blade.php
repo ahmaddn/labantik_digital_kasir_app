@@ -354,18 +354,52 @@
             @endif
         </div>
     @else
-        <!-- Table Section -->
-        <div class="bg-white dark:bg-gray-900 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden">
-            <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse">
-                    <thead>
-                        <tr class="border-b border-gray-50 dark:border-gray-800">
-                            <th class="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-gray-400">Nota / Referensi</th>
-                            <th class="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-gray-400">Pembeli / Jurusan</th>
-                            <th class="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-gray-400">Ringkasan</th>
-                            <th class="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-gray-400">Total Tagihan</th>
-                            <th class="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-gray-400">Status</th>
-                            <th class="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-gray-400">Aksi</th>
+        <!-- Sub-tabs for Debt & Change -->
+        <div class="space-y-6">
+            @if($activeTab === 'debt')
+                <div class="flex items-center gap-2 bg-gray-100 dark:bg-gray-800 p-1.5 rounded-2xl w-fit">
+                    <button 
+                        wire:click="$set('debtSubTab', 'active')"
+                        class="px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all {{ $debtSubTab === 'active' ? 'bg-primary-blue text-white shadow-md' : 'text-gray-400 dark:text-gray-500 hover:text-primary-blue' }}"
+                    >
+                        Belum Lunas
+                    </button>
+                    <button 
+                        wire:click="$set('debtSubTab', 'history')"
+                        class="px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all {{ $debtSubTab === 'history' ? 'bg-emerald-500 text-white shadow-md' : 'text-gray-400 dark:text-gray-500 hover:text-emerald-500' }}"
+                    >
+                        Riwayat Pelunasan
+                    </button>
+                </div>
+            @elseif($activeTab === 'change')
+                <div class="flex items-center gap-2 bg-gray-100 dark:bg-gray-800 p-1.5 rounded-2xl w-fit">
+                    <button 
+                        wire:click="$set('changeSubTab', 'active')"
+                        class="px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all {{ $changeSubTab === 'active' ? 'bg-primary-red text-white shadow-md' : 'text-gray-400 dark:text-gray-500 hover:text-primary-red' }}"
+                    >
+                        Belum Kembalian
+                    </button>
+                    <button 
+                        wire:click="$set('changeSubTab', 'history')"
+                        class="px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all {{ $changeSubTab === 'history' ? 'bg-emerald-500 text-white shadow-md' : 'text-gray-400 dark:text-gray-500 hover:text-emerald-500' }}"
+                    >
+                        Riwayat Pengembalian
+                    </button>
+                </div>
+            @endif
+
+            <!-- Table Section -->
+            <div class="bg-white dark:bg-gray-900 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="border-b border-gray-50 dark:border-gray-800">
+                                <th class="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-gray-400">Nota / Referensi</th>
+                                <th class="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-gray-400">Pembeli / Jurusan</th>
+                                <th class="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-gray-400">Ringkasan</th>
+                                <th class="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-gray-400">Total Tagihan</th>
+                                <th class="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-gray-400">Status</th>
+                                <th class="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-gray-400">Aksi</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-50 dark:divide-gray-800">
@@ -375,6 +409,9 @@
                                     <div class="flex flex-col">
                                         <span class="text-xs font-black text-primary-blue uppercase italic tracking-tighter">{{ $trx->reference }}</span>
                                         <span class="text-[9px] font-bold text-gray-400 uppercase mt-1">{{ $trx->transacted_at->format('d/m/Y H:i') }}</span>
+                                        @if($trx->note)
+                                            <span class="text-[10px] font-bold text-amber-500 dark:text-amber-400 mt-2 max-w-[200px] break-words">{{ $trx->note }}</span>
+                                        @endif
                                     </div>
                                 </td>
                                 <td class="px-8 py-6">
@@ -394,14 +431,26 @@
                                     </div>
                                 </td>
                                 <td class="px-8 py-6">
-                                    <span class="text-base font-black italic {{ $activeTab === 'change' ? 'text-primary-red' : 'text-primary-blue' }} dark:text-white tracking-tighter">
-                                        Rp{{ number_format($activeTab === 'change' ? $trx->change_due : $trx->debt_amount, 0, ',', '.') }}
-                                    </span>
+                                    @if(($activeTab === 'change' && $changeSubTab === 'history') || ($activeTab === 'debt' && $debtSubTab === 'history'))
+                                        <span class="text-sm font-black italic text-emerald-500 tracking-tighter">
+                                            Selesai
+                                        </span>
+                                    @else
+                                        <span class="text-base font-black italic {{ $activeTab === 'change' ? 'text-primary-red' : 'text-primary-blue' }} dark:text-white tracking-tighter">
+                                            Rp{{ number_format($activeTab === 'change' ? $trx->change_due : $trx->debt_amount, 0, ',', '.') }}
+                                        </span>
+                                    @endif
                                 </td>
                                 <td class="px-8 py-6">
-                                    <span class="px-3 py-1 bg-gray-100 dark:bg-gray-800 text-[9px] font-black uppercase text-gray-400 rounded-full tracking-widest border border-gray-200 dark:border-gray-700">
-                                        {{ str_replace('_', ' ', $trx->status) }}
-                                    </span>
+                                    @if(($activeTab === 'change' && $changeSubTab === 'history') || ($activeTab === 'debt' && $debtSubTab === 'history'))
+                                        <span class="px-3 py-1 bg-emerald-500/10 text-emerald-500 text-[9px] font-black uppercase rounded-full tracking-widest border border-emerald-500/20">
+                                            UANG DITERIMA
+                                        </span>
+                                    @else
+                                        <span class="px-3 py-1 bg-gray-100 dark:bg-gray-800 text-[9px] font-black uppercase text-gray-400 rounded-full tracking-widest border border-gray-200 dark:border-gray-700">
+                                            {{ str_replace('_', ' ', $trx->status) }}
+                                        </span>
+                                    @endif
                                 </td>
                                  <td class="px-8 py-6">
                                     <div class="flex items-center gap-2">
@@ -415,13 +464,23 @@
                                                 <svg class="w-3 h-3" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
                                             </span>
                                         </button>
-                                        <button 
-                                            wire:click="openSettleModal('{{ $trx->reference }}')"
-                                            class="flex items-center px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all bg-emerald-500 text-white shadow-lg shadow-emerald-500/20 hover:scale-105 active:scale-95"
-                                        >
-                                            <svg class="w-4 h-4 mr-2" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
-                                            Lunaskan
-                                        </button>
+                                        
+                                        @if(($activeTab === 'debt' && $debtSubTab === 'active') || ($activeTab === 'change' && $changeSubTab === 'active'))
+                                            <button 
+                                                wire:click="openSettleModal('{{ $trx->reference }}')"
+                                                class="flex items-center px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all bg-emerald-500 text-white shadow-lg shadow-emerald-500/20 hover:scale-105 active:scale-95"
+                                            >
+                                                <svg class="w-4 h-4 mr-2" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                                                Lunaskan
+                                            </button>
+                                        @else
+                                            <button 
+                                                wire:click="confirmCancelSettle('{{ $trx->reference }}')"
+                                                class="flex items-center px-4 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white active:scale-95"
+                                            >
+                                                Batalkan
+                                            </button>
+                                        @endif
                                     </div>
                                 </td>
                             </tr>
@@ -446,6 +505,7 @@
                     {{ $transactions->links() }}
                 </div>
             @endif
+        </div>
         </div>
     @endif
 
@@ -601,7 +661,7 @@
                                                 <div class="absolute left-0 right-0 top-full mt-4 bg-white dark:bg-gray-900 rounded-3xl shadow-2xl border border-gray-100 dark:border-gray-800 z-[60] overflow-hidden">
                                                     @foreach($this->searchResults as $res)
                                                         <button 
-                                                            wire:click="addSpentItem({{ $res->id }})"
+                                                            wire:click="addSpentItem('{{ $res->id }}')"
                                                             class="w-full p-5 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors border-b border-gray-50 dark:border-gray-800 last:border-none"
                                                         >
                                                             <div class="text-left">
@@ -1084,6 +1144,37 @@
                         </button>
                     </div>
                 </form>
+            </div>
+        </div>
+    </div>
+    <!-- Cancel Settle Confirmation Modal -->
+    <div 
+        x-data="{ show: @entangle('showCancelSettleModal') }" 
+        x-show="show" 
+        x-cloak
+        class="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-gray-900/60 backdrop-blur-sm"
+        x-transition:enter="transition ease-out duration-300"
+        x-transition:enter-start="opacity-0"
+        x-transition:enter-end="opacity-100"
+        x-transition:leave="transition ease-in duration-200"
+        x-transition:leave-start="opacity-100"
+        x-transition:leave-end="opacity-0"
+    >
+        <div 
+            @click.away="show = false"
+            class="bg-white dark:bg-gray-800 rounded-[3rem] p-12 max-w-md w-full shadow-2xl text-center"
+            x-transition:enter="transition ease-out duration-500"
+            x-transition:enter-start="opacity-0 scale-90 translate-y-10"
+            x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+        >
+            <div class="w-20 h-20 bg-red-100 dark:bg-red-900/30 text-red-500 rounded-full flex items-center justify-center mx-auto mb-8">
+                <svg class="w-10 h-10" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
+            </div>
+            <h3 class="text-2xl font-black italic uppercase tracking-tighter text-gray-800 dark:text-white mb-4">Batalkan Pelunasan?</h3>
+            <p class="text-gray-400 font-bold text-xs uppercase tracking-widest mb-10 leading-relaxed">Status transaksi ini akan dikembalikan menjadi aktif (belum kembalian/belum lunas) dan nominal tagihan akan direstorasi seperti semula.</p>
+            <div class="flex gap-4">
+                <button type="button" @click="show = false" class="flex-1 py-4 bg-gray-100 dark:bg-gray-900 text-gray-400 rounded-2xl font-black uppercase text-[10px] tracking-widest hover:text-gray-600 transition-all">Batal</button>
+                <button type="button" wire:click="cancelSettle" class="flex-1 py-4 bg-red-600 text-white rounded-2xl font-black uppercase text-[10px] tracking-widest shadow-lg shadow-red-500/30 hover:scale-105 transition-all">Ya, Batalkan</button>
             </div>
         </div>
     </div>

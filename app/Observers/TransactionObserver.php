@@ -28,11 +28,11 @@ class TransactionObserver
         $stats = Transaction::whereDate('transacted_at', $date)
             ->where('jurusan_id', $jurusanId)
             ->selectRaw("
-                SUM(CASE WHEN status = 'uang_diterima' THEN total_price ELSE 0 END) as revenue_real,
+                SUM(CASE WHEN status IN ('uang_diterima', 'belum_kembalian') THEN total_price ELSE 0 END) as revenue_real,
                 SUM(total_price) as revenue_all,
                 SUM(unit_profit * quantity) as profit,
                 SUM((unit_price - unit_profit) * quantity) as modal,
-                COUNT(CASE WHEN status = 'uang_diterima' THEN 1 END) as count_received,
+                COUNT(CASE WHEN status IN ('uang_diterima', 'belum_kembalian') THEN 1 END) as count_received,
                 COUNT(CASE WHEN status = 'belum_kembalian' THEN 1 END) as count_unpaid_change,
                 COUNT(CASE WHEN status = 'belum_menerima_uang' THEN 1 END) as count_no_payment,
                 COUNT(CASE WHEN status = 'uang_dipinjam' THEN 1 END) as count_borrowed

@@ -59,7 +59,7 @@
                                 <span class="text-[10px] font-black text-primary-blue uppercase tracking-widest mr-6">{{ count($selectedProducts) }} Dipilih</span>
                                 <div class="flex gap-2">
                                     <button wire:click="bulkToggleStatus" class="px-4 py-2 bg-white dark:bg-gray-900 text-primary-blue rounded-xl text-[9px] font-black uppercase tracking-widest shadow-sm hover:bg-primary-blue hover:text-white transition-all border border-primary-blue/20">Ganti Status</button>
-                                    <button onclick="confirm('Hapus ' + {{ count($selectedProducts) }} + ' produk?') || event.stopImmediatePropagation()" wire:click="bulkDelete" class="px-4 py-2 bg-primary-red text-white rounded-xl text-[9px] font-black uppercase tracking-widest shadow-lg shadow-red-500/20 hover:scale-105 transition-all">Hapus Semua</button>
+                                    <button wire:click="confirmBulkDelete" class="px-4 py-2 bg-primary-red text-white rounded-xl text-[9px] font-black uppercase tracking-widest shadow-lg shadow-red-500/20 hover:scale-105 transition-all">Hapus Semua</button>
                                 </div>
                             </div>
                         @endif
@@ -403,6 +403,41 @@
             <div class="flex gap-4">
                 <button wire:click="cancelDelete" class="flex-1 py-4 bg-gray-100 dark:bg-gray-900 text-gray-400 rounded-2xl font-black uppercase text-[10px] tracking-widest hover:text-gray-600 transition-all">Batal</button>
                 <button wire:click="deleteProduct" class="flex-1 py-4 bg-primary-red text-white rounded-2xl font-black uppercase text-[10px] tracking-widest shadow-lg shadow-red-500/30 hover:scale-105 transition-all">Ya, Hapus</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bulk Delete Modal -->
+    <div 
+        x-data="{ show: @entangle('showBulkDeleteModal') }" 
+        x-show="show" 
+        x-cloak
+        class="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/60 backdrop-blur-sm"
+        x-transition:enter="transition ease-out duration-300"
+        x-transition:enter-start="opacity-0"
+        x-transition:enter-end="opacity-100"
+        x-transition:leave="transition ease-in duration-200"
+        x-transition:leave-start="opacity-100"
+        x-transition:leave-end="opacity-0"
+    >
+        <div 
+            @click.away="show = false"
+            class="bg-white dark:bg-gray-800 rounded-[3rem] p-12 max-w-md w-full shadow-2xl text-center"
+            x-transition:enter="transition ease-out duration-500"
+            x-transition:enter-start="opacity-0 scale-90 translate-y-10"
+            x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+            x-transition:leave="transition ease-in duration-300"
+            x-transition:leave-start="opacity-100 scale-100 translate-y-0"
+            x-transition:leave-end="opacity-0 scale-95 translate-y-10"
+        >
+            <div class="w-20 h-20 bg-primary-red/10 text-primary-red rounded-full flex items-center justify-center mx-auto mb-8">
+                <svg class="w-10 h-10" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
+            </div>
+            <h3 class="text-2xl font-black italic uppercase tracking-tighter text-gray-800 dark:text-white mb-4">Hapus Banyak Produk?</h3>
+            <p class="text-gray-400 font-bold text-xs uppercase tracking-widest mb-10 leading-relaxed">Tindakan ini tidak dapat dibatalkan. Seluruh produk yang dipilih ({{ count($selectedProducts) }} produk) akan dihapus permanen.</p>
+            <div class="flex gap-4">
+                <button wire:click="cancelBulkDelete" class="flex-1 py-4 bg-gray-100 dark:bg-gray-900 text-gray-400 rounded-2xl font-black uppercase text-[10px] tracking-widest hover:text-gray-600 transition-all">Batal</button>
+                <button wire:click="bulkDelete" class="flex-1 py-4 bg-primary-red text-white rounded-2xl font-black uppercase text-[10px] tracking-widest shadow-lg shadow-red-500/30 hover:scale-105 transition-all">Ya, Hapus Semua</button>
             </div>
         </div>
     </div>

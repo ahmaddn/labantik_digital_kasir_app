@@ -154,7 +154,7 @@
                     <div class="flex flex-col">
                         <span class="text-[9px] font-black text-gray-400 uppercase tracking-widest">Status Audit</span>
                         @php
-                            $diff = ((float)$actualCash - (float)$retainedChangeCash) - (float)$recap->total_revenue_real;
+                            $diff = ((float)$actualCash - (float)$startingChangeCash) - (float)$recap->total_revenue_real;
                         @endphp
                         @if($actualCash == 0 && !$cashNote)
                             <span class="text-xs font-black text-gray-300 uppercase tracking-tighter">BELUM DIAUDIT</span>
@@ -195,12 +195,16 @@
                         Simpan Hasil Audit
                     </button>
                     @if($isPosted)
-                        <button 
-                            disabled
-                            class="px-10 py-4 bg-green-600 text-white rounded-2xl shadow-xl font-black italic uppercase text-xs tracking-widest cursor-not-allowed flex items-center gap-2"
-                        >
-                            <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                        <div class="px-6 py-4 bg-green-600/15 border border-green-500/30 text-green-400 rounded-2xl flex items-center gap-2 font-black italic uppercase text-xs tracking-widest">
+                            <svg class="w-4 h-4 text-green-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
                             Sudah Diposting
+                        </div>
+                        <button 
+                            wire:click="postToCashBook"
+                            class="px-10 py-4 bg-amber-500 hover:bg-amber-600 text-black rounded-2xl shadow-xl hover:scale-105 active:scale-95 transition-all font-black italic uppercase text-xs tracking-widest flex items-center gap-2"
+                        >
+                            <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 7.89M9 11l3-3 3 3m-3-3v12" /></svg>
+                            Posting Ulang
                         </button>
                     @else
                         <button 
@@ -229,10 +233,20 @@
             <div class="mt-8 flex flex-col gap-3">
                 <div class="flex items-center gap-4">
                     <div class="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center">
+                        <svg class="w-5 h-5 text-amber-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    </div>
+                    <div>
+                        <p class="text-[9px] font-bold uppercase tracking-widest opacity-60">Modal Awal Kembalian (Laci)</p>
+                        <p class="text-xs font-black">Rp{{ number_format((float)$startingChangeCash, 0, ',', '.') }}</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-4">
+                    <div class="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center">
                         <svg class="w-5 h-5 text-green-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                     </div>
                     <div>
-                        <p class="text-[9px] font-bold uppercase tracking-widest opacity-60">Setoran Bersih (Fisik - Kembalian)</p>
+                        <p class="text-[9px] font-bold uppercase tracking-widest opacity-60">Setoran Bersih (Fisik - Ditahan)</p>
                         <p class="text-xs font-black">Rp{{ number_format((float)$actualCash - (float)$retainedChangeCash, 0, ',', '.') }}</p>
                     </div>
                 </div>

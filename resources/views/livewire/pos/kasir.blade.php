@@ -247,8 +247,8 @@ document.addEventListener('keydown', (e) => {
                     'bg-gray-100 text-black dark:bg-dark-soft dark:text-white'"
                 class="nb-btn text-[10px] py-1.5 px-4 shadow-none border-2">SEMUA</button>
             @foreach ($this->categories as $cat)
-                <button @click="selectedCategory = {{ $cat->id }}"
-                    :class="selectedCategory == {{ $cat->id }} ? 'bg-primary-blue text-white' :
+                <button type="button" @click="selectedCategory = (selectedCategory == '{{ $cat->id }}' ? null : '{{ $cat->id }}')"
+                    :class="selectedCategory == '{{ $cat->id }}' ? 'bg-primary-blue text-white' :
                         'bg-gray-100 text-black dark:bg-dark-soft dark:text-white'"
                     class="nb-btn text-[10px] py-1.5 px-4 whitespace-nowrap shadow-none border-2">{{ $cat->name }}</button>
             @endforeach

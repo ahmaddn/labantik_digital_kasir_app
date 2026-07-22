@@ -44,7 +44,21 @@ class WeeklyProfit extends Component
     public function delete()
     {
         if ($this->reportToDeleteId) {
-            WeeklyProfitShare::destroy($this->reportToDeleteId);
+            $report = WeeklyProfitShare::find($this->reportToDeleteId);
+            if ($report) {
+                $activeJurusanId = session('active_jurusan_id');
+                $weekStart = Carbon::parse($report->week_start);
+                $weekEnd = Carbon::parse($report->week_end);
+                
+                $description = 'Bagi Hasil Mingguan (Sistem) - Periode ' . $weekStart->format('d/m/Y') . ' s.d ' . $weekEnd->format('d/m/Y');
+                
+                // Delete the cash transaction
+                \App\Models\CashTransaction::where('jurusan_id', $activeJurusanId)
+                    ->where('description', $description)
+                    ->delete();
+                
+                $report->delete();
+            }
             $this->reportToDeleteId = null;
             $this->showDeleteModal = false;
             $this->dispatch('toast', message: 'Laporan berhasil dihapus.');
@@ -53,12 +67,7 @@ class WeeklyProfit extends Component
 
     public function generateReport()
     {
-        // Only allow generation on Friday, Saturday, Sunday
-        if (! in_array(now()->dayOfWeek, [Carbon::FRIDAY, Carbon::SATURDAY, Carbon::SUNDAY])) {
-            $this->dispatch('toast', message: 'Laporan hanya bisa diproses pada hari Jumat, Sabtu, atau Minggu.', type: 'error');
-
-            return;
-        }
+        $activeJurusanId = session('active_jurusan_id');
 
         $weekStart = Carbon::parse($this->startDate);
         $weekEnd = Carbon::parse($this->endDate);
@@ -71,6 +80,7 @@ class WeeklyProfit extends Component
             $weekStart->startOfDay()->toDateTimeString(),
             $weekEnd->endOfDay()->toDateTimeString(),
         ])
+            ->where('jurusan_id', $activeJurusanId)
             ->whereIn('status', ['uang_diterima', 'belum_kembalian'])
             ->sum(DB::raw('unit_profit * quantity'));
 
@@ -81,6 +91,7 @@ class WeeklyProfit extends Component
         }
 
         $data = [
+            'jurusan_id' => $activeJurusanId,
             'month_name' => $monthName,
             'week_number' => $weekNumber,
             'week_start' => $weekStart->toDateString(),
@@ -91,16 +102,42 @@ class WeeklyProfit extends Component
         ];
 
         WeeklyProfitShare::updateOrCreate(
-            ['week_start' => $weekStart->toDateString(), 'week_end' => $weekEnd->toDateString()],
+            [
+                'week_start' => $weekStart->toDateString(), 
+                'week_end' => $weekEnd->toDateString(),
+                'jurusan_id' => $activeJurusanId
+            ],
             $data
         );
 
-        $this->dispatch('toast', message: 'Laporan bagi hasil berhasil dibuat!');
+        // Auto post expense to cash book
+        $catBagiHasil = \App\Models\CashCategory::firstOrCreate(
+            ['name' => 'Bagi Hasil Mingguan', 'jurusan_id' => $activeJurusanId]
+        );
+
+        $description = 'Bagi Hasil Mingguan (Sistem) - Periode ' . $weekStart->format('d/m/Y') . ' s.d ' . $weekEnd->format('d/m/Y');
+
+        \App\Models\CashTransaction::updateOrCreate(
+            [
+                'jurusan_id' => $activeJurusanId,
+                'description' => $description,
+            ],
+            [
+                'date' => now()->toDateString(),
+                'cash_type' => 'keuntungan',
+                'cash_category_id' => $catBagiHasil->id,
+                'type' => 'expense',
+                'amount' => $totalProfit * 0.5,
+            ]
+        );
+
+        $this->dispatch('toast', message: 'Laporan bagi hasil berhasil dibuat dan diposting ke Buku Kas!');
     }
 
     public function render()
     {
-        $reports = WeeklyProfitShare::orderByDesc('week_end')->paginate(10);
+        $activeJurusanId = session('active_jurusan_id');
+        $reports = WeeklyProfitShare::where('jurusan_id', $activeJurusanId)->orderByDesc('week_end')->paginate(10);
 
         $weekStart = Carbon::parse($this->startDate);
         $weekEnd = Carbon::parse($this->endDate);
@@ -109,6 +146,7 @@ class WeeklyProfit extends Component
             $weekStart->startOfDay()->toDateTimeString(),
             $weekEnd->endOfDay()->toDateTimeString(),
         ])
+            ->where('jurusan_id', $activeJurusanId)
             ->whereIn('status', ['uang_diterima', 'belum_kembalian'])
             ->selectRaw('
                 SUM(total_price) as total_revenue,
@@ -127,6 +165,7 @@ class WeeklyProfit extends Component
                 $weekStart->startOfDay()->toDateTimeString(),
                 $weekEnd->endOfDay()->toDateTimeString(),
             ])
+            ->where('jurusan_id', $activeJurusanId)
             ->whereIn('status', ['uang_diterima', 'belum_kembalian'])
             ->groupBy('user_id')
             ->get();
@@ -142,6 +181,7 @@ class WeeklyProfit extends Component
             DB::raw('MIN(created_at) as created_at')
         )
             ->where('month_name', 'like', '%' . $monthName . '%')
+            ->where('jurusan_id', $activeJurusanId)
             ->groupBy('month_name')
             ->orderByDesc(DB::raw('MAX(week_end)'))
             ->get();
@@ -155,11 +195,13 @@ class WeeklyProfit extends Component
             DB::raw('COUNT(DISTINCT month_name) as total_months')
         )
             ->whereYear('week_end', $this->currentYear)
+            ->where('jurusan_id', $activeJurusanId)
             ->first();
 
         // Get list of available months with data for filter
         $availableMonths = WeeklyProfitShare::selectRaw('DISTINCT MONTH(week_end) as month, YEAR(week_end) as year')
             ->whereYear('week_end', $this->currentYear)
+            ->where('jurusan_id', $activeJurusanId)
             ->orderBy('month', 'desc')
             ->get();
 
@@ -171,6 +213,7 @@ class WeeklyProfit extends Component
             DB::raw('SUM(shared_amount) as total_shared')
         )
             ->whereYear('week_end', $this->currentYear)
+            ->where('jurusan_id', $activeJurusanId)
             ->groupBy('month_name')
             ->orderByDesc(DB::raw('MAX(week_end)'))
             ->get();

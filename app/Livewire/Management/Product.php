@@ -55,6 +55,8 @@ class Product extends Component
 
     public bool $showDeleteModal = false;
 
+    public bool $showBulkDeleteModal = false;
+
     public bool $showFormModal = false;
 
     public ?string $deleteId = null;
@@ -128,6 +130,19 @@ class Product extends Component
         $this->selectAll = false;
     }
 
+    public function confirmBulkDelete(): void
+    {
+        if (empty($this->selectedProducts)) {
+            return;
+        }
+        $this->showBulkDeleteModal = true;
+    }
+
+    public function cancelBulkDelete(): void
+    {
+        $this->showBulkDeleteModal = false;
+    }
+
     public function bulkDelete(): void
     {
         if (empty($this->selectedProducts)) {
@@ -137,6 +152,7 @@ class Product extends Component
         ProductModel::whereIn('id', $this->selectedProducts)->delete();
         $this->dispatch('toast', message: count($this->selectedProducts).' produk berhasil dihapus.');
         $this->resetSelection();
+        $this->showBulkDeleteModal = false;
     }
 
     public function bulkToggleStatus(): void
