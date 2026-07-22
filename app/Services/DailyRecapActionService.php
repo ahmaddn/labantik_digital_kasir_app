@@ -74,8 +74,15 @@ class DailyRecapActionService
                 $categoryName = $firstTx->product->category->name ?? 'Lainnya';
                 $categoryNameClean = trim($categoryName);
 
+                $categoryNameLower = strtolower($categoryNameClean);
+                if ($categoryNameLower === 'makanan' || $categoryNameLower === 'minuman' || $categoryNameLower === 'makanan & minuman' || $categoryNameLower === 'makanan dan minuman') {
+                    $cashCategoryName = 'Jurusan Makanan & Minuman';
+                } else {
+                    $cashCategoryName = 'Penjualan '.$categoryNameClean;
+                }
+
                 $catPenjualan = CashCategory::firstOrCreate(
-                    ['name' => 'Penjualan '.$categoryNameClean, 'jurusan_id' => $activeJurusanId]
+                    ['name' => $cashCategoryName, 'jurusan_id' => $activeJurusanId]
                 );
 
                 $catModalInternal = $txs->whereNull('supplier_id')
