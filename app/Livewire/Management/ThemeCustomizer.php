@@ -4,9 +4,12 @@ namespace App\Livewire\Management;
 
 use App\Models\Jurusan;
 use Livewire\Component;
+use Livewire\WithFileUploads;
 
 class ThemeCustomizer extends Component
 {
+    use WithFileUploads;
+
     public $jurusans = [];
 
     public $selectedJurusanId = '';
@@ -19,6 +22,17 @@ class ThemeCustomizer extends Component
     public $fontFamily = 'Outfit';
 
     public $themeStyle = 'classic-premium';
+
+    // TEFA configurations
+    public $tefaName = 'TEFA LABANTIK';
+
+    public $docPrefixInvoice = 'INV-SUP';
+
+    public $docPrefixTransaction = 'LBK';
+
+    public $tefaLogo;
+
+    public $existingTefaLogo = '';
 
     // Color presets
     public $colorPresets = [
@@ -47,10 +61,14 @@ class ThemeCustomizer extends Component
 
     public function mount(): void
     {
+        $activeRole = session('active_role_name');
+        if (!in_array($activeRole, ['superadmin', 'pengelola', 'kasir'])) {
+            abort(403, 'Akses ditolak. Anda tidak memiliki izin untuk mengatur konfigurasi tampilan TEFA.');
+        }
+
         $this->jurusans = Jurusan::all();
 
         $activeJurusanId = session('active_jurusan_id');
-        $activeRole = session('active_role_name');
 
         if ($activeRole === 'superadmin') {
             // Superadmin defaults to first jurusan or let them select
@@ -87,12 +105,20 @@ class ThemeCustomizer extends Component
             $this->secondaryColor = $settings['secondary_color'] ?? '#EF4444';
             $this->fontFamily = $settings['font_family'] ?? 'Outfit';
             $this->themeStyle = $settings['theme_style'] ?? 'classic-premium';
+            $this->tefaName = $settings['tefa_name'] ?? 'TEFA LABANTIK';
+            $this->docPrefixInvoice = $settings['doc_prefix_invoice'] ?? 'INV-SUP';
+            $this->docPrefixTransaction = $settings['doc_prefix_transaction'] ?? 'LBK';
+            $this->existingTefaLogo = $settings['tefa_logo'] ?? '';
         } else {
             // Default settings
             $this->primaryColor = '#2563EB';
             $this->secondaryColor = '#EF4444';
             $this->fontFamily = 'Outfit';
             $this->themeStyle = 'classic-premium';
+            $this->tefaName = 'TEFA LABANTIK';
+            $this->docPrefixInvoice = 'INV-SUP';
+            $this->docPrefixTransaction = 'LBK';
+            $this->existingTefaLogo = '';
         }
     }
 
@@ -106,11 +132,23 @@ class ThemeCustomizer extends Component
 
         $jurusan = Jurusan::findOrFail($this->selectedJurusanId);
 
+        $logoPath = $this->existingTefaLogo;
+        if ($this->tefaLogo) {
+            $this->validate([
+                'tefaLogo' => 'image|max:1024', // max 1MB
+            ]);
+            $logoPath = $this->tefaLogo->store('logos', 'public');
+        }
+
         $themeSettings = [
             'primary_color' => $this->primaryColor,
             'secondary_color' => $this->secondaryColor,
             'font_family' => $this->fontFamily,
             'theme_style' => $this->themeStyle,
+            'tefa_name' => $this->tefaName,
+            'doc_prefix_invoice' => $this->docPrefixInvoice,
+            'doc_prefix_transaction' => $this->docPrefixTransaction,
+            'tefa_logo' => $logoPath,
         ];
 
         $jurusan->update([
@@ -122,7 +160,7 @@ class ThemeCustomizer extends Component
             session(['active_jurusan_theme' => $themeSettings]);
         }
 
-        $this->dispatch('toast', message: 'Tampilan tema berhasil disimpan & diterapkan!');
+        $this->dispatch('toast', message: 'Tampilan & Konfigurasi TEFA berhasil disimpan!');
     }
 
     public function render()

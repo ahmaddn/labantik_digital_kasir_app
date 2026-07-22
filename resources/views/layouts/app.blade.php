@@ -76,9 +76,17 @@
         }
     }
 }" x-init="if (darkMode) document.documentElement.classList.add('dark'); else document.documentElement.classList.remove('dark')"
-    class="bg-bone-white dark:bg-dark-soft text-slate-900 dark:text-bone-white antialiased transition-colors duration-300 theme-{{ $themeStyle }}">
+    class="bg-bone-white dark:bg-dark-soft text-slate-900 dark:text-bone-white antialiased transition-colors duration-300 theme-{{ $themeStyle }} relative">
+    @if($themeStyle === 'glassmorphism')
+        <!-- Glassmorphism Background Blobs -->
+        <div class="fixed inset-0 pointer-events-none overflow-hidden z-0">
+            <div class="absolute -top-[10%] -left-[10%] w-[50%] h-[50%] rounded-full bg-[var(--color-primary-blue)] opacity-[0.15] dark:opacity-[0.2] blur-[120px]"></div>
+            <div class="absolute top-[40%] -right-[10%] w-[60%] h-[60%] rounded-full bg-[var(--color-primary-red)] opacity-[0.1] dark:opacity-[0.15] blur-[140px]"></div>
+            <div class="absolute -bottom-[10%] left-[20%] w-[45%] h-[45%] rounded-full bg-[var(--color-primary-blue)] opacity-[0.1] dark:opacity-[0.15] blur-[120px]"></div>
+        </div>
+    @endif
     @livewire('global-search')
-    <div class="flex h-screen overflow-hidden">
+    <div class="flex h-screen overflow-hidden relative z-10">
         
         @include('partials.layout.sidebar')
 

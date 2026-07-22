@@ -63,6 +63,7 @@
                         <th class="px-10 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">Total Omzet</th>
                         <th class="px-10 py-6 text-[10px] font-black text-primary-blue uppercase tracking-widest">Hak Supplier (Modal)</th>
                         <th class="px-10 py-6 text-[10px] font-black text-green-500 uppercase tracking-widest text-right">Profit Toko</th>
+                        <th class="px-10 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-50 dark:divide-gray-700">
@@ -83,10 +84,20 @@
                         <td class="px-10 py-8 text-right font-black text-green-500 italic">
                             Rp{{ number_format($report->total_shop_profit, 0, ',', '.') }}
                         </td>
+                        <td class="px-10 py-8 text-center">
+                            @if($report->supplier_id)
+                            <a href="{{ route('supplier-settlement.print', ['supplierId' => $report->supplier_id, 'date_from' => $dateFrom, 'date_to' => $dateTo]) }}" target="_blank" class="px-4 py-2 bg-primary-blue/10 hover:bg-primary-blue text-primary-blue hover:text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-all inline-flex items-center gap-1.5 shadow-sm">
+                                <svg class="w-3.5 h-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" /></svg>
+                                Cetak Struk
+                            </a>
+                            @else
+                            <span class="text-[9px] px-2.5 py-1 bg-gray-100 dark:bg-gray-800 rounded font-bold text-gray-400 uppercase">Toko</span>
+                            @endif
+                        </td>
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="5" class="px-10 py-32 text-center opacity-20">
+                        <td colspan="6" class="px-10 py-32 text-center opacity-20">
                             <p class="text-xs font-black uppercase tracking-widest italic">Tidak ada data transaksi supplier pada periode ini</p>
                         </td>
                     </tr>
@@ -100,6 +111,7 @@
                         <td class="px-10 py-6 font-black text-gray-800 dark:text-white">Rp{{ number_format($reports->sum('total_sales'), 0, ',', '.') }}</td>
                         <td class="px-10 py-6 font-black text-primary-blue italic text-lg">Rp{{ number_format($reports->sum('total_supplier_share'), 0, ',', '.') }}</td>
                         <td class="px-10 py-6 text-right font-black text-green-500 italic text-lg">Rp{{ number_format($reports->sum('total_shop_profit'), 0, ',', '.') }}</td>
+                        <td class="px-10 py-6"></td>
                     </tr>
                 </tfoot>
                 @endif

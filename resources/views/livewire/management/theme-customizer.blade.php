@@ -34,6 +34,55 @@
 
                 <form wire:submit.prevent="saveTheme" class="space-y-8">
                     
+                    <!-- TEFA Settings Section -->
+                    <div class="space-y-6">
+                        <label class="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-2 ml-2 italic">Identitas & Dokumen TEFA</label>
+                        
+                        <!-- TEFA Name -->
+                        <div>
+                            <label class="block text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-2 ml-2">Nama TEFA / Unit Usaha</label>
+                            <input type="text" wire:model="tefaName" class="w-full px-6 py-4 bg-gray-50 dark:bg-gray-900 border-none rounded-2xl focus:ring-4 focus:ring-primary-blue/10 font-bold text-sm text-gray-800 dark:text-white uppercase tracking-tight">
+                        </div>
+
+                        <!-- Document Prefix -->
+                        <div>
+                            <label class="block text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-2 ml-2">Prefiks Penomoran Invoice Supplier</label>
+                            <input type="text" wire:model="docPrefixInvoice" class="w-full px-6 py-4 bg-gray-50 dark:bg-gray-900 border-none rounded-2xl focus:ring-4 focus:ring-primary-blue/10 font-bold text-sm text-gray-800 dark:text-white uppercase tracking-wider">
+                        </div>
+
+                        <!-- Transaction Prefix -->
+                        <div>
+                            <label class="block text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-2 ml-2">Prefiks Penomoran Nota Kasir (Transaksi)</label>
+                            <input type="text" wire:model="docPrefixTransaction" class="w-full px-6 py-4 bg-gray-50 dark:bg-gray-900 border-none rounded-2xl focus:ring-4 focus:ring-primary-blue/10 font-bold text-sm text-gray-800 dark:text-white uppercase tracking-wider">
+                        </div>
+
+                        <!-- TEFA Logo -->
+                        <div>
+                            <label class="block text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-2 ml-2">Logo TEFA</label>
+                            <div class="flex items-center gap-4 bg-gray-50 dark:bg-gray-900 p-4 rounded-2xl">
+                                <div class="w-16 h-16 bg-white dark:bg-gray-850 rounded-xl border border-gray-200 dark:border-gray-800 flex items-center justify-center overflow-hidden shrink-0">
+                                    @if ($tefaLogo)
+                                        <img src="{{ $tefaLogo->temporaryUrl() }}" class="w-full h-full object-contain p-1">
+                                    @elseif ($existingTefaLogo)
+                                        <img src="{{ asset('storage/' . $existingTefaLogo) }}" class="w-full h-full object-contain p-1">
+                                    @else
+                                        <span class="text-[9px] text-gray-400 font-bold uppercase text-center p-1">No Logo</span>
+                                    @endif
+                                </div>
+                                <div class="flex-1">
+                                    <input type="file" wire:model="tefaLogo" class="hidden" id="tefa-logo-input">
+                                    <label for="tefa-logo-input" class="inline-block px-4 py-2 bg-primary-blue text-white rounded-xl text-[10px] font-black uppercase tracking-wider cursor-pointer hover:bg-primary-blue-dark transition-all">
+                                        Upload Logo
+                                    </label>
+                                    <div wire:loading wire:target="tefaLogo" class="text-[9px] text-primary-blue font-bold uppercase mt-1 block">Uploading...</div>
+                                    @error('tefaLogo') <span class="text-xs text-primary-red block mt-1">{{ $message }}</span> @enderror
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="h-px bg-gray-100 dark:bg-gray-700 my-6"></div>
+                    
                     <!-- Color Customization -->
                     <div>
                         <label class="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-4 ml-2 italic">Skema Warna</label>
@@ -138,7 +187,7 @@
                                 TA
                             </div>
                             <div>
-                                <span class="block text-xs font-black text-white uppercase tracking-tight italic">TEFA RPL Smart</span>
+                                <span class="block text-xs font-black text-white uppercase tracking-tight italic">{{ $tefaName }}</span>
                                 <span class="block text-[8px] font-bold text-gray-500 uppercase tracking-widest mt-0.5">Sesi Penjualan Aktif</span>
                             </div>
                         </div>

@@ -15,6 +15,7 @@ use App\Livewire\Management\ThemeCustomizer;
 use App\Livewire\Management\UserManagement;
 use App\Livewire\Pos\Kasir;
 use App\Livewire\Reports\CashierNotes;
+use App\Livewire\Reports\CategoryDetail;
 use App\Livewire\Reports\DailyRecap;
 use App\Livewire\Reports\InventoryReport;
 use App\Livewire\Reports\MonthlyRecap;
@@ -46,6 +47,7 @@ Route::middleware(['auth', 'verified', EnsureRoleSelected::class])->group(functi
     Route::get('/daily-recap/{date?}', DailyRecap::class)->name('daily-recap');
     Route::get('/monthly-recap', MonthlyRecap::class)->name('monthly-recap');
     Route::get('/yearly-recap', YearlyRecap::class)->name('yearly-recap');
+    Route::get('/category-detail/{categoryId}', CategoryDetail::class)->name('category-detail');
     Route::get('/inventory-report', InventoryReport::class)->name('inventory-report');
     Route::get('/supplier-report', SupplierReport::class)->name('supplier-report');
     Route::get('/cashier-notes', CashierNotes::class)->name('cashier-notes');
@@ -56,6 +58,50 @@ Route::middleware(['auth', 'verified', EnsureRoleSelected::class])->group(functi
         }
         return view('print.debt-deletion', ['debt' => $storeDebt]);
     })->name('debts.print-deletion');
+    Route::get('/reports/supplier-settlement/{supplierId}', function ($supplierId) {
+        $supplier = \App\Models\Supplier::findOrFail($supplierId);
+        $dateFrom = request('date_from', now()->startOfMonth()->toDateString());
+        $dateTo = request('date_to', now()->toDateString());
+
+        // Fetch products and their sales details
+        $products = \App\Models\Product::where('supplier_id', $supplierId)
+            ->where('jurusan_id', session('active_jurusan_id'))
+            ->get()
+            ->map(function ($product) use ($dateFrom, $dateTo) {
+                // Total sold quantity from transactions
+                $sold = \App\Models\Transaction::where('product_id', $product->id)
+                    ->whereIn('status', ['uang_diterima', 'belum_kembalian'])
+                    ->whereBetween('transacted_at', [$dateFrom . ' 00:00:00', $dateTo . ' 23:59:59'])
+                    ->sum('quantity');
+
+                // Get latest stock entry for closing stock context if exists
+                $latestStock = \App\Models\StockEntry::where('product_id', $product->id)
+                    ->whereBetween('date', [$dateFrom, $dateTo])
+                    ->orderBy('date', 'desc')
+                    ->first();
+
+                $closingStock = $latestStock ? $latestStock->closing_stock : 0;
+                $openingStock = $sold + $closingStock;
+
+                return (object) [
+                    'name' => $product->name,
+                    'price' => $product->price,
+                    'modal_price' => $product->modal_price,
+                    'opening_stock' => $openingStock,
+                    'closing_stock' => $closingStock,
+                    'sold_qty' => $sold,
+                    'total_modal' => $sold * $product->modal_price,
+                ];
+            })
+            ->filter(fn($p) => $p->sold_qty > 0 || $p->opening_stock > 0);
+
+        return view('print.supplier-settlement', [
+            'supplier' => $supplier,
+            'products' => $products,
+            'dateFrom' => $dateFrom,
+            'dateTo' => $dateTo,
+        ]);
+    })->name('supplier-settlement.print');
     Route::get('/profit-sharing', WeeklyProfit::class)->name('bagi-hasil');
 
     // Finance

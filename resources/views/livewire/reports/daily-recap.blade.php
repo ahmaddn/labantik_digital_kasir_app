@@ -149,7 +149,7 @@
                 </div>
             </div>
 
-            <div class="mt-8 pt-8 border-t border-gray-50 dark:border-gray-700 flex flex-col md:flex-row items-center justify-between gap-6">
+            <div class="mt-8 pt-8 border-t border-gray-50 dark:border-gray-700 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
                 <div class="flex items-center gap-8">
                     <div class="flex flex-col">
                         <span class="text-[9px] font-black text-gray-400 uppercase tracking-widest">Status Audit</span>
@@ -187,21 +187,21 @@
                     </div>
                 </div>
                 
-                <div class="flex gap-4">
+                <div class="flex flex-wrap items-center gap-3">
                     <button 
                         wire:click="saveCashAudit"
-                        class="px-10 py-4 bg-gray-900 dark:bg-slate-800 text-white rounded-2xl shadow-xl hover:scale-105 active:scale-95 transition-all font-black italic uppercase text-xs tracking-widest"
+                        class="px-6 py-4 bg-gray-900 dark:bg-slate-800 text-white rounded-2xl shadow-xl hover:scale-105 active:scale-95 transition-all font-black italic uppercase text-xs tracking-widest"
                     >
                         Simpan Hasil Audit
                     </button>
                     @if($isPosted)
-                        <div class="px-6 py-4 bg-green-600/15 border border-green-500/30 text-green-400 rounded-2xl flex items-center gap-2 font-black italic uppercase text-xs tracking-widest">
+                        <div class="px-5 py-4 bg-green-600/15 border border-green-500/30 text-green-400 rounded-2xl flex items-center gap-2 font-black italic uppercase text-xs tracking-widest">
                             <svg class="w-4 h-4 text-green-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
                             Sudah Diposting
                         </div>
                         <button 
                             wire:click="postToCashBook"
-                            class="px-10 py-4 bg-amber-500 hover:bg-amber-600 text-black rounded-2xl shadow-xl hover:scale-105 active:scale-95 transition-all font-black italic uppercase text-xs tracking-widest flex items-center gap-2"
+                            class="px-6 py-4 bg-amber-500 hover:bg-amber-600 text-black rounded-2xl shadow-xl hover:scale-105 active:scale-95 transition-all font-black italic uppercase text-xs tracking-widest flex items-center gap-2"
                         >
                             <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 7.89M9 11l3-3 3 3m-3-3v12" /></svg>
                             Posting Ulang
@@ -209,7 +209,7 @@
                     @else
                         <button 
                             wire:click="postToCashBook"
-                            class="px-10 py-4 bg-primary-blue text-white rounded-2xl shadow-xl hover:scale-105 active:scale-95 transition-all font-black italic uppercase text-xs tracking-widest"
+                            class="px-6 py-4 bg-primary-blue text-white rounded-2xl shadow-xl hover:scale-105 active:scale-95 transition-all font-black italic uppercase text-xs tracking-widest"
                         >
                             Posting ke Buku Kas
                         </button>
@@ -288,10 +288,16 @@
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-50 dark:divide-gray-700">
-                    @foreach($categoryRecap as $catName => $stats)
+                    @foreach($categoryRecap as $stats)
                     <tr class="group hover:bg-gray-50/50 dark:hover:bg-gray-900/50 transition-all">
                         <td class="py-8">
-                            <span class="text-base font-black text-gray-800 dark:text-white uppercase tracking-tight group-hover:text-primary-blue transition-colors">{{ $catName }}</span>
+                            <div class="flex items-center gap-3">
+                                <span class="text-base font-black text-gray-800 dark:text-white uppercase tracking-tight">{{ $stats->name }}</span>
+                                <a href="{{ route('category-detail', ['categoryId' => $stats->id, 'type' => 'daily', 'date' => $selectedDate]) }}" wire:navigate class="px-3 py-1.5 bg-primary-blue/10 hover:bg-primary-blue text-primary-blue hover:text-white text-[9px] font-black uppercase tracking-widest rounded-xl transition-all flex items-center gap-1.5 shadow-sm">
+                                    <svg class="w-3 h-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                                    Detail
+                                </a>
+                            </div>
                         </td>
                         <td class="py-8 text-center">
                             <span class="text-sm font-black text-gray-800 dark:text-white">{{ $stats->qty }} <span class="text-[9px] text-gray-400 uppercase ml-1">Unit</span></span>

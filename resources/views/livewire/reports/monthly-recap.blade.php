@@ -117,10 +117,16 @@
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-50 dark:divide-gray-700">
-                    @foreach($categoryRecap as $catName => $stats)
+                    @foreach($categoryRecap as $stats)
                     <tr class="group hover:bg-gray-50/50 dark:hover:bg-gray-900/50 transition-all">
                         <td class="py-8">
-                            <span class="text-base font-black text-gray-800 dark:text-white uppercase tracking-tight group-hover:text-primary-blue transition-colors">{{ $catName }}</span>
+                            <div class="flex items-center gap-3">
+                                <span class="text-base font-black text-gray-800 dark:text-white uppercase tracking-tight">{{ $stats->name }}</span>
+                                <a href="{{ route('category-detail', ['categoryId' => $stats->id, 'type' => 'monthly', 'month' => $selectedMonth, 'year' => $selectedYear]) }}" wire:navigate class="px-3 py-1.5 bg-primary-blue/10 hover:bg-primary-blue text-primary-blue hover:text-white text-[9px] font-black uppercase tracking-widest rounded-xl transition-all flex items-center gap-1.5 shadow-sm">
+                                    <svg class="w-3 h-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                                    Detail
+                                </a>
+                            </div>
                         </td>
                         <td class="py-8 text-center">
                             <span class="text-sm font-black text-gray-800 dark:text-white">{{ $stats->qty }} <span class="text-[9px] text-gray-400 uppercase ml-1">Unit</span></span>

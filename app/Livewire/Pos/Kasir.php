@@ -311,11 +311,17 @@ class Kasir extends Component
         // Ensure time is preserved if it's today, otherwise use current time on that past date
         $transactedAt = $tDate === now()->toDateString() ? now() : Carbon::parse($tDate.' '.now()->format('H:i:s'));
 
+        $activeJurusanId = session('active_jurusan_id');
+        $themeSettings = session('active_jurusan_theme') ?? [];
+        if (empty($themeSettings) && $activeJurusanId) {
+            $jurusan = \App\Models\Jurusan::find($activeJurusanId);
+            $themeSettings = $jurusan ? ($jurusan->theme_settings ?? []) : [];
+        }
+        $prefix = $themeSettings['doc_prefix_transaction'] ?? 'LBK';
+
         $cleanName = preg_replace('/[^A-Za-z0-9]/', '', $buyer_name ?: 'GUEST');
         $initials = strtoupper(substr($cleanName, 0, 2));
-        $reference = 'LBK-'.now()->format('Ymd').'-'.$initials.strtoupper(bin2hex(random_bytes(2)));
-
-        $activeJurusanId = session('active_jurusan_id');
+        $reference = $prefix.'-'.now()->format('Ymd').'-'.$initials.strtoupper(bin2hex(random_bytes(2)));
 
         $first = true;
         foreach ($cart as $item) {

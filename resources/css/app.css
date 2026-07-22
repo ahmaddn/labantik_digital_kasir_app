@@ -164,31 +164,54 @@
     }
 
     /* Theme Styles Support */
-    .theme-glassmorphism .bg-white, 
-    .theme-glassmorphism .bg-gray-50 {
-        background-color: rgba(255, 255, 255, 0.6) !important;
-        backdrop-filter: blur(16px) !important;
-        -webkit-backdrop-filter: blur(16px) !important;
-        border: 1px solid rgba(255, 255, 255, 0.3) !important;
+    /* Glassmorphism Theme Style */
+    html:not(.dark) .theme-glassmorphism .bg-white, 
+    html:not(.dark) .theme-glassmorphism .bg-gray-50 {
+        background-color: rgba(255, 255, 255, 0.45) !important;
+        backdrop-filter: blur(24px) saturate(180%) !important;
+        -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
+        border: 1px solid rgba(255, 255, 255, 0.4) !important;
+        box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.06) !important;
     }
     .theme-glassmorphism.dark .bg-gray-800, 
     .theme-glassmorphism.dark .bg-gray-850, 
     .theme-glassmorphism.dark .bg-gray-900 {
-        background-color: rgba(15, 23, 42, 0.6) !important;
-        backdrop-filter: blur(16px) !important;
-        -webkit-backdrop-filter: blur(16px) !important;
+        background-color: rgba(15, 23, 42, 0.45) !important;
+        backdrop-filter: blur(24px) saturate(160%) !important;
+        -webkit-backdrop-filter: blur(24px) saturate(160%) !important;
         border: 1px solid rgba(255, 255, 255, 0.08) !important;
+        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3) !important;
     }
 
-    .theme-neon-cyberpunk .bg-white,
-    .theme-neon-cyberpunk .bg-gray-50 {
+    /* Classic Premium Theme Style */
+    html:not(.dark) .theme-classic-premium .bg-white,
+    html:not(.dark) .theme-classic-premium .bg-gray-50 {
+        background-color: #ffffff !important;
+        border: 1px solid rgba(0, 0, 0, 0.05) !important;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
+        backdrop-filter: none !important;
+    }
+    .theme-classic-premium.dark .bg-gray-800,
+    .theme-classic-premium.dark .bg-gray-850,
+    .theme-classic-premium.dark .bg-gray-900 {
+        background-color: #1e293b !important;
+        border: 1px solid rgba(255, 255, 255, 0.05) !important;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.35), 0 10px 10px -5px rgba(0, 0, 0, 0.2) !important;
+        backdrop-filter: none !important;
+    }
+
+    /* Neon Cyberpunk Theme Style */
+    html:not(.dark) .theme-neon-cyberpunk .bg-white,
+    html:not(.dark) .theme-neon-cyberpunk .bg-gray-50 {
         background-color: #030712 !important;
         border: 2px solid var(--color-primary-blue) !important;
+        box-shadow: 0 0 15px rgba(37, 99, 235, 0.15) !important;
     }
     .theme-neon-cyberpunk.dark .bg-gray-800,
     .theme-neon-cyberpunk.dark .bg-gray-850,
     .theme-neon-cyberpunk.dark .bg-gray-900 {
         background-color: #000000 !important;
         border: 2px solid var(--color-primary-blue) !important;
+        box-shadow: 0 0 25px rgba(37, 99, 235, 0.25) !important;
     }
 }

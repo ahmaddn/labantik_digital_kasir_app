@@ -6,19 +6,26 @@
         <!-- Brand -->
         <div class="p-10 flex items-center justify-between">
             <div class="flex items-center overflow-hidden">
-                <img src="{{ asset('favicon.png') }}" 
+                @php
+                    $activeJurusanId = session('active_jurusan_id');
+                    $themeSettings = null;
+                    if ($activeJurusanId) {
+                        $jurusanModel = \App\Models\Jurusan::find($activeJurusanId);
+                        if ($jurusanModel && $jurusanModel->theme_settings) {
+                            $themeSettings = $jurusanModel->theme_settings;
+                        }
+                    }
+                    $tefaName = $themeSettings['tefa_name'] ?? 'Superapps Tefa';
+                    $tefaLogo = $themeSettings['tefa_logo'] ?? '';
+                    $roleLabel = session('active_role_label') ?? (session('active_role_name') === 'superadmin' ? 'Superadmin' : 'Tefa ' . session('active_jurusan_name', 'RPL'));
+                @endphp
+                <img src="{{ $tefaLogo ? asset('storage/' . $tefaLogo) : asset('favicon.png') }}" 
                     class="w-14 h-14 bg-white rounded-[1.25rem] p-2 flex items-center justify-center shadow-2xl shadow-blue-900/20 border-4 border-white dark:border-gray-800 flex-shrink-0 object-contain">
                 <div class="ml-4 whitespace-nowrap">
-                    <h1
-                        class="text-xl font-black tracking-tight leading-none text-primary-blue dark:text-primary-blue-light uppercase italic">
-                        Superapps Tefa</h1>
-                    <span
-                        class="text-[9px] font-black text-primary-red tracking-wider uppercase italic">
-                        @if(session('active_role_name') === 'superadmin')
-                            Superadmin
-                        @else
-                            Tefa {{ session('active_jurusan_name', 'RPL') }}
-                        @endif
+                    <h1 class="text-xl font-black tracking-tight leading-none text-primary-blue dark:text-primary-blue-light uppercase italic">
+                        {{ $tefaName }}</h1>
+                    <span class="text-[9px] font-black text-primary-red tracking-wider uppercase italic">
+                        {{ $roleLabel }}
                     </span>
                 </div>
             </div>

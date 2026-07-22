@@ -184,9 +184,12 @@ class MonthlyRecap extends Component
             $day->starting_change_cash = $previousRecap ? ($previousRecap->retained_change_cash ?? 0) : 0;
         }
 
-        $categoryRecap = $allTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->groupBy(fn($tx) => $tx->product->category->name ?? 'Tanpa Kategori')
+        $categoryRecap = $allTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->groupBy(fn($tx) => $tx->product->category_id ?? 'null')
             ->map(function($group) {
+                $first = $group->first();
                 return (object) [
+                    'id' => $first->product->category_id ?? 'null',
+                    'name' => $first->product->category->name ?? 'Tanpa Kategori',
                     'revenue' => $group->sum('total_price'),
                     'profit' => $group->sum(fn($tx) => $tx->unit_profit * $tx->quantity),
                     'modal' => $group->sum(fn($tx) => ($tx->unit_price - $tx->unit_profit) * $tx->quantity),
