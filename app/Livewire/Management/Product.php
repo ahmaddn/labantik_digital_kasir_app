@@ -5,8 +5,8 @@ namespace App\Livewire\Management;
 use App\Models\Jurusan;
 use App\Models\Product as ProductModel;
 use App\Models\ProductCategory;
-use App\Models\StockEntry;
 use App\Models\Supplier;
+use App\Services\ProductService;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -143,40 +143,36 @@ class Product extends Component
         $this->showBulkDeleteModal = false;
     }
 
-    public function bulkDelete(): void
+    public function bulkDelete(ProductService $service): void
     {
         if (empty($this->selectedProducts)) {
             return;
         }
 
-        ProductModel::whereIn('id', $this->selectedProducts)->delete();
-        $this->dispatch('toast', message: count($this->selectedProducts).' produk berhasil dihapus.');
+        $count = count($this->selectedProducts);
+        $service->bulkDelete($this->selectedProducts);
+
+        $this->dispatch('toast', message: $count.' produk berhasil dihapus.');
         $this->resetSelection();
         $this->showBulkDeleteModal = false;
     }
 
-    public function bulkToggleStatus(): void
+    public function bulkToggleStatus(ProductService $service): void
     {
         if (empty($this->selectedProducts)) {
             return;
         }
 
-        $products = ProductModel::whereIn('id', $this->selectedProducts)->get();
-
-        // If all are active, make them inactive. Otherwise, make them all active.
-        $allActive = $products->every(fn ($p) => $p->is_active);
-        $newStatus = ! $allActive;
-
-        ProductModel::whereIn('id', $this->selectedProducts)->update(['is_active' => $newStatus]);
+        $count = count($this->selectedProducts);
+        $newStatus = $service->bulkToggleStatus($this->selectedProducts);
 
         $statusText = $newStatus ? 'diaktifkan' : 'dinonaktifkan';
-        $this->dispatch('toast', message: count($this->selectedProducts)." produk berhasil $statusText.");
+        $this->dispatch('toast', message: $count." produk berhasil $statusText.");
         $this->resetSelection();
     }
 
     public function updatedPrice(): void
     {
-        // When price changes, we prioritize keeping modal_price and updating profit
         if (is_numeric($this->price) && is_numeric($this->modal_price)) {
             $this->profit_per_unit = (int) $this->price - (int) $this->modal_price;
         }
@@ -204,8 +200,6 @@ class Product extends Component
 
     protected function calculateModal(): void
     {
-        // This is now handled in updated hooks for better control,
-        // but kept for saveProduct fallback if needed
         if (is_numeric($this->price) && is_numeric($this->profit_per_unit)) {
             $this->modal_price = (int) $this->price - (int) $this->profit_per_unit;
         }
@@ -218,7 +212,7 @@ class Product extends Component
         }
     }
 
-    public function saveProduct(): void
+    public function saveProduct(ProductService $service): void
     {
         $this->validate([
             'name' => 'required|string|max:100',
@@ -244,16 +238,10 @@ class Product extends Component
             'is_active' => (bool) $this->is_active,
         ];
 
-        if ($this->editingId) {
-            $product = ProductModel::find($this->editingId);
-            if ($product) {
-                $product->update($data);
-                $this->dispatch('toast', message: 'Produk berhasil diperbarui.');
-            }
-        } else {
-            ProductModel::create($data);
-            $this->dispatch('toast', message: 'Produk berhasil ditambahkan.');
-        }
+        $service->saveProduct($this->editingId, $data);
+
+        $msg = $this->editingId ? 'Produk berhasil diperbarui.' : 'Produk berhasil ditambahkan.';
+        $this->dispatch('toast', message: $msg);
 
         $this->reset(['name', 'label', 'price', 'profit_per_unit', 'modal_price', 'category_id', 'supplier_id', 'is_active', 'editingId', 'jurusan_id']);
         $this->is_active = true;
@@ -312,7 +300,7 @@ class Product extends Component
         $this->deleteId = null;
     }
 
-    public function saveStock(): void
+    public function saveStock(ProductService $service): void
     {
         $this->validate([
             'stock_product_id' => 'required|exists:products,id',
@@ -320,16 +308,7 @@ class Product extends Component
             'stock_date' => 'required|date',
         ]);
 
-        StockEntry::updateOrCreate(
-            [
-                'product_id' => $this->stock_product_id,
-                'date' => $this->stock_date,
-            ],
-            [
-                'opening_stock' => $this->opening_stock,
-                'closing_stock' => $this->opening_stock,
-            ]
-        );
+        $service->saveStock($this->stock_product_id, $this->stock_date, $this->opening_stock);
 
         $this->dispatch('toast', message: 'Stok awal berhasil disimpan.');
         $this->reset(['stock_product_id', 'opening_stock']);

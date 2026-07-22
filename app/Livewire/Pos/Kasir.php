@@ -3,11 +3,12 @@
 namespace App\Livewire\Pos;
 
 use App\Models\DailyRecap;
+use App\Models\Jurusan;
 use App\Models\Product;
-use App\Models\ProductCategory;
 use App\Models\StockEntry;
 use App\Models\Transaction;
-use Carbon\Carbon;
+use App\Services\PosQueryService;
+use App\Services\PosSessionService;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -38,7 +39,7 @@ class Kasir extends Component
 
     public $unfinishedSessionDate = null;
 
-    public function mount(): void
+    public function mount(PosSessionService $posSessionService): void
     {
         $this->transactionDate = now()->toDateString();
 
@@ -57,10 +58,10 @@ class Kasir extends Component
         }
 
         // Detect if there's an unfinished session from a previous day
-        $this->detectUnfinishedSession();
+        $this->detectUnfinishedSession($posSessionService);
 
         if (! $this->showRecoveryModal) {
-            $this->checkOpeningStock();
+            $this->checkOpeningStock($posSessionService);
         }
     }
 
@@ -75,106 +76,45 @@ class Kasir extends Component
             ->get();
     }
 
-    protected function detectUnfinishedSession(): void
+    protected function detectUnfinishedSession(PosSessionService $posSessionService): void
     {
         $today = now()->toDateString();
         $activeJurusanId = session('active_jurusan_id');
 
-        // Find the most recent date with stock entries before today
-        $lastSessionDate = StockEntry::where('date', '<', $today)
-            ->whereHas('product', function ($q) use ($activeJurusanId) {
-                if ($activeJurusanId) {
-                    $q->where('jurusan_id', $activeJurusanId);
-                }
-            })
-            ->orderBy('date', 'desc')
-            ->value('date');
+        $unfinishedDate = $posSessionService->detectUnfinishedSession($today, $activeJurusanId);
 
-        if ($lastSessionDate) {
-            // Check if this last session was finished
-            $isFinished = DailyRecap::where('date', $lastSessionDate)
-                ->where('jurusan_id', $activeJurusanId)
-                ->where('actual_cash', '>', 0)
-                ->exists();
-
-            if (! $isFinished) {
-                $this->unfinishedSessionDate = $lastSessionDate;
-                $this->showRecoveryModal = true;
-            }
+        if ($unfinishedDate) {
+            $this->unfinishedSessionDate = $unfinishedDate;
+            $this->showRecoveryModal = true;
         }
     }
 
-    public function fixUnfinishedSession(): void
+    public function fixUnfinishedSession(PosSessionService $posSessionService): void
     {
         if (! $this->unfinishedSessionDate) {
             return;
         }
 
-        $date = $this->unfinishedSessionDate;
-        $allProducts = $this->getActiveProducts();
-
-        foreach ($allProducts as $p) {
-            $entry = StockEntry::where('product_id', $p->id)->where('date', $date)->first();
-            if ($entry) {
-                $sold = Transaction::where('product_id', $p->id)
-                    ->whereDate('transacted_at', $date)
-                    ->sum('quantity');
-
-                $entry->update([
-                    'closing_stock' => $entry->opening_stock - $sold,
-                ]);
-            }
-        }
-
-        // Mark as finished in DailyRecap
         $activeJurusanId = session('active_jurusan_id');
-        DailyRecap::updateOrCreate(
-            [
-                'date' => $date,
-                'jurusan_id' => $activeJurusanId,
-            ],
-            [
-                'actual_cash' => 1,
-                'cash_note' => 'Auto-finished by system (Forgot to click finish)',
-            ]
-        );
+        $posSessionService->fixUnfinishedSession($this->unfinishedSessionDate, $this->getActiveProducts(), $activeJurusanId);
 
         $this->showRecoveryModal = false;
         $this->unfinishedSessionDate = null;
         $this->dispatch('toast', message: 'Sesi sebelumnya berhasil dipulihkan & ditutup.');
 
         // Now proceed to today's opening stock
-        $this->checkOpeningStock();
+        $this->checkOpeningStock($posSessionService);
     }
 
-    public function editOpeningStock(): void
+    public function editOpeningStock(PosSessionService $posSessionService): void
     {
         $today = $this->transactionDate ?: now()->toDateString();
         $activeJurusanId = session('active_jurusan_id');
 
-        $lastSessionDate = StockEntry::where('date', '<', $today)
-            ->whereHas('product', function ($q) use ($activeJurusanId) {
-                if ($activeJurusanId) {
-                    $q->where('jurusan_id', $activeJurusanId);
-                }
-            })
-            ->orderBy('date', 'desc')
-            ->value('date');
-
-        $lastStocks = [];
-        if ($lastSessionDate) {
-            $lastStocks = StockEntry::where('date', $lastSessionDate)
-                ->whereHas('product', function ($q) use ($activeJurusanId) {
-                    if ($activeJurusanId) {
-                        $q->where('jurusan_id', $activeJurusanId);
-                    }
-                })
-                ->pluck('closing_stock', 'product_id')
-                ->toArray();
-        }
+        $lastStocks = $posSessionService->getLastSessionStocks($today, $activeJurusanId);
+        $this->lastClosingStocks = $lastStocks;
 
         $allProducts = $this->getActiveProducts();
-        $this->lastClosingStocks = $lastStocks;
 
         foreach ($allProducts as $p) {
             $entry = StockEntry::where('product_id', $p->id)->where('date', $today)->first();
@@ -188,7 +128,7 @@ class Kasir extends Component
         $this->showOpeningStockModal = true;
     }
 
-    protected function checkOpeningStock(): void
+    protected function checkOpeningStock(PosSessionService $posSessionService): void
     {
         $today = now()->toDateString();
         $activeJurusanId = session('active_jurusan_id');
@@ -202,29 +142,10 @@ class Kasir extends Component
             ->exists();
 
         if (! $exists) {
-            $lastSessionDate = StockEntry::where('date', '<', $today)
-                ->whereHas('product', function ($q) use ($activeJurusanId) {
-                    if ($activeJurusanId) {
-                        $q->where('jurusan_id', $activeJurusanId);
-                    }
-                })
-                ->orderBy('date', 'desc')
-                ->value('date');
-
-            $lastStocks = [];
-            if ($lastSessionDate) {
-                $lastStocks = StockEntry::where('date', $lastSessionDate)
-                    ->whereHas('product', function ($q) use ($activeJurusanId) {
-                        if ($activeJurusanId) {
-                            $q->where('jurusan_id', $activeJurusanId);
-                        }
-                    })
-                    ->pluck('closing_stock', 'product_id')
-                    ->toArray();
-            }
+            $lastStocks = $posSessionService->getLastSessionStocks($today, $activeJurusanId);
+            $this->lastClosingStocks = $lastStocks;
 
             $allProducts = $this->getActiveProducts();
-            $this->lastClosingStocks = $lastStocks;
 
             foreach ($allProducts as $p) {
                 $this->stockItems[$p->id] = $lastStocks[$p->id] ?? 0;
@@ -233,23 +154,11 @@ class Kasir extends Component
         }
     }
 
-    public function saveOpeningStock(): void
+    public function saveOpeningStock(PosSessionService $posSessionService): void
     {
         $today = $this->transactionDate ?: now()->toDateString();
-        foreach ($this->stockItems as $productId => $qty) {
-            $entry = StockEntry::updateOrCreate(
-                ['product_id' => $productId, 'date' => $today],
-                ['opening_stock' => $qty ?? 0]
-            );
+        $posSessionService->saveOpeningStock($this->stockItems, $today);
 
-            $totalSold = Transaction::where('product_id', $productId)
-                ->whereDate('transacted_at', $today)
-                ->sum('quantity');
-
-            $entry->update([
-                'closing_stock' => $entry->opening_stock - $totalSold,
-            ]);
-        }
         $this->showOpeningStockModal = false;
         $this->stockItems = [];
         session()->flash('toast', 'Stok awal berhasil diperbarui.');
@@ -272,25 +181,11 @@ class Kasir extends Component
         $this->showClosingStockModal = true;
     }
 
-    public function saveClosingStock(): void
+    public function saveClosingStock(PosSessionService $posSessionService): void
     {
         $today = $this->transactionDate ?: now()->toDateString();
-        foreach ($this->stockItems as $productId => $qty) {
-            StockEntry::updateOrCreate(
-                ['product_id' => $productId, 'date' => $today],
-                ['closing_stock' => $qty ?? 0]
-            );
-        }
-
-        // Mark session as finished in DailyRecap
         $activeJurusanId = session('active_jurusan_id');
-        DailyRecap::updateOrCreate(
-            [
-                'date' => $today,
-                'jurusan_id' => $activeJurusanId,
-            ],
-            ['actual_cash' => 1] // Set a placeholder value to mark as finished
-        );
+        $posSessionService->saveClosingStock($this->stockItems, $today, $activeJurusanId);
 
         $this->showClosingStockModal = false;
         $this->stockItems = [];
@@ -299,70 +194,31 @@ class Kasir extends Component
         $this->redirectRoute('dashboard', navigate: true);
     }
 
-    public function checkout($cart, $total, $change, $buyer_name, $status, $note, $transactionDate = null): void
+    public function checkout(PosSessionService $posSessionService, $cart, $total, $change, $buyer_name, $status, $note, $transactionDate = null): void
     {
         if (empty($cart)) {
             return;
         }
 
-        $tDate = $transactionDate ?: now()->toDateString();
-        $isBackdate = $tDate < now()->toDateString();
-
-        // Ensure time is preserved if it's today, otherwise use current time on that past date
-        $transactedAt = $tDate === now()->toDateString() ? now() : Carbon::parse($tDate.' '.now()->format('H:i:s'));
-
         $activeJurusanId = session('active_jurusan_id');
         $themeSettings = session('active_jurusan_theme') ?? [];
         if (empty($themeSettings) && $activeJurusanId) {
-            $jurusan = \App\Models\Jurusan::find($activeJurusanId);
+            $jurusan = Jurusan::find($activeJurusanId);
             $themeSettings = $jurusan ? ($jurusan->theme_settings ?? []) : [];
         }
         $prefix = $themeSettings['doc_prefix_transaction'] ?? 'LBK';
 
-        $cleanName = preg_replace('/[^A-Za-z0-9]/', '', $buyer_name ?: 'GUEST');
-        $initials = strtoupper(substr($cleanName, 0, 2));
-        $reference = $prefix.'-'.now()->format('Ymd').'-'.$initials.strtoupper(bin2hex(random_bytes(2)));
-
-        $first = true;
-        foreach ($cart as $item) {
-            Transaction::create([
-                'jurusan_id' => $activeJurusanId,
-                'reference' => $reference,
-                'user_id' => auth()->id(),
-                'product_id' => $item['id'],
-                'supplier_id' => $item['supplier_id'] ?? null,
-                'transacted_at' => $transactedAt,
-                'buyer_name' => $buyer_name ?: null,
-                'quantity' => $item['quantity'],
-                'unit_price' => $item['price'],
-                'unit_profit' => $item['profit'],
-                'total_price' => $item['price'] * $item['quantity'],
-                'debt_amount' => in_array($status, ['belum_menerima_uang', 'uang_dipinjam']) ? ($item['price'] * $item['quantity']) : 0,
-                'change_due' => ($status === 'belum_kembalian' && $first) ? $change : 0,
-                'status' => $status,
-                'note' => $note ?: ($change > 0 && $first ? 'Kembalian: Rp'.number_format($change, 0, ',', '.') : null),
-            ]);
-            $first = false;
-
-            // Cascading stock reduction if backdating
-            if ($isBackdate) {
-                // Find all StockEntry from this date to today
-                $entries = StockEntry::where('product_id', $item['id'])
-                    ->where('date', '>=', $tDate)
-                    ->orderBy('date', 'asc')
-                    ->get();
-
-                foreach ($entries as $ent) {
-                    $soldLater = Transaction::where('product_id', $item['id'])
-                        ->whereDate('transacted_at', $ent->date)
-                        ->sum('quantity');
-
-                    $ent->update([
-                        'closing_stock' => $ent->opening_stock - $soldLater,
-                    ]);
-                }
-            }
-        }
+        $reference = $posSessionService->checkout(
+            $cart,
+            $change,
+            $buyer_name,
+            $status,
+            $note,
+            $transactionDate,
+            auth()->id(),
+            $activeJurusanId,
+            $prefix
+        );
 
         $this->dispatch('transaction-completed', reference: $reference);
         $this->dispatch('toast', message: 'Transaksi berhasil disimpan!');
@@ -384,34 +240,12 @@ class Kasir extends Component
     }
 
     #[Computed]
-    public function categories()
+    public function categories(PosQueryService $posQueryService)
     {
         $today = now()->toDateString();
         $activeJurusanId = session('active_jurusan_id');
 
-        $activeProductCategoryIds = Product::where('is_active', true)
-            ->whereHas('stockEntries', function ($q) use ($today) {
-                $q->where('date', $today)->where('opening_stock', '>', 0);
-            })
-            ->when($activeJurusanId, function ($q) use ($activeJurusanId) {
-                return $q->where('jurusan_id', $activeJurusanId);
-            })
-            ->get()
-            ->filter(function ($p) use ($today) {
-                $entry = StockEntry::where('product_id', $p->id)->where('date', $today)->first();
-                $sold = Transaction::where('product_id', $p->id)
-                    ->whereDate('transacted_at', $today)
-                    ->sum('quantity');
-
-                return (($entry ? $entry->opening_stock : 0) - $sold) > 0;
-            })
-            ->pluck('category_id')
-            ->filter()
-            ->unique();
-
-        return ProductCategory::whereIn('id', $activeProductCategoryIds)
-            ->orderBy('name')
-            ->get();
+        return $posQueryService->getCategories($today, $activeJurusanId);
     }
 
     #[Computed]
@@ -433,79 +267,27 @@ class Kasir extends Component
     }
 
     #[Computed]
-    public function stockComparison()
+    public function stockComparison(PosQueryService $posQueryService)
     {
         $today = $this->transactionDate ?: now()->toDateString();
         $activeJurusanId = session('active_jurusan_id');
 
-        return Product::where('is_active', true)
-            ->when($activeJurusanId, function ($q) use ($activeJurusanId) {
-                return $q->where('jurusan_id', $activeJurusanId);
-            })
-            ->whereHas('stockEntries', function ($q) use ($today) {
-                $q->where('date', $today)->where('opening_stock', '>', 0);
-            })
-            ->with(['stockEntries' => fn ($q) => $q->where('date', $today)])
-            ->get()
-            ->map(function ($p) use ($today) {
-                $entry = $p->stockEntries->first();
-                $sold = Transaction::where('product_id', $p->id)
-                    ->whereDate('transacted_at', $today)
-                    ->sum('quantity');
-
-                return [
-                    'id' => $p->id,
-                    'name' => $p->name,
-                    'category' => $p->category->name ?? 'Uncategorized',
-                    'opening' => $entry ? $entry->opening_stock : 0,
-                    'sold' => $sold,
-                    'expected' => ($entry ? $entry->opening_stock : 0) - $sold,
-                    'actual' => $entry ? $entry->closing_stock : 0,
-                ];
-            });
+        return $posQueryService->getStockComparison($today, $activeJurusanId);
     }
 
-    protected function getProductsForAlpine()
+    protected function getProductsForAlpine(PosQueryService $posQueryService)
     {
         $today = now()->toDateString();
         $activeJurusanId = session('active_jurusan_id');
 
-        return Product::with(['category', 'stockEntries' => fn ($q) => $q->where('date', $today)])
-            ->where('is_active', true)
-            ->whereHas('stockEntries', function ($q) use ($today) {
-                $q->where('date', $today)->where('opening_stock', '>', 0);
-            })
-            ->when($activeJurusanId, function ($q) use ($activeJurusanId) {
-                return $q->where('jurusan_id', $activeJurusanId);
-            })
-            ->orderBy('name')
-            ->get()
-            ->map(function ($p) use ($today) {
-                $entry = $p->stockEntries->first();
-                $sold = Transaction::where('product_id', $p->id)
-                    ->whereDate('transacted_at', $today)
-                    ->sum('quantity');
-                $available_stock = ($entry ? $entry->opening_stock : 0) - $sold;
-
-                return [
-                    'id' => $p->id,
-                    'name' => $p->name,
-                    'price' => (int) $p->price,
-                    'profit' => (int) $p->profit,
-                    'supplier_id' => $p->supplier_id,
-                    'category_id' => $p->category_id,
-                    'category_name' => $p->category->name ?? 'Uncategorized',
-                    'initial' => substr($p->name, 0, 1),
-                    'available_stock' => $available_stock,
-                ];
-            });
+        return $posQueryService->getProductsForAlpine($today, $activeJurusanId);
     }
 
-    public function render()
+    public function render(PosQueryService $posQueryService)
     {
         $today = now()->toDateString();
         $activeJurusanId = session('active_jurusan_id');
-        $allProducts = $this->getProductsForAlpine();
+        $allProducts = $this->getProductsForAlpine($posQueryService);
 
         $isSessionFinished = DailyRecap::where('date', $today)
             ->where('jurusan_id', $activeJurusanId)

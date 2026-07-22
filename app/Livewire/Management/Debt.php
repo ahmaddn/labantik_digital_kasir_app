@@ -3,66 +3,101 @@
 namespace App\Livewire\Management;
 
 use App\Models\Product;
+use App\Models\StoreDebt;
+use App\Models\Supplier;
 use App\Models\Transaction;
-use Illuminate\Support\Facades\DB;
+use App\Services\CustomerDebtService;
+use App\Services\StoreDebtService;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Livewire\Attributes\Computed;
 use Livewire\Component;
 use Livewire\WithPagination;
-use Livewire\Attributes\Computed;
 
 class Debt extends Component
 {
     use WithPagination;
 
     public $search = '';
-    public $activeTab = 'debt'; // 'debt' or 'change'
+
+    public $activeTab = 'debt'; // 'debt' or 'change' or 'store_debt'
+
     public $storeDebtSubTab = 'active'; // 'active' or 'history'
+
     public $changeSubTab = 'active'; // 'active' or 'history'
+
     public $debtSubTab = 'active'; // 'active' or 'history'
+
     public $startDate;
+
     public $endDate;
 
     // Modal State
     public $showSettleModal = false;
+
     public $selectedReference = null;
+
     public $settleAmount = 0;
+
     public $settleMethod = 'dibayarkan'; // dibayarkan, dicicil, dijajankan
+
     public $maxAmount = 0;
+
     public $currentBuyerName = '';
 
     // Details Modal
     public $showDetailsModal = false;
+
     public $detailReference = null;
 
     public $showCancelSettleModal = false;
+
     public $cancelSettleReference = null;
 
     // 'Dijajankan' Feature Properties
     public $productSearch = '';
+
     public $spentItems = []; // [{product_id, name, price, quantity, total}]
+
     public $totalSpent = 0;
 
     // Store Debt Properties
     public $showCreateStoreDebtModal = false;
+
     public $newStoreDebtSupplierId = '';
+
     public $newStoreDebtCreditorName = '';
+
     public $newStoreDebtAmount = '';
+
     public $newStoreDebtDate = '';
+
     public $newStoreDebtDueDate = '';
+
     public $newStoreDebtNote = '';
 
     public $showSettleStoreDebtModal = false;
+
     public $selectedStoreDebtId = null;
+
     public $settleStoreDebtAmount = 0;
+
     public $settleStoreDebtMethod = 'dibayarkan'; // dibayarkan, dicicil
+
     public $maxStoreDebtAmount = 0;
+
     public $currentStoreDebtCreditor = '';
 
     // Delete Store Debt verification properties
     public $showDeleteStoreDebtModal = false;
+
     public $deletingStoreDebtId = null;
+
     public $deleteStoreDebtReason = '';
+
     public $deleteStoreDebtVerification = '';
+
     public $deleteStoreDebtStatement = false;
+
     public $deleteStoreDebtCreditorName = '';
 
     protected $queryString = [
@@ -72,10 +107,7 @@ class Debt extends Component
         'endDate' => ['except' => ''],
     ];
 
-    public function mount()
-    {
-        // No default dates to show all by default
-    }
+    public function mount() {}
 
     public function updatedSearch()
     {
@@ -116,88 +148,33 @@ class Debt extends Component
     {
         $this->selectedReference = $reference;
         $trx = Transaction::where('reference', $reference)->first();
-        
+
         if ($trx) {
             $this->currentBuyerName = $trx->buyer_name;
             $this->maxAmount = Transaction::where('reference', $reference)
                 ->sum($this->activeTab === 'change' ? 'change_due' : 'debt_amount');
-                
+
             $this->settleAmount = $this->maxAmount;
             $this->settleMethod = 'dibayarkan';
             $this->showSettleModal = true;
         }
     }
 
-    public function settle()
+    public function settle(CustomerDebtService $debtService)
     {
         $this->validate([
-            'settleAmount' => 'required|numeric|min:1|max:' . $this->maxAmount,
+            'settleAmount' => 'required|numeric|min:1|max:'.$this->maxAmount,
             'settleMethod' => 'required|in:dibayarkan,dicicil,dijajankan',
         ]);
 
-        $transactions = Transaction::where('reference', $this->selectedReference)->get();
-        $remainingToSettle = $this->settleAmount;
-
-        foreach ($transactions as $trx) {
-            if ($remainingToSettle <= 0) break;
-
-            $currentField = $this->activeTab === 'change' ? 'change_due' : 'debt_amount';
-            $currentAmount = $trx->$currentField;
-            
-            if ($currentAmount <= 0) continue;
-
-            $deduct = min($currentAmount, $remainingToSettle);
-            $remainingToSettle -= $deduct;
-
-            $newAmount = $currentAmount - $deduct;
-            $updates = [
-                $currentField => $newAmount,
-                'note' => $trx->note . " (Pelunasan {$this->settleMethod} Rp" . number_format($deduct, 0, ',', '.') . " pd " . now()->format('d/m/Y H:i') . ")"
-            ];
-
-            if ($newAmount <= 0) {
-                $updates['transacted_at'] = now();
-            }
-
-            $trx->update($updates);
-        }
-
-        // Check if the entire transaction is now fully settled
-        $totalRemaining = Transaction::where('reference', $this->selectedReference)
-            ->sum($this->activeTab === 'change' ? 'change_due' : 'debt_amount');
-            
-        if ($totalRemaining <= 0) {
-            $allTrx = Transaction::where('reference', $this->selectedReference)->get();
-            foreach ($allTrx as $t) {
-                if ($t->status !== 'uang_diterima') {
-                    $t->update([
-                        'status' => 'uang_diterima',
-                        'transacted_at' => now(),
-                    ]);
-                }
-            }
-        }
-
-        // Create new transactions if 'dijajankan'
-        if ($this->settleMethod === 'dijajankan' && !empty($this->spentItems)) {
-            $reference = 'SPNT-' . now()->format('Ymd') . '-' . strtoupper(bin2hex(random_bytes(2)));
-            foreach ($this->spentItems as $item) {
-                Transaction::create([
-                    'reference' => $reference,
-                    'user_id' => auth()->id(),
-                    'product_id' => $item['product_id'],
-                    'supplier_id' => $item['supplier_id'],
-                    'transacted_at' => now(),
-                    'buyer_name' => $transactions->first()->buyer_name, // Carry over buyer name
-                    'quantity' => $item['quantity'],
-                    'unit_price' => $item['price'],
-                    'unit_profit' => $item['profit'],
-                    'total_price' => $item['total'],
-                    'status' => 'uang_diterima',
-                    'note' => "Pembelian dari tukar kembalian nota " . $this->selectedReference
-                ]);
-            }
-        }
+        $debtService->settleDebt(
+            $this->selectedReference,
+            $this->settleAmount,
+            $this->settleMethod,
+            $this->activeTab,
+            $this->spentItems,
+            auth()->id()
+        );
 
         $this->showSettleModal = false;
         $this->showDetailsModal = false;
@@ -212,45 +189,14 @@ class Debt extends Component
         $this->showCancelSettleModal = true;
     }
 
-    public function cancelSettle()
+    public function cancelSettle(CustomerDebtService $debtService)
     {
-        if (!$this->cancelSettleReference) {
+        if (! $this->cancelSettleReference) {
             return;
         }
 
-        $transactions = Transaction::where('reference', $this->cancelSettleReference)->get();
-        
-        $isChangeTrx = false;
-        foreach ($transactions as $t) {
-            if ($t->note && preg_match('/Kembalian:\s*Rp\s*([0-9.,]+)/i', $t->note)) {
-                $isChangeTrx = true;
-                break;
-            }
-        }
+        $debtService->cancelSettle($this->cancelSettleReference);
 
-        foreach ($transactions as $trx) {
-            if ($isChangeTrx) {
-                $originalAmount = 0;
-                if ($trx->note && preg_match('/Kembalian:\s*Rp\s*([0-9.,]+)/i', $trx->note, $matches)) {
-                    $originalAmount = (int) str_replace(['.', ','], '', $matches[1]);
-                }
-                
-                $trx->update([
-                    'status' => 'belum_kembalian',
-                    'change_due' => $originalAmount,
-                    'note' => $originalAmount > 0 ? 'Kembalian: Rp' . number_format($originalAmount, 0, ',', '.') : null,
-                    'transacted_at' => $trx->created_at,
-                ]);
-            } else {
-                $trx->update([
-                    'status' => 'belum_menerima_uang',
-                    'debt_amount' => $trx->total_price,
-                    'note' => null,
-                    'transacted_at' => $trx->created_at,
-                ]);
-            }
-        }
-        
         $this->showCancelSettleModal = false;
         $this->cancelSettleReference = null;
         $this->dispatch('toast', message: 'Pelunasan berhasil dibatalkan dan status dikembalikan.');
@@ -265,16 +211,22 @@ class Debt extends Component
     #[Computed]
     public function detailItems()
     {
-        if (!$this->detailReference) return collect();
+        if (! $this->detailReference) {
+            return collect();
+        }
+
         return Transaction::with('product')->where('reference', $this->detailReference)->get();
     }
 
     #[Computed]
     public function searchResults()
     {
-        if (strlen($this->productSearch) < 2) return collect();
+        if (strlen($this->productSearch) < 2) {
+            return collect();
+        }
+
         return Product::where('is_active', true)
-            ->where('name', 'like', '%' . $this->productSearch . '%')
+            ->where('name', 'like', '%'.$this->productSearch.'%')
             ->limit(5)
             ->get();
     }
@@ -282,15 +234,18 @@ class Debt extends Component
     public function addSpentItem($productId)
     {
         $product = Product::find($productId);
-        if (!$product) return;
+        if (! $product) {
+            return;
+        }
 
         $existing = collect($this->spentItems)->firstWhere('product_id', $productId);
         if ($existing) {
-            $this->spentItems = collect($this->spentItems)->map(function($item) use ($productId) {
+            $this->spentItems = collect($this->spentItems)->map(function ($item) use ($productId) {
                 if ($item['product_id'] == $productId) {
                     $item['quantity']++;
                     $item['total'] = $item['quantity'] * $item['price'];
                 }
+
                 return $item;
             })->toArray();
         } else {
@@ -301,7 +256,7 @@ class Debt extends Component
                 'profit' => $product->profit,
                 'supplier_id' => $product->supplier_id,
                 'quantity' => 1,
-                'total' => $product->price
+                'total' => $product->price,
             ];
         }
         $this->calculateTotalSpent();
@@ -310,7 +265,7 @@ class Debt extends Component
 
     public function updateSpentItemQty($index, $qty)
     {
-        $qty = max(1, (int)$qty);
+        $qty = max(1, (int) $qty);
         $this->spentItems[$index]['quantity'] = $qty;
         $this->spentItems[$index]['total'] = $qty * $this->spentItems[$index]['price'];
         $this->calculateTotalSpent();
@@ -331,8 +286,7 @@ class Debt extends Component
         }
     }
 
-    // Store Debt Actions
-    public function openCreateStoreDebtModal()
+    public function openCreateModal()
     {
         $this->resetValidation();
         $this->newStoreDebtSupplierId = '';
@@ -344,7 +298,7 @@ class Debt extends Component
         $this->showCreateStoreDebtModal = true;
     }
 
-    public function saveStoreDebt()
+    public function saveStoreDebt(StoreDebtService $debtService)
     {
         if (session('active_role_name') === 'superadmin') {
             abort(403, 'Superadmin tidak diizinkan membuat hutang baru.');
@@ -359,23 +313,21 @@ class Debt extends Component
 
         $creditorName = $this->newStoreDebtCreditorName;
         if ($this->newStoreDebtSupplierId) {
-            $supplier = \App\Models\Supplier::find($this->newStoreDebtSupplierId);
+            $supplier = Supplier::find($this->newStoreDebtSupplierId);
             if ($supplier) {
                 $creditorName = $supplier->name;
             }
         }
 
-        \App\Models\StoreDebt::create([
-            'jurusan_id' => session('active_jurusan_id'),
-            'supplier_id' => $this->newStoreDebtSupplierId ?: null,
-            'creditor_name' => $creditorName ?: 'Unknown Creditor',
-            'amount' => $this->newStoreDebtAmount,
-            'remaining_amount' => $this->newStoreDebtAmount,
-            'status' => 'belum_lunas',
-            'note' => $this->newStoreDebtNote,
-            'due_date' => $this->newStoreDebtDueDate ?: null,
-            'date' => $this->newStoreDebtDate,
-        ]);
+        $debtService->createStoreDebt(
+            $creditorName ?: 'Unknown Creditor',
+            $this->newStoreDebtSupplierId ?: null,
+            $this->newStoreDebtAmount,
+            $this->newStoreDebtDate,
+            $this->newStoreDebtDueDate ?: null,
+            $this->newStoreDebtNote,
+            session('active_jurusan_id')
+        );
 
         $this->showCreateStoreDebtModal = false;
         $this->dispatch('toast', message: 'Hutang toko berhasil ditambahkan.');
@@ -384,7 +336,7 @@ class Debt extends Component
     public function openSettleStoreDebtModal($id)
     {
         $this->resetValidation();
-        $debt = \App\Models\StoreDebt::find($id);
+        $debt = StoreDebt::find($id);
         if ($debt) {
             $this->selectedStoreDebtId = $id;
             $this->currentStoreDebtCreditor = $debt->creditor_name;
@@ -395,48 +347,19 @@ class Debt extends Component
         }
     }
 
-    public function settleStoreDebt()
+    public function settleStoreDebt(StoreDebtService $debtService)
     {
         $this->validate([
-            'settleStoreDebtAmount' => 'required|numeric|min:1|max:' . $this->maxStoreDebtAmount,
+            'settleStoreDebtAmount' => 'required|numeric|min:1|max:'.$this->maxStoreDebtAmount,
             'settleStoreDebtMethod' => 'required|in:dibayarkan,dicicil',
         ]);
 
-        $debt = \App\Models\StoreDebt::find($this->selectedStoreDebtId);
-        if ($debt) {
-            $deduct = $this->settleStoreDebtAmount;
-            $newRemaining = $debt->remaining_amount - $deduct;
-            
-            $note = $debt->note;
-            $paymentNote = " (Pelunasan {$this->settleStoreDebtMethod} Rp" . number_format($deduct, 0, ',', '.') . " pd " . now()->format('d/m/Y H:i') . ")";
-            $note = $note ? $note . $paymentNote : ltrim($paymentNote);
-
-            $debt->update([
-                'remaining_amount' => $newRemaining,
-                'status' => $newRemaining <= 0 ? 'lunas' : 'belum_lunas',
-                'note' => $note,
-            ]);
-
-            // Add to Cash Book / cash_transactions as Expense
-            $category = \App\Models\CashCategory::where('name', 'Pelunasan Hutang')->first();
-            if (!$category) {
-                $category = \App\Models\CashCategory::create([
-                    'name' => 'Pelunasan Hutang',
-                    'jurusan_id' => session('active_jurusan_id'),
-                ]);
-            }
-
-            \App\Models\CashTransaction::create([
-                'jurusan_id' => session('active_jurusan_id'),
-                'date' => now()->toDateString(),
-                'type' => 'expense',
-                'cash_type' => 'keuntungan',
-                'cash_category_id' => $category->id,
-                'amount' => $deduct,
-                'description' => "Pelunasan hutang toko kepada " . $debt->creditor_name,
-                'reference' => 'PAY-DEBT-' . now()->format('Ymd') . '-' . strtoupper(bin2hex(random_bytes(2))),
-            ]);
-        }
+        $debtService->settleStoreDebt(
+            $this->selectedStoreDebtId,
+            $this->settleStoreDebtAmount,
+            $this->settleStoreDebtMethod,
+            session('active_jurusan_id')
+        );
 
         $this->showSettleStoreDebtModal = false;
         $this->dispatch('toast', message: 'Pelunasan hutang toko berhasil diproses.');
@@ -444,8 +367,8 @@ class Debt extends Component
 
     public function openDeleteStoreDebtModal($id)
     {
-        $debt = \App\Models\StoreDebt::find($id);
-        if (!$debt) {
+        $debt = StoreDebt::find($id);
+        if (! $debt) {
             return;
         }
 
@@ -453,9 +376,10 @@ class Debt extends Component
             $debt->update([
                 'status' => 'dihapus',
                 'remaining_amount' => 0,
-                'note' => $debt->note ? $debt->note . " [Dihapus oleh Superadmin]" : "[Dihapus oleh Superadmin]",
+                'note' => $debt->note ? $debt->note.' [Dihapus oleh Superadmin]' : '[Dihapus oleh Superadmin]',
             ]);
             $this->dispatch('toast', message: 'Hutang toko berhasil dihapus oleh Superadmin.');
+
             return;
         }
 
@@ -468,133 +392,70 @@ class Debt extends Component
         $this->showDeleteStoreDebtModal = true;
     }
 
-    public function deleteStoreDebt()
+    public function deleteStoreDebt(StoreDebtService $debtService)
     {
         $this->validate([
             'deleteStoreDebtReason' => 'required|string|min:10',
-            'deleteStoreDebtVerification' => 'required|string|in:' . $this->deleteStoreDebtCreditorName,
+            'deleteStoreDebtVerification' => 'required|string|in:'.$this->deleteStoreDebtCreditorName,
             'deleteStoreDebtStatement' => 'accepted',
         ], [
             'deleteStoreDebtReason.required' => 'Alasan penghapusan wajib diisi.',
             'deleteStoreDebtReason.min' => 'Alasan harus diisi minimal 10 karakter untuk pertanggungjawaban.',
-            'deleteStoreDebtVerification.in' => 'Konfirmasi nama salah. Harus sesuai kreditor: "' . $this->deleteStoreDebtCreditorName . '".',
+            'deleteStoreDebtVerification.in' => 'Konfirmasi nama salah. Harus sesuai kreditor: "'.$this->deleteStoreDebtCreditorName.'".',
             'deleteStoreDebtStatement.accepted' => 'Anda harus menyetujui pernyataan pertanggungjawaban.',
         ]);
 
-        $debt = \App\Models\StoreDebt::find($this->deletingStoreDebtId);
-        if ($debt) {
-            $user = auth()->user();
-            $deletionNote = " [Dihapus pd " . now()->format('d/m/Y H:i') . " oleh " . $user->name . ". Alasan: " . $this->deleteStoreDebtReason . "]";
-            $newNote = $debt->note ? $debt->note . $deletionNote : ltrim($deletionNote);
-
-            $debt->update([
-                'status' => 'dihapus',
-                'remaining_amount' => 0,
-                'note' => $newNote,
-            ]);
-        }
+        $user = auth()->user();
+        $debtService->deleteStoreDebt(
+            $this->deletingStoreDebtId,
+            $this->deleteStoreDebtReason,
+            $user->name
+        );
 
         $this->showDeleteStoreDebtModal = false;
         $this->dispatch('toast', message: 'Hutang toko berhasil dihapus (Status diubah menjadi dihapus).');
     }
 
-    public function render()
+    public function render(CustomerDebtService $custService, StoreDebtService $storeService)
     {
         $activeJurusanId = session('active_jurusan_id');
         $storeDebts = collect();
-        
+
         if ($this->activeTab === 'store_debt') {
-            $storeDebtQuery = \App\Models\StoreDebt::query()
-                ->when($activeJurusanId, function ($q) use ($activeJurusanId) {
-                    return $q->where('jurusan_id', $activeJurusanId);
-                });
+            $activeStoreDebts = $storeService->getStoreDebts(
+                $activeJurusanId,
+                $this->search,
+                $this->startDate,
+                $this->endDate,
+                'active',
+                5,
+                'activePage'
+            );
 
-            if ($this->search) {
-                $storeDebtQuery->where('creditor_name', 'like', '%' . $this->search . '%');
-            }
+            $historyStoreDebts = $storeService->getStoreDebts(
+                $activeJurusanId,
+                $this->search,
+                $this->startDate,
+                $this->endDate,
+                'history',
+                5,
+                'historyPage'
+            );
 
-            if ($this->startDate) {
-                $storeDebtQuery->whereDate('date', '>=', $this->startDate);
-            }
-
-            if ($this->endDate) {
-                $storeDebtQuery->whereDate('date', '<=', $this->endDate);
-            }
-
-            // Clone query and paginate separately
-            $activeStoreDebts = (clone $storeDebtQuery)->where('status', 'belum_lunas')
-                ->orderByDesc('date')
-                ->orderByDesc('created_at')
-                ->paginate(5, ['*'], 'activePage');
-
-            $historyStoreDebts = (clone $storeDebtQuery)->whereIn('status', ['lunas', 'dihapus'])
-                ->orderByDesc('date')
-                ->orderByDesc('created_at')
-                ->paginate(5, ['*'], 'historyPage');
-
-            $storeDebts = collect();
-            $transactions = new \Illuminate\Pagination\LengthAwarePaginator([], 0, 15);
+            $transactions = new LengthAwarePaginator([], 0, 15);
         } else {
-            $query = Transaction::query()
-                ->when($activeJurusanId, function ($q) use ($activeJurusanId) {
-                    return $q->where('jurusan_id', $activeJurusanId);
-                })
-                ->when($this->activeTab === 'debt', function ($q) {
-                    if ($this->debtSubTab === 'history') {
-                        return $q->where('status', 'uang_diterima')
-                            ->whereIn('reference', function ($sub) {
-                                $sub->select('reference')
-                                    ->from('transactions')
-                                    ->where('note', 'like', '%Pelunasan%')
-                                    ->where('note', 'not like', '%Kembalian%');
-                            });
-                    } else {
-                        return $q->whereIn('status', ['belum_menerima_uang', 'uang_dipinjam']);
-                    }
-                })
-                ->when($this->activeTab === 'change', function ($q) {
-                    if ($this->changeSubTab === 'history') {
-                        return $q->where('status', 'uang_diterima')
-                            ->whereIn('reference', function ($sub) {
-                                $sub->select('reference')
-                                    ->from('transactions')
-                                    ->where('note', 'like', '%Pelunasan%')
-                                    ->where('note', 'like', '%Kembalian%');
-                            });
-                    } else {
-                        return $q->where('status', 'belum_kembalian');
-                    }
-                });
-
-            if ($this->search) {
-                $query->where('buyer_name', 'like', '%' . $this->search . '%');
-            }
-
-            if ($this->startDate) {
-                $query->whereDate('transacted_at', '>=', $this->startDate);
-            }
-
-            if ($this->endDate) {
-                $query->whereDate('transacted_at', '<=', $this->endDate);
-            }
-
-            $transactions = $query->selectRaw('reference, buyer_name, status, transacted_at, MAX(note) as note, SUM(total_price) as total_price, SUM(debt_amount) as debt_amount, SUM(change_due) as change_due, COUNT(*) as items_count')
-                ->groupBy('reference', 'buyer_name', 'status', 'transacted_at')
-                ->orderByDesc('transacted_at')
-                ->paginate(15);
+            $transactions = $custService->getTransactions(
+                $activeJurusanId,
+                $this->activeTab,
+                $this->activeTab === 'debt' ? $this->debtSubTab : $this->changeSubTab,
+                $this->search,
+                $this->startDate,
+                $this->endDate,
+                15
+            );
         }
 
-        $summary = [
-            'total_debt' => Transaction::when($activeJurusanId, function ($q) use ($activeJurusanId) {
-                return $q->where('jurusan_id', $activeJurusanId);
-            })->whereIn('status', ['belum_menerima_uang', 'uang_dipinjam'])->sum('debt_amount'),
-            'total_change' => Transaction::when($activeJurusanId, function ($q) use ($activeJurusanId) {
-                return $q->where('jurusan_id', $activeJurusanId);
-            })->where('status', 'belum_kembalian')->sum('change_due'),
-            'total_store_debt' => \App\Models\StoreDebt::when($activeJurusanId, function ($q) use ($activeJurusanId) {
-                return $q->where('jurusan_id', $activeJurusanId);
-            })->where('status', 'belum_lunas')->sum('remaining_amount'),
-        ];
+        $summary = $custService->getSummary($activeJurusanId);
 
         return view('livewire.management.debt', [
             'transactions' => $transactions,
@@ -602,7 +463,7 @@ class Debt extends Component
             'activeStoreDebts' => $activeStoreDebts ?? collect(),
             'historyStoreDebts' => $historyStoreDebts ?? collect(),
             'summary' => $summary,
-            'suppliers' => \App\Models\Supplier::orderBy('name')->get()
+            'suppliers' => Supplier::orderBy('name')->get(),
         ])->layout('layouts.app', ['title' => 'Manajemen Hutang & Kembalian']);
     }
 }

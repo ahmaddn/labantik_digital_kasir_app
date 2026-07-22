@@ -3,13 +3,12 @@
 namespace App\Livewire\Reports;
 
 use App\Exports\DailyDataExport;
-use App\Imports\DailyDataImport;
-use App\Models\CashCategory;
 use App\Models\CashTransaction;
 use App\Models\DailyRecap as DailyRecapModel;
 use App\Models\ProductCategory;
 use App\Models\Transaction;
-use Carbon\Carbon;
+use App\Services\DailyRecapActionService;
+use App\Services\DailyRecapQueryService;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithFileUploads;
@@ -103,191 +102,32 @@ class DailyRecap extends Component
             ->exists();
     }
 
-    public function saveCashAudit(): void
+    public function saveCashAudit(DailyRecapActionService $service): void
     {
         $activeJurusanId = session('active_jurusan_id');
-        DailyRecapModel::updateOrCreate(
-            [
-                'date' => $this->selectedDate,
-                'jurusan_id' => $activeJurusanId,
-            ],
-            [
-                'actual_cash' => $this->actualCash,
-                'retained_change_cash' => $this->retainedChangeCash,
-                'cash_note' => $this->cashNote,
-            ]
-        );
+        $service->saveCashAudit($this->selectedDate, $this->actualCash, $this->retainedChangeCash, $this->cashNote, $activeJurusanId);
 
         $this->dispatch('toast', message: 'Audit uang kas berhasil disimpan.');
     }
 
-    public function postToCashBook(): void
+    public function postToCashBook(DailyRecapActionService $service): void
     {
         $activeJurusanId = session('active_jurusan_id');
-        $recap = DailyRecapModel::where('date', $this->selectedDate)
-            ->when($activeJurusanId, function ($q) use ($activeJurusanId) {
-                return $q->where('jurusan_id', $activeJurusanId);
-            })
-            ->first();
+        [$success, $msg] = $service->postToCashBook($this->selectedDate, $activeJurusanId);
 
-        if (! $recap || $recap->actual_cash <= 1) {
-            $this->dispatch('toast', message: 'Lakukan audit uang kas fisik terlebih dahulu sebelum melakukan posting!', type: 'error');
+        if (! $success) {
+            $this->dispatch('toast', message: $msg, type: 'error');
 
             return;
         }
-
-        // Ambil data transaksi hari ini
-        $allTransactions = Transaction::with(['product.category'])
-            ->whereDate('transacted_at', $this->selectedDate)
-            ->when($activeJurusanId, function ($q) use ($activeJurusanId) {
-                return $q->where('jurusan_id', $activeJurusanId);
-            })
-            ->get();
-
-        if ($allTransactions->isEmpty()) {
-            $this->dispatch('toast', message: 'Tidak ada transaksi pada tanggal ini.', type: 'error');
-
-            return;
-        }
-
-        $totalRevenueReal = $allTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->sum('total_price');
-
-        // Hak Supplier / Bagi Hasil (Modal dari barang titipan supplier)
-        $totalSupplierHak = $allTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])
-            ->whereNotNull('supplier_id')
-            ->sum(fn ($tx) => ($tx->unit_price - $tx->unit_profit) * $tx->quantity);
-
-        // Fetch starting change cash from previous day's retained change
-        $previousRecap = DailyRecapModel::where('jurusan_id', $activeJurusanId)
-            ->where('date', '<', $this->selectedDate)
-            ->orderBy('date', 'desc')
-            ->first();
-        $startingChange = $previousRecap ? ($previousRecap->retained_change_cash ?? 0) : 0;
-
-        // Hitung Selisih dengan benar: (Uang Fisik - Kembalian Ditahan) - Omzet Sistem
-        $diff = ((float) $recap->actual_cash - (float) ($recap->retained_change_cash ?? 0)) - (float) $totalRevenueReal;
-
-        // Kelompokkan transaksi berdasarkan Kategori Produk
-        $grouped = $allTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->groupBy('product.category_id');
-
-        \DB::transaction(function () use ($grouped, $totalSupplierHak, $diff, $activeJurusanId) {
-            // Delete old system-posted entries for this day to avoid duplicate or orphaned entries
-            CashTransaction::where('date', $this->selectedDate)
-                ->where('jurusan_id', $activeJurusanId)
-                ->where(function ($q) {
-                    $q->where('description', 'like', '%(Sistem)%')
-                      ->orWhere('description', 'like', 'Penyesuaian Selisih%');
-                })
-                ->delete();
-
-            foreach ($grouped as $categoryId => $txs) {
-                $firstTx = $txs->first();
-                $categoryName = $firstTx->product->category->name ?? 'Lainnya';
-                $categoryNameClean = trim($categoryName);
-
-                // Dapatkan atau buat Kategori Kas per Kategori Produk
-                $catPenjualan = CashCategory::firstOrCreate(
-                    ['name' => 'Penjualan '.$categoryNameClean, 'jurusan_id' => $activeJurusanId]
-                );
-
-                // Hitung modal internal untuk kategori ini (bukan barang supplier)
-                $catModalInternal = $txs->whereNull('supplier_id')
-                    ->sum(fn ($tx) => ($tx->unit_price - $tx->unit_profit) * $tx->quantity);
-
-                // Hitung keuntungan bersih untuk kategori ini (semua untung internal + komisi titipan)
-                $catProfit = $txs->sum(fn ($tx) => $tx->unit_profit * $tx->quantity);
-
-                // 1. Post Modal Terpakai Kategori
-                if ($catModalInternal > 0) {
-                    CashTransaction::updateOrCreate(
-                        [
-                            'date' => $this->selectedDate,
-                            'jurusan_id' => $activeJurusanId,
-                            'description' => 'Modal Penjualan '.$categoryNameClean.' (Sistem)',
-                        ],
-                        [
-                            'cash_type' => 'modal',
-                            'cash_category_id' => $catPenjualan->id,
-                            'type' => 'income',
-                            'amount' => $catModalInternal,
-                        ]
-                    );
-                }
-
-                // 2. Post Keuntungan Kategori
-                if ($catProfit > 0) {
-                    CashTransaction::updateOrCreate(
-                        [
-                            'date' => $this->selectedDate,
-                            'jurusan_id' => $activeJurusanId,
-                            'description' => 'Keuntungan Penjualan '.$categoryNameClean.' (Sistem)',
-                        ],
-                        [
-                            'cash_type' => 'keuntungan',
-                            'cash_category_id' => $catPenjualan->id,
-                            'type' => 'income',
-                            'amount' => $catProfit,
-                        ]
-                    );
-                }
-            }
-
-            // 3. Post Hak Supplier / Bagi Hasil Supplier
-            if ($totalSupplierHak > 0) {
-                $catSupplier = CashCategory::firstOrCreate(
-                    ['name' => 'Bagi Hasil Supplier', 'jurusan_id' => $activeJurusanId]
-                );
-
-                CashTransaction::updateOrCreate(
-                    [
-                        'date' => $this->selectedDate,
-                        'jurusan_id' => $activeJurusanId,
-                        'description' => 'Bagi Hasil Supplier (Sistem)',
-                    ],
-                    [
-                        'cash_type' => 'modal',
-                        'cash_category_id' => $catSupplier->id,
-                        'type' => 'income',
-                        'amount' => $totalSupplierHak,
-                    ]
-                );
-            }
-
-            // 4. Post Selisih sebagai Adjustment (di Kategori Penjualan Umum)
-            if ($diff !== 0) {
-                $catPenjualanUmum = CashCategory::firstOrCreate(
-                    ['name' => 'Penjualan Umum', 'jurusan_id' => $activeJurusanId]
-                );
-
-                $type = $diff < 0 ? 'expense' : 'income';
-                $baseDescription = $diff < 0 ? 'Penyesuaian Selisih Kurang Uang Kas' : 'Penyesuaian Selisih Lebih Uang Kas';
-                $description = (!empty($recap->cash_note)) ? $baseDescription . ' (' . $recap->cash_note . ')' : $baseDescription;
-
-                CashTransaction::updateOrCreate(
-                    [
-                        'date' => $this->selectedDate,
-                        'jurusan_id' => $activeJurusanId,
-                        'description' => $description,
-                    ],
-                    [
-                        'cash_type' => 'keuntungan',
-                        'cash_category_id' => $catPenjualanUmum->id,
-                        'type' => $type,
-                        'amount' => abs($diff),
-                    ]
-                );
-            }
-
-            // 5. Uang Cadangan Kembalian tidak diposting sebagai pengeluaran karena uangnya masih ada di laci kasir (bukan pengeluaran riil) dan akan masuk kembali ke kas.
-        });
 
         $wasPosted = $this->isPosted;
         $this->isPosted = true;
-        
-        $message = $wasPosted 
-            ? 'Data kas harian berhasil diposting ulang (di-update) ke Buku Kas!' 
+
+        $message = $wasPosted
+            ? 'Data kas harian berhasil diposting ulang (di-update) ke Buku Kas!'
             : 'Data kas harian per kategori (termasuk bagi hasil supplier) berhasil diposting ke Buku Kas!';
-            
+
         $this->dispatch('toast', message: $message);
     }
 
@@ -301,16 +141,9 @@ class DailyRecap extends Component
         $this->resetPage();
     }
 
-    public function render()
+    public function render(DailyRecapQueryService $service)
     {
         $activeJurusanId = session('active_jurusan_id');
-
-        $allTransactions = Transaction::with(['product.category'])
-            ->whereDate('transacted_at', $this->selectedDate)
-            ->when($activeJurusanId, function ($q) use ($activeJurusanId) {
-                return $q->where('jurusan_id', $activeJurusanId);
-            })
-            ->get();
 
         $query = Transaction::query()
             ->whereDate('transacted_at', $this->selectedDate)
@@ -343,61 +176,14 @@ class DailyRecap extends Component
             ->orderByDesc('transacted_at')
             ->paginate(15);
 
-        if ($allTransactions->isEmpty()) {
-            return view('livewire.reports.daily-recap', [
-                'recap' => null,
-                'categoryRecap' => collect(),
-                'transactions' => $transactions,
-                'categories' => ProductCategory::orderBy('name')->get(),
-            ])->layout('layouts.app', ['title' => 'Rekap Harian']);
-        }
-
-        $totalRevenueAll = $allTransactions->sum('total_price');
-        $totalRevenueReal = $allTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->sum('total_price');
-
-        $totalSupplierHak = $allTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])
-            ->whereNotNull('supplier_id')
-            ->sum(fn ($tx) => ($tx->unit_price - $tx->unit_profit) * $tx->quantity);
-
-        $totalInternalRevenue = $totalRevenueReal - $totalSupplierHak;
-
-        $totalProfit = $allTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->sum(fn ($tx) => $tx->unit_profit * $tx->quantity);
-        $totalModal = $allTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->sum(fn ($tx) => ($tx->unit_price - $tx->unit_profit) * $tx->quantity);
-
-        $recap = (object) [
-            'total_revenue_all' => $totalRevenueAll,
-            'total_revenue_real' => $totalRevenueReal,
-            'total_internal_revenue' => $totalInternalRevenue,
-            'total_profit' => $totalProfit,
-            'total_modal' => $totalModal,
-            'count_received' => $allTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->count(),
-            'count_unpaid_change' => $allTransactions->where('status', 'belum_kembalian')->count(),
-            'count_no_payment' => $allTransactions->whereIn('status', ['belum_menerima_uang', 'uang_dipinjam'])->count(),
-            'month_name' => Carbon::parse($this->selectedDate)->translatedFormat('F Y'),
-            'month_week' => Carbon::parse($this->selectedDate)->weekOfMonth,
-            'generated_at' => now(),
-        ];
-
-        $categoryRecap = $allTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->groupBy(fn ($tx) => $tx->product->category_id ?? 'null')
-            ->map(function ($group) {
-                $first = $group->first();
-                return (object) [
-                    'id' => $first->product->category_id ?? 'null',
-                    'name' => $first->product->category->name ?? 'Tanpa Kategori',
-                    'revenue' => $group->sum('total_price'),
-                    'profit' => $group->sum(fn ($tx) => $tx->unit_profit * $tx->quantity),
-                    'modal' => $group->sum(fn ($tx) => ($tx->unit_price - $tx->unit_profit) * $tx->quantity),
-                    'qty' => $group->sum('quantity'),
-                ];
-            })->sortByDesc('revenue');
+        $recapData = $service->getRecapData($this->selectedDate, $activeJurusanId);
 
         return view('livewire.reports.daily-recap', [
-            'recap' => $recap,
-            'categoryRecap' => $categoryRecap,
+            'recap' => $recapData['recap'],
+            'categoryRecap' => $recapData['categoryRecap'],
             'transactions' => $transactions,
             'categories' => ProductCategory::orderBy('name')->get(),
         ])->layout('layouts.app', ['title' => 'Rekap Harian']);
-
     }
 
     public function viewDetails($reference): void
@@ -427,22 +213,14 @@ class DailyRecap extends Component
         return Excel::download(new DailyDataExport($this->selectedDate), $fileName);
     }
 
-    public function importExcel()
+    public function importExcel(DailyRecapActionService $service)
     {
         $this->validate([
             'importFile' => 'required|mimes:xlsx,xls',
         ]);
 
         try {
-            Excel::import(new DailyDataImport, $this->importFile);
-
-            // Reopen the cashier session for the imported date by resetting actual_cash
-            if ($this->reopenSession) {
-                $recap = DailyRecapModel::where('date', $this->selectedDate)->first();
-                if ($recap) {
-                    $recap->update(['actual_cash' => 0, 'cash_note' => 'Sesi dibuka kembali setelah proses import data dari device lain.']);
-                }
-            }
+            $service->importExcel($this->importFile, $this->selectedDate, $this->reopenSession);
 
             session()->flash('toast', $this->reopenSession
                 ? 'Data berhasil diimpor dan Sesi Kasir telah dibuka kembali!'
