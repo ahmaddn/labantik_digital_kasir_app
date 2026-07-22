@@ -37,15 +37,15 @@
                 <svg class="w-48 h-48 text-white" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
             </div>
             <h3 class="text-[10px] font-black uppercase tracking-[0.3em] opacity-60 mb-3">Total Omzet Tunai</h3>
-            <p class="text-5xl font-black italic tracking-tighter">Rp{{ number_format($recap->total_revenue_real, 0, ',', '.') }}</p>
+            <p class="text-5xl font-black italic tracking-tighter" :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($recap->total_revenue_real, 0, ',', '.') }}</p>
             <div class="mt-6 pt-6 border-t border-white/10 space-y-2">
                 <div class="flex justify-between items-center text-[10px] font-bold opacity-70 uppercase tracking-widest">
                     <span>Murni Jurusan:</span>
-                    <span>Rp{{ number_format($recap->total_internal_revenue, 0, ',', '.') }}</span>
+                    <span :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($recap->total_internal_revenue, 0, ',', '.') }}</span>
                 </div>
                 <div class="flex justify-between items-center text-[10px] font-bold opacity-40 uppercase tracking-widest">
                     <span>Gross Total:</span>
-                    <span>Rp{{ number_format($recap->total_revenue_all, 0, ',', '.') }}</span>
+                    <span :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($recap->total_revenue_all, 0, ',', '.') }}</span>
                 </div>
             </div>
         </div>
@@ -55,8 +55,8 @@
                 <svg class="w-48 h-48 text-primary-red" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m22 7-8.5 8.5-5-5L2 17"/><polyline points="18 7 22 7 22 11"/></svg>
             </div>
             <h3 class="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 mb-3">Keuntungan Estimasi</h3>
-            <p class="text-5xl font-black italic tracking-tighter text-primary-red">Rp{{ number_format($recap->total_profit, 0, ',', '.') }}</p>
-            <p class="mt-4 text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em]">Modal Terputar Rp{{ number_format($recap->total_modal, 0, ',', '.') }}</p>
+            <p class="text-5xl font-black italic tracking-tighter text-primary-red" :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($recap->total_profit, 0, ',', '.') }}</p>
+            <p class="mt-4 text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em]">Modal Terputar <span :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($recap->total_modal, 0, ',', '.') }}</span></p>
         </div>
 
         <div class="bg-white dark:bg-gray-800 rounded-[3rem] p-10 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 flex flex-col justify-between" id="card-volume">
@@ -70,7 +70,7 @@
             <div class="mt-10 flex gap-4">
                 <div class="flex-1 p-4 bg-gray-50 dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800">
                     <p class="text-[9px] font-black text-gray-400 uppercase mb-1">Rata-rata/Hari</p>
-                    <p class="text-lg font-black text-gray-800 dark:text-white">Rp{{ number_format($recap->total_revenue_real / max(1, $recap->days_count), 0, ',', '.') }}</p>
+                    <p class="text-lg font-black text-gray-800 dark:text-white" :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($recap->total_revenue_real / max(1, $recap->days_count), 0, ',', '.') }}</p>
                 </div>
             </div>
         </div>
@@ -257,7 +257,7 @@
                             @if($day->actual_cash !== null)
                                 <div class="italic">Rp{{ number_format((float)$day->actual_cash - (float)$day->retained_change_cash, 0, ',', '.') }}</div>
                                 @if($day->retained_change_cash > 0)
-                                    <div class="text-[9px] font-bold text-primary-blue uppercase tracking-wider mt-1">Kembalian: Rp{{ number_format($day->retained_change_cash, 0, ',', '.') }}</div>
+                                    <div class="text-[9px] font-bold text-primary-blue uppercase tracking-wider mt-1">Kembalian: <span>Rp{{ number_format($day->retained_change_cash, 0, ',', '.') }}</span></div>
                                 @endif
                             @else
                                 <span class="px-3 py-1 bg-gray-100 dark:bg-gray-900 rounded-lg text-[9px] font-black text-gray-400 uppercase tracking-widest">Belum Audit</span>

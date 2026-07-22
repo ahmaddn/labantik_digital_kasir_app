@@ -61,6 +61,7 @@
 <body x-data="{
     sidebarOpen: localStorage.getItem('sidebar-open') !== 'false',
     darkMode: localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches),
+    censorMode: localStorage.getItem('censor-mode') !== 'false',
     toggleSidebar() {
         this.sidebarOpen = !this.sidebarOpen;
         localStorage.setItem('sidebar-open', this.sidebarOpen);
@@ -74,6 +75,10 @@
             document.documentElement.classList.remove('dark');
             localStorage.setItem('color-theme', 'light');
         }
+    },
+    toggleCensor() {
+        this.censorMode = !this.censorMode;
+        localStorage.setItem('censor-mode', this.censorMode);
     }
 }" x-init="if (darkMode) document.documentElement.classList.add('dark'); else document.documentElement.classList.remove('dark')"
     class="bg-bone-white dark:bg-dark-soft text-slate-900 dark:text-bone-white antialiased transition-colors duration-300 theme-{{ $themeStyle }} relative">

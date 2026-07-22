@@ -63,11 +63,11 @@
                     <span class="text-[10px] font-black uppercase tracking-widest text-white/60 bg-white/5 px-4 py-2 rounded-full">Omzet</span>
                 </div>
                 <h3 class="text-white/60 text-[10px] font-black uppercase tracking-widest mb-1">Total Omzet Tunai</h3>
-                <p class="text-4xl font-black text-white italic tracking-tighter">Rp{{ number_format($stats->today_revenue, 0, ',', '.') }}</p>
+                <p class="text-4xl font-black text-white italic tracking-tighter" :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($stats->today_revenue, 0, ',', '.') }}</p>
                 <div class="mt-4 pt-4 border-t border-white/10 flex flex-col gap-2">
                     <div class="flex justify-between items-center">
                         <span class="text-[9px] font-bold text-white/40 uppercase tracking-widest">Murni Jurusan:</span>
-                        <span class="text-xs font-black text-white italic">Rp{{ number_format($stats->today_internal_revenue, 0, ',', '.') }}</span>
+                        <span class="text-xs font-black text-white italic" :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($stats->today_internal_revenue, 0, ',', '.') }}</span>
                     </div>
                     <div class="flex items-center">
                         <span class="text-[9px] font-black uppercase px-2 py-1 rounded-md bg-white/20 text-white">
@@ -88,7 +88,7 @@
                     <span class="text-[10px] font-black uppercase tracking-widest text-primary-red bg-primary-red/5 px-4 py-2 rounded-full">Profit</span>
                 </div>
                 <h3 class="text-gray-400 text-[10px] font-black uppercase tracking-widest mb-1">Keuntungan Bersih</h3>
-                <p class="text-4xl font-black text-primary-red italic tracking-tighter">Rp{{ number_format($stats->today_profit, 0, ',', '.') }}</p>
+                <p class="text-4xl font-black text-primary-red italic tracking-tighter" :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($stats->today_profit, 0, ',', '.') }}</p>
                 <div class="mt-4 flex items-center">
                     <span class="text-[9px] font-black uppercase px-2 py-1 rounded-md bg-primary-red/10 text-primary-red">
                         {{ $stats->profit_change >= 0 ? '+' : '' }}{{ number_format($stats->profit_change, 1) }}% vs Kemarin
@@ -126,7 +126,7 @@
                     <span class="text-[10px] font-black uppercase tracking-widest text-primary-red bg-primary-red/5 px-4 py-2 rounded-full">Rata-rata</span>
                 </div>
                 <h3 class="text-gray-400 text-[10px] font-black uppercase tracking-widest mb-1">Tiket Rata-rata</h3>
-                <p class="text-4xl font-black text-gray-800 dark:text-white italic tracking-tighter">Rp{{ number_format($stats->avg_transaction, 0, ',', '.') }}</p>
+                <p class="text-4xl font-black text-gray-800 dark:text-white italic tracking-tighter" :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($stats->avg_transaction, 0, ',', '.') }}</p>
                 <div class="mt-4 flex items-center">
                     <span class="text-[9px] font-black uppercase px-2 py-1 rounded-md bg-gray-100 text-gray-500">
                         Nilai Per Transaksi
@@ -154,7 +154,7 @@
                     <span class="text-[10px] font-black uppercase tracking-widest text-indigo-600 bg-indigo-500/5 px-4 py-2 rounded-full">Total Omzet</span>
                 </div>
                 <h3 class="text-gray-400 text-[10px] font-black uppercase tracking-widest mb-1">Seluruh Waktu</h3>
-                <p class="text-4xl font-black text-gray-800 dark:text-white italic tracking-tighter">Rp{{ number_format($stats->total_all_time_revenue, 0, ',', '.') }}</p>
+                <p class="text-4xl font-black text-gray-800 dark:text-white italic tracking-tighter" :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($stats->total_all_time_revenue, 0, ',', '.') }}</p>
                 <p class="mt-4 text-[9px] font-bold text-gray-400 uppercase tracking-widest">Akumulasi Pendapatan Kotor</p>
             </div>
 
@@ -169,7 +169,7 @@
                     <span class="text-[10px] font-black uppercase tracking-widest text-green-600 bg-green-500/5 px-4 py-2 rounded-full">Total Untung</span>
                 </div>
                 <h3 class="text-gray-400 text-[10px] font-black uppercase tracking-widest mb-1">Seluruh Waktu</h3>
-                <p class="text-4xl font-black text-gray-800 dark:text-white italic tracking-tighter">Rp{{ number_format($stats->total_all_time_profit, 0, ',', '.') }}</p>
+                <p class="text-4xl font-black text-gray-800 dark:text-white italic tracking-tighter" :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($stats->total_all_time_profit, 0, ',', '.') }}</p>
                 <p class="mt-4 text-[9px] font-bold text-gray-400 uppercase tracking-widest">Akumulasi Profit Bersih</p>
             </div>
 
@@ -184,7 +184,7 @@
                     <span class="text-[10px] font-black uppercase tracking-widest text-primary-blue bg-primary-blue/5 px-4 py-2 rounded-full">Total Audit</span>
                 </div>
                 <h3 class="text-gray-400 text-[10px] font-black uppercase tracking-widest mb-1">Kas Terverifikasi</h3>
-                <p class="text-4xl font-black text-gray-800 dark:text-white italic tracking-tighter">Rp{{ number_format($stats->total_audit_cash, 0, ',', '.') }}</p>
+                <p class="text-4xl font-black text-gray-800 dark:text-white italic tracking-tighter" :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($stats->total_audit_cash, 0, ',', '.') }}</p>
                 <p class="mt-4 text-[9px] font-bold text-gray-400 uppercase tracking-widest">Total Uang Fisik Terkumpul</p>
             </div>
 
@@ -214,7 +214,7 @@
                     <span class="text-[10px] font-black uppercase tracking-widest text-primary-red bg-primary-red/5 px-4 py-2 rounded-full">Hutang</span>
                 </div>
                 <h3 class="text-gray-400 text-[10px] font-black uppercase tracking-widest mb-1">Piutang Belum Bayar</h3>
-                <p class="text-4xl font-black text-gray-800 dark:text-white italic tracking-tighter">Rp{{ number_format($stats->total_outstanding_debt, 0, ',', '.') }}</p>
+                <p class="text-4xl font-black text-gray-800 dark:text-white italic tracking-tighter" :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($stats->total_outstanding_debt, 0, ',', '.') }}</p>
                 <p class="mt-4 text-[9px] font-bold text-gray-400 uppercase tracking-widest">Total Tagihan Piutang</p>
             </div>
 
@@ -229,7 +229,7 @@
                     <span class="text-[10px] font-black uppercase tracking-widest text-amber-600 bg-amber-500/5 px-4 py-2 rounded-full">Rata-rata</span>
                 </div>
                 <h3 class="text-gray-400 text-[10px] font-black uppercase tracking-widest mb-1">Tiket Rata-rata</h3>
-                <p class="text-4xl font-black text-gray-800 dark:text-white italic tracking-tighter">Rp{{ number_format($stats->avg_all_time_ticket, 0, ',', '.') }}</p>
+                <p class="text-4xl font-black text-gray-800 dark:text-white italic tracking-tighter" :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($stats->avg_all_time_ticket, 0, ',', '.') }}</p>
                 <p class="mt-4 text-[9px] font-bold text-gray-400 uppercase tracking-widest">Rata-rata Nilai Transaksi</p>
             </div>
         </div>
@@ -449,7 +449,7 @@
                 <h2 class="text-2xl font-black italic uppercase tracking-tighter text-gray-800 dark:text-white">Revenue by Category</h2>
                 <p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mt-1">Distribusi Omzet Per Kategori</p>
             </div>
-            <div class="p-10 flex-1 flex flex-col justify-center">
+             <div class="p-10 flex-1 flex flex-col justify-center">
                 <div class="relative h-[300px]" wire:ignore>
                     <canvas id="categoryChart"></canvas>
                 </div>
@@ -473,7 +473,7 @@
                 <h2 class="text-2xl font-black italic uppercase tracking-tighter text-gray-800 dark:text-white">Monthly Growth</h2>
                 <p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mt-1">Tren Omzet 6 Bulan Terakhir</p>
             </div>
-            <div class="p-10 flex-1">
+             <div class="p-10 flex-1">
                 <div class="relative h-[350px]" wire:ignore>
                     <canvas id="monthlyChart"></canvas>
                 </div>

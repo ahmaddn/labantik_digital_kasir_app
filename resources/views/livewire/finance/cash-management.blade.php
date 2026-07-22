@@ -33,7 +33,7 @@
                 <svg class="w-40 h-40 text-white" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="12" x="2" y="6" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/></svg>
             </div>
             <h3 class="text-[10px] font-black uppercase tracking-[0.3em] opacity-80 mb-3 text-emerald-300">Total Saldo Kas</h3>
-            <p class="text-2xl xl:text-3xl font-black italic text-white {{ ($currentModalBalance + $currentProfitBalance) < 0 ? 'text-primary-red' : '' }}">Rp{{ number_format($currentModalBalance + $currentProfitBalance, 0, ',', '.') }}</p>
+            <p class="text-2xl xl:text-3xl font-black italic text-white {{ ($currentModalBalance + $currentProfitBalance) < 0 ? 'text-primary-red' : '' }}" :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($currentModalBalance + $currentProfitBalance, 0, ',', '.') }}</p>
         </div>
 
         <!-- Saldo Modal Card -->
@@ -42,7 +42,7 @@
                 <svg class="w-40 h-40 text-white" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg>
             </div>
             <h3 class="text-[10px] font-black uppercase tracking-[0.3em] opacity-60 mb-3">Saldo Kas Modal</h3>
-            <p class="text-2xl xl:text-3xl font-black italic text-white {{ $currentModalBalance < 0 ? 'text-primary-red' : '' }}">Rp{{ number_format($currentModalBalance, 0, ',', '.') }}</p>
+            <p class="text-2xl xl:text-3xl font-black italic text-white {{ $currentModalBalance < 0 ? 'text-primary-red' : '' }}" :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($currentModalBalance, 0, ',', '.') }}</p>
         </div>
 
         <!-- Saldo Keuntungan Card -->
@@ -51,7 +51,7 @@
                 <svg class="w-40 h-40 text-white" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m16 12-4-4-4 4"/><path d="M12 16V8"/></svg>
             </div>
             <h3 class="text-[10px] font-black uppercase tracking-[0.3em] opacity-80 mb-3">Saldo Kas Keuntungan</h3>
-            <p class="text-2xl xl:text-3xl font-black italic text-white {{ $currentProfitBalance < 0 ? 'text-red-300' : '' }}">Rp{{ number_format($currentProfitBalance, 0, ',', '.') }}</p>
+            <p class="text-2xl xl:text-3xl font-black italic text-white {{ $currentProfitBalance < 0 ? 'text-red-300' : '' }}" :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($currentProfitBalance, 0, ',', '.') }}</p>
         </div>
 
         <!-- Pemasukan Card -->
@@ -60,7 +60,7 @@
                 <svg class="w-40 h-40 text-green-500" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
             </div>
             <h3 class="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 mb-3">Pemasukan (Bulan Ini)</h3>
-            <p class="text-2xl xl:text-3xl font-black italic text-green-500">Rp{{ number_format($monthlyIncome, 0, ',', '.') }}</p>
+            <p class="text-2xl xl:text-3xl font-black italic text-green-500" :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($monthlyIncome, 0, ',', '.') }}</p>
         </div>
 
         <!-- Pengeluaran Card -->
@@ -69,7 +69,7 @@
                 <svg class="w-40 h-40 text-primary-red" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 17 13.5 8.5 8.5 13.5 2 7"/><polyline points="16 17 22 17 22 11"/></svg>
             </div>
             <h3 class="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 mb-3">Pengeluaran (Bulan Ini)</h3>
-            <p class="text-2xl xl:text-3xl font-black italic text-primary-red">Rp{{ number_format($monthlyExpense, 0, ',', '.') }}</p>
+            <p class="text-2xl xl:text-3xl font-black italic text-primary-red" :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($monthlyExpense, 0, ',', '.') }}</p>
         </div>
     </div>
 
@@ -86,15 +86,15 @@
                 <div class="space-y-2">
                     <div class="flex justify-between items-center text-xs">
                         <span class="text-gray-400 font-bold uppercase tracking-widest">Pemasukan</span>
-                        <span class="font-black text-green-500">+Rp{{ number_format($stat['income'], 0, ',', '.') }}</span>
+                        <span class="font-black text-green-500" :class="censorMode ? 'privacy-blur' : ''">+Rp{{ number_format($stat['income'], 0, ',', '.') }}</span>
                     </div>
                     <div class="flex justify-between items-center text-xs">
                         <span class="text-gray-400 font-bold uppercase tracking-widest">Pengeluaran</span>
-                        <span class="font-black text-primary-red">-Rp{{ number_format($stat['expense'], 0, ',', '.') }}</span>
+                        <span class="font-black text-primary-red" :class="censorMode ? 'privacy-blur' : ''">-Rp{{ number_format($stat['expense'], 0, ',', '.') }}</span>
                     </div>
                     <div class="pt-2 mt-2 border-t border-gray-100 dark:border-gray-700 flex justify-between items-center">
                         <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Saldo</span>
-                        <span class="text-lg font-black italic {{ $stat['balance'] >= 0 ? 'text-primary-blue' : 'text-primary-red' }}">Rp{{ number_format($stat['balance'], 0, ',', '.') }}</span>
+                        <span class="text-lg font-black italic {{ $stat['balance'] >= 0 ? 'text-primary-blue' : 'text-primary-red' }}" :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($stat['balance'], 0, ',', '.') }}</span>
                     </div>
                 </div>
             </div>

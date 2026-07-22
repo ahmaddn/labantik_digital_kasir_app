@@ -125,7 +125,7 @@
                             <div class="text-right">
                                 <p class="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-2">Omzet
                                     Internal</p>
-                                <p class="text-5xl font-black text-primary-blue italic tracking-tighter">
+                                <p class="text-5xl font-black text-primary-blue italic tracking-tighter" :class="censorMode ? 'privacy-blur' : ''">
                                     Rp{{ number_format($currentWeek['profit'], 0, ',', '.') }}</p>
                             </div>
                         </div>
@@ -147,7 +147,7 @@
                                         <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Kas
                                             Jurusan (50%)</p>
                                         <p
-                                            class="text-2xl font-black text-gray-800 dark:text-white italic tracking-tighter mt-1">
+                                            class="text-2xl font-black text-gray-800 dark:text-white italic tracking-tighter mt-1" :class="censorMode ? 'privacy-blur' : ''">
                                             Rp{{ number_format($currentWeek['profit'] * 0.5, 0, ',', '.') }}</p>
                                     </div>
                                 </div>
@@ -167,7 +167,7 @@
                                     <div>
                                         <p class="text-[10px] font-black text-white/60 uppercase tracking-widest">Bagi
                                             Hasil Admin (50%)</p>
-                                        <p class="text-2xl font-black italic tracking-tighter mt-1">
+                                        <p class="text-2xl font-black italic tracking-tighter mt-1" :class="censorMode ? 'privacy-blur' : ''">
                                             Rp{{ number_format($currentWeek['profit'] * 0.5, 0, ',', '.') }}</p>
                                     </div>
                                 </div>
@@ -323,21 +323,21 @@
                                 <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Total
                                     Keuntungan</span>
                                 <span
-                                    class="text-lg font-black text-gray-800 dark:text-white italic">Rp{{ number_format($mReport->total_profit, 0, ',', '.') }}</span>
+                                    class="text-lg font-black text-gray-800 dark:text-white italic" :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($mReport->total_profit, 0, ',', '.') }}</span>
                             </div>
                             <div class="grid grid-cols-2 gap-4">
                                 <div
                                     class="p-6 bg-blue-50 dark:bg-blue-900/20 rounded-2xl border border-primary-blue/10">
                                     <p class="text-[9px] font-black text-primary-blue uppercase tracking-widest mb-2">
                                         Kas Jurusan</p>
-                                    <p class="text-sm font-black text-primary-blue italic">
+                                    <p class="text-sm font-black text-primary-blue italic" :class="censorMode ? 'privacy-blur' : ''">
                                         Rp{{ number_format($mReport->total_kas, 0, ',', '.') }}</p>
                                 </div>
                                 <div
                                     class="p-6 bg-green-50 dark:bg-green-900/20 rounded-2xl border border-green-500/10">
                                     <p class="text-[9px] font-black text-green-500 uppercase tracking-widest mb-2">Bagi
                                         Hasil</p>
-                                    <p class="text-sm font-black text-green-500 italic">
+                                    <p class="text-sm font-black text-green-500 italic" :class="censorMode ? 'privacy-blur' : ''">
                                         Rp{{ number_format($mReport->total_shared, 0, ',', '.') }}</p>
                                 </div>
                             </div>
@@ -383,7 +383,7 @@
                             <div class="text-right">
                                 <p class="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-3">Total
                                     Keuntungan Tahunan</p>
-                                <p class="text-6xl font-black text-primary-blue italic tracking-tighter">
+                                <p class="text-6xl font-black text-primary-blue italic tracking-tighter" :class="censorMode ? 'privacy-blur' : ''">
                                     Rp{{ number_format($yearlyData->total_profit, 0, ',', '.') }}</p>
                             </div>
                         </div>
@@ -405,7 +405,7 @@
                                         <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Kas
                                             Jurusan (50%)</p>
                                         <p
-                                            class="text-3xl font-black text-gray-800 dark:text-white italic tracking-tighter mt-2">
+                                            class="text-3xl font-black text-gray-800 dark:text-white italic tracking-tighter mt-2" :class="censorMode ? 'privacy-blur' : ''">
                                             Rp{{ number_format($yearlyData->total_kas, 0, ',', '.') }}</p>
                                     </div>
                                 </div>
@@ -425,7 +425,7 @@
                                     <div>
                                         <p class="text-[10px] font-black text-white/60 uppercase tracking-widest">Bagi
                                             Hasil Admin (50%)</p>
-                                        <p class="text-3xl font-black italic tracking-tighter mt-2">
+                                        <p class="text-3xl font-black italic tracking-tighter mt-2" :class="censorMode ? 'privacy-blur' : ''">
                                             Rp{{ number_format($yearlyData->total_shared, 0, ',', '.') }}</p>
                                     </div>
                                 </div>
