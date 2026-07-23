@@ -29,28 +29,68 @@ class SupplierReport extends Component
 
     public function render()
     {
-        $query = Transaction::join('products', 'transactions.product_id', '=', 'products.id')
-            ->whereIn('transactions.status', ['uang_diterima', 'belum_kembalian'])
-            ->whereNotNull('products.supplier_id')
-            ->whereBetween('transactions.transacted_at', [$this->dateFrom . ' 00:00:00', $this->dateTo . ' 23:59:59']);
-
-        if ($this->supplierId) {
-            $query->where('products.supplier_id', $this->supplierId);
-        }
-
+        $activeJurusanId = session('active_jurusan_id');
         $suppliersList = \App\Models\Supplier::pluck('name', 'id');
 
-        $reports = $query->selectRaw('products.supplier_id as supplier_id, SUM(transactions.quantity) as total_qty, SUM(transactions.total_price) as total_sales, SUM(transactions.quantity * (transactions.unit_price - transactions.unit_profit)) as total_supplier_share, SUM(transactions.quantity * transactions.unit_profit) as total_shop_profit')
-            ->groupBy('products.supplier_id')
-            ->get()
-            ->map(function($report) use ($suppliersList) {
-                if (!$report->supplier_id) {
-                    $report->supplier_name = 'INTERNAL / TOKO';
+        $suppliersQuery = \App\Models\Supplier::query();
+        if ($this->supplierId) {
+            $suppliersQuery->where('id', $this->supplierId);
+        }
+
+        $reports = $suppliersQuery->get()->map(function ($supplier) use ($activeJurusanId) {
+            $products = \App\Models\Product::where('supplier_id', $supplier->id)
+                ->where('jurusan_id', $activeJurusanId)
+                ->get();
+                
+            $totalQty = 0;
+            $totalSales = 0;
+            $totalSupplierShare = 0;
+            $totalShopProfit = 0;
+            
+            foreach ($products as $product) {
+                $firstStock = \App\Models\StockEntry::where('product_id', $product->id)
+                    ->whereBetween('date', [$this->dateFrom, $this->dateTo])
+                    ->where('opening_stock', '>', 0)
+                    ->orderBy('date', 'asc')
+                    ->first() ?? \App\Models\StockEntry::where('product_id', $product->id)
+                    ->whereBetween('date', [$this->dateFrom, $this->dateTo])
+                    ->orderBy('date', 'asc')
+                    ->first();
+
+                $latestStock = \App\Models\StockEntry::where('product_id', $product->id)
+                    ->whereBetween('date', [$this->dateFrom, $this->dateTo])
+                    ->orderBy('date', 'desc')
+                    ->first();
+
+                $openingStock = $firstStock ? $firstStock->opening_stock : 0;
+                $closingStock = $latestStock ? max(0, $latestStock->closing_stock) : 0;
+                
+                if ($firstStock || $latestStock) {
+                    $sold = max(0, $openingStock - $closingStock);
                 } else {
-                    $report->supplier_name = $suppliersList[$report->supplier_id] ?? 'Unknown';
+                    $sold = \App\Models\Transaction::where('product_id', $product->id)
+                        ->whereIn('status', ['uang_diterima', 'belum_kembalian'])
+                        ->whereBetween('transacted_at', [$this->dateFrom . ' 00:00:00', $this->dateTo . ' 23:59:59'])
+                        ->sum('quantity');
                 }
-                return $report;
-            });
+                
+                if ($sold > 0) {
+                    $totalQty += $sold;
+                    $totalSales += $sold * $product->price;
+                    $totalSupplierShare += $sold * $product->modal_price;
+                    $totalShopProfit += $sold * ($product->price - $product->modal_price);
+                }
+            }
+            
+            return (object) [
+                'supplier_id' => $supplier->id,
+                'supplier_name' => $supplier->name,
+                'total_qty' => $totalQty,
+                'total_sales' => $totalSales,
+                'total_supplier_share' => $totalSupplierShare,
+                'total_shop_profit' => $totalShopProfit,
+            ];
+        })->filter(fn($r) => $r->total_qty > 0);
 
         return view('livewire.reports.supplier-report', [
             'reports' => $reports,

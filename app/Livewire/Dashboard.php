@@ -41,6 +41,7 @@ class Dashboard extends Component
             })
             ->whereDate('date', $today)
             ->where('type', 'expense')
+            ->where('cash_type', 'keuntungan')
             ->sum('amount');
 
         $yesterdayExpenses = \App\Models\CashTransaction::when($activeJurusanId, function ($q) use ($activeJurusanId) {
@@ -48,6 +49,7 @@ class Dashboard extends Component
             })
             ->whereDate('date', $yesterday)
             ->where('type', 'expense')
+            ->where('cash_type', 'keuntungan')
             ->sum('amount');
 
         $todayRevenue = (float) $todayTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->sum('total_price');
@@ -72,13 +74,21 @@ class Dashboard extends Component
             ->when($activeJurusanId, function ($q) use ($activeJurusanId) {
                 return $q->where('jurusan_id', $activeJurusanId);
             });
-        $allTimeExpenses = \App\Models\CashTransaction::when($activeJurusanId, function ($q) use ($activeJurusanId) {
+        $allTimeProfitIncome = \App\Models\CashTransaction::when($activeJurusanId, function ($q) use ($activeJurusanId) {
                 return $q->where('jurusan_id', $activeJurusanId);
             })
+            ->where('cash_type', 'keuntungan')
+            ->where('type', 'income')
+            ->sum('amount');
+        $allTimeProfitExpense = \App\Models\CashTransaction::when($activeJurusanId, function ($q) use ($activeJurusanId) {
+                return $q->where('jurusan_id', $activeJurusanId);
+            })
+            ->where('cash_type', 'keuntungan')
             ->where('type', 'expense')
             ->sum('amount');
 
-        $totalAllTimeProfit = max(0, (float) $allTimeBase->sum(\DB::raw('unit_profit * quantity')) - $allTimeExpenses);
+        $totalAllTimeProfit = $allTimeProfitIncome - $allTimeProfitExpense;
+ 
         $totalAllTimeRevenue = (float) $allTimeBase->sum('total_price');
         $totalAllTimeTransactions = $allTimeBase->count();
 
@@ -102,7 +112,43 @@ class Dashboard extends Component
             })
             ->sum('total_price');
 
+        $startOfMonth = now()->startOfMonth()->toDateString();
+        $endOfMonth = now()->endOfMonth()->toDateString();
+
+        $monthlyIncome = \App\Models\CashTransaction::when($activeJurusanId, function ($q) use ($activeJurusanId) {
+                return $q->where('jurusan_id', $activeJurusanId);
+            })
+            ->whereBetween('date', [$startOfMonth, $endOfMonth])
+            ->where('type', 'income')
+            ->sum('amount');
+
+        $monthlyExpense = \App\Models\CashTransaction::when($activeJurusanId, function ($q) use ($activeJurusanId) {
+                return $q->where('jurusan_id', $activeJurusanId);
+            })
+            ->whereBetween('date', [$startOfMonth, $endOfMonth])
+            ->where('type', 'expense')
+            ->sum('amount');
+
+        $modalIncome = \App\Models\CashTransaction::when($activeJurusanId, function ($q) use ($activeJurusanId) {
+                return $q->where('jurusan_id', $activeJurusanId);
+            })
+            ->where('cash_type', 'modal')
+            ->where('type', 'income')
+            ->sum('amount');
+
+        $modalExpense = \App\Models\CashTransaction::when($activeJurusanId, function ($q) use ($activeJurusanId) {
+                return $q->where('jurusan_id', $activeJurusanId);
+            })
+            ->where('cash_type', 'modal')
+            ->where('type', 'expense')
+            ->sum('amount');
+
+        $totalModalBalance = $modalIncome - $modalExpense;
+
         $stats = (object) [
+            'monthly_income' => $monthlyIncome,
+            'monthly_expense' => $monthlyExpense,
+            'total_modal_balance' => $totalModalBalance,
             'today_revenue' => $todayRevenue,
             'today_internal_revenue' => $todayInternalRevenue,
             'revenue_change' => $revenueChange,

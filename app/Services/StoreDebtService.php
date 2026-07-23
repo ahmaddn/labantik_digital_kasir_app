@@ -12,12 +12,12 @@ class StoreDebtService
 {
     public function createStoreDebt(
         string $creditorName,
-        ?int $supplierId,
+        ?string $supplierId,
         float $amount,
         string $date,
         ?string $dueDate,
         ?string $note,
-        ?int $activeJurusanId
+        ?string $activeJurusanId
     ): void {
         StoreDebt::create([
             'jurusan_id' => $activeJurusanId,
@@ -32,7 +32,7 @@ class StoreDebtService
         ]);
     }
 
-    public function settleStoreDebt(int $id, float $amount, string $method, ?int $activeJurusanId): void
+    public function settleStoreDebt(string $id, float $amount, string $method, ?string $activeJurusanId): void
     {
         DB::transaction(function () use ($id, $amount, $method, $activeJurusanId) {
             $debt = StoreDebt::find($id);
@@ -71,7 +71,7 @@ class StoreDebtService
         });
     }
 
-    public function deleteStoreDebt(int $id, string $reason, string $userName): void
+    public function deleteStoreDebt(string $id, string $reason, string $userName): void
     {
         $debt = StoreDebt::find($id);
         if ($debt) {
@@ -87,7 +87,7 @@ class StoreDebtService
     }
 
     public function getStoreDebts(
-        ?int $activeJurusanId,
+        ?string $activeJurusanId,
         ?string $search,
         ?string $startDate,
         ?string $endDate,

@@ -19,6 +19,8 @@ class Kasir extends Component
 
     public $transactionDate;
 
+    public $products = [];
+
     // UI State
     public $rightSidebarTab = 'cart';
 
@@ -39,9 +41,20 @@ class Kasir extends Component
 
     public $unfinishedSessionDate = null;
 
+    public function refreshProducts(): void
+    {
+        $this->products = $this->getProductsForAlpine(app(PosQueryService::class))->toArray();
+    }
+
+    public function updatedTransactionDate(): void
+    {
+        $this->refreshProducts();
+    }
+
     public function mount(PosSessionService $posSessionService): void
     {
         $this->transactionDate = now()->toDateString();
+        $this->refreshProducts();
 
         $activeJurusanId = session('active_jurusan_id');
         // Check if session for today is already finished
@@ -168,7 +181,13 @@ class Kasir extends Component
     public function finishSession(): void
     {
         $today = $this->transactionDate ?: now()->toDateString();
-        $allProducts = $this->getActiveProducts();
+        $allProducts = Product::where('is_active', true)
+            ->whereHas('stockEntries', function ($q) use ($today) {
+                $q->where('date', $today)->where('opening_stock', '>', 0);
+            })
+            ->get();
+
+        $this->stockItems = [];
         foreach ($allProducts as $p) {
             $entry = StockEntry::where('product_id', $p->id)->where('date', $today)->first();
             $sold = Transaction::where('product_id', $p->id)
@@ -185,7 +204,15 @@ class Kasir extends Component
     {
         $today = $this->transactionDate ?: now()->toDateString();
         $activeJurusanId = session('active_jurusan_id');
-        $posSessionService->saveClosingStock($this->stockItems, $today, $activeJurusanId);
+
+        $validProductIds = StockEntry::where('date', $today)
+            ->where('opening_stock', '>', 0)
+            ->pluck('product_id')
+            ->toArray();
+
+        $filteredStockItems = array_intersect_key($this->stockItems, array_flip($validProductIds));
+
+        $posSessionService->saveClosingStock($filteredStockItems, $today, $activeJurusanId);
 
         $this->showClosingStockModal = false;
         $this->stockItems = [];
@@ -222,6 +249,7 @@ class Kasir extends Component
 
         $this->dispatch('transaction-completed', reference: $reference);
         $this->dispatch('toast', message: 'Transaksi berhasil disimpan!');
+        $this->refreshProducts();
     }
 
     public function viewDetails(string $reference): void
@@ -240,12 +268,23 @@ class Kasir extends Component
     }
 
     #[Computed]
-    public function categories(PosQueryService $posQueryService)
+    public function categories()
     {
-        $today = now()->toDateString();
+        $posQueryService = app(PosQueryService::class);
+        $today = $this->transactionDate ?: now()->toDateString();
         $activeJurusanId = session('active_jurusan_id');
 
         return $posQueryService->getCategories($today, $activeJurusanId);
+    }
+
+    #[Computed]
+    public function stockComparison()
+    {
+        $posQueryService = app(PosQueryService::class);
+        $today = $this->transactionDate ?: now()->toDateString();
+        $activeJurusanId = session('active_jurusan_id');
+
+        return $posQueryService->getStockComparison($today, $activeJurusanId);
     }
 
     #[Computed]
@@ -266,18 +305,11 @@ class Kasir extends Component
             ->get();
     }
 
-    #[Computed]
-    public function stockComparison(PosQueryService $posQueryService)
-    {
-        $today = $this->transactionDate ?: now()->toDateString();
-        $activeJurusanId = session('active_jurusan_id');
 
-        return $posQueryService->getStockComparison($today, $activeJurusanId);
-    }
 
     protected function getProductsForAlpine(PosQueryService $posQueryService)
     {
-        $today = now()->toDateString();
+        $today = $this->transactionDate ?: now()->toDateString();
         $activeJurusanId = session('active_jurusan_id');
 
         return $posQueryService->getProductsForAlpine($today, $activeJurusanId);

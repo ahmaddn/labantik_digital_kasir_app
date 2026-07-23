@@ -2,7 +2,7 @@
     showCart: false,
     search: '',
     selectedCategory: null,
-    products: @js($allProductsJson),
+    products: @entangle('products'),
     cart: [],
     loading: false,
     modalSearch: '',

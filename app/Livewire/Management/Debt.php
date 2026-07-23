@@ -286,7 +286,7 @@ class Debt extends Component
         }
     }
 
-    public function openCreateModal()
+    public function openCreateStoreDebtModal()
     {
         $this->resetValidation();
         $this->newStoreDebtSupplierId = '';

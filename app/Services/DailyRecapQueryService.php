@@ -7,7 +7,7 @@ use Carbon\Carbon;
 
 class DailyRecapQueryService
 {
-    public function getRecapData(string $selectedDate, ?int $activeJurusanId): array
+    public function getRecapData(string $selectedDate, ?string $activeJurusanId): array
     {
         $allTransactions = Transaction::with(['product.category'])
             ->whereDate('transacted_at', $selectedDate)

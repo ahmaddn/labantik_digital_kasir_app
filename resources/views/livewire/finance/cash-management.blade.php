@@ -92,6 +92,14 @@
                         <span class="text-gray-400 font-bold uppercase tracking-widest">Pengeluaran</span>
                         <span class="font-black text-primary-red" :class="censorMode ? 'privacy-blur' : ''">-Rp{{ number_format($stat['expense'], 0, ',', '.') }}</span>
                     </div>
+                    <div class="flex justify-between items-center text-xs pt-1 border-t border-dashed border-gray-100 dark:border-gray-700">
+                        <span class="text-gray-400 font-bold uppercase tracking-widest">Modal</span>
+                        <span class="font-black text-primary-blue" :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($stat['modal_balance'], 0, ',', '.') }}</span>
+                    </div>
+                    <div class="flex justify-between items-center text-xs">
+                        <span class="text-gray-400 font-bold uppercase tracking-widest">Keuntungan</span>
+                        <span class="font-black text-emerald-500" :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($stat['profit_balance'], 0, ',', '.') }}</span>
+                    </div>
                     <div class="pt-2 mt-2 border-t border-gray-100 dark:border-gray-700 flex justify-between items-center">
                         <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Saldo</span>
                         <span class="text-lg font-black italic {{ $stat['balance'] >= 0 ? 'text-primary-blue' : 'text-primary-red' }}" :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($stat['balance'], 0, ',', '.') }}</span>

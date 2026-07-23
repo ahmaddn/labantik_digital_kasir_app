@@ -143,19 +143,36 @@
             <h2 class="text-2xl font-black italic uppercase tracking-tighter text-gray-800 dark:text-white">General Insights</h2>
         </div>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <div class="bg-white dark:bg-gray-800 rounded-[3rem] p-10 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 hover:border-indigo-500 transition-all group overflow-hidden relative">
+            <!-- Pemasukan (Bulan Ini) -->
+            <div class="bg-white dark:bg-gray-800 rounded-[3rem] p-10 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 hover:border-green-500 transition-all group overflow-hidden relative">
                 <div class="absolute -right-8 -bottom-8 opacity-5 group-hover:scale-110 transition-transform duration-700">
-                    <svg class="w-48 h-48 text-indigo-500" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                    <svg class="w-48 h-48 text-green-500" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
                 </div>
                 <div class="flex items-center justify-between mb-8">
-                    <div class="p-5 bg-indigo-500/10 rounded-2xl text-indigo-500">
+                    <div class="p-5 bg-green-500/10 rounded-2xl text-green-500">
                         <svg class="w-10 h-10" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="12" x="2" y="6" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/></svg>
                     </div>
-                    <span class="text-[10px] font-black uppercase tracking-widest text-indigo-600 bg-indigo-500/5 px-4 py-2 rounded-full">Total Omzet</span>
+                    <span class="text-[10px] font-black uppercase tracking-widest text-green-600 bg-green-500/5 px-4 py-2 rounded-full">Pemasukan</span>
                 </div>
-                <h3 class="text-gray-400 text-[10px] font-black uppercase tracking-widest mb-1">Seluruh Waktu</h3>
-                <p class="text-4xl font-black text-gray-800 dark:text-white italic tracking-tighter" :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($stats->total_all_time_revenue, 0, ',', '.') }}</p>
-                <p class="mt-4 text-[9px] font-bold text-gray-400 uppercase tracking-widest">Akumulasi Pendapatan Kotor</p>
+                <h3 class="text-gray-400 text-[10px] font-black uppercase tracking-widest mb-1">Bulan Ini</h3>
+                <p class="text-4xl font-black text-green-600 dark:text-green-400 italic tracking-tighter" :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($stats->monthly_income, 0, ',', '.') }}</p>
+                <p class="mt-4 text-[9px] font-bold text-gray-400 uppercase tracking-widest">Akumulasi Kas Masuk</p>
+            </div>
+
+            <!-- Pengeluaran (Bulan Ini) -->
+            <div class="bg-white dark:bg-gray-800 rounded-[3rem] p-10 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 hover:border-red-500 transition-all group overflow-hidden relative">
+                <div class="absolute -right-8 -bottom-8 opacity-5 group-hover:scale-110 transition-transform duration-700">
+                    <svg class="w-48 h-48 text-red-500" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                </div>
+                <div class="flex items-center justify-between mb-8">
+                    <div class="p-5 bg-red-500/10 rounded-2xl text-red-500">
+                        <svg class="w-10 h-10" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="12" x="2" y="6" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/></svg>
+                    </div>
+                    <span class="text-[10px] font-black uppercase tracking-widest text-red-600 bg-red-500/5 px-4 py-2 rounded-full">Pengeluaran</span>
+                </div>
+                <h3 class="text-gray-400 text-[10px] font-black uppercase tracking-widest mb-1">Bulan Ini</h3>
+                <p class="text-4xl font-black text-red-600 dark:text-red-400 italic tracking-tighter" :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($stats->monthly_expense, 0, ',', '.') }}</p>
+                <p class="mt-4 text-[9px] font-bold text-gray-400 uppercase tracking-widest">Akumulasi Kas Keluar</p>
             </div>
 
             <div class="bg-white dark:bg-gray-800 rounded-[3rem] p-10 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 hover:border-green-500 transition-all group overflow-hidden relative">
@@ -231,6 +248,39 @@
                 <h3 class="text-gray-400 text-[10px] font-black uppercase tracking-widest mb-1">Tiket Rata-rata</h3>
                 <p class="text-4xl font-black text-gray-800 dark:text-white italic tracking-tighter" :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($stats->avg_all_time_ticket, 0, ',', '.') }}</p>
                 <p class="mt-4 text-[9px] font-bold text-gray-400 uppercase tracking-widest">Rata-rata Nilai Transaksi</p>
+            </div>
+
+            <!-- Total Omzet (Seluruh Waktu) -->
+            <div class="bg-white dark:bg-gray-800 rounded-[3rem] p-10 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 hover:border-indigo-500 transition-all group overflow-hidden relative">
+                <div class="absolute -right-8 -bottom-8 opacity-5 group-hover:scale-110 transition-transform duration-700">
+                    <svg class="w-48 h-48 text-indigo-500" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                </div>
+                <div class="flex items-center justify-between mb-8">
+                    <div class="p-5 bg-indigo-500/10 rounded-2xl text-indigo-500">
+                        <svg class="w-10 h-10" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="12" x="2" y="6" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/></svg>
+                    </div>
+                    <span class="text-[10px] font-black uppercase tracking-widest text-indigo-600 bg-indigo-500/5 px-4 py-2 rounded-full">Total Omzet</span>
+                </div>
+                <h3 class="text-gray-400 text-[10px] font-black uppercase tracking-widest mb-1">Seluruh Waktu</h3>
+                <p class="text-4xl font-black text-gray-800 dark:text-white italic tracking-tighter" :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($stats->total_all_time_revenue, 0, ',', '.') }}</p>
+                <p class="mt-4 text-[9px] font-bold text-gray-400 uppercase tracking-widest">Akumulasi Pendapatan Kotor</p>
+            </div>
+
+            <!-- Keuntungan (Bulan Ini) -->
+            <!-- Saldo Modal (Seluruh Waktu) -->
+            <div class="bg-white dark:bg-gray-800 rounded-[3rem] p-10 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 hover:border-indigo-500 transition-all group overflow-hidden relative">
+                <div class="absolute -right-8 -bottom-8 opacity-5 group-hover:scale-110 transition-transform duration-700">
+                    <svg class="w-48 h-48 text-indigo-500" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/></svg>
+                </div>
+                <div class="flex items-center justify-between mb-8">
+                    <div class="p-5 bg-indigo-500/10 rounded-2xl text-indigo-500">
+                        <svg class="w-10 h-10" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="12" x="2" y="6" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/></svg>
+                    </div>
+                    <span class="text-[10px] font-black uppercase tracking-widest text-indigo-600 bg-indigo-500/5 px-4 py-2 rounded-full">Saldo Modal</span>
+                </div>
+                <h3 class="text-gray-400 text-[10px] font-black uppercase tracking-widest mb-1">Seluruh Waktu</h3>
+                <p class="text-4xl font-black text-indigo-600 dark:text-indigo-400 italic tracking-tighter" :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($stats->total_modal_balance, 0, ',', '.') }}</p>
+                <p class="mt-4 text-[9px] font-bold text-gray-400 uppercase tracking-widest">Akumulasi Kas Modal Aktif</p>
             </div>
         </div>
     </div>

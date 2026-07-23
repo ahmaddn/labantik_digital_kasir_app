@@ -15,7 +15,7 @@ class CustomerDebtService
         string $settleMethod,
         string $activeTab,
         array $spentItems,
-        int $userId
+        string $userId
     ): void {
         DB::transaction(function () use ($reference, $settleAmount, $settleMethod, $activeTab, $spentItems, $userId) {
             $transactions = Transaction::where('reference', $reference)->get();
@@ -124,7 +124,7 @@ class CustomerDebtService
         });
     }
 
-    public function getSummary(?int $activeJurusanId): array
+    public function getSummary(?string $activeJurusanId): array
     {
         return [
             'total_debt' => Transaction::when($activeJurusanId, function ($q) use ($activeJurusanId) {
@@ -140,7 +140,7 @@ class CustomerDebtService
     }
 
     public function getTransactions(
-        ?int $activeJurusanId,
+        ?string $activeJurusanId,
         string $activeTab,
         string $subTab,
         ?string $search,

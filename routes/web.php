@@ -68,20 +68,34 @@ Route::middleware(['auth', 'verified', EnsureRoleSelected::class])->group(functi
             ->where('jurusan_id', session('active_jurusan_id'))
             ->get()
             ->map(function ($product) use ($dateFrom, $dateTo) {
-                // Total sold quantity from transactions
-                $sold = \App\Models\Transaction::where('product_id', $product->id)
-                    ->whereIn('status', ['uang_diterima', 'belum_kembalian'])
-                    ->whereBetween('transacted_at', [$dateFrom . ' 00:00:00', $dateTo . ' 23:59:59'])
-                    ->sum('quantity');
+                // Get first stock entry in the period for opening stock (with positive stock fallback)
+                $firstStock = \App\Models\StockEntry::where('product_id', $product->id)
+                    ->whereBetween('date', [$dateFrom, $dateTo])
+                    ->where('opening_stock', '>', 0)
+                    ->orderBy('date', 'asc')
+                    ->first() ?? \App\Models\StockEntry::where('product_id', $product->id)
+                    ->whereBetween('date', [$dateFrom, $dateTo])
+                    ->orderBy('date', 'asc')
+                    ->first();
 
-                // Get latest stock entry for closing stock context if exists
+                // Get latest stock entry for closing stock context
                 $latestStock = \App\Models\StockEntry::where('product_id', $product->id)
                     ->whereBetween('date', [$dateFrom, $dateTo])
                     ->orderBy('date', 'desc')
                     ->first();
 
-                $closingStock = $latestStock ? $latestStock->closing_stock : 0;
-                $openingStock = $sold + $closingStock;
+                $openingStock = $firstStock ? $firstStock->opening_stock : 0;
+                $closingStock = $latestStock ? max(0, $latestStock->closing_stock) : 0;
+
+                if ($firstStock || $latestStock) {
+                    $sold = max(0, $openingStock - $closingStock);
+                } else {
+                    $sold = \App\Models\Transaction::where('product_id', $product->id)
+                        ->whereIn('status', ['uang_diterima', 'belum_kembalian'])
+                        ->whereBetween('transacted_at', [$dateFrom . ' 00:00:00', $dateTo . ' 23:59:59'])
+                        ->sum('quantity');
+                    $openingStock = $sold;
+                }
 
                 return (object) [
                     'name' => $product->name,

@@ -10,7 +10,7 @@ use Illuminate\Support\Collection;
 
 class PosQueryService
 {
-    public function getCategories(string $today, ?int $activeJurusanId): Collection
+    public function getCategories(string $today, ?string $activeJurusanId): Collection
     {
         $activeProductCategoryIds = Product::where('is_active', true)
             ->whereHas('stockEntries', function ($q) use ($today) {
@@ -37,7 +37,7 @@ class PosQueryService
             ->get();
     }
 
-    public function getStockComparison(string $today, ?int $activeJurusanId): Collection
+    public function getStockComparison(string $today, ?string $activeJurusanId): Collection
     {
         return Product::where('is_active', true)
             ->when($activeJurusanId, function ($q) use ($activeJurusanId) {
@@ -66,7 +66,7 @@ class PosQueryService
             });
     }
 
-    public function getProductsForAlpine(string $today, ?int $activeJurusanId): Collection
+    public function getProductsForAlpine(string $today, ?string $activeJurusanId): Collection
     {
         return Product::with(['category', 'stockEntries' => fn ($q) => $q->where('date', $today)])
             ->where('is_active', true)

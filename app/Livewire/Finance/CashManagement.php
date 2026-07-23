@@ -172,15 +172,64 @@ class CashManagement extends Component
 
         // Category Stats
         $categories = \App\Models\CashCategory::where('jurusan_id', $activeJurusanId)->get();
+        
+        $catBagiHasil = \App\Models\CashCategory::where('jurusan_id', $activeJurusanId)->where('name', 'Bagi Hasil Mingguan')->first();
+        $bagiHasilTransactions = [];
+        if ($catBagiHasil) {
+            $bagiHasilTransactions = CashTransaction::where('jurusan_id', $activeJurusanId)
+                ->where('cash_category_id', $catBagiHasil->id)
+                ->get();
+        }
+
         $categoryStats = [];
         foreach ($categories as $category) {
             $catIncome = CashTransaction::where('jurusan_id', $activeJurusanId)->where('cash_category_id', $category->id)->where('type', 'income')->sum('amount');
             $catExpense = CashTransaction::where('jurusan_id', $activeJurusanId)->where('cash_category_id', $category->id)->where('type', 'expense')->sum('amount');
+            
+            $modalIncome = CashTransaction::where('jurusan_id', $activeJurusanId)->where('cash_category_id', $category->id)->where('cash_type', 'modal')->where('type', 'income')->sum('amount');
+            $modalExpense = CashTransaction::where('jurusan_id', $activeJurusanId)->where('cash_category_id', $category->id)->where('cash_type', 'modal')->where('type', 'expense')->sum('amount');
+            $modalBalance = $modalIncome - $modalExpense;
+
+            $profitIncome = CashTransaction::where('jurusan_id', $activeJurusanId)->where('cash_category_id', $category->id)->where('cash_type', 'keuntungan')->where('type', 'income')->sum('amount');
+            $profitExpense = CashTransaction::where('jurusan_id', $activeJurusanId)->where('cash_category_id', $category->id)->where('cash_type', 'keuntungan')->where('type', 'expense')->sum('amount');
+            $profitBalance = $profitIncome - $profitExpense;
+
+            // Deduct bagi hasil from the respective sales category
+            $bagiHasilDeduction = 0;
+            if ($category->name !== 'Bagi Hasil Mingguan' && !empty($bagiHasilTransactions)) {
+                $prodCatName = str_replace('Penjualan ', '', $category->name);
+                foreach ($bagiHasilTransactions as $tx) {
+                    if (str_contains(strtolower($tx->description), 'kategori:')) {
+                        if ($category->name === 'Jurusan Snack & Minuman') {
+                            if (str_contains(strtolower($tx->description), 'makanan') || str_contains(strtolower($tx->description), 'minuman')) {
+                                $bagiHasilDeduction += $tx->amount;
+                            }
+                        } else {
+                            if (str_contains(strtolower($tx->description), strtolower($prodCatName)) || ($category->name === 'Penjualan Kerupuk' && str_contains(strtolower($tx->description), 'snack'))) {
+                                $bagiHasilDeduction += $tx->amount;
+                            }
+                        }
+                    }
+                }
+            }
+
+            if ($bagiHasilDeduction > 0) {
+                $catExpense += $bagiHasilDeduction;
+                $profitBalance -= $bagiHasilDeduction;
+            }
+
+            // Override profit_balance to 0 for Bagi Hasil Mingguan card
+            if ($category->name === 'Bagi Hasil Mingguan') {
+                $profitBalance = 0;
+            }
+
             $categoryStats[] = [
                 'name' => $category->name,
                 'income' => $catIncome,
                 'expense' => $catExpense,
                 'balance' => $catIncome - $catExpense,
+                'modal_balance' => $modalBalance,
+                'profit_balance' => $profitBalance,
             ];
         }
 

@@ -12,7 +12,7 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class DailyRecapActionService
 {
-    public function saveCashAudit(string $date, float $actualCash, float $retainedChangeCash, ?string $cashNote, ?int $activeJurusanId): void
+    public function saveCashAudit(string $date, float $actualCash, float $retainedChangeCash, ?string $cashNote, ?string $activeJurusanId): void
     {
         DailyRecapModel::updateOrCreate(
             [
@@ -27,7 +27,7 @@ class DailyRecapActionService
         );
     }
 
-    public function postToCashBook(string $date, ?int $activeJurusanId): array
+    public function postToCashBook(string $date, ?string $activeJurusanId): array
     {
         $recap = DailyRecapModel::where('date', $date)
             ->when($activeJurusanId, function ($q) use ($activeJurusanId) {
@@ -76,7 +76,9 @@ class DailyRecapActionService
 
                 $categoryNameLower = strtolower($categoryNameClean);
                 if ($categoryNameLower === 'makanan' || $categoryNameLower === 'minuman' || $categoryNameLower === 'makanan & minuman' || $categoryNameLower === 'makanan dan minuman') {
-                    $cashCategoryName = 'Jurusan Makanan & Minuman';
+                    $cashCategoryName = 'Jurusan Snack & Minuman';
+                } elseif ($categoryNameLower === 'snack') {
+                    $cashCategoryName = 'Penjualan Kerupuk';
                 } else {
                     $cashCategoryName = 'Penjualan '.$categoryNameClean;
                 }
@@ -85,12 +87,11 @@ class DailyRecapActionService
                     ['name' => $cashCategoryName, 'jurusan_id' => $activeJurusanId]
                 );
 
-                $catModalInternal = $txs->whereNull('supplier_id')
-                    ->sum(fn ($tx) => ($tx->unit_price - $tx->unit_profit) * $tx->quantity);
+                $catModalTotal = $txs->sum(fn ($tx) => ($tx->unit_price - $tx->unit_profit) * $tx->quantity);
 
                 $catProfit = $txs->sum(fn ($tx) => $tx->unit_profit * $tx->quantity);
 
-                if ($catModalInternal > 0) {
+                if ($catModalTotal > 0) {
                     CashTransaction::updateOrCreate(
                         [
                             'date' => $date,
@@ -101,7 +102,7 @@ class DailyRecapActionService
                             'cash_type' => 'modal',
                             'cash_category_id' => $catPenjualan->id,
                             'type' => 'income',
-                            'amount' => $catModalInternal,
+                            'amount' => $catModalTotal,
                         ]
                     );
                 }
@@ -121,26 +122,6 @@ class DailyRecapActionService
                         ]
                     );
                 }
-            }
-
-            if ($totalSupplierHak > 0) {
-                $catSupplier = CashCategory::firstOrCreate(
-                    ['name' => 'Bagi Hasil Supplier', 'jurusan_id' => $activeJurusanId]
-                );
-
-                CashTransaction::updateOrCreate(
-                    [
-                        'date' => $date,
-                        'jurusan_id' => $activeJurusanId,
-                        'description' => 'Bagi Hasil Supplier (Sistem)',
-                    ],
-                    [
-                        'cash_type' => 'modal',
-                        'cash_category_id' => $catSupplier->id,
-                        'type' => 'income',
-                        'amount' => $totalSupplierHak,
-                    ]
-                );
             }
 
             if ($diff !== 0) {

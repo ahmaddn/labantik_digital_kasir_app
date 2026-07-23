@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Invoice Settlement Supplier - {{ $supplier->name }}</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         body {
             font-family: 'Arial', sans-serif;
@@ -185,6 +186,82 @@
             margin-bottom: 40px;
             text-align: justify;
         }
+        /* Premium custom modal style */
+        .custom-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(8px);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        .custom-modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .custom-modal-card {
+            background: #ffffff;
+            border-radius: 28px;
+            padding: 35px;
+            max-width: 420px;
+            width: 90%;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            text-align: center;
+            transform: scale(0.9) translateY(20px);
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .custom-modal-overlay.active .custom-modal-card {
+            transform: scale(1) translateY(0);
+        }
+        .custom-modal-icon {
+            width: 64px;
+            height: 64px;
+            background: #e6f7ed;
+            color: #12b76a;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+        }
+        .custom-modal-title {
+            font-size: 20px;
+            font-weight: 800;
+            color: #0f172a;
+            margin-bottom: 10px;
+            letter-spacing: -0.5px;
+        }
+        .custom-modal-desc {
+            font-size: 13px;
+            color: #64748b;
+            line-height: 1.6;
+            margin-bottom: 25px;
+        }
+        .custom-modal-btn {
+            background: #128c7e;
+            color: #ffffff;
+            border: none;
+            border-radius: 16px;
+            padding: 14px 28px;
+            font-weight: 750;
+            font-size: 13px;
+            cursor: pointer;
+            width: 100%;
+            transition: background 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .custom-modal-btn:hover {
+            background: #075e54;
+        }
         @media print {
             body {
                 padding: 0;
@@ -220,15 +297,15 @@
 
         // WhatsApp Link Generator
         $whatsappUrl = '';
-        if (!empty($supplier->phone)) {
-            $cleanPhone = preg_replace('/[^0-9]/', '', $supplier->phone);
+        if (!empty($supplier->contact)) {
+            $cleanPhone = preg_replace('/[^0-9]/', '', $supplier->contact);
             if (str_starts_with($cleanPhone, '0')) {
                 $cleanPhone = '62' . substr($cleanPhone, 1);
             }
             
-            $message = "Halo *" . $supplier->name . "*, berikut adalah Bukti Pembayaran / Settlement Konsinyasi " . $tefaName . " untuk periode *" . \Carbon\Carbon::parse($dateFrom)->translatedFormat('d F Y') . " - " . \Carbon\Carbon::parse($dateTo)->translatedFormat('d F Y') . "*.\n\n"
-                     . "Total Pembayaran: *Rp" . number_format($totalShare, 0, ',', '.') . "*.\n"
-                     . "Detail Invoice Lengkap: " . request()->fullUrl();
+            $message = "Halo *" . $supplier->name . "*, berikut adalah Bukti Pembayaran / Bagi Hasil Barang Titipan " . $tefaName . " untuk periode *" . \Carbon\Carbon::parse($dateFrom)->translatedFormat('d F Y') . " - " . \Carbon\Carbon::parse($dateTo)->translatedFormat('d F Y') . "*.\n\n"
+                     . "Total Pembayaran: *Rp" . number_format($totalShare, 0, ',', '.') . "*.\n";
+                     // . "Detail Invoice Lengkap: " . request()->fullUrl();
                      
             $whatsappUrl = "https://wa.me/" . $cleanPhone . "?text=" . urlencode($message);
         }
@@ -245,104 +322,181 @@
                 Cetak Invoice
             </button>
             @if($whatsappUrl)
-                <a href="{{ $whatsappUrl }}" target="_blank" class="btn-action btn-whatsapp">
+                <button onclick="shareToWhatsApp('{{ $whatsappUrl }}')" class="btn-action btn-whatsapp">
                     <svg style="width: 14px; height: 14px;" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12.004 2c-5.51 0-9.99 4.48-9.99 9.99 0 2.05.62 3.96 1.7 5.56L2.3 22l4.62-1.37c1.51.91 3.27 1.44 5.08 1.44 5.51 0 10-4.48 10-9.99S17.514 2 12.004 2zm5.83 14.28c-.24.67-1.19 1.25-1.63 1.29-.44.04-.97.19-2.92-.58-2.49-.99-4.08-3.53-4.2-3.7-.12-.17-1.01-1.34-1.01-2.56 0-1.22.64-1.82.87-2.06.23-.24.51-.3.67-.3.16 0 .32 0 .46.01.15.01.35-.06.55.42.2.49.69 1.68.75 1.8.06.12.1.27.02.43-.08.16-.18.27-.3.41-.12.14-.26.31-.37.42-.12.12-.25.26-.11.51.14.25.64 1.05 1.37 1.7.94.84 1.73 1.1 1.97 1.22.24.12.38.1.52-.06.14-.16.61-.71.77-.96.16-.24.32-.2.53-.12.21.08 1.35.63 1.58.75.23.12.39.18.45.28.06.1.06.57-.18 1.24z"/></svg>
-                    Kirim WhatsApp
-                </a>
+                    Kirim &amp; Salin Gambar
+                </button>
             @endif
         </div>
     </div>
 
-    <!-- Kop Surat -->
-    <div class="kop-surat" style="display: flex; align-items: center; justify-content: center; gap: 20px;">
-        @if($tefaLogo)
-            <img src="{{ asset('storage/' . $tefaLogo) }}" alt="Logo" style="height: 60px; max-width: 150px; object-fit: contain;">
-        @endif
-        <div style="text-align: {{ $tefaLogo ? 'left' : 'center' }};">
-            <div class="kop-title">{{ $tefaName }}</div>
-            <div class="kop-subtitle">Aplikasi Penjualan &amp; Keuangan Digital RPL SMART</div>
-        </div>
-    </div>
-
-    <!-- Title Bar -->
-    <div class="invoice-title-bar">
-        <div>
-            <h1 class="invoice-title">INVOICE SETTLEMENT SUPPLIER</h1>
-            <div class="invoice-number">No. Dokumen: {{ $docPrefixInvoice }}/{{ strtoupper(substr($supplier->id, 0, 8)) }}/{{ date('Ymd') }}</div>
-        </div>
-    </div>
-
-    <!-- Meta Information -->
-    <div class="meta-container">
-        <div class="meta-box">
-            <h3>Diberikan Kepada (Supplier):</h3>
-            <div class="meta-value">
-                <strong>{{ $supplier->name }}</strong><br>
-                <span>Kontak: {{ $supplier->phone ?? '-' }}</span><br>
-                <span>Alamat: {{ $supplier->address ?? '-' }}</span>
+    <div id="invoice-card" style="background:#fff; padding: 25px 35px; border-radius: 12px; border: 1px solid #e2e8f0; margin-top: 10px; box-sizing: border-box;">
+        <!-- Kop Surat -->
+        <div class="kop-surat" style="display: flex; align-items: center; justify-content: center; gap: 20px;">
+            @if($tefaLogo)
+                <img src="{{ asset('storage/' . $tefaLogo) }}" alt="Logo" style="height: 60px; max-width: 150px; object-fit: contain;">
+            @endif
+            <div style="text-align: {{ $tefaLogo ? 'left' : 'center' }};">
+                <div class="kop-title">{{ $tefaName }}</div>
+                <div class="kop-subtitle">Aplikasi Penjualan &amp; Keuangan Digital RPL SMART</div>
             </div>
         </div>
-        <div class="meta-box">
-            <h3>Rincian Pembayaran:</h3>
-            <div class="meta-value">
-                <span>Tanggal Settle: <strong>{{ now()->translatedFormat('d F Y') }}</strong></span><br>
-                <span>Periode Transaksi: <strong>{{ \Carbon\Carbon::parse($dateFrom)->translatedFormat('d F Y') }} - {{ \Carbon\Carbon::parse($dateTo)->translatedFormat('d F Y') }}</strong></span>
+
+        <!-- Title Bar -->
+        <div class="invoice-title-bar">
+            <div>
+                <h1 class="invoice-title">INVOICE SETTLEMENT SUPPLIER</h1>
+                <div class="invoice-number">No. Dokumen: {{ $docPrefixInvoice }}/{{ strtoupper(substr($supplier->id, 0, 8)) }}/{{ date('Ymd') }}</div>
             </div>
         </div>
-    </div>
 
-    <!-- Items Table -->
-    <table class="table-items">
-        <thead>
-            <tr>
-                <th style="width: 5%;" class="text-center">No</th>
-                <th style="width: 45%;">Nama Produk</th>
-                <th class="text-center" style="width: 12%;">Stok Awal</th>
-                <th class="text-center" style="width: 12%;">Sisa Stok</th>
-                <th class="text-center" style="width: 12%;">Terjual</th>
-                <th class="text-right" style="width: 18%;">Harga HPP</th>
-                <th class="text-right" style="width: 20%;">Subtotal</th>
-            </tr>
-        </thead>
-        <tbody>
-            @php
-                $i = 1;
-            @endphp
-            @foreach($products as $product)
+        <!-- Meta Information -->
+        <div class="meta-container">
+            <div class="meta-box">
+                <h3>Diberikan Kepada (Supplier):</h3>
+                <div class="meta-value">
+                    <strong>{{ $supplier->name }}</strong><br>
+                    <span>Kontak: {{ $supplier->contact ?? '-' }}</span><br>
+                    <span>Alamat: {{ $supplier->address ?? '-' }}</span>
+                </div>
+            </div>
+            <div class="meta-box">
+                <h3>Rincian Pembayaran:</h3>
+                <div class="meta-value">
+                    <span>Tanggal Settle: <strong>{{ now()->translatedFormat('d F Y') }}</strong></span><br>
+                    <span>Periode Transaksi: <strong>{{ \Carbon\Carbon::parse($dateFrom)->translatedFormat('d F Y') }} - {{ \Carbon\Carbon::parse($dateTo)->translatedFormat('d F Y') }}</strong></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Items Table -->
+        <table class="table-items">
+            <thead>
                 <tr>
-                    <td class="text-center">{{ $i++ }}</td>
-                    <td>
-                        <strong>{{ $product->name }}</strong>
-                    </td>
-                    <td class="text-center">{{ $product->opening_stock }}</td>
-                    <td class="text-center">{{ $product->closing_stock }}</td>
-                    <td class="text-center"><strong>{{ $product->sold_qty }}</strong></td>
-                    <td class="text-right">Rp{{ number_format($product->modal_price, 0, ',', '.') }}</td>
-                    <td class="text-right"><strong>Rp{{ number_format($product->total_modal, 0, ',', '.') }}</strong></td>
+                    <th style="width: 5%;" class="text-center">No</th>
+                    <th style="width: 45%;">Nama Produk</th>
+                    <th class="text-center" style="width: 12%;">Stok Awal</th>
+                    <th class="text-center" style="width: 12%;">Sisa Stok</th>
+                    <th class="text-center" style="width: 12%;">Terjual</th>
+                    <th class="text-right" style="width: 18%;">Harga HPP</th>
+                    <th class="text-right" style="width: 20%;">Subtotal</th>
                 </tr>
-            @endforeach
-        </tbody>
-    </table>
-
-    <!-- Summary Section -->
-    <div class="summary-container">
-        <table class="summary-table">
-            <tr>
-                <td>Total Item Terjual</td>
-                <td class="text-right"><strong>{{ $totalQty }} Unit</strong></td>
-            </tr>
-            <tr class="grand-total">
-                <td>Total Pembayaran</td>
-                <td class="text-right">Rp{{ number_format($totalShare, 0, ',', '.') }}</td>
-            </tr>
+            </thead>
+            <tbody>
+                @php
+                    $i = 1;
+                @endphp
+                @foreach($products as $product)
+                    <tr>
+                        <td class="text-center">{{ $i++ }}</td>
+                        <td>
+                            <strong>{{ $product->name }}</strong>
+                        </td>
+                        <td class="text-center">{{ $product->opening_stock }}</td>
+                        <td class="text-center">{{ $product->closing_stock }}</td>
+                        <td class="text-center"><strong>{{ $product->sold_qty }}</strong></td>
+                        <td class="text-right">Rp{{ number_format($product->modal_price, 0, ',', '.') }}</td>
+                        <td class="text-right"><strong>Rp{{ number_format($product->total_modal, 0, ',', '.') }}</strong></td>
+                    </tr>
+                @endforeach
+            </tbody>
         </table>
+
+        <!-- Summary Section -->
+        <div class="summary-container">
+            <table class="summary-table">
+                <tr>
+                    <td>Total Item Terjual</td>
+                    <td class="text-right"><strong>{{ $totalQty }} Unit</strong></td>
+                </tr>
+                <tr class="grand-total">
+                    <td>Total Pembayaran</td>
+                    <td class="text-right">Rp{{ number_format($totalShare, 0, ',', '.') }}</td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- Note Box -->
+        <div class="note-box">
+            <strong>Bukti Pembayaran Konsinyasi:</strong><br>
+            Dokumen ini merupakan bukti pembayaran resmi atas penyerahan dana bagi hasil/settlement barang konsinyasi antara Pihak Sekolah (TEFA LABANTIK) dengan Pihak Supplier mitra. Rincian stok awal dan sisa stok dicocokkan berdasarkan pencatatan audit stock harian sistem kasir TEFA. Transaksi ini dianggap sah dan telah tercatat secara digital pada sistem keuangan sekolah.
+        </div>
     </div>
 
-    <!-- Note Box -->
-    <div class="note-box">
-        <strong>Bukti Pembayaran Konsinyasi:</strong><br>
-        Dokumen ini merupakan bukti pembayaran resmi atas penyerahan dana bagi hasil/settlement barang konsinyasi antara Pihak Sekolah (TEFA LABANTIK) dengan Pihak Supplier mitra. Rincian stok awal dan sisa stok dicocokkan berdasarkan pencatatan audit stock harian sistem kasir TEFA. Transaksi ini dianggap sah dan telah tercatat secara digital pada sistem keuangan sekolah.
-    </div>
+    <script>
+    async function shareToWhatsApp(waUrl) {
+        const btn = document.querySelector('.btn-whatsapp');
+        const originalText = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = 'Menyalin Gambar...';
+        
+        const invoiceCard = document.getElementById('invoice-card');
+        
+        // Temporarily style invoiceCard for perfect snapshot output
+        const originalBorder = invoiceCard.style.border;
+        invoiceCard.style.border = 'none';
+        
+        try {
+            const canvas = await html2canvas(invoiceCard, {
+                scale: 2, // better quality
+                useCORS: true,
+                backgroundColor: '#ffffff'
+            });
+            
+            // Restore border style
+            invoiceCard.style.border = originalBorder;
+            
+            canvas.toBlob(async (blob) => {
+                try {
+                    const item = new ClipboardItem({ "image/png": blob });
+                    await navigator.clipboard.write([item]);
+                    
+                    // Show custom beautiful modal instead of alert
+                    const modal = document.getElementById('waModal');
+                    const modalBtn = document.getElementById('waModalBtn');
+                    
+                    // Set up click handler for the modal action button
+                    modalBtn.onclick = function() {
+                        window.open(waUrl, '_blank');
+                        modal.classList.remove('active');
+                    };
+                    
+                    // Activate modal
+                    modal.classList.add('active');
+                } catch (err) {
+                    console.error(err);
+                    alert('Gagal menyalin gambar otomatis ke clipboard. Namun chat WhatsApp tetap dibuka.');
+                    window.open(waUrl, '_blank');
+                } finally {
+                    btn.disabled = false;
+                    btn.innerHTML = originalText;
+                }
+            }, 'image/png');
+        } catch (e) {
+            console.error(e);
+            alert('Gagal membuat gambar invoice.');
+            invoiceCard.style.border = originalBorder;
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+        }
+    }
+    </script>
 
+    <!-- Premium WhatsApp Modal Overlay -->
+    <div id="waModal" class="custom-modal-overlay no-print">
+        <div class="custom-modal-card">
+            <div class="custom-modal-icon">
+                <svg style="width: 32px; height: 32px;" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"></path>
+                </svg>
+            </div>
+            <div class="custom-modal-title">INVOICE DISALIN!</div>
+            <div class="custom-modal-desc" style="margin-top: 15px; margin-bottom: 25px; font-weight: bold; font-size: 13px;">
+                Gambar invoice telah disalin ke clipboard.<br><br>
+                Silakan lakukan **Paste (Ctrl + V)** langsung pada room chat WhatsApp untuk mengirim gambar.
+            </div>
+            <button id="waModalBtn" class="custom-modal-btn">Buka WhatsApp</button>
+        </div>
+    </div>
 </body>
 </html>

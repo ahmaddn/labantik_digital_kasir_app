@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\DB;
 
 class PosSessionService
 {
-    public function detectUnfinishedSession(string $today, ?int $activeJurusanId): ?string
+    public function detectUnfinishedSession(string $today, ?string $activeJurusanId): ?string
     {
         $lastSessionDate = StockEntry::where('date', '<', $today)
             ->whereHas('product', function ($q) use ($activeJurusanId) {
@@ -36,7 +36,7 @@ class PosSessionService
         return null;
     }
 
-    public function fixUnfinishedSession(string $date, Collection $allProducts, ?int $activeJurusanId): void
+    public function fixUnfinishedSession(string $date, Collection $allProducts, ?string $activeJurusanId): void
     {
         DB::transaction(function () use ($date, $allProducts, $activeJurusanId) {
             foreach ($allProducts as $p) {
@@ -47,7 +47,7 @@ class PosSessionService
                         ->sum('quantity');
 
                     $entry->update([
-                        'closing_stock' => $entry->opening_stock - $sold,
+                        'closing_stock' => max(0, $entry->opening_stock - $sold),
                     ]);
                 }
             }
@@ -65,7 +65,7 @@ class PosSessionService
         });
     }
 
-    public function getLastSessionStocks(string $today, ?int $activeJurusanId): array
+    public function getLastSessionStocks(string $today, ?string $activeJurusanId): array
     {
         $lastSessionDate = StockEntry::where('date', '<', $today)
             ->whereHas('product', function ($q) use ($activeJurusanId) {
@@ -104,13 +104,13 @@ class PosSessionService
                     ->sum('quantity');
 
                 $entry->update([
-                    'closing_stock' => $entry->opening_stock - $totalSold,
+                    'closing_stock' => max(0, $entry->opening_stock - $totalSold),
                 ]);
             }
         });
     }
 
-    public function saveClosingStock(array $stockItems, string $today, ?int $activeJurusanId): void
+    public function saveClosingStock(array $stockItems, string $today, ?string $activeJurusanId): void
     {
         DB::transaction(function () use ($stockItems, $today, $activeJurusanId) {
             foreach ($stockItems as $productId => $qty) {
@@ -137,8 +137,8 @@ class PosSessionService
         string $status,
         ?string $note,
         ?string $transactionDate,
-        int $userId,
-        ?int $activeJurusanId,
+        string $userId,
+        ?string $activeJurusanId,
         string $docPrefix
     ): string {
         $tDate = $transactionDate ?: now()->toDateString();
@@ -183,7 +183,7 @@ class PosSessionService
                             ->sum('quantity');
 
                         $ent->update([
-                            'closing_stock' => $ent->opening_stock - $soldLater,
+                            'closing_stock' => max(0, $ent->opening_stock - $soldLater),
                         ]);
                     }
                 }

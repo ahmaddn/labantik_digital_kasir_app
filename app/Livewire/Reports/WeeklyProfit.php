@@ -2,6 +2,8 @@
 
 namespace App\Livewire\Reports;
 
+use App\Models\CashCategory;
+use App\Models\CashTransaction;
 use App\Models\Transaction;
 use App\Models\WeeklyProfitShare;
 use Carbon\Carbon;
@@ -49,14 +51,13 @@ class WeeklyProfit extends Component
                 $activeJurusanId = session('active_jurusan_id');
                 $weekStart = Carbon::parse($report->week_start);
                 $weekEnd = Carbon::parse($report->week_end);
-                
-                $description = 'Bagi Hasil Mingguan (Sistem) - Periode ' . $weekStart->format('d/m/Y') . ' s.d ' . $weekEnd->format('d/m/Y');
-                
-                // Delete the cash transaction
-                \App\Models\CashTransaction::where('jurusan_id', $activeJurusanId)
-                    ->where('description', $description)
+
+                // Delete all cash transactions matching this period
+                $descriptionPattern = 'Bagi Hasil Mingguan%Periode '.$weekStart->format('d/m/Y').' s.d '.$weekEnd->format('d/m/Y').'%';
+                CashTransaction::where('jurusan_id', $activeJurusanId)
+                    ->where('description', 'like', $descriptionPattern)
                     ->delete();
-                
+
                 $report->delete();
             }
             $this->reportToDeleteId = null;
@@ -103,33 +104,70 @@ class WeeklyProfit extends Component
 
         WeeklyProfitShare::updateOrCreate(
             [
-                'week_start' => $weekStart->toDateString(), 
+                'week_start' => $weekStart->toDateString(),
                 'week_end' => $weekEnd->toDateString(),
-                'jurusan_id' => $activeJurusanId
+                'jurusan_id' => $activeJurusanId,
             ],
             $data
         );
 
-        // Auto post expense to cash book
-        $catBagiHasil = \App\Models\CashCategory::firstOrCreate(
-            ['name' => 'Bagi Hasil Mingguan', 'jurusan_id' => $activeJurusanId]
-        );
+        // Fetch contributors for this week grouped by user and product category
+        $adminContributions = Transaction::join('products', 'transactions.product_id', '=', 'products.id')
+            ->join('product_categories', 'products.category_id', '=', 'product_categories.id')
+            ->select(
+                'transactions.user_id',
+                'products.category_id',
+                'product_categories.name as category_name',
+                DB::raw('SUM(transactions.unit_profit * transactions.quantity) as user_profit')
+            )
+            ->whereBetween('transactions.transacted_at', [
+                $weekStart->startOfDay()->toDateTimeString(),
+                $weekEnd->endOfDay()->toDateTimeString(),
+            ])
+            ->where('transactions.jurusan_id', $activeJurusanId)
+            ->whereIn('transactions.status', ['uang_diterima', 'belum_kembalian'])
+            ->groupBy('transactions.user_id', 'products.category_id', 'product_categories.name')
+            ->get();
 
-        $description = 'Bagi Hasil Mingguan (Sistem) - Periode ' . $weekStart->format('d/m/Y') . ' s.d ' . $weekEnd->format('d/m/Y');
+        // Delete old postings for this period first to prevent duplicates on regeneration
+        $descriptionPattern = 'Bagi Hasil Mingguan%Periode '.$weekStart->format('d/m/Y').' s.d '.$weekEnd->format('d/m/Y').'%';
+        CashTransaction::where('jurusan_id', $activeJurusanId)
+            ->where('description', 'like', $descriptionPattern)
+            ->delete();
 
-        \App\Models\CashTransaction::updateOrCreate(
-            [
-                'jurusan_id' => $activeJurusanId,
-                'description' => $description,
-            ],
-            [
-                'date' => now()->toDateString(),
-                'cash_type' => 'keuntungan',
-                'cash_category_id' => $catBagiHasil->id,
-                'type' => 'expense',
-                'amount' => $totalProfit * 0.5,
-            ]
-        );
+        foreach ($adminContributions as $contrib) {
+            $userName = $contrib->user ? $contrib->user->name : 'Unknown User';
+            $userShare = $contrib->user_profit * 0.5;
+
+            if ($userShare > 0) {
+                $categoryNameClean = trim($contrib->category_name);
+                $categoryNameLower = strtolower($categoryNameClean);
+                if ($categoryNameLower === 'makanan' || $categoryNameLower === 'minuman' || $categoryNameLower === 'makanan & minuman' || $categoryNameLower === 'makanan dan minuman') {
+                    $cashCategoryName = 'Jurusan Snack & Minuman';
+                } elseif ($categoryNameLower === 'snack') {
+                    $cashCategoryName = 'Penjualan Kerupuk';
+                } else {
+                    $cashCategoryName = 'Penjualan '.$categoryNameClean;
+                }
+
+                $catPenjualan = CashCategory::firstOrCreate(
+                    ['name' => $cashCategoryName, 'jurusan_id' => $activeJurusanId]
+                );
+
+                $userDescription = 'Bagi Hasil Mingguan dengan '.$userName.' (Kategori: '.$categoryNameClean.') - Periode '.$weekStart->format('d/m/Y').' s.d '.$weekEnd->format('d/m/Y');
+
+                CashTransaction::create([
+                    'jurusan_id' => $activeJurusanId,
+                    'date' => now()->toDateString(),
+                    'cash_type' => 'keuntungan',
+                    'cash_category_id' => $catPenjualan->id,
+                    'type' => 'expense',
+                    'amount' => $userShare,
+                    'description' => $userDescription,
+                    'reference' => 'WD-PROFIT-'.now()->format('Ymd').'-'.strtoupper(bin2hex(random_bytes(2))),
+                ]);
+            }
+        }
 
         $this->dispatch('toast', message: 'Laporan bagi hasil berhasil dibuat dan diposting ke Buku Kas!');
     }
@@ -180,7 +218,7 @@ class WeeklyProfit extends Component
             DB::raw('COUNT(*) as weeks_count'),
             DB::raw('MIN(created_at) as created_at')
         )
-            ->where('month_name', 'like', '%' . $monthName . '%')
+            ->where('month_name', 'like', '%'.$monthName.'%')
             ->where('jurusan_id', $activeJurusanId)
             ->groupBy('month_name')
             ->orderByDesc(DB::raw('MAX(week_end)'))
