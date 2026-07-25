@@ -89,6 +89,7 @@ class SupplierReport extends Component
                 'total_sales' => $totalSales,
                 'total_supplier_share' => $totalSupplierShare,
                 'total_shop_profit' => $totalShopProfit,
+                'is_settled' => \App\Models\CashTransaction::where('reference', "SETTLE-SUPPLIER-{$supplier->id}-{$this->dateFrom}-{$this->dateTo}")->exists(),
             ];
         })->filter(fn($r) => $r->total_qty > 0);
 
@@ -96,5 +97,58 @@ class SupplierReport extends Component
             'reports' => $reports,
             'suppliers' => Supplier::all()
         ])->layout('layouts.app', ['title' => 'Laporan Supplier']);
+    }
+
+    public function settleSupplier($supplierId, $supplierName, $amount)
+    {
+        $activeJurusanId = session('active_jurusan_id');
+        
+        $category = \App\Models\CashCategory::where('jurusan_id', $activeJurusanId)
+            ->where('name', 'Bagi Hasil Supplier')
+            ->first();
+            
+        if (!$category) {
+            $category = \App\Models\CashCategory::create([
+                'jurusan_id' => $activeJurusanId,
+                'name' => 'Bagi Hasil Supplier'
+            ]);
+        }
+
+        $reference = "SETTLE-SUPPLIER-{$supplierId}-{$this->dateFrom}-{$this->dateTo}";
+
+        $exists = \App\Models\CashTransaction::where('reference', $reference)->exists();
+        if ($exists) {
+            $this->dispatch('toast', message: 'Bagi hasil supplier ini sudah dilunasi sebelumnya.');
+            return;
+        }
+
+        \App\Models\CashTransaction::create([
+            'jurusan_id' => $activeJurusanId,
+            'date' => now()->toDateString(),
+            'type' => 'expense',
+            'cash_type' => 'modal',
+            'cash_category_id' => $category->id,
+            'amount' => $amount,
+            'description' => "Pelunasan bagi hasil supplier {$supplierName} periode " . \Carbon\Carbon::parse($this->dateFrom)->translatedFormat('d M Y') . " s/d " . \Carbon\Carbon::parse($this->dateTo)->translatedFormat('d M Y'),
+            'reference' => $reference,
+        ]);
+
+        $this->dispatch('toast', message: "Berhasil melunasi bagi hasil {$supplierName}.");
+    }
+
+    public function settleAndShare($supplierId, $supplierName, $amount)
+    {
+        $this->settleSupplier($supplierId, $supplierName, $amount);
+
+        $msg = "📢 *LAPORAN BAGI HASIL SUPPLIER*\n";
+        $msg .= "👤 *Supplier:* {$supplierName}\n";
+        $msg .= "📅 *Periode:* " . \Carbon\Carbon::parse($this->dateFrom)->translatedFormat('d M Y') . " s/d " . \Carbon\Carbon::parse($this->dateTo)->translatedFormat('d M Y') . "\n";
+        $msg .= "💰 *Total Hak Supplier:* Rp" . number_format($amount, 0, ',', '.') . "\n\n";
+        $msg .= "*Status:* ✅ LUNAS (Sudah dibayarkan)\n\n";
+        $msg .= "_Terima kasih atas kerjasamanya._";
+
+        $waUrl = "https://api.whatsapp.com/send?text=" . urlencode($msg);
+        
+        $this->dispatch('open-link', url: $waUrl);
     }
 }

@@ -84,14 +84,27 @@
                         <td class="px-10 py-8 text-right font-black text-green-500 italic">
                             Rp{{ number_format($report->total_shop_profit, 0, ',', '.') }}
                         </td>
-                        <td class="px-10 py-8 text-center">
+                        <td class="px-10 py-8 text-center flex items-center justify-center gap-2">
                             @if($report->supplier_id)
-                            <a href="{{ route('supplier-settlement.print', ['supplierId' => $report->supplier_id, 'date_from' => $dateFrom, 'date_to' => $dateTo]) }}" target="_blank" class="px-4 py-2 bg-primary-blue/10 hover:bg-primary-blue text-primary-blue hover:text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-all inline-flex items-center gap-1.5 shadow-sm">
-                                <svg class="w-3.5 h-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" /></svg>
-                                Cetak Struk
-                            </a>
+                                <a href="{{ route('supplier-settlement.print', ['supplierId' => $report->supplier_id, 'date_from' => $dateFrom, 'date_to' => $dateTo]) }}" target="_blank" class="px-4 py-2 bg-primary-blue/10 hover:bg-primary-blue text-primary-blue hover:text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-all inline-flex items-center gap-1.5 shadow-sm">
+                                    <svg class="w-3.5 h-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" /></svg>
+                                    Struk
+                                </a>
+                                
+                                @if($report->is_settled)
+                                    <span class="px-4 py-2 bg-green-500/10 text-green-500 text-[10px] font-black uppercase tracking-widest rounded-xl inline-flex items-center gap-1.5 border border-green-500/20">
+                                        ✅ Lunas
+                                    </span>
+                                @else
+                                    <button wire:click="settleSupplier('{{ $report->supplier_id }}', '{{ addslashes($report->supplier_name) }}', {{ $report->total_supplier_share }})" class="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-all inline-flex items-center gap-1.5 shadow-md shadow-emerald-500/10">
+                                        Bayar Lunas
+                                    </button>
+                                    <button wire:click="settleAndShare('{{ $report->supplier_id }}', '{{ addslashes($report->supplier_name) }}', {{ $report->total_supplier_share }})" class="px-4 py-2 bg-green-500 hover:bg-green-600 text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-all inline-flex items-center gap-1.5 shadow-md shadow-green-500/10" title="Bayar & Kirim Rincian ke WhatsApp">
+                                        WA & Lunas
+                                    </button>
+                                @endif
                             @else
-                            <span class="text-[9px] px-2.5 py-1 bg-gray-100 dark:bg-gray-800 rounded font-bold text-gray-400 uppercase">Toko</span>
+                                <span class="text-[9px] px-2.5 py-1 bg-gray-100 dark:bg-gray-800 rounded font-bold text-gray-400 uppercase">Toko</span>
                             @endif
                         </td>
                     </tr>
@@ -117,4 +130,13 @@
                 @endif
             </table>
         </div>
+    </div>
 </div>
+
+<script>
+    document.addEventListener('livewire:init', () => {
+        Livewire.on('open-link', (event) => {
+            window.open(event.url, '_blank');
+        });
+    });
+</script>

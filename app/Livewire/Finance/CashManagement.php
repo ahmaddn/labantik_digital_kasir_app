@@ -22,6 +22,12 @@ class CashManagement extends Component
     public string $type = 'expense';
     public $amount;
     public string $description = '';
+    
+    // Split details
+    public $amountModal;
+    public $amountProfit;
+    public float $selectedCategoryModalBalance = 0;
+    public float $selectedCategoryProfitBalance = 0;
 
     // Modal state
     public bool $showModal = false;
@@ -40,10 +46,104 @@ class CashManagement extends Component
         $this->resetPage();
     }
 
+    public function updatedCashCategoryId($value)
+    {
+        $this->calculateSelectedCategoryBalances($value);
+    }
+
+    public function updatedAmountModal($value)
+    {
+        if ($this->cashType === 'keduanya') {
+            $this->amount = (float)($this->amountModal ?: 0) + (float)($this->amountProfit ?: 0);
+        }
+    }
+
+    public function updatedAmountProfit($value)
+    {
+        if ($this->cashType === 'keduanya') {
+            $this->amount = (float)($this->amountModal ?: 0) + (float)($this->amountProfit ?: 0);
+        }
+    }
+
+    public function updatedCashType($value)
+    {
+        if ($value !== 'keduanya') {
+            $this->amountModal = null;
+            $this->amountProfit = null;
+        } else {
+            $this->amount = (float)($this->amountModal ?: 0) + (float)($this->amountProfit ?: 0);
+        }
+    }
+
+    public function updatedType($value)
+    {
+        if ($value !== 'expense' && $this->cashType === 'keduanya') {
+            $this->cashType = 'modal';
+            $this->amountModal = null;
+            $this->amountProfit = null;
+        }
+    }
+
+    public function calculateSelectedCategoryBalances($categoryId)
+    {
+        if (!$categoryId) {
+            $this->selectedCategoryModalBalance = 0;
+            $this->selectedCategoryProfitBalance = 0;
+            return;
+        }
+
+        $activeJurusanId = session('active_jurusan_id');
+
+        $modalIncome = CashTransaction::where('jurusan_id', $activeJurusanId)->where('cash_category_id', $categoryId)->where('cash_type', 'modal')->where('type', 'income')->sum('amount');
+        $modalExpense = CashTransaction::where('jurusan_id', $activeJurusanId)->where('cash_category_id', $categoryId)->where('cash_type', 'modal')->where('type', 'expense')->sum('amount');
+        $this->selectedCategoryModalBalance = $modalIncome - $modalExpense;
+
+        $profitIncome = CashTransaction::where('jurusan_id', $activeJurusanId)->where('cash_category_id', $categoryId)->where('cash_type', 'keuntungan')->where('type', 'income')->sum('amount');
+        $profitExpense = CashTransaction::where('jurusan_id', $activeJurusanId)->where('cash_category_id', $categoryId)->where('cash_type', 'keuntungan')->where('type', 'expense')->sum('amount');
+        
+        // Handle Bagi Hasil Mingguan deduction if applicable
+        $category = \App\Models\CashCategory::find($categoryId);
+        $bagiHasilDeduction = 0;
+        if ($category && $category->name !== 'Bagi Hasil Mingguan') {
+            $catBagiHasil = \App\Models\CashCategory::where('jurusan_id', $activeJurusanId)->where('name', 'Bagi Hasil Mingguan')->first();
+            if ($catBagiHasil) {
+                $bagiHasilTransactions = CashTransaction::where('jurusan_id', $activeJurusanId)
+                    ->where('cash_category_id', $catBagiHasil->id)
+                    ->get();
+                
+                $prodCatName = str_replace('Penjualan ', '', $category->name);
+                foreach ($bagiHasilTransactions as $tx) {
+                    if (str_contains(strtolower($tx->description), 'kategori:')) {
+                        if ($category->name === 'Jurusan Snack & Minuman') {
+                            if (str_contains(strtolower($tx->description), 'makanan') || str_contains(strtolower($tx->description), 'minuman') || str_contains(strtolower($tx->description), 'snack')) {
+                                $bagiHasilDeduction += $tx->amount;
+                            }
+                        } else {
+                            if (str_contains(strtolower($tx->description), strtolower($prodCatName))) {
+                                $bagiHasilDeduction += $tx->amount;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        $profitBalance = $profitIncome - $profitExpense;
+        if ($bagiHasilDeduction > 0) {
+            $profitBalance -= $bagiHasilDeduction;
+        }
+        
+        if ($category && $category->name === 'Bagi Hasil Mingguan') {
+            $profitBalance = 0;
+        }
+
+        $this->selectedCategoryProfitBalance = $profitBalance;
+    }
+
     public function openModal()
     {
         $this->resetValidation();
-        $this->reset(['type', 'cashType', 'cashCategoryId', 'newCategoryName', 'amount', 'description', 'editingId']);
+        $this->reset(['type', 'cashType', 'cashCategoryId', 'newCategoryName', 'amount', 'description', 'editingId', 'amountModal', 'amountProfit', 'selectedCategoryModalBalance', 'selectedCategoryProfitBalance']);
         $this->date = now()->format('Y-m-d');
         $this->type = 'expense';
         $this->cashType = 'modal';
@@ -52,19 +152,78 @@ class CashManagement extends Component
 
     public function saveTransaction()
     {
-        $this->validate([
+        $validationRules = [
             'date' => 'required|date',
-            'cashType' => 'required|in:modal,keuntungan',
+            'cashType' => 'required|in:modal,keuntungan,keduanya',
             'cashCategoryId' => 'required|exists:cash_categories,id',
             'type' => 'required|in:income,expense',
-            'amount' => 'required|numeric|min:1',
             'description' => 'required|string|max:255',
-        ]);
+        ];
 
-        if ($this->editingId) {
-            $transaction = CashTransaction::find($this->editingId);
-            if ($transaction) {
-                $transaction->update([
+        if ($this->cashType === 'keduanya') {
+            $validationRules['amountModal'] = 'required|numeric|min:0';
+            $validationRules['amountProfit'] = 'required|numeric|min:0';
+        } else {
+            $validationRules['amount'] = 'required|numeric|min:1';
+        }
+
+        $this->validate($validationRules);
+
+        if ($this->cashType === 'keduanya') {
+            $this->amount = (float)($this->amountModal ?: 0) + (float)($this->amountProfit ?: 0);
+            if ($this->amount <= 0) {
+                $this->addError('amount', 'Total nominal gabungan harus lebih dari 0.');
+                return;
+            }
+        }
+
+        $activeJurusanId = session('active_jurusan_id');
+
+        \Illuminate\Support\Facades\DB::transaction(function () use ($activeJurusanId) {
+            // If editing, delete original transaction(s) first
+            if ($this->editingId) {
+                $oldTx = CashTransaction::find($this->editingId);
+                if ($oldTx) {
+                    if ($oldTx->reference && str_starts_with($oldTx->reference, 'SPLIT-')) {
+                        CashTransaction::where('reference', $oldTx->reference)->delete();
+                    } else {
+                        $oldTx->delete();
+                    }
+                }
+            }
+
+            // Create new transaction(s)
+            if ($this->cashType === 'keduanya') {
+                $splitRef = 'SPLIT-' . \Illuminate\Support\Str::uuid()->toString();
+                
+                if ($this->amountModal > 0) {
+                    CashTransaction::create([
+                        'jurusan_id' => $activeJurusanId,
+                        'date' => $this->date,
+                        'cash_type' => 'modal',
+                        'cash_category_id' => $this->cashCategoryId,
+                        'type' => $this->type,
+                        'amount' => $this->amountModal,
+                        'description' => $this->description,
+                        'reference' => $splitRef,
+                    ]);
+                }
+                
+                if ($this->amountProfit > 0) {
+                    CashTransaction::create([
+                        'jurusan_id' => $activeJurusanId,
+                        'date' => $this->date,
+                        'cash_type' => 'keuntungan',
+                        'cash_category_id' => $this->cashCategoryId,
+                        'type' => $this->type,
+                        'amount' => $this->amountProfit,
+                        'description' => $this->description,
+                        'reference' => $splitRef,
+                    ]);
+                }
+            } else {
+                CashTransaction::create([
+                    'jurusan_id' => $activeJurusanId,
                     'date' => $this->date,
                     'cash_type' => $this->cashType,
                     'cash_category_id' => $this->cashCategoryId,
@@ -73,20 +232,9 @@ class CashManagement extends Component
                     'description' => $this->description,
                 ]);
             }
-            $message = 'Data kas berhasil diperbarui!';
-        } else {
-            CashTransaction::create([
-                'jurusan_id' => session('active_jurusan_id'),
-                'date' => $this->date,
-                'cash_type' => $this->cashType,
-                'cash_category_id' => $this->cashCategoryId,
-                'type' => $this->type,
-                'amount' => $this->amount,
-                'description' => $this->description,
-            ]);
-            $message = 'Data kas berhasil ditambahkan!';
-        }
+        });
 
+        $message = $this->editingId ? 'Data kas berhasil diperbarui!' : 'Data kas berhasil ditambahkan!';
         $this->showModal = false;
         $this->dispatch('toast', message: $message);
     }
@@ -98,11 +246,27 @@ class CashManagement extends Component
             $this->resetValidation();
             $this->editingId = $transaction->id;
             $this->date = $transaction->date;
-            $this->cashType = $transaction->cash_type;
             $this->cashCategoryId = $transaction->cash_category_id;
             $this->type = $transaction->type;
-            $this->amount = $transaction->amount;
             $this->description = $transaction->description;
+
+            $this->calculateSelectedCategoryBalances($transaction->cash_category_id);
+
+            if ($transaction->reference && str_starts_with($transaction->reference, 'SPLIT-')) {
+                $this->cashType = 'keduanya';
+                $siblings = CashTransaction::where('reference', $transaction->reference)->get();
+                $modalTx = $siblings->where('cash_type', 'modal')->first();
+                $profitTx = $siblings->where('cash_type', 'keuntungan')->first();
+                
+                $this->amountModal = $modalTx ? $modalTx->amount : 0;
+                $this->amountProfit = $profitTx ? $profitTx->amount : 0;
+                $this->amount = $this->amountModal + $this->amountProfit;
+            } else {
+                $this->cashType = $transaction->cash_type;
+                $this->amount = $transaction->amount;
+                $this->amountModal = null;
+                $this->amountProfit = null;
+            }
             $this->showModal = true;
         }
     }
@@ -121,6 +285,7 @@ class CashManagement extends Component
 
         $this->cashCategoryId = $category->id;
         $this->newCategoryName = '';
+        $this->calculateSelectedCategoryBalances($category->id);
         $this->dispatch('toast', message: 'Kategori berhasil ditambahkan!');
     }
 
@@ -135,7 +300,11 @@ class CashManagement extends Component
         if ($this->confirmingDeleteId) {
             $transaction = CashTransaction::find($this->confirmingDeleteId);
             if ($transaction) {
-                $transaction->delete();
+                if ($transaction->reference && str_starts_with($transaction->reference, 'SPLIT-')) {
+                    CashTransaction::where('reference', $transaction->reference)->delete();
+                } else {
+                    $transaction->delete();
+                }
                 $this->dispatch('toast', message: 'Catatan kas berhasil dihapus.');
             }
             $this->showDeleteConfirmation = false;

@@ -216,33 +216,31 @@
             </div>
 
             <div class="p-10 space-y-6">
-                <!-- Sumber/Tujuan Kas -->
+                <!-- Tipe (Jenis Transaksi) -->
                 <div>
-                    <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4 mb-2">Sumber / Tujuan Kas</label>
+                    <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4 mb-2">Jenis Transaksi</label>
                     <div class="grid grid-cols-2 gap-4">
-                        <label class="cursor-pointer relative h-full">
-                            <input type="radio" wire:model="cashType" value="modal" class="peer sr-only">
-                            <div class="flex flex-col items-center justify-center text-center px-4 py-4 rounded-2xl border-2 border-gray-100 dark:border-gray-800 text-gray-400 font-black uppercase text-xs tracking-widest peer-checked:border-primary-blue peer-checked:bg-primary-blue/10 peer-checked:text-primary-blue transition-all h-full">
-                                <span>Kas Modal</span>
-                                <span class="text-[9px] font-bold opacity-70 mt-1 normal-case tracking-normal">(Uang Belanja Stok)</span>
+                        <label class="cursor-pointer relative">
+                            <input type="radio" wire:model.live="type" value="income" class="peer sr-only">
+                            <div class="text-center px-4 py-4 rounded-2xl border-2 border-gray-100 dark:border-gray-800 text-gray-400 font-black uppercase text-xs tracking-widest peer-checked:border-green-500 peer-checked:bg-green-500/10 peer-checked:text-green-500 transition-all">
+                                Pemasukan
                             </div>
                         </label>
-                        <label class="cursor-pointer relative h-full">
-                            <input type="radio" wire:model="cashType" value="keuntungan" class="peer sr-only">
-                            <div class="flex flex-col items-center justify-center text-center px-4 py-4 rounded-2xl border-2 border-gray-100 dark:border-gray-800 text-gray-400 font-black uppercase text-xs tracking-widest peer-checked:border-primary-blue peer-checked:bg-primary-blue/10 peer-checked:text-primary-blue transition-all h-full">
-                                <span>Kas Keuntungan</span>
-                                <span class="text-[9px] font-bold opacity-70 mt-1 normal-case tracking-normal">(Laba Bersih Toko)</span>
+                        <label class="cursor-pointer relative">
+                            <input type="radio" wire:model.live="type" value="expense" class="peer sr-only">
+                            <div class="text-center px-4 py-4 rounded-2xl border-2 border-gray-100 dark:border-gray-800 text-gray-400 font-black uppercase text-xs tracking-widest peer-checked:border-primary-red peer-checked:bg-primary-red/10 peer-checked:text-primary-red transition-all">
+                                Pengeluaran
                             </div>
                         </label>
                     </div>
-                    @error('cashType') <span class="text-primary-red text-xs mt-1 block ml-4">{{ $message }}</span> @enderror
+                    @error('type') <span class="text-primary-red text-xs mt-1 block ml-4">{{ $message }}</span> @enderror
                 </div>
 
-                <!-- Nama Kas -->
+                <!-- Kategori Kas -->
                 <div x-data="{ isAddingNew: false }">
                     <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4 mb-2">Kategori Kas</label>
                     <div x-show="!isAddingNew" class="relative">
-                        <select wire:model="cashCategoryId" class="w-full px-6 py-4 bg-gray-50 dark:bg-gray-800 border-none rounded-2xl focus:ring-4 focus:ring-primary-blue/10 font-black text-gray-800 dark:text-white appearance-none">
+                        <select wire:model.live="cashCategoryId" class="w-full px-6 py-4 bg-gray-50 dark:bg-gray-800 border-none rounded-2xl focus:ring-4 focus:ring-primary-blue/10 font-black text-gray-800 dark:text-white appearance-none">
                             <option value="">-- Pilih Kategori --</option>
                             @foreach($categories as $cat)
                             <option value="{{ $cat->id }}">{{ $cat->name }}</option>
@@ -251,6 +249,14 @@
                         <div class="absolute inset-y-0 right-6 flex items-center pointer-events-none">
                             <svg class="w-4 h-4 text-gray-400" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
                         </div>
+                        
+                        @if($cashCategoryId)
+                        <div class="mt-3 ml-2 flex flex-wrap gap-x-4 gap-y-1 text-[11px] font-bold text-gray-500 dark:text-gray-400">
+                            <div>Saldo Modal Kategori: <span class="text-primary-blue font-extrabold">Rp{{ number_format($selectedCategoryModalBalance, 0, ',', '.') }}</span></div>
+                            <div>Saldo Keuntungan Kategori: <span class="text-emerald-500 font-extrabold">Rp{{ number_format($selectedCategoryProfitBalance, 0, ',', '.') }}</span></div>
+                        </div>
+                        @endif
+
                         <div class="mt-2 text-right">
                             <button type="button" @click="isAddingNew = true" class="text-[10px] font-black text-primary-blue uppercase tracking-widest hover:underline">+ Buat Kategori Baru</button>
                         </div>
@@ -264,24 +270,35 @@
                     @error('newCategoryName') <span class="text-primary-red text-xs mt-1 block ml-4">{{ $message }}</span> @enderror
                 </div>
 
-                <!-- Tipe -->
+                <!-- Sumber/Tujuan Kas -->
                 <div>
-                    <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4 mb-2">Jenis Transaksi</label>
-                    <div class="grid grid-cols-2 gap-4">
-                        <label class="cursor-pointer relative">
-                            <input type="radio" wire:model="type" value="income" class="peer sr-only">
-                            <div class="text-center px-4 py-4 rounded-2xl border-2 border-gray-100 dark:border-gray-800 text-gray-400 font-black uppercase text-xs tracking-widest peer-checked:border-green-500 peer-checked:bg-green-500/10 peer-checked:text-green-500 transition-all">
-                                Pemasukan
+                    <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4 mb-2">Sumber / Tujuan Kas</label>
+                    <div class="grid {{ $type === 'expense' ? 'grid-cols-3' : 'grid-cols-2' }} gap-3">
+                        <label class="cursor-pointer relative h-full">
+                            <input type="radio" wire:model.live="cashType" value="modal" class="peer sr-only">
+                            <div class="flex flex-col items-center justify-center text-center p-3 rounded-2xl border-2 border-gray-100 dark:border-gray-800 text-gray-400 font-black uppercase text-[10px] tracking-widest peer-checked:border-primary-blue peer-checked:bg-primary-blue/10 peer-checked:text-primary-blue transition-all h-full">
+                                <span>Kas Modal</span>
+                                <span class="text-[8px] font-bold opacity-70 mt-1 normal-case tracking-normal">(Belanja Stok)</span>
                             </div>
                         </label>
-                        <label class="cursor-pointer relative">
-                            <input type="radio" wire:model="type" value="expense" class="peer sr-only">
-                            <div class="text-center px-4 py-4 rounded-2xl border-2 border-gray-100 dark:border-gray-800 text-gray-400 font-black uppercase text-xs tracking-widest peer-checked:border-primary-red peer-checked:bg-primary-red/10 peer-checked:text-primary-red transition-all">
-                                Pengeluaran
+                        <label class="cursor-pointer relative h-full">
+                            <input type="radio" wire:model.live="cashType" value="keuntungan" class="peer sr-only">
+                            <div class="flex flex-col items-center justify-center text-center p-3 rounded-2xl border-2 border-gray-100 dark:border-gray-800 text-gray-400 font-black uppercase text-[10px] tracking-widest peer-checked:border-primary-blue peer-checked:bg-primary-blue/10 peer-checked:text-primary-blue transition-all h-full">
+                                <span>Kas Untung</span>
+                                <span class="text-[8px] font-bold opacity-70 mt-1 normal-case tracking-normal">(Laba Bersih)</span>
                             </div>
                         </label>
+                        @if($type === 'expense')
+                        <label class="cursor-pointer relative h-full">
+                            <input type="radio" wire:model.live="cashType" value="keduanya" class="peer sr-only">
+                            <div class="flex flex-col items-center justify-center text-center p-3 rounded-2xl border-2 border-gray-100 dark:border-gray-800 text-gray-400 font-black uppercase text-[10px] tracking-widest peer-checked:border-primary-blue peer-checked:bg-primary-blue/10 peer-checked:text-primary-blue transition-all h-full">
+                                <span>Keduanya</span>
+                                <span class="text-[8px] font-bold opacity-70 mt-1 normal-case tracking-normal">(Modal & Untung)</span>
+                            </div>
+                        </label>
+                        @endif
                     </div>
-                    @error('type') <span class="text-primary-red text-xs mt-1 block ml-4">{{ $message }}</span> @enderror
+                    @error('cashType') <span class="text-primary-red text-xs mt-1 block ml-4">{{ $message }}</span> @enderror
                 </div>
 
                 <!-- Tanggal -->
@@ -292,11 +309,31 @@
                 </div>
 
                 <!-- Nominal -->
+                @if($cashType === 'keduanya')
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4 mb-2">Nominal Kas Modal (Rp)</label>
+                        <input type="number" wire:model.live="amountModal" class="w-full px-6 py-4 bg-gray-50 dark:bg-gray-800 border-none rounded-2xl focus:ring-4 focus:ring-primary-blue/10 font-black text-lg text-gray-800 dark:text-white" placeholder="0">
+                        @error('amountModal') <span class="text-primary-red text-xs mt-1 block ml-4">{{ $message }}</span> @enderror
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4 mb-2">Nominal Kas Untung (Rp)</label>
+                        <input type="number" wire:model.live="amountProfit" class="w-full px-6 py-4 bg-gray-50 dark:bg-gray-800 border-none rounded-2xl focus:ring-4 focus:ring-primary-blue/10 font-black text-lg text-gray-800 dark:text-white" placeholder="0">
+                        @error('amountProfit') <span class="text-primary-red text-xs mt-1 block ml-4">{{ $message }}</span> @enderror
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4 mb-2">Total Pengeluaran (Rp)</label>
+                    <input type="text" readonly value="Rp{{ number_format((float)($amountModal ?: 0) + (float)($amountProfit ?: 0), 0, ',', '.') }}" class="w-full px-6 py-4 bg-gray-100 dark:bg-gray-700/50 border-none rounded-2xl font-black text-2xl text-gray-500 dark:text-gray-300 cursor-not-allowed">
+                    @error('amount') <span class="text-primary-red text-xs mt-1 block ml-4">{{ $message }}</span> @enderror
+                </div>
+                @else
                 <div>
                     <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4 mb-2">Nominal (Rp)</label>
                     <input type="number" wire:model="amount" class="w-full px-6 py-4 bg-gray-50 dark:bg-gray-800 border-none rounded-2xl focus:ring-4 focus:ring-primary-blue/10 font-black text-2xl text-gray-800 dark:text-white" placeholder="0">
                     @error('amount') <span class="text-primary-red text-xs mt-1 block ml-4">{{ $message }}</span> @enderror
                 </div>
+                @endif
 
                 <!-- Keterangan -->
                 <div>

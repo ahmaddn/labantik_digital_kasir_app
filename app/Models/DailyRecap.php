@@ -34,6 +34,21 @@ class DailyRecap extends Model
         return $this->belongsTo(Jurusan::class);
     }
 
+    protected static function booted(): void
+    {
+        static::creating(function (DailyRecap $dailyRecap) {
+            if ($dailyRecap->date) {
+                $carbonDate = \Carbon\Carbon::parse($dailyRecap->date);
+                if (empty($dailyRecap->month_week)) {
+                    $dailyRecap->month_week = ceil($carbonDate->day / 7);
+                }
+                if (empty($dailyRecap->month_name)) {
+                    $dailyRecap->month_name = $carbonDate->translatedFormat('F');
+                }
+            }
+        });
+    }
+
     protected $casts = [
         'date' => 'date',
         'generated_at' => 'datetime',

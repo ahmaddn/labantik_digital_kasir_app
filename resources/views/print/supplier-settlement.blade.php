@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Invoice Settlement Supplier - {{ $supplier->name }}</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="{{ asset('js/html2canvas-pro.min.js') }}"></script>
     <style>
         body {
             font-family: 'Arial', sans-serif;
@@ -437,10 +437,50 @@
         invoiceCard.style.border = 'none';
         
         try {
-            const canvas = await html2canvas(invoiceCard, {
+            const h2c = window.html2canvas || window.html2canvasPro;
+            if (!h2c) {
+                alert('Error: Gagal memuat library perekam gambar.');
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+                return;
+            }
+            
+            const canvas = await h2c(invoiceCard, {
                 scale: 2, // better quality
                 useCORS: true,
-                backgroundColor: '#ffffff'
+                backgroundColor: '#ffffff',
+                onclone: (clonedDoc) => {
+                    const clonedInvoice = clonedDoc.getElementById('invoice-card');
+                    if (clonedInvoice) {
+                        clonedInvoice.style.width = '700px';
+                        clonedInvoice.style.minWidth = '700px';
+                        clonedInvoice.style.maxWidth = '700px';
+                        clonedInvoice.style.padding = '40px';
+                        clonedInvoice.style.borderRadius = '16px';
+                        clonedInvoice.style.boxShadow = 'none';
+                        clonedInvoice.style.border = '1px solid #cbd5e1';
+                        clonedInvoice.style.position = 'relative';
+                        
+                        // Add a beautiful diagonal stamp watermark "LUNAS / PAID"
+                        const watermark = clonedDoc.createElement('div');
+                        watermark.style.position = 'absolute';
+                        watermark.style.right = '45px';
+                        watermark.style.top = '120px';
+                        watermark.style.border = '4px double #10b981';
+                        watermark.style.color = '#10b981';
+                        watermark.style.fontSize = '24px';
+                        watermark.style.fontWeight = '900';
+                        watermark.style.padding = '8px 16px';
+                        watermark.style.borderRadius = '8px';
+                        watermark.style.transform = 'rotate(-15deg)';
+                        watermark.style.textTransform = 'uppercase';
+                        watermark.style.opacity = '0.85';
+                        watermark.style.letterSpacing = '2px';
+                        watermark.style.fontFamily = 'Arial, sans-serif';
+                        watermark.textContent = 'LUNAS';
+                        clonedInvoice.appendChild(watermark);
+                    }
+                }
             });
             
             // Restore border style
