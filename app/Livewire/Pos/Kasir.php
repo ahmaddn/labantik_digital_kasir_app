@@ -249,6 +249,28 @@ class Kasir extends Component
 
         $this->dispatch('transaction-completed', reference: $reference);
         $this->dispatch('toast', message: 'Transaksi berhasil disimpan!');
+
+        // Check if total transaction of today reaches a multiple of 50,000
+        $today = $transactionDate ?: now()->toDateString();
+        $totalToday = Transaction::whereDate('transacted_at', $today)
+            ->where('jurusan_id', $activeJurusanId)
+            ->whereIn('status', ['uang_diterima', 'belum_kembalian'])
+            ->sum('total_price');
+
+        $checkoutAmount = (float) $total;
+        $oldTotal = $totalToday - $checkoutAmount;
+
+        $oldMultiple = floor($oldTotal / 50000);
+        $newMultiple = floor($totalToday / 50000);
+
+        if ($newMultiple > $oldMultiple && $newMultiple > 0) {
+            $reachedAmount = $newMultiple * 50000;
+            $this->dispatch('toast', 
+                message: 'Total transaksi hari ini telah mencapai Rp' . number_format($reachedAmount, 0, ',', '.') . '. Segera cek uang tunai di laci!', 
+                type: 'warning'
+            );
+        }
+
         $this->refreshProducts();
     }
 

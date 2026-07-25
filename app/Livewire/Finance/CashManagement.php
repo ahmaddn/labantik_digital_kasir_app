@@ -194,18 +194,17 @@ class CashManagement extends Component
             $profitExpense = CashTransaction::where('jurusan_id', $activeJurusanId)->where('cash_category_id', $category->id)->where('cash_type', 'keuntungan')->where('type', 'expense')->sum('amount');
             $profitBalance = $profitIncome - $profitExpense;
 
-            // Deduct bagi hasil from the respective sales category
+            $prodCatName = str_replace('Penjualan ', '', $category->name);
             $bagiHasilDeduction = 0;
             if ($category->name !== 'Bagi Hasil Mingguan' && !empty($bagiHasilTransactions)) {
-                $prodCatName = str_replace('Penjualan ', '', $category->name);
                 foreach ($bagiHasilTransactions as $tx) {
                     if (str_contains(strtolower($tx->description), 'kategori:')) {
                         if ($category->name === 'Jurusan Snack & Minuman') {
-                            if (str_contains(strtolower($tx->description), 'makanan') || str_contains(strtolower($tx->description), 'minuman')) {
+                            if (str_contains(strtolower($tx->description), 'makanan') || str_contains(strtolower($tx->description), 'minuman') || str_contains(strtolower($tx->description), 'snack')) {
                                 $bagiHasilDeduction += $tx->amount;
                             }
                         } else {
-                            if (str_contains(strtolower($tx->description), strtolower($prodCatName)) || ($category->name === 'Penjualan Kerupuk' && str_contains(strtolower($tx->description), 'snack'))) {
+                            if (str_contains(strtolower($tx->description), strtolower($prodCatName))) {
                                 $bagiHasilDeduction += $tx->amount;
                             }
                         }

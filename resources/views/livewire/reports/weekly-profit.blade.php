@@ -18,13 +18,14 @@
         </div>
         <div class="flex items-center gap-6">
             @if ($viewMode === 'weekly')
-                <div
-                    class="flex items-center bg-white dark:bg-gray-900 p-2 rounded-[2rem] shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-800">
+                <div x-data="{ start: @entangle('startDate').live, end: @entangle('endDate').live, startInstance: null, endInstance: null }"
+                    x-init="startInstance = flatpickr($refs.startDate, { dateFormat: 'Y-m-d', defaultDate: start, onChange: (s, d) => start = d }); $watch('start', v => startInstance.setDate(v, false)); endInstance = flatpickr($refs.endDate, { dateFormat: 'Y-m-d', defaultDate: end, onChange: (s, d) => end = d }); $watch('end', v => endInstance.setDate(v, false))"
+                    class="flex items-center bg-white dark:bg-gray-900 p-2 rounded-[2rem] shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-800 cursor-pointer">
                     <div class="px-6 py-2">
                         <p class="text-[8px] font-black text-primary-blue uppercase tracking-widest mb-1">DARI TANGGAL
                         </p>
-                        <input type="date" wire:model.live="startDate"
-                            class="bg-transparent border-none p-0 text-[11px] font-black text-gray-800 dark:text-white focus:ring-0 cursor-pointer">
+                        <input x-ref="startDate" type="text" readonly
+                            class="bg-transparent border-none p-0 text-[11px] font-black text-gray-800 dark:text-white focus:ring-0 cursor-pointer w-24">
                     </div>
 
                     <div class="w-10 h-10 flex items-center justify-center">
@@ -37,8 +38,8 @@
                     <div class="px-6 py-2">
                         <p class="text-[8px] font-black text-primary-red uppercase tracking-widest mb-1">SAMPAI TANGGAL
                         </p>
-                        <input type="date" wire:model.live="endDate"
-                            class="bg-transparent border-none p-0 text-[11px] font-black text-gray-800 dark:text-white focus:ring-0 cursor-pointer">
+                        <input x-ref="endDate" type="text" readonly
+                            class="bg-transparent border-none p-0 text-[11px] font-black text-gray-800 dark:text-white focus:ring-0 cursor-pointer w-24">
                     </div>
                 </div>
 
@@ -235,8 +236,8 @@
                         @forelse($reports as $report)
                             <div
                                 class="p-8 bg-gray-50 dark:bg-gray-800/50 rounded-[2.5rem] border border-gray-100 dark:border-gray-700/50 hover:border-primary-blue/30 transition-all group relative">
-                                <button wire:click="confirmDelete({{ $report->id }})"
-                                    class="absolute top-6 right-6 p-2 text-gray-300 hover:text-primary-red opacity-0 group-hover:opacity-100 transition-all">
+                                <button wire:click.stop="confirmDelete('{{ $report->id }}')"
+                                    class="absolute top-6 right-6 p-2 text-gray-300 hover:text-primary-red opacity-0 group-hover:opacity-100 transition-all z-30 cursor-pointer pointer-events-auto">
                                     <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" width="24"
                                         height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                         stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
@@ -485,7 +486,7 @@
     @endif
 
     <!-- Delete Confirmation Modal -->
-    <div x-data="{ show: @entangle('showDeleteModal') }" x-show="show" x-cloak
+    <div x-data="{ show: @entangle('showDeleteModal').live }" x-show="show" x-cloak
         class="fixed inset-0 z-[300] flex items-center justify-center p-6 bg-gray-900/60 backdrop-blur-sm"
         x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0"
         x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-200"

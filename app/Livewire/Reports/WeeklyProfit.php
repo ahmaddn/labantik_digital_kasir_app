@@ -77,13 +77,35 @@ class WeeklyProfit extends Component
         $monthName = $weekEnd->translatedFormat('F Y');
 
         // Calculate total profit (Including shop's share from supplier products)
-        $totalProfit = Transaction::whereBetween('transacted_at', [
+        $systemProfit = Transaction::whereBetween('transacted_at', [
             $weekStart->startOfDay()->toDateTimeString(),
             $weekEnd->endOfDay()->toDateTimeString(),
         ])
             ->where('jurusan_id', $activeJurusanId)
             ->whereIn('status', ['uang_diterima', 'belum_kembalian'])
             ->sum(DB::raw('unit_profit * quantity'));
+
+        // Calculate total shortage from daily recaps
+        $dailyRecaps = \App\Models\DailyRecap::whereBetween('date', [$weekStart->toDateString(), $weekEnd->toDateString()])
+            ->where('jurusan_id', $activeJurusanId)
+            ->get();
+
+        $totalShortage = 0;
+        $totalSurplus = 0;
+        foreach ($dailyRecaps as $recap) {
+            $dayTxs = Transaction::whereDate('transacted_at', $recap->date)
+                ->where('jurusan_id', $activeJurusanId)
+                ->get();
+            $totalRevenueReal = $dayTxs->whereIn('status', ['uang_diterima', 'belum_kembalian'])->sum('total_price');
+            $diff = ((float) $recap->actual_cash - (float) ($recap->retained_change_cash ?? 0)) - (float) $totalRevenueReal;
+            if ($diff < 0) {
+                $totalShortage += abs($diff);
+            } else {
+                $totalSurplus += $diff;
+            }
+        }
+
+        $totalProfit = $systemProfit - $totalShortage + $totalSurplus;
 
         if ($totalProfit <= 0) {
             $this->dispatch('toast', message: 'Tidak ada keuntungan pada periode ini.', type: 'error');
@@ -111,13 +133,16 @@ class WeeklyProfit extends Component
             $data
         );
 
-        // Fetch contributors for this week grouped by user and product category
-        $adminContributions = Transaction::join('products', 'transactions.product_id', '=', 'products.id')
+        // Fetch contributors for this week grouped by user and product category/supplier
+        $adminContributionsRaw = Transaction::join('products', 'transactions.product_id', '=', 'products.id')
             ->join('product_categories', 'products.category_id', '=', 'product_categories.id')
+            ->leftJoin('suppliers', 'products.supplier_id', '=', 'suppliers.id')
             ->select(
                 'transactions.user_id',
                 'products.category_id',
                 'product_categories.name as category_name',
+                'products.supplier_id',
+                'suppliers.name as supplier_name',
                 DB::raw('SUM(transactions.unit_profit * transactions.quantity) as user_profit')
             )
             ->whereBetween('transactions.transacted_at', [
@@ -126,8 +151,24 @@ class WeeklyProfit extends Component
             ])
             ->where('transactions.jurusan_id', $activeJurusanId)
             ->whereIn('transactions.status', ['uang_diterima', 'belum_kembalian'])
-            ->groupBy('transactions.user_id', 'products.category_id', 'product_categories.name')
+            ->groupBy('transactions.user_id', 'products.category_id', 'product_categories.name', 'products.supplier_id', 'suppliers.name')
             ->get();
+
+        $adminContributions = [];
+        foreach ($adminContributionsRaw as $contrib) {
+            $contribUser = \App\Models\User::find($contrib->user_id);
+            $categoryNameClean = trim($contrib->supplier_id ? $contrib->supplier_name : $contrib->category_name);
+            
+            $adminContributions[] = (object) [
+                'user' => $contribUser,
+                'user_profit' => $contrib->user_profit,
+                'category_name' => $categoryNameClean,
+                'supplier_id' => $contrib->supplier_id,
+            ];
+        }
+
+        // Scale factor for contributions
+        $scaleFactor = ($systemProfit > 0) ? ($totalProfit / $systemProfit) : 1;
 
         // Delete old postings for this period first to prevent duplicates on regeneration
         $descriptionPattern = 'Bagi Hasil Mingguan%Periode '.$weekStart->format('d/m/Y').' s.d '.$weekEnd->format('d/m/Y').'%';
@@ -137,17 +178,19 @@ class WeeklyProfit extends Component
 
         foreach ($adminContributions as $contrib) {
             $userName = $contrib->user ? $contrib->user->name : 'Unknown User';
-            $userShare = $contrib->user_profit * 0.5;
+            $userShare = ($contrib->user_profit * $scaleFactor) * 0.5;
 
             if ($userShare > 0) {
                 $categoryNameClean = trim($contrib->category_name);
                 $categoryNameLower = strtolower($categoryNameClean);
-                if ($categoryNameLower === 'makanan' || $categoryNameLower === 'minuman' || $categoryNameLower === 'makanan & minuman' || $categoryNameLower === 'makanan dan minuman') {
-                    $cashCategoryName = 'Jurusan Snack & Minuman';
-                } elseif ($categoryNameLower === 'snack') {
-                    $cashCategoryName = 'Penjualan Kerupuk';
-                } else {
+                if ($contrib->supplier_id) {
                     $cashCategoryName = 'Penjualan '.$categoryNameClean;
+                } else {
+                    if ($categoryNameLower === 'makanan' || $categoryNameLower === 'minuman' || $categoryNameLower === 'makanan & minuman' || $categoryNameLower === 'makanan dan minuman' || $categoryNameLower === 'snack') {
+                        $cashCategoryName = 'Jurusan Snack & Minuman';
+                    } else {
+                        $cashCategoryName = 'Penjualan '.$categoryNameClean;
+                    }
                 }
 
                 $catPenjualan = CashCategory::firstOrCreate(
@@ -193,7 +236,29 @@ class WeeklyProfit extends Component
             ')
             ->first();
 
-        $currentProfit = $weeklyData->internal_profit ?? 0;
+        $systemProfit = $weeklyData->internal_profit ?? 0;
+
+        // Calculate total shortage from daily recaps for the current week
+        $dailyRecaps = \App\Models\DailyRecap::whereBetween('date', [$weekStart->toDateString(), $weekEnd->toDateString()])
+            ->where('jurusan_id', $activeJurusanId)
+            ->get();
+
+        $totalShortage = 0;
+        $totalSurplus = 0;
+        foreach ($dailyRecaps as $recap) {
+            $dayTxs = Transaction::whereDate('transacted_at', $recap->date)
+                ->where('jurusan_id', $activeJurusanId)
+                ->get();
+            $totalRevenueReal = $dayTxs->whereIn('status', ['uang_diterima', 'belum_kembalian'])->sum('total_price');
+            $diff = ((float) $recap->actual_cash - (float) ($recap->retained_change_cash ?? 0)) - (float) $totalRevenueReal;
+            if ($diff < 0) {
+                $totalShortage += abs($diff);
+            } else {
+                $totalSurplus += $diff;
+            }
+        }
+
+        $currentProfit = $systemProfit - $totalShortage + $totalSurplus;
         $totalRevenue = $weeklyData->total_revenue ?? 0;
         $supplierHak = $weeklyData->supplier_hak ?? 0;
 
@@ -207,6 +272,11 @@ class WeeklyProfit extends Component
             ->whereIn('status', ['uang_diterima', 'belum_kembalian'])
             ->groupBy('user_id')
             ->get();
+
+        $scaleFactor = ($systemProfit > 0) ? ($currentProfit / $systemProfit) : 1;
+        foreach ($adminContributions as $contrib) {
+            $contrib->user_profit = $contrib->user_profit * $scaleFactor;
+        }
 
         // Monthly Summary Logic - Filter by month and current year
         $monthName = Carbon::createFromDate($this->currentYear, $this->selectedMonth, 1)->translatedFormat('F Y');

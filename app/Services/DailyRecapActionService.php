@@ -39,7 +39,7 @@ class DailyRecapActionService
             return [false, 'Lakukan audit uang kas fisik terlebih dahulu sebelum melakukan posting!'];
         }
 
-        $allTransactions = Transaction::with(['product.category'])
+        $allTransactions = Transaction::with(['product.category', 'product.supplier'])
             ->whereDate('transacted_at', $date)
             ->when($activeJurusanId, function ($q) use ($activeJurusanId) {
                 return $q->where('jurusan_id', $activeJurusanId);
@@ -56,11 +56,14 @@ class DailyRecapActionService
             ->whereNotNull('supplier_id')
             ->sum(fn ($tx) => ($tx->unit_price - $tx->unit_profit) * $tx->quantity);
 
+        $totalProfit = $allTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->sum(fn ($tx) => $tx->unit_profit * $tx->quantity);
+
         $diff = ((float) $recap->actual_cash - (float) ($recap->retained_change_cash ?? 0)) - (float) $totalRevenueReal;
 
-        $grouped = $allTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->groupBy('product.category_id');
+        $grouped = $allTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])
+            ->groupBy(fn($tx) => $tx->supplier_id ? 'supplier_' . $tx->supplier_id : 'category_' . ($tx->product->category_id ?? 'other'));
 
-        DB::transaction(function () use ($grouped, $totalSupplierHak, $diff, $activeJurusanId, $date, $recap) {
+        DB::transaction(function () use ($grouped, $totalSupplierHak, $diff, $activeJurusanId, $date, $recap, $totalProfit) {
             CashTransaction::where('date', $date)
                 ->where('jurusan_id', $activeJurusanId)
                 ->where(function ($q) {
@@ -69,18 +72,22 @@ class DailyRecapActionService
                 })
                 ->delete();
 
-            foreach ($grouped as $categoryId => $txs) {
+            foreach ($grouped as $key => $txs) {
                 $firstTx = $txs->first();
-                $categoryName = $firstTx->product->category->name ?? 'Lainnya';
-                $categoryNameClean = trim($categoryName);
-
-                $categoryNameLower = strtolower($categoryNameClean);
-                if ($categoryNameLower === 'makanan' || $categoryNameLower === 'minuman' || $categoryNameLower === 'makanan & minuman' || $categoryNameLower === 'makanan dan minuman') {
-                    $cashCategoryName = 'Jurusan Snack & Minuman';
-                } elseif ($categoryNameLower === 'snack') {
-                    $cashCategoryName = 'Penjualan Kerupuk';
-                } else {
+                if (str_starts_with($key, 'supplier_')) {
+                    $supplierName = $firstTx->product->supplier->name ?? 'Supplier';
+                    $categoryNameClean = trim($supplierName);
                     $cashCategoryName = 'Penjualan '.$categoryNameClean;
+                } else {
+                    $categoryName = $firstTx->product->category->name ?? 'Lainnya';
+                    $categoryNameClean = trim($categoryName);
+
+                    $categoryNameLower = strtolower($categoryNameClean);
+                    if ($categoryNameLower === 'makanan' || $categoryNameLower === 'minuman' || $categoryNameLower === 'makanan & minuman' || $categoryNameLower === 'makanan dan minuman' || $categoryNameLower === 'snack') {
+                        $cashCategoryName = 'Jurusan Snack & Minuman';
+                    } else {
+                        $cashCategoryName = 'Penjualan '.$categoryNameClean;
+                    }
                 }
 
                 $catPenjualan = CashCategory::firstOrCreate(
@@ -88,7 +95,6 @@ class DailyRecapActionService
                 );
 
                 $catModalTotal = $txs->sum(fn ($tx) => ($tx->unit_price - $tx->unit_profit) * $tx->quantity);
-
                 $catProfit = $txs->sum(fn ($tx) => $tx->unit_profit * $tx->quantity);
 
                 if ($catModalTotal > 0) {
@@ -122,15 +128,33 @@ class DailyRecapActionService
                         ]
                     );
                 }
+
+                if ($diff < 0 && $totalProfit > 0) {
+                    $reduction = abs($diff) * ($catProfit / $totalProfit);
+                    if ($reduction > 0) {
+                        CashTransaction::updateOrCreate(
+                            [
+                                'date' => $date,
+                                'jurusan_id' => $activeJurusanId,
+                                'description' => 'Penyesuaian Selisih Kurang Keuntungan '.$categoryNameClean.' (Sistem)',
+                            ],
+                            [
+                                'cash_type' => 'keuntungan',
+                                'cash_category_id' => $catPenjualan->id,
+                                'type' => 'expense',
+                                'amount' => $reduction,
+                            ]
+                        );
+                    }
+                }
             }
 
-            if ($diff !== 0) {
+            if ($diff > 0) {
                 $catPenjualanUmum = CashCategory::firstOrCreate(
                     ['name' => 'Penjualan Umum', 'jurusan_id' => $activeJurusanId]
                 );
 
-                $type = $diff < 0 ? 'expense' : 'income';
-                $baseDescription = $diff < 0 ? 'Penyesuaian Selisih Kurang Uang Kas' : 'Penyesuaian Selisih Lebih Uang Kas';
+                $baseDescription = 'Penyesuaian Selisih Lebih Uang Kas';
                 $description = (! empty($recap->cash_note)) ? $baseDescription.' ('.$recap->cash_note.')' : $baseDescription;
 
                 CashTransaction::updateOrCreate(
@@ -142,8 +166,8 @@ class DailyRecapActionService
                     [
                         'cash_type' => 'keuntungan',
                         'cash_category_id' => $catPenjualanUmum->id,
-                        'type' => $type,
-                        'amount' => abs($diff),
+                        'type' => 'income',
+                        'amount' => $diff,
                     ]
                 );
             }
