@@ -113,6 +113,17 @@
         return colors[name.toUpperCase()] || colors['DEFAULT'];
     },
 
+    getCategoryBorderColor(name) {
+        const borders = {
+            'SNACK': 'border-t-4 border-t-primary-yellow',
+            'MINUMAN': 'border-t-4 border-t-primary-blue',
+            'MAKANAN': 'border-t-4 border-t-primary-red',
+            'ESKRIM': 'border-t-4 border-t-purple-500',
+            'DEFAULT': 'border-t-4 border-t-gray-400'
+        };
+        return borders[name.toUpperCase()] || borders['DEFAULT'];
+    },
+
     checkout() {
         if (this.loading) return;
         this.loading = true;
@@ -135,6 +146,12 @@
 }" x-init="if (darkMode) document.documentElement.classList.add('dark');
 else document.documentElement.classList.remove('dark');
 
+// Autofocus search on load
+$nextTick(() => {
+    const searchInput = document.getElementById('pos-search-input');
+    if (searchInput) searchInput.focus();
+});
+
 // Setup event listeners that persist even after idle
 const gridContainer = document.querySelector('[data-product-grid]');
 if (gridContainer) {
@@ -152,7 +169,9 @@ document.addEventListener('keydown', (e) => {
 });"
     class="flex flex-col lg:flex-row h-screen w-full bg-slate-50 dark:bg-dark-bg overflow-hidden font-outfit relative"
     x-on:stock-saved.window="products = $event.detail.products"
-    x-on:product-click="handleProductClick($event.detail.event)">
+    x-on:product-click="handleProductClick($event.detail.event)"
+    x-on:keydown.window.escape="search = ''; $nextTick(() => { const el = document.getElementById('pos-search-input'); if (el) el.focus(); })"
+    x-on:keydown.window.prevent.slash="if (document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') { $nextTick(() => { const el = document.getElementById('pos-search-input'); if (el) el.focus(); }) }">
 
     <!-- Global Loading Indicator -->
     <div wire:loading.flex
@@ -201,7 +220,7 @@ document.addEventListener('keydown', (e) => {
                 </div>
 
                 <div class="flex-1 w-full max-w-lg">
-                    <input type="text" x-model="search" placeholder="CARI MENU (INSTAN)..."
+                    <input type="text" id="pos-search-input" x-ref="searchInput" x-model="search" placeholder="CARI MENU (INSTAN)..."
                         class="nb-input w-full p-3 text-sm uppercase placeholder:text-gray-400 bg-white dark:bg-slate-800 border-white shadow-none focus:ring-0">
                 </div>
 
@@ -279,18 +298,22 @@ document.addEventListener('keydown', (e) => {
                 <template x-for="product in filteredProducts" :key="product.id">
                     <button type="button" data-add-to-cart :data-product-id="product.id"
                         :disabled="{{ $isSessionFinished ? 'true' : 'false' }}"
+                        :class="getCategoryBorderColor(product.category_name)"
                         class="nb-card nb-card-hover group p-0 text-left overflow-hidden flex flex-col h-full bg-white dark:bg-slate-900">
                         <div
                             class="p-3 bg-gray-50 dark:bg-slate-800 border-b-[var(--nb-border)] border-black dark:border-slate-800 flex items-center justify-between">
                             <span :class="getCategoryColor(product.category_name)"
                                 class="text-[9px] font-black px-2 py-0.5 uppercase tracking-widest border-2"
                                 x-text="product.category_name"></span>
-                            <span
-                                class="text-[8px] font-black border-2 border-black dark:border-slate-700 px-2 py-0.5 uppercase tracking-widest dark:text-slate-400">READY</span>
+                            <span x-show="product.available_stock > 0"
+                                class="text-[8px] font-black border-2 border-black dark:border-slate-700 px-2 py-0.5 uppercase tracking-widest text-emerald-600 dark:text-emerald-400"
+                                x-text="'STOK: ' + product.available_stock"></span>
+                            <span x-show="product.available_stock <= 0"
+                                class="text-[8px] font-black border-2 border-black dark:border-slate-700 px-2 py-0.5 uppercase tracking-widest text-primary-red dark:text-rose-400">HABIS</span>
                         </div>
                         <div class="p-5 flex-1">
                             <h3 x-text="product.name"
-                                class="text-sm font-black uppercase leading-tight mb-3 dark:text-white line-clamp-2">
+                                class="text-lg font-black uppercase leading-tight mb-3 dark:text-white line-clamp-2">
                             </h3>
                             <div class="flex items-baseline gap-1">
                                 <span

@@ -22,6 +22,29 @@ class CashTransaction extends Model
         'reference',
     ];
 
+    protected static function booted()
+    {
+        static::saved(function ($transaction) {
+            if ($transaction->jurusan_id) {
+                \Illuminate\Support\Facades\Cache::forget('cash_balances_' . $transaction->jurusan_id);
+                if ($transaction->date) {
+                    $month = \Carbon\Carbon::parse($transaction->date)->format('Y-m');
+                    \Illuminate\Support\Facades\Cache::forget('cash_monthly_stats_' . $transaction->jurusan_id . '_' . $month);
+                }
+            }
+        });
+
+        static::deleted(function ($transaction) {
+            if ($transaction->jurusan_id) {
+                \Illuminate\Support\Facades\Cache::forget('cash_balances_' . $transaction->jurusan_id);
+                if ($transaction->date) {
+                    $month = \Carbon\Carbon::parse($transaction->date)->format('Y-m');
+                    \Illuminate\Support\Facades\Cache::forget('cash_monthly_stats_' . $transaction->jurusan_id . '_' . $month);
+                }
+            }
+        });
+    }
+
     public function jurusan(): BelongsTo
     {
         return $this->belongsTo(Jurusan::class);

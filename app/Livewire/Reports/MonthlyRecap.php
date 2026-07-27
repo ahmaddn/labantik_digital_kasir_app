@@ -3,6 +3,8 @@
 namespace App\Livewire\Reports;
 
 use App\Models\Transaction;
+use App\Models\DailyRecap;
+use App\Models\CashTransaction;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
@@ -29,30 +31,42 @@ class MonthlyRecap extends Component
         }
     }
 
-    public function exportExcel()
+    private function getRecapData($activeJurusanId)
     {
-        $query = Transaction::with(['product.category'])
-            ->whereMonth('transacted_at', $this->selectedMonth)
-            ->whereYear('transacted_at', $this->selectedYear);
-
-        $allTransactions = $query->get();
-
-        $activeJurusanId = session('active_jurusan_id');
-        $monthlyExpenses = \App\Models\CashTransaction::where('jurusan_id', $activeJurusanId)
+        $monthlyExpenses = CashTransaction::where('jurusan_id', $activeJurusanId)
             ->whereYear('date', $this->selectedYear)
             ->whereMonth('date', $this->selectedMonth)
             ->where('type', 'expense')
             ->sum('amount');
 
-        $totalRevenueAll = max(0, $allTransactions->sum('total_price') - $monthlyExpenses);
-        $totalRevenueReal = max(0, $allTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->sum('total_price') - $monthlyExpenses);
-        $totalSupplierHak = $allTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])
-            ->whereNotNull('supplier_id')
-            ->sum(fn($tx) => ($tx->unit_price - $tx->unit_profit) * $tx->quantity);
+        // 1. Calculate monthly aggregates
+        $aggregates = Transaction::whereMonth('transacted_at', $this->selectedMonth)
+            ->whereYear('transacted_at', $this->selectedYear)
+            ->when($activeJurusanId, function ($q) use ($activeJurusanId) {
+                return $q->where('jurusan_id', $activeJurusanId);
+            })
+            ->selectRaw("
+                SUM(total_price) as total_revenue_all,
+                SUM(CASE WHEN status IN ('uang_diterima', 'belum_kembalian') THEN total_price ELSE 0 END) as total_revenue_real,
+                SUM(CASE WHEN status IN ('uang_diterima', 'belum_kembalian') AND supplier_id IS NOT NULL THEN (unit_price - unit_profit) * quantity ELSE 0 END) as total_supplier_hak,
+                SUM(CASE WHEN status IN ('uang_diterima', 'belum_kembalian') THEN unit_profit * quantity ELSE 0 END) as total_profit,
+                SUM(CASE WHEN status IN ('uang_diterima', 'belum_kembalian') THEN (unit_price - unit_profit) * quantity ELSE 0 END) as total_modal,
+                COUNT(CASE WHEN status IN ('uang_diterima', 'belum_kembalian') THEN 1 END) as total_transactions,
+                COUNT(DISTINCT DATE(transacted_at)) as days_count
+            ")
+            ->first();
+
+        if (!$aggregates || !$aggregates->total_transactions) {
+            return null;
+        }
+
+        $totalRevenueAll = max(0, ($aggregates->total_revenue_all ?? 0) - $monthlyExpenses);
+        $totalRevenueReal = max(0, ($aggregates->total_revenue_real ?? 0) - $monthlyExpenses);
+        $totalSupplierHak = $aggregates->total_supplier_hak ?? 0;
         $totalInternalRevenue = max(0, $totalRevenueReal - $totalSupplierHak);
-        $totalProfit = max(0, $allTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->sum(fn($tx) => $tx->unit_profit * $tx->quantity) - $monthlyExpenses);
-        $totalModal = $allTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->sum(fn($tx) => ($tx->unit_price - $tx->unit_profit) * $tx->quantity);
-        $daysCount = $allTransactions->pluck('transacted_at')->map(fn($date) => Carbon::parse($date)->format('Y-m-d'))->unique()->count();
+        $totalProfit = max(0, ($aggregates->total_profit ?? 0) - $monthlyExpenses);
+        $totalModal = $aggregates->total_modal ?? 0;
+        $daysCount = $aggregates->days_count ?? 1;
 
         $recap = (object) [
             'total_revenue_all' => $totalRevenueAll,
@@ -60,63 +74,124 @@ class MonthlyRecap extends Component
             'total_internal_revenue' => $totalInternalRevenue,
             'total_profit' => $totalProfit,
             'total_modal' => $totalModal,
-            'total_transactions' => $allTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->count(),
+            'total_transactions' => $aggregates->total_transactions ?? 0,
             'days_count' => $daysCount ?: 1
         ];
 
+        // 2. Fetch daily breakdown with profit calculated in DB
         $dailyBreakdown = Transaction::selectRaw('
                 DATE(transacted_at) as date,
                 COUNT(*) as total_transactions,
                 SUM(total_price) as total_revenue_all,
-                SUM(CASE WHEN status IN ("uang_diterima", "belum_kembalian") THEN total_price ELSE 0 END) as total_revenue_real
+                SUM(CASE WHEN status IN ("uang_diterima", "belum_kembalian") THEN total_price ELSE 0 END) as total_revenue_real,
+                SUM(CASE WHEN status IN ("uang_diterima", "belum_kembalian") THEN unit_profit * quantity ELSE 0 END) as total_profit
             ')
             ->whereMonth('transacted_at', $this->selectedMonth)
             ->whereYear('transacted_at', $this->selectedYear)
+            ->when($activeJurusanId, function ($q) use ($activeJurusanId) {
+                return $q->where('jurusan_id', $activeJurusanId);
+            })
             ->groupBy('date')
             ->orderBy('date', 'desc')
             ->get();
 
-        foreach ($dailyBreakdown as $day) {
-            $dayTransactions = Transaction::whereDate('transacted_at', $day->date)->whereIn('status', ['uang_diterima', 'belum_kembalian'])->get();
-            $day->total_profit = $dayTransactions->sum(fn($tx) => $tx->unit_profit * $tx->quantity);
-            
-            // Load daily recap audit values
-            $recapModel = \App\Models\DailyRecap::whereDate('date', $day->date)->first();
-            $day->actual_cash = $recapModel ? $recapModel->actual_cash : null;
-            $day->retained_change_cash = $recapModel ? $recapModel->retained_change_cash : 0;
-            
-            $previousRecap = \App\Models\DailyRecap::where('jurusan_id', session('active_jurusan_id'))
-                ->where('date', '<', $day->date)
+        // 3. Load daily recaps and calculate starting change cash in-memory
+        $dates = $dailyBreakdown->pluck('date')->sort()->values();
+        $firstDate = $dates->first();
+        
+        $initialPrev = null;
+        if ($firstDate) {
+            $initialPrev = DailyRecap::where('jurusan_id', $activeJurusanId)
+                ->where('date', '<', $firstDate)
                 ->orderBy('date', 'desc')
                 ->first();
-            $day->starting_change_cash = $previousRecap ? ($previousRecap->retained_change_cash ?? 0) : 0;
         }
 
-        $categoryRecap = $allTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->groupBy(fn($tx) => $tx->product->category->name ?? 'Tanpa Kategori')
-            ->map(function($group) {
-                return (object) [
-                    'revenue' => $group->sum('total_price'),
-                    'profit' => $group->sum(fn($tx) => $tx->unit_profit * $tx->quantity),
-                    'modal' => $group->sum(fn($tx) => ($tx->unit_price - $tx->unit_profit) * $tx->quantity),
-                    'qty' => $group->sum('quantity'),
-                ];
-            })->sortByDesc('revenue');
+        $recapsMap = [];
+        $recapsWithPrevious = [];
+        if ($firstDate) {
+            $lastDate = $dates->last();
+            $allRecaps = DailyRecap::where('jurusan_id', $activeJurusanId)
+                ->whereBetween('date', [$firstDate, $lastDate])
+                ->orderBy('date')
+                ->get();
 
-        $monthName = \Carbon\Carbon::create(null, $this->selectedMonth)->translatedFormat('F') . ' ' . $this->selectedYear;
+            foreach ($allRecaps as $r) {
+                $recapsMap[Carbon::parse($r->date)->toDateString()] = $r;
+            }
+
+            $prevChangeCash = $initialPrev ? ($initialPrev->retained_change_cash ?? 0) : 0;
+            foreach ($allRecaps as $r) {
+                $recapsWithPrevious[Carbon::parse($r->date)->toDateString()] = $prevChangeCash;
+                $prevChangeCash = $r->retained_change_cash ?? 0;
+            }
+        }
+
+        foreach ($dailyBreakdown as $day) {
+            $dateStr = Carbon::parse($day->date)->toDateString();
+            $day->month_week = Carbon::parse($day->date)->weekOfMonth;
+
+            // Load daily recap audit values from memory map
+            $recapModel = $recapsMap[$dateStr] ?? null;
+            $day->actual_cash = $recapModel ? $recapModel->actual_cash : null;
+            $day->retained_change_cash = $recapModel ? $recapModel->retained_change_cash : 0;
+            $day->starting_change_cash = $recapsWithPrevious[$dateStr] ?? 0;
+        }
+
+        // 4. Category breakdown directly from DB
+        $categoryRecap = Transaction::whereMonth('transacted_at', $this->selectedMonth)
+            ->whereYear('transacted_at', $this->selectedYear)
+            ->when($activeJurusanId, function ($q) use ($activeJurusanId) {
+                return $q->where('jurusan_id', $activeJurusanId);
+            })
+            ->whereIn('status', ['uang_diterima', 'belum_kembalian'])
+            ->join('products', 'transactions.product_id', '=', 'products.id')
+            ->leftJoin('product_categories', 'products.category_id', '=', 'product_categories.id')
+            ->selectRaw("
+                product_categories.id as id,
+                COALESCE(product_categories.name, 'Tanpa Kategori') as name,
+                SUM(transactions.total_price) as revenue,
+                SUM(transactions.unit_profit * transactions.quantity) as profit,
+                SUM((transactions.unit_price - transactions.unit_profit) * transactions.quantity) as modal,
+                SUM(transactions.quantity) as qty
+            ")
+            ->groupBy('product_categories.id', 'product_categories.name')
+            ->orderByDesc('revenue')
+            ->get();
+
+        return [
+            'recap' => $recap,
+            'categoryRecap' => $categoryRecap,
+            'dailyBreakdown' => $dailyBreakdown
+        ];
+    }
+
+    public function exportExcel()
+    {
+        $activeJurusanId = session('active_jurusan_id');
+        $data = $this->getRecapData($activeJurusanId);
+
+        if (!$data) {
+            return;
+        }
+
+        $monthName = Carbon::create(null, $this->selectedMonth)->translatedFormat('F') . ' ' . $this->selectedYear;
         $filename = 'Rekap_Bulanan_' . str_replace(' ', '_', $monthName) . '.xlsx';
 
-        return \Maatwebsite\Excel\Facades\Excel::download(new \App\Exports\MonthlyRecapExport($recap, $categoryRecap, $dailyBreakdown, $monthName), $filename);
+        return \Maatwebsite\Excel\Facades\Excel::download(new \App\Exports\MonthlyRecapExport(
+            $data['recap'], 
+            $data['categoryRecap'], 
+            $data['dailyBreakdown'], 
+            $monthName
+        ), $filename);
     }
 
     public function render()
     {
-        $query = Transaction::with(['product.category'])
-            ->whereMonth('transacted_at', $this->selectedMonth)
-            ->whereYear('transacted_at', $this->selectedYear);
+        $activeJurusanId = session('active_jurusan_id');
+        $data = $this->getRecapData($activeJurusanId);
 
-        $allTransactions = $query->get();
-
-        if ($allTransactions->isEmpty()) {
+        if (!$data) {
             return view('livewire.reports.monthly-recap', [
                 'recap' => null,
                 'categoryRecap' => [],
@@ -124,83 +199,10 @@ class MonthlyRecap extends Component
             ])->layout('layouts.app', ['title' => 'Rekap Bulanan']);
         }
 
-        $activeJurusanId = session('active_jurusan_id');
-        $monthlyExpenses = \App\Models\CashTransaction::where('jurusan_id', $activeJurusanId)
-            ->whereYear('date', $this->selectedYear)
-            ->whereMonth('date', $this->selectedMonth)
-            ->where('type', 'expense')
-            ->sum('amount');
-
-        $totalRevenueAll = max(0, $allTransactions->sum('total_price') - $monthlyExpenses);
-        $totalRevenueReal = max(0, $allTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->sum('total_price') - $monthlyExpenses);
-        
-        $totalSupplierHak = $allTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])
-            ->whereNotNull('supplier_id')
-            ->sum(fn($tx) => ($tx->unit_price - $tx->unit_profit) * $tx->quantity);
-            
-        $totalInternalRevenue = max(0, $totalRevenueReal - $totalSupplierHak);
-
-        $totalProfit = max(0, $allTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->sum(fn($tx) => $tx->unit_profit * $tx->quantity) - $monthlyExpenses);
-        $totalModal = $allTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->sum(fn($tx) => ($tx->unit_price - $tx->unit_profit) * $tx->quantity);
-        $daysCount = $allTransactions->pluck('transacted_at')->map(fn($date) => Carbon::parse($date)->format('Y-m-d'))->unique()->count();
-
-        $recap = (object) [
-            'total_revenue_all' => $totalRevenueAll,
-            'total_revenue_real' => $totalRevenueReal,
-            'total_internal_revenue' => $totalInternalRevenue,
-            'total_profit' => $totalProfit,
-            'total_modal' => $totalModal,
-            'total_transactions' => $allTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->count(),
-            'days_count' => $daysCount ?: 1
-        ];
-
-        $dailyBreakdown = Transaction::selectRaw('
-                DATE(transacted_at) as date,
-                COUNT(*) as total_transactions,
-                SUM(total_price) as total_revenue_all,
-                SUM(CASE WHEN status IN ("uang_diterima", "belum_kembalian") THEN total_price ELSE 0 END) as total_revenue_real
-            ')
-            ->whereMonth('transacted_at', $this->selectedMonth)
-            ->whereYear('transacted_at', $this->selectedYear)
-            ->groupBy('date')
-            ->orderBy('date', 'desc')
-            ->get();
-
-        // Add profit and physical cash audit data manually to breakdown
-        foreach ($dailyBreakdown as $day) {
-            $dayTransactions = Transaction::whereDate('transacted_at', $day->date)->whereIn('status', ['uang_diterima', 'belum_kembalian'])->get();
-            $day->total_profit = $dayTransactions->sum(fn($tx) => $tx->unit_profit * $tx->quantity);
-            $day->month_week = Carbon::parse($day->date)->weekOfMonth;
-
-            // Load daily recap audit values
-            $recapModel = \App\Models\DailyRecap::whereDate('date', $day->date)->first();
-            $day->actual_cash = $recapModel ? $recapModel->actual_cash : null;
-            $day->retained_change_cash = $recapModel ? $recapModel->retained_change_cash : 0;
-
-            $previousRecap = \App\Models\DailyRecap::where('jurusan_id', session('active_jurusan_id'))
-                ->where('date', '<', $day->date)
-                ->orderBy('date', 'desc')
-                ->first();
-            $day->starting_change_cash = $previousRecap ? ($previousRecap->retained_change_cash ?? 0) : 0;
-        }
-
-        $categoryRecap = $allTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->groupBy(fn($tx) => $tx->product->category_id ?? 'null')
-            ->map(function($group) {
-                $first = $group->first();
-                return (object) [
-                    'id' => $first->product->category_id ?? 'null',
-                    'name' => $first->product->category->name ?? 'Tanpa Kategori',
-                    'revenue' => $group->sum('total_price'),
-                    'profit' => $group->sum(fn($tx) => $tx->unit_profit * $tx->quantity),
-                    'modal' => $group->sum(fn($tx) => ($tx->unit_price - $tx->unit_profit) * $tx->quantity),
-                    'qty' => $group->sum('quantity'),
-                ];
-            })->sortByDesc('revenue');
-
         return view('livewire.reports.monthly-recap', [
-            'recap' => $recap,
-            'categoryRecap' => $categoryRecap,
-            'dailyBreakdown' => $dailyBreakdown
+            'recap' => $data['recap'],
+            'categoryRecap' => $data['categoryRecap'],
+            'dailyBreakdown' => $data['dailyBreakdown']
         ])->layout('layouts.app', ['title' => 'Rekap Bulanan']);
     }
 }
