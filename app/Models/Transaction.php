@@ -64,4 +64,11 @@ class Transaction extends Model
     {
         return $query->where('status', 'belum_kembalian');
     }
+
+    protected static function booted()
+    {
+        static::addGlobalScope('active', function ($builder) {
+            $builder->where('is_archived', false);
+        });
+    }
 }

@@ -24,6 +24,8 @@ class Transactions extends Component
 
     public $filterJurusan = '';
 
+    public $showArchived = false;
+
     public $successMessage = '';
 
     // Details Modal
@@ -42,7 +44,12 @@ class Transactions extends Component
 
     public $editItems = []; // Array of transaction items for editing
 
-    protected $queryString = ['search', 'filterStatus', 'filterDate', 'filterJurusan'];
+    protected $queryString = ['search', 'filterStatus', 'filterDate', 'filterJurusan', 'showArchived'];
+
+    public function updatedShowArchived()
+    {
+        $this->resetPage();
+    }
 
     public function updatedSearch()
     {
@@ -110,7 +117,7 @@ class Transactions extends Component
             return collect();
         }
 
-        return Transaction::with('product')->where('reference', $this->detailReference)->get();
+        return Transaction::withoutGlobalScope('active')->with('product')->where('reference', $this->detailReference)->get();
     }
 
     public function edit($reference)
@@ -170,8 +177,11 @@ class Transactions extends Component
     public function render()
     {
         $activeJurusanId = session('active_jurusan_id');
-        $query = Transaction::query()
-            ->when($activeJurusanId, function ($q) use ($activeJurusanId) {
+        $query = $this->showArchived 
+            ? Transaction::withoutGlobalScope('active')->where('is_archived', true)
+            : Transaction::query();
+
+        $query->when($activeJurusanId, function ($q) use ($activeJurusanId) {
                 return $q->where('jurusan_id', $activeJurusanId);
             })
             ->when(! $activeJurusanId && $this->filterJurusan, function ($q) {

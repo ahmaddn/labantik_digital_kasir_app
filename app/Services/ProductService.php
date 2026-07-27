@@ -34,19 +34,16 @@ class ProductService
         });
     }
 
-    /**
-     * Create or update a product.
-     */
-    public function saveProduct(?string $editingId, array $data): void
+    public function saveProduct(?string $editingId, array $data): Product
     {
         if ($editingId) {
             $product = Product::find($editingId);
             if ($product) {
                 $product->update($data);
+                return $product;
             }
-        } else {
-            Product::create($data);
         }
+        return Product::create($data);
     }
 
     /**

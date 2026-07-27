@@ -337,6 +337,26 @@ class Kasir extends Component
         return $posQueryService->getProductsForAlpine($today, $activeJurusanId);
     }
 
+    public function saveQuickExpense($amount, $categoryId, $description): void
+    {
+        $activeJurusanId = session('active_jurusan_id');
+        
+        \App\Models\CashTransaction::create([
+            'jurusan_id' => $activeJurusanId,
+            'date' => $this->transactionDate ?: now()->toDateString(),
+            'cash_type' => 'modal',
+            'cash_category_id' => $categoryId,
+            'type' => 'expense',
+            'amount' => (float) $amount,
+            'description' => trim($description) . ' (Sistem - Pengeluaran Cepat)',
+        ]);
+
+        // Invalidate cache
+        \Illuminate\Support\Facades\Cache::forget('cash_balances_' . ($activeJurusanId ?: 'global'));
+
+        $this->dispatch('toast', message: 'Pengeluaran berhasil dicatat!');
+    }
+
     public function render(PosQueryService $posQueryService)
     {
         $today = now()->toDateString();
@@ -348,9 +368,12 @@ class Kasir extends Component
             ->where('actual_cash', '>', 0)
             ->exists();
 
+        $categories = \App\Models\CashCategory::where('jurusan_id', $activeJurusanId)->get();
+
         return view('livewire.pos.kasir', [
             'allProductsJson' => $allProducts,
             'isSessionFinished' => $isSessionFinished,
+            'categories' => $categories,
         ])->layout('layouts.kasir');
     }
 }

@@ -104,6 +104,13 @@
                         <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Saldo</span>
                         <span class="text-lg font-black italic {{ $stat['balance'] >= 0 ? 'text-primary-blue' : 'text-primary-red' }}" :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($stat['balance'], 0, ',', '.') }}</span>
                     </div>
+                    @if($stat['name'] !== 'Bagi Hasil Mingguan')
+                        <div class="mt-3 pt-2 border-t border-dashed border-gray-150 dark:border-gray-700">
+                            <button wire:click="openAdjustModal('{{ $stat['id'] }}', '{{ $stat['name'] }}', {{ $stat['balance'] }})" class="w-full text-center py-2.5 bg-gray-50 hover:bg-primary-blue hover:text-white dark:bg-gray-700/50 dark:hover:bg-primary-blue dark:text-gray-300 dark:hover:text-white text-[9px] font-black uppercase tracking-wider rounded-xl transition-all shadow-sm">
+                                Sesuaikan Saldo Fisik
+                            </button>
+                        </div>
+                    @endif
                 </div>
             </div>
             @empty
@@ -385,4 +392,65 @@
             </div>
         </div>
     </div>
+
+    <!-- Physical Cash Adjustment Modal -->
+    <div 
+        x-data="{ show: @entangle('showAdjustModal') }" 
+        x-show="show" 
+        x-cloak
+        class="fixed inset-0 z-[300] flex items-center justify-center p-6 bg-gray-900/60 backdrop-blur-sm"
+        x-transition:enter="transition ease-out duration-300"
+        x-transition:enter-start="opacity-0"
+        x-transition:enter-end="opacity-100"
+        x-transition:leave="transition ease-in duration-200"
+        x-transition:leave-start="opacity-100"
+        x-transition:leave-end="opacity-0"
+    >
+        <div 
+            @click.away="show = false"
+            class="bg-white dark:bg-gray-900 w-full max-w-lg rounded-[2.5rem] shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-300 border-t-8 border-t-primary-blue"
+        >
+            <div class="p-10 border-b border-gray-100 dark:border-gray-800">
+                <h3 class="text-2xl font-black italic uppercase tracking-tighter text-gray-800 dark:text-white">Sesuaikan Saldo Kas Fisik</h3>
+                <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mt-1">Kategori: {{ $adjustCategoryName }}</p>
+            </div>
+            
+            <div class="p-10 space-y-6">
+                <!-- System Balance -->
+                <div class="bg-gray-50 dark:bg-gray-800/40 p-5 rounded-2xl border border-gray-100 dark:border-gray-800">
+                    <p class="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Saldo Sistem Saat Ini</p>
+                    <p class="text-xl font-black italic text-gray-800 dark:text-white">Rp{{ number_format($adjustSystemBalance, 0, ',', '.') }}</p>
+                </div>
+
+                <!-- Input Physical Cash -->
+                <div>
+                    <label class="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-3">Nominal Uang Kas Fisik Riil (Rp)</label>
+                    <input type="number" wire:model="adjustPhysicalBalance" placeholder="Contoh: 165000"
+                        class="w-full px-6 py-4 bg-gray-50 dark:bg-gray-800/50 border-2 border-gray-200 dark:border-gray-700 focus:border-primary-blue dark:focus:border-primary-blue rounded-2xl focus:ring-0 text-sm font-bold dark:text-white transition-colors">
+                    @error('adjustPhysicalBalance') <span class="text-xs text-primary-red font-bold uppercase tracking-wide mt-2 block">{{ $message }}</span> @enderror
+                </div>
+
+                <!-- Cash Type Classification -->
+                <div>
+                    <label class="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-3">Klasifikasi Akun Selisih</label>
+                    <select wire:model="adjustCashType"
+                        class="w-full px-6 py-4 bg-gray-50 dark:bg-gray-800/50 border-2 border-gray-200 dark:border-gray-700 focus:border-primary-blue dark:focus:border-primary-blue rounded-2xl focus:ring-0 text-sm font-bold dark:text-white transition-colors">
+                        <option value="keuntungan">KAS KEUNTUNGAN (Rekomendasi untuk selisih harian)</option>
+                        <option value="modal">KAS MODAL (Gunakan jika modal fisik bertambah/berkurang)</option>
+                    </select>
+                    @error('adjustCashType') <span class="text-xs text-primary-red font-bold uppercase tracking-wide mt-2 block">{{ $message }}</span> @enderror
+                </div>
+            </div>
+
+            <div class="p-10 bg-gray-50 dark:bg-gray-800/50 flex gap-4">
+                <button @click="show = false" class="flex-1 py-4 bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-2xl font-black text-xs uppercase tracking-widest hover:scale-105 active:scale-95 transition-transform">
+                    Batal
+                </button>
+                <button wire:click="submitAdjustment" class="flex-1 py-4 bg-primary-blue text-white rounded-2xl font-black italic uppercase text-xs tracking-widest shadow-xl shadow-blue-500/20 hover:scale-105 active:scale-95 transition-all">
+                    Simpan Penyesuaian
+                </button>
+            </div>
+        </div>
+    </div>
 </div>
+

@@ -24,6 +24,10 @@ class CashTransaction extends Model
 
     protected static function booted()
     {
+        static::addGlobalScope('active', function ($builder) {
+            $builder->where('is_archived', false);
+        });
+
         static::saved(function ($transaction) {
             if ($transaction->jurusan_id) {
                 \Illuminate\Support\Facades\Cache::forget('cash_balances_' . $transaction->jurusan_id);

@@ -14,6 +14,14 @@
     status: 'uang_diterima',
     note: '',
 
+    showChangeModal: false,
+    lastChangeData: { total: 0, payment: 0, change: 0 },
+    showQuickExpenseModal: false,
+    quickExpenseAmount: '',
+    quickExpenseCategoryId: '',
+    quickExpenseDescription: '',
+    quickExpenseLoading: false,
+
     get filteredProducts() {
         return this.products.filter(p => {
             const matchesSearch = !this.search || p.name.toLowerCase().includes(this.search.toLowerCase());
@@ -127,9 +135,18 @@
     checkout() {
         if (this.loading) return;
         this.loading = true;
+
+        const totalVal = this.total;
+        const paymentVal = this.payment_amount > 0 ? this.payment_amount : this.total;
+        const changeVal = this.change;
+
         this.$wire.checkout(this.cart, this.total, this.change, this.buyer_name, this.status, this.note, this.$wire.transactionDate).then(() => {
             this.clearCart();
             this.loading = false;
+            
+            // Show Change Due Modal
+            this.lastChangeData = { total: totalVal, payment: paymentVal, change: changeVal };
+            this.showChangeModal = true;
         }).catch(() => {
             this.loading = false;
         });
@@ -224,7 +241,13 @@ document.addEventListener('keydown', (e) => {
                         class="nb-input w-full p-3 text-sm uppercase placeholder:text-gray-400 bg-white dark:bg-slate-800 border-white shadow-none focus:ring-0">
                 </div>
 
-                <div class="flex items-center gap-3">
+                 <div class="flex items-center gap-3">
+                    <button @click="showQuickExpenseModal = true" class="nb-btn px-4 py-3 bg-primary-red text-white shadow-none border-2 border-black flex items-center gap-2 hover:scale-105 transition-transform text-xs font-black uppercase tracking-wider">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        Catat Pengeluaran
+                    </button>
                     <button @click="toggleTheme()" class="nb-btn p-3 bg-white dark:bg-dark-soft shadow-none border-2">
                         <svg x-show="!darkMode" class="w-5 h-5 text-black" fill="none" stroke="currentColor"
                             viewBox="0 0 24 24">
@@ -809,6 +832,127 @@ document.addEventListener('keydown', (e) => {
                 class="nb-btn w-full bg-black text-white text-base py-4">MENGERTI</button>
         </div>
     </div>
+
+
+    <!-- Change Due Modal -->
+    <div x-show="showChangeModal" x-cloak 
+        x-on:keydown.window.escape="showChangeModal = false; $nextTick(() => { const el = document.getElementById('pos-search-input'); if (el) el.focus(); })"
+        x-on:keydown.window.enter="if (showChangeModal) { showChangeModal = false; $nextTick(() => { const el = document.getElementById('pos-search-input'); if (el) el.focus(); }); }"
+        class="fixed inset-0 z-[600] flex items-center justify-center p-6">
+        
+        <!-- Backdrop -->
+        <div x-show="showChangeModal" x-transition:enter="transition ease-out duration-300"
+            x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+            x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100"
+            x-transition:leave-end="opacity-0" class="absolute inset-0 bg-white/20 dark:bg-black/40 backdrop-blur-md">
+        </div>
+
+        <!-- Modal Box -->
+        <div x-show="showChangeModal" @click.away="showChangeModal = false; $nextTick(() => { const el = document.getElementById('pos-search-input'); if (el) el.focus(); })"
+            x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 scale-95"
+            x-transition:enter-end="opacity-100 scale-100" x-transition:leave="transition ease-in duration-200"
+            x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95"
+            class="nb-card bg-white dark:bg-dark-soft w-full max-w-md p-10 relative z-10 border-t-8 border-t-primary-blue">
+            
+            <div class="text-center mb-8">
+                <span class="text-[9px] font-black bg-green-500 text-white px-3 py-1 uppercase tracking-widest border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">TRANSAKSI SUKSES</span>
+                <h2 class="text-2xl font-black uppercase italic mt-4 dark:text-white">UANG KEMBALIAN</h2>
+            </div>
+
+            <div class="space-y-4 mb-10">
+                <div class="flex justify-between items-center py-3 border-b-2 border-dashed border-black dark:border-slate-800">
+                    <span class="text-xs font-black uppercase tracking-widest text-slate-400">Total Belanja</span>
+                    <span class="text-lg font-black dark:text-white" x-text="'Rp' + formatRupiah(lastChangeData.total).replace('Rp', '').trim()"></span>
+                </div>
+                <div class="flex justify-between items-center py-3 border-b-2 border-dashed border-black dark:border-slate-800">
+                    <span class="text-xs font-black uppercase tracking-widest text-slate-400">Uang Diterima</span>
+                    <span class="text-lg font-black dark:text-white" x-text="'Rp' + formatRupiah(lastChangeData.payment).replace('Rp', '').trim()"></span>
+                </div>
+                <div class="flex justify-between items-center py-5">
+                    <span class="text-sm font-black uppercase tracking-widest text-slate-500">Kembalian</span>
+                    <span class="text-3xl font-black italic text-green-600 dark:text-emerald-400" x-text="'Rp' + formatRupiah(lastChangeData.change).replace('Rp', '').trim()"></span>
+                </div>
+            </div>
+
+            <button @click="showChangeModal = false; $nextTick(() => { const el = document.getElementById('pos-search-input'); if (el) el.focus(); })"
+                class="nb-btn w-full bg-black text-white text-base py-4 font-black uppercase tracking-widest">TUTUP (ENTER)</button>
+        </div>
+    </div>
+
+
+    <!-- Quick Expense Modal -->
+    <div x-show="showQuickExpenseModal" x-cloak @keydown.window.escape="showQuickExpenseModal = false"
+        class="fixed inset-0 z-[600] flex items-center justify-center p-6">
+        
+        <!-- Backdrop -->
+        <div x-show="showQuickExpenseModal" x-transition:enter="transition ease-out duration-300"
+            x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+            x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100"
+            x-transition:leave-end="opacity-0" class="absolute inset-0 bg-white/20 dark:bg-black/40 backdrop-blur-md">
+        </div>
+
+        <!-- Modal Box -->
+        <div x-show="showQuickExpenseModal" @click.away="showQuickExpenseModal = false"
+            x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 scale-95"
+            x-transition:enter-end="opacity-100 scale-100" x-transition:leave="transition ease-in duration-200"
+            x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95"
+            class="nb-card bg-white dark:bg-dark-soft w-full max-w-md p-10 relative z-10 border-t-8 border-t-primary-red">
+            
+            <div class="text-center mb-8">
+                <span class="text-[9px] font-black bg-primary-red text-white px-3 py-1 uppercase tracking-widest border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">OPERASIONAL</span>
+                <h2 class="text-2xl font-black uppercase italic mt-4 dark:text-white">CATAT PENGELUARAN CEPAT</h2>
+            </div>
+
+            <div class="space-y-5 mb-8">
+                <div>
+                    <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Nominal Pengeluaran (Rp)</label>
+                    <input type="number" x-model="quickExpenseAmount" placeholder="Contoh: 10000"
+                        class="nb-input w-full p-4 text-base font-bold bg-white dark:bg-slate-800 border-2 border-black">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Kategori Kas</label>
+                    <select x-model="quickExpenseCategoryId"
+                        class="nb-input w-full p-4 text-sm font-bold bg-white dark:bg-slate-800 border-2 border-black uppercase">
+                        <option value="">-- Pilihlah Kategori --</option>
+                        @foreach($categories as $cat)
+                            <option value="{{ $cat->id }}">{{ $cat->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Keterangan / Keperluan</label>
+                    <textarea x-model="quickExpenseDescription" placeholder="Contoh: Beli Kantong Plastik Besar" rows="3"
+                        class="nb-input w-full p-4 text-sm font-bold bg-white dark:bg-slate-800 border-2 border-black uppercase"></textarea>
+                </div>
+            </div>
+
+            <div class="flex gap-4">
+                <button type="button" @click="showQuickExpenseModal = false"
+                    class="nb-btn w-1/3 bg-white text-black border-2 border-black hover:bg-slate-100 py-4 font-black uppercase tracking-widest text-xs">BATAL</button>
+                <button type="button" @click="
+                    if (!quickExpenseAmount || !quickExpenseCategoryId || !quickExpenseDescription) {
+                        alert('Harap isi semua kolom!');
+                        return;
+                    }
+                    quickExpenseLoading = true;
+                    $wire.saveQuickExpense(quickExpenseAmount, quickExpenseCategoryId, quickExpenseDescription).then(() => {
+                        showQuickExpenseModal = false;
+                        quickExpenseAmount = '';
+                        quickExpenseCategoryId = '';
+                        quickExpenseDescription = '';
+                        quickExpenseLoading = false;
+                    }).catch(() => {
+                        quickExpenseLoading = false;
+                    });
+                " :disabled="quickExpenseLoading"
+                    class="nb-btn w-2/3 bg-primary-red text-white py-4 font-black uppercase tracking-widest text-xs flex items-center justify-center">
+                    <span x-show="!quickExpenseLoading">SIMPAN</span>
+                    <span x-show="quickExpenseLoading">MENYIMPAN...</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
 
     <script>
         window.addEventListener('transaction-complete', () => {

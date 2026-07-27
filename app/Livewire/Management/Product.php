@@ -37,6 +37,11 @@ class Product extends Component
 
     public ?string $editingId = null;
 
+    // Restock Assistant properties
+    public $restockQty = '';
+    public $totalModalCost = '';
+    public string $activeTab = 'products'; // 'products' | 'grouping'
+
     // Stok harian
     public $stock_product_id = '';
 
@@ -193,6 +198,26 @@ class Product extends Component
         }
     }
 
+    public function updatedRestockQty()
+    {
+        $this->calculateFromRestock();
+    }
+
+    public function updatedTotalModalCost()
+    {
+        $this->calculateFromRestock();
+    }
+
+    protected function calculateFromRestock()
+    {
+        if (is_numeric($this->restockQty) && $this->restockQty > 0 && is_numeric($this->totalModalCost) && $this->totalModalCost >= 0) {
+            $this->modal_price = round((float) $this->totalModalCost / (int) $this->restockQty);
+            if (is_numeric($this->price)) {
+                $this->profit_per_unit = (int) $this->price - (int) $this->modal_price;
+            }
+        }
+    }
+
     public function updatedName(): void
     {
         $this->updateLabel();
@@ -221,6 +246,8 @@ class Product extends Component
             'category_id' => 'required|exists:product_categories,id',
             'supplier_id' => 'nullable|exists:suppliers,id',
             'jurusan_id' => 'nullable|exists:jurusans,id',
+            'restockQty' => 'nullable|numeric|min:1',
+            'totalModalCost' => 'nullable|numeric|min:0',
         ]);
 
         $this->calculateModal();
@@ -238,19 +265,25 @@ class Product extends Component
             'is_active' => (bool) $this->is_active,
         ];
 
-        $service->saveProduct($this->editingId, $data);
+        $product = $service->saveProduct($this->editingId, $data);
+
+        // Save stock if Restock Qty is provided
+        if (is_numeric($this->restockQty) && $this->restockQty > 0) {
+            $today = today()->toDateString();
+            $service->saveStock($product->id, $today, (int) $this->restockQty);
+        }
 
         $msg = $this->editingId ? 'Produk berhasil diperbarui.' : 'Produk berhasil ditambahkan.';
         $this->dispatch('toast', message: $msg);
 
-        $this->reset(['name', 'label', 'price', 'profit_per_unit', 'modal_price', 'category_id', 'supplier_id', 'is_active', 'editingId', 'jurusan_id']);
+        $this->reset(['name', 'label', 'price', 'profit_per_unit', 'modal_price', 'category_id', 'supplier_id', 'is_active', 'editingId', 'jurusan_id', 'restockQty', 'totalModalCost']);
         $this->is_active = true;
         $this->showFormModal = false;
     }
 
     public function openCreateModal(): void
     {
-        $this->reset(['name', 'label', 'price', 'profit_per_unit', 'modal_price', 'category_id', 'supplier_id', 'editingId', 'jurusan_id']);
+        $this->reset(['name', 'label', 'price', 'profit_per_unit', 'modal_price', 'category_id', 'supplier_id', 'editingId', 'jurusan_id', 'restockQty', 'totalModalCost']);
         $this->is_active = true;
         $this->showFormModal = true;
     }
@@ -268,12 +301,14 @@ class Product extends Component
         $this->supplier_id = $product->supplier_id;
         $this->jurusan_id = $product->jurusan_id;
         $this->is_active = (bool) $product->is_active;
+        $this->restockQty = '';
+        $this->totalModalCost = '';
         $this->showFormModal = true;
     }
 
     public function cancelEdit(): void
     {
-        $this->reset(['name', 'label', 'price', 'profit_per_unit', 'modal_price', 'category_id', 'editingId', 'jurusan_id']);
+        $this->reset(['name', 'label', 'price', 'profit_per_unit', 'modal_price', 'category_id', 'editingId', 'jurusan_id', 'restockQty', 'totalModalCost']);
         $this->is_active = true;
         $this->showFormModal = false;
     }
@@ -315,6 +350,48 @@ class Product extends Component
         $this->stock_date = today()->toDateString();
     }
 
+    public function getCashGroupedProducts()
+    {
+        $activeJurusanId = session('active_jurusan_id');
+        $products = ProductModel::with(['category', 'supplier'])
+            ->where('is_active', true)
+            ->when($activeJurusanId, function ($q) use ($activeJurusanId) {
+                return $q->where('jurusan_id', $activeJurusanId);
+            })
+            ->when($this->search, function ($q) {
+                $q->where(function ($sq) {
+                    $sq->where('name', 'like', '%'.$this->search.'%')
+                        ->orWhere('label', 'like', '%'.$this->search.'%')
+                        ->orWhereHas('supplier', function ($subq) {
+                            $subq->where('name', 'like', '%'.$this->search.'%');
+                        });
+                });
+            })
+            ->get();
+
+        $grouped = [];
+
+        foreach ($products as $product) {
+            if ($product->supplier_id) {
+                $categoryName = 'Penjualan ' . trim($product->supplier->name ?? 'Supplier');
+            } else {
+                $categoryNameClean = trim($product->category->name ?? 'Lainnya');
+                $categoryNameLower = strtolower($categoryNameClean);
+                if (in_array($categoryNameLower, ['makanan', 'minuman', 'makanan & minuman', 'makanan dan minuman', 'snack'])) {
+                    $categoryName = 'Jurusan Snack & Minuman';
+                } else {
+                    $categoryName = 'Penjualan ' . $categoryNameClean;
+                }
+            }
+
+            $grouped[$categoryName][] = $product;
+        }
+
+        ksort($grouped);
+
+        return $grouped;
+    }
+
     public function render()
     {
         $activeJurusanId = session('active_jurusan_id');
@@ -345,6 +422,7 @@ class Product extends Component
 
         return view('livewire.management.product', [
             'products' => $query->paginate(10),
+            'cashGroupedProducts' => $this->getCashGroupedProducts(),
         ])->layout('layouts.app', ['title' => 'Katalog Produk']);
     }
 }

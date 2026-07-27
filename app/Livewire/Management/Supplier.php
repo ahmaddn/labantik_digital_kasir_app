@@ -42,10 +42,29 @@ class Supplier extends Component
         ];
 
         if ($this->editingId) {
-            SupplierModel::find($this->editingId)?->update($data);
+            $supplier = SupplierModel::find($this->editingId);
+            if ($supplier) {
+                $oldName = $supplier->name;
+                $supplier->update($data);
+                
+                if (trim($oldName) !== trim($this->name)) {
+                    \App\Models\CashCategory::where('name', 'Penjualan ' . trim($oldName))
+                        ->update(['name' => 'Penjualan ' . trim($this->name)]);
+                }
+            }
             $this->dispatch('toast', message: 'Supplier berhasil diperbarui.');
         } else {
-            SupplierModel::create($data);
+            $supplier = SupplierModel::create($data);
+            
+            // Auto create CashCategory for each Jurusan
+            $jurusans = \App\Models\Jurusan::all();
+            foreach ($jurusans as $jurusan) {
+                \App\Models\CashCategory::firstOrCreate([
+                    'jurusan_id' => $jurusan->id,
+                    'name' => 'Penjualan ' . trim($supplier->name),
+                ]);
+            }
+            
             $this->dispatch('toast', message: 'Supplier berhasil ditambahkan.');
         }
 
@@ -69,7 +88,11 @@ class Supplier extends Component
 
     public function deleteSupplier(string $id): void
     {
-        SupplierModel::destroy($id);
+        $supplier = SupplierModel::find($id);
+        if ($supplier) {
+            \App\Models\CashCategory::where('name', 'Penjualan ' . trim($supplier->name))->delete();
+            $supplier->delete();
+        }
         $this->dispatch('toast', message: 'Supplier berhasil dihapus.');
     }
 

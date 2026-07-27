@@ -8,7 +8,8 @@
         @if(session('active_role_name') !== 'superadmin')
         <div class="flex flex-wrap items-center gap-4">
             <div class="flex items-center bg-white dark:bg-gray-800 px-6 py-2 rounded-2xl shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-800">
-                <button wire:click="$set('tab', 'products')" class="px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all {{ $tab === 'products' ? 'bg-primary-blue text-white shadow-lg shadow-blue-900/20' : 'text-gray-400 hover:text-gray-600' }}">Daftar Produk</button>
+                <button wire:click="$set('tab', 'products'); $set('activeTab', 'products');" class="px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all {{ ($tab === 'products' && $activeTab === 'products') ? 'bg-primary-blue text-white shadow-lg shadow-blue-900/20' : 'text-gray-400 hover:text-gray-600' }}">Daftar Produk</button>
+                <button wire:click="$set('tab', 'products'); $set('activeTab', 'grouping');" class="px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all {{ ($tab === 'products' && $activeTab === 'grouping') ? 'bg-primary-blue text-white shadow-lg shadow-blue-900/20' : 'text-gray-400 hover:text-gray-600' }}">Pengelompokan Kas</button>
                 <button wire:click="$set('tab', 'stock')" class="px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all {{ $tab === 'stock' ? 'bg-primary-blue text-white shadow-lg shadow-blue-900/20' : 'text-gray-400 hover:text-gray-600' }}">Input Stok Awal</button>
             </div>
         </div>
@@ -17,6 +18,7 @@
 
     @if($tab === 'products')
     <div class="w-full">
+        @if($activeTab === 'products')
         <!-- List Section -->
         <div class="bg-white dark:bg-gray-800 rounded-[3.5rem] shadow-2xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 overflow-hidden">
             <div class="p-8 border-b border-gray-100 dark:border-gray-700 flex flex-col md:flex-row justify-between items-center gap-4">
@@ -186,7 +188,72 @@
                     {{ $products->links('livewire.partials.custom-pagination') }}
                 </div>
             </div>
+        @else
+        <!-- Search bar for Grouping -->
+        <div class="mb-8 max-w-md">
+            <div class="flex items-center bg-white dark:bg-gray-800 px-6 py-4 rounded-2xl shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-800">
+                <svg class="w-4 h-4 text-gray-400 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                <input type="text" wire:model.live="search" placeholder="Cari nama produk / supplier..." class="border-none p-0 focus:ring-0 font-black text-xs bg-transparent dark:text-white uppercase tracking-widest w-full">
+            </div>
         </div>
+
+        <!-- Grouped Cash Categories Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            @forelse($cashGroupedProducts as $categoryName => $prods)
+                <div class="bg-white dark:bg-gray-800 rounded-[2.5rem] p-8 shadow-2xl border border-gray-150 dark:border-gray-700 relative overflow-hidden group">
+                    <div class="absolute -right-4 -bottom-4 opacity-5 group-hover:scale-110 transition-transform duration-500 pointer-events-none">
+                        <svg class="w-32 h-32 text-primary-blue" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 00 2 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
+                    </div>
+                    <h3 class="text-base font-black uppercase tracking-wider text-gray-800 dark:text-white mb-6 border-b-2 border-dashed border-gray-100 dark:border-gray-700 pb-3 flex justify-between items-center">
+                        <span>{{ $categoryName }}</span>
+                        <span class="text-[10px] bg-primary-blue/10 text-primary-blue dark:text-primary-blue-light px-2.5 py-1 rounded-lg font-black tracking-normal normal-case">{{ count($prods) }} Produk</span>
+                    </h3>
+                    
+                    <!-- Paginated Product List (Alpine.js) -->
+                    <div x-data="{ 
+                        page: 1, 
+                        perPage: 5, 
+                        items: {{ json_encode($prods) }},
+                        get totalPages() { return Math.ceil(this.items.length / this.perPage) || 1 },
+                        get paginatedItems() {
+                            let start = (this.page - 1) * this.perPage;
+                            return this.items.slice(start, start + this.perPage);
+                        }
+                    }" x-init="$watch('items', () => page = 1)" class="flex flex-col justify-between h-[310px]">
+                        <ul class="space-y-3.5 relative z-10">
+                            <template x-for="prod in paginatedItems" :key="prod.id">
+                                <li class="flex items-center justify-between text-xs py-2.5 border-b border-gray-100 dark:border-gray-700/50">
+                                    <span class="font-bold text-gray-750 dark:text-gray-300 uppercase tracking-tight" x-text="prod.name"></span>
+                                    <div class="flex items-center gap-3">
+                                        <span class="text-[9px] font-black bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 px-2 py-0.5 rounded uppercase" x-text="'M: Rp' + Number(prod.modal_price).toLocaleString('id-ID')"></span>
+                                        <span class="text-[9px] font-black bg-green-500/10 text-green-500 px-2 py-0.5 rounded uppercase" x-text="'J: Rp' + Number(prod.price).toLocaleString('id-ID')"></span>
+                                    </div>
+                                </li>
+                            </template>
+                        </ul>
+
+                        <!-- Pagination Controls inside Card -->
+                        <div x-show="totalPages > 1" class="flex items-center justify-between mt-auto pt-4 border-t border-gray-100 dark:border-gray-700 text-xs font-black uppercase tracking-wider text-gray-400 relative z-20">
+                            <button type="button" @click="if (page > 1) page--" :disabled="page === 1" class="px-3.5 py-2.5 bg-gray-100 dark:bg-gray-700 rounded-xl hover:bg-primary-blue hover:text-white disabled:opacity-20 disabled:hover:bg-gray-100 disabled:hover:text-gray-450 transition-all flex items-center gap-1 cursor-pointer">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+                                Prev
+                            </button>
+                            <span class="text-gray-550 font-black" x-text="page + ' / ' + totalPages"></span>
+                            <button type="button" @click="if (page < totalPages) page++" :disabled="page === totalPages" class="px-3.5 py-2.5 bg-gray-100 dark:bg-gray-700 rounded-xl hover:bg-primary-blue hover:text-white disabled:opacity-20 disabled:hover:bg-gray-100 disabled:hover:text-gray-450 transition-all flex items-center gap-1 cursor-pointer">
+                                Next
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            @empty
+                <div class="col-span-full bg-white dark:bg-gray-800 rounded-[3rem] p-12 text-center border border-gray-100 dark:border-gray-700">
+                    <p class="text-sm font-black text-gray-400 uppercase tracking-widest italic">Belum ada pemetaan kategori kas.</p>
+                </div>
+            @endforelse
+        </div>
+        @endif
+    </div>
     @endif
 
     @if($tab === 'stock')
@@ -357,6 +424,28 @@
                     <div class="relative">
                         <span class="absolute left-6 inset-y-0 flex items-center text-[10px] font-black text-gray-400">Rp</span>
                         <input type="number" wire:model.live="modal_price" class="w-full pl-12 pr-6 py-4 bg-white dark:bg-gray-800 border-none rounded-xl focus:ring-4 focus:ring-primary-blue/10 font-black text-sm text-gray-800 dark:text-white">
+                    </div>
+                </div>
+
+                <!-- Restock Assistant -->
+                <div class="p-6 bg-blue-500/5 dark:bg-primary-blue/5 rounded-3xl border-2 border-dashed border-primary-blue/30 space-y-4">
+                    <h3 class="text-xs font-black uppercase tracking-widest text-primary-blue dark:text-primary-blue-light">Asisten Restock & Modal (Opsional)</h3>
+                    <p class="text-[10px] font-bold text-gray-400 leading-relaxed uppercase">Gunakan ini jika ingin menginput stok baru sekaligus menghitung harga modal unit secara otomatis berdasarkan total belanja modal.</p>
+                    
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-[9px] font-black text-gray-400 uppercase tracking-wider mb-2 ml-2 italic">Jumlah Restock (Pcs)</label>
+                            <input type="number" wire:model.live="restockQty" placeholder="Contoh: 100" class="w-full px-5 py-3.5 bg-white dark:bg-gray-900 border-none rounded-xl focus:ring-2 focus:ring-primary-blue/30 font-black text-sm text-gray-800 dark:text-white">
+                            @error('restockQty') <span class="text-[9px] font-bold text-primary-red mt-1.5 ml-2 block uppercase italic">{{ $message }}</span> @enderror
+                        </div>
+                        <div>
+                            <label class="block text-[9px] font-black text-gray-400 uppercase tracking-wider mb-2 ml-2 italic">Total Modal Restock (Rp)</label>
+                            <div class="relative">
+                                <span class="absolute left-5 inset-y-0 flex items-center text-[9px] font-black text-gray-400">Rp</span>
+                                <input type="number" wire:model.live="totalModalCost" placeholder="Contoh: 100000" class="w-full pl-10 pr-5 py-3.5 bg-white dark:bg-gray-900 border-none rounded-xl focus:ring-2 focus:ring-primary-blue/30 font-black text-sm text-gray-800 dark:text-white">
+                            </div>
+                            @error('totalModalCost') <span class="text-[9px] font-bold text-primary-red mt-1.5 ml-2 block uppercase italic">{{ $message }}</span> @enderror
+                        </div>
                     </div>
                 </div>
 

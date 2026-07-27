@@ -53,7 +53,7 @@ class DailyRecapActionService
         $totalRevenueReal = $allTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->sum('total_price');
 
         $totalSupplierHak = $allTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])
-            ->whereNotNull('supplier_id')
+            ->filter(fn ($tx) => ($tx->product->supplier_id ?? $tx->supplier_id) !== null)
             ->sum(fn ($tx) => ($tx->unit_price - $tx->unit_profit) * $tx->quantity);
 
         $totalProfit = $allTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->sum(fn ($tx) => $tx->unit_profit * $tx->quantity);
@@ -61,7 +61,7 @@ class DailyRecapActionService
         $diff = ((float) $recap->actual_cash - (float) ($recap->retained_change_cash ?? 0)) - (float) $totalRevenueReal;
 
         $grouped = $allTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])
-            ->groupBy(fn($tx) => $tx->supplier_id ? 'supplier_' . $tx->supplier_id : 'category_' . ($tx->product->category_id ?? 'other'));
+            ->groupBy(fn($tx) => ($tx->product->supplier_id ?? $tx->supplier_id) ? 'supplier_' . ($tx->product->supplier_id ?? $tx->supplier_id) : 'category_' . ($tx->product->category_id ?? 'other'));
 
         DB::transaction(function () use ($grouped, $totalSupplierHak, $diff, $activeJurusanId, $date, $recap, $totalProfit) {
             CashTransaction::where('date', $date)

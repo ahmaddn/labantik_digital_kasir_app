@@ -35,6 +35,14 @@ class CashManagement extends Component
     public bool $showDeleteConfirmation = false;
     public $confirmingDeleteId = null;
 
+    // Physical Cash Adjustment Modal properties
+    public bool $showAdjustModal = false;
+    public $adjustCategoryId = '';
+    public $adjustCategoryName = '';
+    public $adjustSystemBalance = 0;
+    public $adjustPhysicalBalance;
+    public string $adjustCashType = 'keuntungan';
+
     public function mount()
     {
         $this->filterMonth = now()->format('Y-m');
@@ -312,6 +320,54 @@ class CashManagement extends Component
         }
     }
 
+    public function openAdjustModal($id, $name, $balance): void
+    {
+        $this->resetValidation();
+        $this->adjustCategoryId = $id;
+        $this->adjustCategoryName = $name;
+        $this->adjustSystemBalance = (float) $balance;
+        $this->adjustPhysicalBalance = '';
+        $this->adjustCashType = 'keuntungan';
+        $this->showAdjustModal = true;
+    }
+
+    public function submitAdjustment(): void
+    {
+        $this->validate([
+            'adjustPhysicalBalance' => 'required|numeric|min:0',
+            'adjustCashType' => 'required|in:modal,keuntungan',
+        ]);
+
+        $activeJurusanId = session('active_jurusan_id');
+        $difference = (float) $this->adjustPhysicalBalance - $this->adjustSystemBalance;
+
+        if (abs($difference) < 0.01) {
+            $this->showAdjustModal = false;
+            $this->dispatch('toast', message: 'Saldo fisik sudah sesuai dengan saldo sistem.');
+            return;
+        }
+
+        $type = $difference > 0 ? 'income' : 'expense';
+        $amount = abs($difference);
+        $descType = $difference > 0 ? 'Lebih' : 'Kurang';
+
+        CashTransaction::create([
+            'jurusan_id' => $activeJurusanId,
+            'date' => now()->format('Y-m-d'),
+            'cash_type' => $this->adjustCashType,
+            'cash_category_id' => $this->adjustCategoryId,
+            'type' => $type,
+            'amount' => $amount,
+            'description' => "Penyesuaian Selisih {$descType} Kas {$this->adjustCategoryName} (Manual)",
+        ]);
+
+        // Invalidate cache
+        \Illuminate\Support\Facades\Cache::forget('cash_balances_' . ($activeJurusanId ?: 'global'));
+
+        $this->showAdjustModal = false;
+        $this->dispatch('toast', message: 'Penyesuaian kas fisik berhasil disimpan!');
+    }
+
     public function exportExcel()
     {
         $filename = 'Laporan_Kas_Internal_' . Carbon::parse($this->filterMonth)->translatedFormat('F_Y') . '.xlsx';
@@ -402,7 +458,7 @@ class CashManagement extends Component
         $categoryStats = [];
 
         foreach ($categories as $category) {
-            $catSum = $categorySums->get($category->id);
+            $catSum = (object) ($categorySums->get($category->id) ?? []);
             
             $catIncome = $catSum->cat_income ?? 0;
             $catExpense = $catSum->cat_expense ?? 0;
@@ -438,6 +494,7 @@ class CashManagement extends Component
             }
 
             $categoryStats[] = [
+                'id' => $category->id,
                 'name' => $category->name,
                 'income' => $catIncome,
                 'expense' => $catExpense,

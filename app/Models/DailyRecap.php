@@ -36,6 +36,10 @@ class DailyRecap extends Model
 
     protected static function booted(): void
     {
+        static::addGlobalScope('active', function ($builder) {
+            $builder->where('is_archived', false);
+        });
+
         static::creating(function (DailyRecap $dailyRecap) {
             if ($dailyRecap->date) {
                 $carbonDate = \Carbon\Carbon::parse($dailyRecap->date);
