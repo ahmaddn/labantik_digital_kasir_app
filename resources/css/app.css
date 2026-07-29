@@ -173,6 +173,7 @@
         border: 1px solid rgba(255, 255, 255, 0.4) !important;
         box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.06) !important;
     }
+    .dark .theme-glassmorphism .bg-white,
     .dark .theme-glassmorphism .bg-gray-800, 
     .dark .theme-glassmorphism .bg-gray-850, 
     .dark .theme-glassmorphism .bg-gray-900 {
@@ -191,6 +192,7 @@
         box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
         backdrop-filter: none !important;
     }
+    .dark .theme-classic-premium .bg-white,
     .dark .theme-classic-premium .bg-gray-800,
     .dark .theme-classic-premium .bg-gray-850,
     .dark .theme-classic-premium .bg-gray-900 {
@@ -207,6 +209,7 @@
         border: 2px solid var(--color-primary-blue) !important;
         box-shadow: 0 0 15px rgba(37, 99, 235, 0.15) !important;
     }
+    .dark .theme-neon-cyberpunk .bg-white,
     .dark .theme-neon-cyberpunk .bg-gray-800,
     .dark .theme-neon-cyberpunk .bg-gray-850,
     .dark .theme-neon-cyberpunk .bg-gray-900 {
@@ -222,6 +225,7 @@
         border: 1px solid rgba(249, 115, 22, 0.1) !important;
         box-shadow: 0 10px 15px -3px rgba(249, 115, 22, 0.05), 0 4px 6px -2px rgba(249, 115, 22, 0.02) !important;
     }
+    .dark .theme-restaurant-aesthetic .bg-white,
     .dark .theme-restaurant-aesthetic .bg-gray-800,
     .dark .theme-restaurant-aesthetic .bg-gray-850,
     .dark .theme-restaurant-aesthetic .bg-gray-900 {
@@ -238,6 +242,7 @@
         border-radius: 4px !important;
         box-shadow: none !important;
     }
+    .dark .theme-retail-aesthetic .bg-white,
     .dark .theme-retail-aesthetic .bg-gray-800,
     .dark .theme-retail-aesthetic .bg-gray-850,
     .dark .theme-retail-aesthetic .bg-gray-900 {
@@ -254,6 +259,7 @@
         border: 1px solid rgba(14, 165, 233, 0.1) !important;
         box-shadow: 0 4px 20px -2px rgba(14, 165, 233, 0.08) !important;
     }
+    .dark .theme-bank-aesthetic .bg-white,
     .dark .theme-bank-aesthetic .bg-gray-800,
     .dark .theme-bank-aesthetic .bg-gray-850,
     .dark .theme-bank-aesthetic .bg-gray-900 {
