@@ -94,7 +94,7 @@ class Kasir extends Component
                 ->where('date', now()->toDateString())
                 ->first();
 
-            if (!$attendance) {
+            if (!$attendance && !$hasHigherRole) {
                 // Must clock in first
                 $this->showOpeningAttendanceModal = true;
             }
