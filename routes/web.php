@@ -126,6 +126,11 @@ Route::middleware(['auth', 'verified', EnsureRoleSelected::class])->group(functi
     Route::get('/users', UserManagement::class)->name('users');
     Route::get('/jurusans', JurusanManagement::class)->name('jurusans');
     Route::get('/roles', RoleManagement::class)->name('roles');
+
+    // Cashier Scheduling & Tasks & Attendance Reports
+    Route::get('/management/schedules', \App\Livewire\Management\CashierScheduling::class)->name('schedules');
+    Route::get('/management/tasks', \App\Livewire\Management\CashierTasks::class)->name('tasks');
+    Route::get('/reports/attendances', \App\Livewire\Reports\AttendanceReport::class)->name('attendances');
 });
 
 require __DIR__.'/settings.php';

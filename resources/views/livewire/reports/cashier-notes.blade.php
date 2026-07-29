@@ -108,9 +108,9 @@
                         </div>
                     </div>
 
-                    <!-- Content -->
-                    <div class="whitespace-pre-line text-sm font-medium leading-relaxed opacity-95 mb-6">
-                        {{ $note->content }}
+                    <!-- Content (Raw HTML output for Rich Text) -->
+                    <div class="prose dark:prose-invert max-w-none text-sm font-medium leading-relaxed opacity-95 mb-6">
+                        {!! $note->content !!}
                     </div>
                 </div>
 
@@ -204,13 +204,36 @@
                         <input type="date" wire:model="date" class="w-full px-5 py-3.5 bg-gray-50 dark:bg-gray-900 border-none rounded-2xl focus:ring-4 focus:ring-primary-blue/10 font-bold text-sm text-gray-800 dark:text-white">
                         @error('date') <span class="text-xs text-red-500 font-bold mt-1 ml-1 block">{{ $message }}</span> @enderror
                     </div>
-
-                    <!-- Content -->
-                    <div>
+                    <!-- Content with Quill Rich Text Editor -->
+                    <div wire:ignore>
                         <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 ml-1">Isi Catatan</label>
-                        <textarea wire:model="content" rows="4" placeholder="Tulis rincian pesan, instruksi pengelola, atau pengingat untuk sesama kasir..." class="w-full px-5 py-3.5 bg-gray-50 dark:bg-gray-900 border-none rounded-2xl focus:ring-4 focus:ring-primary-blue/10 font-bold text-sm text-gray-800 dark:text-white"></textarea>
-                        @error('content') <span class="text-xs text-red-500 font-bold mt-1 ml-1 block">{{ $message }}</span> @enderror
+                        <!-- Include Quill stylesheet -->
+                        <link href="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.snow.css" rel="stylesheet">
+                        <div class="bg-gray-50 dark:bg-gray-900 rounded-2xl overflow-hidden border border-gray-200 dark:border-gray-700">
+                            <div id="quill-editor" class="h-44 text-sm font-bold text-gray-800 dark:text-white dark:bg-gray-900" style="border: none;"></div>
+                        </div>
+                        <!-- Include the Quill library -->
+                        <script src="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.js"></script>
+                        <script>
+                            document.addEventListener('DOMContentLoaded', function () {
+                                const quill = new Quill('#quill-editor', {
+                                    theme: 'snow',
+                                    placeholder: 'Tulis rincian pesan, instruksi pengelola, atau pengingat untuk sesama kasir...'
+                                });
+
+                                // Sync Quill content with Livewire content model
+                                quill.on('text-change', function () {
+                                    @this.set('content', quill.root.innerHTML);
+                                });
+
+                                // Listen to Livewire event to update editor value when editing
+                                window.addEventListener('quill-update', event => {
+                                    quill.root.innerHTML = event.detail.content || '';
+                                });
+                            });
+                        </script>
                     </div>
+                    @error('content') <span class="text-xs text-red-500 font-bold mt-1 ml-1 block">{{ $message }}</span> @enderror
 
                     <!-- Options: Pinning & Color -->
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
@@ -405,7 +428,9 @@ function shareToWhatsApp(noteId, title, creator, date, content) {
     if (date) {
         msg += "📅 *Tanggal:* " + date + "\n";
     }
-    msg += "\n" + content + "\n\n";
+    // Remove HTML tags for clean WhatsApp plain text
+    const cleanContent = content.replace(/<\/?[^>]+(>|$)/g, "");
+    msg += "\n" + cleanContent + "\n\n";
     
     // 1. Render card to canvas
     h2c(card, {

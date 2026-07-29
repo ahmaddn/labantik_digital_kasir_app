@@ -7,6 +7,9 @@ use App\Models\Jurusan;
 use App\Models\Product;
 use App\Models\StockEntry;
 use App\Models\Transaction;
+use App\Models\CashierSchedule;
+use App\Models\CashierAttendance;
+use App\Models\CashierTask;
 use App\Services\PosQueryService;
 use App\Services\PosSessionService;
 use Livewire\Attributes\Computed;
@@ -41,6 +44,14 @@ class Kasir extends Component
 
     public $unfinishedSessionDate = null;
 
+    // Attendance & Tasks UI State
+    public $showOpeningAttendanceModal = false;
+    public $openingCash = '';
+    
+    // Closing attendance fields (added to closing modal)
+    public $closingCashInput = '';
+    public $closingReportText = '';
+
     public function refreshProducts(): void
     {
         $this->products = $this->getProductsForAlpine(app(PosQueryService::class))->toArray();
@@ -57,6 +68,32 @@ class Kasir extends Component
         $this->refreshProducts();
 
         $activeJurusanId = session('active_jurusan_id');
+        
+        // 1. Validate if user is scheduled for today (mandatory for cashier role)
+        if (session('active_role_name') === 'kasir') {
+            $isScheduled = CashierSchedule::where('user_id', auth()->id())
+                ->where('jurusan_id', $activeJurusanId)
+                ->where('date', now()->toDateString())
+                ->exists();
+
+            if (!$isScheduled) {
+                session()->flash('error', 'Anda tidak memiliki jadwal jaga kasir hari ini.');
+                $this->redirectRoute('dashboard', navigate: true);
+                return;
+            }
+
+            // 2. Check if already clocked in for today
+            $attendance = CashierAttendance::where('user_id', auth()->id())
+                ->where('jurusan_id', $activeJurusanId)
+                ->where('date', now()->toDateString())
+                ->first();
+
+            if (!$attendance) {
+                // Must clock in first
+                $this->showOpeningAttendanceModal = true;
+            }
+        }
+
         // Check if session for today is already finished
         $isTodayFinished = DailyRecap::whereDate('date', now())
             ->where('jurusan_id', $activeJurusanId)
@@ -73,8 +110,52 @@ class Kasir extends Component
         // Detect if there's an unfinished session from a previous day
         $this->detectUnfinishedSession($posSessionService);
 
-        if (! $this->showRecoveryModal) {
+        if (! $this->showRecoveryModal && !$this->showOpeningAttendanceModal) {
             $this->checkOpeningStock($posSessionService);
+        }
+    }
+
+    public function saveOpeningAttendance(PosSessionService $posSessionService): void
+    {
+        $this->validate([
+            'openingCash' => 'required|numeric|min:0',
+        ]);
+
+        $activeJurusanId = session('active_jurusan_id');
+        $schedule = CashierSchedule::where('user_id', auth()->id())
+            ->where('jurusan_id', $activeJurusanId)
+            ->where('date', now()->toDateString())
+            ->first();
+
+        CashierAttendance::create([
+            'cashier_schedule_id' => $schedule ? $schedule->id : null,
+            'user_id' => auth()->id(),
+            'jurusan_id' => $activeJurusanId,
+            'date' => now()->toDateString(),
+            'clock_in' => now(),
+            'opening_cash' => (float)$this->openingCash,
+            'status' => 'present',
+        ]);
+
+        $this->showOpeningAttendanceModal = false;
+        $this->dispatch('toast', message: 'Absen buka berhasil dicatat.');
+
+        // Proceed to opening stock check
+        $this->checkOpeningStock($posSessionService);
+    }
+
+    public function toggleTask($taskId): void
+    {
+        $task = CashierTask::where('assigned_to', auth()->id())
+            ->where('id', $taskId)
+            ->first();
+
+        if ($task) {
+            $task->update([
+                'is_completed' => !$task->is_completed,
+                'completed_at' => !$task->is_completed ? now() : null,
+            ]);
+            $this->dispatch('toast', message: 'Status tugas diperbarui.');
         }
     }
 
@@ -202,6 +283,11 @@ class Kasir extends Component
 
     public function saveClosingStock(PosSessionService $posSessionService): void
     {
+        $this->validate([
+            'closingCashInput' => 'required|numeric|min:0',
+            'closingReportText' => 'required|string',
+        ]);
+
         $today = $this->transactionDate ?: now()->toDateString();
         $activeJurusanId = session('active_jurusan_id');
 
@@ -212,7 +298,28 @@ class Kasir extends Component
 
         $filteredStockItems = array_intersect_key($this->stockItems, array_flip($validProductIds));
 
+        // Save stock
         $posSessionService->saveClosingStock($filteredStockItems, $today, $activeJurusanId);
+
+        // Record Closing Attendance
+        $attendance = CashierAttendance::where('user_id', auth()->id())
+            ->where('jurusan_id', $activeJurusanId)
+            ->where('date', now()->toDateString())
+            ->first();
+
+        if ($attendance) {
+            $attendance->update([
+                'clock_out' => now(),
+                'closing_cash' => (float)$this->closingCashInput,
+                'closing_report' => $this->closingReportText,
+            ]);
+        }
+
+        // Post closing cash to daily recap
+        DailyRecap::updateOrCreate(
+            ['date' => $today, 'jurusan_id' => $activeJurusanId],
+            ['actual_cash' => (float)$this->closingCashInput]
+        );
 
         $this->showClosingStockModal = false;
         $this->stockItems = [];
@@ -327,8 +434,6 @@ class Kasir extends Component
             ->get();
     }
 
-
-
     protected function getProductsForAlpine(PosQueryService $posQueryService)
     {
         $today = $this->transactionDate ?: now()->toDateString();
@@ -370,10 +475,16 @@ class Kasir extends Component
 
         $categories = \App\Models\CashCategory::where('jurusan_id', $activeJurusanId)->get();
 
+        // Get daily tasks for the logged in cashier
+        $dailyTasks = CashierTask::where('assigned_to', auth()->id())
+            ->where('date', now()->toDateString())
+            ->get();
+
         return view('livewire.pos.kasir', [
             'allProductsJson' => $allProducts,
             'isSessionFinished' => $isSessionFinished,
             'categories' => $categories,
+            'dailyTasks' => $dailyTasks,
         ])->layout('layouts.kasir');
     }
 }

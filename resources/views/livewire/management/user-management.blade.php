@@ -5,10 +5,20 @@
             <h1 class="text-3xl font-black italic uppercase tracking-tighter text-primary-blue dark:text-primary-yellow">Manajemen User</h1>
             <p class="text-gray-400 text-sm font-semibold uppercase tracking-widest mt-1">Kelola Pengguna & Hak Akses TEFA</p>
         </div>
-        <div>
-            <button wire:click="openCreateModal" class="inline-flex items-center px-6 py-4 bg-primary-blue hover:bg-blue-900 text-primary-yellow rounded-2xl font-black text-sm uppercase italic tracking-wider transition-all duration-300 shadow-xl shadow-blue-900/10 active:scale-95">
+        <div class="flex items-center gap-3">
+            <button wire:click="downloadTemplate" class="inline-flex items-center px-5 py-3.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:text-white rounded-2xl font-black text-sm uppercase italic tracking-wider transition-all duration-300">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                Template Excel
+            </button>
+
+            <button wire:click="$set('showImportModal', true)" class="inline-flex items-center px-5 py-3.5 bg-amber-500 hover:bg-amber-600 text-white rounded-2xl font-black text-sm uppercase italic tracking-wider transition-all duration-300">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                Import Excel
+            </button>
+
+            <button wire:click="openCreateModal" class="inline-flex items-center px-5 py-3.5 bg-primary-blue hover:bg-blue-900 text-primary-yellow rounded-2xl font-black text-sm uppercase italic tracking-wider transition-all duration-300 shadow-xl shadow-blue-900/10 active:scale-95">
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
-                Tambah Pengguna Baru
+                Tambah Pengguna
             </button>
         </div>
     </div>
@@ -356,6 +366,40 @@
                     Ya, Hapus
                 </button>
             </div>
+        </div>
+    </div>
+
+    <!-- Import Excel Modal -->
+    <div x-data="{ showImport: @entangle('showImportModal') }" x-show="showImport" class="fixed inset-0 z-50 flex items-center justify-center p-4" x-cloak>
+        <div x-show="showImport" x-transition.opacity class="fixed inset-0 bg-black/60 backdrop-blur-xs" wire:click="$set('showImportModal', false)"></div>
+        <div x-show="showImport" x-transition.scale class="relative w-full max-w-md bg-white dark:bg-gray-800 rounded-[2.5rem] shadow-2xl p-8 border border-gray-100 dark:border-gray-700 z-10">
+            <h2 class="text-2xl font-black text-gray-855 dark:text-white uppercase italic mb-6">Import User dari Excel</h2>
+            
+            <form wire:submit.prevent="importExcel" class="space-y-5">
+                <div>
+                    <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">Pilih File Excel (.xlsx, .xls)</label>
+                    <input type="file" wire:model="excelFile" class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 border border-dashed border-gray-300 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-primary-blue dark:text-white text-sm">
+                    @error('excelFile') <span class="text-xs text-red-500 font-bold mt-1 block">{{ $message }}</span> @enderror
+                </div>
+
+                <div class="text-[10px] text-gray-400 font-semibold leading-relaxed">
+                    * Pastikan format kolom file Excel Anda sesuai template:<br>
+                    <strong>A: Nama Lengkap</strong>, 
+                    <strong>B: Email</strong>, 
+                    <strong>C: Role (kasir)</strong>, 
+                    <strong>D: Jurusan (contoh: RPL)</strong>.<br>
+                    <span class="text-amber-500 font-bold">* Password secara otomatis diset default menjadi '00000000' (nol 8 kali) untuk semua user yang diimport.</span>
+                </div>
+
+                <div class="flex gap-3 pt-4">
+                    <button type="button" wire:click="$set('showImportModal', false)" class="flex-1 py-3 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:text-white rounded-xl font-black text-xs uppercase tracking-wider transition-all">
+                        Batal
+                    </button>
+                    <button type="submit" class="flex-1 py-3 bg-primary-blue hover:bg-blue-900 text-primary-yellow rounded-xl font-black text-xs uppercase tracking-wider transition-all shadow-md">
+                        Mulai Import
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 </div>

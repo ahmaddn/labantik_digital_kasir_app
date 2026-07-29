@@ -381,6 +381,10 @@ document.addEventListener('keydown', (e) => {
                     :class="tab === 'cart' ? 'bg-primary-blue text-white' :
                         'bg-white text-black dark:bg-dark-soft dark:text-white'"
                     class="nb-btn flex-1 py-1.5 text-xs shadow-none border-2">CART</button>
+                <button @click="tab = 'tasks'"
+                    :class="tab === 'tasks' ? 'bg-amber-500 text-white' :
+                        'bg-white text-black dark:bg-dark-soft dark:text-white'"
+                    class="nb-btn flex-1 py-1.5 text-xs shadow-none border-2">TASKS</button>
                 <button @click="tab = 'history'"
                     :class="tab === 'history' ? 'bg-primary-red text-white' :
                         'bg-white text-black dark:bg-dark-soft dark:text-white'"
@@ -423,6 +427,24 @@ document.addEventListener('keydown', (e) => {
                 </div>
             </div>
 
+            <!-- Tasks Content -->
+            <div x-show="tab === 'tasks'" class="flex-1 overflow-y-auto p-5 space-y-3 no-scrollbar">
+                <div class="text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Tugas Harian Anda Hari Ini</div>
+                @forelse($dailyTasks as $task)
+                    <div class="nb-card p-4 flex items-start gap-3 bg-white dark:bg-dark-soft border-2 shadow-sm">
+                        <input type="checkbox" wire:click="toggleTask('{{ $task->id }}')" {{ $task->is_completed ? 'checked' : '' }} class="mt-1 w-4 h-4 text-primary-blue rounded border-gray-300 focus:ring-primary-blue">
+                        <div class="flex-1">
+                            <h4 class="text-xs font-bold uppercase tracking-tight {{ $task->is_completed ? 'line-through text-gray-400' : 'text-gray-855 dark:text-white' }}">{{ $task->task_name }}</h4>
+                            @if($task->description)
+                                <p class="text-[10px] text-gray-400 mt-1">{{ $task->description }}</p>
+                            @endif
+                        </div>
+                    </div>
+                @empty
+                    <div class="text-center py-10 text-xs text-gray-400 italic font-semibold">Tidak ada tugas khusus hari ini</div>
+                @endforelse
+            </div>
+
             <div x-show="tab === 'history'" class="flex-1 overflow-y-auto p-5 space-y-3 no-scrollbar">
                 @foreach ($this->recentTransactions as $history)
                     <div class="nb-card p-3 bg-white dark:bg-dark-soft border-2 hover:shadow-none transition-shadow">
@@ -448,6 +470,7 @@ document.addEventListener('keydown', (e) => {
                     </div>
                 @endforeach
             </div>
+
 
             <!-- Checkout Section -->
             <div
@@ -540,8 +563,27 @@ document.addEventListener('keydown', (e) => {
             </div>
         </div>
     </div>
+    <!-- Opening Attendance (Clock In) Modal -->
+    <div x-data="{ show: @entangle('showOpeningAttendanceModal') }" x-show="show" x-cloak
+        class="fixed inset-0 z-[500] flex items-center justify-center p-6 bg-white/20 dark:bg-black/40 backdrop-blur-md">
+        <div class="nb-card bg-white dark:bg-dark-soft w-full max-w-md p-10 border-4 border-black text-center">
+            <div class="mb-6">
+                <span class="text-[9px] font-black bg-primary-blue text-white px-3 py-1 uppercase tracking-widest border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">ABSENSI MASUK</span>
+                <h2 class="text-2xl font-black uppercase italic mt-4 dark:text-white">CLOCK IN KASIR</h2>
+                <p class="text-xs text-gray-500 font-semibold mt-1">Lakukan absen buka shift sebelum melayani transaksi POS</p>
+            </div>
 
-    <!-- Modals -->
+            <div class="space-y-4 mb-6">
+                <div>
+                    <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Input Uang Modal Laci Awal (Rp)</label>
+                    <input type="number" wire:model="openingCash" placeholder="Contoh: 100000" class="nb-input w-full p-4 text-base font-bold bg-white dark:bg-slate-800 border-2 border-black text-center">
+                    @error('openingCash') <span class="text-xs text-red-500 font-bold mt-1 block">{{ $message }}</span> @enderror
+                </div>
+            </div>
+
+            <button wire:click="saveOpeningAttendance" class="nb-btn w-full bg-black text-white text-base py-4 font-black uppercase tracking-widest">CLOCK IN & MULAI</button>
+        </div>
+    </div>
 
     <!-- Recovery Modal -->
     <div x-data="{ show: @entangle('showRecoveryModal') }" x-show="show" x-cloak @keydown.window.escape="show = false"
@@ -735,10 +777,28 @@ document.addEventListener('keydown', (e) => {
                             "<span x-text="modalSearch"></span>"</div>
                     </div>
                 </div>
+
+                <!-- Cash & Activity Report Fields -->
+                <div class="p-6 bg-white dark:bg-dark-soft border-2 border-black rounded-3xl mt-6 space-y-4">
+                    <h3 class="text-sm font-black uppercase tracking-widest dark:text-white">Laporan Closing Shift Kasir</h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Total Uang Laci Akhir (Rp)</label>
+                            <input type="number" wire:model="closingCashInput" placeholder="Contoh: 1500000" class="nb-input w-full p-4 text-sm font-bold bg-white dark:bg-slate-800 border-2 border-black">
+                            @error('closingCashInput') <span class="text-xs text-red-500 font-bold mt-1 block">{{ $message }}</span> @enderror
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Laporan Aktivitas Selama Shift</label>
+                            <textarea wire:model="closingReportText" placeholder="Jelaskan apa saja yang Anda lakukan selama shift ini..." rows="3" class="nb-input w-full p-4 text-sm font-bold bg-white dark:bg-slate-800 border-2 border-black"></textarea>
+                            @error('closingReportText') <span class="text-xs text-red-500 font-bold mt-1 block">{{ $message }}</span> @enderror
+                        </div>
+                    </div>
+                </div>
             </div>
             <div class="p-6 bg-white dark:bg-dark-soft border-t-4 border-black">
                 <button wire:click="saveClosingStock"
-                    class="nb-btn w-full bg-primary-red text-white text-lg py-5">SELESAIKAN SESI HARI INI</button>
+                    class="nb-btn w-full bg-primary-red text-white text-lg py-5">SELESAIKAN SESI & CLOCK OUT</button>
             </div>
         </div>
     </div>

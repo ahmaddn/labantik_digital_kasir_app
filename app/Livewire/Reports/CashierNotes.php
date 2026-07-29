@@ -71,12 +71,11 @@ class CashierNotes extends Component
             $msg = $note->is_pinned ? 'Catatan disematkan ke paling atas!' : 'Sematkan catatan dilepas.';
             $this->dispatch('toast', message: $msg);
         }
-    }
-
-    public function openCreateModal(): void
+    }    public function openCreateModal(): void
     {
         $this->resetForm();
         $this->showModal = true;
+        $this->dispatch('quill-update', content: '');
     }
 
     public function openEditModal($id): void
@@ -98,9 +97,9 @@ class CashierNotes extends Component
             $this->target_user_id = $note->target_user_id;
             $this->date = $note->date ? $note->date->format('Y-m-d') : null;
             $this->showModal = true;
+            $this->dispatch('quill-update', content: $this->content);
         }
     }
-
     public function saveNote(): void
     {
         $this->validate();
