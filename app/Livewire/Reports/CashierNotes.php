@@ -125,7 +125,7 @@ class CashierNotes extends Component
                 $this->dispatch('toast', message: 'Catatan berhasil diperbarui!');
             }
         } else {
-            CashierNote::create([
+            $note = CashierNote::create([
                 'jurusan_id' => $activeJurusanId ?: null,
                 'user_id' => auth()->id(),
                 'target_user_id' => $this->target_user_id ?: null,
@@ -135,6 +135,16 @@ class CashierNotes extends Component
                 'is_pinned' => $this->is_pinned,
                 'date' => $this->date ?: null,
             ]);
+
+            if ($this->target_user_id && $this->target_user_id !== auth()->id()) {
+                \App\Models\Notification::create([
+                    'user_id' => $this->target_user_id,
+                    'title' => 'Catatan Baru Ditujukan Untuk Anda',
+                    'body' => auth()->user()->name . ' membuat catatan: "' . $this->title . '"',
+                    'type' => 'note',
+                    'action_url' => '/cashier-notes'
+                ]);
+            }
             $this->dispatch('toast', message: 'Catatan baru berhasil ditambahkan!');
         }
 
@@ -183,11 +193,29 @@ class CashierNotes extends Component
         ]);
 
         if ($this->activeNoteId) {
-            NoteReply::create([
+            $reply = NoteReply::create([
                 'cashier_note_id' => $this->activeNoteId,
                 'user_id' => auth()->id(),
                 'content' => trim($this->replyContent),
             ]);
+
+            $note = \App\Models\CashierNote::find($this->activeNoteId);
+            if ($note) {
+                $recipients = collect([$note->user_id, $note->target_user_id])
+                    ->filter()
+                    ->unique()
+                    ->reject(fn($id) => $id === auth()->id());
+                
+                foreach ($recipients as $recipientId) {
+                    \App\Models\Notification::create([
+                        'user_id' => $recipientId,
+                        'title' => 'Balasan Catatan Baru',
+                        'body' => auth()->user()->name . ' membalas catatan "' . $note->title . '"',
+                        'type' => 'note',
+                        'action_url' => '/cashier-notes'
+                    ]);
+                }
+            }
 
             $this->replyContent = '';
             $this->dispatch('toast', message: 'Balasan berhasil dikirim!');

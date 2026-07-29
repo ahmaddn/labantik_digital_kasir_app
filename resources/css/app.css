@@ -722,5 +722,19 @@ html:not(.dark) ::-webkit-scrollbar-thumb:hover {
     }
 }
 
+/* Ensure hover actions are always visible on mobile viewports */
+@media (max-width: 767px) {
+    .opacity-0.group-hover\:opacity-100 {
+        opacity: 1 !important;
+        pointer-events: auto !important;
+        visibility: visible !important;
+    }
+    .opacity-0 {
+        opacity: 1 !important;
+        pointer-events: auto !important;
+        visibility: visible !important;
+    }
+}
+
 
 

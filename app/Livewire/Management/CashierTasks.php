@@ -61,13 +61,22 @@ class CashierTasks extends Component
             return;
         }
 
-        CashierTask::create([
+        $task = CashierTask::create([
             'jurusan_id' => $activeJurusanId,
             'assigned_to' => $this->assignedTo,
             'date' => $this->date,
             'task_name' => $this->taskName,
             'description' => $this->description,
             'created_by' => auth()->id(),
+        ]);
+
+        // Send a global notification
+        \App\Models\Notification::create([
+            'user_id' => $this->assignedTo,
+            'title' => 'Tugas Baru Ditugaskan',
+            'body' => 'Anda mendapatkan tugas: "' . $this->taskName . '" pada tanggal ' . \Carbon\Carbon::parse($this->date)->format('d M Y'),
+            'type' => 'task',
+            'action_url' => '/cashier'
         ]);
 
         $this->showCreateModal = false;

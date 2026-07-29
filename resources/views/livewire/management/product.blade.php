@@ -71,7 +71,7 @@
                 </div>
                 <div class="px-8 py-4">
                     <!-- Header Row (Grid 12) -->
-                    <div class="grid grid-cols-12 items-center px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest bg-gray-50 dark:bg-gray-900/50 rounded-2xl mb-4">
+                    <div class="hidden md:grid grid-cols-12 items-center px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest bg-gray-50 dark:bg-gray-900/50 rounded-2xl mb-4">
                         <div class="col-span-1 flex justify-center">
                             <input type="checkbox" wire:model.live="selectAll" class="w-4 h-4 rounded border-gray-300 text-primary-blue focus:ring-primary-blue dark:bg-gray-900 dark:border-gray-700">
                         </div>
@@ -89,7 +89,8 @@
                     <div class="space-y-4">
                         @forelse($products as $product)
                         <div class="group transition-all duration-300">
-                            <div class="grid grid-cols-12 items-center p-4 rounded-[2.5rem] border-2 transition-all duration-500 {{ $highlight == $product->id ? 'bg-amber-400/10 border-amber-400 animate-highlight-breath z-10 relative' : 'bg-white dark:bg-gray-800/50 border-transparent group-hover:border-primary-blue/20' }} {{ in_array($product->id, $selectedProducts) ? 'border-primary-blue/30 bg-primary-blue/5' : '' }}">
+                            <!-- Desktop view -->
+                            <div class="hidden md:grid grid-cols-12 items-center p-4 rounded-[2.5rem] border-2 transition-all duration-500 {{ $highlight == $product->id ? 'bg-amber-400/10 border-amber-400 animate-highlight-breath z-10 relative' : 'bg-white dark:bg-gray-800/50 border-transparent group-hover:border-primary-blue/20' }} {{ in_array($product->id, $selectedProducts) ? 'border-primary-blue/30 bg-primary-blue/5' : '' }}">
                                 <!-- Checkbox -->
                                 <div class="col-span-1 flex justify-center">
                                     <input type="checkbox" wire:model.live="selectedProducts" value="{{ $product->id }}" class="w-5 h-5 rounded-lg border-gray-200 text-primary-blue focus:ring-primary-blue dark:bg-gray-900 dark:border-gray-700">
@@ -176,6 +177,84 @@
                                     </button>
                                 </div>
                             </div>
+
+                            <!-- Mobile Card View -->
+                            <div class="block md:hidden p-5 rounded-[2rem] border bg-white dark:bg-gray-900/40 transition-all duration-300 {{ $highlight == $product->id ? 'border-amber-400 bg-amber-400/5 animate-highlight-breath' : 'border-gray-100 dark:border-gray-800' }} {{ in_array($product->id, $selectedProducts) ? 'border-primary-blue bg-primary-blue/5' : '' }} mb-4">
+                                <div class="flex items-start justify-between gap-3">
+                                    <div class="flex items-start gap-3">
+                                        <!-- Checkbox -->
+                                        <input type="checkbox" wire:model.live="selectedProducts" value="{{ $product->id }}" class="mt-1.5 w-5 h-5 rounded-lg border-gray-200 text-primary-blue focus:ring-primary-blue dark:bg-gray-900 dark:border-gray-700">
+                                        
+                                        <div>
+                                            <!-- Product Title -->
+                                            <h3 class="text-base font-black text-gray-800 dark:text-white uppercase tracking-tight italic leading-snug">{{ $product->name }}</h3>
+                                            
+                                            <!-- ID & Jurusan Tag -->
+                                            <div class="flex flex-wrap items-center gap-1.5 mt-1.5">
+                                                <span class="text-[9px] font-bold text-gray-400 uppercase">ID: #{{ substr($product->id, 0, 8) }}</span>
+                                                @if($product->jurusan)
+                                                    <span class="px-1.5 py-0.5 text-[8px] font-black rounded uppercase tracking-wider bg-primary-red/10 text-primary-red">
+                                                        TEFA {{ $product->jurusan->name }}
+                                                    </span>
+                                                @else
+                                                    <span class="px-1.5 py-0.5 text-[8px] font-black rounded uppercase tracking-wider bg-gray-100 text-gray-600 dark:bg-gray-900 dark:text-gray-300">
+                                                        GLOBAL
+                                                    </span>
+                                                @endif
+                                                <span class="px-2 py-0.5 bg-blue-50 dark:bg-blue-950/20 text-primary-blue border border-blue-100 dark:border-blue-900/30 rounded text-[8px] font-black uppercase tracking-wider">
+                                                    {{ $product->category->name }}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Status Indicator -->
+                                    <div>
+                                        @if($product->is_active)
+                                            <span class="flex items-center text-[9px] font-black text-green-500 uppercase tracking-widest bg-green-50 dark:bg-green-500/10 py-1.5 px-2.5 rounded-xl border border-green-100 dark:border-green-500/20">
+                                                Aktif
+                                            </span>
+                                        @else
+                                            <span class="flex items-center text-[9px] font-black text-gray-400 uppercase tracking-widest bg-gray-50 dark:bg-gray-900 py-1.5 px-2.5 rounded-xl border border-gray-150 dark:border-gray-800">
+                                                Nonaktif
+                                            </span>
+                                        @endif
+                                    </div>
+                                </div>
+                                
+                                <!-- Finance Info Box -->
+                                <div class="grid grid-cols-3 gap-2 mt-4 p-3 bg-gray-50 dark:bg-gray-900/50 rounded-2xl border border-gray-100 dark:border-gray-800">
+                                    <div class="text-center">
+                                        <span class="block text-[8px] font-black text-gray-400 uppercase tracking-wider">Harga Jual</span>
+                                        <span class="text-xs font-black text-primary-red">Rp{{ number_format($product->price, 0, ',', '.') }}</span>
+                                    </div>
+                                    <div class="text-center border-x border-gray-200/50 dark:border-gray-700/50">
+                                        <span class="block text-[8px] font-black text-gray-400 uppercase tracking-wider">Harga Modal</span>
+                                        <span class="text-xs font-black text-gray-500 dark:text-gray-400">Rp{{ number_format($product->modal_price, 0, ',', '.') }}</span>
+                                    </div>
+                                    <div class="text-center">
+                                        <span class="block text-[8px] font-black text-gray-400 uppercase tracking-wider">Profit</span>
+                                        <span class="text-xs font-black text-green-500">Rp{{ number_format($product->price - $product->modal_price, 0, ',', '.') }}</span>
+                                    </div>
+                                </div>
+                                
+                                <!-- Supplier & Actions -->
+                                <div class="flex items-center justify-between mt-4 pt-3 border-t border-gray-100 dark:border-gray-800">
+                                    <span class="text-[9px] font-bold text-gray-400">
+                                        Supplier: <strong class="text-gray-600 dark:text-gray-300 uppercase font-black italic">{{ $product->supplier_id ? $product->supplier->name : 'Internal' }}</strong>
+                                    </span>
+                                    
+                                    <div class="flex gap-2">
+                                        <button wire:click="editProduct('{{ $product->id }}')" class="p-2.5 bg-white dark:bg-gray-700 text-primary-blue rounded-xl shadow-sm border border-gray-150 dark:border-gray-600">
+                                            <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+                                        </button>
+                                        <button wire:click="confirmDelete('{{ $product->id }}')" class="p-2.5 bg-white dark:bg-gray-700 text-primary-red rounded-xl shadow-sm border border-gray-150 dark:border-gray-600">
+                                            <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                         </div>
                         @empty
                         <div class="py-32 text-center opacity-20">

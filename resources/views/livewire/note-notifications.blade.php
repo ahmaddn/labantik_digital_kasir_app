@@ -1,4 +1,4 @@
-<div class="relative" wire:poll.5s>
+<div class="relative" wire:poll.5s id="global-notifications-container">
     <!-- Bell Icon Trigger Button -->
     <button wire:click="toggleDropdown" class="relative p-3.5 bg-gray-50 dark:bg-gray-800 text-gray-400 rounded-xl hover:text-primary-blue hover:bg-primary-blue/5 transition-all shadow-sm">
         <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
@@ -6,7 +6,7 @@
         </svg>
 
         @if($unreadCount > 0)
-            <span class="absolute top-2 right-2 w-2.5 h-2.5 bg-rose-500 rounded-full animate-ping"></span>
+            <span id="unread-count-badge" data-count="{{ $unreadCount }}" class="absolute top-2 right-2 w-2.5 h-2.5 bg-rose-500 rounded-full animate-ping"></span>
             <span class="absolute top-2 right-2 w-2.5 h-2.5 bg-rose-500 rounded-full border-2 border-white dark:border-gray-800"></span>
         @endif
     </button>
@@ -16,46 +16,93 @@
         <div class="absolute right-0 mt-3 w-80 sm:w-96 bg-white dark:bg-gray-800 rounded-3xl shadow-2xl border border-gray-100 dark:border-gray-700 z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
             <div class="p-4 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
                 <div class="flex items-center gap-2">
-                    <h4 class="text-xs font-black uppercase tracking-wider text-gray-800 dark:text-white">Notifikasi Balasan</h4>
+                    <h4 class="text-xs font-black uppercase tracking-wider text-gray-800 dark:text-white">Notifikasi Aktivitas</h4>
                     @if($unreadCount > 0)
                         <span class="px-2 py-0.5 rounded-full bg-primary-blue text-white text-[9px] font-black">{{ $unreadCount }} Baru</span>
                     @endif
                 </div>
-                <button wire:click="$set('isOpen', false)" class="text-gray-400 hover:text-gray-600 dark:hover:text-white text-xs">
+                <button wire:click="$set('isOpen', false)" class="text-gray-400 hover:text-gray-600 dark:hover:text-white text-xs font-black">
                     &times;
                 </button>
             </div>
 
+            <!-- WhatsApp Mobile Link Promo Banner -->
+            <div class="p-3 bg-gradient-to-r from-green-500/10 to-emerald-500/10 dark:from-green-950/20 dark:to-emerald-950/20 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between gap-2">
+                <div class="flex items-center gap-2 min-w-0">
+                    <svg class="w-4 h-4 text-green-500 shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.717-1.454L0 24zm6.59-4.846c1.6.95 3.197 1.451 4.887 1.452 5.4 0 9.794-4.394 9.797-9.798.002-2.618-1.017-5.08-2.868-6.931-1.85-1.85-4.311-2.867-6.924-2.869-5.405 0-9.8 4.394-9.803 9.799 0 1.77.464 3.498 1.348 5.048l-.995 3.637 3.733-.979a9.715 9.715 0 0 0 4.625 1.22z"/></svg>
+                    <span class="text-[9px] font-black uppercase text-gray-500 dark:text-gray-400 truncate">Notifikasi ke HP (WhatsApp)</span>
+                </div>
+                <a href="https://api.whatsapp.com/send?phone=6282218080000&text=DAFTAR%20NOTIFIKASI%20TEFA%20{{ urlencode(auth()->user()->email) }}" target="_blank" class="px-2.5 py-1 bg-green-500 hover:bg-green-600 text-white rounded-lg text-[8px] font-black uppercase tracking-wider transition-all shrink-0">
+                    Aktifkan
+                </a>
+            </div>
+
             <div class="max-h-80 overflow-y-auto divide-y divide-gray-50 dark:divide-gray-700/50">
                 @forelse($notifications as $notif)
-                    <a href="{{ route('cashier-notes') }}" wire:navigate wire:click="$set('isOpen', false)" class="p-4 flex items-start gap-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors block">
-                        <div class="w-8 h-8 rounded-full bg-primary-blue/10 dark:bg-blue-400/20 text-primary-blue dark:text-blue-300 flex items-center justify-center font-black text-xs shrink-0">
-                            {{ substr($notif->user->name ?? 'U', 0, 1) }}
+                    @php
+                        $iconBg = match($notif->type) {
+                            'task' => 'bg-amber-50 text-amber-500 dark:bg-amber-950/20 dark:text-amber-400',
+                            'note' => 'bg-blue-50 text-primary-blue dark:bg-blue-950/20 dark:text-blue-400',
+                            default => 'bg-gray-50 text-gray-500 dark:bg-gray-900 dark:text-gray-400'
+                        };
+                        $iconSvg = match($notif->type) {
+                            'task' => '<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>',
+                            'note' => '<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>',
+                            default => '<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>'
+                        };
+                    @endphp
+                    <a href="{{ $notif->action_url ? url($notif->action_url) : '#' }}" wire:navigate wire:click="$set('isOpen', false)" class="p-4 flex items-start gap-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors block">
+                        <div class="w-8 h-8 rounded-xl {{ $iconBg }} flex items-center justify-center shrink-0">
+                            {!! $iconSvg !!}
                         </div>
                         <div class="flex-1 min-w-0">
-                            <p class="text-xs font-bold text-gray-800 dark:text-gray-200">
-                                <span class="font-black text-primary-blue dark:text-blue-400">{{ $notif->user->name ?? 'Seseorang' }}</span> membalas catatan
+                            <p class="text-xs font-black text-gray-800 dark:text-gray-200">
+                                {{ $notif->title }}
                             </p>
-                            <p class="text-[11px] text-gray-500 dark:text-gray-400 truncate mt-0.5 italic">
-                                "{{ $notif->content }}"
+                            <p class="text-[10px] text-gray-500 dark:text-gray-400 mt-1 leading-relaxed">
+                                {{ $notif->body }}
                             </p>
-                            <span class="text-[9px] font-bold text-gray-400 block mt-1">
+                            <span class="text-[8px] font-bold text-gray-450 dark:text-gray-500 block mt-1 uppercase tracking-wider">
                                 {{ $notif->created_at->diffForHumans() }}
                             </span>
                         </div>
                     </a>
                 @empty
-                    <div class="p-8 text-center text-xs font-bold text-gray-400 uppercase tracking-wider">
-                        Tidak ada balasan catatan baru.
+                    <div class="p-8 text-center text-xs font-bold text-gray-450 uppercase tracking-widest italic">
+                        Tidak ada notifikasi aktivitas.
                     </div>
                 @endforelse
             </div>
-
-            <div class="p-3 bg-gray-50 dark:bg-gray-900/50 border-t border-gray-100 dark:border-gray-700 text-center">
-                <a href="{{ route('cashier-notes') }}" wire:navigate wire:click="$set('isOpen', false)" class="text-[10px] font-black uppercase tracking-widest text-primary-blue dark:text-blue-400 hover:underline">
-                    Buka Semua Catatan &rarr;
-                </a>
-            </div>
         </div>
     @endif
+
+    <script>
+        document.addEventListener('livewire:init', () => {
+            let lastCount = 0;
+            
+            // Check native notification permission
+            if (Notification.permission === 'default') {
+                Notification.requestPermission();
+            }
+
+            // Hook into Livewire response to check unread notification increments
+            Livewire.hook('request', ({ respond }) => {
+                respond(({ status }) => {
+                    const badge = document.querySelector('#unread-count-badge');
+                    if (badge) {
+                        const currentCount = parseInt(badge.getAttribute('data-count') || '0');
+                        if (currentCount > lastCount) {
+                            if (Notification.permission === 'granted') {
+                                new Notification('LabAntik Kasir', {
+                                    body: 'Anda mendapatkan tugas, catatan, atau pesan baru!',
+                                    icon: '/favicon.png'
+                                });
+                            }
+                        }
+                        lastCount = currentCount;
+                    }
+                });
+            });
+        });
+    </script>
 </div>

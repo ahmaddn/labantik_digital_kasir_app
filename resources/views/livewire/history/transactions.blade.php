@@ -48,7 +48,7 @@
     <div class="bg-white dark:bg-gray-800 rounded-[3.5rem] shadow-2xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 overflow-hidden">
         <div class="px-10 py-6">
             <!-- Header Grid -->
-            <div class="grid grid-cols-[1.5fr_1.5fr_2fr_1fr_1.5fr_1.5fr_130px] items-center px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest bg-gray-50 dark:bg-gray-900/50 rounded-2xl mb-6">
+            <div class="hidden md:grid grid-cols-[1.5fr_1.5fr_2fr_1fr_1.5fr_1.5fr_130px] items-center px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest bg-gray-50 dark:bg-gray-900/50 rounded-2xl mb-6">
                 <div class="px-4">Waktu</div>
                 <div class="px-4">No. Ref</div>
                 <div class="px-4">Pembeli</div>
@@ -66,7 +66,8 @@
                     $productNames = \App\Models\Transaction::where('reference', $tx->reference)->with('product')->get()->pluck('product.name')->implode(', ');
                 @endphp
                 <div class="group transition-all duration-300 {{ $isActive ? 'z-50 relative' : '' }}">
-                    <div class="grid grid-cols-[1.5fr_1.5fr_2fr_1fr_1.5fr_1.5fr_130px] items-center p-6 rounded-[2.5rem] border-2 transition-all duration-500 {{ $isActive ? 'bg-white dark:bg-gray-800/50 border-amber-400 shadow-[0_0_25px_rgba(245,158,11,0.4)] ring-4 ring-amber-400/20 scale-[1.01]' : 'bg-white dark:bg-gray-800/50 border-transparent group-hover:border-primary-blue/20' }}">
+                    <!-- Desktop view -->
+                    <div class="hidden md:grid grid-cols-[1.5fr_1.5fr_2fr_1fr_1.5fr_1.5fr_130px] items-center p-6 rounded-[2.5rem] border-2 transition-all duration-500 {{ $isActive ? 'bg-white dark:bg-gray-800/50 border-amber-400 shadow-[0_0_25px_rgba(245,158,11,0.4)] ring-4 ring-amber-400/20 scale-[1.01]' : 'bg-white dark:bg-gray-800/50 border-transparent group-hover:border-primary-blue/20' }}">
                         <!-- Waktu -->
                         <div class="px-4">
                             <div class="text-sm font-black text-gray-800 dark:text-white uppercase tracking-tight">{{ \Carbon\Carbon::parse($tx->transacted_at)->format('d M Y') }}</div>
@@ -152,6 +153,93 @@
                             <button @click="$dispatch('open-delete-transaction', { id: '{{ $tx->reference }}' })" class="p-2.5 bg-white dark:bg-gray-700 text-primary-red rounded-xl shadow-sm hover:scale-110 transition-transform border border-gray-100 dark:border-gray-600">
                                 <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
                             </button>
+                        </div>
+                    </div>
+
+                    <!-- Mobile Card View -->
+                    <div class="block md:hidden p-5 rounded-[2rem] border bg-white dark:bg-gray-900/40 transition-all duration-300 {{ $isActive ? 'border-amber-400 bg-amber-400/5 animate-highlight-breath' : 'border-gray-100 dark:border-gray-800' }} mb-4">
+                        <div class="flex items-start justify-between gap-3">
+                            <div>
+                                <!-- Ref Code & Jurusan -->
+                                <div class="flex items-center gap-2">
+                                    <span class="text-base font-black text-primary-blue tracking-tight uppercase italic">{{ $tx->reference }}</span>
+                                    @php
+                                        $txJurusan = $tx->jurusan_id ? $jurusans->firstWhere('id', $tx->jurusan_id) : null;
+                                    @endphp
+                                    @if($txJurusan)
+                                        <span class="px-1.5 py-0.5 text-[8px] font-black rounded uppercase tracking-wider bg-primary-red/10 text-primary-red">
+                                            {{ $txJurusan->name }}
+                                        </span>
+                                    @else
+                                        <span class="px-1.5 py-0.5 text-[8px] font-black rounded uppercase tracking-wider bg-gray-100 text-gray-600 dark:bg-gray-900 dark:text-gray-300">
+                                            GLOBAL
+                                        </span>
+                                    @endif
+                                </div>
+                                <!-- Time -->
+                                <span class="text-[10px] font-bold text-gray-400 block mt-1 uppercase tracking-widest">
+                                    {{ \Carbon\Carbon::parse($tx->transacted_at)->format('d M Y - H:i') }}
+                                </span>
+                            </div>
+                            
+                            <!-- Status -->
+                            <div>
+                                @php
+                                    $statusColor = match($tx->status) {
+                                        'uang_diterima' => 'bg-green-50 text-green-600 border-green-100 dark:bg-green-500/10 dark:text-green-500 dark:border-green-500/20',
+                                        'belum_kembalian' => 'bg-amber-50 text-amber-600 border-amber-100 dark:bg-amber-500/10 dark:text-amber-500 dark:border-amber-500/20',
+                                        default => 'bg-red-50 text-red-600 border-red-100 dark:bg-red-500/10 dark:text-red-500 dark:border-red-500/20'
+                                    };
+                                    $statusText = match($tx->status) {
+                                        'uang_diterima' => 'Lunas',
+                                        'belum_kembalian' => 'Pending',
+                                        default => 'Hutang'
+                                    };
+                                @endphp
+                                <span class="py-1.5 px-3 {{ $statusColor }} border rounded-full text-[8px] font-black uppercase tracking-widest block text-center truncate">
+                                    {{ $statusText }}
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <!-- Product list summary -->
+                        <p class="text-[10px] font-bold text-gray-500 dark:text-gray-400 mt-3 border-t border-gray-55 dark:border-gray-800/80 pt-3 leading-relaxed">
+                            {{ $productNames }}
+                        </p>
+                        
+                        <!-- Buyer & Kasir -->
+                        <div class="flex items-center gap-3 mt-4 p-3 bg-gray-50 dark:bg-gray-900/50 rounded-2xl border border-gray-150 dark:border-gray-800">
+                            <div class="w-8 h-8 rounded-lg bg-white dark:bg-gray-900 flex items-center justify-center text-[10px] font-black text-primary-blue border border-gray-150 dark:border-gray-800 shrink-0">
+                                {{ substr($tx->buyer_name ?? 'G', 0, 1) }}
+                            </div>
+                            <div class="flex flex-col min-w-0">
+                                <span class="text-xs font-black uppercase tracking-tight text-gray-700 dark:text-gray-300 truncate">
+                                    {{ $tx->buyer_name ?? 'Guest Customer' }}
+                                </span>
+                                @if($tx->user)
+                                    <span class="text-[9px] font-bold text-gray-400 dark:text-gray-500 tracking-wider">
+                                        Kasir: {{ $tx->user->name }}
+                                    </span>
+                                @endif
+                            </div>
+                        </div>
+                        
+                        <!-- Amount & Actions -->
+                        <div class="flex items-center justify-between mt-4 pt-3 border-t border-gray-150 dark:border-gray-800">
+                            <div>
+                                <span class="block text-[8px] font-black text-gray-400 uppercase tracking-wider">Total Pembayaran</span>
+                                <span class="text-lg font-black text-primary-red italic leading-none">Rp{{ number_format($tx->total_amount, 0, ',', '.') }}</span>
+                                <span class="text-[8px] text-gray-400 block font-bold mt-0.5">{{ $tx->total_qty }} Item ({{ $tx->unique_items }} Jenis)</span>
+                            </div>
+                            
+                            <div class="flex gap-2">
+                                <button wire:click="viewDetails('{{ $tx->reference }}')" class="p-2.5 bg-white dark:bg-gray-700 text-primary-blue rounded-xl shadow-sm border border-gray-150 dark:border-gray-600">
+                                    <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                </button>
+                                <button wire:click="edit('{{ $tx->reference }}')" class="p-2.5 bg-white dark:bg-gray-700 text-amber-500 rounded-xl shadow-sm border border-gray-150 dark:border-gray-600">
+                                    <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>

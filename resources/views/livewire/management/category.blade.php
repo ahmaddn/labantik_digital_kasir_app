@@ -80,8 +80,8 @@
         <!-- List Section -->
         <div class="lg:col-span-2">
             <div class="bg-white dark:bg-gray-800 rounded-[3.5rem] shadow-2xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 overflow-hidden">
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left">
+                    <!-- Desktop Table View -->
+                    <table class="hidden md:table w-full text-left">
                         <thead class="bg-gray-50 dark:bg-gray-900/50">
                             <tr>
                                 <th class="px-10 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">Kategori</th>
@@ -132,6 +132,48 @@
                             @endforelse
                         </tbody>
                     </table>
+
+                    <!-- Mobile List View -->
+                    <div class="block md:hidden p-4 space-y-4">
+                        @forelse($categories as $category)
+                            <div class="p-5 rounded-[2rem] border border-gray-150 dark:border-gray-800 bg-white dark:bg-gray-900/40">
+                                <div class="flex items-start justify-between gap-3">
+                                    <div>
+                                        <div class="flex items-center gap-2">
+                                            <h3 class="text-base font-black text-gray-850 dark:text-white uppercase tracking-tight italic">{{ $category->name }}</h3>
+                                            @if($category->jurusan)
+                                                <span class="px-1.5 py-0.5 text-[8px] font-black rounded uppercase tracking-wider bg-primary-red/10 text-primary-red">
+                                                    TEFA {{ $category->jurusan->name }}
+                                                </span>
+                                            @else
+                                                <span class="px-1.5 py-0.5 text-[8px] font-black rounded uppercase tracking-wider bg-gray-100 text-gray-600 dark:bg-gray-900 dark:text-gray-350">
+                                                    GLOBAL
+                                                </span>
+                                            @endif
+                                        </div>
+                                        <p class="text-[10px] font-medium text-gray-400 mt-1.5">{{ $category->description ?? 'Tidak ada deskripsi' }}</p>
+                                    </div>
+                                    
+                                    <span class="px-3 py-1.5 bg-primary-blue/5 text-primary-blue rounded-full text-[9px] font-black uppercase tracking-widest shrink-0 border border-primary-blue/10">
+                                        {{ $category->products_count ?? $category->products()->count() }} Produk
+                                    </span>
+                                </div>
+                                
+                                <div class="flex justify-end gap-2 mt-4 pt-3 border-t border-gray-100 dark:border-gray-800">
+                                    <button wire:click="edit({{ $category->id }})" class="p-2.5 bg-white dark:bg-gray-700 text-primary-blue rounded-xl shadow-sm border border-gray-150 dark:border-gray-600">
+                                        <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+                                    </button>
+                                    <button @click="$dispatch('open-delete-category', { id: {{ $category->id }} })" class="p-2.5 bg-white dark:bg-gray-700 text-primary-red rounded-xl shadow-sm border border-gray-150 dark:border-gray-600">
+                                        <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                    </button>
+                                </div>
+                            </div>
+                        @empty
+                            <div class="py-16 text-center opacity-20">
+                                <p class="text-xs font-black uppercase tracking-widest italic">Belum ada kategori</p>
+                            </div>
+                        @endforelse
+                    </div>
                 </div>
                 <div class="px-10 py-8 bg-gray-50 dark:bg-gray-900/50">
                     {{ $categories->links('livewire.partials.custom-pagination') }}

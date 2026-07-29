@@ -13,34 +13,39 @@ class NoteNotifications extends Component
     public function toggleDropdown(): void
     {
         $this->isOpen = !$this->isOpen;
+        if ($this->isOpen) {
+            $this->markAllAsRead();
+        }
+    }
+
+    public function markAllAsRead()
+    {
+        $user = auth()->user();
+        if ($user) {
+            \App\Models\Notification::where('user_id', $user->id)
+                ->where('is_read', false)
+                ->update(['is_read' => true]);
+        }
     }
 
     public function render()
     {
         $user = auth()->user();
-        $currentUserId = $user->id;
-        $isSuperAdmin = $user->roles()->where('name', 'superadmin')->exists();
-        $activeJurusanId = session('active_jurusan_id');
+        if (!$user) {
+            return view('livewire.note-notifications', [
+                'notifications' => collect(),
+                'unreadCount' => 0,
+            ]);
+        }
 
-        // Unread replies for notes created by the current user OR target user, where reply was written by someone else
-        $notifications = NoteReply::with(['note', 'user'])
-            ->whereHas('note', function ($q) use ($isSuperAdmin, $activeJurusanId, $currentUserId) {
-                if (!$isSuperAdmin && $activeJurusanId) {
-                    $q->where('jurusan_id', $activeJurusanId);
-                }
-                if (!$isSuperAdmin) {
-                    $q->where(function ($sq) use ($currentUserId) {
-                        $sq->where('user_id', $currentUserId)
-                           ->orWhere('target_user_id', $currentUserId);
-                    });
-                }
-            })
-            ->where('user_id', '!=', $currentUserId) // Don't notify self replies
+        $notifications = \App\Models\Notification::where('user_id', $user->id)
             ->orderBy('created_at', 'desc')
-            ->limit(8)
+            ->limit(10)
             ->get();
 
-        $unreadCount = $notifications->count();
+        $unreadCount = \App\Models\Notification::where('user_id', $user->id)
+            ->where('is_read', false)
+            ->count();
 
         return view('livewire.note-notifications', [
             'notifications' => $notifications,
