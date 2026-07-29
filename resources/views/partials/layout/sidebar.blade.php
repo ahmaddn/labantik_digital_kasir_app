@@ -44,6 +44,10 @@
 
         <!-- Nav -->
         <nav class="flex-1 px-8 space-y-2 mt-4 overflow-y-auto no-scrollbar pb-10">
+            <div class="px-5 mb-6">
+                @livewire('layout.tefa-switcher')
+            </div>
+
             <p class="text-[9px] font-black text-primary-blue uppercase tracking-[0.3em] mb-4 ml-5">Beranda & Utama</p>
 
             <a href="{{ route('dashboard') }}"

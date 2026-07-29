@@ -135,7 +135,9 @@
 
                     <!-- Visual Template Style -->
                     <div>
-                        <label class="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-4 ml-2 italic">Gaya Visual Template</label>
+                        <label class="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-4 ml-2 italic">
+                            {{ $isSubUnit ? 'Tipe Bisnis Sub-Unit (Tema Khusus)' : 'Gaya Visual Template' }}
+                        </label>
                         <div class="space-y-3">
                             @foreach($stylePresets as $style)
                                 <label class="flex p-5 bg-gray-50 dark:bg-gray-900/50 rounded-[2rem] border-2 cursor-pointer transition-all {{ $themeStyle === $style['value'] ? 'border-primary-blue bg-blue-50/10 dark:bg-blue-900/5' : 'border-transparent hover:border-gray-200 dark:hover:border-gray-800' }}">

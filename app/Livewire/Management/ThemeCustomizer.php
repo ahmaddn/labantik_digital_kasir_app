@@ -103,13 +103,32 @@ class ThemeCustomizer extends Component
         }
 
         $jurusan = Jurusan::find($this->selectedJurusanId);
-        if ($jurusan && $jurusan->theme_settings) {
-            $settings = $jurusan->theme_settings;
+        if ($jurusan) {
+            $settings = $jurusan->theme_settings ?: [];
             $this->primaryColor = $settings['primary_color'] ?? '#2563EB';
             $this->secondaryColor = $settings['secondary_color'] ?? '#EF4444';
             $this->fontFamily = $settings['font_family'] ?? 'Outfit';
-            $this->themeStyle = $settings['theme_style'] ?? 'classic-premium';
-            $this->tefaName = $settings['tefa_name'] ?? 'TEFA LABANTIK';
+            
+            $isSubUnit = !is_null($jurusan->parent_id);
+            $loadedStyle = $settings['theme_style'] ?? null;
+
+            if ($isSubUnit) {
+                // Sub-unit: fallback to culinary/restaurant if not business style
+                if (!in_array($loadedStyle, ['restaurant-aesthetic', 'retail-aesthetic', 'bank-aesthetic'])) {
+                    $this->themeStyle = 'restaurant-aesthetic';
+                } else {
+                    $this->themeStyle = $loadedStyle;
+                }
+            } else {
+                // Parent: fallback to classic-premium if using a business style
+                if (in_array($loadedStyle, ['restaurant-aesthetic', 'retail-aesthetic', 'bank-aesthetic'])) {
+                    $this->themeStyle = 'classic-premium';
+                } else {
+                    $this->themeStyle = $loadedStyle ?: 'classic-premium';
+                }
+            }
+
+            $this->tefaName = $settings['tefa_name'] ?? $jurusan->name;
             $this->docPrefixInvoice = $settings['doc_prefix_invoice'] ?? 'INV-SUP';
             $this->docPrefixTransaction = $settings['doc_prefix_transaction'] ?? 'LBK';
             $this->existingTefaLogo = $settings['tefa_logo'] ?? '';
@@ -169,7 +188,29 @@ class ThemeCustomizer extends Component
 
     public function render()
     {
-        return view('livewire.management.theme-customizer')
-            ->layout('layouts.app', ['title' => 'Kustomisasi Tampilan TEFA']);
+        $selectedJurusan = Jurusan::find($this->selectedJurusanId);
+        $isSubUnit = $selectedJurusan && !is_null($selectedJurusan->parent_id);
+
+        $filteredStyles = [];
+        foreach ($this->stylePresets as $style) {
+            $isBusinessStyle = in_array($style['value'], ['restaurant-aesthetic', 'retail-aesthetic', 'bank-aesthetic']);
+            
+            if ($isSubUnit) {
+                // For sub-units: show only the business presets
+                if ($isBusinessStyle) {
+                    $filteredStyles[] = $style;
+                }
+            } else {
+                // For parent units: show only the general presets
+                if (!$isBusinessStyle) {
+                    $filteredStyles[] = $style;
+                }
+            }
+        }
+
+        return view('livewire.management.theme-customizer', [
+            'stylePresets' => $filteredStyles,
+            'isSubUnit' => $isSubUnit,
+        ])->layout('layouts.app', ['title' => 'Kustomisasi Tampilan TEFA']);
     }
 }
