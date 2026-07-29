@@ -51,12 +51,16 @@
                             </td>
                             <td class="py-5 text-right pr-4">
                                 <div class="flex items-center justify-end gap-2">
-                                    <button wire:click="openEditModal('{{ $jurusan->id }}')" class="p-2 text-gray-400 hover:text-primary-blue dark:hover:text-primary-yellow hover:bg-gray-100 dark:hover:bg-gray-900 rounded-xl transition-all">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
-                                    </button>
-                                    <button wire:click="confirmDelete('{{ $jurusan->id }}')" class="p-2 text-gray-400 hover:text-primary-red hover:bg-red-50 dark:hover:bg-red-950/30 rounded-xl transition-all">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                                    </button>
+                                    @if(session('active_role_name') !== 'pengelola' || !is_null($jurusan->parent_id))
+                                        <button wire:click="openEditModal('{{ $jurusan->id }}')" class="p-2 text-gray-400 hover:text-primary-blue dark:hover:text-primary-yellow hover:bg-gray-100 dark:hover:bg-gray-900 rounded-xl transition-all">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                                        </button>
+                                        <button wire:click="confirmDelete('{{ $jurusan->id }}')" class="p-2 text-gray-400 hover:text-primary-red hover:bg-red-50 dark:hover:bg-red-950/30 rounded-xl transition-all">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                        </button>
+                                    @else
+                                        <span class="text-[10px] font-black text-gray-400 dark:text-gray-600 uppercase tracking-widest mr-2 italic">Akses Terbatas</span>
+                                    @endif
                                 </div>
                             </td>
                         </tr>
@@ -81,12 +85,16 @@
                             <p class="text-[10px] text-gray-400 font-semibold mt-1">ID: {{ $jurusan->id }}</p>
                         </div>
                         <div class="flex items-center gap-1">
-                            <button wire:click="openEditModal('{{ $jurusan->id }}')" class="p-2 text-gray-400 hover:text-primary-blue dark:hover:text-primary-yellow hover:bg-white dark:hover:bg-gray-800 rounded-xl transition-all">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
-                            </button>
-                            <button wire:click="confirmDelete('{{ $jurusan->id }}')" class="p-2 text-gray-400 hover:text-primary-red hover:bg-white dark:hover:bg-gray-800 rounded-xl transition-all">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                            </button>
+                            @if(session('active_role_name') !== 'pengelola' || !is_null($jurusan->parent_id))
+                                <button wire:click="openEditModal('{{ $jurusan->id }}')" class="p-2 text-gray-400 hover:text-primary-blue dark:hover:text-primary-yellow hover:bg-white dark:hover:bg-gray-800 rounded-xl transition-all">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                                </button>
+                                <button wire:click="confirmDelete('{{ $jurusan->id }}')" class="p-2 text-gray-400 hover:text-primary-red hover:bg-white dark:hover:bg-gray-800 rounded-xl transition-all">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                </button>
+                            @else
+                                <span class="text-[9px] font-black text-gray-400 dark:text-gray-600 uppercase tracking-widest mr-1 italic">Terbatas</span>
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -112,7 +120,7 @@
         <div x-show="show" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95" class="relative w-full max-w-md bg-white dark:bg-gray-800 rounded-[2.5rem] shadow-2xl p-8 border border-gray-100 dark:border-gray-700 z-10">
             <div class="flex justify-between items-center mb-6">
                 <h2 class="text-2xl font-black text-gray-850 dark:text-white uppercase italic tracking-tight">
-                    {{ $jurusanId ? 'Edit Jurusan' : 'Tambah Jurusan' }}
+                    {{ $jurusanId ? 'Edit Sub-Unit' : 'Tambah Sub-Unit' }}
                 </h2>
                 <button wire:click="$set('showModal', false)" class="text-gray-400 hover:text-gray-600 dark:hover:text-white transition-colors">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
@@ -121,15 +129,21 @@
 
             <form wire:submit.prevent="saveJurusan" class="space-y-6">
                 <div>
-                    <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">Nama Unit / TEFA (e.g. RPL, Angkringan Doku)</label>
+                    <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">Nama Sub-Unit / TEFA</label>
                     <input wire:model="name" type="text" required placeholder="Contoh: Angkringan Doku" class="w-full px-4 py-4 bg-gray-50 dark:bg-gray-900 border-none rounded-2xl focus:ring-2 focus:ring-primary-blue dark:text-white transition-all text-sm">
                     @error('name') <span class="text-xs text-primary-red font-bold mt-1 block">{{ $message }}</span> @enderror
                 </div>
 
                 <div>
-                    <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">Unit Induk (Parent TEFA) - Opsional</label>
+                    <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">
+                        Unit Induk (Parent TEFA) {!! session('active_role_name') === 'pengelola' ? '<span class="text-primary-red">* Wajib</span>' : '- Opsional' !!}
+                    </label>
                     <select wire:model="parent_id" class="w-full px-4 py-4 bg-gray-50 dark:bg-gray-900 border-none rounded-2xl focus:ring-2 focus:ring-primary-blue dark:text-white focus:outline-none transition-all text-sm">
-                        <option value="">-- Tanpa Induk (Unit Utama / Jurusan) --</option>
+                        @if(session('active_role_name') !== 'pengelola')
+                            <option value="">-- Tanpa Induk (Unit Utama / Jurusan) --</option>
+                        @else
+                            <option value="">-- Pilih Unit Induk / Jurusan --</option>
+                        @endif
                         @foreach($parentOptions as $parentOpt)
                             <option value="{{ $parentOpt->id }}">TEFA {{ $parentOpt->name }}</option>
                         @endforeach

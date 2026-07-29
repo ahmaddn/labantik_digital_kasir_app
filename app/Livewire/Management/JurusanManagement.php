@@ -44,6 +44,10 @@ class JurusanManagement extends Component
     {
         $this->resetForm();
         $jurusan = Jurusan::findOrFail($id);
+        if (session('active_role_name') === 'pengelola' && is_null($jurusan->parent_id)) {
+            $this->dispatch('toast', message: 'Akses Ditolak: Pengelola hanya dapat mengedit Sub-Unit.');
+            return;
+        }
         $this->jurusanId = $jurusan->id;
         $this->name = $jurusan->name;
         $this->parent_id = $jurusan->parent_id;
@@ -59,12 +63,20 @@ class JurusanManagement extends Component
 
     public function saveJurusan()
     {
+        if (session('active_role_name') === 'pengelola' && empty($this->parent_id)) {
+            $this->addError('parent_id', 'Pengelola wajib memilih Unit Induk (Parent TEFA).');
+            return;
+        }
+
         if ($this->jurusanId) {
             $this->validate([
                 'name' => 'required|string|max:255|unique:jurusans,name,'.$this->jurusanId,
                 'parent_id' => 'nullable|exists:jurusans,id|different:jurusanId',
             ]);
             $jurusan = Jurusan::findOrFail($this->jurusanId);
+            if (session('active_role_name') === 'pengelola' && is_null($jurusan->parent_id)) {
+                abort(403, 'Akses Ditolak: Pengelola tidak dapat mengedit Jurusan Induk.');
+            }
             $jurusan->update([
                 'name' => $this->name,
                 'parent_id' => $this->parent_id ?: null,
@@ -84,6 +96,11 @@ class JurusanManagement extends Component
 
     public function confirmDelete($id)
     {
+        $jurusan = Jurusan::findOrFail($id);
+        if (session('active_role_name') === 'pengelola' && is_null($jurusan->parent_id)) {
+            $this->dispatch('toast', message: 'Akses Ditolak: Pengelola hanya dapat menghapus Sub-Unit.');
+            return;
+        }
         $this->deleteId = $id;
         $this->showDeleteModal = true;
     }
@@ -91,7 +108,11 @@ class JurusanManagement extends Component
     public function deleteJurusan()
     {
         if ($this->deleteId) {
-            Jurusan::findOrFail($this->deleteId)->delete();
+            $jurusan = Jurusan::findOrFail($this->deleteId);
+            if (session('active_role_name') === 'pengelola' && is_null($jurusan->parent_id)) {
+                abort(403, 'Akses Ditolak: Pengelola tidak dapat menghapus Jurusan Induk.');
+            }
+            $jurusan->delete();
             $this->dispatch('toast', message: 'Data jurusan berhasil dihapus.');
             $this->showDeleteModal = false;
             $this->deleteId = null;
@@ -100,7 +121,7 @@ class JurusanManagement extends Component
 
     public function render()
     {
-        if (session('active_role_name') !== 'superadmin') {
+        if (session('active_role_name') !== 'superadmin' && session('active_role_name') !== 'pengelola') {
             abort(403);
         }
 

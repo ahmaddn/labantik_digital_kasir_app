@@ -183,12 +183,15 @@
                     </a>
                 @endif
 
-                @if(session('active_role_name') === 'superadmin')
+                @if(session('active_role_name') === 'superadmin' || session('active_role_name') === 'pengelola')
                     <a href="{{ route('jurusans') }}"
                         class="flex items-center px-6 py-4 text-sm font-black rounded-2xl transition-all {{ request()->routeIs('jurusans') ? 'bg-primary-blue text-white shadow-xl shadow-blue-900/20' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
                         <svg class="w-5 h-5 mr-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21V5a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
                         Manajemen Jurusan
                     </a>
+                @endif
+
+                @if(session('active_role_name') === 'superadmin')
                     <a href="{{ route('roles') }}"
                         class="flex items-center px-6 py-4 text-sm font-black rounded-2xl transition-all {{ request()->routeIs('roles') ? 'bg-primary-blue text-white shadow-xl shadow-blue-900/20' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
                         <svg class="w-5 h-5 mr-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 17v-4h6v4M9 7v4h6V7"/></svg>
