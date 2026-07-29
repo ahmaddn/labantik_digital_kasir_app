@@ -715,5 +715,12 @@ html:not(.dark) ::-webkit-scrollbar-thumb:hover {
     }
 }
 
+/* Security: Blank out screen when printing is attempted */
+@media print {
+    body {
+        display: none !important;
+    }
+}
+
 
 

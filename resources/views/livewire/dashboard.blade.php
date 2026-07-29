@@ -780,6 +780,17 @@
                             </p>
                         </div>
                     </div>
+
+                    <!-- Step 4 -->
+                    <div class="flex gap-4 items-start p-4 bg-red-500/5 dark:bg-red-950/10 rounded-2xl border border-red-500/10">
+                        <div class="w-8 h-8 rounded-full bg-primary-red text-white flex items-center justify-center text-xs font-black flex-shrink-0">4</div>
+                        <div>
+                            <h5 class="text-sm font-black text-primary-red leading-tight">Kerahasiaan & Keamanan Data</h5>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 leading-relaxed">
+                                <strong>Dilarang keras</strong> mengambil screenshot, merekam, atau menyebarkan data transaksi, kas, dan informasi keuangan aplikasi ini ke pihak luar. Seluruh tindakan mencurigakan akan terekam otomatis di log audit keamanan.
+                            </p>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="p-4 bg-amber-500/10 text-amber-600 dark:text-amber-400 rounded-2xl border border-amber-500/20 text-xs font-semibold flex items-center gap-3">

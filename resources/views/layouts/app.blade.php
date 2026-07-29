@@ -114,6 +114,54 @@
         </main>
     </div>
 
+    @auth
+    <script>
+        // Track PrintScreen Key Press
+        window.addEventListener('keyup', function(e) {
+            if (e.key === 'PrintScreen') {
+                logSecurityAlert('PrintScreen Key Press');
+            }
+        });
+
+        // Track Print Attempts and Screenshot shortcuts
+        window.addEventListener('keydown', function(e) {
+            // Ctrl+P or Cmd+P
+            if ((e.ctrlKey || e.metaKey) && e.key === 'p') {
+                logSecurityAlert('Print Attempt (Ctrl+P / Cmd+P)');
+            }
+            // Meta+Shift+S (Snipping Tool Shortcut)
+            if (e.metaKey && e.shiftKey && (e.key === 's' || e.key === 'S')) {
+                logSecurityAlert('Screenshot Shortcut (Win+Shift+S)');
+            }
+        });
+
+        // Track Window Blur on sensitive pages (Potential OS-level screen clipping/capture tool activity)
+        window.addEventListener('blur', function() {
+            const path = window.location.pathname;
+            const sensitivePages = ['/management', '/reports', '/cashier', '/transactions', '/daily-recap', '/monthly-recap', '/profit-sharing', '/cash-management'];
+            const isSensitive = sensitivePages.some(p => path.includes(p));
+            
+            if (isSensitive) {
+                logSecurityAlert('Window Blur (Possible Screen Capture)');
+            }
+        });
+
+        function logSecurityAlert(type) {
+            fetch('/log-security-alert', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify({
+                    url: window.location.href,
+                    type: type
+                })
+            }).catch(err => console.error('Security alert recording failed:', err));
+        }
+    </script>
+    @endauth
+
     @include('partials.global-loading')
     @livewireScripts
 </body>

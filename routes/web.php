@@ -124,6 +124,7 @@ Route::middleware(['auth', 'verified', EnsureRoleSelected::class])->group(functi
 
     // User Management
     Route::get('/users', UserManagement::class)->name('users');
+    Route::get('/management/security-logs', \App\Livewire\Management\SecurityLogs::class)->name('security-logs');
     Route::get('/jurusans', JurusanManagement::class)->name('jurusans');
     Route::get('/roles', RoleManagement::class)->name('roles');
 
@@ -132,6 +133,19 @@ Route::middleware(['auth', 'verified', EnsureRoleSelected::class])->group(functi
     Route::get('/management/tasks', \App\Livewire\Management\CashierTasks::class)->name('tasks');
     Route::get('/reports/attendances', \App\Livewire\Reports\AttendanceReport::class)->name('attendances');
     Route::get('/guide', \App\Livewire\Guide\CashierGuide::class)->name('guide');
+    
+    // Security Audit Log alerts
+    Route::post('/log-security-alert', function (\Illuminate\Http\Request $request) {
+        $user = auth()->user();
+        $userName = $user ? $user->name : 'Guest';
+        $userEmail = $user ? $user->email : 'N/A';
+        $pageUrl = $request->input('url', 'Unknown Page');
+        $type = $request->input('type', 'screenshot');
+        
+        \Illuminate\Support\Facades\Log::warning("SECURITY ALERT: User '{$userName}' ({$userEmail}) triggered a possible {$type} action on page: {$pageUrl}");
+        
+        return response()->json(['status' => 'logged']);
+    })->name('security.log-alert');
 });
 
 require __DIR__.'/settings.php';
