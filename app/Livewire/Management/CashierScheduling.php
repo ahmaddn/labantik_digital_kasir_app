@@ -22,6 +22,8 @@ class CashierScheduling extends Component
     public $selectedJurusanId = '';
     public $maxCashiersPerDay = 1; // Default 1 person per day
     public $maxShiftsPerWeek = 1; // Default max 1 shift per week
+    public $randomizeStartDate = '';
+    public $randomizeEndDate = '';
 
     // Modal UI states
     public $showCreateModal = false;
@@ -40,6 +42,16 @@ class CashierScheduling extends Component
         $this->currentWeekStart = now()->startOfWeek();
         $this->date = now()->toDateString();
         $this->selectedJurusanId = session('active_jurusan_id') ?? '';
+        $this->randomizeStartDate = now()->startOfWeek()->toDateString();
+        $this->randomizeEndDate = now()->startOfWeek()->addDays(5)->toDateString();
+    }
+
+    public function openRandomModal()
+    {
+        $start = Carbon::parse($this->currentWeekStart);
+        $this->randomizeStartDate = $start->toDateString();
+        $this->randomizeEndDate = $start->copy()->addDays(5)->toDateString();
+        $this->showRandomModal = true;
     }
 
     public function previousWeek()
@@ -138,6 +150,8 @@ class CashierScheduling extends Component
         $this->validate([
             'maxCashiersPerDay' => 'required|integer|min:1|max:10',
             'maxShiftsPerWeek' => 'required|integer|min:1|max:5',
+            'randomizeStartDate' => 'required|date',
+            'randomizeEndDate' => 'required|date|after_or_equal:randomizeStartDate',
         ]);
 
         // Get all cashiers in this jurusan
@@ -165,8 +179,18 @@ class CashierScheduling extends Component
             return;
         }
 
-        // Limit: total slots available vs total cashiers max capacity (cashiers count * maxShiftsPerWeek)
-        $totalDays = 6;
+        // Calculate custom date range days
+        $startDate = Carbon::parse($this->randomizeStartDate);
+        $endDate = Carbon::parse($this->randomizeEndDate);
+        
+        $days = [];
+        $tempDate = $startDate->copy();
+        while ($tempDate->lte($endDate)) {
+            $days[] = $tempDate->toDateString();
+            $tempDate->addDay();
+        }
+
+        $totalDays = count($days);
         $neededSlots = $totalDays * $this->maxCashiersPerDay;
         $maxCapacity = count($cashierIds) * $this->maxShiftsPerWeek;
 
@@ -175,23 +199,15 @@ class CashierScheduling extends Component
             return;
         }
 
-        $startOfWeek = Carbon::parse($this->currentWeekStart);
-        
         try {
-            DB::transaction(function () use ($cashierIds, $startOfWeek, $activeJurusanId, $neededSlots) {
+            DB::transaction(function () use ($cashierIds, $startDate, $endDate, $days, $activeJurusanId, $neededSlots) {
                 // Delete existing schedules for this week and jurusan to prevent clashes
                 CashierSchedule::where('jurusan_id', $activeJurusanId)
                     ->whereBetween('date', [
-                        $startOfWeek->copy()->toDateString(),
-                        $startOfWeek->copy()->endOfWeek()->toDateString()
+                        $startDate->toDateString(),
+                        $endDate->toDateString()
                     ])
                     ->delete();
-
-                // Mon-Sat
-                $days = [];
-                for ($i = 0; $i < 6; $i++) {
-                    $days[] = $startOfWeek->copy()->addDays($i)->toDateString();
-                }
 
                 // Balance distribution
                 $n = count($cashierIds);

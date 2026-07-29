@@ -47,7 +47,7 @@
             :class="{
                 'border-emerald-500/20 shadow-emerald-500/10': msg.type === 'success',
                 'border-amber-500/20 shadow-amber-500/10': msg.type === 'warning',
-                'border-red-500/20 shadow-red-500/10': msg.type === 'error'
+                'border-red-500/20 shadow-red-500/10': msg.type === 'error' || msg.type === 'danger'
             }"
         >
             <!-- Background Accent -->
@@ -56,7 +56,7 @@
                 :class="{
                     'bg-emerald-500': msg.type === 'success',
                     'bg-amber-500': msg.type === 'warning',
-                    'bg-red-500': msg.type === 'error'
+                    'bg-red-500': msg.type === 'error' || msg.type === 'danger'
                 }"
             ></div>
 
@@ -66,7 +66,7 @@
                 :class="{
                     'bg-gradient-to-br from-emerald-400 to-emerald-600 shadow-emerald-500/30': msg.type === 'success',
                     'bg-gradient-to-br from-amber-400 to-amber-600 shadow-amber-500/30': msg.type === 'warning',
-                    'bg-gradient-to-br from-red-400 to-red-600 shadow-red-500/30': msg.type === 'error'
+                    'bg-gradient-to-br from-red-400 to-red-600 shadow-red-500/30': msg.type === 'error' || msg.type === 'danger'
                 }"
             >
                 <!-- Subtle Inner Glow -->
@@ -78,7 +78,7 @@
                 <template x-if="msg.type === 'warning'">
                     <svg class="w-8 h-8 relative z-10" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="m12 9 4 4-4 4"/><path d="M8 9h.01"/><path d="M8 13h.01"/><path d="M8 17h.01"/><rect width="20" height="20" x="2" y="2" rx="2"/></svg>
                 </template>
-                <template x-if="msg.type === 'error'">
+                <template x-if="msg.type === 'error' || msg.type === 'danger'">
                     <svg class="w-8 h-8 relative z-10" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
                 </template>
             </div>
@@ -89,9 +89,9 @@
                    :class="{
                        'text-emerald-500': msg.type === 'success',
                        'text-amber-500': msg.type === 'warning',
-                       'text-red-500': msg.type === 'error'
+                       'text-red-500': msg.type === 'error' || msg.type === 'danger'
                    }"
-                   x-text="msg.type === 'success' ? 'Sukses' : (msg.type === 'warning' ? 'Perhatian' : 'Kesalahan System')">
+                   x-text="msg.type === 'success' ? 'Sukses' : (msg.type === 'warning' ? 'Perhatian' : 'Kesalahan Sistem')">
                 </p>
                 <p class="text-sm font-black uppercase tracking-tight text-gray-800 dark:text-white leading-tight italic" x-text="msg.text"></p>
             </div>
@@ -108,7 +108,7 @@
                     :class="{
                         'bg-emerald-500': msg.type === 'success',
                         'bg-amber-500': msg.type === 'warning',
-                        'bg-red-500': msg.type === 'error'
+                        'bg-red-500': msg.type === 'error' || msg.type === 'danger'
                     }"
                     x-init="setTimeout(() => $el.style.width = '0%', 100)"
                     style="width: 100%"

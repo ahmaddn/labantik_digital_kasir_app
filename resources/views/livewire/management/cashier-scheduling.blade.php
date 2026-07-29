@@ -18,7 +18,7 @@
             @endif
 
             @if(in_array(session('active_role_name'), ['superadmin', 'pengelola_jurusan']))
-                <button wire:click="$set('showRandomModal', true)" class="flex-1 sm:flex-initial inline-flex items-center justify-center px-4 py-3 bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-black text-xs uppercase italic tracking-wider transition-all duration-300">
+                <button wire:click="openRandomModal" class="flex-1 sm:flex-initial inline-flex items-center justify-center px-4 py-3 bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-black text-xs uppercase italic tracking-wider transition-all duration-300">
                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 7.89H18v3z"></path></svg>
                     Randomize
                 </button>
@@ -184,6 +184,19 @@
             <h2 class="text-2xl font-black text-gray-855 dark:text-white uppercase italic mb-6">Randomize Jadwal</h2>
             
             <form wire:submit.prevent="randomizeSchedules" class="space-y-5">
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">Tanggal Mulai</label>
+                        <input type="date" wire:model="randomizeStartDate" class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 border-none rounded-xl focus:ring-2 focus:ring-primary-blue dark:text-white text-xs font-semibold">
+                        @error('randomizeStartDate') <span class="text-[10px] text-red-500 font-bold mt-1 block">{{ $message }}</span> @enderror
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">Tanggal Selesai</label>
+                        <input type="date" wire:model="randomizeEndDate" class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 border-none rounded-xl focus:ring-2 focus:ring-primary-blue dark:text-white text-xs font-semibold">
+                        @error('randomizeEndDate') <span class="text-[10px] text-red-500 font-bold mt-1 block">{{ $message }}</span> @enderror
+                    </div>
+                </div>
+
                 <div>
                     <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">Kasir per Hari</label>
                     <input type="number" wire:model="maxCashiersPerDay" min="1" max="10" class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 border-none rounded-xl focus:ring-2 focus:ring-primary-blue dark:text-white text-sm font-semibold">
