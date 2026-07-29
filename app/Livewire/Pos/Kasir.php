@@ -151,10 +151,30 @@ class Kasir extends Component
             ->first();
 
         if ($task) {
+            $wasCompleted = $task->is_completed;
             $task->update([
-                'is_completed' => !$task->is_completed,
-                'completed_at' => !$task->is_completed ? now() : null,
+                'is_completed' => !$wasCompleted,
+                'completed_at' => !$wasCompleted ? now() : null,
             ]);
+
+            $user = auth()->user();
+            if ($user) {
+                if (!$wasCompleted) {
+                    $user->increment('pending_points', 10);
+                    $user->increment('streak', 1);
+                } else {
+                    $user->decrement('pending_points', 10);
+                    $user->decrement('streak', 1);
+                    if ($user->pending_points < 0) {
+                        $user->pending_points = 0;
+                    }
+                    if ($user->streak < 0) {
+                        $user->streak = 0;
+                    }
+                    $user->save();
+                }
+            }
+
             $this->dispatch('toast', message: 'Status tugas diperbarui.');
         }
     }

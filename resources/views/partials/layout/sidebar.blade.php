@@ -1,9 +1,14 @@
 <!-- Mobile Sidebar Overlay Backdrop -->
-<div x-show="sidebarOpen" @click="toggleSidebar" class="md:hidden fixed inset-0 z-40 bg-gray-950/40 backdrop-blur-sm" style="display: none;" x-transition></div>
+<div x-show="sidebarOpen" @click="toggleSidebar" class="lg:hidden fixed inset-0 z-40 bg-gray-950/40 backdrop-blur-sm" style="display: none;" x-transition></div>
 
 <aside
-    class="fixed inset-y-0 left-0 z-50 w-80 md:relative md:inset-y-auto md:left-auto md:flex md:flex-shrink-0 flex-col bg-white dark:bg-gray-900 border-r border-gray-100 dark:border-gray-800 transition-all duration-500 ease-in-out shadow-2xl md:shadow-none"
-    :class="sidebarOpen ? 'translate-x-0 opacity-100 w-80' : '-translate-x-full opacity-0 w-0 md:w-0 overflow-hidden'">
+    x-data="{ isMobile: window.innerWidth < 1024 }"
+    x-on:resize.window="isMobile = window.innerWidth < 1024"
+    class="z-50 flex-col bg-white dark:bg-gray-900 border-r border-gray-100 dark:border-gray-800 transition-all duration-500 ease-in-out shadow-2xl md:shadow-none flex"
+    :class="isMobile 
+        ? 'fixed inset-y-0 left-0 w-80 ' + (sidebarOpen ? 'translate-x-0 opacity-100' : '-translate-x-full opacity-0 pointer-events-none w-0 overflow-hidden') 
+        : 'relative ' + (sidebarOpen ? 'translate-x-0 opacity-100 w-80' : 'w-0 opacity-0 -translate-x-full overflow-hidden')"
+>
     <div class="flex flex-col h-full">
         <!-- Brand -->
         <div class="p-10 flex items-center justify-between">
@@ -146,11 +151,13 @@
                     </a>
                 @endif
 
-                <a href="{{ route('theme-customizer') }}"
-                    class="flex items-center px-6 py-4 text-sm font-black rounded-2xl transition-all {{ request()->routeIs('theme-customizer') ? 'bg-primary-blue text-white shadow-xl shadow-blue-900/20' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
-                    <svg class="w-5 h-5 mr-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" /><circle cx="7.5" cy="10.5" r="1.5" /><circle cx="11.5" cy="7.5" r="1.5" /><circle cx="16.5" cy="9.5" r="1.5" /><circle cx="15.5" cy="14.5" r="1.5" /></svg>
-                    Kustomisasi Tema
-                </a>
+                @if(session('active_role_name') !== 'kasir')
+                    <a href="{{ route('theme-customizer') }}"
+                        class="flex items-center px-6 py-4 text-sm font-black rounded-2xl transition-all {{ request()->routeIs('theme-customizer') ? 'bg-primary-blue text-white shadow-xl shadow-blue-900/20' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
+                        <svg class="w-5 h-5 mr-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" /><circle cx="7.5" cy="10.5" r="1.5" /><circle cx="11.5" cy="7.5" r="1.5" /><circle cx="16.5" cy="9.5" r="1.5" /><circle cx="15.5" cy="14.5" r="1.5" /></svg>
+                        Kustomisasi Tema
+                    </a>
+                @endif
 
                 @if(in_array(session('active_role_name'), ['superadmin', 'pengelola_jurusan', 'kasir']))
                     <a href="{{ route('schedules') }}"
@@ -209,17 +216,19 @@
                     </a>
                 @endif
 
-                <a href="{{ route('monthly-recap') }}"
-                    class="flex items-center px-6 py-4 text-sm font-black rounded-2xl transition-all {{ request()->routeIs('monthly-recap') ? 'bg-primary-blue text-white shadow-xl shadow-blue-900/20' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
-                    <svg class="w-5 h-5 mr-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v4" /><path d="M16 2v4" /><rect width="18" height="18" x="3" y="4" rx="2" /><path d="M3 10h18" /><path d="M8 14h.01" /><path d="M12 14h.01" /><path d="M16 14h.01" /><path d="M8 18h.01" /><path d="M12 18h.01" /><path d="M16 18h.01" /></svg>
-                    Rekap Bulanan
-                </a>
+                @if(session('active_role_name') !== 'kasir')
+                    <a href="{{ route('monthly-recap') }}"
+                        class="flex items-center px-6 py-4 text-sm font-black rounded-2xl transition-all {{ request()->routeIs('monthly-recap') ? 'bg-primary-blue text-white shadow-xl shadow-blue-900/20' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
+                        <svg class="w-5 h-5 mr-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v4" /><path d="M16 2v4" /><rect width="18" height="18" x="3" y="4" rx="2" /><path d="M3 10h18" /><path d="M8 14h.01" /><path d="M12 14h.01" /><path d="M16 14h.01" /><path d="M8 18h.01" /><path d="M12 18h.01" /><path d="M16 18h.01" /></svg>
+                        Rekap Bulanan
+                    </a>
 
-                <a href="{{ route('yearly-recap') }}"
-                    class="flex items-center px-6 py-4 text-sm font-black rounded-2xl transition-all {{ request()->routeIs('yearly-recap') ? 'bg-primary-blue text-white shadow-xl shadow-blue-900/20' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
-                    <svg class="w-5 h-5 mr-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m12 14 4-4" /><path d="M3.34 19a10 10 0 1 1 17.32 0" /><path d="m9.05 9 5.64 5.64" /><circle cx="12" cy="12" r="2" /></svg>
-                    Rekap Tahunan
-                </a>
+                    <a href="{{ route('yearly-recap') }}"
+                        class="flex items-center px-6 py-4 text-sm font-black rounded-2xl transition-all {{ request()->routeIs('yearly-recap') ? 'bg-primary-blue text-white shadow-xl shadow-blue-900/20' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
+                        <svg class="w-5 h-5 mr-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m12 14 4-4" /><path d="M3.34 19a10 10 0 1 1 17.32 0" /><path d="m9.05 9 5.64 5.64" /><circle cx="12" cy="12" r="2" /></svg>
+                        Rekap Tahunan
+                    </a>
+                @endif
 
                 <a href="{{ route('inventory-report') }}"
                     class="flex items-center px-6 py-4 text-sm font-black rounded-2xl transition-all {{ request()->routeIs('inventory-report') ? 'bg-primary-blue text-white shadow-xl shadow-blue-900/20' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800' }}">

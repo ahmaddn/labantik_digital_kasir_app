@@ -127,7 +127,24 @@ class MonthlyClosing extends Component
                 ->whereMonth('date', $month)
                 ->update(['is_archived' => true]);
 
-            // 4. Create carry forward starting transactions for the next month
+            // 4. Consolidate pending points of active cashiers in this month/jurusan
+            $userIds = Transaction::withoutGlobalScope('active')
+                ->where('jurusan_id', $activeJurusanId)
+                ->whereYear('transacted_at', $year)
+                ->whereMonth('transacted_at', $month)
+                ->distinct()
+                ->pluck('user_id')
+                ->filter()
+                ->toArray();
+
+            if (!empty($userIds)) {
+                DB::table('users')->whereIn('id', $userIds)->update([
+                    'points' => DB::raw('points + pending_points'),
+                    'pending_points' => 0
+                ]);
+            }
+
+            // 5. Create carry forward starting transactions for the next month
             $nextMonthFirstDay = Carbon::create($year, $month, 1)->addMonth()->startOfMonth()->toDateString();
             
             // Modal Carry Forward

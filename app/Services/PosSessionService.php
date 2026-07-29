@@ -110,6 +110,12 @@ class PosSessionService
                     'closing_stock' => max(0, $entry->opening_stock - $totalSold),
                 ]);
             }
+
+            // Award opening session points
+            $user = auth()->user();
+            if ($user) {
+                $user->increment('pending_points', 15);
+            }
         });
     }
 
@@ -133,6 +139,15 @@ class PosSessionService
                 ],
                 ['actual_cash' => 1]
             );
+
+            // Award closing session points and reset current streak
+            $user = auth()->user();
+            if ($user) {
+                $user->update([
+                    'streak' => 0,
+                    'pending_points' => $user->pending_points + 15
+                ]);
+            }
         });
     }
 
@@ -193,6 +208,13 @@ class PosSessionService
                         ]);
                     }
                 }
+            }
+
+            // Award transaction points and increment streak
+            $user = \App\Models\User::find($userId);
+            if ($user) {
+                $user->increment('pending_points', 5);
+                $user->increment('streak', 1);
             }
         });
 
