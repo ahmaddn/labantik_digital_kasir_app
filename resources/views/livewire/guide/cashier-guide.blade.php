@@ -97,10 +97,12 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 pt-4">
                     <!-- Step 1 -->
                     <div class="p-6 bg-gray-50 dark:bg-gray-800/50 rounded-3xl border border-gray-150 dark:border-gray-800 relative flex flex-col justify-between">
-                        <span class="absolute right-4 top-4 text-3xl font-black text-blue-500/20">01</span>
-                        <div class="space-y-2">
-                            <h4 class="font-black text-sm text-gray-950 dark:text-white uppercase">1. Buka Sesi & Absen</h4>
-                            <p class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
+                        <div class="space-y-3">
+                            <div class="flex items-center gap-2.5">
+                                <span class="w-8 h-8 rounded-full bg-blue-500/10 dark:bg-blue-400/20 text-primary-blue dark:text-blue-450 text-xs font-black flex items-center justify-center shrink-0">01</span>
+                                <h4 class="font-black text-sm text-gray-950 dark:text-white uppercase leading-tight">Buka Sesi & Absen</h4>
+                            </div>
+                            <p class="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
                                 Klik tombol <strong>"Buka Kasir"</strong> di dashboard. Sistem memicu modal absen masuk. Isi keterangan kehadiran Anda, lalu input <strong>Stok Awal (Opening Stock)</strong> semua produk di rak.
                             </p>
                         </div>
@@ -108,10 +110,12 @@
 
                     <!-- Step 2 -->
                     <div class="p-6 bg-gray-50 dark:bg-gray-800/50 rounded-3xl border border-gray-150 dark:border-gray-800 relative flex flex-col justify-between">
-                        <span class="absolute right-4 top-4 text-3xl font-black text-blue-500/20">02</span>
-                        <div class="space-y-2">
-                            <h4 class="font-black text-sm text-gray-950 dark:text-white uppercase">2. Input Penjualan (POS)</h4>
-                            <p class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
+                        <div class="space-y-3">
+                            <div class="flex items-center gap-2.5">
+                                <span class="w-8 h-8 rounded-full bg-blue-500/10 dark:bg-blue-400/20 text-primary-blue dark:text-blue-450 text-xs font-black flex items-center justify-center shrink-0">02</span>
+                                <h4 class="font-black text-sm text-gray-950 dark:text-white uppercase leading-tight">Input Penjualan (POS)</h4>
+                            </div>
+                            <p class="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
                                 Pilih produk di menu instan atau scan barcode. Sesuaikan jumlah pesanan di keranjang belanja. Input nama pembeli dan pilih tipe pembayaran (Lunas/Hutang/Sisa Kembalian).
                             </p>
                         </div>
@@ -119,10 +123,12 @@
 
                     <!-- Step 3 -->
                     <div class="p-6 bg-gray-50 dark:bg-gray-800/50 rounded-3xl border border-gray-150 dark:border-gray-800 relative flex flex-col justify-between">
-                        <span class="absolute right-4 top-4 text-3xl font-black text-blue-500/20">03</span>
-                        <div class="space-y-2">
-                            <h4 class="font-black text-sm text-gray-950 dark:text-white uppercase">3. Catat Pengeluaran</h4>
-                            <p class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
+                        <div class="space-y-3">
+                            <div class="flex items-center gap-2.5">
+                                <span class="w-8 h-8 rounded-full bg-blue-500/10 dark:bg-blue-400/20 text-primary-blue dark:text-blue-450 text-xs font-black flex items-center justify-center shrink-0">03</span>
+                                <h4 class="font-black text-sm text-gray-950 dark:text-white uppercase leading-tight">Catat Pengeluaran</h4>
+                            </div>
+                            <p class="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
                                 Bila ada pengeluaran mendadak untuk shift operasional (seperti membeli lakban atau sabun cuci), klik tombol <strong>"Catat Pengeluaran"</strong> di atas POS untuk menjaga kebersihan laci kasir.
                             </p>
                         </div>
@@ -130,10 +136,12 @@
 
                     <!-- Step 4 -->
                     <div class="p-6 bg-gray-50 dark:bg-gray-800/50 rounded-3xl border border-gray-150 dark:border-gray-800 relative flex flex-col justify-between">
-                        <span class="absolute right-4 top-4 text-3xl font-black text-blue-500/20">04</span>
-                        <div class="space-y-2">
-                            <h4 class="font-black text-sm text-gray-950 dark:text-white uppercase">4. Selesai Sesi (Tutup)</h4>
-                            <p class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
+                        <div class="space-y-3">
+                            <div class="flex items-center gap-2.5">
+                                <span class="w-8 h-8 rounded-full bg-blue-500/10 dark:bg-blue-400/20 text-primary-blue dark:text-blue-450 text-xs font-black flex items-center justify-center shrink-0">04</span>
+                                <h4 class="font-black text-sm text-gray-950 dark:text-white uppercase leading-tight">Selesai Sesi (Tutup)</h4>
+                            </div>
+                            <p class="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
                                 Tekan tombol <strong>"Selesai"</strong> di POS. Masukkan jumlah <strong>Stok Sisa Fisik (Closing Stock)</strong>, hitung uang fisik laci kasir, dan klik Simpan untuk menutup giliran jaga Anda.
                             </p>
                         </div>
@@ -161,7 +169,7 @@
                             <span class="w-2.5 h-2.5 rounded-lg bg-primary-blue shrink-0"></span>
                             Dashboard Overview
                         </h4>
-                        <div class="text-xs text-gray-500 dark:text-gray-400 space-y-2 leading-relaxed">
+                        <div class="text-sm text-gray-500 dark:text-gray-400 space-y-2 leading-relaxed">
                             <p><strong>Fungsi:</strong> Halaman ringkasan status shift operasional kasir yang sedang aktif.</p>
                             <p><strong>Alur Penggunaan:</strong></p>
                             <ol class="list-decimal list-inside space-y-1">
@@ -178,7 +186,7 @@
                             <span class="w-2.5 h-2.5 rounded-lg bg-primary-blue shrink-0"></span>
                             Petunjuk & SOP
                         </h4>
-                        <div class="text-xs text-gray-500 dark:text-gray-400 space-y-2 leading-relaxed">
+                        <div class="text-sm text-gray-500 dark:text-gray-400 space-y-2 leading-relaxed">
                             <p><strong>Fungsi:</strong> Pusat edukasi petunjuk pengoperasian kasir dan papan peringkat gamifikasi.</p>
                             <p><strong>Alur Penggunaan:</strong></p>
                             <ol class="list-decimal list-inside space-y-1">
@@ -195,7 +203,7 @@
                             <span class="w-2.5 h-2.5 rounded-lg bg-primary-blue shrink-0"></span>
                             Buka Mode Kasir (POS)
                         </h4>
-                        <div class="text-xs text-gray-500 dark:text-gray-400 space-y-2 leading-relaxed">
+                        <div class="text-sm text-gray-500 dark:text-gray-400 space-y-2 leading-relaxed">
                             <p><strong>Fungsi:</strong> Halaman pelayanan kasir instan untuk transaksi retail maupun makanan/minuman.</p>
                             <p><strong>Alur Penggunaan:</strong></p>
                             <ol class="list-decimal list-inside space-y-1">
@@ -214,7 +222,7 @@
                             <span class="w-2.5 h-2.5 rounded-lg bg-primary-blue shrink-0"></span>
                             Buku Kas Internal
                         </h4>
-                        <div class="text-xs text-gray-500 dark:text-gray-400 space-y-2 leading-relaxed">
+                        <div class="text-sm text-gray-500 dark:text-gray-400 space-y-2 leading-relaxed">
                             <p><strong>Fungsi:</strong> Melakukan pencatatan arus masuk/keluar kas non-POS secara manual.</p>
                             <p><strong>Alur Penggunaan:</strong></p>
                             <ol class="list-decimal list-inside space-y-1">
@@ -232,7 +240,7 @@
                             <span class="w-2.5 h-2.5 rounded-lg bg-primary-blue shrink-0"></span>
                             Rekap Harian & Audit
                         </h4>
-                        <div class="text-xs text-gray-500 dark:text-gray-400 space-y-2 leading-relaxed">
+                        <div class="text-sm text-gray-500 dark:text-gray-400 space-y-2 leading-relaxed">
                             <p><strong>Fungsi:</strong> Melakukan audit akhir dan meninjau laporan shift kasir yang telah ditutup.</p>
                             <p><strong>Alur Penggunaan:</strong></p>
                             <ol class="list-decimal list-inside space-y-1">
@@ -249,7 +257,7 @@
                             <span class="w-2.5 h-2.5 rounded-lg bg-primary-blue shrink-0"></span>
                             History Transaksi
                         </h4>
-                        <div class="text-xs text-gray-500 dark:text-gray-400 space-y-2 leading-relaxed">
+                        <div class="text-sm text-gray-500 dark:text-gray-400 space-y-2 leading-relaxed">
                             <p><strong>Fungsi:</strong> Log lengkap jejak rekam seluruh penjualan kasir.</p>
                             <p><strong>Alur Penggunaan:</strong></p>
                             <ol class="list-decimal list-inside space-y-1">
@@ -266,7 +274,7 @@
                             <span class="w-2.5 h-2.5 rounded-lg bg-primary-blue shrink-0"></span>
                             Hutang & Kembalian
                         </h4>
-                        <div class="text-xs text-gray-500 dark:text-gray-400 space-y-2 leading-relaxed">
+                        <div class="text-sm text-gray-500 dark:text-gray-400 space-y-2 leading-relaxed">
                             <p><strong>Fungsi:</strong> Mengelola catatan piutang belanja dan sisa uang kembalian pelanggan.</p>
                             <p><strong>Alur Penggunaan:</strong></p>
                             <ol class="list-decimal list-inside space-y-1">
@@ -282,7 +290,7 @@
                             <span class="w-2.5 h-2.5 rounded-lg bg-primary-blue shrink-0"></span>
                             Laporan Stok & Selisih
                         </h4>
-                        <div class="text-xs text-gray-500 dark:text-gray-400 space-y-2 leading-relaxed">
+                        <div class="text-sm text-gray-500 dark:text-gray-400 space-y-2 leading-relaxed">
                             <p><strong>Fungsi:</strong> Melakukan audit fisik persediaan produk harian.</p>
                             <p><strong>Alur Penggunaan:</strong></p>
                             <ol class="list-decimal list-inside space-y-1">
@@ -313,14 +321,14 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div class="p-6 bg-blue-50/50 dark:bg-blue-900/10 rounded-2xl border border-blue-100/50 dark:border-blue-900/20">
                             <h3 class="font-black text-gray-950 dark:text-white text-base uppercase">Buku Kas Modal</h3>
-                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-2 leading-relaxed">
+                            <p class="text-sm text-gray-500 dark:text-gray-400 mt-2 leading-relaxed">
                                 Digunakan untuk mencatat dana modal operasional, seperti pembelian bahan baku ke supplier, pembayaran utang operasional, dan kas awal laci kasir.
                             </p>
                         </div>
                         
                         <div class="p-6 bg-emerald-50/50 dark:bg-emerald-900/10 rounded-2xl border border-emerald-100/50 dark:border-emerald-900/20">
                             <h3 class="font-black text-gray-950 dark:text-white text-base uppercase">Buku Kas Keuntungan</h3>
-                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-2 leading-relaxed">
+                            <p class="text-sm text-gray-500 dark:text-gray-400 mt-2 leading-relaxed">
                                 Digunakan khusus untuk mengumpulkan margin/keuntungan bersih dari hasil penjualan retail/kuliner yang nantinya dialokasikan untuk kas utama jurusan.
                             </p>
                         </div>
@@ -328,10 +336,10 @@
 
                     <div class="p-6 bg-amber-50 dark:bg-gray-800 rounded-3xl border border-amber-200/50 dark:border-gray-700 mt-4">
                         <h4 class="font-black text-amber-700 dark:text-amber-400 text-sm uppercase tracking-wider">Fitur Konsolidasi Sub-Unit Usaha</h4>
-                        <p class="text-xs text-gray-600 dark:text-gray-300 mt-2 leading-relaxed font-medium">
+                        <p class="text-sm text-gray-600 dark:text-gray-300 mt-2 leading-relaxed font-medium">
                             Bagi kasir sub-unit (seperti Angkringan Doku), saldo harian yang telah dipotong modal dapat dikirim secara langsung ke unit induk (TEFA Jurusan utama) menggunakan tombol <strong>"Gabungkan ke Kas Induk"</strong> di halaman Buku Kas Internal. Transfer ini akan memotong saldo kas sub-unit dan mencatat penambahan dana masuk di kas induk secara otomatis.
                         </p>
-                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-2 leading-relaxed italic font-semibold">
+                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-2 leading-relaxed italic font-semibold">
                             *Catatan: Untuk kasir unit utama/biasa, fitur penggabungan ini tidak aktif, dan Anda hanya memantau serta mencatat data mutasi kas lokal unit Anda sendiri.
                         </p>
                     </div>
@@ -354,17 +362,17 @@
                 <div class="border-t border-gray-100 dark:border-gray-800 pt-6 space-y-6">
                     <div class="space-y-4">
                         <h3 class="font-black text-gray-900 dark:text-white text-base">1. Laporan Selisih Stok (Audit Fisik)</h3>
-                        <p class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
-                            Pengelola jurusan dan administrator memantau kecocokan inventaris pada menu <strong>Laporan Selisih Stok</strong>. Halaman ini membandingkan data stok awal, penjualan di POS, serta stok sisa akhir (closing) yang Anda input secara fisik.
+                        <p class="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
+                            Pengelola jurusan and administrator memantau kecocokan inventaris pada menu <strong>Laporan Selisih Stok</strong>. Halaman ini membandingkan data stok awal, penjualan di POS, serta stok sisa akhir (closing) yang Anda input secara fisik.
                         </p>
-                        <div class="p-4 bg-gray-50 dark:bg-gray-800 rounded-2xl text-xs text-gray-500 dark:text-gray-400 border border-gray-100 dark:border-gray-700">
+                        <div class="p-4 bg-gray-50 dark:bg-gray-800 rounded-2xl text-sm text-gray-500 dark:text-gray-400 border border-gray-100 dark:border-gray-700">
                             <strong>Indikator Selisih:</strong> Jika fisik akhir kurang dari sistem, status produk akan ditandai dengan badge merah <strong>"Hilang / Kurang"</strong>. Pengelola dapat melacak identitas kasir penginput stok harian tersebut untuk evaluasi.
                         </div>
                     </div>
 
                     <div class="space-y-4 pt-4 border-t border-gray-100 dark:border-gray-800">
                         <h3 class="font-black text-gray-900 dark:text-white text-base">2. Tutup Buku Bulanan (Monthly Closing)</h3>
-                        <p class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
+                        <p class="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
                             Di akhir bulan, Pengelola Jurusan akan mengeksekusi menu <strong>Tutup Buku Bulanan</strong>. Proses ini akan mengarsipkan seluruh data transaksi bulan tersebut agar pembukuan tidak dapat diubah kembali dan mentransfer sisa saldo kas ke saldo awal modal bulan berikutnya.
                         </p>
                     </div>
@@ -392,7 +400,7 @@
                             <div class="p-6 bg-gray-50 dark:bg-gray-800/50 rounded-2xl border border-gray-150 dark:border-gray-700 space-y-2">
                                 <span class="px-2.5 py-1 bg-blue-500/10 text-primary-blue text-[10px] font-black rounded-lg border border-blue-500/20 uppercase tracking-widest">Presensi Masuk (Clock-In)</span>
                                 <h4 class="font-black text-sm text-gray-900 dark:text-white mt-2">Bagaimana cara Clock-In?</h4>
-                                <p class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
+                                <p class="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
                                     Ketika pertama kali membuka tombol <strong>"Buka Kasir"</strong> di awal shift, Anda wajib mengisi modal absensi masuk Anda.
                                 </p>
                             </div>
@@ -400,7 +408,7 @@
                             <div class="p-6 bg-gray-50 dark:bg-gray-800/50 rounded-2xl border border-gray-150 dark:border-gray-700 space-y-2">
                                 <span class="px-2.5 py-1 bg-red-500/10 text-primary-red text-[10px] font-black rounded-lg border border-red-500/20 uppercase tracking-widest">Presensi Keluar (Clock-Out)</span>
                                 <h4 class="font-black text-sm text-gray-900 dark:text-white mt-2">Bagaimana cara Clock-Out?</h4>
-                                <p class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
+                                <p class="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
                                     Clock-out dilakukan terintegrasi saat Anda menekan tombol <strong>"Selesai"</strong> (Tutup Kasir) di POS. Keterangan penutupan shift Anda berfungsi sebagai pencatatan jam pulang.
                                 </p>
                             </div>
@@ -410,12 +418,12 @@
                     <!-- Tugas Harian -->
                     <div class="space-y-4 pt-4 border-t border-gray-100 dark:border-gray-800">
                         <h3 class="font-black text-gray-900 dark:text-white text-base">2. Pelaporan Tugas Harian</h3>
-                        <p class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
+                        <p class="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
                             Untuk melaporkan tugas yang selesai, kasir cukup melakukan <strong>centang (toggle checkbox)</strong> di samping nama tugas tersebut di halaman kasir. 
                         </p>
                         <div class="bg-gray-50 dark:bg-gray-800/50 p-6 rounded-2xl border border-gray-150 dark:border-gray-700 space-y-2">
                             <p class="text-[11px] font-black text-gray-800 dark:text-gray-200 uppercase tracking-wider">Bentuk Bukti & Pelaporan:</p>
-                            <ul class="list-disc list-inside text-xs text-gray-500 dark:text-gray-400 space-y-1">
+                            <ul class="list-disc list-inside text-sm text-gray-500 dark:text-gray-400 space-y-1">
                                 <li><strong>Bukti Digital:</strong> Sistem otomatis mencatat siapa kasir yang mencentang beserta <strong>waktu penyelesaian (Timestamp)</strong> tugas tersebut.</li>
                                 <li><strong>Bukti Deskriptif (Opsional):</strong> Di akhir shift saat Anda melakukan tutup buku (Clock-out), Anda dapat menulis laporan penutupan pada kolom <strong>"Laporan Penutupan / Catatan Kasir"</strong> untuk merinci status tugas tertentu atau jika ada temuan khusus.</li>
                             </ul>
@@ -573,8 +581,8 @@
                                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
                             </div>
                             <div>
-                                <p class="text-xs font-black text-gray-800 dark:text-white">Melayani POS</p>
-                                <p class="text-[10px] text-gray-500 dark:text-gray-400 mt-1">Selesaikan checkout keranjang belanja di POS: <strong>+5 Poin & +1 Streak</strong></p>
+                                <p class="text-sm font-black text-gray-800 dark:text-white">Melayani POS</p>
+                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Selesaikan checkout keranjang belanja di POS: <strong>+5 Poin & +1 Streak</strong></p>
                             </div>
                         </div>
                         <div class="p-4 bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 flex items-start gap-3">
@@ -582,8 +590,8 @@
                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2"/></svg>
                             </div>
                             <div>
-                                <p class="text-xs font-black text-gray-800 dark:text-white">Menyelesaikan Tugas</p>
-                                <p class="text-[10px] text-gray-500 dark:text-gray-400 mt-1">Centang/Toggle tugas harian kasir: <strong>+10 Poin & +1 Streak</strong></p>
+                                <p class="text-sm font-black text-gray-800 dark:text-white">Menyelesaikan Tugas</p>
+                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Centang/Toggle tugas harian kasir: <strong>+10 Poin & +1 Streak</strong></p>
                             </div>
                         </div>
                         <div class="p-4 bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 flex items-start gap-3">
@@ -591,8 +599,8 @@
                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                             </div>
                             <div>
-                                <p class="text-xs font-black text-gray-800 dark:text-white">Buka & Selesai Sesi</p>
-                                <p class="text-[10px] text-gray-500 dark:text-gray-400 mt-1">Input stok pembuka/penutup dan catat laci uang: <strong>+15 Poin</strong> (Streak kembali ke 0)</p>
+                                <p class="text-sm font-black text-gray-800 dark:text-white">Buka & Selesai Sesi</p>
+                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Input stok pembuka/penutup dan catat laci uang: <strong>+15 Poin</strong> (Streak kembali ke 0)</p>
                             </div>
                         </div>
                     </div>
@@ -616,10 +624,10 @@
                     <!-- FAQ 1 -->
                     <div class="border border-gray-100 dark:border-gray-800 rounded-2xl overflow-hidden transition-all">
                         <button @click="activeFaq = activeFaq === 1 ? null : 1" class="w-full flex items-center justify-between p-5 text-left font-black text-sm text-gray-900 dark:text-white bg-gray-50/50 dark:bg-gray-800/20 hover:bg-gray-50 dark:hover:bg-gray-800">
-                            <span>Bagaimana jika printer struk macet atau mati saat transaksi?</span>
+                             <span>Bagaimana jika printer struk macet atau mati saat transaksi?</span>
                             <svg class="w-4 h-4 transition-transform duration-300" :class="activeFaq === 1 ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
                         </button>
-                        <div x-show="activeFaq === 1" class="p-5 text-xs text-gray-500 dark:text-gray-400 border-t border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 leading-relaxed">
+                        <div x-show="activeFaq === 1" class="p-5 text-sm text-gray-500 dark:text-gray-400 border-t border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 leading-relaxed">
                             Selesaikan transaksi terlebih dahulu agar tercatat di sistem. Periksa kabel power printer dan koneksi kabel data (USB). Jika kertas thermal habis, ganti dengan gulungan yang baru. Setelah printer kembali normal, Anda dapat mencetak ulang struk dari menu <strong>"History Transaksi"</strong>.
                         </div>
                     </div>
@@ -630,7 +638,7 @@
                             <span>Bagaimana jika salah menginput produk yang dibeli?</span>
                             <svg class="w-4 h-4 transition-transform duration-300" :class="activeFaq === 2 ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
                         </button>
-                        <div x-show="activeFaq === 2" class="p-5 text-xs text-gray-500 dark:text-gray-400 border-t border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 leading-relaxed">
+                        <div x-show="activeFaq === 2" class="p-5 text-sm text-gray-500 dark:text-gray-400 border-t border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 leading-relaxed">
                             Jika pembayaran <strong>belum</strong> diselesaikan, Anda dapat langsung menghapus produk dari keranjang belanja dengan menekan tombol tempat sampah atau tombol kurangi (<strong>-</strong>) hingga kuantitas menjadi nol. Jika transaksi <strong>sudah</strong> disimpan, segera hubungi Pengelola Jurusan/Superadmin untuk melakukan pembatalan transaksi secara berwenang.
                         </div>
                     </div>
@@ -641,7 +649,7 @@
                             <span>Bagaimana cara mencatat uang kembalian yang dihutangkan?</span>
                             <svg class="w-4 h-4 transition-transform duration-300" :class="activeFaq === 3 ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
                         </button>
-                        <div x-show="activeFaq === 3" class="p-5 text-xs text-gray-500 dark:text-gray-400 border-t border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 leading-relaxed">
+                        <div x-show="activeFaq === 3" class="p-5 text-sm text-gray-500 dark:text-gray-400 border-t border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 leading-relaxed">
                             Masuk ke menu <strong>"Hutang & Kembalian"</strong>. Anda dapat mendaftarkan transaksi piutang atau sisa kembalian customer yang belum terbayarkan di halaman tersebut dengan memasukkan nama customer, tanggal, dan nominal terkait agar tercatat rapi di pembukuan toko.
                         </div>
                     </div>
