@@ -1,7 +1,9 @@
-<!-- Sidebar -->
+<!-- Mobile Sidebar Overlay Backdrop -->
+<div x-show="sidebarOpen" @click="toggleSidebar" class="md:hidden fixed inset-0 z-40 bg-gray-950/40 backdrop-blur-sm" style="display: none;" x-transition></div>
+
 <aside
-    class="hidden md:flex md:flex-shrink-0 flex-col bg-white dark:bg-gray-900 border-r border-gray-100 dark:border-gray-800 relative z-50 transition-all duration-500 ease-in-out"
-    :class="sidebarOpen ? 'w-80 opacity-100 translate-x-0' : 'w-0 opacity-0 -translate-x-full overflow-hidden'">
+    class="fixed inset-y-0 left-0 z-50 w-80 md:relative md:flex md:flex-shrink-0 flex-col bg-white dark:bg-gray-900 border-r border-gray-100 dark:border-gray-800 transition-all duration-500 ease-in-out shadow-2xl md:shadow-none"
+    :class="sidebarOpen ? 'translate-x-0 opacity-100 w-80' : '-translate-x-full opacity-0 w-0 md:w-0 overflow-hidden'">
     <div class="flex flex-col h-full">
         <!-- Brand -->
         <div class="p-10 flex items-center justify-between">
@@ -29,6 +31,10 @@
                     </span>
                 </div>
             </div>
+            <!-- Close Button (Mobile Only) -->
+            <button @click="toggleSidebar" class="md:hidden p-2.5 bg-gray-50 dark:bg-gray-800 text-gray-400 hover:text-primary-red rounded-xl transition-all shadow-sm" title="Tutup Menu">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
         </div>
 
         <!-- Nav -->
@@ -39,6 +45,12 @@
                 class="flex items-center px-6 py-4 text-sm font-black rounded-2xl transition-all {{ request()->routeIs('dashboard') ? 'bg-primary-blue text-white shadow-xl shadow-blue-900/20' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
                 <svg class="w-5 h-5 mr-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="9" x="3" y="3" rx="1" /><rect width="7" height="5" x="14" y="3" rx="1" /><rect width="7" height="9" x="14" y="12" rx="1" /><rect width="7" height="5" x="3" y="16" rx="1" /></svg>
                 Dashboard Overview
+            </a>
+
+            <a href="{{ route('guide') }}"
+                class="flex items-center px-6 py-4 text-sm font-black rounded-2xl transition-all {{ request()->routeIs('guide') ? 'bg-primary-blue text-white shadow-xl shadow-blue-900/20' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
+                <svg class="w-5 h-5 mr-4 text-blue-600 dark:text-blue-400" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                Petunjuk & SOP
             </a>
 
             @if(auth()->check() && count(auth()->user()->getAvailableAccesses()) > 1)

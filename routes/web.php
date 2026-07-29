@@ -131,6 +131,7 @@ Route::middleware(['auth', 'verified', EnsureRoleSelected::class])->group(functi
     Route::get('/management/schedules', \App\Livewire\Management\CashierScheduling::class)->name('schedules');
     Route::get('/management/tasks', \App\Livewire\Management\CashierTasks::class)->name('tasks');
     Route::get('/reports/attendances', \App\Livewire\Reports\AttendanceReport::class)->name('attendances');
+    Route::get('/guide', \App\Livewire\Guide\CashierGuide::class)->name('guide');
 });
 
 require __DIR__.'/settings.php';

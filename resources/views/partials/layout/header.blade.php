@@ -18,7 +18,10 @@
         </button>
 
         <!-- Page Context (Mobile Branding) -->
-        <div class="md:hidden flex items-center gap-3">
+        <div class="md:hidden flex items-center gap-2">
+            <button @click="toggleSidebar" class="p-2.5 bg-gray-50 dark:bg-gray-800 text-gray-405 rounded-xl hover:text-primary-blue transition-all shadow-sm" title="Menu">
+                <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
+            </button>
             <div class="w-10 h-10 bg-primary-blue rounded-xl flex items-center justify-center text-white font-black italic shadow-lg">LA</div>
             <span class="font-black italic uppercase text-sm text-primary-blue dark:text-white">Admin</span>
         </div>

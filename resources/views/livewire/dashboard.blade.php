@@ -699,4 +699,105 @@
             });
         });
     </script>
+
+    <!-- Welcome SOP Modal -->
+    <div x-data="{ 
+        showWelcome: false,
+        init() {
+            const isStaff = ['kasir', 'pengelola_jurusan'].includes('{{ session('active_role_name') }}');
+            if (isStaff && !localStorage.getItem('hasSeenWelcomeGuide_v1')) {
+                setTimeout(() => { this.showWelcome = true; }, 800);
+            }
+        },
+        closeWelcome(goToGuide = false) {
+            localStorage.setItem('hasSeenWelcomeGuide_v1', 'true');
+            this.showWelcome = false;
+            if (goToGuide) {
+                window.location.href = '{{ route('guide') }}';
+            }
+        }
+    }" 
+    x-show="showWelcome" 
+    x-transition:enter="transition ease-out duration-350"
+    x-transition:enter-start="opacity-0 scale-90"
+    x-transition:enter-end="opacity-100 scale-100"
+    x-transition:leave="transition ease-in duration-200"
+    x-transition:leave-start="opacity-100 scale-100"
+    x-transition:leave-end="opacity-0 scale-90"
+    class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-950/80 backdrop-blur-md" 
+    style="display: none;">
+        
+        <div class="bg-white dark:bg-gray-900 w-full max-w-2xl rounded-[2.5rem] shadow-2xl overflow-hidden border border-gray-100 dark:border-gray-800 transition-all max-h-[90vh] flex flex-col">
+            <!-- Modal Header -->
+            <div class="p-8 bg-gradient-to-br from-primary-blue to-blue-700 text-white relative overflow-hidden flex-shrink-0">
+                <div class="absolute -right-10 -bottom-10 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
+                <div class="relative z-10 flex items-center gap-4">
+                    <div class="w-14 h-14 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/20">
+                        <svg class="w-8 h-8 text-white animate-bounce mt-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+                    </div>
+                    <div>
+                        <span class="px-2.5 py-0.5 bg-white/25 text-[10px] font-black uppercase tracking-widest rounded-full border border-white/10">Staff Baru / Operator</span>
+                        <h3 class="text-2xl font-black italic tracking-tight mt-1">Halo, Selamat Datang!</h3>
+                        <p class="text-xs text-blue-100/90 mt-1">Kami telah menyiapkan ringkasan SOP kerja kasir untuk Anda.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal Content (Scrollable) -->
+            <div class="p-8 space-y-6 overflow-y-auto no-scrollbar flex-1">
+                <h4 class="text-sm font-black text-gray-900 dark:text-white uppercase tracking-wider">3 Langkah Utama Alur Kerja Kasir:</h4>
+                
+                <div class="space-y-4">
+                    <!-- Step 1 -->
+                    <div class="flex gap-4 items-start p-4 bg-gray-50 dark:bg-gray-850 rounded-2xl border border-gray-100 dark:border-gray-800">
+                        <div class="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center text-xs font-black flex-shrink-0">1</div>
+                        <div>
+                            <h5 class="text-sm font-black text-gray-900 dark:text-white leading-tight">Persiapan & Buka Kasir</h5>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 leading-relaxed">
+                                Pastikan area bersih, nyalakan printer struk, lalu klik <strong>"Buka Kasir"</strong> untuk memasukkan jumlah modal awal yang ada di laci uang Anda.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Step 2 -->
+                    <div class="flex gap-4 items-start p-4 bg-gray-50 dark:bg-gray-850 rounded-2xl border border-gray-100 dark:border-gray-800">
+                        <div class="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center text-xs font-black flex-shrink-0">2</div>
+                        <div>
+                            <h5 class="text-sm font-black text-gray-900 dark:text-white leading-tight">Proses Transaksi & Struk</h5>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 leading-relaxed">
+                                Pilih produk customer, isi kuantitas, tentukan metode pembayaran (Tunai/QRIS), terima uang, berikan kembalian dengan tepat, dan cetak struk belanja.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Step 3 -->
+                    <div class="flex gap-4 items-start p-4 bg-gray-50 dark:bg-gray-850 rounded-2xl border border-gray-100 dark:border-gray-800">
+                        <div class="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center text-xs font-black flex-shrink-0">3</div>
+                        <div>
+                            <h5 class="text-sm font-black text-gray-900 dark:text-white leading-tight">Rekap Fisik & Tutup Buku</h5>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 leading-relaxed">
+                                Di akhir shift, hitung total uang fisik di laci Anda secara manual, input ke menu <strong>Rekap Harian & Audit</strong>, tulis penjelasan jika ada selisih, lalu tutup sesi.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="p-4 bg-amber-500/10 text-amber-600 dark:text-amber-400 rounded-2xl border border-amber-500/20 text-xs font-semibold flex items-center gap-3">
+                    <svg class="w-5 h-5 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    <span>Anda dapat membuka halaman panduan lengkap & SOP interaktif kapan saja melalui menu <strong>"Petunjuk & SOP"</strong> di sidebar.</span>
+                </div>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="p-6 bg-gray-50 dark:bg-gray-850 border-t border-gray-100 dark:border-gray-800 flex flex-col sm:flex-row gap-3 justify-end flex-shrink-0">
+                <button @click="closeWelcome(true)" class="px-6 py-3.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 text-xs font-black rounded-2xl hover:bg-gray-50 dark:hover:bg-gray-750 transition-all text-center">
+                    Pelajari SOP Lengkap
+                </button>
+                <button @click="closeWelcome(false)" class="px-8 py-3.5 bg-primary-blue text-white text-xs font-black rounded-2xl hover:bg-blue-600 shadow-lg shadow-blue-500/25 transition-all text-center">
+                    Mulai Kerja
+                </button>
+            </div>
+        </div>
+
+    </div>
 </div>
