@@ -309,9 +309,13 @@ class Kasir extends Component
 
     public function saveClosingStock(PosSessionService $posSessionService): void
     {
+        $hasHigherRole = auth()->user()->roles()
+            ->whereIn('roles.name', ['superadmin', 'pengelola_jurusan'])
+            ->exists();
+
         $this->validate([
             'closingCashInput' => 'required|numeric|min:0',
-            'closingReportText' => 'required|string',
+            'closingReportText' => $hasHigherRole ? 'nullable|string' : 'required|string',
         ]);
 
         $today = $this->transactionDate ?: now()->toDateString();

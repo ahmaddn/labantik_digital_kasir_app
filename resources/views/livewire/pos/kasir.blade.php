@@ -789,7 +789,14 @@ document.addEventListener('keydown', (e) => {
                             @error('closingCashInput') <span class="text-xs text-red-500 font-bold mt-1 block">{{ $message }}</span> @enderror
                         </div>
                         <div>
-                            <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Laporan Aktivitas Selama Shift</label>
+                            @php
+                                $hasHigherRole = auth()->user()->roles()
+                                    ->whereIn('roles.name', ['superadmin', 'pengelola_jurusan'])
+                                    ->exists();
+                            @endphp
+                            <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">
+                                Laporan Aktivitas Selama Shift {!! $hasHigherRole ? '<span class="text-amber-500 font-black">(OPSIONAL)</span>' : '' !!}
+                            </label>
                             <textarea wire:model="closingReportText" placeholder="Jelaskan apa saja yang Anda lakukan selama shift ini..." rows="3" class="nb-input w-full p-4 text-sm font-bold bg-white dark:bg-slate-800 border-2 border-black"></textarea>
                             @error('closingReportText') <span class="text-xs text-red-500 font-bold mt-1 block">{{ $message }}</span> @enderror
                         </div>
