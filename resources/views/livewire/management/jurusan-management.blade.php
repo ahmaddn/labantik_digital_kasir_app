@@ -1,14 +1,14 @@
-<div class="space-y-8">
+<div class="p-6">
     <!-- Header -->
-    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+    <div class="flex flex-col md:flex-row md:items-center justify-between mb-10 gap-6">
         <div>
-            <h1 class="text-3xl font-black italic uppercase tracking-tighter text-primary-blue dark:text-primary-yellow">Manajemen Jurusan</h1>
-            <p class="text-gray-400 text-sm font-semibold uppercase tracking-widest mt-1">Kelola Unit TEFA Jurusan SMKN 1 Talaga</p>
+            <h1 class="text-4xl font-black italic uppercase tracking-tighter text-primary-blue dark:text-primary-blue-light">Manajemen Jurusan</h1>
+            <p class="text-gray-400 font-bold text-xs uppercase tracking-[0.2em] italic">Kelola Unit TEFA Jurusan SMKN 1 Talaga</p>
         </div>
-        <div>
-            <button wire:click="openCreateModal" class="inline-flex items-center px-6 py-4 bg-primary-blue hover:bg-blue-900 text-primary-yellow rounded-2xl font-black text-sm uppercase italic tracking-wider transition-all duration-300 shadow-xl shadow-blue-900/10 active:scale-95">
-                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
-                Tambah Jurusan Baru
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
+            <button wire:click="openCreateModal" class="px-5 sm:px-8 py-3.5 sm:py-4 bg-primary-blue text-white rounded-2xl shadow-xl shadow-blue-500/20 font-black italic uppercase text-xs tracking-widest transform hover:-translate-y-1 transition-all flex items-center justify-center">
+                <svg class="w-4 h-4 mr-3" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+                Tambah Sub-Unit Baru
             </button>
         </div>
     </div>
