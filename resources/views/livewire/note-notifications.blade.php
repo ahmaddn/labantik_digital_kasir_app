@@ -27,7 +27,7 @@
             </div>
 
             <!-- WhatsApp Mobile Link Promo Banner -->
-            <div class="p-3 bg-gradient-to-r from-green-500/10 to-emerald-500/10 dark:from-green-950/20 dark:to-emerald-950/20 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between gap-2">
+            {{-- <div class="p-3 bg-gradient-to-r from-green-500/10 to-emerald-500/10 dark:from-green-950/20 dark:to-emerald-950/20 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between gap-2">
                 <div class="flex items-center gap-2 min-w-0">
                     <svg class="w-4 h-4 text-green-500 shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.717-1.454L0 24zm6.59-4.846c1.6.95 3.197 1.451 4.887 1.452 5.4 0 9.794-4.394 9.797-9.798.002-2.618-1.017-5.08-2.868-6.931-1.85-1.85-4.311-2.867-6.924-2.869-5.405 0-9.8 4.394-9.803 9.799 0 1.77.464 3.498 1.348 5.048l-.995 3.637 3.733-.979a9.715 9.715 0 0 0 4.625 1.22z"/></svg>
                     <span class="text-[9px] font-black uppercase text-gray-500 dark:text-gray-400 truncate">Notifikasi ke HP (WhatsApp)</span>
@@ -35,7 +35,7 @@
                 <a href="https://api.whatsapp.com/send?phone=6282218080000&text=DAFTAR%20NOTIFIKASI%20TEFA%20{{ urlencode(auth()->user()->email) }}" target="_blank" class="px-2.5 py-1 bg-green-500 hover:bg-green-600 text-white rounded-lg text-[8px] font-black uppercase tracking-wider transition-all shrink-0">
                     Aktifkan
                 </a>
-            </div>
+            </div> --}}
 
             <div class="max-h-80 overflow-y-auto divide-y divide-gray-50 dark:divide-gray-700/50">
                 @forelse($notifications as $notif)
