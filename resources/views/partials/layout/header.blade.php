@@ -78,6 +78,11 @@
                 <span class="text-xs font-black text-gray-800 dark:text-white uppercase tracking-tighter">{{ auth()->user()->name ?? 'Admin' }}</span>
                 <span class="text-[8px] font-black text-gray-400 uppercase tracking-widest">Administrator</span>
             </div>
+            <!-- Change Password -->
+            <button @click="$dispatch('open-change-password-modal')" class="p-3.5 bg-gray-50 dark:bg-gray-800 text-gray-400 rounded-xl hover:text-amber-500 hover:bg-amber-500/5 transition-all shadow-sm" title="Ganti Password">
+                <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m21 2-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0 1.5 1.5M15.5 7.5 14 6m3 3 1.5-1.5M17 9l1.5 1.5"/></svg>
+            </button>
+
             <form method="POST" action="{{ route('logout') }}">
                 @csrf
                 <button type="submit" class="p-3.5 bg-gray-50 dark:bg-gray-800 text-gray-400 rounded-xl hover:text-primary-red hover:bg-primary-red/5 transition-all shadow-sm group">

@@ -1,4 +1,28 @@
-<div class="space-y-8 pt-6">
+<div class="space-y-8 pt-6" x-data="{
+    exportUser(name, email, role, initials) {
+        this.$refs.cardName.innerText = name;
+        this.$refs.cardEmail.innerText = email;
+        this.$refs.cardRole.innerText = role;
+        this.$refs.cardInitials.innerText = initials;
+        
+        const target = this.$refs.exportTarget;
+        target.style.display = 'block';
+        
+        setTimeout(() => {
+            html2canvas(target, {
+                useCORS: true,
+                backgroundColor: null,
+                scale: 2
+            }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = 'TEFA-CREDENTIALS-' + name.replace(/\s+/g, '-').toUpperCase() + '.png';
+                link.href = canvas.toDataURL();
+                link.click();
+                target.style.display = 'none';
+            });
+        }, 100);
+    }
+}">
     <!-- Header -->
     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
@@ -92,6 +116,9 @@
                             </td>
                             <td class="py-5 text-right pr-4">
                                 <div class="flex items-center justify-end gap-3">
+                                    <button @click="exportUser('{{ $user->name }}', '{{ $user->email }}', '{{ count($userAccesses) > 0 ? $userAccesses[0]->role_label : 'User' }}', '{{ $user->initials() }}')" class="p-2.5 text-gray-400 hover:text-emerald-500 hover:bg-emerald-500/10 rounded-xl transition-all" title="Cetak Kartu Akses">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2v-7a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.333 0 4 .667 4 2v1H5v-1c0-1.333 2.667-2 4-2z"></path></svg>
+                                    </button>
                                     <button wire:click="openEditModal('{{ $user->id }}')" class="p-2.5 text-gray-400 hover:text-primary-blue dark:hover:text-primary-yellow hover:bg-gray-100 dark:hover:bg-gray-900 rounded-xl transition-all">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                                     </button>
@@ -158,6 +185,10 @@
 
                     <!-- Actions -->
                     <div class="flex justify-end gap-2 pt-3 border-t border-gray-200 dark:border-gray-800">
+                        <button @click="exportUser('{{ $user->name }}', '{{ $user->email }}', '{{ count($userAccesses) > 0 ? $userAccesses[0]->role_label : 'User' }}', '{{ $user->initials() }}')" class="inline-flex items-center px-4 py-2.5 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400 border border-emerald-250 dark:border-emerald-900 rounded-xl font-bold text-xs gap-2 transition-all">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2v-7a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.333 0 4 .667 4 2v1H5v-1c0-1.333 2.667-2 4-2z"></path></svg>
+                            Export Kartu
+                        </button>
                         <button wire:click="openEditModal('{{ $user->id }}')" class="inline-flex items-center px-4 py-2.5 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 border border-gray-250 dark:border-gray-700 rounded-xl font-bold text-xs gap-2 transition-all">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                             Edit
@@ -402,4 +433,67 @@
             </form>
         </div>
     </div>
+    <!-- Hidden Card Template for Export -->
+    <div x-ref="exportTarget" style="display: none;" class="fixed">
+        <div class="w-[400px] h-[250px] bg-gradient-to-br from-slate-900 to-slate-950 p-6 rounded-[2rem] border-4 border-primary-blue text-white shadow-2xl relative overflow-hidden flex flex-col justify-between" style="font-family: 'Outfit', sans-serif;">
+            <!-- Card Pattern/Accents -->
+            <div class="absolute -right-16 -top-16 w-32 h-32 rounded-full bg-primary-blue/20 blur-xl"></div>
+            <div class="absolute -left-16 -bottom-16 w-32 h-32 rounded-full bg-primary-red/10 blur-xl"></div>
+            
+            <!-- Header -->
+            <div class="flex items-center justify-between border-b border-white/10 pb-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-lg bg-primary-blue flex items-center justify-center text-white font-black italic text-xs shadow-md">
+                        LA
+                    </div>
+                    <div>
+                        <span class="block text-[10px] font-black uppercase tracking-wider text-primary-blue">LabAntik Kasir</span>
+                        <span class="block text-[6px] font-black uppercase tracking-widest text-gray-500">Digital Credentials</span>
+                    </div>
+                </div>
+                <span class="px-2.5 py-1 rounded-full text-[6px] font-black uppercase tracking-widest bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                    ACTIVE MEMBER
+                </span>
+            </div>
+            
+            <!-- Body -->
+            <div class="flex items-center gap-4 my-auto">
+                <!-- Initials Avatar -->
+                <div x-ref="cardInitials" class="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-black text-2xl shadow-lg border-2 border-white/20">
+                    JD
+                </div>
+                <div>
+                    <h2 x-ref="cardName" class="text-lg font-black tracking-tight leading-tight uppercase italic text-white">John Doe</h2>
+                    <p x-ref="cardEmail" class="text-xs font-semibold text-gray-400 mt-1">johndoe@example.com</p>
+                    <div class="mt-2">
+                        <span x-ref="cardRole" class="inline-flex px-2 py-0.5 rounded-md text-[8px] font-black bg-white/10 text-primary-yellow uppercase tracking-widest border border-white/5">
+                            KASIR
+                        </span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Footer -->
+            <div class="flex items-center justify-between border-t border-white/10 pt-3">
+                <div class="flex flex-col">
+                    <span class="text-[5px] font-bold text-gray-500 uppercase tracking-widest">Verification ID</span>
+                    <span class="text-[8px] font-black text-primary-blue tracking-wider font-mono">TEFA-SECURE-ID</span>
+                </div>
+                <!-- Mock Barcode -->
+                <div class="flex items-center gap-0.5 opacity-40">
+                    <div class="w-0.5 h-6 bg-white"></div>
+                    <div class="w-1 h-6 bg-white"></div>
+                    <div class="w-0.5 h-6 bg-white"></div>
+                    <div class="w-1.5 h-6 bg-white"></div>
+                    <div class="w-0.5 h-6 bg-white"></div>
+                    <div class="w-0.5 h-6 bg-white"></div>
+                    <div class="w-1 h-6 bg-white"></div>
+                    <div class="w-0.5 h-6 bg-white"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- html2canvas dependency -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </div>

@@ -95,6 +95,7 @@
         </div>
     @endif
     @livewire('global-search')
+    @livewire('auth.change-password')
     <div class="flex h-screen overflow-hidden relative z-10">
         
         @include('partials.layout.sidebar')
