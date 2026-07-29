@@ -21,6 +21,51 @@
                 target.style.display = 'none';
             });
         }, 100);
+    },
+    async exportAllCards(filterType) {
+        const users = await this.$wire.getAllUsersForExport();
+        const filteredUsers = users.filter(u => {
+            if (filterType === 'all') return true;
+            if (filterType === 'kasir') return u.isKasir;
+            return false;
+        });
+
+        if (filteredUsers.length === 0) {
+            this.$dispatch('toast', { message: 'Tidak ada data pengguna yang cocok.' });
+            return;
+        }
+
+        const target = this.$refs.exportTarget;
+        target.style.display = 'block';
+
+        this.$dispatch('toast', { message: 'Mulai mengunduh ' + filteredUsers.length + ' kartu akses...' });
+
+        for (const u of filteredUsers) {
+            this.$refs.cardName.innerText = u.name;
+            this.$refs.cardEmail.innerText = u.email;
+            this.$refs.cardRole.innerText = u.role;
+            this.$refs.cardInitials.innerText = u.initials;
+
+            // Wait a tiny bit for render
+            await new Promise(resolve => setTimeout(resolve, 100));
+
+            const canvas = await html2canvas(target, {
+                useCORS: true,
+                backgroundColor: null,
+                scale: 2
+            });
+
+            const link = document.createElement('a');
+            link.download = 'TEFA-CREDENTIALS-' + u.name.replace(/\s+/g, '-').toUpperCase() + '.png';
+            link.href = canvas.toDataURL();
+            link.click();
+            
+            // Interval to prevent browser download locks
+            await new Promise(resolve => setTimeout(resolve, 400));
+        }
+
+        target.style.display = 'none';
+        this.$dispatch('toast', { message: 'Selesai! Semua kartu berhasil diunduh.' });
     }
 }">
     <!-- Header -->
@@ -39,6 +84,23 @@
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
                 Import Excel
             </button>
+
+            <!-- Export Cards Dropdown -->
+            <div class="relative" x-data="{ openExport: false }" @click.outside="openExport = false">
+                <button @click="openExport = !openExport" class="inline-flex items-center px-5 py-3.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-2xl font-black text-sm uppercase italic tracking-wider transition-all duration-300 shadow-xl shadow-emerald-950/10 active:scale-95">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                    Export Kartu
+                </button>
+                <div x-show="openExport" x-cloak
+                    class="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-100 dark:border-gray-700 py-2 z-50 transform origin-top-right">
+                    <button @click="openExport = false; exportAllCards('all')" class="w-full flex items-center gap-3 px-4 py-3 text-xs font-black uppercase tracking-wider italic text-gray-500 dark:text-gray-300 hover:text-emerald-500 dark:hover:text-emerald-400 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-all text-left">
+                        Semua Akun
+                    </button>
+                    <button @click="openExport = false; exportAllCards('kasir')" class="w-full flex items-center gap-3 px-4 py-3 text-xs font-black uppercase tracking-wider italic text-gray-500 dark:text-gray-300 hover:text-emerald-500 dark:hover:text-emerald-400 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-all text-left border-t border-gray-50 dark:border-gray-700/50">
+                        Hanya Kasir
+                    </button>
+                </div>
+            </div>
 
             <button wire:click="openCreateModal" class="inline-flex items-center px-5 py-3.5 bg-primary-blue hover:bg-blue-900 text-primary-yellow rounded-2xl font-black text-sm uppercase italic tracking-wider transition-all duration-300 shadow-xl shadow-blue-900/10 active:scale-95">
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
@@ -434,7 +496,7 @@
         </div>
     </div>
     <!-- Hidden Card Template for Export -->
-    <div x-ref="exportTarget" style="display: none;" class="fixed">
+    <div x-ref="exportTarget" style="display: none;" class="fixed -top-[9999px] -left-[9999px] opacity-0 pointer-events-none z-0">
         <div class="w-[400px] h-[250px] bg-gradient-to-br from-slate-900 to-slate-950 p-6 rounded-[2rem] border-4 border-primary-blue text-white shadow-2xl relative overflow-hidden flex flex-col justify-between" style="font-family: 'Outfit', sans-serif;">
             <!-- Card Pattern/Accents -->
             <div class="absolute -right-16 -top-16 w-32 h-32 rounded-full bg-primary-blue/20 blur-xl"></div>

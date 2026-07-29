@@ -22,8 +22,6 @@
             <button @click="toggleSidebar" class="p-2.5 bg-gray-50 dark:bg-gray-800 text-gray-405 rounded-xl hover:text-primary-blue transition-all shadow-sm" title="Menu">
                 <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
             </button>
-            <div class="w-10 h-10 bg-primary-blue rounded-xl flex items-center justify-center text-white font-black italic shadow-lg">LA</div>
-            <span class="font-black italic uppercase text-sm text-primary-blue dark:text-white">Admin</span>
         </div>
     </div>
 
@@ -72,23 +70,43 @@
             </div>
         @endauth
 
-        <!-- User Profile & Logout -->
-        <div class="flex items-center gap-4">
-            <div class="hidden md:flex flex-col items-end mr-2">
-                <span class="text-xs font-black text-gray-800 dark:text-white uppercase tracking-tighter">{{ auth()->user()->name ?? 'Admin' }}</span>
-                <span class="text-[8px] font-black text-gray-400 uppercase tracking-widest">Administrator</span>
-            </div>
-            <!-- Change Password -->
-            <button @click="$dispatch('open-change-password-modal')" class="p-3.5 bg-gray-50 dark:bg-gray-800 text-gray-400 rounded-xl hover:text-amber-500 hover:bg-amber-500/5 transition-all shadow-sm" title="Ganti Password">
-                <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m21 2-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0 1.5 1.5M15.5 7.5 14 6m3 3 1.5-1.5M17 9l1.5 1.5"/></svg>
+        <!-- User Profile Dropdown (Unified Mobile & Desktop) -->
+        <div class="relative" x-data="{ open: false }" @click.outside="open = false">
+            <button @click="open = !open" class="w-10 h-10 bg-primary-blue text-white font-black italic rounded-xl flex items-center justify-center shadow-lg transition-transform active:scale-95 focus:outline-none" title="Menu Akun">
+                {{ auth()->check() ? auth()->user()->initials() : 'LA' }}
             </button>
 
-            <form method="POST" action="{{ route('logout') }}">
-                @csrf
-                <button type="submit" class="p-3.5 bg-gray-50 dark:bg-gray-800 text-gray-400 rounded-xl hover:text-primary-red hover:bg-primary-red/5 transition-all shadow-sm group">
-                    <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            <!-- Dropdown Menu -->
+            <div x-show="open" x-cloak
+                x-transition:enter="transition ease-out duration-200"
+                x-transition:enter-start="opacity-0 scale-95"
+                x-transition:enter-end="opacity-100 scale-100"
+                x-transition:leave="transition ease-in duration-75"
+                x-transition:leave-start="opacity-100 scale-100"
+                x-transition:leave-end="opacity-0 scale-95"
+                class="absolute right-0 mt-3 w-56 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-100 dark:border-gray-700 py-2 z-50 transform origin-top-right">
+                
+                <!-- User Info Header -->
+                <div class="px-4 py-3 border-b border-gray-50 dark:border-gray-700/50">
+                    <span class="block text-xs font-black text-gray-800 dark:text-white uppercase tracking-tighter">{{ auth()->user()->name ?? 'Guest' }}</span>
+                    <span class="block text-[8px] font-black text-gray-400 uppercase tracking-widest mt-0.5">{{ session('active_role_label', 'User') }}</span>
+                </div>
+
+                <!-- Ganti Password -->
+                <button @click="open = false; $dispatch('open-change-password-modal')" class="w-full flex items-center gap-3 px-4 py-3 text-xs font-black uppercase tracking-wider italic text-gray-500 dark:text-gray-300 hover:text-amber-500 dark:hover:text-primary-yellow hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-all text-left">
+                    <svg class="w-4.5 h-4.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="m21 2-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0 1.5 1.5M15.5 7.5 14 6m3 3 1.5-1.5M17 9l1.5 1.5"/></svg>
+                    Ganti Password
                 </button>
-            </form>
+
+                <!-- Logout -->
+                <form method="POST" action="{{ route('logout') }}" class="block">
+                    @csrf
+                    <button type="submit" class="w-full flex items-center gap-3 px-4 py-3 text-xs font-black uppercase tracking-wider italic text-gray-500 dark:text-gray-300 hover:text-primary-red hover:bg-red-50 dark:hover:bg-red-950/20 transition-all text-left border-t border-gray-50 dark:border-gray-700/50">
+                        <svg class="w-4.5 h-4.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                        Keluar
+                    </button>
+                </form>
+            </div>
         </div>
     </div>
 </header>

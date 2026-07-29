@@ -180,6 +180,28 @@ class UserManagement extends Component
         $this->resetForm();
     }
 
+    public function getAllUsersForExport()
+    {
+        return User::all()->map(function ($user) {
+            $userAccesses = $user->getAvailableAccesses();
+            $roleLabel = count($userAccesses) > 0 ? $userAccesses[0]->role_label : 'User';
+            $isKasir = false;
+            foreach ($userAccesses as $acc) {
+                if ($acc->role_name === 'kasir') {
+                    $isKasir = true;
+                }
+            }
+
+            return [
+                'name' => $user->name,
+                'email' => $user->email,
+                'role' => $roleLabel,
+                'initials' => $user->initials(),
+                'isKasir' => $isKasir,
+            ];
+        })->toArray();
+    }
+
     public function confirmDelete($id)
     {
         $this->deleteId = $id;
