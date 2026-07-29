@@ -1,52 +1,50 @@
 <div class="p-10 space-y-10">
     <!-- Header Section -->
-    <div class="flex justify-between items-end">
-        <div>
-            <h1 class="text-6xl font-black italic uppercase tracking-tighter text-primary-blue leading-none">Bagi Hasil
-            </h1>
-            <div class="flex items-center gap-4 mt-6">
+    <div class="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-6">
+        <div class="w-full lg:w-auto">
+            <h1 class="text-5xl lg:text-6xl font-black italic uppercase tracking-tighter text-primary-blue leading-none">Bagi Hasil</h1>
+            <div class="flex flex-wrap sm:flex-nowrap items-center gap-3 mt-6 w-full">
                 <button wire:click="$set('viewMode', 'weekly')"
-                    class="px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all {{ $viewMode === 'weekly' ? 'bg-primary-blue text-white shadow-lg' : 'bg-gray-100 text-gray-400 dark:bg-gray-800' }}">Laporan
+                    class="flex-1 sm:flex-initial px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all {{ $viewMode === 'weekly' ? 'bg-primary-blue text-white shadow-lg' : 'bg-gray-100 text-gray-400 dark:bg-gray-800' }}">Laporan
                     Mingguan</button>
                 <button wire:click="$set('viewMode', 'monthly')"
-                    class="px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all {{ $viewMode === 'monthly' ? 'bg-primary-blue text-white shadow-lg' : 'bg-gray-100 text-gray-400 dark:bg-gray-800' }}">Rekap
+                    class="flex-1 sm:flex-initial px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all {{ $viewMode === 'monthly' ? 'bg-primary-blue text-white shadow-lg' : 'bg-gray-100 text-gray-400 dark:bg-gray-800' }}">Rekap
                     Bulanan</button>
                 <button wire:click="$set('viewMode', 'yearly')"
-                    class="px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all {{ $viewMode === 'yearly' ? 'bg-primary-blue text-white shadow-lg' : 'bg-gray-100 text-gray-400 dark:bg-gray-800' }}">Rekap
+                    class="flex-1 sm:flex-initial px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all {{ $viewMode === 'yearly' ? 'bg-primary-blue text-white shadow-lg' : 'bg-gray-100 text-gray-400 dark:bg-gray-800' }}">Rekap
                     Tahunan</button>
             </div>
         </div>
-        <div class="flex items-center gap-6">
+        
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full lg:w-auto">
             @if ($viewMode === 'weekly')
                 <div x-data="{ start: @entangle('startDate').live, end: @entangle('endDate').live, startInstance: null, endInstance: null }"
                     x-init="startInstance = flatpickr($refs.startDate, { dateFormat: 'Y-m-d', defaultDate: start, onChange: (s, d) => start = d }); $watch('start', v => startInstance.setDate(v, false)); endInstance = flatpickr($refs.endDate, { dateFormat: 'Y-m-d', defaultDate: end, onChange: (s, d) => end = d }); $watch('end', v => endInstance.setDate(v, false))"
-                    class="flex items-center bg-white dark:bg-gray-900 p-2 rounded-[2rem] shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-800 cursor-pointer">
-                    <div class="px-6 py-2">
-                        <p class="text-[8px] font-black text-primary-blue uppercase tracking-widest mb-1">DARI TANGGAL
-                        </p>
+                    class="flex items-center justify-between bg-white dark:bg-gray-900 p-2 rounded-[2rem] shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-800 cursor-pointer w-full sm:w-auto">
+                    <div class="px-5 py-2 flex-1 sm:flex-initial">
+                        <p class="text-[8px] font-black text-primary-blue uppercase tracking-widest mb-1">DARI TANGGAL</p>
                         <input x-ref="startDate" type="text" readonly
-                            class="bg-transparent border-none p-0 text-[11px] font-black text-gray-800 dark:text-white focus:ring-0 cursor-pointer w-24">
+                            class="bg-transparent border-none p-0 text-[11px] font-black text-gray-800 dark:text-white focus:ring-0 cursor-pointer w-20">
                     </div>
 
-                    <div class="w-10 h-10 flex items-center justify-center">
+                    <div class="w-8 h-8 flex items-center justify-center shrink-0">
                         <svg class="w-4 h-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
                                 d="M14 5l7 7m0 0l-7 7m7-7H3" />
                         </svg>
                     </div>
 
-                    <div class="px-6 py-2">
-                        <p class="text-[8px] font-black text-primary-red uppercase tracking-widest mb-1">SAMPAI TANGGAL
-                        </p>
+                    <div class="px-5 py-2 flex-1 sm:flex-initial">
+                        <p class="text-[8px] font-black text-primary-red uppercase tracking-widest mb-1">SAMPAI TANGGAL</p>
                         <input x-ref="endDate" type="text" readonly
-                            class="bg-transparent border-none p-0 text-[11px] font-black text-gray-800 dark:text-white focus:ring-0 cursor-pointer w-24">
+                            class="bg-transparent border-none p-0 text-[11px] font-black text-gray-800 dark:text-white focus:ring-0 cursor-pointer w-20">
                     </div>
                 </div>
 
                 @if ($canProcess)
                     <button wire:click="generateReport"
-                        class="px-10 py-6 bg-primary-blue text-white rounded-[2rem] shadow-2xl shadow-blue-500/20 font-black italic uppercase text-xs tracking-widest hover:scale-[1.02] active:scale-95 transition-all flex items-center gap-4">
-                        <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                        class="px-10 py-5 bg-primary-blue text-white rounded-[2rem] shadow-2xl shadow-blue-500/20 font-black italic uppercase text-xs tracking-widest hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-4 w-full sm:w-auto">
+                        <svg class="w-5 h-5 shrink-0" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
                             viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
                             stroke-linecap="round" stroke-linejoin="round">
                             <path d="M5 12h14" />
@@ -56,8 +54,8 @@
                     </button>
                 @else
                     <button disabled
-                        class="px-10 py-6 bg-gray-200 dark:bg-gray-800 text-gray-400 rounded-[2rem] font-black italic uppercase text-xs tracking-widest cursor-not-allowed flex items-center gap-4 opacity-50">
-                        <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                        class="px-10 py-5 bg-gray-200 dark:bg-gray-800 text-gray-405 rounded-[2rem] font-black italic uppercase text-xs tracking-widest cursor-not-allowed flex items-center justify-center gap-4 opacity-50 w-full sm:w-auto">
+                        <svg class="w-5 h-5 shrink-0" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
                             viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
                             stroke-linecap="round" stroke-linejoin="round">
                             <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
@@ -68,12 +66,11 @@
                 @endif
             @elseif($viewMode === 'monthly')
                 <div
-                    class="flex items-center bg-white dark:bg-gray-900 p-2 rounded-[2rem] shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-800">
-                    <div class="px-6 py-2">
-                        <p class="text-[8px] font-black text-primary-blue uppercase tracking-widest mb-1">PILIH BULAN
-                        </p>
+                    class="flex items-center bg-white dark:bg-gray-900 p-2 rounded-[2rem] shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-800 w-full sm:w-auto">
+                    <div class="px-6 py-2 w-full">
+                        <p class="text-[8px] font-black text-primary-blue uppercase tracking-widest mb-1">PILIH BULAN</p>
                         <select wire:model.live="selectedMonth"
-                            class="bg-transparent border-none p-0 text-[11px] font-black text-gray-800 dark:text-white focus:ring-0 cursor-pointer">
+                            class="bg-transparent border-none p-0 text-[11px] font-black text-gray-800 dark:text-white focus:ring-0 cursor-pointer w-full">
                             <option value="1">Januari</option>
                             <option value="2">Februari</option>
                             <option value="3">Maret</option>

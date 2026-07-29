@@ -267,7 +267,8 @@ class WeeklyProfit extends Component
         $totalShortage = 0;
         $totalSurplus = 0;
         foreach ($dailyRecaps as $recap) {
-            $totalRevenueReal = $dailyRevenues[$recap->date] ?? 0;
+            $recapDateString = $recap->date instanceof \DateTimeInterface ? $recap->date->format('Y-m-d') : (string) $recap->date;
+            $totalRevenueReal = $dailyRevenues[$recapDateString] ?? 0;
             $diff = ((float) $recap->actual_cash - (float) ($recap->retained_change_cash ?? 0)) - (float) $totalRevenueReal;
             if ($diff < 0) {
                 $totalShortage += abs($diff);

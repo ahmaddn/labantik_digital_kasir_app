@@ -1,47 +1,56 @@
 <div class="p-6">
-    <div class="flex flex-col md:flex-row md:items-center justify-between mb-10 gap-6">
+    <div class="flex flex-col lg:flex-row lg:items-center justify-between mb-10 gap-6">
         <div>
             <h1 class="text-4xl font-black italic uppercase tracking-tighter text-primary-blue dark:text-primary-blue-light">Riwayat Transaksi</h1>
             <p class="text-gray-400 font-bold text-xs uppercase tracking-[0.2em] italic">Log Aktivitas Penjualan</p>
         </div>
         
-        <div class="flex flex-wrap items-center gap-4">
-            <div class="flex items-center bg-white dark:bg-gray-800 px-6 py-3 rounded-2xl shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-800">
-                <svg class="w-4 h-4 text-gray-400 mr-3" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-                <input type="text" wire:model.live="search" placeholder="Cari transaksi..." class="border-none p-0 focus:ring-0 font-black text-sm bg-transparent dark:text-white w-48">
+        <!-- Filter Toolbar -->
+        <div class="flex flex-col lg:flex-row items-stretch lg:items-center gap-4 w-full lg:w-auto">
+            <!-- Search bar -->
+            <div class="flex items-center bg-white dark:bg-gray-800 px-6 py-3.5 rounded-2xl shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-805 w-full lg:w-64">
+                <svg class="w-4 h-4 text-gray-400 mr-3 shrink-0" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                <input type="text" wire:model.live="search" placeholder="Cari transaksi..." class="border-none p-0 focus:ring-0 font-black text-[11px] bg-transparent dark:text-white uppercase tracking-widest placeholder:text-gray-300 w-full">
             </div>
 
-            <div class="flex items-center bg-white dark:bg-gray-800 px-6 py-3 rounded-2xl shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-800">
-                <svg class="w-4 h-4 text-primary-blue mr-3" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
-                <select wire:model.live="filterStatus" class="border-none p-0 focus:ring-0 font-black text-xs bg-transparent dark:text-white uppercase tracking-widest">
-                    <option value="">Semua Status</option>
-                    <option value="uang_diterima">Lunas</option>
-                    <option value="belum_kembalian">Pending</option>
-                    <option value="belum_menerima_uang">Hutang</option>
-                </select>
-            </div>
+            <!-- Dropdowns & Date Selector Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 xl:flex xl:items-center gap-4 w-full lg:w-auto">
+                <!-- Status Filter -->
+                <div class="flex items-center bg-white dark:bg-gray-800 px-6 py-3.5 rounded-2xl shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-800 w-full lg:w-auto">
+                    <svg class="w-4 h-4 text-primary-blue mr-3 shrink-0" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+                    <select wire:model.live="filterStatus" class="border-none p-0 focus:ring-0 font-black text-[11px] bg-transparent dark:text-white uppercase tracking-widest w-full">
+                        <option value="">Semua Status</option>
+                        <option value="uang_diterima">Lunas</option>
+                        <option value="belum_kembalian">Pending</option>
+                        <option value="belum_menerima_uang">Hutang</option>
+                    </select>
+                </div>
 
-            @if(!session('active_jurusan_id'))
-            <div class="flex items-center bg-white dark:bg-gray-800 px-6 py-3 rounded-2xl shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-800">
-                <svg class="w-4 h-4 text-primary-blue mr-3" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
-                <select wire:model.live="filterJurusan" class="border-none p-0 focus:ring-0 font-black text-xs bg-transparent dark:text-white uppercase tracking-widest">
-                    <option value="">Semua Jurusan</option>
-                    @foreach($jurusans as $jur)
-                        <option value="{{ $jur->id }}">{{ $jur->name }}</option>
-                    @endforeach
-                </select>
-            </div>
-            @endif
+                <!-- Jurusan Filter -->
+                @if(!session('active_jurusan_id'))
+                <div class="flex items-center bg-white dark:bg-gray-800 px-6 py-3.5 rounded-2xl shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-800 w-full lg:w-auto">
+                    <svg class="w-4 h-4 text-primary-blue mr-3 shrink-0" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
+                    <select wire:model.live="filterJurusan" class="border-none p-0 focus:ring-0 font-black text-[11px] bg-transparent dark:text-white uppercase tracking-widest w-full">
+                        <option value="">Semua Jurusan</option>
+                        @foreach($jurusans as $jur)
+                            <option value="{{ $jur->id }}">{{ $jur->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                @endif
 
-            <div class="flex items-center bg-white dark:bg-gray-800 px-6 py-3 rounded-2xl shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-800">
-                <svg class="w-4 h-4 text-primary-red mr-3" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
-                <input type="date" wire:model.live="filterDate" class="border-none p-0 focus:ring-0 font-black text-xs bg-transparent dark:text-white uppercase tracking-widest cursor-pointer">
-            </div>
+                <!-- Date Selector -->
+                <div class="flex items-center bg-white dark:bg-gray-800 px-6 py-3.5 rounded-2xl shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-800 w-full lg:w-auto">
+                    <svg class="w-4 h-4 text-primary-red mr-3 shrink-0" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
+                    <input type="date" wire:model.live="filterDate" class="border-none p-0 focus:ring-0 font-black text-[11px] bg-transparent dark:text-white uppercase tracking-widest cursor-pointer w-full">
+                </div>
 
-            <label class="flex items-center bg-white dark:bg-gray-800 px-6 py-3 rounded-2xl shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-800 cursor-pointer select-none">
-                <input type="checkbox" wire:model.live="showArchived" class="rounded border-gray-300 text-primary-blue focus:ring-primary-blue mr-3 w-4 h-4">
-                <span class="text-xs font-black uppercase tracking-widest text-slate-500">Tampilkan Arsip</span>
-            </label>
+                <!-- Archive Selector -->
+                <label class="flex items-center bg-white dark:bg-gray-800 px-6 py-3.5 rounded-2xl shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-800 cursor-pointer select-none w-full lg:w-auto justify-center sm:justify-start">
+                    <input type="checkbox" wire:model.live="showArchived" class="rounded border-gray-300 text-primary-blue focus:ring-primary-blue mr-3 w-4 h-4">
+                    <span class="text-[10px] font-black uppercase tracking-widest text-slate-500 shrink-0">Tampilkan Arsip</span>
+                </label>
+            </div>
         </div>
     </div>
 
@@ -65,9 +74,9 @@
                     $isActive = ($detailReference == $tx->reference && $showDetailsModal) || ($editingReference == $tx->reference && $showEditModal) || ($highlight == $tx->reference);
                     $productNames = \App\Models\Transaction::where('reference', $tx->reference)->with('product')->get()->pluck('product.name')->implode(', ');
                 @endphp
-                <div class="group transition-all duration-300 {{ $isActive ? 'z-50 relative' : '' }}">
+                <div class="group transition-all duration-300 {{ $isActive ? 'z-10 relative' : '' }}">
                     <!-- Desktop view -->
-                    <div class="hidden md:grid grid-cols-[1.5fr_1.5fr_2fr_1fr_1.5fr_1.5fr_130px] items-center p-6 rounded-[2.5rem] border-2 transition-all duration-500 {{ $isActive ? 'bg-white dark:bg-gray-800/50 border-amber-400 shadow-[0_0_25px_rgba(245,158,11,0.4)] ring-4 ring-amber-400/20 scale-[1.01]' : 'bg-white dark:bg-gray-800/50 border-transparent group-hover:border-primary-blue/20' }}">
+                    <div class="hidden lg:grid grid-cols-[1.5fr_1.5fr_2fr_1fr_1.5fr_1.5fr_130px] items-center p-6 rounded-[2.5rem] border-2 transition-all duration-500 {{ $isActive ? 'bg-white dark:bg-gray-800/50 border-amber-400 shadow-[0_0_25px_rgba(245,158,11,0.4)] ring-4 ring-amber-400/20 scale-[1.01]' : 'bg-white dark:bg-gray-800/50 border-transparent group-hover:border-primary-blue/20' }}">
                         <!-- Waktu -->
                         <div class="px-4">
                             <div class="text-sm font-black text-gray-800 dark:text-white uppercase tracking-tight">{{ \Carbon\Carbon::parse($tx->transacted_at)->format('d M Y') }}</div>
@@ -157,7 +166,7 @@
                     </div>
 
                     <!-- Mobile Card View -->
-                    <div class="block md:hidden p-5 rounded-[2rem] border bg-white dark:bg-gray-900/40 transition-all duration-300 {{ $isActive ? 'border-amber-400 bg-amber-400/5 animate-highlight-breath' : 'border-gray-100 dark:border-gray-800' }} mb-4">
+                    <div class="block lg:hidden p-5 rounded-[2rem] border bg-white dark:bg-gray-900/40 transition-all duration-300 {{ $isActive ? 'border-amber-400 bg-amber-400/5 animate-highlight-breath' : 'border-gray-100 dark:border-gray-800' }} mb-4">
                         <div class="flex items-start justify-between gap-3">
                             <div>
                                 <!-- Ref Code & Jurusan -->
@@ -202,28 +211,6 @@
                             </div>
                         </div>
                         
-                        <!-- Product list summary -->
-                        <p class="text-[10px] font-bold text-gray-500 dark:text-gray-400 mt-3 border-t border-gray-55 dark:border-gray-800/80 pt-3 leading-relaxed">
-                            {{ $productNames }}
-                        </p>
-                        
-                        <!-- Buyer & Kasir -->
-                        <div class="flex items-center gap-3 mt-4 p-3 bg-gray-50 dark:bg-gray-900/50 rounded-2xl border border-gray-150 dark:border-gray-800">
-                            <div class="w-8 h-8 rounded-lg bg-white dark:bg-gray-900 flex items-center justify-center text-[10px] font-black text-primary-blue border border-gray-150 dark:border-gray-800 shrink-0">
-                                {{ substr($tx->buyer_name ?? 'G', 0, 1) }}
-                            </div>
-                            <div class="flex flex-col min-w-0">
-                                <span class="text-xs font-black uppercase tracking-tight text-gray-700 dark:text-gray-300 truncate">
-                                    {{ $tx->buyer_name ?? 'Guest Customer' }}
-                                </span>
-                                @if($tx->user)
-                                    <span class="text-[9px] font-bold text-gray-400 dark:text-gray-500 tracking-wider">
-                                        Kasir: {{ $tx->user->name }}
-                                    </span>
-                                @endif
-                            </div>
-                        </div>
-                        
                         <!-- Amount & Actions -->
                         <div class="flex items-center justify-between mt-4 pt-3 border-t border-gray-150 dark:border-gray-800">
                             <div>
@@ -233,7 +220,7 @@
                             </div>
                             
                             <div class="flex gap-2">
-                                <button wire:click="viewDetails('{{ $tx->reference }}')" class="p-2.5 bg-white dark:bg-gray-700 text-primary-blue rounded-xl shadow-sm border border-gray-150 dark:border-gray-600">
+                                <button wire:click="viewDetails('{{ $tx->reference }}')" class="p-2.5 bg-white dark:bg-gray-700 text-primary-blue rounded-xl shadow-sm border border-gray-150 dark:border-gray-600" title="Detail Transaksi">
                                     <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                                 </button>
                                 <button wire:click="edit('{{ $tx->reference }}')" class="p-2.5 bg-white dark:bg-gray-700 text-amber-500 rounded-xl shadow-sm border border-gray-150 dark:border-gray-600">

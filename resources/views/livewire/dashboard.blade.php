@@ -18,6 +18,16 @@
             @endif
 
             @if(session('active_role_name') !== 'superadmin')
+                @php
+                    $isScheduled = true;
+                    if (session('active_role_name') === 'kasir') {
+                        $isScheduled = \App\Models\CashierSchedule::where('user_id', auth()->id())
+                            ->where('jurusan_id', session('active_jurusan_id'))
+                            ->where('date', now()->toDateString())
+                            ->exists();
+                    }
+                @endphp
+
                 @if($isSessionFinished)
                     <div class="flex items-center space-x-2">
                         <button disabled class="px-6 md:px-10 py-3.5 md:py-5 bg-gray-400 text-white rounded-2xl md:rounded-[2rem] shadow-xl font-black italic uppercase tracking-wider cursor-not-allowed flex flex-col items-center leading-tight">
@@ -34,6 +44,14 @@
                             </div>
                             <span class="text-[8px] font-black uppercase tracking-widest mt-1 opacity-90">Aktifkan Sesi</span>
                         </button>
+                    </div>
+                @elseif(!$isScheduled)
+                    <div class="px-6 md:px-10 py-3.5 md:py-5 bg-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-400 rounded-2xl md:rounded-[2rem] shadow-xl opacity-90 cursor-not-allowed flex flex-col items-center justify-center leading-tight text-center">
+                        <div class="flex items-center text-xs font-black uppercase italic tracking-wider">
+                            <svg class="w-5 h-5 mr-2.5 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
+                            Tidak Ada Jadwal
+                        </div>
+                        <span class="text-[8px] font-black uppercase tracking-widest mt-1 opacity-90">Anda tidak dijadwalkan hari ini</span>
                     </div>
                 @else
                     <a href="{{ route('kasir') }}" class="px-6 md:px-10 py-3.5 md:py-5 bg-primary-red text-white rounded-2xl md:rounded-[2rem] shadow-2xl shadow-red-500/30 font-black italic uppercase tracking-wider transition transform hover:-translate-y-2 active:scale-95 flex items-center">

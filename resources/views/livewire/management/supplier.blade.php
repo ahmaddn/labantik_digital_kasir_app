@@ -151,7 +151,6 @@
                 </div>
             </div>
         </div>
-    </div>
     <!-- Delete Modal -->
     <div 
         x-data="{ 

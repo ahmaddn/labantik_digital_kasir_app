@@ -1,4 +1,4 @@
-<div class="p-6">
+<div class="p-6" x-data="{ showProductDetail: false, detailProduct: {} }">
     <div class="flex flex-col md:flex-row md:items-center justify-between mb-10 gap-6">
         <div>
             <h1 class="text-4xl font-black italic uppercase tracking-tighter text-primary-blue dark:text-primary-blue-light">Katalog Produk</h1>
@@ -21,32 +21,41 @@
         @if($activeTab === 'products')
         <!-- List Section -->
         <div class="bg-white dark:bg-gray-800 rounded-[3.5rem] shadow-2xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 overflow-hidden">
-            <div class="p-8 border-b border-gray-100 dark:border-gray-700 flex flex-col md:flex-row justify-between items-center gap-4">
-                <div class="flex flex-wrap items-center gap-4 w-full md:w-auto">
+            <div class="p-8 border-b border-gray-100 dark:border-gray-700 flex flex-col lg:flex-row justify-between items-stretch lg:items-center gap-6">
+                <!-- Left Filters & Add Button -->
+                <div class="flex flex-col lg:flex-row items-stretch lg:items-center gap-4 w-full lg:w-auto">
                     <!-- Tambah Produk Button -->
-                    <button wire:click="openCreateModal" class="px-6 py-3 bg-primary-blue text-white rounded-xl text-[10px] font-black uppercase tracking-widest transition-transform hover:scale-105 active:scale-95 shadow-md flex items-center shrink-0">
+                    <button wire:click="openCreateModal" class="px-6 py-3.5 bg-primary-blue text-white rounded-xl text-[10px] font-black uppercase tracking-widest transition-all hover:scale-105 active:scale-95 shadow-md flex items-center justify-center shrink-0 w-full lg:w-auto">
                         <svg class="w-4 h-4 mr-2" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                         Tambah Produk
                     </button>
-                    <div class="relative group flex-1 md:w-64">
+                    
+                    <!-- Grid wrapper to align Search & Dropdowns side-by-side on mobile, flex on desktop -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:flex lg:items-center gap-4 w-full lg:w-auto">
+                        <!-- Search Input -->
+                        <div class="relative group w-full lg:w-64">
                             <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                <svg class="w-3 h-3 text-gray-400" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                                <svg class="w-3.5 h-3.5 text-gray-400" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
                             </div>
-                            <input type="text" wire:model.live="search" placeholder="Cari produk..." class="w-full pl-10 pr-4 py-2 bg-gray-50 dark:bg-gray-900 border-none rounded-xl focus:ring-2 focus:ring-primary-blue/20 font-black text-[10px] text-gray-800 dark:text-white uppercase tracking-widest placeholder:text-gray-300">
+                            <input type="text" wire:model.live="search" placeholder="Cari produk..." class="w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-gray-900 border-none rounded-xl focus:ring-2 focus:ring-primary-blue/20 font-black text-[10px] text-gray-800 dark:text-white uppercase tracking-widest placeholder:text-gray-300">
                         </div>
-                        <div class="flex items-center bg-gray-50 dark:bg-gray-900 px-4 py-2 rounded-xl border border-gray-100 dark:border-gray-800">
-                            <svg class="w-3 h-3 text-gray-400 mr-2" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
-                            <select wire:model.live="filterCategory" class="bg-transparent border-none p-0 focus:ring-0 text-[10px] font-black uppercase tracking-widest text-gray-500">
+                        
+                        <!-- Category Select -->
+                        <div class="flex items-center bg-gray-50 dark:bg-gray-900 px-4 py-3 rounded-xl border border-gray-100 dark:border-gray-800 w-full lg:w-auto">
+                            <svg class="w-3.5 h-3.5 text-gray-400 mr-2 shrink-0" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+                            <select wire:model.live="filterCategory" class="bg-transparent border-none p-0 focus:ring-0 text-[10px] font-black uppercase tracking-widest text-gray-500 w-full">
                                 <option value="">Semua Kategori</option>
                                 @foreach($categories as $cat)
                                     <option value="{{ $cat->id }}">{{ $cat->name }}</option>
                                 @endforeach
                             </select>
                         </div>
+                        
+                        <!-- Jurusan Select -->
                         @if(!session('active_jurusan_id'))
-                        <div class="flex items-center bg-gray-50 dark:bg-gray-900 px-4 py-2 rounded-xl border border-gray-100 dark:border-gray-800">
-                            <svg class="w-3 h-3 text-gray-400 mr-2" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
-                            <select wire:model.live="filterJurusan" class="bg-transparent border-none p-0 focus:ring-0 text-[10px] font-black uppercase tracking-widest text-gray-500">
+                        <div class="flex items-center bg-gray-50 dark:bg-gray-900 px-4 py-3 rounded-xl border border-gray-100 dark:border-gray-800 w-full lg:w-auto">
+                            <svg class="w-3.5 h-3.5 text-gray-400 mr-2 shrink-0" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
+                            <select wire:model.live="filterJurusan" class="bg-transparent border-none p-0 focus:ring-0 text-[10px] font-black uppercase tracking-widest text-gray-500 w-full">
                                 <option value="">Semua Jurusan</option>
                                 @foreach($jurusans as $jur)
                                     <option value="{{ $jur->id }}">{{ $jur->name }}</option>
@@ -55,23 +64,27 @@
                         </div>
                         @endif
                     </div>
-                    <div class="flex items-center gap-6">
-                        @if(count($selectedProducts) > 0)
-                            <div class="flex items-center bg-primary-blue/5 px-6 py-2 rounded-2xl border border-primary-blue/10 animate-fade-in">
-                                <span class="text-[10px] font-black text-primary-blue uppercase tracking-widest mr-6">{{ count($selectedProducts) }} Dipilih</span>
-                                <div class="flex gap-2">
-                                    <button wire:click="bulkToggleStatus" class="px-4 py-2 bg-white dark:bg-gray-900 text-primary-blue rounded-xl text-[9px] font-black uppercase tracking-widest shadow-sm hover:bg-primary-blue hover:text-white transition-all border border-primary-blue/20">Ganti Status</button>
-                                    <button wire:click="confirmBulkDelete" class="px-4 py-2 bg-primary-red text-white rounded-xl text-[9px] font-black uppercase tracking-widest shadow-lg shadow-red-500/20 hover:scale-105 transition-all">Hapus Semua</button>
-                                </div>
-                            </div>
-                        @endif
-                        <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest">{{ $products->total() }} Produk Ditemukan</span>
-                    </div>
-
                 </div>
+
+                <!-- Right Bulk Actions & Count -->
+                <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full lg:w-auto shrink-0 justify-between">
+                    @if(count($selectedProducts) > 0)
+                        <div class="flex items-center justify-between sm:justify-start bg-primary-blue/5 px-6 py-2.5 rounded-2xl border border-primary-blue/10 animate-fade-in gap-4 w-full sm:w-auto">
+                            <span class="text-[10px] font-black text-primary-blue uppercase tracking-widest shrink-0">{{ count($selectedProducts) }} Dipilih</span>
+                            <div class="flex gap-2">
+                                <button wire:click="bulkToggleStatus" class="px-3.5 py-2 bg-white dark:bg-gray-900 text-primary-blue rounded-xl text-[9px] font-black uppercase tracking-widest shadow-sm hover:bg-primary-blue hover:text-white transition-all border border-primary-blue/20">Ganti Status</button>
+                                <button wire:click="confirmBulkDelete" class="px-3.5 py-2 bg-primary-red text-white rounded-xl text-[9px] font-black uppercase tracking-widest shadow-lg shadow-red-500/20 hover:scale-105 transition-all">Hapus Semua</button>
+                            </div>
+                        </div>
+                    @endif
+                    <span class="text-[10px] font-black text-gray-450 uppercase tracking-widest text-center sm:text-right w-full sm:w-auto">
+                        {{ $products->total() }} Produk Ditemukan
+                    </span>
+                </div>
+            </div>
                 <div class="px-8 py-4">
                     <!-- Header Row (Grid 12) -->
-                    <div class="hidden md:grid grid-cols-12 items-center px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest bg-gray-50 dark:bg-gray-900/50 rounded-2xl mb-4">
+                    <div class="hidden lg:grid grid-cols-12 items-center px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest bg-gray-50 dark:bg-gray-900/50 rounded-2xl mb-4">
                         <div class="col-span-1 flex justify-center">
                             <input type="checkbox" wire:model.live="selectAll" class="w-4 h-4 rounded border-gray-300 text-primary-blue focus:ring-primary-blue dark:bg-gray-900 dark:border-gray-700">
                         </div>
@@ -90,7 +103,7 @@
                         @forelse($products as $product)
                         <div class="group transition-all duration-300">
                             <!-- Desktop view -->
-                            <div class="hidden md:grid grid-cols-12 items-center p-4 rounded-[2.5rem] border-2 transition-all duration-500 {{ $highlight == $product->id ? 'bg-amber-400/10 border-amber-400 animate-highlight-breath z-10 relative' : 'bg-white dark:bg-gray-800/50 border-transparent group-hover:border-primary-blue/20' }} {{ in_array($product->id, $selectedProducts) ? 'border-primary-blue/30 bg-primary-blue/5' : '' }}">
+                            <div class="hidden lg:grid grid-cols-12 items-center p-4 rounded-[2.5rem] border-2 transition-all duration-500 {{ $highlight == $product->id ? 'bg-amber-400/10 border-amber-400 animate-highlight-breath z-10 relative' : 'bg-white dark:bg-gray-800/50 border-transparent group-hover:border-primary-blue/20' }} {{ in_array($product->id, $selectedProducts) ? 'border-primary-blue/30 bg-primary-blue/5' : '' }}">
                                 <!-- Checkbox -->
                                 <div class="col-span-1 flex justify-center">
                                     <input type="checkbox" wire:model.live="selectedProducts" value="{{ $product->id }}" class="w-5 h-5 rounded-lg border-gray-200 text-primary-blue focus:ring-primary-blue dark:bg-gray-900 dark:border-gray-700">
@@ -179,7 +192,7 @@
                             </div>
 
                             <!-- Mobile Card View -->
-                            <div class="block md:hidden p-5 rounded-[2rem] border bg-white dark:bg-gray-900/40 transition-all duration-300 {{ $highlight == $product->id ? 'border-amber-400 bg-amber-400/5 animate-highlight-breath' : 'border-gray-100 dark:border-gray-800' }} {{ in_array($product->id, $selectedProducts) ? 'border-primary-blue bg-primary-blue/5' : '' }} mb-4">
+                            <div class="block lg:hidden p-5 rounded-[2rem] border bg-white dark:bg-gray-900/40 transition-all duration-300 {{ $highlight == $product->id ? 'border-amber-400 bg-amber-400/5 animate-highlight-breath' : 'border-gray-100 dark:border-gray-800' }} {{ in_array($product->id, $selectedProducts) ? 'border-primary-blue bg-primary-blue/5' : '' }} mb-4">
                                 <div class="flex items-start justify-between gap-3">
                                     <div class="flex items-start gap-3">
                                         <!-- Checkbox -->
@@ -188,63 +201,19 @@
                                         <div>
                                             <!-- Product Title -->
                                             <h3 class="text-base font-black text-gray-800 dark:text-white uppercase tracking-tight italic leading-snug">{{ $product->name }}</h3>
-                                            
-                                            <!-- ID & Jurusan Tag -->
-                                            <div class="flex flex-wrap items-center gap-1.5 mt-1.5">
-                                                <span class="text-[9px] font-bold text-gray-400 uppercase">ID: #{{ substr($product->id, 0, 8) }}</span>
-                                                @if($product->jurusan)
-                                                    <span class="px-1.5 py-0.5 text-[8px] font-black rounded uppercase tracking-wider bg-primary-red/10 text-primary-red">
-                                                        TEFA {{ $product->jurusan->name }}
-                                                    </span>
-                                                @else
-                                                    <span class="px-1.5 py-0.5 text-[8px] font-black rounded uppercase tracking-wider bg-gray-100 text-gray-600 dark:bg-gray-900 dark:text-gray-300">
-                                                        GLOBAL
-                                                    </span>
-                                                @endif
-                                                <span class="px-2 py-0.5 bg-blue-50 dark:bg-blue-950/20 text-primary-blue border border-blue-100 dark:border-blue-900/30 rounded text-[8px] font-black uppercase tracking-wider">
-                                                    {{ $product->category->name }}
-                                                </span>
-                                            </div>
+                                            <span class="px-2 py-0.5 bg-blue-50 dark:bg-blue-950/20 text-primary-blue border border-blue-100 dark:border-blue-900/30 rounded text-[8px] font-black uppercase tracking-wider inline-block mt-1">
+                                                {{ $product->category->name }}
+                                            </span>
+                                            <span class="block text-[11px] font-black text-primary-red mt-1">Rp{{ number_format($product->price, 0, ',', '.') }}</span>
                                         </div>
                                     </div>
                                     
-                                    <!-- Status Indicator -->
-                                    <div>
-                                        @if($product->is_active)
-                                            <span class="flex items-center text-[9px] font-black text-green-500 uppercase tracking-widest bg-green-50 dark:bg-green-500/10 py-1.5 px-2.5 rounded-xl border border-green-100 dark:border-green-500/20">
-                                                Aktif
-                                            </span>
-                                        @else
-                                            <span class="flex items-center text-[9px] font-black text-gray-400 uppercase tracking-widest bg-gray-50 dark:bg-gray-900 py-1.5 px-2.5 rounded-xl border border-gray-150 dark:border-gray-800">
-                                                Nonaktif
-                                            </span>
-                                        @endif
-                                    </div>
-                                </div>
-                                
-                                <!-- Finance Info Box -->
-                                <div class="grid grid-cols-3 gap-2 mt-4 p-3 bg-gray-50 dark:bg-gray-900/50 rounded-2xl border border-gray-100 dark:border-gray-800">
-                                    <div class="text-center">
-                                        <span class="block text-[8px] font-black text-gray-400 uppercase tracking-wider">Harga Jual</span>
-                                        <span class="text-xs font-black text-primary-red">Rp{{ number_format($product->price, 0, ',', '.') }}</span>
-                                    </div>
-                                    <div class="text-center border-x border-gray-200/50 dark:border-gray-700/50">
-                                        <span class="block text-[8px] font-black text-gray-400 uppercase tracking-wider">Harga Modal</span>
-                                        <span class="text-xs font-black text-gray-500 dark:text-gray-400">Rp{{ number_format($product->modal_price, 0, ',', '.') }}</span>
-                                    </div>
-                                    <div class="text-center">
-                                        <span class="block text-[8px] font-black text-gray-400 uppercase tracking-wider">Profit</span>
-                                        <span class="text-xs font-black text-green-500">Rp{{ number_format($product->price - $product->modal_price, 0, ',', '.') }}</span>
-                                    </div>
-                                </div>
-                                
-                                <!-- Supplier & Actions -->
-                                <div class="flex items-center justify-between mt-4 pt-3 border-t border-gray-100 dark:border-gray-800">
-                                    <span class="text-[9px] font-bold text-gray-400">
-                                        Supplier: <strong class="text-gray-600 dark:text-gray-300 uppercase font-black italic">{{ $product->supplier_id ? $product->supplier->name : 'Internal' }}</strong>
-                                    </span>
-                                    
-                                    <div class="flex gap-2">
+                                    <!-- Aksi -->
+                                    <div class="flex gap-1.5">
+                                        <!-- Detail Eye Button -->
+                                        <button @click="showProductDetail = true; detailProduct = { name: '{{ addslashes($product->name) }}', category: '{{ addslashes($product->category->name) }}', price: 'Rp{{ number_format($product->price, 0, ',', '.') }}', modal: 'Rp{{ number_format($product->modal_price, 0, ',', '.') }}', profit: 'Rp{{ number_format($product->price - $product->modal_price, 0, ',', '.') }}', supplier: '{{ $product->supplier_id ? addslashes($product->supplier->name) : 'Internal' }}', status: '{{ $product->is_active ? 'Aktif' : 'Nonaktif' }}' }" class="p-2.5 bg-white dark:bg-gray-700 text-primary-blue rounded-xl shadow-sm border border-gray-150 dark:border-gray-650">
+                                            <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                        </button>
                                         <button wire:click="editProduct('{{ $product->id }}')" class="p-2.5 bg-white dark:bg-gray-700 text-primary-blue rounded-xl shadow-sm border border-gray-150 dark:border-gray-600">
                                             <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
                                         </button>
@@ -605,6 +574,60 @@
             <div class="flex gap-4">
                 <button wire:click="cancelBulkDelete" class="flex-1 py-4 bg-gray-100 dark:bg-gray-900 text-gray-400 rounded-2xl font-black uppercase text-[10px] tracking-widest hover:text-gray-600 transition-all">Batal</button>
                 <button wire:click="bulkDelete" class="flex-1 py-4 bg-primary-red text-white rounded-2xl font-black uppercase text-[10px] tracking-widest shadow-lg shadow-red-500/30 hover:scale-105 transition-all">Ya, Hapus Semua</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Product Detail Modal (Alpine.js) -->
+    <div x-show="showProductDetail" x-cloak class="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/60 backdrop-blur-sm" style="display: none;" x-transition>
+        <div @click.away="showProductDetail = false" class="bg-white dark:bg-gray-800 rounded-[3rem] p-10 max-w-md w-full shadow-2xl border border-gray-100 dark:border-gray-700">
+            <div class="flex items-center justify-between pb-4 border-b border-gray-100 dark:border-gray-700">
+                <h3 class="text-xl font-black italic uppercase tracking-tight text-primary-blue dark:text-primary-yellow">Detail Produk</h3>
+                <button @click="showProductDetail = false" class="text-gray-400 hover:text-gray-650 dark:hover:text-white text-2xl font-black">&times;</button>
+            </div>
+            
+            <div class="py-6 space-y-4 text-left">
+                <div>
+                    <span class="text-[8px] font-black text-gray-400 uppercase tracking-widest block">Nama Produk</span>
+                    <span class="text-base font-black text-gray-800 dark:text-white uppercase italic tracking-tight" x-text="detailProduct.name"></span>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <span class="text-[8px] font-black text-gray-400 uppercase tracking-widest block">Kategori</span>
+                        <span class="text-xs font-bold text-gray-650 dark:text-gray-300" x-text="detailProduct.category"></span>
+                    </div>
+                    <div>
+                        <span class="text-[8px] font-black text-gray-400 uppercase tracking-widest block">Status</span>
+                        <span class="text-xs font-bold text-gray-650 dark:text-gray-300" x-text="detailProduct.status"></span>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <span class="text-[8px] font-black text-gray-400 uppercase tracking-widest block">Harga Jual</span>
+                        <span class="text-sm font-black text-primary-red" x-text="detailProduct.price"></span>
+                    </div>
+                    <div>
+                        <span class="text-[8px] font-black text-gray-400 uppercase tracking-widest block">Harga Modal</span>
+                        <span class="text-sm font-black text-gray-500 dark:text-gray-405" x-text="detailProduct.modal"></span>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <span class="text-[8px] font-black text-gray-400 uppercase tracking-widest block">Profit</span>
+                        <span class="text-sm font-black text-green-500" x-text="detailProduct.profit"></span>
+                    </div>
+                    <div>
+                        <span class="text-[8px] font-black text-gray-400 uppercase tracking-widest block">Supplier</span>
+                        <span class="text-xs font-bold text-gray-650 dark:text-gray-300" x-text="detailProduct.supplier"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pt-4 border-t border-gray-100 dark:border-gray-700 flex justify-end">
+                <button @click="showProductDetail = false" class="px-6 py-3 bg-gray-100 dark:bg-gray-900 text-gray-500 dark:text-gray-300 text-[10px] font-black uppercase tracking-widest rounded-2xl hover:bg-gray-250 transition-all">Tutup</button>
             </div>
         </div>
     </div>
