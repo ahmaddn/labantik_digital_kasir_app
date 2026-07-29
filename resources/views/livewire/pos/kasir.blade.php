@@ -728,55 +728,63 @@ document.addEventListener('keydown', (e) => {
                 </div>
             </div>
             <div class="flex-1 overflow-y-auto p-6 no-scrollbar bg-gray-50 dark:bg-black">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    @php
-                        $rekapNames = collect($this->stockComparison)->pluck('name')->toArray();
-                    @endphp
-                    @foreach ($this->stockComparison as $item)
-                        <div x-show="'{{ strtolower($item['name']) }}'.includes(modalSearch.toLowerCase())"
-                            wire:key="closing-stock-{{ $item['id'] }}"
-                            class="nb-card p-5 flex flex-col bg-white dark:bg-dark-soft shadow-none border-2">
-                            <h4 class="font-black uppercase text-sm dark:text-white mb-4">{{ $item['name'] }}</h4>
-                            <div class="flex flex-wrap items-center gap-3 mb-5">
-                                <div class="flex flex-col">
-                                    <span class="text-[9px] font-black uppercase text-gray-400 mb-1">AWAL</span>
-                                    <span
-                                        class="text-xs font-black border-2 border-black dark:border-white px-3 py-1 uppercase tracking-widest dark:text-white bg-gray-100 dark:bg-slate-800">{{ $item['opening'] }}</span>
-                                </div>
-                                <div class="flex flex-col">
-                                    <span class="text-[9px] font-black uppercase text-primary-blue mb-1">LAKU</span>
-                                    <span
-                                        class="text-xs font-black bg-primary-blue text-white px-3 py-1 uppercase tracking-widest">{{ $item['sold'] }}</span>
-                                </div>
-                                <div class="flex flex-col">
-                                    <span class="text-[9px] font-black uppercase text-green-600 mb-1">SISA</span>
-                                    <span
-                                        class="text-xs font-black bg-green-500 text-white px-3 py-1 uppercase tracking-widest">{{ $item['expected'] }}</span>
-                                </div>
-                            </div>
-                            <div class="space-y-1">
-                                <label class="text-[10px] font-black uppercase tracking-widest dark:text-gray-400">STOK
-                                    FISIK SEKARANG</label>
-                                <input type="number" wire:model="stockItems.{{ $item['id'] }}"
-                                    class="nb-input w-full text-center text-2xl p-3 shadow-none border-2 bg-white dark:bg-black">
-                            </div>
-                        </div>
-                    @endforeach
+                @php
+                    $hasHigherRole = auth()->user()->roles()
+                        ->whereIn('roles.name', ['superadmin', 'pengelola_jurusan'])
+                        ->exists();
+                @endphp
 
-                    <div x-show="{{ json_encode($rekapNames) }}.filter(name => name.toLowerCase().includes(modalSearch.toLowerCase())).length === 0"
-                        x-cloak
-                        class="col-span-full py-16 flex flex-col items-center justify-center bg-gray-50 dark:bg-black/50 border-2 border-dashed border-gray-200 dark:border-gray-800">
-                        <svg class="w-12 h-12 text-gray-300 dark:text-gray-700 mb-4" fill="none"
-                            stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        <div class="text-gray-400 font-bold text-xs uppercase tracking-widest italic mb-1">PRODUK TIDAK
-                            DITEMUKAN</div>
-                        <div class="text-gray-300 dark:text-gray-600 font-black text-2xl uppercase tracking-tighter">
-                            "<span x-text="modalSearch"></span>"</div>
+                @if($hasHigherRole)
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        @php
+                            $rekapNames = collect($this->stockComparison)->pluck('name')->toArray();
+                        @endphp
+                        @foreach ($this->stockComparison as $item)
+                            <div x-show="'{{ strtolower($item['name']) }}'.includes(modalSearch.toLowerCase())"
+                                wire:key="closing-stock-{{ $item['id'] }}"
+                                class="nb-card p-5 flex flex-col bg-white dark:bg-dark-soft shadow-none border-2">
+                                <h4 class="font-black uppercase text-sm dark:text-white mb-4">{{ $item['name'] }}</h4>
+                                <div class="flex flex-wrap items-center gap-3 mb-5">
+                                    <div class="flex flex-col">
+                                        <span class="text-[9px] font-black uppercase text-gray-400 mb-1">AWAL</span>
+                                        <span
+                                            class="text-xs font-black border-2 border-black dark:border-white px-3 py-1 uppercase tracking-widest dark:text-white bg-gray-100 dark:bg-slate-800">{{ $item['opening'] }}</span>
+                                    </div>
+                                    <div class="flex flex-col">
+                                        <span class="text-[9px] font-black uppercase text-primary-blue mb-1">LAKU</span>
+                                        <span
+                                            class="text-xs font-black bg-primary-blue text-white px-3 py-1 uppercase tracking-widest">{{ $item['sold'] }}</span>
+                                    </div>
+                                    <div class="flex flex-col">
+                                        <span class="text-[9px] font-black uppercase text-green-600 mb-1">SISA</span>
+                                        <span
+                                            class="text-xs font-black bg-green-500 text-white px-3 py-1 uppercase tracking-widest">{{ $item['expected'] }}</span>
+                                    </div>
+                                </div>
+                                <div class="space-y-1">
+                                    <label class="text-[10px] font-black uppercase tracking-widest dark:text-gray-400">STOK
+                                        FISIK SEKARANG</label>
+                                    <input type="number" wire:model="stockItems.{{ $item['id'] }}"
+                                        class="nb-input w-full text-center text-2xl p-3 shadow-none border-2 bg-white dark:bg-black">
+                                </div>
+                            </div>
+                        @endforeach
+
+                        <div x-show="{{ json_encode($rekapNames) }}.filter(name => name.toLowerCase().includes(modalSearch.toLowerCase())).length === 0"
+                            x-cloak
+                            class="col-span-full py-16 flex flex-col items-center justify-center bg-gray-50 dark:bg-black/50 border-2 border-dashed border-gray-200 dark:border-gray-800">
+                            <svg class="w-12 h-12 text-gray-300 dark:text-gray-700 mb-4" fill="none"
+                                stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <div class="text-gray-400 font-bold text-xs uppercase tracking-widest italic mb-1">PRODUK TIDAK
+                                DITEMUKAN</div>
+                            <div class="text-gray-300 dark:text-gray-600 font-black text-2xl uppercase tracking-tighter">
+                                "<span x-text="modalSearch"></span>"</div>
+                        </div>
                     </div>
-                </div>
+                @endif
 
                 <!-- Cash & Activity Report Fields -->
                 <div class="p-6 bg-white dark:bg-dark-soft border-2 border-black rounded-3xl mt-6 space-y-4">

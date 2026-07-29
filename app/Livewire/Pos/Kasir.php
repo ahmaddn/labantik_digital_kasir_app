@@ -88,11 +88,17 @@ class Kasir extends Component
                 }
             }
 
-            // 2. Check if already clocked in for today
+            // 2. Check if already clocked in/out for today
             $attendance = CashierAttendance::where('user_id', auth()->id())
                 ->where('jurusan_id', $activeJurusanId)
                 ->where('date', now()->toDateString())
                 ->first();
+
+            if ($attendance && $attendance->clock_out) {
+                session()->flash('error', 'Anda sudah melakukan clock-out untuk hari ini.');
+                $this->redirectRoute('dashboard', navigate: true);
+                return;
+            }
 
             if (!$attendance && !$hasHigherRole) {
                 // Must clock in first
@@ -107,10 +113,26 @@ class Kasir extends Component
             ->exists();
 
         if ($isTodayFinished) {
-            session()->flash('error', 'Sesi kasir hari ini telah berakhir. Anda tidak dapat melakukan transaksi lagi.');
-            $this->redirectRoute('dashboard', navigate: true);
+            $hasHigherRole = auth()->user()->roles()
+                ->whereIn('roles.name', ['superadmin', 'pengelola_jurusan'])
+                ->exists();
 
-            return;
+            if (!$hasHigherRole) {
+                // If they haven't clocked out yet, redirect to late report
+                $attendance = CashierAttendance::where('user_id', auth()->id())
+                    ->where('jurusan_id', $activeJurusanId)
+                    ->where('date', now()->toDateString())
+                    ->first();
+
+                if ($attendance && !$attendance->clock_out) {
+                    $this->redirectRoute('late-report', navigate: true);
+                    return;
+                }
+
+                session()->flash('error', 'Sesi kasir hari ini telah berakhir. Anda tidak dapat melakukan transaksi lagi.');
+                $this->redirectRoute('dashboard', navigate: true);
+                return;
+            }
         }
 
         // Detect if there's an unfinished session from a previous day
@@ -328,8 +350,10 @@ class Kasir extends Component
 
         $filteredStockItems = array_intersect_key($this->stockItems, array_flip($validProductIds));
 
-        // Save stock
-        $posSessionService->saveClosingStock($filteredStockItems, $today, $activeJurusanId);
+        if ($hasHigherRole) {
+            // Save stock
+            $posSessionService->saveClosingStock($filteredStockItems, $today, $activeJurusanId);
+        }
 
         // Record Closing Attendance
         $attendance = CashierAttendance::where('user_id', auth()->id())
@@ -351,11 +375,13 @@ class Kasir extends Component
             ]);
         }
 
-        // Post closing cash to daily recap
-        DailyRecap::updateOrCreate(
-            ['date' => $today, 'jurusan_id' => $activeJurusanId],
-            ['actual_cash' => $closingCash]
-        );
+        if ($hasHigherRole) {
+            // Post closing cash to daily recap
+            DailyRecap::updateOrCreate(
+                ['date' => $today, 'jurusan_id' => $activeJurusanId],
+                ['actual_cash' => $closingCash]
+            );
+        }
 
         $this->showClosingStockModal = false;
         $this->stockItems = [];

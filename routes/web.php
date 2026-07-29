@@ -30,6 +30,7 @@ Route::get('/', function () {
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/select-role', SelectRole::class)->name('select-role');
+    Route::get('/late-report', \App\Livewire\Auth\LateReport::class)->name('late-report');
 });
 
 Route::middleware(['auth', 'verified', EnsureRoleSelected::class])->group(function () {
