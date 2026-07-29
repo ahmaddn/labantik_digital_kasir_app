@@ -103,6 +103,7 @@
                 const calendarEl = document.getElementById('cashier-calendar');
                 const calendar = new FullCalendar.Calendar(calendarEl, {
                     initialView: 'dayGridMonth',
+                    height: 'auto',
                     headerToolbar: {
                         left: 'prev,next today',
                         center: 'title',
@@ -186,6 +187,7 @@
                 </button>
             </div>
         </div>
+    </div>
     <!-- Delete All Confirmation Modal -->
     <div x-data="{ show: @entangle('showDeleteAllModal') }" x-show="show" class="fixed inset-0 z-50 flex items-center justify-center p-4" x-cloak>
         <div x-show="show" x-transition.opacity class="fixed inset-0 bg-black/60 backdrop-blur-xs" wire:click="$set('showDeleteAllModal', false)"></div>
