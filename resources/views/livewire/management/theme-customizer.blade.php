@@ -177,24 +177,24 @@
                 </div>
 
                 <!-- Preview Area Wrapper -->
-                <div class="p-8 md:p-12 bg-gray-900 rounded-[4rem] shadow-2xl relative overflow-hidden min-h-[500px] flex flex-col justify-between" 
+                <div class="p-8 md:p-12 bg-white dark:bg-gray-950 rounded-[4rem] border border-gray-100 dark:border-gray-800 shadow-2xl relative overflow-hidden min-h-[500px] flex flex-col justify-between" 
                     style="font-family: '{{ $fontFamily }}', sans-serif;">
                     
                     <!-- Top Bar Preview -->
-                    <div class="flex items-center justify-between mb-10 pb-6 border-b border-white/5">
+                    <div class="flex items-center justify-between mb-10 pb-6 border-b border-gray-100 dark:border-white/5">
                         <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-xl flex items-center justify-center text-white font-black italic shadow-lg"
+                            <div class="w-10 h-10 rounded-xl flex items-center justify-center text-white font-black italic shadow-lg animate-pulse"
                                 style="background-color: {{ $primaryColor }};">
                                 TA
                             </div>
                             <div>
-                                <span class="block text-xs font-black text-white uppercase tracking-tight italic">{{ $tefaName }}</span>
-                                <span class="block text-[8px] font-bold text-gray-500 uppercase tracking-widest mt-0.5">Sesi Penjualan Aktif</span>
+                                <span class="block text-xs font-black text-gray-950 dark:text-white uppercase tracking-tight italic">{{ $tefaName }}</span>
+                                <span class="block text-[8px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mt-0.5">Sesi Penjualan Aktif</span>
                             </div>
                         </div>
 
                         <!-- Status Button -->
-                        <span class="px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest text-white/90 border border-white/10"
+                        <span class="px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest"
                             style="background-color: {{ $primaryColor }}15; border-color: {{ $primaryColor }}30; color: {{ $primaryColor }};">
                             Online
                         </span>
@@ -204,22 +204,22 @@
                     <div class="flex-1 flex flex-col justify-center">
                         @if($themeStyle === 'glassmorphism')
                             <!-- Glassmorphism Card -->
-                            <div class="bg-white/5 backdrop-blur-md rounded-[3rem] p-8 border border-white/10 shadow-2xl relative overflow-hidden">
+                            <div class="bg-white/50 dark:bg-slate-900/50 backdrop-blur-md rounded-[3rem] p-8 border border-white/40 dark:border-white/10 shadow-2xl relative overflow-hidden">
                                 <div class="absolute -right-8 -bottom-8 opacity-10">
-                                    <svg class="w-48 h-48 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
+                                    <svg class="w-48 h-48 text-gray-800 dark:text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
                                 </div>
-                                <h3 class="text-white/60 text-[10px] font-black uppercase tracking-widest mb-2">Penjualan Hari Ini</h3>
-                                <p class="text-4xl font-black text-white italic tracking-tighter mb-4">Rp2.450.000</p>
-                                <span class="px-2.5 py-1 rounded-md text-[8px] font-black bg-white/10 text-white uppercase tracking-widest">
+                                <h3 class="text-gray-500 dark:text-white/60 text-[10px] font-black uppercase tracking-widest mb-2">Penjualan Hari Ini</h3>
+                                <p class="text-4xl font-black text-gray-950 dark:text-white italic tracking-tighter mb-4">Rp2.450.000</p>
+                                <span class="px-2.5 py-1 rounded-md text-[8px] font-black bg-white/20 dark:bg-white/10 text-gray-800 dark:text-white uppercase tracking-widest">
                                     +12.4% vs Kemarin
                                 </span>
                             </div>
                         @elseif($themeStyle === 'neon-cyberpunk')
                             <!-- Neon Cyberpunk Card -->
-                            <div class="bg-black/80 rounded-[3rem] p-8 border-2 shadow-[0_0_20px_rgba(255,255,255,0.05)] relative overflow-hidden"
+                            <div class="bg-gray-955 dark:bg-black rounded-[3rem] p-8 border-2 shadow-[0_0_20px_rgba(0,0,0,0.05)] dark:shadow-[0_0_20px_rgba(255,255,255,0.05)] relative overflow-hidden"
                                 style="border-color: {{ $primaryColor }}; box-shadow: 0 0 20px {{ $primaryColor }}20;">
                                 <div class="absolute right-6 top-6 w-3 h-3 rounded-full animate-ping" style="background-color: {{ $secondaryColor }};"></div>
-                                <h3 class="text-gray-400 text-[10px] font-black uppercase tracking-widest mb-2">System Performance</h3>
+                                <h3 class="text-gray-500 dark:text-gray-400 text-[10px] font-black uppercase tracking-widest mb-2">System Performance</h3>
                                 <p class="text-4xl font-black italic tracking-tighter mb-4" style="color: {{ $primaryColor }};">98.4% AUDIT</p>
                                 <span class="px-2.5 py-1 rounded-md text-[8px] font-black uppercase tracking-widest"
                                     style="background-color: {{ $secondaryColor }}20; color: {{ $secondaryColor }};">
@@ -228,27 +228,27 @@
                             </div>
                         @elseif($themeStyle === 'restaurant-aesthetic')
                             <!-- Restoran & Warung Culinary Card -->
-                            <div class="bg-[#fffaf0] rounded-[2.5rem] p-8 border-2 border-dashed border-amber-500/30 shadow-xl relative overflow-hidden text-amber-950">
-                                <h3 class="text-amber-800/80 text-[10px] font-black uppercase tracking-widest mb-2">Total Penjualan</h3>
-                                <p class="text-4xl font-black text-amber-950 italic tracking-tighter mb-4">Rp1.850.000</p>
+                            <div class="bg-[#fffaf0] dark:bg-[#1c1917] rounded-[2.5rem] p-8 border-2 border-dashed border-amber-500/30 dark:border-amber-500/10 shadow-xl relative overflow-hidden text-amber-950 dark:text-amber-100">
+                                <h3 class="text-amber-800/80 dark:text-amber-400/60 text-[10px] font-black uppercase tracking-widest mb-2">Total Penjualan</h3>
+                                <p class="text-4xl font-black text-amber-950 dark:text-white italic tracking-tighter mb-4">Rp1.850.000</p>
                                 <span class="px-3 py-1 rounded-full text-[8px] font-black bg-amber-500 text-white uppercase tracking-widest">
                                     WARUNG STYLE ACTIVE
                                 </span>
                             </div>
                         @elseif($themeStyle === 'retail-aesthetic')
                             <!-- Retail Minimarket Card -->
-                            <div class="bg-white rounded-lg p-8 border border-slate-200 shadow-sm relative overflow-hidden text-slate-800">
-                                <h3 class="text-slate-500 text-[10px] font-black uppercase tracking-widest mb-2">Kas Masuk</h3>
-                                <p class="text-4xl font-black text-slate-900 tracking-tighter mb-4">Rp720.000</p>
-                                <span class="px-2.5 py-1 rounded-sm text-[8px] font-black bg-slate-900 text-white uppercase tracking-widest">
+                            <div class="bg-white dark:bg-[#0f172a] rounded-lg p-8 border border-slate-200 dark:border-slate-800 shadow-sm relative overflow-hidden text-slate-800 dark:text-slate-200">
+                                <h3 class="text-slate-500 dark:text-slate-400 text-[10px] font-black uppercase tracking-widest mb-2">Kas Masuk</h3>
+                                <p class="text-4xl font-black text-slate-900 dark:text-white tracking-tighter mb-4">Rp720.000</p>
+                                <span class="px-2.5 py-1 rounded-sm text-[8px] font-black bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 uppercase tracking-widest">
                                     GRID SYSTEM ACTIVE
                                 </span>
                             </div>
                         @elseif($themeStyle === 'bank-aesthetic')
                             <!-- Bank Mini Fintech Card -->
-                            <div class="bg-white rounded-2xl p-8 border border-sky-100 shadow-md relative overflow-hidden text-sky-950">
-                                <h3 class="text-sky-600 text-[10px] font-black uppercase tracking-widest mb-2">Total Simpanan</h3>
-                                <p class="text-4xl font-black text-sky-950 italic tracking-tighter mb-4">Rp5.450.000</p>
+                            <div class="bg-white dark:bg-[#0b1329] rounded-2xl p-8 border border-sky-100 dark:border-sky-950/30 shadow-md relative overflow-hidden text-sky-950 dark:text-sky-100">
+                                <h3 class="text-sky-600 dark:text-sky-400 text-[10px] font-black uppercase tracking-widest mb-2">Total Simpanan</h3>
+                                <p class="text-4xl font-black text-sky-950 dark:text-white italic tracking-tighter mb-4">Rp5.450.000</p>
                                 <span class="px-2.5 py-1 rounded-lg text-[8px] font-black text-white uppercase tracking-widest"
                                     style="background-color: {{ $primaryColor }};">
                                     FINTECH STYLE ACTIVE
@@ -256,9 +256,9 @@
                             </div>
                         @else
                             <!-- Classic Premium Card -->
-                            <div class="bg-white/5 rounded-[3rem] p-8 border border-white/5 shadow-2xl relative overflow-hidden">
-                                <h3 class="text-white/60 text-[10px] font-black uppercase tracking-widest mb-2">Laba Bersih</h3>
-                                <p class="text-4xl font-black text-white italic tracking-tighter mb-4">Rp840.500</p>
+                            <div class="bg-white dark:bg-[#1e293b] rounded-[3rem] p-8 border border-gray-100 dark:border-white/5 shadow-2xl relative overflow-hidden">
+                                <h3 class="text-gray-500 dark:text-white/60 text-[10px] font-black uppercase tracking-widest mb-2">Laba Bersih</h3>
+                                <p class="text-4xl font-black text-gray-950 dark:text-white italic tracking-tighter mb-4">Rp840.500</p>
                                 <span class="px-2.5 py-1 rounded-md text-[8px] font-black text-white uppercase tracking-widest"
                                     style="background-color: {{ $primaryColor }};">
                                     Target Tercapai
@@ -268,15 +268,14 @@
                     </div>
 
                     <!-- Bottom Buttons Preview -->
-                    <div class="mt-10 pt-6 border-t border-white/5 flex gap-4">
+                    <div class="mt-10 pt-6 border-t border-gray-100 dark:border-white/5 flex gap-4">
                         <button type="button" class="flex-1 py-4 text-xs font-black uppercase tracking-wider italic text-white transition-all
                             {{ $themeStyle === 'restaurant-aesthetic' ? 'rounded-full' : ($themeStyle === 'retail-aesthetic' ? 'rounded-md' : ($themeStyle === 'bank-aesthetic' ? 'rounded-lg' : ($themeStyle === 'neon-cyberpunk' ? 'rounded-none border-2 border-[#ff007f]' : 'rounded-2xl'))) }}"
                             style="background-color: {{ $primaryColor }};">
                             Lanjutkan Transaksi
                         </button>
-                        <button type="button" class="px-6 py-4 text-xs font-black uppercase tracking-wider italic text-white transition-all
-                            {{ $themeStyle === 'restaurant-aesthetic' ? 'rounded-full' : ($themeStyle === 'retail-aesthetic' ? 'rounded-md' : ($themeStyle === 'bank-aesthetic' ? 'rounded-lg' : ($themeStyle === 'neon-cyberpunk' ? 'rounded-none border-2 border-cyan-400' : 'rounded-2xl'))) }}"
-                            style="background-color: {{ $secondaryColor }};">
+                        <button type="button" class="px-6 py-4 text-xs font-black uppercase tracking-wider italic text-gray-700 dark:text-white transition-all bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700
+                            {{ $themeStyle === 'restaurant-aesthetic' ? 'rounded-full' : ($themeStyle === 'retail-aesthetic' ? 'rounded-md' : ($themeStyle === 'bank-aesthetic' ? 'rounded-lg' : ($themeStyle === 'neon-cyberpunk' ? 'rounded-none border-2 border-cyan-400' : 'rounded-2xl'))) }}">
                             Batal
                         </button>
                     </div>

@@ -173,9 +173,9 @@
         border: 1px solid rgba(255, 255, 255, 0.4) !important;
         box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.06) !important;
     }
-    .theme-glassmorphism.dark .bg-gray-800, 
-    .theme-glassmorphism.dark .bg-gray-850, 
-    .theme-glassmorphism.dark .bg-gray-900 {
+    .dark .theme-glassmorphism .bg-gray-800, 
+    .dark .theme-glassmorphism .bg-gray-850, 
+    .dark .theme-glassmorphism .bg-gray-900 {
         background-color: rgba(15, 23, 42, 0.45) !important;
         backdrop-filter: blur(24px) saturate(160%) !important;
         -webkit-backdrop-filter: blur(24px) saturate(160%) !important;
@@ -191,9 +191,9 @@
         box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
         backdrop-filter: none !important;
     }
-    .theme-classic-premium.dark .bg-gray-800,
-    .theme-classic-premium.dark .bg-gray-850,
-    .theme-classic-premium.dark .bg-gray-900 {
+    .dark .theme-classic-premium .bg-gray-800,
+    .dark .theme-classic-premium .bg-gray-850,
+    .dark .theme-classic-premium .bg-gray-900 {
         background-color: #1e293b !important;
         border: 1px solid rgba(255, 255, 255, 0.05) !important;
         box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.35), 0 10px 10px -5px rgba(0, 0, 0, 0.2) !important;
@@ -207,9 +207,9 @@
         border: 2px solid var(--color-primary-blue) !important;
         box-shadow: 0 0 15px rgba(37, 99, 235, 0.15) !important;
     }
-    .theme-neon-cyberpunk.dark .bg-gray-800,
-    .theme-neon-cyberpunk.dark .bg-gray-850,
-    .theme-neon-cyberpunk.dark .bg-gray-900 {
+    .dark .theme-neon-cyberpunk .bg-gray-800,
+    .dark .theme-neon-cyberpunk .bg-gray-850,
+    .dark .theme-neon-cyberpunk .bg-gray-900 {
         background-color: #000000 !important;
         border: 2px solid var(--color-primary-blue) !important;
         box-shadow: 0 0 25px rgba(37, 99, 235, 0.25) !important;
@@ -222,9 +222,9 @@
         border: 1px solid rgba(249, 115, 22, 0.1) !important;
         box-shadow: 0 10px 15px -3px rgba(249, 115, 22, 0.05), 0 4px 6px -2px rgba(249, 115, 22, 0.02) !important;
     }
-    .theme-restaurant-aesthetic.dark .bg-gray-800,
-    .theme-restaurant-aesthetic.dark .bg-gray-850,
-    .theme-restaurant-aesthetic.dark .bg-gray-900 {
+    .dark .theme-restaurant-aesthetic .bg-gray-800,
+    .dark .theme-restaurant-aesthetic .bg-gray-850,
+    .dark .theme-restaurant-aesthetic .bg-gray-900 {
         background-color: #1c1917 !important;
         border: 1px solid rgba(255, 255, 255, 0.03) !important;
         box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.4) !important;
@@ -238,9 +238,9 @@
         border-radius: 4px !important;
         box-shadow: none !important;
     }
-    .theme-retail-aesthetic.dark .bg-gray-800,
-    .theme-retail-aesthetic.dark .bg-gray-850,
-    .theme-retail-aesthetic.dark .bg-gray-900 {
+    .dark .theme-retail-aesthetic .bg-gray-800,
+    .dark .theme-retail-aesthetic .bg-gray-850,
+    .dark .theme-retail-aesthetic .bg-gray-900 {
         background-color: #0f172a !important;
         border: 1px solid #334155 !important;
         border-radius: 4px !important;
@@ -254,9 +254,9 @@
         border: 1px solid rgba(14, 165, 233, 0.1) !important;
         box-shadow: 0 4px 20px -2px rgba(14, 165, 233, 0.08) !important;
     }
-    .theme-bank-aesthetic.dark .bg-gray-800,
-    .theme-bank-aesthetic.dark .bg-gray-850,
-    .theme-bank-aesthetic.dark .bg-gray-900 {
+    .dark .theme-bank-aesthetic .bg-gray-800,
+    .dark .theme-bank-aesthetic .bg-gray-850,
+    .dark .theme-bank-aesthetic .bg-gray-900 {
         background-color: #0b1329 !important;
         border: 1px solid rgba(14, 165, 233, 0.08) !important;
         box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.5) !important;
@@ -476,16 +476,16 @@ html:not(.dark) ::-webkit-scrollbar-thumb:hover {
     box-shadow: none !important;
 }
 /* Classic Premium Dark Mode Overrides */
-.theme-classic-premium.dark .nb-card,
-.theme-classic-premium.dark .nb-card-flat {
+.dark .theme-classic-premium .nb-card,
+.dark .theme-classic-premium .nb-card-flat {
     border: 1px solid rgba(255, 255, 255, 0.08) !important;
     box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.5) !important;
 }
-.theme-classic-premium.dark .nb-btn {
+.dark .theme-classic-premium .nb-btn {
     border: 1px solid rgba(255, 255, 255, 0.12) !important;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
 }
-.theme-classic-premium.dark .nb-input {
+.dark .theme-classic-premium .nb-input {
     border: 1px solid rgba(255, 255, 255, 0.15) !important;
 }
 
@@ -513,16 +513,16 @@ html:not(.dark) ::-webkit-scrollbar-thumb:hover {
     box-shadow: none !important;
 }
 /* Glassmorphism Dark Mode Overrides */
-.theme-glassmorphism.dark .nb-card,
-.theme-glassmorphism.dark .nb-card-flat {
+.dark .theme-glassmorphism .nb-card,
+.dark .theme-glassmorphism .nb-card-flat {
     background-color: rgba(15, 23, 42, 0.45) !important;
     border: 1px solid rgba(255, 255, 255, 0.08) !important;
     box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3) !important;
 }
-.theme-glassmorphism.dark .nb-btn {
+.dark .theme-glassmorphism .nb-btn {
     border: 1px solid rgba(255, 255, 255, 0.1) !important;
 }
-.theme-glassmorphism.dark .nb-input {
+.dark .theme-glassmorphism .nb-input {
     background-color: rgba(15, 23, 42, 0.3) !important;
     border: 1px solid rgba(255, 255, 255, 0.08) !important;
 }
@@ -546,17 +546,17 @@ html:not(.dark) ::-webkit-scrollbar-thumb:hover {
     box-shadow: inset 0 2px 4px rgba(249, 115, 22, 0.03) !important;
 }
 /* Restoran Dark Mode Overrides */
-.theme-restaurant-aesthetic.dark .nb-card,
-.theme-restaurant-aesthetic.dark .nb-card-flat {
+.dark .theme-restaurant-aesthetic .nb-card,
+.dark .theme-restaurant-aesthetic .nb-card-flat {
     background-color: #1c1917 !important; /* Warm dark stone */
     border: 1.5px dashed rgba(255, 255, 255, 0.08) !important;
     box-shadow: 0 15px 35px rgba(0, 0, 0, 0.45) !important;
 }
-.theme-restaurant-aesthetic.dark .nb-btn {
+.dark .theme-restaurant-aesthetic .nb-btn {
     border: 1.5px solid rgba(255, 255, 255, 0.15) !important;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3) !important;
 }
-.theme-restaurant-aesthetic.dark .nb-input {
+.dark .theme-restaurant-aesthetic .nb-input {
     border: 1.5px solid rgba(255, 255, 255, 0.12) !important;
 }
 
@@ -578,16 +578,16 @@ html:not(.dark) ::-webkit-scrollbar-thumb:hover {
     box-shadow: none !important;
 }
 /* Retail Dark Mode Overrides */
-.theme-retail-aesthetic.dark .nb-card,
-.theme-retail-aesthetic.dark .nb-card-flat {
+.dark .theme-retail-aesthetic .nb-card,
+.dark .theme-retail-aesthetic .nb-card-flat {
     background-color: #0f172a !important;
     border: 1px solid #334155 !important;
     box-shadow: none !important;
 }
-.theme-retail-aesthetic.dark .nb-btn {
+.dark .theme-retail-aesthetic .nb-btn {
     border: 1px solid #475569 !important;
 }
-.theme-retail-aesthetic.dark .nb-input {
+.dark .theme-retail-aesthetic .nb-input {
     border: 1px solid #334155 !important;
 }
 
@@ -609,16 +609,16 @@ html:not(.dark) ::-webkit-scrollbar-thumb:hover {
     box-shadow: none !important;
 }
 /* Bank Dark Mode Overrides */
-.theme-bank-aesthetic.dark .nb-card,
-.theme-bank-aesthetic.dark .nb-card-flat {
+.dark .theme-bank-aesthetic .nb-card,
+.dark .theme-bank-aesthetic .nb-card-flat {
     background-color: #0b1329 !important;
     border: 1px solid rgba(14, 165, 233, 0.12) !important;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5) !important;
 }
-.theme-bank-aesthetic.dark .nb-btn {
+.dark .theme-bank-aesthetic .nb-btn {
     border: 1px solid rgba(14, 165, 233, 0.2) !important;
 }
-.theme-bank-aesthetic.dark .nb-input {
+.dark .theme-bank-aesthetic .nb-input {
     border: 1.5px solid rgba(14, 165, 233, 0.15) !important;
 }
 
@@ -640,17 +640,17 @@ html:not(.dark) ::-webkit-scrollbar-thumb:hover {
     box-shadow: inset 0 0 4px rgba(0, 240, 255, 0.1) !important;
 }
 /* Neon Cyberpunk Dark Mode Overrides */
-.theme-neon-cyberpunk.dark .nb-card,
-.theme-neon-cyberpunk.dark .nb-card-flat {
+.dark .theme-neon-cyberpunk .nb-card,
+.dark .theme-neon-cyberpunk .nb-card-flat {
     background-color: #000000 !important;
     border: 2px solid #00f0ff !important;
     box-shadow: 0 0 18px rgba(0, 240, 255, 0.35) !important;
 }
-.theme-neon-cyberpunk.dark .nb-btn {
+.dark .theme-neon-cyberpunk .nb-btn {
     border: 2px solid #ff007f !important;
     box-shadow: 0 0 12px rgba(255, 0, 127, 0.3) !important;
 }
-.theme-neon-cyberpunk.dark .nb-input {
+.dark .theme-neon-cyberpunk .nb-input {
     border: 2px solid #00f0ff !important;
 }
 
