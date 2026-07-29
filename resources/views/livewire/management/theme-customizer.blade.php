@@ -17,10 +17,10 @@
                 <!-- Jurusan Selection (Locked if not Superadmin) -->
                 <div class="mb-8">
                     <label class="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-3 ml-2 italic">Unit TEFA yang Dikustomisasi</label>
-                    @if(session('active_role_name') === 'superadmin')
+                    @if(session('active_role_name') === 'superadmin' || session('active_role_name') === 'pengelola_jurusan')
                         <select wire:model.live="selectedJurusanId" class="w-full px-6 py-4 bg-gray-50 dark:bg-gray-900 border-none rounded-2xl focus:ring-4 focus:ring-primary-blue/10 font-black text-sm text-gray-800 dark:text-white">
                             @foreach($jurusans as $jur)
-                                <option value="{{ $jur->id }}">TEFA {{ $jur->name }}</option>
+                                <option value="{{ $jur->id }}">{{ is_null($jur->parent_id) ? 'Jurusan Utama: ' : 'Sub-Unit: ' }}TEFA {{ $jur->name }}</option>
                             @endforeach
                         </select>
                     @else
