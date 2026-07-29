@@ -692,5 +692,28 @@ html:not(.dark) ::-webkit-scrollbar-thumb:hover {
     border: 2px solid #00f0ff !important;
 }
 
+/* Global Mobile View Font Size Scaling for Enhanced Readability */
+@media (max-width: 767px) {
+    .text-xs {
+        font-size: 0.8125rem !important; /* Scale 12px -> 13px */
+        line-height: 1.25rem !important;
+    }
+    .text-sm {
+        font-size: 0.9375rem !important; /* Scale 14px -> 15px */
+        line-height: 1.375rem !important;
+    }
+    .text-base {
+        font-size: 1.0625rem !important; /* Scale 16px -> 17px */
+        line-height: 1.5rem !important;
+    }
+    .text-\[10px\] {
+        font-size: 0.75rem !important; /* Scale 10px -> 12px */
+        line-height: 1.125rem !important;
+    }
+    .text-\[8px\] {
+        font-size: 0.6875rem !important; /* Scale 8px -> 11px */
+    }
+}
+
 
 
