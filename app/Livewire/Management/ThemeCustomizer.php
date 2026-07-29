@@ -209,7 +209,7 @@ class ThemeCustomizer extends Component
         }
 
         return view('livewire.management.theme-customizer', [
-            'stylePresets' => $filteredStyles,
+            'availableStyles' => $filteredStyles,
             'isSubUnit' => $isSubUnit,
         ])->layout('layouts.app', ['title' => 'Kustomisasi Tampilan TEFA']);
     }

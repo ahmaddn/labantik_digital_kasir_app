@@ -139,7 +139,7 @@
                             {{ $isSubUnit ? 'Tipe Bisnis Sub-Unit (Tema Khusus)' : 'Gaya Visual Template' }}
                         </label>
                         <div class="space-y-3">
-                            @foreach($stylePresets as $style)
+                            @foreach($availableStyles as $style)
                                 <label class="flex p-5 bg-gray-50 dark:bg-gray-900/50 rounded-[2rem] border-2 cursor-pointer transition-all {{ $themeStyle === $style['value'] ? 'border-primary-blue bg-blue-50/10 dark:bg-blue-900/5' : 'border-transparent hover:border-gray-200 dark:hover:border-gray-800' }}">
                                     <input type="radio" wire:model.live="themeStyle" value="{{ $style['value'] }}" class="sr-only">
                                     <div class="flex items-start">
@@ -165,7 +165,6 @@
                         </button>
                     </div>
                 </form>
-
             </div>
         </div>
 
@@ -227,6 +226,34 @@
                                     CRITICAL STOCKS OK
                                 </span>
                             </div>
+                        @elseif($themeStyle === 'restaurant-aesthetic')
+                            <!-- Restoran & Warung Culinary Card -->
+                            <div class="bg-[#fffaf0] rounded-[2.5rem] p-8 border-2 border-dashed border-amber-500/30 shadow-xl relative overflow-hidden text-amber-950">
+                                <h3 class="text-amber-800/80 text-[10px] font-black uppercase tracking-widest mb-2">Total Penjualan</h3>
+                                <p class="text-4xl font-black text-amber-950 italic tracking-tighter mb-4">Rp1.850.000</p>
+                                <span class="px-3 py-1 rounded-full text-[8px] font-black bg-amber-500 text-white uppercase tracking-widest">
+                                    WARUNG STYLE ACTIVE
+                                </span>
+                            </div>
+                        @elseif($themeStyle === 'retail-aesthetic')
+                            <!-- Retail Minimarket Card -->
+                            <div class="bg-white rounded-lg p-8 border border-slate-200 shadow-sm relative overflow-hidden text-slate-800">
+                                <h3 class="text-slate-500 text-[10px] font-black uppercase tracking-widest mb-2">Kas Masuk</h3>
+                                <p class="text-4xl font-black text-slate-900 tracking-tighter mb-4">Rp720.000</p>
+                                <span class="px-2.5 py-1 rounded-sm text-[8px] font-black bg-slate-900 text-white uppercase tracking-widest">
+                                    GRID SYSTEM ACTIVE
+                                </span>
+                            </div>
+                        @elseif($themeStyle === 'bank-aesthetic')
+                            <!-- Bank Mini Fintech Card -->
+                            <div class="bg-white rounded-2xl p-8 border border-sky-100 shadow-md relative overflow-hidden text-sky-950">
+                                <h3 class="text-sky-600 text-[10px] font-black uppercase tracking-widest mb-2">Total Simpanan</h3>
+                                <p class="text-4xl font-black text-sky-950 italic tracking-tighter mb-4">Rp5.450.000</p>
+                                <span class="px-2.5 py-1 rounded-lg text-[8px] font-black text-white uppercase tracking-widest"
+                                    style="background-color: {{ $primaryColor }};">
+                                    FINTECH STYLE ACTIVE
+                                </span>
+                            </div>
                         @else
                             <!-- Classic Premium Card -->
                             <div class="bg-white/5 rounded-[3rem] p-8 border border-white/5 shadow-2xl relative overflow-hidden">
@@ -242,11 +269,13 @@
 
                     <!-- Bottom Buttons Preview -->
                     <div class="mt-10 pt-6 border-t border-white/5 flex gap-4">
-                        <button type="button" class="flex-1 py-4 text-xs font-black uppercase tracking-wider italic text-white rounded-2xl transition-all"
+                        <button type="button" class="flex-1 py-4 text-xs font-black uppercase tracking-wider italic text-white transition-all
+                            {{ $themeStyle === 'restaurant-aesthetic' ? 'rounded-full' : ($themeStyle === 'retail-aesthetic' ? 'rounded-md' : ($themeStyle === 'bank-aesthetic' ? 'rounded-lg' : ($themeStyle === 'neon-cyberpunk' ? 'rounded-none border-2 border-[#ff007f]' : 'rounded-2xl'))) }}"
                             style="background-color: {{ $primaryColor }};">
                             Lanjutkan Transaksi
                         </button>
-                        <button type="button" class="px-6 py-4 text-xs font-black uppercase tracking-wider italic text-white rounded-2xl transition-all"
+                        <button type="button" class="px-6 py-4 text-xs font-black uppercase tracking-wider italic text-white transition-all
+                            {{ $themeStyle === 'restaurant-aesthetic' ? 'rounded-full' : ($themeStyle === 'retail-aesthetic' ? 'rounded-md' : ($themeStyle === 'bank-aesthetic' ? 'rounded-lg' : ($themeStyle === 'neon-cyberpunk' ? 'rounded-none border-2 border-cyan-400' : 'rounded-2xl'))) }}"
                             style="background-color: {{ $secondaryColor }};">
                             Batal
                         </button>
