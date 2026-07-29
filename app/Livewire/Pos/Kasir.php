@@ -69,17 +69,23 @@ class Kasir extends Component
 
         $activeJurusanId = session('active_jurusan_id');
         
-        // 1. Validate if user is scheduled for today (mandatory for cashier role)
+        // 1. Validate if user is scheduled for today (mandatory for cashier role, unless they have a higher role)
         if (session('active_role_name') === 'kasir') {
-            $isScheduled = CashierSchedule::where('user_id', auth()->id())
-                ->where('jurusan_id', $activeJurusanId)
-                ->where('date', now()->toDateString())
+            $hasHigherRole = auth()->user()->roles()
+                ->whereIn('roles.name', ['superadmin', 'pengelola_jurusan'])
                 ->exists();
 
-            if (!$isScheduled) {
-                session()->flash('error', 'Anda tidak memiliki jadwal jaga kasir hari ini.');
-                $this->redirectRoute('dashboard', navigate: true);
-                return;
+            if (!$hasHigherRole) {
+                $isScheduled = CashierSchedule::where('user_id', auth()->id())
+                    ->where('jurusan_id', $activeJurusanId)
+                    ->where('date', now()->toDateString())
+                    ->exists();
+
+                if (!$isScheduled) {
+                    session()->flash('error', 'Anda tidak memiliki jadwal jaga kasir hari ini.');
+                    $this->redirectRoute('dashboard', navigate: true);
+                    return;
+                }
             }
 
             // 2. Check if already clocked in for today

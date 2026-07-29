@@ -126,7 +126,7 @@ class CashierScheduling extends Component
             return;
         }
 
-        CashierSchedule::create([
+        $newSchedule = CashierSchedule::create([
             'jurusan_id' => $activeJurusanId,
             'user_id' => $this->selectedUserId,
             'date' => $this->date,
@@ -134,9 +134,18 @@ class CashierScheduling extends Component
             'created_by' => auth()->id(),
         ]);
 
+        \App\Models\Notification::create([
+            'user_id' => $this->selectedUserId,
+            'title' => 'Jadwal Jaga Baru',
+            'body' => 'Anda dijadwalkan jaga kasir pada tanggal ' . Carbon::parse($this->date)->translatedFormat('d M Y') . ($this->notes ? ' (' . $this->notes . ')' : ''),
+            'type' => 'system',
+            'action_url' => '/management/schedules'
+        ]);
+
         $this->showCreateModal = false;
         $this->resetForm();
         $this->dispatch('toast', message: 'Jadwal berhasil ditambahkan!');
+        $this->dispatch('schedule-updated', schedules: $this->getSchedulesForCalendar());
     }
 
     public function randomizeSchedules()
@@ -273,7 +282,15 @@ class CashierScheduling extends Component
                 }
 
                 foreach ($assignedSchedules as $sched) {
-                    CashierSchedule::create($sched);
+                    $createdSched = CashierSchedule::create($sched);
+
+                    \App\Models\Notification::create([
+                        'user_id' => $createdSched->user_id,
+                        'title' => 'Jadwal Jaga Baru (Acak Otomatis)',
+                        'body' => 'Anda dijadwalkan jaga kasir pada tanggal ' . Carbon::parse($createdSched->date)->translatedFormat('d M Y'),
+                        'type' => 'system',
+                        'action_url' => '/management/schedules'
+                    ]);
                 }
             });
         } catch (\Exception $e) {
@@ -283,6 +300,7 @@ class CashierScheduling extends Component
 
         $this->showRandomModal = false;
         $this->dispatch('toast', message: 'Jadwal minggu ini berhasil dirandomize secara merata!');
+        $this->dispatch('schedule-updated', schedules: $this->getSchedulesForCalendar());
     }
 
     public function confirmDelete($id)
@@ -298,7 +316,28 @@ class CashierScheduling extends Component
             $this->showDeleteModal = false;
             $this->deletingScheduleId = null;
             $this->dispatch('toast', message: 'Jadwal berhasil dihapus.');
+            $this->dispatch('schedule-updated', schedules: $this->getSchedulesForCalendar());
         }
+    }
+
+    public function getSchedulesForCalendar()
+    {
+        $activeJurusanId = session('active_jurusan_id') ?: $this->selectedJurusanId;
+        return CashierSchedule::with('user')
+            ->when($activeJurusanId, function($q) use ($activeJurusanId) {
+                $q->where('jurusan_id', $activeJurusanId);
+            })
+            ->orderBy('date')
+            ->get()
+            ->map(function($s) {
+                return [
+                    'id' => $s->id,
+                    'title' => $s->user->name . ($s->notes ? ' (' . $s->notes . ')' : ''),
+                    'start' => $s->date->toDateString(),
+                    'allDay' => true,
+                ];
+            })
+            ->toArray();
     }
 
     public function render()

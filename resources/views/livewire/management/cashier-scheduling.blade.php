@@ -114,6 +114,12 @@
                 window.addEventListener('livewire:navigated', () => {
                     calendar.refetchEvents();
                 });
+
+                // Update calendar events dynamically without page refresh
+                window.addEventListener('schedule-updated', event => {
+                    calendar.removeAllEvents();
+                    calendar.addEventSource(event.detail.schedules);
+                });
             });
         </script>
     </div>
