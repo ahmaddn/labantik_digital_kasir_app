@@ -314,7 +314,7 @@ class Kasir extends Component
             ->exists();
 
         $this->validate([
-            'closingCashInput' => 'required|numeric|min:0',
+            'closingCashInput' => $hasHigherRole ? 'nullable|numeric|min:0' : 'required|numeric|min:0',
             'closingReportText' => $hasHigherRole ? 'nullable|string' : 'required|string',
         ]);
 
@@ -337,10 +337,15 @@ class Kasir extends Component
             ->where('date', now()->toDateString())
             ->first();
 
+        $closingCash = $this->closingCashInput !== '' && $this->closingCashInput !== null ? (float)$this->closingCashInput : 0;
+        if ($hasHigherRole && $closingCash <= 0) {
+            $closingCash = 1; // Default to 1 to lock the session (actual_cash > 0)
+        }
+
         if ($attendance) {
             $attendance->update([
                 'clock_out' => now(),
-                'closing_cash' => (float)$this->closingCashInput,
+                'closing_cash' => $closingCash,
                 'closing_report' => $this->closingReportText,
                 'points_at_closing' => (int)(auth()->user()->points + auth()->user()->pending_points),
             ]);
@@ -349,7 +354,7 @@ class Kasir extends Component
         // Post closing cash to daily recap
         DailyRecap::updateOrCreate(
             ['date' => $today, 'jurusan_id' => $activeJurusanId],
-            ['actual_cash' => (float)$this->closingCashInput]
+            ['actual_cash' => $closingCash]
         );
 
         $this->showClosingStockModal = false;

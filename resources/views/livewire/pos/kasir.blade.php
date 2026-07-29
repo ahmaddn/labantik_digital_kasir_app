@@ -783,8 +783,15 @@ document.addEventListener('keydown', (e) => {
                     <h3 class="text-sm font-black uppercase tracking-widest dark:text-white">Laporan Closing Shift Kasir</h3>
                     
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        @php
+                            $hasHigherRole = auth()->user()->roles()
+                                ->whereIn('roles.name', ['superadmin', 'pengelola_jurusan'])
+                                ->exists();
+                        @endphp
                         <div>
-                            <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Total Uang Laci Akhir (Rp)</label>
+                            <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">
+                                Total Uang Laci Akhir (Rp) {!! $hasHigherRole ? '<span class="text-amber-500 font-black">(OPSIONAL)</span>' : '' !!}
+                            </label>
                             <input type="number" wire:model="closingCashInput" placeholder="Contoh: 1500000" class="nb-input w-full p-4 text-sm font-bold bg-white dark:bg-slate-800 border-2 border-black">
                             @error('closingCashInput') <span class="text-xs text-red-500 font-bold mt-1 block">{{ $message }}</span> @enderror
                         </div>
