@@ -91,6 +91,7 @@
         <h2 class="text-xl font-black text-gray-850 dark:text-white uppercase italic tracking-tight mb-6">Kalender Jadwal Kasir</h2>
         
         <!-- FullCalendar Stylesheet and Scripts -->
+        <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.css" rel="stylesheet" />
         <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
         
         <div wire:ignore>
