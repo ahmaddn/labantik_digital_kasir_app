@@ -12,6 +12,7 @@ class StockEntry extends Model
 
     protected $fillable = [
         'product_id',
+        'user_id',
         'date',
         'opening_stock',
         'closing_stock',
@@ -20,5 +21,10 @@ class StockEntry extends Model
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
     }
 }

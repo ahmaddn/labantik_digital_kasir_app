@@ -101,9 +101,16 @@
                                 <div class="w-8 h-8 rounded-lg bg-gray-50 dark:bg-gray-900 flex items-center justify-center text-[10px] font-black text-primary-blue border border-gray-100 dark:border-gray-800 mr-3 shrink-0">
                                     {{ substr($tx->buyer_name ?? 'G', 0, 1) }}
                                 </div>
-                                <span class="text-sm font-black italic uppercase tracking-tighter text-gray-700 dark:text-gray-300 truncate">
-                                    {{ $tx->buyer_name ?? 'Guest Customer' }}
-                                </span>
+                                <div class="flex flex-col min-w-0">
+                                    <span class="text-sm font-black italic uppercase tracking-tighter text-gray-700 dark:text-gray-300 truncate">
+                                        {{ $tx->buyer_name ?? 'Guest Customer' }}
+                                    </span>
+                                    @if($tx->user)
+                                        <span class="text-[9px] font-black uppercase text-gray-405 dark:text-gray-500 tracking-widest mt-0.5">
+                                            Kasir: {{ $tx->user->name }}
+                                        </span>
+                                    @endif
+                                </div>
                             </div>
                         </div>
 

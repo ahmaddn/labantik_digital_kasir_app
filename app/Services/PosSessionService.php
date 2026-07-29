@@ -96,7 +96,10 @@ class PosSessionService
             foreach ($stockItems as $productId => $qty) {
                 $entry = StockEntry::updateOrCreate(
                     ['product_id' => $productId, 'date' => $today],
-                    ['opening_stock' => $qty ?? 0]
+                    [
+                        'opening_stock' => $qty ?? 0,
+                        'user_id' => auth()->id(),
+                    ]
                 );
 
                 $totalSold = Transaction::where('product_id', $productId)
@@ -116,7 +119,10 @@ class PosSessionService
             foreach ($stockItems as $productId => $qty) {
                 StockEntry::updateOrCreate(
                     ['product_id' => $productId, 'date' => $today],
-                    ['closing_stock' => $qty ?? 0]
+                    [
+                        'closing_stock' => $qty ?? 0,
+                        'user_id' => auth()->id(),
+                    ]
                 );
             }
 

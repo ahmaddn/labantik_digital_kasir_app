@@ -43,6 +43,11 @@
                             </td>
                             <td class="py-5 font-bold text-gray-800 dark:text-white group-hover:text-primary-blue dark:group-hover:text-primary-yellow transition-colors">
                                 TEFA {{ $jurusan->name }}
+                                @if($jurusan->parent)
+                                    <span class="ml-2 px-2.5 py-1 bg-blue-500/10 text-primary-blue dark:text-primary-yellow text-[10px] font-black uppercase rounded-lg border border-blue-500/20">
+                                        Sub-Unit: {{ $jurusan->parent->name }}
+                                    </span>
+                                @endif
                             </td>
                             <td class="py-5 text-right pr-4">
                                 <div class="flex items-center justify-end gap-2">
@@ -116,9 +121,21 @@
 
             <form wire:submit.prevent="saveJurusan" class="space-y-6">
                 <div>
-                    <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">Nama Jurusan (e.g. RPL, TKJ)</label>
-                    <input wire:model="name" type="text" required placeholder="Contoh: RPL" class="w-full px-4 py-4 bg-gray-50 dark:bg-gray-900 border-none rounded-2xl focus:ring-2 focus:ring-primary-blue dark:text-white transition-all text-sm">
+                    <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">Nama Unit / TEFA (e.g. RPL, Angkringan Doku)</label>
+                    <input wire:model="name" type="text" required placeholder="Contoh: Angkringan Doku" class="w-full px-4 py-4 bg-gray-50 dark:bg-gray-900 border-none rounded-2xl focus:ring-2 focus:ring-primary-blue dark:text-white transition-all text-sm">
                     @error('name') <span class="text-xs text-primary-red font-bold mt-1 block">{{ $message }}</span> @enderror
+                </div>
+
+                <div>
+                    <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">Unit Induk (Parent TEFA) - Opsional</label>
+                    <select wire:model="parent_id" class="w-full px-4 py-4 bg-gray-50 dark:bg-gray-900 border-none rounded-2xl focus:ring-2 focus:ring-primary-blue dark:text-white focus:outline-none transition-all text-sm">
+                        <option value="">-- Tanpa Induk (Unit Utama / Jurusan) --</option>
+                        @foreach($parentOptions as $parentOpt)
+                            <option value="{{ $parentOpt->id }}">TEFA {{ $parentOpt->name }}</option>
+                        @endforeach
+                    </select>
+                    @error('parent_id') <span class="text-xs text-primary-red font-bold mt-1 block">{{ $message }}</span> @enderror
+                    <p class="text-[9px] text-gray-400 font-semibold mt-2 ml-1">Hubungkan unit ini sebagai sub-unit usaha di bawah jurusan induk (contoh: Angkringan Doku di bawah RPL).</p>
                 </div>
 
                 <div class="flex justify-end gap-3 pt-4 border-t border-gray-100 dark:border-gray-700/50">

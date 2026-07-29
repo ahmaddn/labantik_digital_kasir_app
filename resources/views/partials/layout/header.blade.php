@@ -7,6 +7,8 @@
             <svg x-show="!sidebarOpen" class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
         </button>
 
+        @livewire('layout.tefa-switcher')
+
         <!-- Global Search Trigger -->
         <button @click="console.log('Dispatching open-global-search'); $dispatch('open-global-search')" class="hidden md:flex items-center gap-3 px-4 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl text-gray-400 hover:bg-white dark:hover:bg-gray-700 hover:border-primary-blue/30 transition-all group flex-1 max-w-md">
             <svg class="w-4 h-4 group-hover:text-primary-blue" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>

@@ -241,7 +241,7 @@ document.addEventListener('keydown', (e) => {
                         class="nb-input w-full p-3 text-sm uppercase placeholder:text-gray-400 bg-white dark:bg-slate-800 border-white shadow-none focus:ring-0">
                 </div>
 
-                 <div class="flex items-center gap-3">
+                 <div class="flex flex-wrap items-center gap-3">
                     <button @click="showQuickExpenseModal = true" class="nb-btn px-4 py-3 bg-primary-red text-white shadow-none border-2 border-black flex items-center gap-2 hover:scale-105 transition-transform text-xs font-black uppercase tracking-wider">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -1013,6 +1013,19 @@ document.addEventListener('keydown', (e) => {
         </div>
     </div>
 
+
+    <!-- Mobile Cart FAB Trigger -->
+    <button 
+        @click="showCart = true" 
+        x-show="!showCart" 
+        class="lg:hidden fixed bottom-6 right-6 z-40 px-6 py-4 bg-primary-blue text-white rounded-2xl shadow-2xl font-black uppercase tracking-widest flex items-center gap-3 border-2 border-black active:scale-95 transition-transform"
+    >
+        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z"/>
+        </svg>
+        <span>Lihat Keranjang</span>
+        <span class="bg-primary-red text-white text-[10px] px-2.5 py-1 rounded-full border border-white" x-text="cart.length"></span>
+    </button>
 
     <script>
         window.addEventListener('transaction-complete', () => {

@@ -12,12 +12,23 @@ class Jurusan extends Model
 
     protected $fillable = [
         'name',
+        'parent_id',
         'theme_settings',
     ];
 
     protected $casts = [
         'theme_settings' => 'array',
     ];
+
+    public function parent()
+    {
+        return $this->belongsTo(Jurusan::class, 'parent_id');
+    }
+
+    public function children()
+    {
+        return $this->hasMany(Jurusan::class, 'parent_id');
+    }
 
     public function users(): BelongsToMany
     {

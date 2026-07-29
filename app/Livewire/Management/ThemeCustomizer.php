@@ -57,24 +57,28 @@ class ThemeCustomizer extends Component
         ['name' => 'Classic Premium', 'value' => 'classic-premium', 'desc' => 'Desain premium dengan sudut membulat lebar dan bayangan lembut.'],
         ['name' => 'Glassmorphism', 'value' => 'glassmorphism', 'desc' => 'Tampilan modern transparan dengan efek blur kaca di latar belakang.'],
         ['name' => 'Neon Cyberpunk', 'value' => 'neon-cyberpunk', 'desc' => 'Kontras tinggi, bingkai menyala, dan aksen neon futuristik.'],
+        ['name' => 'Restoran & Warung (Warm Culinary Style)', 'value' => 'restaurant-aesthetic', 'desc' => 'Aksen hangat, bayangan tebal, ideal untuk warung atau depot makanan.'],
+        ['name' => 'Retail Minimarket (Clean Grid Style)', 'value' => 'retail-aesthetic', 'desc' => 'Tampilan modular ultra bersih dengan sudut tajam untuk toko/retail.'],
+        ['name' => 'Bank Mini (Corporate FinTech Style)', 'value' => 'bank-aesthetic', 'desc' => 'Desain biru/hijau korporat terstruktur, font formal, dan nuansa finansial.'],
     ];
 
     public function mount(): void
     {
         $activeRole = session('active_role_name');
-        if (!in_array($activeRole, ['superadmin', 'pengelola', 'kasir'])) {
+        if (!in_array($activeRole, ['superadmin', 'pengelola_jurusan', 'pengelola', 'kasir'])) {
             abort(403, 'Akses ditolak. Anda tidak memiliki izin untuk mengatur konfigurasi tampilan TEFA.');
         }
-
-        $this->jurusans = Jurusan::all();
 
         $activeJurusanId = session('active_jurusan_id');
 
         if ($activeRole === 'superadmin') {
-            // Superadmin defaults to first jurusan or let them select
+            $this->jurusans = Jurusan::all();
             $this->selectedJurusanId = $this->jurusans->first() ? $this->jurusans->first()->id : '';
         } else {
-            // Non-superadmin is locked to active jurusan
+            // Can edit their own parent jurusan and all its sub-units
+            $this->jurusans = Jurusan::where('id', $activeJurusanId)
+                ->orWhere('parent_id', $activeJurusanId)
+                ->get();
             $this->selectedJurusanId = $activeJurusanId;
         }
 

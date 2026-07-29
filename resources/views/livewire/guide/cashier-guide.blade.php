@@ -1,6 +1,6 @@
 <div class="py-8 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
     <!-- Header Section -->
-    <div class="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-gradient-to-r from-primary-blue to-blue-600 dark:from-gray-900 dark:to-gray-850 p-8 rounded-3xl shadow-xl text-white relative overflow-hidden">
+    <div class="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-gradient-to-r from-primary-blue to-blue-600 dark:from-gray-900 dark:to-gray-800 p-8 rounded-3xl shadow-xl text-white relative overflow-hidden">
         <div class="absolute -right-10 -bottom-10 w-40 h-40 bg-white/10 rounded-full blur-2xl"></div>
         <div class="absolute right-20 top-2 w-20 h-20 bg-white/5 rounded-full blur-xl"></div>
         
@@ -34,31 +34,31 @@
                 <p class="text-xs font-black text-gray-400 uppercase tracking-widest mb-4">Navigasi Panduan</p>
                 <div class="space-y-1">
                     <button wire:click="selectTab('sop-transaksi')"
-                        class="w-full flex items-center px-4 py-3.5 text-sm font-black rounded-2xl transition-all duration-300 {{ $activeTab === 'sop-transaksi' ? 'bg-primary-blue text-white shadow-lg shadow-blue-500/20' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-850 hover:text-gray-900 dark:hover:text-white' }}">
+                        class="w-full flex items-center px-4 py-3.5 text-sm font-black rounded-2xl transition-all duration-300 {{ $activeTab === 'sop-transaksi' ? 'bg-primary-blue text-white shadow-lg shadow-blue-500/20' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white' }}">
                         <svg class="w-5 h-5 mr-3 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
                         SOP Transaksi
                     </button>
                     
                     <button wire:click="selectTab('buku-kas')"
-                        class="w-full flex items-center px-4 py-3.5 text-sm font-black rounded-2xl transition-all duration-300 {{ $activeTab === 'buku-kas' ? 'bg-primary-blue text-white shadow-lg shadow-blue-500/20' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-850 hover:text-gray-900 dark:hover:text-white' }}">
+                        class="w-full flex items-center px-4 py-3.5 text-sm font-black rounded-2xl transition-all duration-300 {{ $activeTab === 'buku-kas' ? 'bg-primary-blue text-white shadow-lg shadow-blue-500/20' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white' }}">
                         <svg class="w-5 h-5 mr-3 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                         Pengelolaan Kas
                     </button>
 
                     <button wire:click="selectTab('tutup-buku')"
-                        class="w-full flex items-center px-4 py-3.5 text-sm font-black rounded-2xl transition-all duration-300 {{ $activeTab === 'tutup-buku' ? 'bg-primary-blue text-white shadow-lg shadow-blue-500/20' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-850 hover:text-gray-900 dark:hover:text-white' }}">
+                        class="w-full flex items-center px-4 py-3.5 text-sm font-black rounded-2xl transition-all duration-300 {{ $activeTab === 'tutup-buku' ? 'bg-primary-blue text-white shadow-lg shadow-blue-500/20' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white' }}">
                         <svg class="w-5 h-5 mr-3 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
                         Tutup Sesi & Audit
                     </button>
 
                     <button wire:click="selectTab('presensi-tugas')"
-                        class="w-full flex items-center px-4 py-3.5 text-sm font-black rounded-2xl transition-all duration-300 {{ $activeTab === 'presensi-tugas' ? 'bg-primary-blue text-white shadow-lg shadow-blue-500/20' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-850 hover:text-gray-900 dark:hover:text-white' }}">
+                        class="w-full flex items-center px-4 py-3.5 text-sm font-black rounded-2xl transition-all duration-300 {{ $activeTab === 'presensi-tugas' ? 'bg-primary-blue text-white shadow-lg shadow-blue-500/20' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white' }}">
                         <svg class="w-5 h-5 mr-3 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
                         Presensi & Tugas
                     </button>
 
                     <button wire:click="selectTab('faq')"
-                        class="w-full flex items-center px-4 py-3.5 text-sm font-black rounded-2xl transition-all duration-300 {{ $activeTab === 'faq' ? 'bg-primary-blue text-white shadow-lg shadow-blue-500/20' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-850 hover:text-gray-900 dark:hover:text-white' }}">
+                        class="w-full flex items-center px-4 py-3.5 text-sm font-black rounded-2xl transition-all duration-300 {{ $activeTab === 'faq' ? 'bg-primary-blue text-white shadow-lg shadow-blue-500/20' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white' }}">
                         <svg class="w-5 h-5 mr-3 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                         Pertanyaan (FAQ)
                     </button>
@@ -100,7 +100,7 @@
                             <!-- Step 1 -->
                             <div class="relative">
                                 <div class="absolute -left-[29px] top-0.5 w-6 h-6 rounded-full bg-primary-blue text-white flex items-center justify-center text-xs font-black ring-4 ring-white dark:ring-gray-900">1</div>
-                                <div class="bg-gray-50 dark:bg-gray-850/50 p-5 rounded-2xl border border-gray-100/50 dark:border-gray-800">
+                                <div class="bg-gray-50 dark:bg-gray-800/50 p-5 rounded-2xl border border-gray-100/50 dark:border-gray-800">
                                     <h4 class="font-black text-gray-900 dark:text-white">Buka Sesi Kasir & Input Modal Awal</h4>
                                     <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
                                         Sebelum melayani transaksi, pastikan Anda menekan tombol <strong>"Buka Mode Kasir"</strong> di dashboard atau sidebar. Masukkan jumlah <strong>Modal Uang Awal</strong> yang ada di laci kasir (misal untuk uang kembalian).
@@ -111,7 +111,7 @@
                             <!-- Step 2 -->
                             <div class="relative">
                                 <div class="absolute -left-[29px] top-0.5 w-6 h-6 rounded-full bg-primary-blue text-white flex items-center justify-center text-xs font-black ring-4 ring-white dark:ring-gray-900">2</div>
-                                <div class="bg-gray-50 dark:bg-gray-850/50 p-5 rounded-2xl border border-gray-100/50 dark:border-gray-800">
+                                <div class="bg-gray-50 dark:bg-gray-800/50 p-5 rounded-2xl border border-gray-100/50 dark:border-gray-800">
                                     <h4 class="font-black text-gray-900 dark:text-white">Pilih Produk & Kuantitas</h4>
                                     <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
                                         Klik pada produk yang diinginkan di halaman kasir, atau gunakan kotak pencarian cepat. Tentukan kuantitas item dengan menekan tombol <strong>+</strong> atau <strong>-</strong>.
@@ -125,7 +125,7 @@
                             <!-- Step 3 -->
                             <div class="relative">
                                 <div class="absolute -left-[29px] top-0.5 w-6 h-6 rounded-full bg-primary-blue text-white flex items-center justify-center text-xs font-black ring-4 ring-white dark:ring-gray-900">3</div>
-                                <div class="bg-gray-50 dark:bg-gray-850/50 p-5 rounded-2xl border border-gray-100/50 dark:border-gray-800">
+                                <div class="bg-gray-50 dark:bg-gray-800/50 p-5 rounded-2xl border border-gray-100/50 dark:border-gray-800">
                                     <h4 class="font-black text-gray-900 dark:text-white">Proses Pembayaran</h4>
                                     <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
                                         Tekan tombol <strong>"Bayar / Selesaikan Transaksi"</strong>. Pilih metode pembayaran:
@@ -140,7 +140,7 @@
                             <!-- Step 4 -->
                             <div class="relative">
                                 <div class="absolute -left-[29px] top-0.5 w-6 h-6 rounded-full bg-primary-blue text-white flex items-center justify-center text-xs font-black ring-4 ring-white dark:ring-gray-900">4</div>
-                                <div class="bg-gray-50 dark:bg-gray-850/50 p-5 rounded-2xl border border-gray-100/50 dark:border-gray-800">
+                                <div class="bg-gray-50 dark:bg-gray-800/50 p-5 rounded-2xl border border-gray-100/50 dark:border-gray-800">
                                     <h4 class="font-black text-gray-900 dark:text-white">Cetak & Berikan Struk</h4>
                                     <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
                                         Sistem akan mencetak struk secara otomatis (atau klik tombol <strong>"Cetak Struk"</strong>). Robek struk dengan rapi lalu serahkan struk belanja beserta uang kembalian ke customer dengan sopan.
@@ -176,7 +176,7 @@
                         </div>
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div class="border border-gray-100 dark:border-gray-800 p-5 rounded-2xl bg-gray-50/50 dark:bg-gray-850/40">
+                            <div class="border border-gray-100 dark:border-gray-800 p-5 rounded-2xl bg-gray-50/50 dark:bg-gray-800/40">
                                 <span class="px-2.5 py-0.5 bg-green-500/10 text-green-500 text-[10px] font-black rounded-full uppercase border border-green-500/20">Kas Masuk (Income)</span>
                                 <h4 class="font-black text-gray-900 dark:text-white mt-2">Kapan mencatat Kas Masuk?</h4>
                                 <ul class="list-disc list-inside text-xs text-gray-500 dark:text-gray-400 mt-2 space-y-2">
@@ -186,7 +186,7 @@
                                 </ul>
                             </div>
 
-                            <div class="border border-gray-100 dark:border-gray-800 p-5 rounded-2xl bg-gray-50/50 dark:bg-gray-850/40">
+                            <div class="border border-gray-100 dark:border-gray-800 p-5 rounded-2xl bg-gray-50/50 dark:bg-gray-800/40">
                                 <span class="px-2.5 py-0.5 bg-red-500/10 text-red-500 text-[10px] font-black rounded-full uppercase border border-red-500/20">Kas Keluar (Expense)</span>
                                 <h4 class="font-black text-gray-900 dark:text-white mt-2">Kapan mencatat Kas Keluar?</h4>
                                 <ul class="list-disc list-inside text-xs text-gray-500 dark:text-gray-400 mt-2 space-y-2">
@@ -215,7 +215,7 @@
                     <div class="border-t border-gray-100 dark:border-gray-800 pt-6 space-y-6">
                         <!-- SOP Cards -->
                         <div class="grid grid-cols-1 gap-4">
-                            <div class="flex gap-4 p-5 rounded-2xl bg-gray-50/50 dark:bg-gray-850/30 border border-gray-100 dark:border-gray-850">
+                            <div class="flex gap-4 p-5 rounded-2xl bg-gray-50/50 dark:bg-gray-800/30 border border-gray-100 dark:border-gray-800">
                                 <span class="w-8 h-8 rounded-full bg-primary-blue/10 text-primary-blue flex items-center justify-center text-sm font-black flex-shrink-0">1</span>
                                 <div>
                                     <h4 class="font-black text-gray-900 dark:text-white">Hitung Uang Fisik Secara Manual</h4>
@@ -225,7 +225,7 @@
                                 </div>
                             </div>
 
-                            <div class="flex gap-4 p-5 rounded-2xl bg-gray-50/50 dark:bg-gray-850/30 border border-gray-100 dark:border-gray-850">
+                            <div class="flex gap-4 p-5 rounded-2xl bg-gray-50/50 dark:bg-gray-800/30 border border-gray-100 dark:border-gray-800">
                                 <span class="w-8 h-8 rounded-full bg-primary-blue/10 text-primary-blue flex items-center justify-center text-sm font-black flex-shrink-0">2</span>
                                 <div>
                                     <h4 class="font-black text-gray-900 dark:text-white">Masuk Menu Rekap Harian & Audit</h4>
@@ -235,7 +235,7 @@
                                 </div>
                             </div>
 
-                            <div class="flex gap-4 p-5 rounded-2xl bg-gray-50/50 dark:bg-gray-850/30 border border-gray-100 dark:border-gray-850">
+                            <div class="flex gap-4 p-5 rounded-2xl bg-gray-50/50 dark:bg-gray-800/30 border border-gray-100 dark:border-gray-800">
                                 <span class="w-8 h-8 rounded-full bg-primary-blue/10 text-primary-blue flex items-center justify-center text-sm font-black flex-shrink-0">3</span>
                                 <div>
                                     <h4 class="font-black text-gray-900 dark:text-white">Periksa Selisih (Difference)</h4>
@@ -245,7 +245,7 @@
                                 </div>
                             </div>
 
-                            <div class="flex gap-4 p-5 rounded-2xl bg-gray-50/50 dark:bg-gray-850/30 border border-gray-100 dark:border-gray-850">
+                            <div class="flex gap-4 p-5 rounded-2xl bg-gray-50/50 dark:bg-gray-800/30 border border-gray-100 dark:border-gray-800">
                                 <span class="w-8 h-8 rounded-full bg-primary-blue/10 text-primary-blue flex items-center justify-center text-sm font-black flex-shrink-0">4</span>
                                 <div>
                                     <h4 class="font-black text-gray-900 dark:text-white">Tutup Sesi Kasir</h4>
@@ -284,7 +284,7 @@
                         <div>
                             <h3 class="text-lg font-black text-gray-900 dark:text-white mb-3">1. SOP Presensi (Check-in & Check-out)</h3>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div class="p-6 bg-gray-50 dark:bg-gray-850 rounded-2xl border border-gray-100 dark:border-gray-800 space-y-3">
+                                <div class="p-6 bg-gray-50 dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-800 space-y-3">
                                     <span class="px-2.5 py-0.5 bg-teal-500/10 text-teal-600 dark:text-teal-400 text-[10px] font-black rounded-full uppercase border border-teal-500/20">Presensi Masuk (Clock In)</span>
                                     <h4 class="font-black text-gray-900 dark:text-white">Bagaimana cara Clock-In?</h4>
                                     <p class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
@@ -297,7 +297,7 @@
                                     </ul>
                                 </div>
 
-                                <div class="p-6 bg-gray-50 dark:bg-gray-850 rounded-2xl border border-gray-100 dark:border-gray-800 space-y-3">
+                                <div class="p-6 bg-gray-50 dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-800 space-y-3">
                                     <span class="px-2.5 py-0.5 bg-rose-500/10 text-rose-600 dark:text-rose-400 text-[10px] font-black rounded-full uppercase border border-rose-500/20">Presensi Keluar (Clock Out)</span>
                                     <h4 class="font-black text-gray-900 dark:text-white">Bagaimana cara Clock-Out?</h4>
                                     <p class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
@@ -330,7 +330,7 @@
                                         Untuk melaporkan tugas yang selesai, kasir cukup melakukan <strong>centang (toggle checkbox)</strong> di samping nama tugas tersebut di halaman kasir. 
                                     </p>
                                     <div class="mt-3 bg-white dark:bg-gray-900 p-4 rounded-xl border border-gray-100 dark:border-gray-800 space-y-2">
-                                        <p class="text-[11px] font-black text-gray-850 dark:text-gray-150">Bentuk Bukti & Pelaporan:</p>
+                                        <p class="text-[11px] font-black text-gray-800 dark:text-gray-200">Bentuk Bukti & Pelaporan:</p>
                                         <ul class="list-disc list-inside text-[11px] text-gray-500 dark:text-gray-400 space-y-1">
                                             <li><strong>Bukti Digital:</strong> Sistem otomatis mencatat siapa kasir yang mencentang beserta <strong>waktu penyelesaian (Timestamp)</strong> tugas tersebut.</li>
                                             <li><strong>Bukti Deskriptif (Opsional):</strong> Di akhir shift saat Anda melakukan tutup buku (Clock-out), Anda dapat menulis laporan penutupan pada kolom <strong>"Laporan Penutupan / Catatan Kasir"</strong> untuk merinci status tugas tertentu atau jika ada temuan khusus.</li>
@@ -358,7 +358,7 @@
                     <div class="border-t border-gray-100 dark:border-gray-800 pt-6 space-y-6" x-data="{ activeFaq: null }">
                         <!-- FAQ 1 -->
                         <div class="border border-gray-100 dark:border-gray-800 rounded-2xl overflow-hidden transition-all">
-                            <button @click="activeFaq = activeFaq === 1 ? null : 1" class="w-full flex items-center justify-between p-5 text-left font-black text-sm text-gray-900 dark:text-white bg-gray-50/50 dark:bg-gray-850/20 hover:bg-gray-50 dark:hover:bg-gray-850">
+                            <button @click="activeFaq = activeFaq === 1 ? null : 1" class="w-full flex items-center justify-between p-5 text-left font-black text-sm text-gray-900 dark:text-white bg-gray-50/50 dark:bg-gray-800/20 hover:bg-gray-50 dark:hover:bg-gray-800">
                                 <span>Bagaimana jika printer struk macet atau mati saat transaksi?</span>
                                 <svg class="w-4 h-4 transition-transform duration-300" :class="activeFaq === 1 ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
                             </button>
@@ -369,7 +369,7 @@
 
                         <!-- FAQ 2 -->
                         <div class="border border-gray-100 dark:border-gray-800 rounded-2xl overflow-hidden transition-all">
-                            <button @click="activeFaq = activeFaq === 2 ? null : 2" class="w-full flex items-center justify-between p-5 text-left font-black text-sm text-gray-900 dark:text-white bg-gray-50/50 dark:bg-gray-850/20 hover:bg-gray-50 dark:hover:bg-gray-850">
+                            <button @click="activeFaq = activeFaq === 2 ? null : 2" class="w-full flex items-center justify-between p-5 text-left font-black text-sm text-gray-900 dark:text-white bg-gray-50/50 dark:bg-gray-800/20 hover:bg-gray-50 dark:hover:bg-gray-800">
                                 <span>Bagaimana jika salah menginput produk yang dibeli?</span>
                                 <svg class="w-4 h-4 transition-transform duration-300" :class="activeFaq === 2 ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
                             </button>
@@ -380,7 +380,7 @@
 
                         <!-- FAQ 3 -->
                         <div class="border border-gray-100 dark:border-gray-800 rounded-2xl overflow-hidden transition-all">
-                            <button @click="activeFaq = activeFaq === 3 ? null : 3" class="w-full flex items-center justify-between p-5 text-left font-black text-sm text-gray-900 dark:text-white bg-gray-50/50 dark:bg-gray-850/20 hover:bg-gray-50 dark:hover:bg-gray-850">
+                            <button @click="activeFaq = activeFaq === 3 ? null : 3" class="w-full flex items-center justify-between p-5 text-left font-black text-sm text-gray-900 dark:text-white bg-gray-50/50 dark:bg-gray-800/20 hover:bg-gray-50 dark:hover:bg-gray-800">
                                 <span>Bagaimana cara mencatat uang kembalian yang dihutangkan?</span>
                                 <svg class="w-4 h-4 transition-transform duration-300" :class="activeFaq === 3 ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
                             </button>

@@ -208,7 +208,7 @@ class Transactions extends Component
             $query->whereDate('transacted_at', $this->filterDate);
         }
 
-        $transactions = $query->selectRaw('reference, MAX(buyer_name) as buyer_name, MAX(status) as status, MAX(transacted_at) as transacted_at, SUM(total_price) as total_amount, SUM(quantity) as total_qty, COUNT(*) as unique_items, MAX(jurusan_id) as jurusan_id')
+        $transactions = $query->selectRaw('reference, MAX(buyer_name) as buyer_name, MAX(status) as status, MAX(transacted_at) as transacted_at, SUM(total_price) as total_amount, SUM(quantity) as total_qty, COUNT(*) as unique_items, MAX(jurusan_id) as jurusan_id, MAX(user_id) as user_id')
             ->groupBy('reference')
             ->orderByDesc('transacted_at')
             ->paginate(15);

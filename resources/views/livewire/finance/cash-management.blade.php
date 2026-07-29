@@ -18,6 +18,13 @@
                 <span wire:loading wire:target="exportExcel">Mengekspor...</span>
             </button>
 
+            @if($isSubUnit)
+            <button wire:click="openConsolidateModal" class="px-8 py-4 bg-amber-500 text-white rounded-2xl shadow-xl shadow-amber-500/20 font-black italic uppercase text-xs tracking-widest transform hover:-translate-y-1 transition-all flex items-center">
+                <svg class="w-4 h-4 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m16 16 3-8 5-5-5-5-8 3"/><path d="M7 21A14 14 0 0 1 21 7"/></svg>
+                Gabungkan Ke Kas Induk
+            </button>
+            @endif
+
             <button wire:click="openModal" class="px-8 py-4 bg-primary-blue text-white rounded-2xl shadow-xl shadow-blue-500/20 font-black italic uppercase text-xs tracking-widest transform hover:-translate-y-1 transition-all flex items-center">
                 <svg class="w-4 h-4 mr-3" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
                 Catat Kas Baru
@@ -448,6 +455,65 @@
                 </button>
                 <button wire:click="submitAdjustment" class="flex-1 py-4 bg-primary-blue text-white rounded-2xl font-black italic uppercase text-xs tracking-widest shadow-xl shadow-blue-500/20 hover:scale-105 active:scale-95 transition-all">
                     Simpan Penyesuaian
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Consolidation Modal -->
+    <div 
+        x-data="{ show: @entangle('showConsolidateModal') }" 
+        x-show="show" 
+        x-cloak
+        class="fixed inset-0 z-[300] flex items-center justify-center p-6 bg-gray-900/60 backdrop-blur-sm"
+        x-transition:enter="transition ease-out duration-300"
+        x-transition:enter-start="opacity-0"
+        x-transition:enter-end="opacity-100"
+        x-transition:leave="transition ease-in duration-200"
+        x-transition:leave-start="opacity-100"
+        x-transition:leave-end="opacity-0"
+    >
+        <div 
+            @click.away="show = false"
+            class="bg-white dark:bg-gray-900 w-full max-w-lg rounded-[2.5rem] shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-300 border-t-8 border-t-amber-500"
+        >
+            <div class="p-10 border-b border-gray-100 dark:border-gray-800">
+                <h3 class="text-2xl font-black italic uppercase tracking-tighter text-gray-800 dark:text-white">Gabungkan Saldo ke Kas Induk</h3>
+                <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mt-1">Konsolidasi Keuangan Sub-Unit</p>
+            </div>
+            
+            <div class="p-10 space-y-6">
+                <!-- Info Message -->
+                <div class="p-4 bg-amber-500/10 text-amber-600 dark:text-amber-400 rounded-2xl border border-amber-500/20 text-xs font-semibold">
+                    Tindakan ini akan memotong saldo kas sub-unit saat ini dan menambahkannya ke Buku Kas Induk Jurusan sebagai pencatatan konsolidasi transfer masuk.
+                </div>
+
+                <!-- Choose Cash Type -->
+                <div>
+                    <label class="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-3">Tipe Saldo yang Dikirim</label>
+                    <select wire:model="consolidateCashType"
+                        class="w-full px-6 py-4 bg-gray-50 dark:bg-gray-800/50 border-2 border-gray-205 dark:border-gray-700 focus:border-amber-500 dark:focus:border-amber-500 rounded-2xl focus:ring-0 text-sm font-bold dark:text-white transition-colors">
+                        <option value="keuntungan">KAS KEUNTUNGAN (Rekomendasi transfer laba)</option>
+                        <option value="modal">KAS MODAL (Gunakan untuk pengembalian dana modal)</option>
+                    </select>
+                    @error('consolidateCashType') <span class="text-xs text-primary-red font-bold uppercase tracking-wide mt-2 block">{{ $message }}</span> @enderror
+                </div>
+
+                <!-- Input Amount -->
+                <div>
+                    <label class="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-3">Nominal Saldo yang Dikirim (Rp)</label>
+                    <input type="number" wire:model="consolidateAmount" placeholder="Contoh: 250000"
+                        class="w-full px-6 py-4 bg-gray-50 dark:bg-gray-800/50 border-2 border-gray-205 dark:border-gray-700 focus:border-amber-500 dark:focus:border-amber-500 rounded-2xl focus:ring-0 text-sm font-bold dark:text-white transition-colors">
+                    @error('consolidateAmount') <span class="text-xs text-primary-red font-bold uppercase tracking-wide mt-2 block">{{ $message }}</span> @enderror
+                </div>
+            </div>
+
+            <div class="p-10 bg-gray-50 dark:bg-gray-800/50 flex gap-4">
+                <button @click="show = false" class="flex-1 py-4 bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-2xl font-black text-xs uppercase tracking-widest hover:scale-105 active:scale-95 transition-transform">
+                    Batal
+                </button>
+                <button wire:click="consolidateToParent" class="flex-1 py-4 bg-amber-500 text-white rounded-2xl font-black italic uppercase text-xs tracking-widest shadow-xl shadow-amber-500/20 hover:scale-105 active:scale-95 transition-all">
+                    Gabungkan Saldo
                 </button>
             </div>
         </div>

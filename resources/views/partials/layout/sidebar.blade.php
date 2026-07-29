@@ -2,7 +2,7 @@
 <div x-show="sidebarOpen" @click="toggleSidebar" class="md:hidden fixed inset-0 z-40 bg-gray-950/40 backdrop-blur-sm" style="display: none;" x-transition></div>
 
 <aside
-    class="fixed inset-y-0 left-0 z-50 w-80 md:relative md:flex md:flex-shrink-0 flex-col bg-white dark:bg-gray-900 border-r border-gray-100 dark:border-gray-800 transition-all duration-500 ease-in-out shadow-2xl md:shadow-none"
+    class="fixed inset-y-0 left-0 z-50 w-80 md:relative md:inset-y-auto md:left-auto md:flex md:flex-shrink-0 flex-col bg-white dark:bg-gray-900 border-r border-gray-100 dark:border-gray-800 transition-all duration-500 ease-in-out shadow-2xl md:shadow-none"
     :class="sidebarOpen ? 'translate-x-0 opacity-100 w-80' : '-translate-x-full opacity-0 w-0 md:w-0 overflow-hidden'">
     <div class="flex flex-col h-full">
         <!-- Brand -->

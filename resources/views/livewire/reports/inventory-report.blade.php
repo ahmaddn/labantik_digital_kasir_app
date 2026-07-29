@@ -121,7 +121,14 @@
                         @forelse($reportData as $row)
                         <tr wire:key="inventory-row-{{ $row->id }}" class="group hover:bg-gray-50/30 dark:hover:bg-gray-800/30 transition-all">
                             <td class="px-10 py-6">
-                                <span class="text-sm font-black text-gray-800 dark:text-white uppercase tracking-tight group-hover:text-primary-blue transition-colors">{{ $row->name }}</span>
+                                <div class="flex flex-col">
+                                    <span class="text-sm font-black text-gray-800 dark:text-white uppercase tracking-tight group-hover:text-primary-blue transition-colors">{{ $row->name }}</span>
+                                    @if($row->cashier_name)
+                                        <span class="text-[9px] font-black uppercase text-gray-400 dark:text-gray-500 tracking-widest mt-1">
+                                            Penginput: {{ $row->cashier_name }}
+                                        </span>
+                                    @endif
+                                </div>
                             </td>
                             <td class="px-6 py-6">
                                 <span class="px-4 py-2 bg-gray-100 dark:bg-gray-900 rounded-xl text-[9px] font-black text-gray-500 uppercase tracking-widest">{{ $row->category }}</span>

@@ -1,10 +1,10 @@
 <div class="p-6">
-    <div class="flex items-center justify-between mb-12">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
         <div>
-            <h1 class="text-5xl font-black italic uppercase tracking-tighter text-primary-blue dark:text-primary-blue-light">Dashboard Digital</h1>
+            <h1 class="text-3xl md:text-5xl font-black italic uppercase tracking-tighter text-primary-blue dark:text-primary-blue-light">Dashboard Digital</h1>
             <p class="text-gray-400 font-bold text-xs uppercase tracking-[0.3em] italic">{{ \Carbon\Carbon::parse($today)->translatedFormat('l, d F Y') }}</p>
         </div>
-        <div class="flex space-x-4 items-center">
+        <div class="flex flex-wrap items-center gap-4">
             @if(!session('active_jurusan_id'))
             <div class="flex items-center bg-white dark:bg-gray-800 px-6 py-4 rounded-2xl shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-800">
                 <svg class="w-5 h-5 text-primary-blue mr-3" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
@@ -749,7 +749,7 @@
                 
                 <div class="space-y-4">
                     <!-- Step 1 -->
-                    <div class="flex gap-4 items-start p-4 bg-gray-50 dark:bg-gray-850 rounded-2xl border border-gray-100 dark:border-gray-800">
+                    <div class="flex gap-4 items-start p-4 bg-gray-50 dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-800">
                         <div class="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center text-xs font-black flex-shrink-0">1</div>
                         <div>
                             <h5 class="text-sm font-black text-gray-900 dark:text-white leading-tight">Persiapan & Buka Kasir</h5>
@@ -760,7 +760,7 @@
                     </div>
 
                     <!-- Step 2 -->
-                    <div class="flex gap-4 items-start p-4 bg-gray-50 dark:bg-gray-850 rounded-2xl border border-gray-100 dark:border-gray-800">
+                    <div class="flex gap-4 items-start p-4 bg-gray-50 dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-800">
                         <div class="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center text-xs font-black flex-shrink-0">2</div>
                         <div>
                             <h5 class="text-sm font-black text-gray-900 dark:text-white leading-tight">Proses Transaksi & Struk</h5>
@@ -771,7 +771,7 @@
                     </div>
 
                     <!-- Step 3 -->
-                    <div class="flex gap-4 items-start p-4 bg-gray-50 dark:bg-gray-850 rounded-2xl border border-gray-100 dark:border-gray-800">
+                    <div class="flex gap-4 items-start p-4 bg-gray-50 dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-800">
                         <div class="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center text-xs font-black flex-shrink-0">3</div>
                         <div>
                             <h5 class="text-sm font-black text-gray-900 dark:text-white leading-tight">Rekap Fisik & Tutup Buku</h5>
@@ -789,7 +789,7 @@
             </div>
 
             <!-- Modal Footer -->
-            <div class="p-6 bg-gray-50 dark:bg-gray-850 border-t border-gray-100 dark:border-gray-800 flex flex-col sm:flex-row gap-3 justify-end flex-shrink-0">
+            <div class="p-6 bg-gray-50 dark:bg-gray-800 border-t border-gray-100 dark:border-gray-800 flex flex-col sm:flex-row gap-3 justify-end flex-shrink-0">
                 <button @click="closeWelcome(true)" class="px-6 py-3.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 text-xs font-black rounded-2xl hover:bg-gray-50 dark:hover:bg-gray-750 transition-all text-center">
                     Pelajari SOP Lengkap
                 </button>

@@ -57,7 +57,8 @@ class InventoryReport extends Component
             ['product_id' => $this->editingProductId, 'date' => $this->selectedDate],
             [
                 'opening_stock' => $this->newOpeningStock,
-                'closing_stock' => $this->newClosingStock
+                'closing_stock' => $this->newClosingStock,
+                'user_id' => auth()->id(),
             ]
         );
 
@@ -104,7 +105,7 @@ class InventoryReport extends Component
         $reportData = [];
 
         foreach ($products as $product) {
-            $stockEntry = StockEntry::where('product_id', $product->id)
+            $stockEntry = StockEntry::with('user')->where('product_id', $product->id)
                 ->where('date', $this->selectedDate)
                 ->first();
 
@@ -127,6 +128,7 @@ class InventoryReport extends Component
                 'expected' => $expected,
                 'closing' => $closing,
                 'discrepancy' => $discrepancy,
+                'cashier_name' => $stockEntry && $stockEntry->user ? $stockEntry->user->name : null,
             ];
         }
 

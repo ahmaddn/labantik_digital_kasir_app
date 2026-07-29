@@ -43,6 +43,11 @@ class CashManagement extends Component
     public $adjustPhysicalBalance;
     public string $adjustCashType = 'keuntungan';
 
+    // Consolidation Modal properties
+    public bool $showConsolidateModal = false;
+    public $consolidateAmount;
+    public string $consolidateCashType = 'keuntungan';
+
     public function mount()
     {
         $this->filterMonth = now()->format('Y-m');
@@ -368,6 +373,89 @@ class CashManagement extends Component
         $this->dispatch('toast', message: 'Penyesuaian kas fisik berhasil disimpan!');
     }
 
+    public function openConsolidateModal(): void
+    {
+        $this->consolidateAmount = '';
+        $this->consolidateCashType = 'keuntungan';
+        $this->showConsolidateModal = true;
+    }
+
+    public function consolidateToParent(): void
+    {
+        $activeJurusanId = session('active_jurusan_id');
+        $jurusan = \App\Models\Jurusan::with('parent')->find($activeJurusanId);
+
+        if (!$jurusan || !$jurusan->parent_id) {
+            $this->dispatch('toast', message: 'Hanya sub-unit usaha yang dapat melakukan konsolidasi kas ke induk.', type: 'error');
+            return;
+        }
+
+        $this->validate([
+            'consolidateAmount' => 'required|numeric|min:1',
+            'consolidateCashType' => 'required|in:modal,keuntungan',
+        ]);
+
+        // Calculate current balance of sub-unit
+        $balances = CashTransaction::where('jurusan_id', $activeJurusanId)
+            ->selectRaw("
+                SUM(CASE WHEN cash_type = 'modal' AND type = 'income' THEN amount ELSE 0 END) as modal_income,
+                SUM(CASE WHEN cash_type = 'modal' AND type = 'expense' THEN amount ELSE 0 END) as modal_expense,
+                SUM(CASE WHEN cash_type = 'keuntungan' AND type = 'income' THEN amount ELSE 0 END) as profit_income,
+                SUM(CASE WHEN cash_type = 'keuntungan' AND type = 'expense' THEN amount ELSE 0 END) as profit_expense
+            ")
+            ->first();
+
+        $currentModalBalance = ($balances->modal_income ?? 0) - ($balances->modal_expense ?? 0);
+        $currentProfitBalance = ($balances->profit_income ?? 0) - ($balances->profit_expense ?? 0);
+        $availableBalance = $this->consolidateCashType === 'modal' ? $currentModalBalance : $currentProfitBalance;
+
+        if ((float)$this->consolidateAmount > $availableBalance) {
+            $this->dispatch('toast', message: 'Saldo tidak mencukupi untuk melakukan konsolidasi kas.', type: 'error');
+            return;
+        }
+
+        // 1. Record expense in child
+        CashTransaction::create([
+            'jurusan_id' => $activeJurusanId,
+            'date' => now()->format('Y-m-d'),
+            'cash_type' => $this->consolidateCashType,
+            'type' => 'expense',
+            'amount' => (float)$this->consolidateAmount,
+            'description' => "Konsolidasi Saldo ke Unit Induk (TEFA {$jurusan->parent->name})",
+        ]);
+
+        // 2. Find or create Category in Parent for "Konsolidasi Sub-Unit"
+        $parentCategoryId = null;
+        $parentCategory = \App\Models\CashCategory::where('jurusan_id', $jurusan->parent_id)
+            ->where('name', 'Konsolidasi Sub-Unit')
+            ->first();
+        if (!$parentCategory) {
+            $parentCategory = \App\Models\CashCategory::create([
+                'jurusan_id' => $jurusan->parent_id,
+                'name' => 'Konsolidasi Sub-Unit',
+            ]);
+        }
+        $parentCategoryId = $parentCategory->id;
+
+        // 3. Record income in parent
+        CashTransaction::create([
+            'jurusan_id' => $jurusan->parent_id,
+            'date' => now()->format('Y-m-d'),
+            'cash_type' => $this->consolidateCashType,
+            'cash_category_id' => $parentCategoryId,
+            'type' => 'income',
+            'amount' => (float)$this->consolidateAmount,
+            'description' => "Penerimaan Konsolidasi dari Sub-Unit: {$jurusan->name}",
+        ]);
+
+        // Invalidate caches
+        \Illuminate\Support\Facades\Cache::forget('cash_balances_' . $activeJurusanId);
+        \Illuminate\Support\Facades\Cache::forget('cash_balances_' . $jurusan->parent_id);
+
+        $this->showConsolidateModal = false;
+        $this->dispatch('toast', message: 'Konsolidasi kas ke induk berhasil dicatat!');
+    }
+
     public function exportExcel()
     {
         $filename = 'Laporan_Kas_Internal_' . Carbon::parse($this->filterMonth)->translatedFormat('F_Y') . '.xlsx';
@@ -377,6 +465,8 @@ class CashManagement extends Component
     public function render()
     {
         $activeJurusanId = session('active_jurusan_id');
+        $jurusan = \App\Models\Jurusan::find($activeJurusanId);
+        $isSubUnit = $jurusan && $jurusan->parent_id;
 
         // Cache all-time balances and category sums
         $cacheKey = 'cash_balances_' . ($activeJurusanId ?: 'global');
@@ -520,6 +610,7 @@ class CashManagement extends Component
             'monthlyExpense' => $monthlyExpense,
             'categories' => $categories,
             'categoryStats' => collect($categoryStats),
+            'isSubUnit' => $isSubUnit,
         ])->layout('layouts.app', ['title' => 'Buku Kas Internal']);
     }
 }

@@ -22,8 +22,11 @@ class JurusanManagement extends Component
 
     public $deleteId = null;
 
+    public $parent_id = null;
+
     protected $rules = [
         'name' => 'required|string|max:255|unique:jurusans,name',
+        'parent_id' => 'nullable|exists:jurusans,id',
     ];
 
     public function updatedSearch()
@@ -43,6 +46,7 @@ class JurusanManagement extends Component
         $jurusan = Jurusan::findOrFail($id);
         $this->jurusanId = $jurusan->id;
         $this->name = $jurusan->name;
+        $this->parent_id = $jurusan->parent_id;
         $this->showModal = true;
     }
 
@@ -50,6 +54,7 @@ class JurusanManagement extends Component
     {
         $this->jurusanId = null;
         $this->name = '';
+        $this->parent_id = null;
     }
 
     public function saveJurusan()
@@ -57,12 +62,19 @@ class JurusanManagement extends Component
         if ($this->jurusanId) {
             $this->validate([
                 'name' => 'required|string|max:255|unique:jurusans,name,'.$this->jurusanId,
+                'parent_id' => 'nullable|exists:jurusans,id|different:jurusanId',
             ]);
             $jurusan = Jurusan::findOrFail($this->jurusanId);
-            $jurusan->update(['name' => $this->name]);
+            $jurusan->update([
+                'name' => $this->name,
+                'parent_id' => $this->parent_id ?: null,
+            ]);
         } else {
             $this->validate();
-            Jurusan::create(['name' => $this->name]);
+            Jurusan::create([
+                'name' => $this->name,
+                'parent_id' => $this->parent_id ?: null,
+            ]);
         }
 
         $this->showModal = false;
@@ -92,12 +104,20 @@ class JurusanManagement extends Component
             abort(403);
         }
 
-        $jurusans = Jurusan::where('name', 'like', '%'.$this->search.'%')
+        $jurusans = Jurusan::with('parent')
+            ->where('name', 'like', '%'.$this->search.'%')
             ->latest()
             ->paginate(10);
 
+        $parentOptions = Jurusan::whereNull('parent_id')
+            ->when($this->jurusanId, function ($q) {
+                return $q->where('id', '!=', $this->jurusanId);
+            })
+            ->get();
+
         return view('livewire.management.jurusan-management', [
             'jurusans' => $jurusans,
+            'parentOptions' => $parentOptions,
         ])->layout('layouts.app', ['title' => 'Manajemen Jurusan']);
     }
 }

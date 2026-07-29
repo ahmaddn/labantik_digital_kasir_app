@@ -214,6 +214,53 @@
         border: 2px solid var(--color-primary-blue) !important;
         box-shadow: 0 0 25px rgba(37, 99, 235, 0.25) !important;
     }
+
+    /* Restoran & Warung Theme Style (Warm Culinary) */
+    html:not(.dark) .theme-restaurant-aesthetic .bg-white,
+    html:not(.dark) .theme-restaurant-aesthetic .bg-gray-50 {
+        background-color: #fffaf0 !important;
+        border: 1px solid rgba(249, 115, 22, 0.1) !important;
+        box-shadow: 0 10px 15px -3px rgba(249, 115, 22, 0.05), 0 4px 6px -2px rgba(249, 115, 22, 0.02) !important;
+    }
+    .theme-restaurant-aesthetic.dark .bg-gray-800,
+    .theme-restaurant-aesthetic.dark .bg-gray-850,
+    .theme-restaurant-aesthetic.dark .bg-gray-900 {
+        background-color: #1c1917 !important;
+        border: 1px solid rgba(255, 255, 255, 0.03) !important;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.4) !important;
+    }
+
+    /* Retail Minimarket Theme Style (Clean Grid) */
+    html:not(.dark) .theme-retail-aesthetic .bg-white,
+    html:not(.dark) .theme-retail-aesthetic .bg-gray-50 {
+        background-color: #ffffff !important;
+        border: 1px solid #e2e8f0 !important;
+        border-radius: 4px !important;
+        box-shadow: none !important;
+    }
+    .theme-retail-aesthetic.dark .bg-gray-800,
+    .theme-retail-aesthetic.dark .bg-gray-850,
+    .theme-retail-aesthetic.dark .bg-gray-900 {
+        background-color: #0f172a !important;
+        border: 1px solid #334155 !important;
+        border-radius: 4px !important;
+        box-shadow: none !important;
+    }
+
+    /* Bank Mini Theme Style (Corporate FinTech) */
+    html:not(.dark) .theme-bank-aesthetic .bg-white,
+    html:not(.dark) .theme-bank-aesthetic .bg-gray-50 {
+        background-color: #ffffff !important;
+        border: 1px solid rgba(14, 165, 233, 0.1) !important;
+        box-shadow: 0 4px 20px -2px rgba(14, 165, 233, 0.08) !important;
+    }
+    .theme-bank-aesthetic.dark .bg-gray-800,
+    .theme-bank-aesthetic.dark .bg-gray-850,
+    .theme-bank-aesthetic.dark .bg-gray-900 {
+        background-color: #0b1329 !important;
+        border: 1px solid rgba(14, 165, 233, 0.08) !important;
+        box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.5) !important;
+    }
 }
 
 .privacy-blur {
