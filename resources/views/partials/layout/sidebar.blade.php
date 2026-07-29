@@ -79,10 +79,16 @@
 
                     $isScheduled = true;
                     if (session('active_role_name') === 'kasir') {
-                        $isScheduled = \App\Models\CashierSchedule::where('user_id', auth()->id())
-                            ->where('jurusan_id', session('active_jurusan_id'))
-                            ->where('date', now()->toDateString())
+                        $hasHigherRole = auth()->user()->roles()
+                            ->whereIn('roles.name', ['superadmin', 'pengelola_jurusan'])
                             ->exists();
+
+                        if (!$hasHigherRole) {
+                            $isScheduled = \App\Models\CashierSchedule::where('user_id', auth()->id())
+                                ->where('jurusan_id', session('active_jurusan_id'))
+                                ->where('date', now()->toDateString())
+                                ->exists();
+                        }
                     }
                 @endphp
 
