@@ -51,7 +51,7 @@
                             </td>
                             <td class="py-5 text-right pr-4">
                                 <div class="flex items-center justify-end gap-2">
-                                    @if(session('active_role_name') !== 'pengelola' || !is_null($jurusan->parent_id))
+                                    @if(session('active_role_name') !== 'pengelola_jurusan' || !is_null($jurusan->parent_id))
                                         <button wire:click="openEditModal('{{ $jurusan->id }}')" class="p-2 text-gray-400 hover:text-primary-blue dark:hover:text-primary-yellow hover:bg-gray-100 dark:hover:bg-gray-900 rounded-xl transition-all">
                                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                                         </button>
@@ -85,7 +85,7 @@
                             <p class="text-[10px] text-gray-400 font-semibold mt-1">ID: {{ $jurusan->id }}</p>
                         </div>
                         <div class="flex items-center gap-1">
-                            @if(session('active_role_name') !== 'pengelola' || !is_null($jurusan->parent_id))
+                            @if(session('active_role_name') !== 'pengelola_jurusan' || !is_null($jurusan->parent_id))
                                 <button wire:click="openEditModal('{{ $jurusan->id }}')" class="p-2 text-gray-400 hover:text-primary-blue dark:hover:text-primary-yellow hover:bg-white dark:hover:bg-gray-800 rounded-xl transition-all">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                                 </button>
@@ -136,10 +136,10 @@
 
                 <div>
                     <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">
-                        Unit Induk (Parent TEFA) {!! session('active_role_name') === 'pengelola' ? '<span class="text-primary-red">* Wajib</span>' : '- Opsional' !!}
+                        Unit Induk (Parent TEFA) {!! session('active_role_name') === 'pengelola_jurusan' ? '<span class="text-primary-red">* Wajib</span>' : '- Opsional' !!}
                     </label>
                     <select wire:model="parent_id" class="w-full px-4 py-4 bg-gray-50 dark:bg-gray-900 border-none rounded-2xl focus:ring-2 focus:ring-primary-blue dark:text-white focus:outline-none transition-all text-sm">
-                        @if(session('active_role_name') !== 'pengelola')
+                        @if(session('active_role_name') !== 'pengelola_jurusan')
                             <option value="">-- Tanpa Induk (Unit Utama / Jurusan) --</option>
                         @else
                             <option value="">-- Pilih Unit Induk / Jurusan --</option>
