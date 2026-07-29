@@ -165,7 +165,7 @@
 
     /* Theme Styles Support */
     /* Glassmorphism Theme Style */
-    html:not(.dark) .theme-glassmorphism .bg-white, 
+    html:not(.dark) .theme-glassmorphism .bg-white:not(img), 
     html:not(.dark) .theme-glassmorphism .bg-gray-50 {
         background-color: rgba(255, 255, 255, 0.45) !important;
         backdrop-filter: blur(24px) saturate(180%) !important;
@@ -174,7 +174,7 @@
         box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.06) !important;
         border-radius: 2rem !important;
     }
-    .dark .theme-glassmorphism .bg-white,
+    .dark .theme-glassmorphism .bg-white:not(img),
     .dark .theme-glassmorphism .bg-gray-800, 
     .dark .theme-glassmorphism .bg-gray-850, 
     .dark .theme-glassmorphism .bg-gray-900 {
@@ -187,7 +187,7 @@
     }
 
     /* Classic Premium Theme Style */
-    html:not(.dark) .theme-classic-premium .bg-white,
+    html:not(.dark) .theme-classic-premium .bg-white:not(img),
     html:not(.dark) .theme-classic-premium .bg-gray-50 {
         background-color: #ffffff !important;
         border: 1px solid rgba(0, 0, 0, 0.05) !important;
@@ -195,7 +195,7 @@
         backdrop-filter: none !important;
         border-radius: 2rem !important;
     }
-    .dark .theme-classic-premium .bg-white,
+    .dark .theme-classic-premium .bg-white:not(img),
     .dark .theme-classic-premium .bg-gray-800,
     .dark .theme-classic-premium .bg-gray-850,
     .dark .theme-classic-premium .bg-gray-900 {
@@ -207,14 +207,14 @@
     }
 
     /* Neon Cyberpunk Theme Style */
-    html:not(.dark) .theme-neon-cyberpunk .bg-white,
+    html:not(.dark) .theme-neon-cyberpunk .bg-white:not(img),
     html:not(.dark) .theme-neon-cyberpunk .bg-gray-50 {
         background-color: #030712 !important;
         border: 2px solid var(--color-primary-blue) !important;
         box-shadow: 0 0 15px rgba(37, 99, 235, 0.15) !important;
         border-radius: 0.125rem !important;
     }
-    .dark .theme-neon-cyberpunk .bg-white,
+    .dark .theme-neon-cyberpunk .bg-white:not(img),
     .dark .theme-neon-cyberpunk .bg-gray-800,
     .dark .theme-neon-cyberpunk .bg-gray-850,
     .dark .theme-neon-cyberpunk .bg-gray-900 {
@@ -225,14 +225,14 @@
     }
 
     /* Restoran & Warung Theme Style (Warm Culinary) */
-    html:not(.dark) .theme-restaurant-aesthetic .bg-white,
+    html:not(.dark) .theme-restaurant-aesthetic .bg-white:not(img),
     html:not(.dark) .theme-restaurant-aesthetic .bg-gray-50 {
         background-color: #fffaf0 !important;
         border: 1.5px dashed rgba(249, 115, 22, 0.25) !important;
         box-shadow: 0 10px 15px -3px rgba(249, 115, 22, 0.05), 0 4px 6px -2px rgba(249, 115, 22, 0.02) !important;
         border-radius: 2.5rem !important;
     }
-    .dark .theme-restaurant-aesthetic .bg-white,
+    .dark .theme-restaurant-aesthetic .bg-white:not(img),
     .dark .theme-restaurant-aesthetic .bg-gray-800,
     .dark .theme-restaurant-aesthetic .bg-gray-850,
     .dark .theme-restaurant-aesthetic .bg-gray-900 {
@@ -243,14 +243,14 @@
     }
 
     /* Retail Minimarket Theme Style (Clean Grid) */
-    html:not(.dark) .theme-retail-aesthetic .bg-white,
+    html:not(.dark) .theme-retail-aesthetic .bg-white:not(img),
     html:not(.dark) .theme-retail-aesthetic .bg-gray-50 {
         background-color: #ffffff !important;
         border: 1px solid #cbd5e1 !important;
         border-radius: 0.5rem !important;
         box-shadow: none !important;
     }
-    .dark .theme-retail-aesthetic .bg-white,
+    .dark .theme-retail-aesthetic .bg-white:not(img),
     .dark .theme-retail-aesthetic .bg-gray-800,
     .dark .theme-retail-aesthetic .bg-gray-850,
     .dark .theme-retail-aesthetic .bg-gray-900 {
@@ -261,14 +261,14 @@
     }
 
     /* Bank Mini Theme Style (Corporate FinTech) */
-    html:not(.dark) .theme-bank-aesthetic .bg-white,
+    html:not(.dark) .theme-bank-aesthetic .bg-white:not(img),
     html:not(.dark) .theme-bank-aesthetic .bg-gray-50 {
         background-color: #ffffff !important;
         border: 1px solid rgba(14, 165, 233, 0.18) !important;
         box-shadow: 0 4px 20px -2px rgba(14, 165, 233, 0.08) !important;
         border-radius: 1.25rem !important;
     }
-    .dark .theme-bank-aesthetic .bg-white,
+    .dark .theme-bank-aesthetic .bg-white:not(img),
     .dark .theme-bank-aesthetic .bg-gray-800,
     .dark .theme-bank-aesthetic .bg-gray-850,
     .dark .theme-bank-aesthetic .bg-gray-900 {
