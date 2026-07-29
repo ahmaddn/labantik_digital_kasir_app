@@ -180,26 +180,65 @@ class UserManagement extends Component
         $this->resetForm();
     }
 
-    public function getAllUsersForExport()
+    public function exportToExcel($filterType = 'all')
     {
-        return User::all()->map(function ($user) {
-            $userAccesses = $user->getAvailableAccesses();
-            $roleLabel = count($userAccesses) > 0 ? $userAccesses[0]->role_label : 'User';
-            $isKasir = false;
-            foreach ($userAccesses as $acc) {
-                if ($acc->role_name === 'kasir') {
-                    $isKasir = true;
+        $users = User::all()->filter(function ($user) use ($filterType) {
+            if ($filterType === 'all') {
+                return true;
+            }
+            if ($filterType === 'kasir') {
+                $accesses = $user->getAvailableAccesses();
+                foreach ($accesses as $acc) {
+                    if ($acc->role_name === 'kasir') {
+                        return true;
+                    }
                 }
             }
+            return false;
+        });
 
-            return [
-                'name' => $user->name,
-                'email' => $user->email,
-                'role' => $roleLabel,
-                'initials' => $user->initials(),
-                'isKasir' => $isKasir,
-            ];
-        })->toArray();
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        // Set Headers
+        $sheet->setCellValue('A1', 'No');
+        $sheet->setCellValue('B1', 'Nama Lengkap');
+        $sheet->setCellValue('C1', 'Email');
+        $sheet->setCellValue('D1', 'Akses Role / Unit TEFA');
+
+        // Style header
+        $sheet->getStyle('A1:D1')->getFont()->setBold(true);
+        foreach (range('A', 'D') as $col) {
+            $sheet->getColumnDimension($col)->setAutoSize(true);
+        }
+
+        $row = 2;
+        $no = 1;
+        foreach ($users as $user) {
+            $accesses = $user->getAvailableAccesses();
+            $accessStrings = [];
+            foreach ($accesses as $acc) {
+                $str = $acc->role_label;
+                if ($acc->jurusan_name) {
+                    $str .= ' • ' . $acc->jurusan_name;
+                }
+                $accessStrings[] = $str;
+            }
+            $accessText = implode(', ', $accessStrings);
+
+            $sheet->setCellValue('A' . $row, $no++);
+            $sheet->setCellValue('B' . $row, $user->name);
+            $sheet->setCellValue('C' . $row, $user->email);
+            $sheet->setCellValue('D' . $row, $accessText);
+            $row++;
+        }
+
+        $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+        $filename = 'Export-User-' . ($filterType === 'kasir' ? 'Kasir' : 'Semua') . '-' . date('Y-m-d') . '.xlsx';
+
+        return response()->streamDownload(function () use ($writer) {
+            $writer->save('php://output');
+        }, $filename);
     }
 
     public function confirmDelete($id)

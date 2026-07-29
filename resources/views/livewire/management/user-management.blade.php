@@ -1,73 +1,4 @@
-<div class="space-y-8 pt-6" x-data="{
-    exportUser(name, email, role, initials) {
-        this.$refs.cardName.innerText = name;
-        this.$refs.cardEmail.innerText = email;
-        this.$refs.cardRole.innerText = role;
-        this.$refs.cardInitials.innerText = initials;
-        
-        const target = this.$refs.exportTarget;
-        target.style.display = 'block';
-        
-        setTimeout(() => {
-            html2canvas(target, {
-                useCORS: true,
-                backgroundColor: null,
-                scale: 2
-            }).then(canvas => {
-                const link = document.createElement('a');
-                link.download = 'TEFA-CREDENTIALS-' + name.replace(/\s+/g, '-').toUpperCase() + '.png';
-                link.href = canvas.toDataURL();
-                link.click();
-                target.style.display = 'none';
-            });
-        }, 100);
-    },
-    async exportAllCards(filterType) {
-        const users = await this.$wire.getAllUsersForExport();
-        const filteredUsers = users.filter(u => {
-            if (filterType === 'all') return true;
-            if (filterType === 'kasir') return u.isKasir;
-            return false;
-        });
-
-        if (filteredUsers.length === 0) {
-            this.$dispatch('toast', { message: 'Tidak ada data pengguna yang cocok.' });
-            return;
-        }
-
-        const target = this.$refs.exportTarget;
-        target.style.display = 'block';
-
-        this.$dispatch('toast', { message: 'Mulai mengunduh ' + filteredUsers.length + ' kartu akses...' });
-
-        for (const u of filteredUsers) {
-            this.$refs.cardName.innerText = u.name;
-            this.$refs.cardEmail.innerText = u.email;
-            this.$refs.cardRole.innerText = u.role;
-            this.$refs.cardInitials.innerText = u.initials;
-
-            // Wait a tiny bit for render
-            await new Promise(resolve => setTimeout(resolve, 100));
-
-            const canvas = await html2canvas(target, {
-                useCORS: true,
-                backgroundColor: null,
-                scale: 2
-            });
-
-            const link = document.createElement('a');
-            link.download = 'TEFA-CREDENTIALS-' + u.name.replace(/\s+/g, '-').toUpperCase() + '.png';
-            link.href = canvas.toDataURL();
-            link.click();
-            
-            // Interval to prevent browser download locks
-            await new Promise(resolve => setTimeout(resolve, 400));
-        }
-
-        target.style.display = 'none';
-        this.$dispatch('toast', { message: 'Selesai! Semua kartu berhasil diunduh.' });
-    }
-}">
+<div class="space-y-8 pt-6">
     <!-- Header -->
     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
@@ -85,18 +16,18 @@
                 Import Excel
             </button>
 
-            <!-- Export Cards Dropdown -->
+            <!-- Export Excel Dropdown -->
             <div class="relative" x-data="{ openExport: false }" @click.outside="openExport = false">
                 <button @click="openExport = !openExport" class="inline-flex items-center px-5 py-3.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-2xl font-black text-sm uppercase italic tracking-wider transition-all duration-300 shadow-xl shadow-emerald-950/10 active:scale-95">
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                    Export Kartu
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                    Export Excel
                 </button>
                 <div x-show="openExport" x-cloak
                     class="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-100 dark:border-gray-700 py-2 z-50 transform origin-top-right">
-                    <button @click="openExport = false; exportAllCards('all')" class="w-full flex items-center gap-3 px-4 py-3 text-xs font-black uppercase tracking-wider italic text-gray-500 dark:text-gray-300 hover:text-emerald-500 dark:hover:text-emerald-400 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-all text-left">
+                    <button @click="openExport = false; $wire.exportToExcel('all')" class="w-full flex items-center gap-3 px-4 py-3 text-xs font-black uppercase tracking-wider italic text-gray-500 dark:text-gray-300 hover:text-emerald-500 dark:hover:text-emerald-400 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-all text-left">
                         Semua Akun
                     </button>
-                    <button @click="openExport = false; exportAllCards('kasir')" class="w-full flex items-center gap-3 px-4 py-3 text-xs font-black uppercase tracking-wider italic text-gray-500 dark:text-gray-300 hover:text-emerald-500 dark:hover:text-emerald-400 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-all text-left border-t border-gray-50 dark:border-gray-700/50">
+                    <button @click="openExport = false; $wire.exportToExcel('kasir')" class="w-full flex items-center gap-3 px-4 py-3 text-xs font-black uppercase tracking-wider italic text-gray-500 dark:text-gray-300 hover:text-emerald-500 dark:hover:text-emerald-400 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-all text-left border-t border-gray-50 dark:border-gray-700/50">
                         Hanya Kasir
                     </button>
                 </div>
@@ -178,9 +109,7 @@
                             </td>
                             <td class="py-5 text-right pr-4">
                                 <div class="flex items-center justify-end gap-3">
-                                    <button @click="exportUser('{{ $user->name }}', '{{ $user->email }}', '{{ count($userAccesses) > 0 ? $userAccesses[0]->role_label : 'User' }}', '{{ $user->initials() }}')" class="p-2.5 text-gray-400 hover:text-emerald-500 hover:bg-emerald-500/10 rounded-xl transition-all" title="Cetak Kartu Akses">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2v-7a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.333 0 4 .667 4 2v1H5v-1c0-1.333 2.667-2 4-2z"></path></svg>
-                                    </button>
+
                                     <button wire:click="openEditModal('{{ $user->id }}')" class="p-2.5 text-gray-400 hover:text-primary-blue dark:hover:text-primary-yellow hover:bg-gray-100 dark:hover:bg-gray-900 rounded-xl transition-all">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                                     </button>
@@ -247,10 +176,7 @@
 
                     <!-- Actions -->
                     <div class="flex justify-end gap-2 pt-3 border-t border-gray-200 dark:border-gray-800">
-                        <button @click="exportUser('{{ $user->name }}', '{{ $user->email }}', '{{ count($userAccesses) > 0 ? $userAccesses[0]->role_label : 'User' }}', '{{ $user->initials() }}')" class="inline-flex items-center px-4 py-2.5 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400 border border-emerald-250 dark:border-emerald-900 rounded-xl font-bold text-xs gap-2 transition-all">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2v-7a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.333 0 4 .667 4 2v1H5v-1c0-1.333 2.667-2 4-2z"></path></svg>
-                            Export Kartu
-                        </button>
+
                         <button wire:click="openEditModal('{{ $user->id }}')" class="inline-flex items-center px-4 py-2.5 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 border border-gray-250 dark:border-gray-700 rounded-xl font-bold text-xs gap-2 transition-all">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                             Edit
@@ -495,68 +421,4 @@
             </form>
         </div>
     </div>
-    <!-- Hidden Card Template for Export -->
-    <div x-ref="exportTarget" style="display: none;" class="fixed -top-[9999px] -left-[9999px] opacity-0 pointer-events-none z-0">
-        <div class="w-[400px] h-[250px] p-6 rounded-[2rem] text-white shadow-2xl relative overflow-hidden flex flex-col justify-between" 
-             style="background: linear-gradient(135deg, #0f172a, #0b1329); border: 4px solid #2563eb; font-family: 'Outfit', sans-serif; box-sizing: border-box; display: flex; flex-direction: column; justify-content: space-between;">
-            <!-- Card Pattern/Accents -->
-            <div class="absolute -right-16 -top-16 w-32 h-32 rounded-full blur-xl" style="background: rgba(37, 99, 235, 0.15); position: absolute; right: -64px; top: -64px; width: 128px; height: 128px; border-radius: 9999px; filter: blur(24px);"></div>
-            <div class="absolute -left-16 -bottom-16 w-32 h-32 rounded-full blur-xl" style="background: rgba(239, 68, 68, 0.08); position: absolute; left: -64px; bottom: -64px; width: 128px; height: 128px; border-radius: 9999px; filter: blur(24px);"></div>
-            
-            <!-- Header -->
-            <div class="flex items-center justify-between pb-4" style="border-bottom: 1px solid rgba(255, 255, 255, 0.1); display: flex; align-items: center; justify-content: space-between; padding-bottom: 16px;">
-                <div class="flex items-center gap-3" style="display: flex; align-items: center; gap: 12px;">
-                    <div class="w-8 h-8 rounded-lg flex items-center justify-center text-white font-black italic text-xs shadow-md" style="background: #2563eb; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 8px; font-weight: 900; font-style: italic;">
-                        LA
-                    </div>
-                    <div style="display: flex; flex-direction: column;">
-                        <span class="block text-[10px] font-black uppercase tracking-wider" style="color: #2563eb; display: block; font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.05em;">LabAntik Kasir</span>
-                        <span class="block text-[6px] font-black uppercase tracking-widest" style="color: #6b7280; display: block; font-size: 6px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em;">Digital Credentials</span>
-                    </div>
-                </div>
-                <span class="px-2.5 py-1 rounded-full text-[6px] font-black uppercase tracking-widest" style="background: rgba(16, 185, 129, 0.1); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.2); font-size: 6px; padding: 4px 10px; font-weight: 900; border-radius: 9999px; text-transform: uppercase; letter-spacing: 0.1em;">
-                    ACTIVE MEMBER
-                </span>
-            </div>
-            
-            <!-- Body -->
-            <div class="flex items-center gap-4 my-auto" style="display: flex; align-items: center; gap: 16px; margin-top: auto; margin-bottom: auto;">
-                <!-- Initials Avatar -->
-                <div x-ref="cardInitials" class="w-16 h-16 rounded-2xl flex items-center justify-center text-white font-black text-2xl shadow-lg" style="background: linear-gradient(135deg, #3b82f6, #4f46e5); border: 2px solid rgba(255, 255, 255, 0.2); width: 64px; height: 64px; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 900; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);">
-                    JD
-                </div>
-                <div style="display: flex; flex-direction: column;">
-                    <h2 x-ref="cardName" class="text-lg font-black tracking-tight leading-tight uppercase italic" style="color: #ffffff; font-size: 18px; font-weight: 900; margin: 0; font-style: italic; letter-spacing: -0.025em; text-transform: uppercase;">John Doe</h2>
-                    <p x-ref="cardEmail" class="text-xs font-semibold mt-1" style="color: #94a3b8; font-size: 12px; margin-top: 4px; margin-bottom: 0;">johndoe@example.com</p>
-                    <div class="mt-2" style="margin-top: 8px;">
-                        <span x-ref="cardRole" class="inline-flex px-2 py-0.5 rounded-md text-[8px] font-black uppercase tracking-widest" style="background: rgba(255, 255, 255, 0.1); color: #fbbf24; border: 1px solid rgba(255, 255, 255, 0.05); font-size: 8px; font-weight: 900; padding: 2px 8px; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.1em;">
-                            KASIR
-                        </span>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Footer -->
-            <div class="flex items-center justify-between pt-3" style="border-top: 1px solid rgba(255, 255, 255, 0.1); display: flex; align-items: center; justify-content: space-between; padding-top: 12px;">
-                <div class="flex flex-col" style="display: flex; flex-direction: column;">
-                    <span class="text-[5px] font-bold uppercase tracking-widest" style="color: #6b7280; font-size: 5px; text-transform: uppercase; letter-spacing: 0.1em;">Verification ID</span>
-                    <span class="text-[8px] font-black tracking-wider font-mono" style="color: #2563eb; font-size: 8px; font-family: monospace; font-weight: 900; letter-spacing: 0.05em;">TEFA-SECURE-ID</span>
-                </div>
-                <!-- Mock Barcode -->
-                <div class="flex items-center gap-0.5 opacity-40" style="display: flex; gap: 2px; opacity: 0.4;">
-                    <div style="background: #ffffff; width: 2px; height: 24px;"></div>
-                    <div style="background: #ffffff; width: 4px; height: 24px;"></div>
-                    <div style="background: #ffffff; width: 2px; height: 24px;"></div>
-                    <div style="background: #ffffff; width: 6px; height: 24px;"></div>
-                    <div style="background: #ffffff; width: 2px; height: 24px;"></div>
-                    <div style="background: #ffffff; width: 2px; height: 24px;"></div>
-                    <div style="background: #ffffff; width: 4px; height: 24px;"></div>
-                    <div style="background: #ffffff; width: 2px; height: 24px;"></div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- html2canvas dependency -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </div>
