@@ -21,6 +21,7 @@ class CashierScheduling extends Component
     public $selectedUserId = '';
     public $selectedJurusanId = '';
     public $maxCashiersPerDay = 1; // Default 1 person per day
+    public $maxShiftsPerWeek = 1; // Default max 1 shift per week
 
     // Modal UI states
     public $showCreateModal = false;
@@ -136,6 +137,7 @@ class CashierScheduling extends Component
 
         $this->validate([
             'maxCashiersPerDay' => 'required|integer|min:1|max:10',
+            'maxShiftsPerWeek' => 'required|integer|min:1|max:5',
         ]);
 
         // Get all cashiers in this jurusan
@@ -163,67 +165,108 @@ class CashierScheduling extends Component
             return;
         }
 
-        // Limit: total slots available vs total cashiers max capacity (cashiers count * 2)
+        // Limit: total slots available vs total cashiers max capacity (cashiers count * maxShiftsPerWeek)
         $totalDays = 6;
         $neededSlots = $totalDays * $this->maxCashiersPerDay;
-        $maxCapacity = count($cashierIds) * 2;
+        $maxCapacity = count($cashierIds) * $this->maxShiftsPerWeek;
 
         if ($neededSlots > $maxCapacity) {
-            $this->dispatch('toast', message: 'Jumlah kasir tidak cukup untuk slot harian yang ditentukan (Batas maksimal 2x jaga per kasir).', type: 'danger');
+            $this->dispatch('toast', message: 'Jumlah kasir tidak cukup untuk slot harian dengan batas maksimal shift mingguan saat ini.', type: 'danger');
             return;
         }
 
         $startOfWeek = Carbon::parse($this->currentWeekStart);
         
-        DB::transaction(function () use ($cashierIds, $startOfWeek, $activeJurusanId) {
-            // Delete existing schedules for this week and jurusan to prevent clashes
-            CashierSchedule::where('jurusan_id', $activeJurusanId)
-                ->whereBetween('date', [
-                    $startOfWeek->copy()->toDateString(),
-                    $startOfWeek->copy()->endOfWeek()->toDateString()
-                ])
-                ->delete();
+        try {
+            DB::transaction(function () use ($cashierIds, $startOfWeek, $activeJurusanId, $neededSlots) {
+                // Delete existing schedules for this week and jurusan to prevent clashes
+                CashierSchedule::where('jurusan_id', $activeJurusanId)
+                    ->whereBetween('date', [
+                        $startOfWeek->copy()->toDateString(),
+                        $startOfWeek->copy()->endOfWeek()->toDateString()
+                    ])
+                    ->delete();
 
-            // Distribute cashiers randomly to 6 days (Mon-Sat)
-            $days = [];
-            for ($i = 0; $i < 6; $i++) {
-                $days[] = $startOfWeek->copy()->addDays($i)->toDateString();
-            }
+                // Mon-Sat
+                $days = [];
+                for ($i = 0; $i < 6; $i++) {
+                    $days[] = $startOfWeek->copy()->addDays($i)->toDateString();
+                }
 
-            $userStats = array_fill_keys($cashierIds, 0);
+                // Balance distribution
+                $n = count($cashierIds);
+                $baseShifts = (int) floor($neededSlots / $n);
+                $extraShiftsCount = $neededSlots % $n;
 
-            foreach ($days as $day) {
-                // Keep track of cashiers assigned today to prevent assigning same cashier twice on the same day
-                $assignedToday = [];
+                shuffle($cashierIds);
 
-                for ($slot = 0; $slot < $this->maxCashiersPerDay; $slot++) {
-                    // Find candidates who have been scheduled < 2 times and not scheduled today
-                    $candidates = array_keys(array_filter($userStats, function($val, $uid) use ($assignedToday) {
-                        return $val < 2 && !in_array($uid, $assignedToday);
-                    }, ARRAY_FILTER_USE_BOTH));
+                $pool = [];
+                foreach ($cashierIds as $index => $uid) {
+                    $targetShifts = $baseShifts + ($index < $extraShiftsCount ? 1 : 0);
+                    for ($j = 0; $j < $targetShifts; $j++) {
+                        $pool[] = $uid;
+                    }
+                }
 
-                    if (empty($candidates)) {
-                        break;
+                $assignedSchedules = [];
+                $success = false;
+
+                for ($attempt = 0; $attempt < 150; $attempt++) {
+                    $success = true;
+                    $assignedSchedules = [];
+                    $tempPool = $pool;
+                    shuffle($tempPool);
+
+                    foreach ($days as $day) {
+                        $dayAssigned = [];
+                        for ($slot = 0; $slot < $this->maxCashiersPerDay; $slot++) {
+                            $candidateIndex = null;
+                            foreach ($tempPool as $idx => $uid) {
+                                if (!in_array($uid, $dayAssigned)) {
+                                    $candidateIndex = $idx;
+                                    break;
+                                }
+                            }
+
+                            if ($candidateIndex === null) {
+                                $success = false;
+                                break 2;
+                            }
+
+                            $selectedUser = $tempPool[$candidateIndex];
+                            $dayAssigned[] = $selectedUser;
+                            array_splice($tempPool, $candidateIndex, 1);
+
+                            $assignedSchedules[] = [
+                                'jurusan_id' => $activeJurusanId,
+                                'user_id' => $selectedUser,
+                                'date' => $day,
+                                'notes' => 'Acak Otomatis',
+                                'created_by' => auth()->id(),
+                            ];
+                        }
                     }
 
-                    $randomUser = $candidates[array_rand($candidates)];
-                    
-                    CashierSchedule::create([
-                        'jurusan_id' => $activeJurusanId,
-                        'user_id' => $randomUser,
-                        'date' => $day,
-                        'notes' => 'Acak Otomatis',
-                        'created_by' => auth()->id(),
-                    ]);
-
-                    $userStats[$randomUser]++;
-                    $assignedToday[] = $randomUser;
+                    if ($success) {
+                        break;
+                    }
                 }
-            }
-        });
+
+                if (!$success) {
+                    throw new \Exception('Gagal mendistribusikan jadwal secara merata tanpa bentrok hari. Silakan coba lagi.');
+                }
+
+                foreach ($assignedSchedules as $sched) {
+                    CashierSchedule::create($sched);
+                }
+            });
+        } catch (\Exception $e) {
+            $this->dispatch('toast', message: $e->getMessage(), type: 'danger');
+            return;
+        }
 
         $this->showRandomModal = false;
-        $this->dispatch('toast', message: 'Jadwal minggu ini berhasil dirandomize!');
+        $this->dispatch('toast', message: 'Jadwal minggu ini berhasil dirandomize secara merata!');
     }
 
     public function confirmDelete($id)

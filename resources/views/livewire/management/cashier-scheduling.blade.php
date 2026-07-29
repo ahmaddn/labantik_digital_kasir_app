@@ -190,8 +190,17 @@
                     @error('maxCashiersPerDay') <span class="text-xs text-red-500 font-bold mt-1 block">{{ $message }}</span> @enderror
                 </div>
 
+                <div>
+                    <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">Maksimal Shift per Kasir (Minggu ini)</label>
+                    <select wire:model="maxShiftsPerWeek" class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 border-none rounded-xl focus:ring-2 focus:ring-primary-blue dark:text-white text-sm font-semibold">
+                        <option value="1">1 Kali Jaga / Kasir</option>
+                        <option value="2">Maksimal 2 Kali Jaga / Kasir</option>
+                    </select>
+                    @error('maxShiftsPerWeek') <span class="text-xs text-red-500 font-bold mt-1 block">{{ $message }}</span> @enderror
+                </div>
+
                 <div class="text-[10px] text-gray-400 font-bold leading-relaxed">
-                    * Sistem akan mendistribusikan kasir secara acak ke slot harian dengan batas maksimal 2x jaga per kasir dalam seminggu.
+                    * Sistem akan mendistribusikan jadwal secara <strong>adil & merata</strong> ke setiap kasir sehingga beban kerja seimbang dan tidak memicu kesenjangan.
                 </div>
 
                 <div class="flex gap-3 pt-4">
