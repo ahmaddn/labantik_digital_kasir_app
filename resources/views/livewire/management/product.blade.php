@@ -255,7 +255,6 @@
                                 </div>
                             </div>
                         </div>
-                        </div>
                         @empty
                         <div class="py-32 text-center opacity-20">
                             <p class="text-xs font-black uppercase tracking-widest italic">Belum ada produk</p>
