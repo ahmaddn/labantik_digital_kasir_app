@@ -172,6 +172,7 @@
         -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
         border: 1px solid rgba(255, 255, 255, 0.4) !important;
         box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.06) !important;
+        border-radius: 2rem !important;
     }
     .dark .theme-glassmorphism .bg-white,
     .dark .theme-glassmorphism .bg-gray-800, 
@@ -182,6 +183,7 @@
         -webkit-backdrop-filter: blur(24px) saturate(160%) !important;
         border: 1px solid rgba(255, 255, 255, 0.08) !important;
         box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3) !important;
+        border-radius: 2rem !important;
     }
 
     /* Classic Premium Theme Style */
@@ -191,6 +193,7 @@
         border: 1px solid rgba(0, 0, 0, 0.05) !important;
         box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
         backdrop-filter: none !important;
+        border-radius: 2rem !important;
     }
     .dark .theme-classic-premium .bg-white,
     .dark .theme-classic-premium .bg-gray-800,
@@ -200,6 +203,7 @@
         border: 1px solid rgba(255, 255, 255, 0.05) !important;
         box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.35), 0 10px 10px -5px rgba(0, 0, 0, 0.2) !important;
         backdrop-filter: none !important;
+        border-radius: 2rem !important;
     }
 
     /* Neon Cyberpunk Theme Style */
@@ -208,6 +212,7 @@
         background-color: #030712 !important;
         border: 2px solid var(--color-primary-blue) !important;
         box-shadow: 0 0 15px rgba(37, 99, 235, 0.15) !important;
+        border-radius: 0.125rem !important;
     }
     .dark .theme-neon-cyberpunk .bg-white,
     .dark .theme-neon-cyberpunk .bg-gray-800,
@@ -216,30 +221,33 @@
         background-color: #000000 !important;
         border: 2px solid var(--color-primary-blue) !important;
         box-shadow: 0 0 25px rgba(37, 99, 235, 0.25) !important;
+        border-radius: 0.125rem !important;
     }
 
     /* Restoran & Warung Theme Style (Warm Culinary) */
     html:not(.dark) .theme-restaurant-aesthetic .bg-white,
     html:not(.dark) .theme-restaurant-aesthetic .bg-gray-50 {
         background-color: #fffaf0 !important;
-        border: 1px solid rgba(249, 115, 22, 0.1) !important;
+        border: 1.5px dashed rgba(249, 115, 22, 0.25) !important;
         box-shadow: 0 10px 15px -3px rgba(249, 115, 22, 0.05), 0 4px 6px -2px rgba(249, 115, 22, 0.02) !important;
+        border-radius: 2.5rem !important;
     }
     .dark .theme-restaurant-aesthetic .bg-white,
     .dark .theme-restaurant-aesthetic .bg-gray-800,
     .dark .theme-restaurant-aesthetic .bg-gray-850,
     .dark .theme-restaurant-aesthetic .bg-gray-900 {
         background-color: #1c1917 !important;
-        border: 1px solid rgba(255, 255, 255, 0.03) !important;
+        border: 1.5px dashed rgba(255, 255, 255, 0.08) !important;
         box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.4) !important;
+        border-radius: 2.5rem !important;
     }
 
     /* Retail Minimarket Theme Style (Clean Grid) */
     html:not(.dark) .theme-retail-aesthetic .bg-white,
     html:not(.dark) .theme-retail-aesthetic .bg-gray-50 {
         background-color: #ffffff !important;
-        border: 1px solid #e2e8f0 !important;
-        border-radius: 4px !important;
+        border: 1px solid #cbd5e1 !important;
+        border-radius: 0.5rem !important;
         box-shadow: none !important;
     }
     .dark .theme-retail-aesthetic .bg-white,
@@ -248,7 +256,7 @@
     .dark .theme-retail-aesthetic .bg-gray-900 {
         background-color: #0f172a !important;
         border: 1px solid #334155 !important;
-        border-radius: 4px !important;
+        border-radius: 0.5rem !important;
         box-shadow: none !important;
     }
 
@@ -256,17 +264,42 @@
     html:not(.dark) .theme-bank-aesthetic .bg-white,
     html:not(.dark) .theme-bank-aesthetic .bg-gray-50 {
         background-color: #ffffff !important;
-        border: 1px solid rgba(14, 165, 233, 0.1) !important;
+        border: 1px solid rgba(14, 165, 233, 0.18) !important;
         box-shadow: 0 4px 20px -2px rgba(14, 165, 233, 0.08) !important;
+        border-radius: 1.25rem !important;
     }
     .dark .theme-bank-aesthetic .bg-white,
     .dark .theme-bank-aesthetic .bg-gray-800,
     .dark .theme-bank-aesthetic .bg-gray-850,
     .dark .theme-bank-aesthetic .bg-gray-900 {
         background-color: #0b1329 !important;
-        border: 1px solid rgba(14, 165, 233, 0.08) !important;
+        border: 1px solid rgba(14, 165, 233, 0.12) !important;
         box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.5) !important;
+        border-radius: 1.25rem !important;
     }
+
+    /* Generic Card Rounding Overrides for Page Layouts */
+    .theme-restaurant-aesthetic [class*="rounded-[3rem]"],
+    .theme-restaurant-aesthetic [class*="rounded-3xl"] {
+        border-radius: 2.5rem !important;
+    }
+    .theme-retail-aesthetic [class*="rounded-[3rem]"],
+    .theme-retail-aesthetic [class*="rounded-3xl"] {
+        border-radius: 0.5rem !important;
+    }
+    .theme-bank-aesthetic [class*="rounded-[3rem]"],
+    .theme-bank-aesthetic [class*="rounded-3xl"] {
+        border-radius: 1.25rem !important;
+    }
+    .theme-neon-cyberpunk [class*="rounded-[3rem]"],
+    .theme-neon-cyberpunk [class*="rounded-3xl"] {
+        border-radius: 0.125rem !important;
+    }
+    .theme-glassmorphism [class*="rounded-[3rem]"],
+    .theme-glassmorphism [class*="rounded-3xl"] {
+        border-radius: 2rem !important;
+    }
+}
 }
 
 .privacy-blur {
