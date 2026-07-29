@@ -31,11 +31,11 @@
         </div>
     </div>
 
-    <!-- Main Grid Content -->
-    <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+    <!-- Main Flex Content (Responsive Flex instead of rigid grid column limits) -->
+    <div class="flex flex-col lg:flex-row gap-8 items-start w-full">
         <!-- Navigation Sidebar / Tabs -->
-        <div class="lg:col-span-1 space-y-3">
-            <div class="bg-white dark:bg-gray-900 rounded-3xl p-6 shadow-sm border border-gray-100 dark:border-gray-800 sticky top-6">
+        <div class="w-full lg:w-80 shrink-0 space-y-3">
+            <div class="bg-white dark:bg-gray-900 rounded-3xl p-6 shadow-sm border border-gray-100 dark:border-gray-800 w-full">
                 <p class="text-xs font-black text-gray-400 uppercase tracking-widest mb-4">Navigasi Panduan</p>
                 <div class="space-y-1">
                     <button wire:click="selectTab('sop-transaksi')"
@@ -83,11 +83,11 @@
                     </button>
                 </div>
 
-                <div class="mt-8 pt-6 border-t border-gray-100 dark:border-gray-800 text-center">
+                <div class="mt-8 pt-6 border-t border-gray-100 dark:border-gray-800 text-center w-full">
                     <p class="text-xs text-gray-400 font-semibold mb-2">Butuh Bantuan Lainnya?</p>
                     
-                    <!-- Disabled Hubungi Pengelola Button (Do not remove, just disable) -->
-                    <button disabled class="inline-flex items-center justify-center w-full px-4 py-3 text-xs font-black rounded-xl bg-gray-200 dark:bg-gray-800 text-gray-400 dark:text-gray-500 cursor-not-allowed shadow-none border border-gray-250 dark:border-gray-700 opacity-60">
+                    <!-- Disabled Hubungi Pengelola Button -->
+                    <button disabled class="inline-flex items-center justify-center w-full px-4 py-3 text-xs font-black rounded-xl bg-gray-250 dark:bg-gray-800 text-gray-400 dark:text-gray-500 cursor-not-allowed shadow-none border border-gray-150 dark:border-gray-700 opacity-60">
                         Hubungi Pengelola (Nonaktif)
                     </button>
                     
@@ -100,11 +100,11 @@
             </div>
         </div>
 
-        <!-- Content Area -->
-        <div class="lg:col-span-3 space-y-6">
+        <!-- Content Area (Fills 100% of remaining width on desktop) -->
+        <div class="flex-1 min-w-0 w-full space-y-6">
             @if($activeTab === 'sop-transaksi')
                 <!-- TAB: SOP TRANSAKSI -->
-                <div class="bg-white dark:bg-gray-900 rounded-3xl p-8 shadow-sm border border-gray-100 dark:border-gray-800 space-y-6">
+                <div class="bg-white dark:bg-gray-900 rounded-3xl p-8 shadow-sm border border-gray-100 dark:border-gray-800 space-y-6 w-full">
                     <div class="flex items-center gap-4">
                         <div class="w-12 h-12 rounded-2xl bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center text-primary-blue dark:text-blue-400">
                             <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
@@ -169,88 +169,139 @@
                 </div>
 
             @elseif($activeTab === 'panduan-menu')
-                <!-- TAB: PANDUAN MENU SIDEBAR -->
-                <div class="bg-white dark:bg-gray-900 rounded-3xl p-8 shadow-sm border border-gray-100 dark:border-gray-800 space-y-6">
+                <!-- TAB: PANDUAN MENU SIDEBAR (Stretches fully across desktop screen width) -->
+                <div class="bg-white dark:bg-gray-900 rounded-3xl p-8 shadow-sm border border-gray-100 dark:border-gray-800 space-y-6 w-full">
                     <div class="flex items-center gap-4">
                         <div class="w-12 h-12 rounded-2xl bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center text-primary-blue dark:text-blue-400">
                             <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
                         </div>
                         <div>
                             <h2 class="text-2xl font-black text-gray-950 dark:text-white leading-none">PANDUAN MENU SIDEBAR KASIR</h2>
-                            <p class="text-sm text-gray-400 mt-1 font-medium">Penjelasan alur kerja mendetail untuk setiap menu di kasir</p>
+                            <p class="text-sm text-gray-400 mt-1 font-medium">Langkah demi langkah dalam menggunakan fitur yang tersedia di setiap halaman kasir</p>
                         </div>
                     </div>
 
-                    <div class="border-t border-gray-100 dark:border-gray-800 pt-6 space-y-4">
+                    <div class="border-t border-gray-100 dark:border-gray-800 pt-6 space-y-6">
                         <!-- Menu Item 1 -->
-                        <div class="p-5 bg-gray-50 dark:bg-gray-800/50 rounded-2xl border border-gray-100/50 dark:border-gray-800 space-y-1">
-                            <h4 class="font-black text-xs text-primary-blue uppercase tracking-wider">Dashboard Overview</h4>
-                            <p class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
-                                Halaman pemantauan utama kasir. Berisi ringkasan statistik harian Anda meliputi total omzet tunai, profit bersih, grafik penjualan, status sesi kasir (buka/selesai), absensi shift Anda, serta tugas-tugas operasional yang harus diselesaikan hari ini.
-                            </p>
+                        <div class="p-6 bg-gray-50 dark:bg-gray-800/50 rounded-2xl border border-gray-100/50 dark:border-gray-850 space-y-3">
+                            <h4 class="font-black text-sm text-primary-blue uppercase tracking-wider">1. Dashboard Overview</h4>
+                            <div class="text-xs text-gray-500 dark:text-gray-400 space-y-2 leading-relaxed">
+                                <p><strong>Fungsi:</strong> Halaman ringkasan status shift operasional kasir yang sedang aktif.</p>
+                                <p><strong>Alur Penggunaan:</strong></p>
+                                <ol class="list-decimal list-inside pl-2 space-y-1">
+                                    <li>Membuka dashboard pertama kali untuk melihat rangkuman omzet dan margin hari ini.</li>
+                                    <li>Memeriksa status kehadiran (presensi) Anda yang tercatat di tab kanan atas.</li>
+                                    <li>Menyelesaikan checklist **Tugas Harian** Anda di bagian bawah agar poin dan streak Anda bertambah.</li>
+                                </ol>
+                            </div>
                         </div>
 
                         <!-- Menu Item 2 -->
-                        <div class="p-5 bg-gray-50 dark:bg-gray-800/50 rounded-2xl border border-gray-100/50 dark:border-gray-800 space-y-1">
-                            <h4 class="font-black text-xs text-primary-blue uppercase tracking-wider">Petunjuk & SOP</h4>
-                            <p class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
-                                Halaman panduan edukasi ini. Anda dapat mempelajari SOP operasional kasir, mengaudit selisih stok, melihat aturan sistem poin prestasi, serta memantau papan skor (leaderboard) kasir terbaik.
-                            </p>
+                        <div class="p-6 bg-gray-50 dark:bg-gray-800/50 rounded-2xl border border-gray-100/50 dark:border-gray-850 space-y-3">
+                            <h4 class="font-black text-sm text-primary-blue uppercase tracking-wider">2. Petunjuk & SOP</h4>
+                            <div class="text-xs text-gray-500 dark:text-gray-400 space-y-2 leading-relaxed">
+                                <p><strong>Fungsi:</strong> Pusat edukasi petunjuk pengoperasian kasir dan papan peringkat gamifikasi.</p>
+                                <p><strong>Alur Penggunaan:</strong></p>
+                                <ol class="list-decimal list-inside pl-2 space-y-1">
+                                    <li>Membaca detail SOP transaksi penjualan untuk memandu langkah kasir.</li>
+                                    <li>Memeriksa tab **Papan Skor & Streak** untuk melihat pencapaian poin dan memotivasi persaingan sehat dengan kasir lainnya.</li>
+                                    <li>Mencari jawaban cepat dari modul **FAQ** jika printer bermasalah atau salah input belanja.</li>
+                                </ol>
+                            </div>
                         </div>
 
                         <!-- Menu Item 3 -->
-                        <div class="p-5 bg-gray-50 dark:bg-gray-800/50 rounded-2xl border border-gray-100/50 dark:border-gray-800 space-y-1">
-                            <h4 class="font-black text-xs text-primary-blue uppercase tracking-wider">Buka Mode Kasir (POS)</h4>
-                            <p class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
-                                Fitur inti penjualan. Di sini kasir memilih menu pesanan pelanggan, memindai barcode scanner, mencatat nama pembeli, memilih status lunas/hutang, memotong stok otomatis, mencatat pengeluaran shift mendesak, dan mencetak struk belanja.
-                            </p>
+                        <div class="p-6 bg-gray-50 dark:bg-gray-800/50 rounded-2xl border border-gray-100/50 dark:border-gray-850 space-y-3">
+                            <h4 class="font-black text-sm text-primary-blue uppercase tracking-wider">3. Buka Mode Kasir (POS)</h4>
+                            <div class="text-xs text-gray-500 dark:text-gray-400 space-y-2 leading-relaxed">
+                                <p><strong>Fungsi:</strong> Halaman pelayanan kasir instan untuk transaksi retail maupun makanan/minuman.</p>
+                                <p><strong>Alur Penggunaan:</strong></p>
+                                <ol class="list-decimal list-inside pl-2 space-y-1">
+                                    <li>Klik tombol menu atau cari nama barang di kolom pencarian instan.</li>
+                                    <li>Gunakan tombol **+ / -** untuk menyesuaikan jumlah barang belanjaan di keranjang.</li>
+                                    <li>Ketik nama pelanggan, masukkan jumlah pembayaran tunai dari pelanggan (sistem otomatis menghitung uang kembalian).</li>
+                                    <li>Pilih status pelunasan (Lunas, Hutang/Uang Dipinjam, atau Pending Kembalian).</li>
+                                    <li>Klik tombol **Bayar** atau tekan **Enter** untuk menyelesaikan transaksi dan mencetak struk thermal.</li>
+                                </ol>
+                            </div>
                         </div>
 
                         <!-- Menu Item 4 -->
-                        <div class="p-5 bg-gray-50 dark:bg-gray-800/50 rounded-2xl border border-gray-100/50 dark:border-gray-800 space-y-1">
-                            <h4 class="font-black text-xs text-primary-blue uppercase tracking-wider">Buku Kas Internal</h4>
-                            <p class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
-                                Modul pencatatan kas masuk & keluar secara manual di luar transaksi POS. Khusus sub-unit usaha, halaman ini memiliki tombol "Gabungkan ke Kas Induk" untuk mengirim laba/modal bersih harian Anda ke kas utama jurusan.
-                            </p>
+                        <div class="p-6 bg-gray-50 dark:bg-gray-800/50 rounded-2xl border border-gray-100/50 dark:border-gray-855 space-y-3">
+                            <h4 class="font-black text-sm text-primary-blue uppercase tracking-wider">4. Buku Kas Internal</h4>
+                            <div class="text-xs text-gray-500 dark:text-gray-400 space-y-2 leading-relaxed">
+                                <p><strong>Fungsi:</strong> Melakukan pencatatan arus masuk/keluar kas non-POS secara manual.</p>
+                                <p><strong>Alur Penggunaan:</strong></p>
+                                <ol class="list-decimal list-inside pl-2 space-y-1">
+                                    <li>Pilih jenis kas yang akan digunakan (Modal atau Keuntungan).</li>
+                                    <li>Klik tombol **"Catat Transaksi Kas"** untuk mengisi nominal, tipe (pemasukan/pengeluaran), serta keterangan tertulis.</li>
+                                    <li><strong>Kasir Sub-Unit Usaha (seperti Angkringan):</strong> Memiliki tombol khusus **"Gabungkan ke Kas Induk"** untuk menyetor dan mentransfer sisa keuntungan/dana harian langsung ke kas utama unit induk secara real-time.</li>
+                                    <li><strong>Kasir Unit Utama / Biasa:</strong> Tidak memiliki opsi penggabungan. Kasir unit biasa **hanya dapat memantau dan mencatat data mutasi kas** lokal unitnya sendiri.</li>
+                                </ol>
+                            </div>
                         </div>
 
                         <!-- Menu Item 5 -->
-                        <div class="p-5 bg-gray-50 dark:bg-gray-800/50 rounded-2xl border border-gray-100/50 dark:border-gray-800 space-y-1">
-                            <h4 class="font-black text-xs text-primary-blue uppercase tracking-wider">Rekap Harian & Audit</h4>
-                            <p class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
-                                Halaman rekapitulasi sesi kasir yang telah ditutup. Membantu pengelola mencocokkan perhitungan pendapatan sistem dengan uang fisik laci kasir serta meninjau catatan/laporan serah terima kasir di setiap shift.
-                            </p>
+                        <div class="p-6 bg-gray-50 dark:bg-gray-800/50 rounded-2xl border border-gray-100/50 dark:border-gray-850 space-y-3">
+                            <h4 class="font-black text-sm text-primary-blue uppercase tracking-wider">5. Rekap Harian & Audit</h4>
+                            <div class="text-xs text-gray-500 dark:text-gray-400 space-y-2 leading-relaxed">
+                                <p><strong>Fungsi:</strong> Melakukan audit akhir dan meninjau laporan shift kasir yang telah ditutup.</p>
+                                <p><strong>Alur Penggunaan:</strong></p>
+                                <ol class="list-decimal list-inside pl-2 space-y-1">
+                                    <li>Pilih tanggal audit sesi kasir.</li>
+                                    <li>Bandingkan nominal pendapatan sistem dengan nominal uang fisik laci kasir yang dilaporkan oleh kasir.</li>
+                                    <li>Tinjau laporan catatan tertulis kasir untuk mengonfirmasi jika ada temuan khusus pada shift tersebut.</li>
+                                </ol>
+                            </div>
                         </div>
 
                         <!-- Menu Item 6 -->
-                        <div class="p-5 bg-gray-50 dark:bg-gray-800/50 rounded-2xl border border-gray-100/50 dark:border-gray-800 space-y-1">
-                            <h4 class="font-black text-xs text-primary-blue uppercase tracking-wider">History Transaksi</h4>
-                            <p class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
-                                Log lengkap aktivitas penjualan yang terjadi. Kasir dapat melakukan pencarian transaksi berdasarkan nomor referensi/pembeli, meninjau rincian item produk yang terjual, mencetak ulang struk thermal, atau mengarsipkan transaksi lama.
-                            </p>
+                        <div class="p-6 bg-gray-50 dark:bg-gray-800/50 rounded-2xl border border-gray-100/50 dark:border-gray-850 space-y-3">
+                            <h4 class="font-black text-sm text-primary-blue uppercase tracking-wider">6. History Transaksi</h4>
+                            <div class="text-xs text-gray-500 dark:text-gray-400 space-y-2 leading-relaxed">
+                                <p><strong>Fungsi:</strong> Log lengkap jejak rekam seluruh penjualan kasir.</p>
+                                <p><strong>Alur Penggunaan:</strong></p>
+                                <ol class="list-decimal list-inside pl-2 space-y-1">
+                                    <li>Cari kode referensi atau nama pembeli jika ingin meninjau ulang detail pesanan.</li>
+                                    <li>Klik tombol detail mata untuk melihat item-item produk dan kasir yang menginput transaksi.</li>
+                                    <li>Gunakan tombol printer untuk mencetak ulang struk thermal pembeli yang hilang.</li>
+                                </ol>
+                            </div>
                         </div>
 
                         <!-- Menu Item 7 -->
-                        <div class="p-5 bg-gray-50 dark:bg-gray-800/50 rounded-2xl border border-gray-100/50 dark:border-gray-800 space-y-1">
-                            <h4 class="font-black text-xs text-primary-blue uppercase tracking-wider">Hutang & Kembalian</h4>
-                            <p class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
-                                Modul pencatatan piutang pelanggan (pembelian yang belum dibayar lunas) dan sisa uang kembalian pelanggan yang belum sempat diserahkan agar tercatat rapi di pembukuan toko dan tidak terlupakan.
-                            </p>
+                        <div class="p-6 bg-gray-50 dark:bg-gray-800/50 rounded-2xl border border-gray-100/50 dark:border-gray-850 space-y-3">
+                            <h4 class="font-black text-sm text-primary-blue uppercase tracking-wider">7. Hutang & Kembalian</h4>
+                            <div class="text-xs text-gray-500 dark:text-gray-400 space-y-2 leading-relaxed">
+                                <p><strong>Fungsi:</strong> Mengelola catatan piutang belanja dan sisa uang kembalian pelanggan.</p>
+                                <p><strong>Alur Penggunaan:</strong></p>
+                                <ol class="list-decimal list-inside pl-2 space-y-1">
+                                    <li>Melihat daftar nama pelanggan yang masih memiliki sangkutan hutang atau kembalian sisa belanja.</li>
+                                    <li>Ketika pembeli datang membayar hutang, klik tombol aksi untuk menandai transaksi telah diselesaikan/lunas di kasir.</li>
+                                </ol>
+                            </div>
                         </div>
 
                         <!-- Menu Item 8 -->
-                        <div class="p-5 bg-gray-50 dark:bg-gray-800/50 rounded-2xl border border-gray-100/50 dark:border-gray-800 space-y-1">
-                            <h4 class="font-black text-xs text-primary-blue uppercase tracking-wider">Laporan Stok & Selisih</h4>
-                            <p class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
-                                Modul pencocokan persediaan (stok). Halaman ini digunakan untuk mengaudit stok barang di rak toko secara fisik dibandingkan dengan stok sistem (Opening - Terjual), guna mendeteksi produk yang hilang, rusak, atau berlebih.
-                            </p>
+                        <div class="p-6 bg-gray-50 dark:bg-gray-800/50 rounded-2xl border border-gray-100/50 dark:border-gray-850 space-y-3">
+                            <h4 class="font-black text-sm text-primary-blue uppercase tracking-wider">8. Laporan Stok & Selisih</h4>
+                            <div class="text-xs text-gray-500 dark:text-gray-400 space-y-2 leading-relaxed">
+                                <p><strong>Fungsi:</strong> Melakukan audit fisik persediaan produk harian.</p>
+                                <p><strong>Alur Penggunaan:</strong></p>
+                                <ol class="list-decimal list-inside pl-2 space-y-1">
+                                    <li>Pilih tanggal audit yang ingin diperiksa.</li>
+                                    <li>Lihat kolom 'Ekspektasi Sistem' (`Stok Awal - Terjual`).</li>
+                                    <li>Hitung jumlah fisik barang di rak pajang, lalu klik ikon pensil edit di kanan untuk mengisi jumlah fisik sebenarnya.</li>
+                                    <li>Sistem otomatis menghitung nilai **Selisih** (Lebih atau Hilang/Kurang) secara akurat demi keamanan inventaris.</li>
+                                </ol>
+                            </div>
                         </div>
                     </div>
                 </div>
 
             @elseif($activeTab === 'buku-kas')
                 <!-- TAB: PENGELOLAAN KAS -->
-                <div class="bg-white dark:bg-gray-900 rounded-3xl p-8 shadow-sm border border-gray-100 dark:border-gray-800 space-y-6">
+                <div class="bg-white dark:bg-gray-900 rounded-3xl p-8 shadow-sm border border-gray-100 dark:border-gray-800 space-y-6 w-full">
                     <div class="flex items-center gap-4">
                         <div class="w-12 h-12 rounded-2xl bg-green-50 dark:bg-green-900/30 flex items-center justify-center text-green-600 dark:text-green-400">
                             <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
@@ -283,13 +334,16 @@
                             <p class="text-xs text-gray-600 dark:text-gray-300 mt-2 leading-relaxed font-medium">
                                 Bagi kasir sub-unit (seperti Angkringan Doku), saldo harian yang telah dipotong modal dapat dikirim secara langsung ke unit induk (TEFA Jurusan utama) menggunakan tombol <strong>"Gabungkan ke Kas Induk"</strong> di halaman Buku Kas Internal. Transfer ini akan memotong saldo kas sub-unit dan mencatat penambahan dana masuk di kas induk secara otomatis.
                             </p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-2 leading-relaxed italic font-semibold">
+                                *Catatan: Untuk kasir unit utama/biasa, fitur penggabungan ini tidak aktif, dan Anda hanya memantau serta mencatat data mutasi kas lokal unit Anda sendiri.
+                            </p>
                         </div>
                     </div>
                 </div>
 
             @elseif($activeTab === 'tutup-buku')
                 <!-- TAB: AUDIT & TUTUP BUKU -->
-                <div class="bg-white dark:bg-gray-900 rounded-3xl p-8 shadow-sm border border-gray-100 dark:border-gray-800 space-y-6">
+                <div class="bg-white dark:bg-gray-900 rounded-3xl p-8 shadow-sm border border-gray-100 dark:border-gray-800 space-y-6 w-full">
                     <div class="flex items-center gap-4">
                         <div class="w-12 h-12 rounded-2xl bg-amber-50 dark:bg-amber-900/30 flex items-center justify-center text-amber-600 dark:text-amber-400">
                             <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
@@ -322,7 +376,7 @@
 
             @elseif($activeTab === 'presensi-tugas')
                 <!-- TAB: PRESENSI & TUGAS -->
-                <div class="bg-white dark:bg-gray-900 rounded-3xl p-8 shadow-sm border border-gray-100 dark:border-gray-800 space-y-6">
+                <div class="bg-white dark:bg-gray-900 rounded-3xl p-8 shadow-sm border border-gray-100 dark:border-gray-800 space-y-6 w-full">
                     <div class="flex items-center gap-4">
                         <div class="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
                             <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
@@ -374,7 +428,7 @@
 
             @elseif($activeTab === 'leaderboard')
                 <!-- TAB: LEADERBOARD & PRESTASI -->
-                <div class="bg-white dark:bg-gray-900 rounded-3xl p-8 shadow-sm border border-gray-100 dark:border-gray-800 space-y-6">
+                <div class="bg-white dark:bg-gray-900 rounded-3xl p-8 shadow-sm border border-gray-100 dark:border-gray-800 space-y-6 w-full">
                     <div class="flex items-center gap-4">
                         <div class="w-12 h-12 rounded-2xl bg-amber-50 dark:bg-amber-900/30 flex items-center justify-center text-amber-600 dark:text-amber-400">
                             <svg class="w-6 h-6 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -458,7 +512,7 @@
                                 </div>
                                 <div class="text-center mt-2 min-w-0 w-full">
                                     <p class="text-xs font-black text-gray-800 dark:text-white truncate">{{ $u3->name }}</p>
-                                    <p class="text-[10px] font-bold text-gray-450 mt-0.5">{{ $u3->total_score }} Pts</p>
+                                    <p class="text-[10px] font-bold text-gray-455 mt-0.5">{{ $u3->total_score }} Pts</p>
                                 </div>
                                 <div class="w-full h-12 bg-gray-50 dark:bg-gray-900 rounded-t-xl mt-3 flex items-center justify-center font-black text-gray-455 text-base">
                                     3
@@ -468,7 +522,7 @@
                     </div>
 
                     <!-- Leaderboard Table -->
-                    <div class="overflow-hidden rounded-2xl border border-gray-100 dark:border-gray-800">
+                    <div class="overflow-hidden rounded-2xl border border-gray-100 dark:border-gray-800 w-full">
                         <table class="w-full text-left">
                             <thead class="bg-gray-50 dark:bg-gray-900/50">
                                 <tr>
@@ -513,7 +567,7 @@
                     </div>
 
                     <!-- Points Rule Guide -->
-                    <div class="p-6 bg-gray-50 dark:bg-gray-800/50 rounded-2xl border border-gray-100 dark:border-gray-800">
+                    <div class="p-6 bg-gray-50 dark:bg-gray-800/50 rounded-2xl border border-gray-100 dark:border-gray-800 w-full">
                         <h4 class="text-xs font-black text-gray-800 dark:text-white uppercase tracking-widest mb-3">Aturan Perolehan Skor & Poin</h4>
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div class="p-4 bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 flex items-start gap-3">
@@ -549,7 +603,7 @@
 
             @elseif($activeTab === 'faq')
                 <!-- TAB: FAQ -->
-                <div class="bg-white dark:bg-gray-900 rounded-3xl p-8 shadow-sm border border-gray-100 dark:border-gray-800 space-y-6">
+                <div class="bg-white dark:bg-gray-900 rounded-3xl p-8 shadow-sm border border-gray-100 dark:border-gray-800 space-y-6 w-full">
                     <div class="flex items-center gap-4">
                         <div class="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
                             <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
