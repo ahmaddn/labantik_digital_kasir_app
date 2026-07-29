@@ -91,11 +91,10 @@
         <h2 class="text-xl font-black text-gray-850 dark:text-white uppercase italic tracking-tight mb-6">Kalender Jadwal Kasir</h2>
         
         <!-- FullCalendar Stylesheet and Scripts -->
-        <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/main.min.css" rel="stylesheet" />
         <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
         
         <div wire:ignore>
-            <div id="cashier-calendar" class="dark:text-white"></div>
+            <div id="cashier-calendar" class="dark:text-white w-full"></div>
         </div>
 
         <script>
@@ -115,16 +114,27 @@
                     eventTextColor: '#ffffff'
                 });
                 calendar.render();
+                
+                // Force size update to fix width issues on mobile rendering
+                setTimeout(() => {
+                    calendar.updateSize();
+                }, 150);
 
                 // Re-render calendar when Livewire updates components
                 window.addEventListener('livewire:navigated', () => {
                     calendar.refetchEvents();
+                    setTimeout(() => {
+                        calendar.updateSize();
+                    }, 150);
                 });
 
                 // Update calendar events dynamically without page refresh
                 window.addEventListener('schedule-updated', event => {
                     calendar.removeAllEvents();
                     calendar.addEventSource(event.detail.schedules);
+                    setTimeout(() => {
+                        calendar.updateSize();
+                    }, 100);
                 });
             });
         </script>
