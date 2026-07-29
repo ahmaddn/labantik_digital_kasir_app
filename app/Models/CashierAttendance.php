@@ -22,6 +22,7 @@ class CashierAttendance extends Model
         'closing_report',
         'edit_count',
         'status',
+        'points_at_closing',
     ];
 
     protected $casts = [

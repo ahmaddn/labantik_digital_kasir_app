@@ -332,6 +332,7 @@ class Kasir extends Component
                 'clock_out' => now(),
                 'closing_cash' => (float)$this->closingCashInput,
                 'closing_report' => $this->closingReportText,
+                'points_at_closing' => (int)(auth()->user()->points + auth()->user()->pending_points),
             ]);
         }
 
