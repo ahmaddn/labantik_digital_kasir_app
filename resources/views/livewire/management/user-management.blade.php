@@ -497,38 +497,39 @@
     </div>
     <!-- Hidden Card Template for Export -->
     <div x-ref="exportTarget" style="display: none;" class="fixed -top-[9999px] -left-[9999px] opacity-0 pointer-events-none z-0">
-        <div class="w-[400px] h-[250px] bg-gradient-to-br from-slate-900 to-slate-950 p-6 rounded-[2rem] border-4 border-primary-blue text-white shadow-2xl relative overflow-hidden flex flex-col justify-between" style="font-family: 'Outfit', sans-serif;">
+        <div class="w-[400px] h-[250px] p-6 rounded-[2rem] text-white shadow-2xl relative overflow-hidden flex flex-col justify-between" 
+             style="background: linear-gradient(135deg, #0f172a, #0b1329); border: 4px solid #2563eb; font-family: 'Outfit', sans-serif; box-sizing: border-box; display: flex; flex-direction: column; justify-content: space-between;">
             <!-- Card Pattern/Accents -->
-            <div class="absolute -right-16 -top-16 w-32 h-32 rounded-full bg-primary-blue/20 blur-xl"></div>
-            <div class="absolute -left-16 -bottom-16 w-32 h-32 rounded-full bg-primary-red/10 blur-xl"></div>
+            <div class="absolute -right-16 -top-16 w-32 h-32 rounded-full blur-xl" style="background: rgba(37, 99, 235, 0.15); position: absolute; right: -64px; top: -64px; width: 128px; height: 128px; border-radius: 9999px; filter: blur(24px);"></div>
+            <div class="absolute -left-16 -bottom-16 w-32 h-32 rounded-full blur-xl" style="background: rgba(239, 68, 68, 0.08); position: absolute; left: -64px; bottom: -64px; width: 128px; height: 128px; border-radius: 9999px; filter: blur(24px);"></div>
             
             <!-- Header -->
-            <div class="flex items-center justify-between border-b border-white/10 pb-4">
-                <div class="flex items-center gap-3">
-                    <div class="w-8 h-8 rounded-lg bg-primary-blue flex items-center justify-center text-white font-black italic text-xs shadow-md">
+            <div class="flex items-center justify-between pb-4" style="border-bottom: 1px solid rgba(255, 255, 255, 0.1); display: flex; align-items: center; justify-content: space-between; padding-bottom: 16px;">
+                <div class="flex items-center gap-3" style="display: flex; align-items: center; gap: 12px;">
+                    <div class="w-8 h-8 rounded-lg flex items-center justify-center text-white font-black italic text-xs shadow-md" style="background: #2563eb; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 8px; font-weight: 900; font-style: italic;">
                         LA
                     </div>
-                    <div>
-                        <span class="block text-[10px] font-black uppercase tracking-wider text-primary-blue">LabAntik Kasir</span>
-                        <span class="block text-[6px] font-black uppercase tracking-widest text-gray-500">Digital Credentials</span>
+                    <div style="display: flex; flex-direction: column;">
+                        <span class="block text-[10px] font-black uppercase tracking-wider" style="color: #2563eb; display: block; font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.05em;">LabAntik Kasir</span>
+                        <span class="block text-[6px] font-black uppercase tracking-widest" style="color: #6b7280; display: block; font-size: 6px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em;">Digital Credentials</span>
                     </div>
                 </div>
-                <span class="px-2.5 py-1 rounded-full text-[6px] font-black uppercase tracking-widest bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                <span class="px-2.5 py-1 rounded-full text-[6px] font-black uppercase tracking-widest" style="background: rgba(16, 185, 129, 0.1); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.2); font-size: 6px; padding: 4px 10px; font-weight: 900; border-radius: 9999px; text-transform: uppercase; letter-spacing: 0.1em;">
                     ACTIVE MEMBER
                 </span>
             </div>
             
             <!-- Body -->
-            <div class="flex items-center gap-4 my-auto">
+            <div class="flex items-center gap-4 my-auto" style="display: flex; align-items: center; gap: 16px; margin-top: auto; margin-bottom: auto;">
                 <!-- Initials Avatar -->
-                <div x-ref="cardInitials" class="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-black text-2xl shadow-lg border-2 border-white/20">
+                <div x-ref="cardInitials" class="w-16 h-16 rounded-2xl flex items-center justify-center text-white font-black text-2xl shadow-lg" style="background: linear-gradient(135deg, #3b82f6, #4f46e5); border: 2px solid rgba(255, 255, 255, 0.2); width: 64px; height: 64px; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 900; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);">
                     JD
                 </div>
-                <div>
-                    <h2 x-ref="cardName" class="text-lg font-black tracking-tight leading-tight uppercase italic text-white">John Doe</h2>
-                    <p x-ref="cardEmail" class="text-xs font-semibold text-gray-400 mt-1">johndoe@example.com</p>
-                    <div class="mt-2">
-                        <span x-ref="cardRole" class="inline-flex px-2 py-0.5 rounded-md text-[8px] font-black bg-white/10 text-primary-yellow uppercase tracking-widest border border-white/5">
+                <div style="display: flex; flex-direction: column;">
+                    <h2 x-ref="cardName" class="text-lg font-black tracking-tight leading-tight uppercase italic" style="color: #ffffff; font-size: 18px; font-weight: 900; margin: 0; font-style: italic; letter-spacing: -0.025em; text-transform: uppercase;">John Doe</h2>
+                    <p x-ref="cardEmail" class="text-xs font-semibold mt-1" style="color: #94a3b8; font-size: 12px; margin-top: 4px; margin-bottom: 0;">johndoe@example.com</p>
+                    <div class="mt-2" style="margin-top: 8px;">
+                        <span x-ref="cardRole" class="inline-flex px-2 py-0.5 rounded-md text-[8px] font-black uppercase tracking-widest" style="background: rgba(255, 255, 255, 0.1); color: #fbbf24; border: 1px solid rgba(255, 255, 255, 0.05); font-size: 8px; font-weight: 900; padding: 2px 8px; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.1em;">
                             KASIR
                         </span>
                     </div>
@@ -536,21 +537,21 @@
             </div>
             
             <!-- Footer -->
-            <div class="flex items-center justify-between border-t border-white/10 pt-3">
-                <div class="flex flex-col">
-                    <span class="text-[5px] font-bold text-gray-500 uppercase tracking-widest">Verification ID</span>
-                    <span class="text-[8px] font-black text-primary-blue tracking-wider font-mono">TEFA-SECURE-ID</span>
+            <div class="flex items-center justify-between pt-3" style="border-top: 1px solid rgba(255, 255, 255, 0.1); display: flex; align-items: center; justify-content: space-between; padding-top: 12px;">
+                <div class="flex flex-col" style="display: flex; flex-direction: column;">
+                    <span class="text-[5px] font-bold uppercase tracking-widest" style="color: #6b7280; font-size: 5px; text-transform: uppercase; letter-spacing: 0.1em;">Verification ID</span>
+                    <span class="text-[8px] font-black tracking-wider font-mono" style="color: #2563eb; font-size: 8px; font-family: monospace; font-weight: 900; letter-spacing: 0.05em;">TEFA-SECURE-ID</span>
                 </div>
                 <!-- Mock Barcode -->
-                <div class="flex items-center gap-0.5 opacity-40">
-                    <div class="w-0.5 h-6 bg-white"></div>
-                    <div class="w-1 h-6 bg-white"></div>
-                    <div class="w-0.5 h-6 bg-white"></div>
-                    <div class="w-1.5 h-6 bg-white"></div>
-                    <div class="w-0.5 h-6 bg-white"></div>
-                    <div class="w-0.5 h-6 bg-white"></div>
-                    <div class="w-1 h-6 bg-white"></div>
-                    <div class="w-0.5 h-6 bg-white"></div>
+                <div class="flex items-center gap-0.5 opacity-40" style="display: flex; gap: 2px; opacity: 0.4;">
+                    <div style="background: #ffffff; width: 2px; height: 24px;"></div>
+                    <div style="background: #ffffff; width: 4px; height: 24px;"></div>
+                    <div style="background: #ffffff; width: 2px; height: 24px;"></div>
+                    <div style="background: #ffffff; width: 6px; height: 24px;"></div>
+                    <div style="background: #ffffff; width: 2px; height: 24px;"></div>
+                    <div style="background: #ffffff; width: 2px; height: 24px;"></div>
+                    <div style="background: #ffffff; width: 4px; height: 24px;"></div>
+                    <div style="background: #ffffff; width: 2px; height: 24px;"></div>
                 </div>
             </div>
         </div>
