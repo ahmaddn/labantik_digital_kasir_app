@@ -31,6 +31,14 @@ class WeeklyProfit extends Component
 
     public function mount()
     {
+        $activeRole = session('active_role_name');
+        if ($activeRole === 'kasir') {
+            $isScheduled = \App\Models\CashierSchedule::where('user_id', auth()->id())->exists();
+            if ($isScheduled) {
+                abort(403, 'Akses ditolak. Kasir terjadwal tidak diperkenankan mengakses menu Bagi Hasil Mingguan.');
+            }
+        }
+
         $this->startDate = now()->startOfWeek(Carbon::MONDAY)->toDateString();
         $this->endDate = now()->startOfWeek(Carbon::MONDAY)->addDays(4)->toDateString();
         $this->currentYear = now()->year;

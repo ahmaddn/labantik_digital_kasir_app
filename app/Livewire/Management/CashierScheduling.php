@@ -28,6 +28,7 @@ class CashierScheduling extends Component
     // Modal UI states
     public $showCreateModal = false;
     public $showDeleteModal = false;
+    public $showDeleteAllModal = false;
     public $showRandomModal = false; // Modal to input randomizer settings
     public $deletingScheduleId = null;
 
@@ -318,6 +319,31 @@ class CashierScheduling extends Component
             $this->dispatch('toast', message: 'Jadwal berhasil dihapus.');
             $this->dispatch('schedule-updated', schedules: $this->getSchedulesForCalendar());
         }
+    }
+
+    public function confirmDeleteAll()
+    {
+        $this->showDeleteAllModal = true;
+    }
+
+    public function deleteAllSchedules()
+    {
+        $activeJurusanId = session('active_jurusan_id') ?: $this->selectedJurusanId;
+        if (!$activeJurusanId) {
+            $this->dispatch('toast', message: 'Jurusan tidak terdeteksi.', type: 'danger');
+            return;
+        }
+
+        $startOfWeek = Carbon::parse($this->currentWeekStart);
+        $endOfWeek = $startOfWeek->copy()->endOfWeek();
+
+        CashierSchedule::where('jurusan_id', $activeJurusanId)
+            ->whereBetween('date', [$startOfWeek->toDateString(), $endOfWeek->toDateString()])
+            ->delete();
+
+        $this->showDeleteAllModal = false;
+        $this->dispatch('toast', message: 'Semua jadwal minggu ini berhasil dihapus.');
+        $this->dispatch('schedule-updated', schedules: $this->getSchedulesForCalendar());
     }
 
     public function getSchedulesForCalendar()

@@ -18,6 +18,11 @@
             @endif
 
             @if(in_array(session('active_role_name'), ['superadmin', 'pengelola_jurusan']))
+                <button wire:click="confirmDeleteAll" class="flex-1 sm:flex-initial inline-flex items-center justify-center px-4 py-3 bg-rose-500 hover:bg-rose-600 text-white rounded-xl font-black text-xs uppercase italic tracking-wider transition-all duration-300 shadow-xl shadow-rose-900/10 active:scale-95">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                    Kosongkan Jadwal
+                </button>
+
                 <button wire:click="openRandomModal" class="flex-1 sm:flex-initial inline-flex items-center justify-center px-4 py-3 bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-black text-xs uppercase italic tracking-wider transition-all duration-300">
                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 7.89H18v3z"></path></svg>
                     Randomize
@@ -178,6 +183,21 @@
                 </button>
                 <button wire:click="deleteSchedule" class="flex-1 py-3 bg-red-500 hover:bg-red-600 text-white rounded-xl font-black text-xs uppercase tracking-wider transition-all">
                     Ya, Hapus
+                </button>
+            </div>
+        </div>
+    <!-- Delete All Confirmation Modal -->
+    <div x-data="{ show: @entangle('showDeleteAllModal') }" x-show="show" class="fixed inset-0 z-50 flex items-center justify-center p-4" x-cloak>
+        <div x-show="show" x-transition.opacity class="fixed inset-0 bg-black/60 backdrop-blur-xs" wire:click="$set('showDeleteAllModal', false)"></div>
+        <div x-show="show" x-transition.scale class="relative w-full max-w-sm bg-white dark:bg-gray-800 rounded-[2rem] shadow-2xl p-8 border border-gray-100 dark:border-gray-700 z-10 text-center">
+            <h2 class="text-xl font-black text-gray-850 dark:text-white uppercase italic mb-4">Kosongkan Jadwal?</h2>
+            <p class="text-gray-400 text-sm mb-6">Apakah Anda yakin ingin menghapus seluruh jadwal tugas kasir pada minggu ini ({{ $weekRange }})?</p>
+            <div class="flex gap-3">
+                <button wire:click="$set('showDeleteAllModal', false)" class="flex-1 py-3 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:text-white rounded-xl font-black text-xs uppercase tracking-wider transition-all">
+                    Batal
+                </button>
+                <button wire:click="deleteAllSchedules" class="flex-1 py-3 bg-red-500 hover:bg-red-600 text-white rounded-xl font-black text-xs uppercase tracking-wider transition-all">
+                    Ya, Hapus Semua
                 </button>
             </div>
         </div>

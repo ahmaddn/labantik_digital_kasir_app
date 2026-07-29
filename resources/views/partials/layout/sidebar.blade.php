@@ -273,11 +273,25 @@
                     Bagi Hasil Supplier
                 </a>
 
-                <a href="{{ route('bagi-hasil') }}"
-                    class="flex items-center px-6 py-4 text-sm font-black rounded-2xl transition-all {{ request()->routeIs('bagi-hasil') ? 'bg-primary-blue text-white shadow-xl shadow-blue-900/20' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
-                    <svg class="w-5 h-5 mr-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M19 8v2" /><path d="M20 18v2" /><rect width="20" height="14" x="2" y="6" rx="2" /></svg>
-                    Bagi Hasil Mingguan
-                </a>
+                @php
+                    $isScheduledCashier = false;
+                    if (session('active_role_name') === 'kasir') {
+                        $isScheduledCashier = \App\Models\CashierSchedule::where('user_id', auth()->id())->exists();
+                    }
+                @endphp
+
+                @if($isScheduledCashier)
+                    <div class="flex items-center px-6 py-4 text-sm font-black text-gray-400 rounded-2xl cursor-not-allowed opacity-50 select-none bg-gray-50/50 dark:bg-gray-800/30">
+                        <svg class="w-5 h-5 mr-4 text-gray-400" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M19 8v2" /><path d="M20 18v2" /><rect width="20" height="14" x="2" y="6" rx="2" /></svg>
+                        Bagi Hasil Mingguan <span class="ml-auto text-[9px] bg-red-100 dark:bg-red-950 text-red-600 dark:text-red-400 px-2 py-1 rounded-md font-bold uppercase tracking-wider">Terkunci</span>
+                    </div>
+                @else
+                    <a href="{{ route('bagi-hasil') }}"
+                        class="flex items-center px-6 py-4 text-sm font-black rounded-2xl transition-all {{ request()->routeIs('bagi-hasil') ? 'bg-primary-blue text-white shadow-xl shadow-blue-900/20' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
+                        <svg class="w-5 h-5 mr-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M19 8v2" /><path d="M20 18v2" /><rect width="20" height="14" x="2" y="6" rx="2" /></svg>
+                        Bagi Hasil Mingguan
+                    </a>
+                @endif
             @endif
 
             <div class="h-10"></div>

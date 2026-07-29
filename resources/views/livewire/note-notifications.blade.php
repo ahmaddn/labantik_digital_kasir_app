@@ -13,7 +13,7 @@
 
     <!-- Dropdown Notification Menu -->
     @if($isOpen)
-        <div class="absolute right-0 mt-3 w-80 sm:w-96 bg-white dark:bg-gray-800 rounded-3xl shadow-2xl border border-gray-100 dark:border-gray-700 z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+        <div class="fixed sm:absolute top-20 sm:top-auto left-4 sm:left-auto right-4 sm:right-0 mt-3 w-auto sm:w-96 bg-white dark:bg-gray-800 rounded-3xl shadow-2xl border border-gray-100 dark:border-gray-700 z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
             <div class="p-4 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
                 <div class="flex items-center gap-2">
                     <h4 class="text-xs font-black uppercase tracking-wider text-gray-800 dark:text-white">Notifikasi Aktivitas</h4>
