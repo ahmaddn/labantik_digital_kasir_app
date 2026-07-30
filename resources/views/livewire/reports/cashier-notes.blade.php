@@ -109,7 +109,7 @@
                     </div>
 
                     <!-- Content (Raw HTML output for Rich Text) -->
-                    <div class="prose dark:prose-invert max-w-none text-sm font-medium leading-relaxed opacity-95 mb-6">
+                    <div class="prose dark:prose-invert max-w-none text-sm font-medium leading-relaxed opacity-95 mb-6 whitespace-pre-wrap">
                         {!! $note->content !!}
                     </div>
                 </div>
@@ -205,33 +205,94 @@
                         @error('date') <span class="text-xs text-red-500 font-bold mt-1 ml-1 block">{{ $message }}</span> @enderror
                     </div>
                     <!-- Content with Quill Rich Text Editor -->
-                    <div wire:ignore>
+                    <div wire:ignore 
+                         x-data="{ 
+                             content: @entangle('content').live,
+                             init() {
+                                 const initQuill = () => {
+                                     if (typeof Quill === 'undefined') {
+                                         setTimeout(initQuill, 50);
+                                         return;
+                                     }
+                                     const quill = new Quill(this.$refs.editor, {
+                                         theme: 'snow',
+                                         placeholder: 'Tulis rincian pesan, instruksi pengelola, atau pengingat untuk sesama kasir...',
+                                         modules: {
+                                             toolbar: [
+                                                 ['bold', 'italic', 'underline'],
+                                                 [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                                                 ['clean']
+                                             ]
+                                         }
+                                     });
+
+                                     // Set initial value
+                                     quill.root.innerHTML = this.content || '';
+
+                                     // Listen for text changes inside Quill
+                                     quill.on('text-change', () => {
+                                         this.content = quill.root.innerHTML;
+                                     });
+
+                                     // Watch Alpine state changes to sync Quill
+                                     this.$watch('content', value => {
+                                         if (quill.root.innerHTML !== value) {
+                                             quill.root.innerHTML = value || '';
+                                         }
+                                     });
+                                     
+                                     // Listen to specific edit event to reset Quill content
+                                     window.addEventListener('quill-update', event => {
+                                         quill.root.innerHTML = event.detail.content || '';
+                                     });
+                                 };
+                                 initQuill();
+                             }
+                         }" 
+                         class="relative">
                         <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 ml-1">Isi Catatan</label>
-                        <!-- Include Quill stylesheet -->
-                        <link href="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.snow.css" rel="stylesheet">
-                        <div class="bg-gray-50 dark:bg-gray-900 rounded-2xl overflow-hidden border border-gray-200 dark:border-gray-700">
-                            <div id="quill-editor" class="h-44 text-sm font-bold text-gray-800 dark:text-white dark:bg-gray-900" style="border: none;"></div>
+                        <style>
+                            /* Custom styles to match theme inputs */
+                            .ql-toolbar.ql-snow {
+                                border-top-left-radius: 1rem !important;
+                                border-top-right-radius: 1rem !important;
+                                border: 2px solid #e2e8f0 !important;
+                                border-bottom: none !important;
+                                background-color: #f8fafc;
+                                padding: 8px 12px !important;
+                            }
+                            .ql-container.ql-snow {
+                                border-bottom-left-radius: 1rem !important;
+                                border-bottom-right-radius: 1rem !important;
+                                border: 2px solid #e2e8f0 !important;
+                                border-top: none !important;
+                                font-family: inherit !important;
+                            }
+                            .dark .ql-toolbar.ql-snow {
+                                background-color: #0f172a !important;
+                                border-color: #334155 !important;
+                            }
+                            .dark .ql-container.ql-snow {
+                                background-color: #0f172a !important;
+                                border-color: #334155 !important;
+                            }
+                            .dark .ql-snow .ql-stroke {
+                                stroke: #cbd5e1 !important;
+                            }
+                            .dark .ql-snow .ql-fill {
+                                fill: #cbd5e1 !important;
+                            }
+                            .dark .ql-snow .ql-picker {
+                                color: #cbd5e1 !important;
+                            }
+                            .dark .ql-snow .ql-picker-options {
+                                background-color: #0f172a !important;
+                                border-color: #334155 !important;
+                            }
+                        </style>
+                        <div class="rounded-2xl overflow-hidden">
+                            <div x-ref="editor" class="h-44 text-sm font-bold text-gray-800 dark:text-white" style="border: none;"></div>
                         </div>
-                        <!-- Include the Quill library -->
-                        <script src="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.js"></script>
-                        <script>
-                            document.addEventListener('DOMContentLoaded', function () {
-                                const quill = new Quill('#quill-editor', {
-                                    theme: 'snow',
-                                    placeholder: 'Tulis rincian pesan, instruksi pengelola, atau pengingat untuk sesama kasir...'
-                                });
-
-                                // Sync Quill content with Livewire content model
-                                quill.on('text-change', function () {
-                                    @this.set('content', quill.root.innerHTML);
-                                });
-
-                                // Listen to Livewire event to update editor value when editing
-                                window.addEventListener('quill-update', event => {
-                                    quill.root.innerHTML = event.detail.content || '';
-                                });
-                            });
-                        </script>
                     </div>
                     @error('content') <span class="text-xs text-red-500 font-bold mt-1 ml-1 block">{{ $message }}</span> @enderror
 

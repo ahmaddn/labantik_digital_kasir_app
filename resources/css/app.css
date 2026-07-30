@@ -165,8 +165,8 @@
 
     /* Theme Styles Support */
     /* Glassmorphism Theme Style */
-    html:not(.dark) .theme-glassmorphism .bg-white:not(img), 
-    html:not(.dark) .theme-glassmorphism .bg-gray-50 {
+    html:not(.dark) .theme-glassmorphism .bg-white:not(img):not(.theme-no-card), 
+    html:not(.dark) .theme-glassmorphism .bg-gray-50:not(.theme-no-card) {
         background-color: rgba(255, 255, 255, 0.45) !important;
         backdrop-filter: blur(24px) saturate(180%) !important;
         -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
@@ -174,10 +174,10 @@
         box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.06) !important;
         border-radius: 2rem !important;
     }
-    .dark .theme-glassmorphism .bg-white:not(img),
-    .dark .theme-glassmorphism .bg-gray-800, 
-    .dark .theme-glassmorphism .bg-gray-850, 
-    .dark .theme-glassmorphism .bg-gray-900 {
+    .dark .theme-glassmorphism .bg-white:not(img):not(.theme-no-card),
+    .dark .theme-glassmorphism .bg-gray-800:not(.theme-no-card), 
+    .dark .theme-glassmorphism .bg-gray-850:not(.theme-no-card), 
+    .dark .theme-glassmorphism .bg-gray-900:not(.theme-no-card) {
         background-color: rgba(15, 23, 42, 0.45) !important;
         backdrop-filter: blur(24px) saturate(160%) !important;
         -webkit-backdrop-filter: blur(24px) saturate(160%) !important;
@@ -187,18 +187,18 @@
     }
 
     /* Classic Premium Theme Style */
-    html:not(.dark) .theme-classic-premium .bg-white:not(img),
-    html:not(.dark) .theme-classic-premium .bg-gray-50 {
+    html:not(.dark) .theme-classic-premium .bg-white:not(img):not(.theme-no-card),
+    html:not(.dark) .theme-classic-premium .bg-gray-50:not(.theme-no-card) {
         background-color: #ffffff !important;
         border: 1px solid rgba(0, 0, 0, 0.05) !important;
         box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
         backdrop-filter: none !important;
         border-radius: 2rem !important;
     }
-    .dark .theme-classic-premium .bg-white:not(img),
-    .dark .theme-classic-premium .bg-gray-800,
-    .dark .theme-classic-premium .bg-gray-850,
-    .dark .theme-classic-premium .bg-gray-900 {
+    .dark .theme-classic-premium .bg-white:not(img):not(.theme-no-card),
+    .dark .theme-classic-premium .bg-gray-800:not(.theme-no-card),
+    .dark .theme-classic-premium .bg-gray-850:not(.theme-no-card),
+    .dark .theme-classic-premium .bg-gray-900:not(.theme-no-card) {
         background-color: #1e293b !important;
         border: 1px solid rgba(255, 255, 255, 0.05) !important;
         box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.35), 0 10px 10px -5px rgba(0, 0, 0, 0.2) !important;
@@ -207,17 +207,17 @@
     }
 
     /* Neon Cyberpunk Theme Style */
-    html:not(.dark) .theme-neon-cyberpunk .bg-white:not(img),
-    html:not(.dark) .theme-neon-cyberpunk .bg-gray-50 {
+    html:not(.dark) .theme-neon-cyberpunk .bg-white:not(img):not(.theme-no-card),
+    html:not(.dark) .theme-neon-cyberpunk .bg-gray-50:not(.theme-no-card) {
         background-color: #030712 !important;
         border: 2px solid var(--color-primary-blue) !important;
         box-shadow: 0 0 15px rgba(37, 99, 235, 0.15) !important;
         border-radius: 0.125rem !important;
     }
-    .dark .theme-neon-cyberpunk .bg-white:not(img),
-    .dark .theme-neon-cyberpunk .bg-gray-800,
-    .dark .theme-neon-cyberpunk .bg-gray-850,
-    .dark .theme-neon-cyberpunk .bg-gray-900 {
+    .dark .theme-neon-cyberpunk .bg-white:not(img):not(.theme-no-card),
+    .dark .theme-neon-cyberpunk .bg-gray-800:not(.theme-no-card),
+    .dark .theme-neon-cyberpunk .bg-gray-850:not(.theme-no-card),
+    .dark .theme-neon-cyberpunk .bg-gray-900:not(.theme-no-card) {
         background-color: #000000 !important;
         border: 2px solid var(--color-primary-blue) !important;
         box-shadow: 0 0 25px rgba(37, 99, 235, 0.25) !important;
@@ -225,17 +225,17 @@
     }
 
     /* Restoran & Warung Theme Style (Warm Culinary) */
-    html:not(.dark) .theme-restaurant-aesthetic .bg-white:not(img),
-    html:not(.dark) .theme-restaurant-aesthetic .bg-gray-50 {
+    html:not(.dark) .theme-restaurant-aesthetic .bg-white:not(img):not(.theme-no-card),
+    html:not(.dark) .theme-restaurant-aesthetic .bg-gray-50:not(.theme-no-card) {
         background-color: #fffaf0 !important;
         border: 1.5px dashed rgba(249, 115, 22, 0.25) !important;
         box-shadow: 0 10px 15px -3px rgba(249, 115, 22, 0.05), 0 4px 6px -2px rgba(249, 115, 22, 0.02) !important;
         border-radius: 2.5rem !important;
     }
-    .dark .theme-restaurant-aesthetic .bg-white:not(img),
-    .dark .theme-restaurant-aesthetic .bg-gray-800,
-    .dark .theme-restaurant-aesthetic .bg-gray-850,
-    .dark .theme-restaurant-aesthetic .bg-gray-900 {
+    .dark .theme-restaurant-aesthetic .bg-white:not(img):not(.theme-no-card),
+    .dark .theme-restaurant-aesthetic .bg-gray-800:not(.theme-no-card),
+    .dark .theme-restaurant-aesthetic .bg-gray-850:not(.theme-no-card),
+    .dark .theme-restaurant-aesthetic .bg-gray-900:not(.theme-no-card) {
         background-color: #1c1917 !important;
         border: 1.5px dashed rgba(255, 255, 255, 0.08) !important;
         box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.4) !important;
@@ -243,17 +243,17 @@
     }
 
     /* Retail Minimarket Theme Style (Clean Grid) */
-    html:not(.dark) .theme-retail-aesthetic .bg-white:not(img),
-    html:not(.dark) .theme-retail-aesthetic .bg-gray-50 {
+    html:not(.dark) .theme-retail-aesthetic .bg-white:not(img):not(.theme-no-card),
+    html:not(.dark) .theme-retail-aesthetic .bg-gray-50:not(.theme-no-card) {
         background-color: #ffffff !important;
         border: 1px solid #cbd5e1 !important;
         border-radius: 0.5rem !important;
         box-shadow: none !important;
     }
-    .dark .theme-retail-aesthetic .bg-white:not(img),
-    .dark .theme-retail-aesthetic .bg-gray-800,
-    .dark .theme-retail-aesthetic .bg-gray-850,
-    .dark .theme-retail-aesthetic .bg-gray-900 {
+    .dark .theme-retail-aesthetic .bg-white:not(img):not(.theme-no-card),
+    .dark .theme-retail-aesthetic .bg-gray-800:not(.theme-no-card),
+    .dark .theme-retail-aesthetic .bg-gray-850:not(.theme-no-card),
+    .dark .theme-retail-aesthetic .bg-gray-900:not(.theme-no-card) {
         background-color: #0f172a !important;
         border: 1px solid #334155 !important;
         border-radius: 0.5rem !important;
@@ -261,17 +261,17 @@
     }
 
     /* Bank Mini Theme Style (Corporate FinTech) */
-    html:not(.dark) .theme-bank-aesthetic .bg-white:not(img),
-    html:not(.dark) .theme-bank-aesthetic .bg-gray-50 {
+    html:not(.dark) .theme-bank-aesthetic .bg-white:not(img):not(.theme-no-card),
+    html:not(.dark) .theme-bank-aesthetic .bg-gray-50:not(.theme-no-card) {
         background-color: #ffffff !important;
         border: 1px solid rgba(14, 165, 233, 0.18) !important;
         box-shadow: 0 4px 20px -2px rgba(14, 165, 233, 0.08) !important;
         border-radius: 1.25rem !important;
     }
-    .dark .theme-bank-aesthetic .bg-white:not(img),
-    .dark .theme-bank-aesthetic .bg-gray-800,
-    .dark .theme-bank-aesthetic .bg-gray-850,
-    .dark .theme-bank-aesthetic .bg-gray-900 {
+    .dark .theme-bank-aesthetic .bg-white:not(img):not(.theme-no-card),
+    .dark .theme-bank-aesthetic .bg-gray-800:not(.theme-no-card),
+    .dark .theme-bank-aesthetic .bg-gray-850:not(.theme-no-card),
+    .dark .theme-bank-aesthetic .bg-gray-900:not(.theme-no-card) {
         background-color: #0b1329 !important;
         border: 1px solid rgba(14, 165, 233, 0.12) !important;
         box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.5) !important;
@@ -495,6 +495,42 @@ html:not(.dark) ::-webkit-scrollbar-thumb:hover {
    Theme Aesthetics Overrides for Cards, Buttons, and Inputs (POS & Cashier)
    ========================================================================== */
 
+/* --- Global Theme Exclusions (Flat layouts, full-width headers/navs) --- */
+html .theme-no-card,
+body .theme-no-card,
+[class*="theme-"] .theme-no-card,
+[class*="theme-"] .theme-no-card.bg-white,
+[class*="theme-"] .theme-no-card.bg-gray-50,
+[class*="theme-"] .theme-no-card.bg-gray-800,
+[class*="theme-"] .theme-no-card.bg-gray-850,
+[class*="theme-"] .theme-no-card.bg-gray-900,
+.theme-classic-premium .theme-no-card,
+.theme-glassmorphism .theme-no-card,
+.theme-restaurant-aesthetic .theme-no-card,
+.theme-retail-aesthetic .theme-no-card,
+.theme-bank-aesthetic .theme-no-card,
+.theme-neon-cyberpunk .theme-no-card {
+    border-radius: 0px !important;
+    box-shadow: none !important;
+    border-left: none !important;
+    border-right: none !important;
+    border-top: none !important;
+}
+html:not(.dark) [class*="theme-"] .theme-no-card,
+html:not(.dark) [class*="theme-"] .theme-no-card.bg-white,
+html:not(.dark) [class*="theme-"] .theme-no-card.bg-gray-50 {
+    background-color: #ffffff !important;
+    border-bottom: 1px solid #e2e8f0 !important;
+}
+.dark [class*="theme-"] .theme-no-card,
+.dark [class*="theme-"] .theme-no-card.bg-white,
+.dark [class*="theme-"] .theme-no-card.bg-gray-800,
+.dark [class*="theme-"] .theme-no-card.bg-gray-850,
+.dark [class*="theme-"] .theme-no-card.bg-gray-900 {
+    background-color: #020617 !important;
+    border-bottom: 1px solid #1e293b !important;
+}
+
 /* --- 1. Classic Premium --- */
 .theme-classic-premium .nb-card,
 .theme-classic-premium .nb-card-flat {
@@ -503,10 +539,19 @@ html:not(.dark) ::-webkit-scrollbar-thumb:hover {
     box-shadow: 0 15px 30px -10px rgba(0, 0, 0, 0.05) !important;
 }
 .theme-classic-premium .nb-btn {
-    border-radius: 1.25rem !important;
-    border: 1px solid rgba(0, 0, 0, 0.08) !important;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04) !important;
+    border-radius: 9999px !important;
+    border: 1px solid rgba(0, 0, 0, 0.06) !important;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04) !important;
     text-shadow: none !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.03em !important;
+    font-size: 11px !important;
+    padding: 0.5rem 1.25rem !important;
+    transition: all 0.2s ease-in-out !important;
+}
+.theme-classic-premium .nb-btn:hover {
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
 }
 .theme-classic-premium .nb-input {
     border-radius: 1.25rem !important;
@@ -520,8 +565,14 @@ html:not(.dark) ::-webkit-scrollbar-thumb:hover {
     box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.5) !important;
 }
 .dark .theme-classic-premium .nb-btn {
-    border: 1px solid rgba(255, 255, 255, 0.12) !important;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2) !important;
+    color: rgba(255, 255, 255, 0.8) !important;
+}
+.dark .theme-classic-premium .nb-btn:hover {
+    border-color: rgba(255, 255, 255, 0.2) !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) !important;
 }
 .dark .theme-classic-premium .nb-input {
     border: 1px solid rgba(255, 255, 255, 0.15) !important;

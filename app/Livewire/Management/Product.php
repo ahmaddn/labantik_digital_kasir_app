@@ -155,11 +155,15 @@ class Product extends Component
         }
 
         $count = count($this->selectedProducts);
-        $service->bulkDelete($this->selectedProducts);
-
-        $this->dispatch('toast', message: $count.' produk berhasil dihapus.');
-        $this->resetSelection();
-        $this->showBulkDeleteModal = false;
+        try {
+            $service->bulkDelete($this->selectedProducts);
+            $this->dispatch('toast', message: $count.' produk berhasil dihapus.');
+            $this->resetSelection();
+            $this->showBulkDeleteModal = false;
+        } catch (\Exception $e) {
+            $this->dispatch('toast', message: $e->getMessage(), type: 'error');
+            $this->showBulkDeleteModal = false;
+        }
     }
 
     public function bulkToggleStatus(ProductService $service): void
@@ -319,11 +323,15 @@ class Product extends Component
         $this->showDeleteModal = true;
     }
 
-    public function deleteProduct(): void
+    public function deleteProduct(ProductService $service): void
     {
         if ($this->deleteId) {
-            ProductModel::destroy($this->deleteId);
-            $this->dispatch('toast', message: 'Produk berhasil dihapus.');
+            try {
+                $service->deleteProduct($this->deleteId);
+                $this->dispatch('toast', message: 'Produk berhasil dihapus.');
+            } catch (\Exception $e) {
+                $this->dispatch('toast', message: $e->getMessage(), type: 'error');
+            }
         }
         $this->showDeleteModal = false;
         $this->deleteId = null;

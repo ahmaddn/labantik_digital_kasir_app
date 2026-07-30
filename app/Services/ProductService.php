@@ -9,11 +9,41 @@ use Illuminate\Support\Facades\DB;
 class ProductService
 {
     /**
+     * Delete a single product.
+     * @throws \Exception
+     */
+    public function deleteProduct(string $productId): void
+    {
+        $product = Product::findOrFail($productId);
+        
+        if ($product->transactions()->exists()) {
+            throw new \Exception("Produk '{$product->name}' tidak bisa dihapus karena memiliki riwayat transaksi. Silakan nonaktifkan status produk saja.");
+        }
+        
+        DB::transaction(function () use ($product) {
+            $product->stockEntries()->delete();
+            $product->delete();
+        });
+    }
+
+    /**
      * Delete multiple products.
+     * @throws \Exception
      */
     public function bulkDelete(array $productIds): void
     {
-        Product::whereIn('id', $productIds)->delete();
+        $products = Product::whereIn('id', $productIds)->get();
+        
+        foreach ($products as $product) {
+            if ($product->transactions()->exists()) {
+                throw new \Exception("Produk '{$product->name}' tidak bisa dihapus karena memiliki riwayat transaksi. Silakan nonaktifkan status produk saja.");
+            }
+        }
+        
+        DB::transaction(function () use ($productIds) {
+            StockEntry::whereIn('product_id', $productIds)->delete();
+            Product::whereIn('id', $productIds)->delete();
+        });
     }
 
     /**

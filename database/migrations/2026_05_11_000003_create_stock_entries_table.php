@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('stock_entries', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->foreignUuid('product_id')->constrained('products');
+            $table->foreignUuid('product_id')->constrained('products')->cascadeOnDelete();
             $table->date('date');
             $table->integer('opening_stock')->default(0); // stok awal (input manual)
             $table->integer('closing_stock')->default(0); // stok sisa (otomatis = opening - terjual)

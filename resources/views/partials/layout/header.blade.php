@@ -90,6 +90,31 @@
                 <div class="px-4 py-3 border-b border-gray-50 dark:border-gray-700/50">
                     <span class="block text-xs font-black text-gray-800 dark:text-white uppercase tracking-tighter">{{ auth()->user()->name ?? 'Guest' }}</span>
                     <span class="block text-[8px] font-black text-gray-400 uppercase tracking-widest mt-0.5">{{ session('active_role_label', 'User') }}</span>
+                    
+                    <!-- Gamification Widgets (Points & Streak) - Mobile Only -->
+                    <div class="flex sm:hidden items-center justify-between gap-2 mt-3 bg-gray-50 dark:bg-gray-900/50 px-3 py-2 rounded-xl border border-gray-100 dark:border-gray-700">
+                        <!-- Streak Badge -->
+                        <div class="flex items-center gap-1.5" title="Streak Aktivitas Hari Ini">
+                            <svg class="w-3.5 h-3.5 text-orange-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                <path fill-rule="evenodd" d="M12.395 2.553a1 1 0 00-1.45-.385c-.345.23-.614.558-.822.94-.209.381-.363.887-.453 1.488-.12.802-.073 1.84.195 2.87l.062.24c.024.1.039.223.05.375a2.037 2.037 0 01-.029.511c-.048.24-.154.48-.32.647a.997.997 0 01-1.08.16c-.461-.247-.744-.623-.926-1.08-.182-.456-.224-.959-.224-1.347V6a1 1 0 00-1-1 3 3 0 00-2 2.22c0 1.258.18 2.5.474 3.738.152.64.4 1.25.753 1.807.353.558.836 1.057 1.443 1.487a8.007 8.007 0 005.19 2.09c.477.027.947-.033 1.4-.18a7.995 7.995 0 003.86-2.482c.187-.228.34-.483.47-.752.43-.892.652-1.928.652-3.141 0-1.622-.515-2.91-1.293-3.812a6.002 6.002 0 00-.825-1.012l-.011-.011-.002-.002a1 1 0 00-1.436.17l-.02.027a4.01 4.01 0 01-.262.33c-.758.874-1.808 1.47-3.2 1.47V2.553z" clip-rule="evenodd" />
+                            </svg>
+                            <span class="text-[9px] font-black text-gray-700 dark:text-gray-200 uppercase tracking-wider">
+                                {{ auth()->user()->streak }} Streak
+                            </span>
+                        </div>
+                        
+                        <div class="w-px h-3 bg-gray-200 dark:bg-gray-700"></div>
+                        
+                        <!-- Points Badge -->
+                        <div class="flex items-center gap-1.5" title="Poin Terkumpul Bulan Ini">
+                            <svg class="w-3.5 h-3.5 text-amber-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                            </svg>
+                            <span class="text-[9px] font-black text-gray-700 dark:text-gray-200 uppercase tracking-wider">
+                                {{ auth()->user()->points + auth()->user()->pending_points }} Pts
+                            </span>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Ganti Password -->

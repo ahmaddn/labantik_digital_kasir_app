@@ -221,7 +221,7 @@ document.addEventListener('keydown', (e) => {
             <div class="flex flex-col md:flex-row items-center justify-between gap-6">
                 <div class="flex items-center gap-6">
                     <a href="{{ route('dashboard') }}"
-                        class="nb-card-flat p-2 w-14 h-14 bg-white flex items-center justify-center hover:scale-110 transition-transform">
+                        class="theme-no-card nb-card-flat p-2 w-14 h-14 bg-white flex items-center justify-center hover:scale-110 transition-transform">
                         <img src="{{ asset('favicon.png') }}" class="w-full h-full object-contain">
                     </a>
                     <div>
@@ -231,7 +231,7 @@ document.addEventListener('keydown', (e) => {
                             <span
                                 class="text-[9px] font-black bg-black text-white px-2 py-0.5 uppercase tracking-widest border border-white">{{ now()->translatedFormat('d F Y') }}</span>
                             <span x-data="{ time: '' }" x-init="setInterval(() => time = new Date().toLocaleTimeString('id-ID', { hour12: false }), 1000)" x-text="time"
-                                class="text-[9px] font-black bg-white text-black px-2 py-0.5 uppercase tracking-widest border border-black"></span>
+                                class="theme-no-card text-[9px] font-black bg-white text-black px-2 py-0.5 uppercase tracking-widest border border-black"></span>
                         </div>
                     </div>
                 </div>
@@ -283,7 +283,7 @@ document.addEventListener('keydown', (e) => {
 
         <!-- Category Navigation -->
         <div
-            class="px-6 lg:px-10 py-4 bg-white dark:bg-slate-950 border-b-[var(--nb-border)] border-black dark:border-slate-800 flex items-center gap-3 overflow-x-auto no-scrollbar">
+            class="theme-no-card px-6 lg:px-10 py-4 bg-white dark:bg-slate-950 border-b-[var(--nb-border)] border-black dark:border-slate-800 flex items-center gap-3 overflow-x-auto no-scrollbar">
             <button @click="selectedCategory = null"
                 :class="selectedCategory === null ? 'bg-primary-blue text-white' :
                     'bg-gray-100 text-black dark:bg-dark-soft dark:text-white'"
@@ -384,7 +384,17 @@ document.addEventListener('keydown', (e) => {
                 <button @click="tab = 'tasks'"
                     :class="tab === 'tasks' ? 'bg-amber-500 text-white' :
                         'bg-white text-black dark:bg-dark-soft dark:text-white'"
-                    class="nb-btn flex-1 py-1.5 text-xs shadow-none border-2">TASKS</button>
+                    class="nb-btn flex-1 py-1.5 text-xs shadow-none border-2 flex items-center justify-center gap-1.5">
+                    <span>TASKS</span>
+                    @php
+                        $pendingTasksCount = collect($dailyTasks)->where('is_completed', false)->count();
+                    @endphp
+                    @if($pendingTasksCount > 0)
+                        <span class="px-1.5 py-0.5 text-[9px] font-black bg-rose-500 text-white rounded-full border border-white dark:border-gray-800 leading-none min-w-[16px] text-center">
+                            {{ $pendingTasksCount }}
+                        </span>
+                    @endif
+                </button>
                 <button @click="tab = 'history'"
                     :class="tab === 'history' ? 'bg-primary-red text-white' :
                         'bg-white text-black dark:bg-dark-soft dark:text-white'"

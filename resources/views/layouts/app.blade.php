@@ -47,6 +47,10 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
+    <!-- Quill Rich Text Editor -->
+    <link href="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.snow.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.js"></script>
+
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -63,7 +67,7 @@
 </head>
 
 <body x-data="{
-    sidebarOpen: localStorage.getItem('sidebar-open') !== 'false',
+    sidebarOpen: window.innerWidth < 1024 ? false : (localStorage.getItem('sidebar-open') !== 'false'),
     darkMode: localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches),
     censorMode: localStorage.getItem('censor-mode') !== 'false',
     toggleSidebar() {
