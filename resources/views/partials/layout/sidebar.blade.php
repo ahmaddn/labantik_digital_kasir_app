@@ -136,6 +136,25 @@
 
             <p class="text-[9px] font-black text-gray-400 uppercase tracking-[0.3em] mb-4 ml-5">Aktivitas Harian</p>
 
+            @if(session('active_role_name') === 'kasir')
+                @php
+                    $myPendingTasksCount = \App\Models\CashierTask::where('assigned_to', auth()->id())
+                        ->where('date', now()->toDateString())
+                        ->where(function ($q) {
+                            $q->whereNull('approval_status')->orWhere('approval_status', '!=', 'approved');
+                        })
+                        ->count();
+                @endphp
+                <a href="{{ route('my-tasks') }}"
+                    class="flex items-center px-6 py-4 text-sm font-black rounded-2xl transition-all {{ request()->routeIs('my-tasks') ? 'bg-primary-blue text-white shadow-xl shadow-blue-900/20' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
+                    <svg class="w-5 h-5 mr-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><path d="M9 5a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2M9 5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2"/><path d="m9 14 2 2 4-4"/></svg>
+                    Tugas Saya
+                    @if($myPendingTasksCount > 0)
+                        <span class="ml-auto px-2 py-0.5 min-w-[22px] text-center text-[10px] font-black bg-rose-500 text-white rounded-full">{{ $myPendingTasksCount }}</span>
+                    @endif
+                </a>
+            @endif
+
             @if(session('active_role_name') === 'pengelola_jurusan' || session('active_role_name') === 'kasir')
                 <a href="{{ route('buku-kas') }}"
                     class="flex items-center px-6 py-4 text-sm font-black rounded-2xl transition-all {{ request()->routeIs('buku-kas') ? 'bg-primary-blue text-white shadow-xl shadow-blue-900/20' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800' }}">

@@ -63,24 +63,41 @@
                                 {{ $task->user->name }}
                             </td>
                             <td class="py-4">
-                                @if($task->is_completed)
+                                @if($task->approval_status === 'approved')
                                     <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-emerald-50 text-emerald-600 dark:bg-emerald-950/30 dark:text-emerald-400">
-                                        Selesai
+                                        Disetujui
                                     </span>
-                                    <div class="text-[9px] text-gray-400 mt-1 font-bold">{{ $task->completed_at?->format('d/m/Y H:i') }} WIB</div>
-                                    @if($task->completion_report)
-                                        <div class="text-xs font-semibold bg-gray-50 dark:bg-gray-900 p-2 border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-lg mt-2 text-slate-700 dark:text-slate-300 max-w-xs break-words">
-                                            Laporan: {{ $task->completion_report }}
+                                    <div class="text-[9px] text-gray-400 mt-1 font-bold">ACC: {{ $task->reviewed_at?->format('d/m/Y H:i') }} WIB{{ $task->reviewer ? ' oleh ' . $task->reviewer->name : '' }}</div>
+                                @elseif($task->approval_status === 'rejected')
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-red-50 text-red-600 dark:bg-red-950/30 dark:text-red-400">
+                                        Ditolak — Revisi
+                                    </span>
+                                    @if($task->rejection_note)
+                                        <div class="text-[10px] font-bold text-red-500 bg-red-50 dark:bg-red-950/30 p-2 rounded-lg mt-2 max-w-xs break-words">
+                                            Catatan: {{ $task->rejection_note }}
                                         </div>
                                     @endif
+                                @elseif($task->approval_status === 'pending')
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-blue-50 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400">
+                                        Menunggu ACC
+                                    </span>
                                 @else
                                     <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-amber-50 text-amber-600 dark:bg-amber-950/30 dark:text-amber-400">
-                                        Pending
+                                        Belum Dikerjakan
                                     </span>
+                                @endif
+
+                                @if($task->completed_at)
+                                    <div class="text-[9px] text-gray-400 mt-1 font-bold">Dikirim: {{ $task->completed_at?->format('d/m/Y H:i') }} WIB</div>
+                                @endif
+                                @if($task->completion_report)
+                                    <div class="text-xs font-semibold bg-gray-50 dark:bg-gray-900 p-2 border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-lg mt-2 text-slate-700 dark:text-slate-300 max-w-xs break-words">
+                                        Laporan: {{ $task->completion_report }}
+                                    </div>
                                 @endif
                             </td>
                             <td class="py-4">
-                                @if($task->is_completed && $task->proof_image)
+                                @if($task->proof_image)
                                     <a href="{{ asset('storage/' . $task->proof_image) }}" target="_blank" class="inline-flex items-center gap-1.5 text-xs font-black text-primary-blue hover:text-blue-900 transition-colors uppercase italic">
                                         <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                                         Lihat Foto Bukti
@@ -90,9 +107,19 @@
                                 @endif
                             </td>
                             <td class="py-4 text-right pr-4">
-                                <button wire:click="confirmDelete('{{ $task->id }}')" class="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-xl transition-all">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                                </button>
+                                <div class="flex items-center justify-end gap-1.5">
+                                    @if($task->approval_status === 'pending')
+                                        <button wire:click="approveTask('{{ $task->id }}')" wire:loading.attr="disabled" title="Setujui (ACC) tugas" class="px-3 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-[10px] font-black uppercase tracking-wider transition-all active:scale-95 shadow-md shadow-emerald-500/20">
+                                            ACC
+                                        </button>
+                                        <button wire:click="openRejectModal('{{ $task->id }}')" title="Tolak & minta revisi" class="px-3 py-2 bg-red-500 hover:bg-red-600 text-white rounded-xl text-[10px] font-black uppercase tracking-wider transition-all active:scale-95 shadow-md shadow-red-500/20">
+                                            Tolak
+                                        </button>
+                                    @endif
+                                    <button wire:click="confirmDelete('{{ $task->id }}')" class="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-xl transition-all">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                    </button>
+                                </div>
                             </td>
                         </tr>
                     @empty
@@ -171,6 +198,32 @@
                     Ya, Hapus
                 </button>
             </div>
+        </div>
+    </div>
+
+    <!-- Reject Modal -->
+    <div x-data="{ show: @entangle('showRejectModal') }" x-show="show" class="fixed inset-0 z-50 flex items-center justify-center p-4" x-cloak>
+        <div x-show="show" x-transition.opacity class="fixed inset-0 bg-black/60 backdrop-blur-xs" wire:click="$set('showRejectModal', false)"></div>
+        <div x-show="show" x-transition.scale class="relative w-full max-w-md bg-white dark:bg-gray-800 rounded-[2rem] shadow-2xl p-8 border border-gray-100 dark:border-gray-700 z-10">
+            <h2 class="text-xl font-black text-gray-850 dark:text-white uppercase italic mb-2">Tolak Laporan Tugas</h2>
+            <p class="text-gray-400 text-sm mb-6">Tugas akan dikembalikan ke kasir untuk direvisi. Berikan catatan agar kasir tahu apa yang harus diperbaiki.</p>
+
+            <form wire:submit.prevent="rejectTask" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">Catatan Penolakan</label>
+                    <textarea wire:model="rejectionNote" placeholder="Contoh: Foto bukti kurang jelas, mohon foto ulang..." rows="3" class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 border-none rounded-xl focus:ring-2 focus:ring-red-500 dark:text-white text-sm"></textarea>
+                    @error('rejectionNote') <span class="text-xs text-red-500 font-bold mt-1 block">{{ $message }}</span> @enderror
+                </div>
+
+                <div class="flex gap-3 pt-2">
+                    <button type="button" wire:click="$set('showRejectModal', false)" class="flex-1 py-3 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:text-white rounded-xl font-black text-xs uppercase tracking-wider transition-all">
+                        Batal
+                    </button>
+                    <button type="submit" class="flex-1 py-3 bg-red-500 hover:bg-red-600 text-white rounded-xl font-black text-xs uppercase tracking-wider transition-all shadow-md">
+                        Tolak & Minta Revisi
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 </div>

@@ -1,6 +1,8 @@
-<div>
-    @if($showModal)
-        <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-950/40 backdrop-blur-sm" x-transition>
+<div x-data="{ show: false }"
+    @open-change-password-modal.window="show = true; $wire.resetInput()"
+    @close-change-password-modal.window="show = false"
+    @keydown.window.escape="show = false">
+    <div x-show="show" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-950/40 backdrop-blur-sm" x-transition>
             <div class="w-full max-w-md bg-white dark:bg-gray-800 rounded-[2.5rem] shadow-2xl border border-gray-100 dark:border-gray-700 p-8 space-y-6">
                 <!-- Header -->
                 <div class="flex items-center justify-between border-b border-gray-50 dark:border-gray-700/50 pb-4">
@@ -11,7 +13,7 @@
                         </h3>
                         <p class="text-gray-400 text-[10px] font-bold uppercase tracking-widest mt-1">Perbarui Kredensial Keamanan Akun</p>
                     </div>
-                    <button wire:click="$set('showModal', false)" class="p-2 text-gray-400 hover:text-primary-red hover:bg-red-50 dark:hover:bg-red-950/20 rounded-xl transition-all">
+                    <button type="button" @click="show = false" class="p-2 text-gray-400 hover:text-primary-red hover:bg-red-50 dark:hover:bg-red-950/20 rounded-xl transition-all">
                         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
                     </button>
                 </div>
@@ -40,7 +42,7 @@
 
                     <!-- Actions -->
                     <div class="pt-4 flex gap-3">
-                        <button type="button" wire:click="$set('showModal', false)" class="flex-1 py-3.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:text-white rounded-xl font-black text-xs uppercase italic tracking-wider transition-all">
+                        <button type="button" @click="show = false" class="flex-1 py-3.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:text-white rounded-xl font-black text-xs uppercase italic tracking-wider transition-all">
                             Batal
                         </button>
                         <button type="submit" class="flex-1 py-3.5 bg-primary-blue text-white rounded-xl font-black text-xs uppercase italic tracking-wider transition-all shadow-lg shadow-blue-900/10 hover:bg-blue-800">
@@ -50,5 +52,4 @@
                 </form>
             </div>
         </div>
-    @endif
 </div>

@@ -8,16 +8,6 @@ use Livewire\Component;
 
 class NoteNotifications extends Component
 {
-    public bool $isOpen = false;
-
-    public function toggleDropdown(): void
-    {
-        $this->isOpen = !$this->isOpen;
-        if ($this->isOpen) {
-            $this->markAllAsRead();
-        }
-    }
-
     public function markAllAsRead()
     {
         $user = auth()->user();

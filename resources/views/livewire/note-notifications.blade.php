@@ -1,6 +1,6 @@
-<div class="relative" wire:poll.5s id="global-notifications-container">
-    <!-- Bell Icon Trigger Button -->
-    <button wire:click="toggleDropdown" class="relative p-3.5 bg-gray-50 dark:bg-gray-800 text-gray-400 rounded-xl hover:text-primary-blue hover:bg-primary-blue/5 transition-all shadow-sm">
+<div class="relative" wire:poll.5s id="global-notifications-container" x-data="{ open: false }" @click.outside="open = false" @keydown.window.escape="open = false">
+    <!-- Bell Icon Trigger Button (Alpine: buka instan tanpa round-trip server) -->
+    <button @click="open = !open; if (open) $wire.markAllAsRead()" class="relative p-3.5 bg-gray-50 dark:bg-gray-800 text-gray-400 rounded-xl hover:text-primary-blue hover:bg-primary-blue/5 transition-all shadow-sm">
         <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
             <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
         </svg>
@@ -12,8 +12,7 @@
     </button>
 
     <!-- Dropdown Notification Menu -->
-    @if($isOpen)
-        <div class="fixed sm:absolute top-20 sm:top-auto left-4 sm:left-0 right-4 sm:right-auto mt-3 w-auto sm:w-96 bg-white dark:bg-gray-800 rounded-3xl shadow-2xl border border-gray-100 dark:border-gray-700 z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+    <div x-show="open" x-cloak class="fixed sm:absolute top-20 sm:top-auto left-4 sm:left-0 right-4 sm:right-auto mt-3 w-auto sm:w-96 bg-white dark:bg-gray-800 rounded-3xl shadow-2xl border border-gray-100 dark:border-gray-700 z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
             <div class="p-4 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
                 <div class="flex items-center gap-2">
                     <h4 class="text-xs font-black uppercase tracking-wider text-gray-800 dark:text-white">Notifikasi Aktivitas</h4>
@@ -21,7 +20,7 @@
                         <span class="px-2 py-0.5 rounded-full bg-primary-blue text-white text-[9px] font-black">{{ $unreadCount }} Baru</span>
                     @endif
                 </div>
-                <button wire:click="$set('isOpen', false)" class="text-gray-400 hover:text-gray-600 dark:hover:text-white text-xs font-black">
+                <button @click="open = false" class="text-gray-400 hover:text-gray-600 dark:hover:text-white text-xs font-black">
                     &times;
                 </button>
             </div>
@@ -51,7 +50,7 @@
                             default => '<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>'
                         };
                     @endphp
-                    <a href="{{ $notif->action_url ? url($notif->action_url) : '#' }}" wire:navigate wire:click="$set('isOpen', false)" class="p-4 flex items-start gap-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors block">
+                    <a href="{{ $notif->action_url ? url($notif->action_url) : '#' }}" wire:navigate @click="open = false" class="p-4 flex items-start gap-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors block">
                         <div class="w-8 h-8 rounded-xl {{ $iconBg }} flex items-center justify-center shrink-0">
                             {!! $iconSvg !!}
                         </div>
@@ -73,34 +72,79 @@
                     </div>
                 @endforelse
             </div>
-        </div>
-    @endif
+    </div>
 
     <script>
         document.addEventListener('livewire:init', () => {
-            let lastCount = 0;
-            
-            // Check native notification permission
-            if (Notification.permission === 'default') {
+            const badgeCount = () => {
+                const badge = document.querySelector('#unread-count-badge');
+                return badge ? parseInt(badge.getAttribute('data-count') || '0') : 0;
+            };
+
+            let lastCount = badgeCount();
+            const nativeSupported = 'Notification' in window;
+            let swRegistration = null;
+
+            // Register the service worker so notifications can reach the phone's
+            // notification tray (Android Chrome requires registration.showNotification())
+            if (nativeSupported && 'serviceWorker' in navigator) {
+                navigator.serviceWorker.register('/js/sw.js')
+                    .then((reg) => { swRegistration = reg; })
+                    .catch(() => { /* SW unavailable, fall back to other methods */ });
+            }
+
+            // Check native notification permission (only where the API exists,
+            // iOS Safari does not expose window.Notification at all)
+            if (nativeSupported && Notification.permission === 'default') {
                 Notification.requestPermission();
             }
+
+            const showPopup = () => {
+                const body = 'Anda mendapatkan tugas, catatan, atau pesan baru!';
+
+                if (nativeSupported && Notification.permission === 'granted') {
+                    // 1. Preferred: through the Service Worker — this is the only way
+                    //    the notification shows up in the phone's notification tray
+                    if (swRegistration) {
+                        swRegistration.showNotification('LabAntik Kasir', {
+                            body: body,
+                            icon: '/favicon.png',
+                            badge: '/favicon.png',
+                            vibrate: [200, 100, 200],
+                            tag: 'labantik-notif',
+                            renotify: true,
+                            data: { url: '/' }
+                        }).catch(() => {});
+                        return;
+                    }
+
+                    // 2. Desktop fallback: direct constructor
+                    try {
+                        new Notification('LabAntik Kasir', {
+                            body: body,
+                            icon: '/favicon.png'
+                        });
+                        return;
+                    } catch (e) {
+                        // Android Chrome blocks the constructor (needs a Service Worker),
+                        // fall through to the in-app toast popup below
+                    }
+                }
+
+                // 3. In-app popup fallback (iOS Safari / permission denied)
+                window.dispatchEvent(new CustomEvent('toast', {
+                    detail: { message: '\uD83D\uDD14 ' + body, type: 'warning' }
+                }));
+            };
 
             // Hook into Livewire response to check unread notification increments
             Livewire.hook('request', ({ respond }) => {
                 respond(({ status }) => {
-                    const badge = document.querySelector('#unread-count-badge');
-                    if (badge) {
-                        const currentCount = parseInt(badge.getAttribute('data-count') || '0');
-                        if (currentCount > lastCount) {
-                            if (Notification.permission === 'granted') {
-                                new Notification('LabAntik Kasir', {
-                                    body: 'Anda mendapatkan tugas, catatan, atau pesan baru!',
-                                    icon: '/favicon.png'
-                                });
-                            }
-                        }
-                        lastCount = currentCount;
+                    const currentCount = badgeCount();
+                    if (currentCount > lastCount) {
+                        showPopup();
                     }
+                    lastCount = currentCount;
                 });
             });
         });

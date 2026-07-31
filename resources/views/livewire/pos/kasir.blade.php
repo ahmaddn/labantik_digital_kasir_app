@@ -254,6 +254,8 @@ document.addEventListener('keydown', (e) => {
                 </div>
 
                  <div class="flex flex-wrap items-center gap-3">
+                    <!-- Global Notifications Bell -->
+                    @livewire('note-notifications')
                     <button @click="showQuickExpenseModal = true" class="nb-btn px-4 py-3 bg-primary-red text-white shadow-none border-2 border-black flex items-center gap-2 hover:scale-105 transition-transform text-xs font-black uppercase tracking-wider">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -399,7 +401,7 @@ document.addEventListener('keydown', (e) => {
                     class="nb-btn flex-1 py-1.5 text-xs shadow-none border-2 flex items-center justify-center gap-1.5">
                     <span>TASKS</span>
                     @php
-                        $pendingTasksCount = collect($dailyTasks)->where('is_completed', false)->count();
+                        $pendingTasksCount = collect($dailyTasks)->where('approval_status', '!=', 'approved')->count();
                     @endphp
                     @if($pendingTasksCount > 0)
                         <span class="px-1.5 py-0.5 text-[9px] font-black bg-rose-500 text-white rounded-full border border-white dark:border-gray-800 leading-none min-w-[16px] text-center">
@@ -453,11 +455,15 @@ document.addEventListener('keydown', (e) => {
             <div x-show="tab === 'tasks'" class="flex-1 overflow-y-auto p-5 space-y-3 no-scrollbar">
                 <div class="text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Tugas Harian Anda Hari Ini</div>
                 @forelse($dailyTasks as $task)
-                    <div class="nb-card p-4 flex flex-col gap-3 bg-white dark:bg-dark-soft border-2 shadow-sm hover:shadow-none transition-shadow">
+                    <a href="{{ route('my-tasks') }}" target="_blank" class="nb-card p-4 flex flex-col gap-3 bg-white dark:bg-dark-soft border-2 shadow-sm hover:shadow-none transition-shadow cursor-pointer">
                         <div class="flex justify-between items-start">
-                            <h4 class="text-xs font-bold uppercase tracking-tight {{ $task->is_completed ? 'line-through text-gray-400' : 'text-slate-800 dark:text-white' }}">{{ $task->task_name }}</h4>
-                            @if($task->is_completed)
-                                <span class="text-[8px] font-black uppercase bg-green-500 text-white px-2 py-0.5 rounded border border-white">SELESAI</span>
+                            <h4 class="text-xs font-bold uppercase tracking-tight {{ $task->approval_status === 'approved' ? 'line-through text-gray-400' : 'text-slate-800 dark:text-white' }}">{{ $task->task_name }}</h4>
+                            @if($task->approval_status === 'approved')
+                                <span class="text-[8px] font-black uppercase bg-green-500 text-white px-2 py-0.5 rounded border border-white">DISETUJUI</span>
+                            @elseif($task->approval_status === 'rejected')
+                                <span class="text-[8px] font-black uppercase bg-red-500 text-white px-2 py-0.5 rounded border border-white">DITOLAK - REVISI</span>
+                            @elseif($task->approval_status === 'pending')
+                                <span class="text-[8px] font-black uppercase bg-primary-blue text-white px-2 py-0.5 rounded border border-white">MENUNGGU ACC</span>
                             @else
                                 <span class="text-[8px] font-black uppercase bg-amber-500 text-white px-2 py-0.5 rounded border border-white">BELUM SELESAI</span>
                             @endif
@@ -465,10 +471,11 @@ document.addEventListener('keydown', (e) => {
                         @if($task->description)
                             <p class="text-[10px] text-gray-400">{{ $task->description }}</p>
                         @endif
-                        <button wire:click="selectTaskForCompletion('{{ $task->id }}')" class="nb-btn text-[9px] py-1.5 px-3 mt-2 {{ $task->is_completed ? 'bg-primary-blue text-white' : 'bg-black text-white hover:bg-primary-blue' }} shadow-none border-2">
-                            {{ $task->is_completed ? 'LIHAT DETAIL & LAPORAN' : 'LAPORKAN SELESAI' }}
-                        </button>
-                    </div>
+                        <span class="text-[9px] font-black uppercase tracking-widest text-primary-blue flex items-center gap-1.5 mt-1">
+                            Kerjakan di Halaman Tugas Saya
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"/></svg>
+                        </span>
+                    </a>
                 @empty
                     <div class="text-center py-10 text-xs text-gray-400 italic font-semibold">Tidak ada tugas khusus hari ini</div>
                 @endforelse
@@ -592,28 +599,6 @@ document.addEventListener('keydown', (e) => {
             </div>
         </div>
     </div>
-    <!-- Opening Attendance (Clock In) Modal -->
-    <div x-data="{ show: @entangle('showOpeningAttendanceModal') }" x-show="show" x-cloak
-        class="fixed inset-0 z-[500] flex items-center justify-center p-6 bg-white/20 dark:bg-black/40 backdrop-blur-md">
-        <div class="nb-card bg-white dark:bg-dark-soft w-full max-w-md p-10 border-4 border-black text-center">
-            <div class="mb-6">
-                <span class="text-[9px] font-black bg-primary-blue text-white px-3 py-1 uppercase tracking-widest border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">ABSENSI MASUK</span>
-                <h2 class="text-2xl font-black uppercase italic mt-4 dark:text-white">CLOCK IN KASIR</h2>
-                <p class="text-xs text-gray-500 font-semibold mt-1">Lakukan absen buka shift sebelum melayani transaksi POS</p>
-            </div>
-
-            <div class="space-y-4 mb-6">
-                <div>
-                    <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Input Uang Modal Laci Awal (Rp)</label>
-                    <input type="number" wire:model="openingCash" placeholder="Contoh: 100000" class="nb-input w-full p-4 text-base font-bold bg-white dark:bg-slate-800 border-2 border-black text-center">
-                    @error('openingCash') <span class="text-xs text-red-500 font-bold mt-1 block">{{ $message }}</span> @enderror
-                </div>
-            </div>
-
-            <button wire:click="saveOpeningAttendance" class="nb-btn w-full bg-black text-white text-base py-4 font-black uppercase tracking-widest">CLOCK IN & MULAI</button>
-        </div>
-    </div>
-
     <!-- Recovery Modal -->
     <div x-data="{ show: @entangle('showRecoveryModal') }" x-show="show" x-cloak @keydown.window.escape="show = false"
         class="fixed inset-0 z-[500] flex items-center justify-center p-6 bg-white/20 dark:bg-black/40 backdrop-blur-md">
@@ -1059,89 +1044,6 @@ document.addEventListener('keydown', (e) => {
                     <span x-show="quickExpenseLoading">MENYIMPAN...</span>
                 </button>
             </div>
-        </div>
-    </div>
-
-
-    <!-- Task Completion Modal -->
-    <div x-data="{ show: @entangle('showTaskCompletionModal') }" x-show="show" x-cloak @keydown.window.escape="show = false"
-        class="fixed inset-0 z-[600] flex items-center justify-center p-6 bg-white/20 dark:bg-black/40 backdrop-blur-md">
-        <div @click.away="show = false"
-            class="nb-card bg-white dark:bg-dark-soft w-full max-w-lg flex flex-col overflow-hidden animate-in zoom-in-95 duration-300 border-4 border-black">
-            <div class="p-6 bg-primary-blue text-white border-b-4 border-black relative">
-                <button @click="show = false"
-                    class="absolute right-6 top-6 nb-btn bg-white text-black p-2 shadow-none border-2">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="4"
-                            d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                </button>
-                <h3 class="text-xl font-black uppercase italic tracking-tighter">DETAIL & LAPORAN TUGAS</h3>
-                <p class="text-[8px] font-black uppercase tracking-[0.3em] mt-1.5 opacity-60">PROSES PENYELESAIAN TUGAS KASIR</p>
-            </div>
-
-            <div class="p-6 max-h-[60vh] overflow-y-auto no-scrollbar bg-white dark:bg-black space-y-4 text-left">
-                @if($selectedTaskModel)
-                    <div>
-                        <span class="text-[8px] font-black uppercase tracking-widest text-slate-400 block mb-1">Nama Tugas</span>
-                        <h4 class="text-sm font-black uppercase dark:text-white">{{ $selectedTaskModel->task_name }}</h4>
-                    </div>
-                    @if($selectedTaskModel->description)
-                        <div>
-                            <span class="text-[8px] font-black uppercase tracking-widest text-slate-400 block mb-1">Deskripsi Tugas</span>
-                            <p class="text-xs text-slate-600 dark:text-slate-300 font-semibold">{{ $selectedTaskModel->description }}</p>
-                        </div>
-                    @endif
-                    <div>
-                        <span class="text-[8px] font-black uppercase tracking-widest text-slate-400 block mb-1">Status</span>
-                        @if($selectedTaskModel->is_completed)
-                            <span class="inline-block text-[9px] font-black uppercase bg-green-500 text-white px-2.5 py-1 rounded border-2 border-black">SELESAI PADA {{ $selectedTaskModel->completed_at->format('d/m/Y H:i') }}</span>
-                        @else
-                            <span class="inline-block text-[9px] font-black uppercase bg-amber-500 text-white px-2.5 py-1 rounded border-2 border-black">BELUM SELESAI</span>
-                        @endif
-                    </div>
-
-                    <hr class="border-2 border-black/10 dark:border-white/10 my-4" />
-
-                    @if(!$selectedTaskModel->is_completed)
-                        <div class="space-y-4">
-                            <div>
-                                <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Laporan Hasil Pekerjaan</label>
-                                <textarea wire:model.defer="taskCompletionReport" placeholder="Jelaskan detail pekerjaan/tugas yang telah selesai dilakukan..." rows="3" class="nb-input w-full p-4 text-sm font-bold bg-white dark:bg-slate-800 border-2 border-black"></textarea>
-                                @error('taskCompletionReport') <span class="text-xs text-red-500 font-bold mt-1 block">{{ $message }}</span> @enderror
-                            </div>
-                            <div>
-                                <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Foto / Gambar Bukti</label>
-                                <input type="file" wire:model="taskProofImage" class="nb-input w-full p-3 text-xs bg-white dark:bg-slate-800 border-2 border-black font-bold">
-                                @error('taskProofImage') <span class="text-xs text-red-500 font-bold mt-1 block">{{ $message }}</span> @enderror
-                                <div wire:loading wire:target="taskProofImage" class="text-[10px] font-black text-amber-500 uppercase mt-2">Mengunggah gambar...</div>
-                            </div>
-                        </div>
-                    @else
-                        <div class="space-y-4">
-                            <div>
-                                <span class="text-[8px] font-black uppercase tracking-widest text-slate-400 block mb-1">Laporan Hasil</span>
-                                <p class="text-xs font-bold text-slate-800 dark:text-white bg-slate-50 dark:bg-slate-900 p-4 border-2 border-dashed border-black/10 rounded-xl leading-relaxed">{{ $selectedTaskModel->completion_report }}</p>
-                            </div>
-                            @if($selectedTaskModel->proof_image)
-                                <div>
-                                    <span class="text-[8px] font-black uppercase tracking-widest text-slate-400 block mb-1">Foto Bukti</span>
-                                    <a href="{{ asset('storage/' . $selectedTaskModel->proof_image) }}" target="_blank" class="block border-4 border-black rounded-2xl overflow-hidden hover:opacity-90 transition-opacity">
-                                        <img src="{{ asset('storage/' . $selectedTaskModel->proof_image) }}" class="w-full object-cover max-h-48" alt="Bukti Tugas" />
-                                    </a>
-                                </div>
-                            @endif
-                        </div>
-                    @endif
-                @endif
-            </div>
-
-            @if($selectedTaskModel && !$selectedTaskModel->is_completed)
-                <div class="p-6 bg-white dark:bg-dark-soft border-t-4 border-black flex gap-3">
-                    <button @click="show = false" type="button" class="nb-btn flex-1 py-4 bg-white text-black border-2 border-black text-sm">BATAL</button>
-                    <button wire:click="submitTaskCompletion" type="button" class="nb-btn flex-2 py-4 bg-primary-blue text-white text-sm">SELESAIKAN TUGAS</button>
-                </div>
-            @endif
         </div>
     </div>
 

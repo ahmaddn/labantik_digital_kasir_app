@@ -15,11 +15,10 @@ use App\Services\PosSessionService;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
 use Livewire\WithPagination;
-use Livewire\WithFileUploads;
 
 class Kasir extends Component
 {
-    use WithPagination, WithFileUploads;
+    use WithPagination;
 
     public $transactionDate;
 
@@ -44,17 +43,6 @@ class Kasir extends Component
     public $showRecoveryModal = false;
 
     public $unfinishedSessionDate = null;
-
-    // Attendance & Tasks UI State
-    public $showOpeningAttendanceModal = false;
-    public $openingCash = '';
-
-    // Task completion properties
-    public bool $showTaskCompletionModal = false;
-    public $selectedTaskId = null;
-    public $selectedTaskModel = null;
-    public string $taskCompletionReport = '';
-    public $taskProofImage = null;
 
     // Closing report properties
     public bool $showClosingReportModal = false;
@@ -109,8 +97,22 @@ class Kasir extends Component
             }
 
             if (!$attendance && !$hasHigherRole) {
-                // Must clock in first
-                $this->showOpeningAttendanceModal = true;
+                // Auto clock-in: first POS entry of the day counts as clock in
+                $schedule = CashierSchedule::where('user_id', auth()->id())
+                    ->where('jurusan_id', $activeJurusanId)
+                    ->where('date', now()->toDateString())
+                    ->first();
+
+                CashierAttendance::create([
+                    'cashier_schedule_id' => $schedule ? $schedule->id : null,
+                    'user_id' => auth()->id(),
+                    'jurusan_id' => $activeJurusanId,
+                    'date' => now()->toDateString(),
+                    'clock_in' => now(),
+                    'status' => 'present',
+                ]);
+
+                $this->dispatch('toast', message: 'Clock in otomatis tercatat. Selamat bertugas!');
             }
         }
 
@@ -146,104 +148,10 @@ class Kasir extends Component
         // Detect if there's an unfinished session from a previous day
         $this->detectUnfinishedSession($posSessionService);
 
-        if (! $this->showRecoveryModal && !$this->showOpeningAttendanceModal) {
+        if (! $this->showRecoveryModal) {
             $this->checkOpeningStock($posSessionService);
         }
     }
-
-    public function saveOpeningAttendance(PosSessionService $posSessionService): void
-    {
-        $this->validate([
-            'openingCash' => 'required|numeric|min:0',
-        ]);
-
-        $activeJurusanId = session('active_jurusan_id');
-        $schedule = CashierSchedule::where('user_id', auth()->id())
-            ->where('jurusan_id', $activeJurusanId)
-            ->where('date', now()->toDateString())
-            ->first();
-
-        CashierAttendance::create([
-            'cashier_schedule_id' => $schedule ? $schedule->id : null,
-            'user_id' => auth()->id(),
-            'jurusan_id' => $activeJurusanId,
-            'date' => now()->toDateString(),
-            'clock_in' => now(),
-            'opening_cash' => (float)$this->openingCash,
-            'status' => 'present',
-        ]);
-
-        $this->showOpeningAttendanceModal = false;
-        $this->dispatch('toast', message: 'Absen buka berhasil dicatat.');
-
-        // Proceed to opening stock check
-        $this->checkOpeningStock($posSessionService);
-    }
-
-    public function selectTaskForCompletion($taskId): void
-    {
-        $task = CashierTask::where('assigned_to', auth()->id())
-            ->where('id', $taskId)
-            ->first();
-
-        if ($task) {
-            $this->selectedTaskId = $taskId;
-            $this->selectedTaskModel = $task;
-            $this->taskCompletionReport = $task->completion_report ?? '';
-            $this->taskProofImage = null;
-            $this->showTaskCompletionModal = true;
-        }
-    }
-
-    public function submitTaskCompletion(): void
-    {
-        $task = CashierTask::where('assigned_to', auth()->id())
-            ->where('id', $this->selectedTaskId)
-            ->first();
-
-        if ($task) {
-            $rules = [
-                'taskCompletionReport' => 'required|string|min:5',
-            ];
-
-            // If not completed yet, proof image is required
-            if (!$task->is_completed) {
-                $rules['taskProofImage'] = 'required|image|max:2048'; // Max 2MB
-            } else {
-                $rules['taskProofImage'] = 'nullable|image|max:2048';
-            }
-
-            $this->validate($rules);
-
-            $data = [
-                'completion_report' => $this->taskCompletionReport,
-            ];
-
-            if ($this->taskProofImage) {
-                $path = $this->taskProofImage->store('tasks/proofs', 'public');
-                $data['proof_image'] = $path;
-            }
-
-            if (!$task->is_completed) {
-                $data['is_completed'] = true;
-                $data['completed_at'] = now();
-
-                $user = auth()->user();
-                if ($user) {
-                    $user->increment('pending_points', 10);
-                    $user->increment('streak', 1);
-                    $user->save();
-                }
-            }
-
-            $task->update($data);
-
-            $this->showTaskCompletionModal = false;
-            $this->reset(['selectedTaskId', 'selectedTaskModel', 'taskCompletionReport', 'taskProofImage']);
-            $this->dispatch('toast', message: 'Tugas berhasil diselesaikan dengan laporan & bukti!');
-        }
-    }
-
 
     protected function getActiveProducts()
     {

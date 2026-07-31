@@ -21,12 +21,17 @@ class CashierTask extends Model
         'created_by',
         'completion_report',
         'proof_image',
+        'approval_status',
+        'rejection_note',
+        'reviewed_by',
+        'reviewed_at',
     ];
 
     protected $casts = [
         'date' => 'date',
         'is_completed' => 'boolean',
         'completed_at' => 'datetime',
+        'reviewed_at' => 'datetime',
     ];
 
     public function user(): BelongsTo
@@ -42,5 +47,10 @@ class CashierTask extends Model
     public function jurusan(): BelongsTo
     {
         return $this->belongsTo(Jurusan::class);
+    }
+
+    public function reviewer(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'reviewed_by');
     }
 }

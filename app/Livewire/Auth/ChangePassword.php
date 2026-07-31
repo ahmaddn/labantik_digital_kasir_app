@@ -8,18 +8,9 @@ use Livewire\Component;
 
 class ChangePassword extends Component
 {
-    public $showModal = false;
     public $currentPassword = '';
     public $newPassword = '';
     public $newPasswordConfirmation = '';
-
-    protected $listeners = ['open-change-password-modal' => 'openModal'];
-
-    public function openModal()
-    {
-        $this->resetInput();
-        $this->showModal = true;
-    }
 
     public function resetInput()
     {
@@ -50,8 +41,9 @@ class ChangePassword extends Component
         $user->password = Hash::make($this->newPassword);
         $user->save();
 
-        $this->showModal = false;
         $this->resetInput();
+        $this->resetErrorBag();
+        $this->dispatch('close-change-password-modal');
         $this->dispatch('toast', message: 'Password berhasil diperbarui.');
     }
 

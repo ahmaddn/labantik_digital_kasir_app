@@ -23,6 +23,9 @@ class CashierTasks extends Component
     public $showCreateModal = false;
     public $showDeleteModal = false;
     public $deletingTaskId = null;
+    public $showRejectModal = false;
+    public $rejectingTaskId = null;
+    public $rejectionNote = '';
 
     protected $rules = [
         'assignedTo' => 'required|exists:users,id',
@@ -100,6 +103,78 @@ class CashierTasks extends Component
         }
     }
 
+    public function approveTask($id)
+    {
+        $task = CashierTask::findOrFail($id);
+
+        if ($task->approval_status !== 'pending') {
+            $this->dispatch('toast', message: 'Tugas ini tidak sedang menunggu review.', type: 'warning');
+            return;
+        }
+
+        $task->update([
+            'approval_status' => 'approved',
+            'rejection_note' => null,
+            'reviewed_by' => auth()->id(),
+            'reviewed_at' => now(),
+        ]);
+
+        // Award gamification points only after admin approval
+        $cashier = User::find($task->assigned_to);
+        if ($cashier) {
+            $cashier->increment('pending_points', 10);
+            $cashier->increment('streak', 1);
+        }
+
+        \App\Models\Notification::create([
+            'user_id' => $task->assigned_to,
+            'title' => 'Tugas Disetujui',
+            'body' => 'Laporan tugas "' . $task->task_name . '" telah di-ACC admin. +10 poin untukmu!',
+            'type' => 'task',
+            'action_url' => '/my-tasks'
+        ]);
+
+        $this->dispatch('toast', message: 'Tugas disetujui, poin diberikan ke kasir.');
+    }
+
+    public function openRejectModal($id)
+    {
+        $this->rejectingTaskId = $id;
+        $this->rejectionNote = '';
+        $this->showRejectModal = true;
+    }
+
+    public function rejectTask()
+    {
+        $this->validate([
+            'rejectionNote' => 'required|string|min:5',
+        ], [], ['rejectionNote' => 'catatan penolakan']);
+
+        $task = CashierTask::findOrFail($this->rejectingTaskId);
+
+        // Reopen the task so the cashier must revise & resubmit
+        $task->update([
+            'approval_status' => 'rejected',
+            'rejection_note' => $this->rejectionNote,
+            'reviewed_by' => auth()->id(),
+            'reviewed_at' => now(),
+            'is_completed' => false,
+        ]);
+
+        \App\Models\Notification::create([
+            'user_id' => $task->assigned_to,
+            'title' => 'Tugas Ditolak — Perlu Revisi',
+            'body' => 'Laporan tugas "' . $task->task_name . '" ditolak: ' . $this->rejectionNote . '. Silakan revisi & kirim ulang.',
+            'type' => 'task',
+            'action_url' => '/my-tasks'
+        ]);
+
+        $this->showRejectModal = false;
+        $this->rejectingTaskId = null;
+        $this->rejectionNote = '';
+        $this->dispatch('toast', message: 'Tugas ditolak & dikembalikan ke kasir untuk direvisi.');
+    }
+
     public function render()
     {
         $activeRole = session('active_role_name');
@@ -118,7 +193,7 @@ class CashierTasks extends Component
         })->get();
 
         // Query Tasks
-        $tasks = CashierTask::with(['user', 'creator'])
+        $tasks = CashierTask::with(['user', 'creator', 'reviewer'])
             ->when($activeJurusanId, function($q) use ($activeJurusanId) {
                 $q->where('jurusan_id', $activeJurusanId);
             })
