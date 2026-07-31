@@ -113,7 +113,14 @@ class WeeklyProfit extends Component
         $totalShortage = 0;
         $totalSurplus = 0;
         foreach ($dailyRecaps as $recap) {
-            $totalRevenueReal = $dailyRevenues[$recap->date] ?? 0;
+            // Lewati recap yang uang fisiknya belum diinput (0/null) agar seluruh
+            // omzet hari itu tidak ikut terhitung sebagai kekurangan kas
+            if ((float) $recap->actual_cash <= 0) {
+                continue;
+            }
+
+            $recapDateString = $recap->date instanceof \DateTimeInterface ? $recap->date->format('Y-m-d') : (string) $recap->date;
+            $totalRevenueReal = $dailyRevenues[$recapDateString] ?? 0;
             $diff = ((float) $recap->actual_cash - (float) ($recap->retained_change_cash ?? 0)) - (float) $totalRevenueReal;
             if ($diff < 0) {
                 $totalShortage += abs($diff);
@@ -275,6 +282,12 @@ class WeeklyProfit extends Component
         $totalShortage = 0;
         $totalSurplus = 0;
         foreach ($dailyRecaps as $recap) {
+            // Lewati recap yang uang fisiknya belum diinput (0/null) agar seluruh
+            // omzet hari itu tidak ikut terhitung sebagai kekurangan kas
+            if ((float) $recap->actual_cash <= 0) {
+                continue;
+            }
+
             $recapDateString = $recap->date instanceof \DateTimeInterface ? $recap->date->format('Y-m-d') : (string) $recap->date;
             $totalRevenueReal = $dailyRevenues[$recapDateString] ?? 0;
             $diff = ((float) $recap->actual_cash - (float) ($recap->retained_change_cash ?? 0)) - (float) $totalRevenueReal;
