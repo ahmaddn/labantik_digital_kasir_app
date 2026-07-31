@@ -99,8 +99,55 @@
                 Notification.requestPermission();
             }
 
+            // --- Sound & vibration (browsers only allow this after a user gesture,
+            //     so the AudioContext is unlocked on the first tap/click) ---
+            let audioCtx = null;
+            const unlockAudio = () => {
+                try {
+                    if (!audioCtx) {
+                        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                    }
+                    if (audioCtx.state === 'suspended') {
+                        audioCtx.resume();
+                    }
+                } catch (e) { /* Web Audio not available */ }
+            };
+            document.addEventListener('click', unlockAudio, { once: true });
+            document.addEventListener('touchstart', unlockAudio, { once: true });
+
+            const playAlertSound = () => {
+                if (!audioCtx || audioCtx.state !== 'running') return;
+                try {
+                    // Two short "ding" tones as the notification sound
+                    [0, 0.18].forEach((delay, i) => {
+                        const osc = audioCtx.createOscillator();
+                        const gain = audioCtx.createGain();
+                        osc.type = 'sine';
+                        osc.frequency.value = i === 0 ? 880 : 1174;
+                        gain.gain.setValueAtTime(0.0001, audioCtx.currentTime + delay);
+                        gain.gain.exponentialRampToValueAtTime(0.35, audioCtx.currentTime + delay + 0.02);
+                        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + delay + 0.3);
+                        osc.connect(gain).connect(audioCtx.destination);
+                        osc.start(audioCtx.currentTime + delay);
+                        osc.stop(audioCtx.currentTime + delay + 0.35);
+                    });
+                } catch (e) { /* ignore audio errors */ }
+            };
+
+            const triggerVibration = () => {
+                // Modern Android Chrome ignores the notification `vibrate` option,
+                // so vibrate straight from the page as well
+                if ('vibrate' in navigator) {
+                    try { navigator.vibrate([200, 100, 200]); } catch (e) { /* ignore */ }
+                }
+            };
+
             const showPopup = () => {
                 const body = 'Anda mendapatkan tugas, catatan, atau pesan baru!';
+
+                // Always give haptic + audible feedback while the app is open
+                triggerVibration();
+                playAlertSound();
 
                 if (nativeSupported && Notification.permission === 'granted') {
                     // 1. Preferred: through the Service Worker — this is the only way
@@ -111,6 +158,7 @@
                             icon: '/favicon.png',
                             badge: '/favicon.png',
                             vibrate: [200, 100, 200],
+                            silent: false,
                             tag: 'labantik-notif',
                             renotify: true,
                             data: { url: '/' }
@@ -122,7 +170,8 @@
                     try {
                         new Notification('LabAntik Kasir', {
                             body: body,
-                            icon: '/favicon.png'
+                            icon: '/favicon.png',
+                            silent: false
                         });
                         return;
                     } catch (e) {
@@ -133,7 +182,7 @@
 
                 // 3. In-app popup fallback (iOS Safari / permission denied)
                 window.dispatchEvent(new CustomEvent('toast', {
-                    detail: { message: '\uD83D\uDD14 ' + body, type: 'warning' }
+                    detail: { message: body, type: 'warning' }
                 }));
             };
 
