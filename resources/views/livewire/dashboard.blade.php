@@ -32,7 +32,7 @@
                 @endphp
 
                 @if($isSessionFinished)
-                    <div class="flex items-center space-x-2">
+                    <div class="flex items-center space-x-2" x-data="{ showEmergencyConfirm: false }">
                         <button disabled class="px-6 md:px-10 py-3.5 md:py-5 bg-gray-400 text-white rounded-2xl md:rounded-[2rem] shadow-xl font-black italic uppercase tracking-wider cursor-not-allowed flex flex-col items-center leading-tight">
                             <div class="flex items-center">
                                 <svg class="w-6 h-6 mr-3" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
@@ -40,13 +40,62 @@
                             </div>
                             <span class="text-[8px] font-black uppercase tracking-widest mt-1 opacity-60">Data hari ini telah dikunci</span>
                         </button>
-                        <button wire:click="emergencyReactivateSession" wire:confirm="Anda yakin ingin mengaktifkan kembali sesi ini? Data rekap hari ini akan dihapus dan Anda harus melakukan tutup kasir ulang nantinya." @class(['px-4 md:px-6 py-3.5 md:py-5 bg-red-600 hover:bg-red-700 text-white rounded-2xl md:rounded-[2rem] shadow-xl shadow-red-600/30 font-black italic uppercase tracking-wider flex flex-col items-center leading-tight transition transform hover:-translate-y-1 active:scale-95', 'hidden' => !$hasHigherRole])>
+                        <button type="button" @click="showEmergencyConfirm = true" @class(['px-4 md:px-6 py-3.5 md:py-5 bg-red-600 hover:bg-red-700 text-white rounded-2xl md:rounded-[2rem] shadow-xl shadow-red-600/30 font-black italic uppercase tracking-wider flex flex-col items-center leading-tight transition transform hover:-translate-y-1 active:scale-95', 'hidden' => !$hasHigherRole])>
                             <div class="flex items-center">
                                 <svg class="w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
                                 Darurat
                             </div>
                             <span class="text-[8px] font-black uppercase tracking-widest mt-1 opacity-90">Aktifkan Sesi</span>
                         </button>
+
+                        <!-- Emergency Reactivate Confirmation Modal -->
+                        <div x-show="showEmergencyConfirm" x-cloak
+                            x-transition:enter="transition ease-out duration-300"
+                            x-transition:enter-start="opacity-0"
+                            x-transition:enter-end="opacity-100"
+                            x-transition:leave="transition ease-in duration-200"
+                            x-transition:leave-start="opacity-100"
+                            x-transition:leave-end="opacity-0"
+                            @keydown.window.escape="showEmergencyConfirm = false"
+                            class="fixed inset-0 z-[500] flex items-center justify-center p-4 bg-gray-950/80 backdrop-blur-md text-left"
+                            style="display: none;">
+                            <div @click.outside="showEmergencyConfirm = false"
+                                x-transition:enter="transition ease-out duration-300"
+                                x-transition:enter-start="opacity-0 scale-90"
+                                x-transition:enter-end="opacity-100 scale-100"
+                                class="bg-white dark:bg-gray-900 w-full max-w-md rounded-[2.5rem] shadow-2xl overflow-hidden border border-gray-100 dark:border-gray-800">
+                                <!-- Header -->
+                                <div class="p-8 bg-gradient-to-br from-red-600 to-red-700 text-white relative overflow-hidden">
+                                    <div class="absolute -right-10 -bottom-10 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
+                                    <div class="relative z-10 flex items-center gap-4">
+                                        <div class="w-14 h-14 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/20 flex-shrink-0">
+                                            <svg class="w-8 h-8 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                                        </div>
+                                        <div>
+                                            <span class="px-2.5 py-0.5 bg-white/25 text-[10px] font-black uppercase tracking-widest rounded-full border border-white/10">Tindakan Darurat</span>
+                                            <h3 class="text-2xl font-black italic tracking-tight mt-1">Aktifkan Kembali Sesi?</h3>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Content -->
+                                <div class="p-8">
+                                    <p class="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
+                                        Anda yakin ingin mengaktifkan kembali sesi ini? <strong class="text-primary-red">Data rekap hari ini akan dihapus</strong> dan Anda harus melakukan tutup kasir ulang nantinya.
+                                    </p>
+                                </div>
+
+                                <!-- Footer -->
+                                <div class="p-6 bg-gray-50 dark:bg-gray-800 border-t border-gray-100 dark:border-gray-800 flex flex-col sm:flex-row gap-3 justify-end">
+                                    <button type="button" @click="showEmergencyConfirm = false" class="px-6 py-3.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 text-xs font-black rounded-2xl hover:bg-gray-50 dark:hover:bg-gray-750 transition-all text-center uppercase tracking-widest">
+                                        Batal
+                                    </button>
+                                    <button type="button" wire:click="emergencyReactivateSession" @click="showEmergencyConfirm = false" class="px-8 py-3.5 bg-gradient-to-r from-red-600 to-red-700 text-white text-xs font-black rounded-2xl hover:bg-red-700 shadow-lg shadow-red-600/25 transition-all text-center uppercase tracking-widest">
+                                        Ya, Aktifkan Sesi
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 @elseif(!$isScheduled)
                     <div class="px-6 md:px-10 py-3.5 md:py-5 bg-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-400 rounded-2xl md:rounded-[2rem] shadow-xl opacity-90 cursor-not-allowed flex flex-col items-center justify-center leading-tight text-center">
