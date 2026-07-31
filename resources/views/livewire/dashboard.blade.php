@@ -40,7 +40,7 @@
                             </div>
                             <span class="text-[8px] font-black uppercase tracking-widest mt-1 opacity-60">Data hari ini telah dikunci</span>
                         </button>
-                        <button wire:click="emergencyReactivateSession" wire:confirm="Anda yakin ingin mengaktifkan kembali sesi ini? Data rekap hari ini akan dihapus dan Anda harus melakukan tutup kasir ulang nantinya." class="px-4 md:px-6 py-3.5 md:py-5 bg-red-600 hover:bg-red-700 text-white rounded-2xl md:rounded-[2rem] shadow-xl shadow-red-600/30 font-black italic uppercase tracking-wider flex flex-col items-center leading-tight transition transform hover:-translate-y-1 active:scale-95">
+                        <button wire:click="emergencyReactivateSession" wire:confirm="Anda yakin ingin mengaktifkan kembali sesi ini? Data rekap hari ini akan dihapus dan Anda harus melakukan tutup kasir ulang nantinya." @class(['px-4 md:px-6 py-3.5 md:py-5 bg-red-600 hover:bg-red-700 text-white rounded-2xl md:rounded-[2rem] shadow-xl shadow-red-600/30 font-black italic uppercase tracking-wider flex flex-col items-center leading-tight transition transform hover:-translate-y-1 active:scale-95', 'hidden' => !$hasHigherRole])>
                             <div class="flex items-center">
                                 <svg class="w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
                                 Darurat

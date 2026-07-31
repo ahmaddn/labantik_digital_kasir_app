@@ -143,6 +143,12 @@ class Kasir extends Component
                 $this->redirectRoute('dashboard', navigate: true);
                 return;
             }
+
+            // Higher-role cashier: once the session is finished, the cashier mode
+            // is locked too — block re-entry (can only be reopened via emergency reactivate)
+            session()->flash('error', 'Sesi kasir hari ini telah diselesaikan. Mode kasir terkunci.');
+            $this->redirectRoute('dashboard', navigate: true);
+            return;
         }
 
         // Detect if there's an unfinished session from a previous day
@@ -294,22 +300,28 @@ class Kasir extends Component
         if ($hasHigherRole) {
             // Save stock
             $posSessionService->saveClosingStock($filteredStockItems, $today, $activeJurusanId);
+
+            // Higher-role cashier: no closing report needed, finish immediately
+            $this->completeSession(null);
+
+            return;
         }
 
         $this->showClosingStockModal = false;
         $this->showClosingReportModal = true;
     }
 
-    public function submitClosingReport(PosSessionService $posSessionService): void
+    public function submitClosingReport(): void
     {
-        $hasHigherRole = auth()->user()->roles()
-            ->whereIn('roles.name', ['superadmin', 'pengelola_jurusan'])
-            ->exists();
-
         $this->validate([
-            'closingReportText' => $hasHigherRole ? 'nullable|string' : 'required|string|min:5',
+            'closingReportText' => 'required|string|min:5',
         ]);
 
+        $this->completeSession($this->closingReportText);
+    }
+
+    protected function completeSession(?string $report): void
+    {
         $today = $this->transactionDate ?: now()->toDateString();
         $activeJurusanId = session('active_jurusan_id');
 
@@ -325,7 +337,7 @@ class Kasir extends Component
             $attendance->update([
                 'clock_out' => now(),
                 'closing_cash' => $closingCash,
-                'closing_report' => $this->closingReportText,
+                'closing_report' => $report,
                 'points_at_closing' => (int)(auth()->user()->points + auth()->user()->pending_points),
             ]);
         }
@@ -336,6 +348,7 @@ class Kasir extends Component
             ['actual_cash' => $closingCash]
         );
 
+        $this->showClosingStockModal = false;
         $this->showClosingReportModal = false;
         $this->stockItems = [];
 

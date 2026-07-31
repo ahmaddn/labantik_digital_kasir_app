@@ -297,6 +297,15 @@ class Dashboard extends Component
 
     public function emergencyReactivateSession()
     {
+        // Only cashiers with a higher role may force-reactivate a finished session
+        $hasHigherRole = auth()->user()->roles()
+            ->whereIn('roles.name', ['superadmin', 'pengelola_jurusan'])
+            ->exists();
+
+        if (! $hasHigherRole) {
+            abort(403);
+        }
+
         $activeJurusanId = session('active_jurusan_id');
         DailyRecap::whereDate('date', now())
             ->when($activeJurusanId, function ($q) use ($activeJurusanId) {
