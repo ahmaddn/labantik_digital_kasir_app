@@ -19,8 +19,11 @@
 
             @if(session('active_role_name') !== 'superadmin')
                 @php
+                    $hasHigherRole = auth()->user()->roles()
+                        ->whereIn('roles.name', ['superadmin', 'pengelola_jurusan'])
+                        ->exists();
                     $isScheduled = true;
-                    if (session('active_role_name') === 'kasir') {
+                    if (session('active_role_name') === 'kasir' && !$hasHigherRole) {
                         $isScheduled = \App\Models\CashierSchedule::where('user_id', auth()->id())
                             ->where('jurusan_id', session('active_jurusan_id'))
                             ->where('date', now()->toDateString())

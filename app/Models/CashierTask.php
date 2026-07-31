@@ -19,6 +19,8 @@ class CashierTask extends Model
         'is_completed',
         'completed_at',
         'created_by',
+        'completion_report',
+        'proof_image',
     ];
 
     protected $casts = [

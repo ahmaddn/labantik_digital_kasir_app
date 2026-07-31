@@ -167,22 +167,36 @@ class Dashboard extends Component
             'total_outstanding_debt' => $totalOutstandingDebt,
         ];
 
-        // Weekly Chart Data
+        // Weekly Chart Data - Optimized to use only 2 queries instead of 14
+        $startDate = today()->subDays(6)->startOfDay()->toDateTimeString();
+        $endDate = today()->endOfDay()->toDateTimeString();
+
+        $weeklyTransactions = Transaction::whereBetween('transacted_at', [$startDate, $endDate])
+            ->when($activeJurusanId, function ($q) use ($activeJurusanId) {
+                return $q->where('jurusan_id', $activeJurusanId);
+            })
+            ->get();
+
+        $weeklyExpenses = \App\Models\CashTransaction::when($activeJurusanId, function ($q) use ($activeJurusanId) {
+                return $q->where('jurusan_id', $activeJurusanId);
+            })
+            ->whereBetween('date', [today()->subDays(6)->toDateString(), today()->toDateString()])
+            ->where('type', 'expense')
+            ->selectRaw('date, SUM(amount) as total_amount')
+            ->groupBy('date')
+            ->pluck('total_amount', 'date')
+            ->toArray();
+
         $weeklyData = [];
         for ($i = 6; $i >= 0; $i--) {
             $date = today()->subDays($i);
-            $dayTxs = Transaction::whereDate('transacted_at', $date)
-                ->when($activeJurusanId, function ($q) use ($activeJurusanId) {
-                    return $q->where('jurusan_id', $activeJurusanId);
-                })
-                ->get();
+            $dateString = $date->toDateString();
+            
+            $dayTxs = $weeklyTransactions->filter(function ($tx) use ($dateString) {
+                return substr($tx->transacted_at, 0, 10) === $dateString;
+            });
 
-            $dayExpenses = \App\Models\CashTransaction::when($activeJurusanId, function ($q) use ($activeJurusanId) {
-                    return $q->where('jurusan_id', $activeJurusanId);
-                })
-                ->whereDate('date', $date)
-                ->where('type', 'expense')
-                ->sum('amount');
+            $dayExpenses = (float) ($weeklyExpenses[$dateString] ?? 0);
 
             $weeklyData[] = [
                 'day' => $date->translatedFormat('D'),
@@ -221,27 +235,42 @@ class Dashboard extends Component
             ->orderByDesc('total_revenue')
             ->get();
 
-        // Monthly Revenue Growth (Last 6 Months)
+        // Monthly Revenue Growth (Last 6 Months) - Optimized to use only 2 queries instead of 12
+        $startOfMonthRange = today()->subMonths(5)->startOfMonth()->startOfDay()->toDateTimeString();
+        $endOfMonthRange = today()->endOfDay()->toDateTimeString();
+
+        $monthlyTransactions = Transaction::whereBetween('transacted_at', [$startOfMonthRange, $endOfMonthRange])
+            ->whereIn('status', ['uang_diterima', 'belum_kembalian'])
+            ->when($activeJurusanId, function ($q) use ($activeJurusanId) {
+                return $q->where('jurusan_id', $activeJurusanId);
+            })
+            ->get();
+
+        $monthlyExpenses = \App\Models\CashTransaction::when($activeJurusanId, function ($q) use ($activeJurusanId) {
+                return $q->where('jurusan_id', $activeJurusanId);
+            })
+            ->whereBetween('date', [today()->subMonths(5)->startOfMonth()->toDateString(), today()->toDateString()])
+            ->where('type', 'expense')
+            ->selectRaw("DATE_FORMAT(date, '%Y-%m') as expense_month, SUM(amount) as total_amount")
+            ->groupBy('expense_month')
+            ->pluck('total_amount', 'expense_month')
+            ->toArray();
+
         $monthlyData = [];
         for ($i = 5; $i >= 0; $i--) {
             $month = today()->subMonths($i);
-            $monthExpenses = \App\Models\CashTransaction::when($activeJurusanId, function ($q) use ($activeJurusanId) {
-                    return $q->where('jurusan_id', $activeJurusanId);
-                })
-                ->whereMonth('date', $month->month)
-                ->whereYear('date', $month->year)
-                ->where('type', 'expense')
-                ->sum('amount');
+            $yearMonthKey = $month->format('Y-m');
+
+            $monthExpenses = (float) ($monthlyExpenses[$yearMonthKey] ?? 0);
+            
+            $monthTxs = $monthlyTransactions->filter(function ($tx) use ($month) {
+                $txDate = \Carbon\Carbon::parse($tx->transacted_at);
+                return $txDate->month === $month->month && $txDate->year === $month->year;
+            });
 
             $monthlyData[] = [
                 'month' => $month->translatedFormat('M Y'),
-                'revenue' => max(0, Transaction::whereMonth('transacted_at', $month->month)
-                    ->whereYear('transacted_at', $month->year)
-                    ->whereIn('status', ['uang_diterima', 'belum_kembalian'])
-                    ->when($activeJurusanId, function ($q) use ($activeJurusanId) {
-                        return $q->where('jurusan_id', $activeJurusanId);
-                    })
-                    ->sum('total_price') - $monthExpenses),
+                'revenue' => max(0, $monthTxs->sum('total_price') - $monthExpenses),
             ];
         }
 

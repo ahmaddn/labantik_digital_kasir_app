@@ -104,14 +104,24 @@ class InventoryReport extends Component
 
         $reportData = [];
 
-        foreach ($products as $product) {
-            $stockEntry = StockEntry::with('user')->where('product_id', $product->id)
-                ->where('date', $this->selectedDate)
-                ->first();
+        $productIds = $products->pluck('id');
 
-            $sold = Transaction::where('product_id', $product->id)
-                ->whereDate('transacted_at', $this->selectedDate)
-                ->sum('quantity');
+        $stockEntries = StockEntry::with('user')
+            ->whereIn('product_id', $productIds)
+            ->where('date', $this->selectedDate)
+            ->get()
+            ->keyBy('product_id');
+
+        $sales = Transaction::whereIn('product_id', $productIds)
+            ->whereDate('transacted_at', $this->selectedDate)
+            ->selectRaw('product_id, SUM(quantity) as total_sold')
+            ->groupBy('product_id')
+            ->pluck('total_sold', 'product_id')
+            ->toArray();
+
+        foreach ($products as $product) {
+            $stockEntry = $stockEntries->get($product->id);
+            $sold = (int) ($sales[$product->id] ?? 0);
 
             $opening = $stockEntry ? $stockEntry->opening_stock : 0;
             $closing = $stockEntry ? $stockEntry->closing_stock : 0;

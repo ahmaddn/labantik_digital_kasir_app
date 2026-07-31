@@ -430,7 +430,7 @@ class Product extends Component
 
         return view('livewire.management.product', [
             'products' => $query->paginate(10),
-            'cashGroupedProducts' => $this->getCashGroupedProducts(),
+            'cashGroupedProducts' => $this->activeTab === 'grouping' ? $this->getCashGroupedProducts() : [],
         ])->layout('layouts.app', ['title' => 'Katalog Produk']);
     }
 }

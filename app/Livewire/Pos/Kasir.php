@@ -15,10 +15,11 @@ use App\Services\PosSessionService;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Livewire\WithFileUploads;
 
 class Kasir extends Component
 {
-    use WithPagination;
+    use WithPagination, WithFileUploads;
 
     public $transactionDate;
 
@@ -47,10 +48,17 @@ class Kasir extends Component
     // Attendance & Tasks UI State
     public $showOpeningAttendanceModal = false;
     public $openingCash = '';
-    
-    // Closing attendance fields (added to closing modal)
-    public $closingCashInput = '';
-    public $closingReportText = '';
+
+    // Task completion properties
+    public bool $showTaskCompletionModal = false;
+    public $selectedTaskId = null;
+    public $selectedTaskModel = null;
+    public string $taskCompletionReport = '';
+    public $taskProofImage = null;
+
+    // Closing report properties
+    public bool $showClosingReportModal = false;
+    public string $closingReportText = '';
 
     public function refreshProducts(): void
     {
@@ -68,7 +76,7 @@ class Kasir extends Component
         $this->refreshProducts();
 
         $activeJurusanId = session('active_jurusan_id');
-        
+
         // 1. Validate if user is scheduled for today (mandatory for cashier role, unless they have a higher role)
         if (session('active_role_name') === 'kasir') {
             $hasHigherRole = auth()->user()->roles()
@@ -172,40 +180,70 @@ class Kasir extends Component
         $this->checkOpeningStock($posSessionService);
     }
 
-    public function toggleTask($taskId): void
+    public function selectTaskForCompletion($taskId): void
     {
         $task = CashierTask::where('assigned_to', auth()->id())
             ->where('id', $taskId)
             ->first();
 
         if ($task) {
-            $wasCompleted = $task->is_completed;
-            $task->update([
-                'is_completed' => !$wasCompleted,
-                'completed_at' => !$wasCompleted ? now() : null,
-            ]);
+            $this->selectedTaskId = $taskId;
+            $this->selectedTaskModel = $task;
+            $this->taskCompletionReport = $task->completion_report ?? '';
+            $this->taskProofImage = null;
+            $this->showTaskCompletionModal = true;
+        }
+    }
 
-            $user = auth()->user();
-            if ($user) {
-                if (!$wasCompleted) {
+    public function submitTaskCompletion(): void
+    {
+        $task = CashierTask::where('assigned_to', auth()->id())
+            ->where('id', $this->selectedTaskId)
+            ->first();
+
+        if ($task) {
+            $rules = [
+                'taskCompletionReport' => 'required|string|min:5',
+            ];
+
+            // If not completed yet, proof image is required
+            if (!$task->is_completed) {
+                $rules['taskProofImage'] = 'required|image|max:2048'; // Max 2MB
+            } else {
+                $rules['taskProofImage'] = 'nullable|image|max:2048';
+            }
+
+            $this->validate($rules);
+
+            $data = [
+                'completion_report' => $this->taskCompletionReport,
+            ];
+
+            if ($this->taskProofImage) {
+                $path = $this->taskProofImage->store('tasks/proofs', 'public');
+                $data['proof_image'] = $path;
+            }
+
+            if (!$task->is_completed) {
+                $data['is_completed'] = true;
+                $data['completed_at'] = now();
+
+                $user = auth()->user();
+                if ($user) {
                     $user->increment('pending_points', 10);
                     $user->increment('streak', 1);
-                } else {
-                    $user->decrement('pending_points', 10);
-                    $user->decrement('streak', 1);
-                    if ($user->pending_points < 0) {
-                        $user->pending_points = 0;
-                    }
-                    if ($user->streak < 0) {
-                        $user->streak = 0;
-                    }
                     $user->save();
                 }
             }
 
-            $this->dispatch('toast', message: 'Status tugas diperbarui.');
+            $task->update($data);
+
+            $this->showTaskCompletionModal = false;
+            $this->reset(['selectedTaskId', 'selectedTaskModel', 'taskCompletionReport', 'taskProofImage']);
+            $this->dispatch('toast', message: 'Tugas berhasil diselesaikan dengan laporan & bukti!');
         }
     }
+
 
     protected function getActiveProducts()
     {
@@ -329,17 +367,8 @@ class Kasir extends Component
         $this->showClosingStockModal = true;
     }
 
-    public function saveClosingStock(PosSessionService $posSessionService): void
+    public function saveClosingStockAndNext(PosSessionService $posSessionService): void
     {
-        $hasHigherRole = auth()->user()->roles()
-            ->whereIn('roles.name', ['superadmin', 'pengelola_jurusan'])
-            ->exists();
-
-        $this->validate([
-            'closingCashInput' => $hasHigherRole ? 'nullable|numeric|min:0' : 'required|numeric|min:0',
-            'closingReportText' => $hasHigherRole ? 'nullable|string' : 'required|string',
-        ]);
-
         $today = $this->transactionDate ?: now()->toDateString();
         $activeJurusanId = session('active_jurusan_id');
 
@@ -350,10 +379,31 @@ class Kasir extends Component
 
         $filteredStockItems = array_intersect_key($this->stockItems, array_flip($validProductIds));
 
+        $hasHigherRole = auth()->user()->roles()
+            ->whereIn('roles.name', ['superadmin', 'pengelola_jurusan'])
+            ->exists();
+
         if ($hasHigherRole) {
             // Save stock
             $posSessionService->saveClosingStock($filteredStockItems, $today, $activeJurusanId);
         }
+
+        $this->showClosingStockModal = false;
+        $this->showClosingReportModal = true;
+    }
+
+    public function submitClosingReport(PosSessionService $posSessionService): void
+    {
+        $hasHigherRole = auth()->user()->roles()
+            ->whereIn('roles.name', ['superadmin', 'pengelola_jurusan'])
+            ->exists();
+
+        $this->validate([
+            'closingReportText' => $hasHigherRole ? 'nullable|string' : 'required|string|min:5',
+        ]);
+
+        $today = $this->transactionDate ?: now()->toDateString();
+        $activeJurusanId = session('active_jurusan_id');
 
         // Record Closing Attendance
         $attendance = CashierAttendance::where('user_id', auth()->id())
@@ -361,10 +411,7 @@ class Kasir extends Component
             ->where('date', now()->toDateString())
             ->first();
 
-        $closingCash = $this->closingCashInput !== '' && $this->closingCashInput !== null ? (float)$this->closingCashInput : 0;
-        if ($hasHigherRole && $closingCash <= 0) {
-            $closingCash = 1; // Default to 1 to lock the session (actual_cash > 0)
-        }
+        $closingCash = 1; // Default to 1 to lock the session (actual_cash > 0)
 
         if ($attendance) {
             $attendance->update([
@@ -375,15 +422,13 @@ class Kasir extends Component
             ]);
         }
 
-        if ($hasHigherRole) {
-            // Post closing cash to daily recap
-            DailyRecap::updateOrCreate(
-                ['date' => $today, 'jurusan_id' => $activeJurusanId],
-                ['actual_cash' => $closingCash]
-            );
-        }
+        // Always make sure DailyRecap is locked for today
+        DailyRecap::updateOrCreate(
+            ['date' => $today, 'jurusan_id' => $activeJurusanId],
+            ['actual_cash' => $closingCash]
+        );
 
-        $this->showClosingStockModal = false;
+        $this->showClosingReportModal = false;
         $this->stockItems = [];
 
         session()->flash('toast', 'Sesi kasir berhasil diselesaikan.');
@@ -434,8 +479,9 @@ class Kasir extends Component
 
         if ($newMultiple > $oldMultiple && $newMultiple > 0) {
             $reachedAmount = $newMultiple * 50000;
-            $this->dispatch('toast', 
-                message: 'Total transaksi hari ini telah mencapai Rp' . number_format($reachedAmount, 0, ',', '.') . '. Segera cek uang tunai di laci!', 
+            $this->dispatch(
+                'toast',
+                message: 'Total transaksi hari ini telah mencapai Rp' . number_format($reachedAmount, 0, ',', '.') . '. Segera cek uang tunai di laci!',
                 type: 'warning'
             );
         }
@@ -507,7 +553,7 @@ class Kasir extends Component
     public function saveQuickExpense($amount, $categoryId, $description): void
     {
         $activeJurusanId = session('active_jurusan_id');
-        
+
         \App\Models\CashTransaction::create([
             'jurusan_id' => $activeJurusanId,
             'date' => $this->transactionDate ?: now()->toDateString(),

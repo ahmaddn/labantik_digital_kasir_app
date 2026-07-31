@@ -60,6 +60,10 @@ class User extends Authenticatable
      */
     public function getAvailableAccesses()
     {
+        if ($this->relationLoaded('available_accesses')) {
+            return $this->getRelation('available_accesses');
+        }
+
         return \DB::table('role_user')
             ->join('roles', 'role_user.role_id', '=', 'roles.id')
             ->leftJoin('jurusans', 'role_user.jurusan_id', '=', 'jurusans.id')

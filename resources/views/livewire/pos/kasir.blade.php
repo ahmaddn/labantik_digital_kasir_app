@@ -220,18 +220,30 @@ document.addEventListener('keydown', (e) => {
             class="px-6 lg:px-10 py-5 bg-primary-blue dark:bg-slate-900 border-b-[var(--nb-border)] border-black dark:border-slate-800 shadow-[0_4px_0_0_rgba(0,0,0,1)] dark:shadow-[0_4px_0_0_rgba(0,0,0,0.5)]">
             <div class="flex flex-col md:flex-row items-center justify-between gap-6">
                 <div class="flex items-center gap-6">
+                    @php
+                        $activeJurusanId = session('active_jurusan_id');
+                        $themeSettings = null;
+                        if ($activeJurusanId) {
+                            $jurusanModel = \App\Models\Jurusan::find($activeJurusanId);
+                            if ($jurusanModel && $jurusanModel->theme_settings) {
+                                $themeSettings = $jurusanModel->theme_settings;
+                            }
+                        }
+                        $tefaName = $themeSettings['tefa_name'] ?? 'LABANTIK POS';
+                        $tefaLogo = $themeSettings['tefa_logo'] ?? '';
+                    @endphp
                     <a href="{{ route('dashboard') }}"
                         class="theme-no-card nb-card-flat p-2 w-14 h-14 bg-white flex items-center justify-center hover:scale-110 transition-transform">
-                        <img src="{{ asset('favicon.png') }}" class="w-full h-full object-contain">
+                        <img src="{{ $tefaLogo ? asset('storage/' . $tefaLogo) : asset('favicon.png') }}" class="w-full h-full object-contain">
                     </a>
                     <div>
                         <h1 class="text-xl lg:text-2xl font-black uppercase tracking-tighter text-white leading-none">
-                            LABANTIK POS</h1>
+                            {{ $tefaName }}</h1>
                         <div class="flex items-center gap-2 mt-1.5">
                             <span
                                 class="text-[9px] font-black bg-black text-white px-2 py-0.5 uppercase tracking-widest border border-white">{{ now()->translatedFormat('d F Y') }}</span>
                             <span x-data="{ time: '' }" x-init="setInterval(() => time = new Date().toLocaleTimeString('id-ID', { hour12: false }), 1000)" x-text="time"
-                                class="theme-no-card text-[9px] font-black bg-white text-black px-2 py-0.5 uppercase tracking-widest border border-black"></span>
+                                class="text-[9px] font-black bg-slate-100 dark:bg-black text-black dark:text-white px-2 py-0.5 uppercase tracking-widest border border-black dark:border-white"></span>
                         </div>
                     </div>
                 </div>
@@ -441,14 +453,21 @@ document.addEventListener('keydown', (e) => {
             <div x-show="tab === 'tasks'" class="flex-1 overflow-y-auto p-5 space-y-3 no-scrollbar">
                 <div class="text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Tugas Harian Anda Hari Ini</div>
                 @forelse($dailyTasks as $task)
-                    <div class="nb-card p-4 flex items-start gap-3 bg-white dark:bg-dark-soft border-2 shadow-sm">
-                        <input type="checkbox" wire:click="toggleTask('{{ $task->id }}')" {{ $task->is_completed ? 'checked' : '' }} class="mt-1 w-4 h-4 text-primary-blue rounded border-gray-300 focus:ring-primary-blue">
-                        <div class="flex-1">
-                            <h4 class="text-xs font-bold uppercase tracking-tight {{ $task->is_completed ? 'line-through text-gray-400' : 'text-gray-855 dark:text-white' }}">{{ $task->task_name }}</h4>
-                            @if($task->description)
-                                <p class="text-[10px] text-gray-400 mt-1">{{ $task->description }}</p>
+                    <div class="nb-card p-4 flex flex-col gap-3 bg-white dark:bg-dark-soft border-2 shadow-sm hover:shadow-none transition-shadow">
+                        <div class="flex justify-between items-start">
+                            <h4 class="text-xs font-bold uppercase tracking-tight {{ $task->is_completed ? 'line-through text-gray-400' : 'text-slate-800 dark:text-white' }}">{{ $task->task_name }}</h4>
+                            @if($task->is_completed)
+                                <span class="text-[8px] font-black uppercase bg-green-500 text-white px-2 py-0.5 rounded border border-white">SELESAI</span>
+                            @else
+                                <span class="text-[8px] font-black uppercase bg-amber-500 text-white px-2 py-0.5 rounded border border-white">BELUM SELESAI</span>
                             @endif
                         </div>
+                        @if($task->description)
+                            <p class="text-[10px] text-gray-400">{{ $task->description }}</p>
+                        @endif
+                        <button wire:click="selectTaskForCompletion('{{ $task->id }}')" class="nb-btn text-[9px] py-1.5 px-3 mt-2 {{ $task->is_completed ? 'bg-primary-blue text-white' : 'bg-black text-white hover:bg-primary-blue' }} shadow-none border-2">
+                            {{ $task->is_completed ? 'LIHAT DETAIL & LAPORAN' : 'LAPORKAN SELESAI' }}
+                        </button>
                     </div>
                 @empty
                     <div class="text-center py-10 text-xs text-gray-400 italic font-semibold">Tidak ada tugas khusus hari ini</div>
@@ -796,42 +815,40 @@ document.addEventListener('keydown', (e) => {
                     </div>
                 @endif
 
-                <!-- Cash & Activity Report Fields -->
-                <div class="p-6 bg-white dark:bg-dark-soft border-2 border-black rounded-3xl mt-6 space-y-4">
-                    <h3 class="text-sm font-black uppercase tracking-widest dark:text-white">Laporan Closing Shift Kasir</h3>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        @php
-                            $hasHigherRole = auth()->user()->roles()
-                                ->whereIn('roles.name', ['superadmin', 'pengelola_jurusan'])
-                                ->exists();
-                        @endphp
-                        <div>
-                            <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">
-                                Total Uang Laci Akhir (Rp) {!! $hasHigherRole ? '<span class="text-amber-500 font-black">(OPSIONAL)</span>' : '' !!}
-                            </label>
-                            <input type="number" wire:model="closingCashInput" placeholder="Contoh: 1500000" class="nb-input w-full p-4 text-sm font-bold bg-white dark:bg-slate-800 border-2 border-black">
-                            @error('closingCashInput') <span class="text-xs text-red-500 font-bold mt-1 block">{{ $message }}</span> @enderror
-                        </div>
-                        <div>
-                            @php
-                                $hasHigherRole = auth()->user()->roles()
-                                    ->whereIn('roles.name', ['superadmin', 'pengelola_jurusan'])
-                                    ->exists();
-                            @endphp
-                            <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">
-                                Laporan Aktivitas Selama Shift {!! $hasHigherRole ? '<span class="text-amber-500 font-black">(OPSIONAL)</span>' : '' !!}
-                            </label>
-                            <textarea wire:model="closingReportText" placeholder="Jelaskan apa saja yang Anda lakukan selama shift ini..." rows="3" class="nb-input w-full p-4 text-sm font-bold bg-white dark:bg-slate-800 border-2 border-black"></textarea>
-                            @error('closingReportText') <span class="text-xs text-red-500 font-bold mt-1 block">{{ $message }}</span> @enderror
-                        </div>
-                    </div>
-                </div>
             </div>
             <div class="p-6 bg-white dark:bg-dark-soft border-t-4 border-black">
-                <button wire:click="saveClosingStock"
-                    class="nb-btn w-full bg-primary-red text-white text-lg py-5">SELESAIKAN SESI & CLOCK OUT</button>
+                <button wire:click="saveClosingStockAndNext"
+                    class="nb-btn w-full bg-primary-blue text-white text-lg py-5">SIMPAN SISA BARANG & LANJUT</button>
             </div>
+        </div>
+    </div>
+
+    <!-- Closing Report Modal -->
+    <div x-data="{ show: @entangle('showClosingReportModal') }" x-show="show" x-cloak
+        class="fixed inset-0 z-[500] flex items-center justify-center p-6 bg-white/20 dark:bg-black/40 backdrop-blur-md">
+        <div class="nb-card bg-white dark:bg-dark-soft w-full max-w-md p-10 border-4 border-black text-center">
+            <div class="mb-6">
+                <span class="text-[9px] font-black bg-primary-red text-white px-3 py-1 uppercase tracking-widest border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">LAPORAN AKHIR SHIFT</span>
+                <h2 class="text-2xl font-black uppercase italic mt-4 dark:text-white">CLOSING REPORT</h2>
+                <p class="text-xs text-gray-500 font-semibold mt-1">Tulis laporan aktivitas Anda sebelum menyelesaikan sesi</p>
+            </div>
+
+            <div class="space-y-4 mb-6 text-left">
+                @php
+                    $hasHigherRole = auth()->user()->roles()
+                        ->whereIn('roles.name', ['superadmin', 'pengelola_jurusan'])
+                        ->exists();
+                @endphp
+                <div>
+                    <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">
+                        Laporan Aktivitas Selama Shift {!! $hasHigherRole ? '<span class="text-amber-500 font-black">(OPSIONAL)</span>' : '' !!}
+                    </label>
+                    <textarea wire:model="closingReportText" placeholder="Jelaskan apa saja yang Anda lakukan selama shift ini..." rows="4" class="nb-input w-full p-4 text-sm font-bold bg-white dark:bg-slate-800 border-2 border-black"></textarea>
+                    @error('closingReportText') <span class="text-xs text-red-500 font-bold mt-1 block">{{ $message }}</span> @enderror
+                </div>
+            </div>
+
+            <button wire:click="submitClosingReport" class="nb-btn w-full bg-primary-red text-white text-base py-4 font-black uppercase tracking-widest">KIRIM LAPORAN & CLOCK OUT</button>
         </div>
     </div>
 
@@ -1042,6 +1059,89 @@ document.addEventListener('keydown', (e) => {
                     <span x-show="quickExpenseLoading">MENYIMPAN...</span>
                 </button>
             </div>
+        </div>
+    </div>
+
+
+    <!-- Task Completion Modal -->
+    <div x-data="{ show: @entangle('showTaskCompletionModal') }" x-show="show" x-cloak @keydown.window.escape="show = false"
+        class="fixed inset-0 z-[600] flex items-center justify-center p-6 bg-white/20 dark:bg-black/40 backdrop-blur-md">
+        <div @click.away="show = false"
+            class="nb-card bg-white dark:bg-dark-soft w-full max-w-lg flex flex-col overflow-hidden animate-in zoom-in-95 duration-300 border-4 border-black">
+            <div class="p-6 bg-primary-blue text-white border-b-4 border-black relative">
+                <button @click="show = false"
+                    class="absolute right-6 top-6 nb-btn bg-white text-black p-2 shadow-none border-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="4"
+                            d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+                <h3 class="text-xl font-black uppercase italic tracking-tighter">DETAIL & LAPORAN TUGAS</h3>
+                <p class="text-[8px] font-black uppercase tracking-[0.3em] mt-1.5 opacity-60">PROSES PENYELESAIAN TUGAS KASIR</p>
+            </div>
+
+            <div class="p-6 max-h-[60vh] overflow-y-auto no-scrollbar bg-white dark:bg-black space-y-4 text-left">
+                @if($selectedTaskModel)
+                    <div>
+                        <span class="text-[8px] font-black uppercase tracking-widest text-slate-400 block mb-1">Nama Tugas</span>
+                        <h4 class="text-sm font-black uppercase dark:text-white">{{ $selectedTaskModel->task_name }}</h4>
+                    </div>
+                    @if($selectedTaskModel->description)
+                        <div>
+                            <span class="text-[8px] font-black uppercase tracking-widest text-slate-400 block mb-1">Deskripsi Tugas</span>
+                            <p class="text-xs text-slate-600 dark:text-slate-300 font-semibold">{{ $selectedTaskModel->description }}</p>
+                        </div>
+                    @endif
+                    <div>
+                        <span class="text-[8px] font-black uppercase tracking-widest text-slate-400 block mb-1">Status</span>
+                        @if($selectedTaskModel->is_completed)
+                            <span class="inline-block text-[9px] font-black uppercase bg-green-500 text-white px-2.5 py-1 rounded border-2 border-black">SELESAI PADA {{ $selectedTaskModel->completed_at->format('d/m/Y H:i') }}</span>
+                        @else
+                            <span class="inline-block text-[9px] font-black uppercase bg-amber-500 text-white px-2.5 py-1 rounded border-2 border-black">BELUM SELESAI</span>
+                        @endif
+                    </div>
+
+                    <hr class="border-2 border-black/10 dark:border-white/10 my-4" />
+
+                    @if(!$selectedTaskModel->is_completed)
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Laporan Hasil Pekerjaan</label>
+                                <textarea wire:model.defer="taskCompletionReport" placeholder="Jelaskan detail pekerjaan/tugas yang telah selesai dilakukan..." rows="3" class="nb-input w-full p-4 text-sm font-bold bg-white dark:bg-slate-800 border-2 border-black"></textarea>
+                                @error('taskCompletionReport') <span class="text-xs text-red-500 font-bold mt-1 block">{{ $message }}</span> @enderror
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Foto / Gambar Bukti</label>
+                                <input type="file" wire:model="taskProofImage" class="nb-input w-full p-3 text-xs bg-white dark:bg-slate-800 border-2 border-black font-bold">
+                                @error('taskProofImage') <span class="text-xs text-red-500 font-bold mt-1 block">{{ $message }}</span> @enderror
+                                <div wire:loading wire:target="taskProofImage" class="text-[10px] font-black text-amber-500 uppercase mt-2">Mengunggah gambar...</div>
+                            </div>
+                        </div>
+                    @else
+                        <div class="space-y-4">
+                            <div>
+                                <span class="text-[8px] font-black uppercase tracking-widest text-slate-400 block mb-1">Laporan Hasil</span>
+                                <p class="text-xs font-bold text-slate-800 dark:text-white bg-slate-50 dark:bg-slate-900 p-4 border-2 border-dashed border-black/10 rounded-xl leading-relaxed">{{ $selectedTaskModel->completion_report }}</p>
+                            </div>
+                            @if($selectedTaskModel->proof_image)
+                                <div>
+                                    <span class="text-[8px] font-black uppercase tracking-widest text-slate-400 block mb-1">Foto Bukti</span>
+                                    <a href="{{ asset('storage/' . $selectedTaskModel->proof_image) }}" target="_blank" class="block border-4 border-black rounded-2xl overflow-hidden hover:opacity-90 transition-opacity">
+                                        <img src="{{ asset('storage/' . $selectedTaskModel->proof_image) }}" class="w-full object-cover max-h-48" alt="Bukti Tugas" />
+                                    </a>
+                                </div>
+                            @endif
+                        </div>
+                    @endif
+                @endif
+            </div>
+
+            @if($selectedTaskModel && !$selectedTaskModel->is_completed)
+                <div class="p-6 bg-white dark:bg-dark-soft border-t-4 border-black flex gap-3">
+                    <button @click="show = false" type="button" class="nb-btn flex-1 py-4 bg-white text-black border-2 border-black text-sm">BATAL</button>
+                    <button wire:click="submitTaskCompletion" type="button" class="nb-btn flex-2 py-4 bg-primary-blue text-white text-sm">SELESAIKAN TUGAS</button>
+                </div>
+            @endif
         </div>
     </div>
 

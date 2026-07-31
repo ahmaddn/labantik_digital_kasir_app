@@ -427,6 +427,28 @@ class UserManagement extends Component
         ->latest()
         ->paginate(10);
 
+        // Eager-load accesses to prevent N+1 query in loops
+        $userIds = $users->pluck('id');
+        $allAccesses = DB::table('role_user')
+            ->join('roles', 'role_user.role_id', '=', 'roles.id')
+            ->leftJoin('jurusans', 'role_user.jurusan_id', '=', 'jurusans.id')
+            ->whereIn('role_user.user_id', $userIds)
+            ->select(
+                'role_user.user_id',
+                'role_user.id as access_id',
+                'roles.id as role_id',
+                'roles.name as role_name',
+                'roles.label as role_label',
+                'jurusans.id as jurusan_id',
+                'jurusans.name as jurusan_name'
+            )
+            ->get()
+            ->groupBy('user_id');
+
+        foreach ($users as $user) {
+            $user->setRelation('available_accesses', $allAccesses->get($user->id, collect()));
+        }
+
         // Filter roles and jurusans list for form selection
         if ($activeRole === 'superadmin') {
             $roles = Role::orderBy('label')->get();

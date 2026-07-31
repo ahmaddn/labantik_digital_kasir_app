@@ -42,7 +42,8 @@
                         <th class="pb-4 text-xs font-black uppercase tracking-widest text-gray-400 pl-4">Tanggal</th>
                         <th class="pb-4 text-xs font-black uppercase tracking-widest text-gray-400">Tugas</th>
                         <th class="pb-4 text-xs font-black uppercase tracking-widest text-gray-400">Ditugaskan Ke</th>
-                        <th class="pb-4 text-xs font-black uppercase tracking-widest text-gray-400">Status</th>
+                        <th class="pb-4 text-xs font-black uppercase tracking-widest text-gray-400">Status & Laporan</th>
+                        <th class="pb-4 text-xs font-black uppercase tracking-widest text-gray-400">Bukti Tugas</th>
                         <th class="pb-4 text-xs font-black uppercase tracking-widest text-gray-400 text-right pr-4 w-32">Aksi</th>
                     </tr>
                 </thead>
@@ -53,7 +54,7 @@
                                 {{ $task->date->translatedFormat('d M Y') }}
                             </td>
                             <td class="py-4">
-                                <div class="font-bold text-gray-850 dark:text-gray-200">{{ $task->task_name }}</div>
+                                <div class="font-bold text-gray-855 dark:text-gray-200">{{ $task->task_name }}</div>
                                 @if($task->description)
                                     <div class="text-xs text-gray-400 mt-0.5">{{ $task->description }}</div>
                                 @endif
@@ -66,11 +67,26 @@
                                     <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-emerald-50 text-emerald-600 dark:bg-emerald-950/30 dark:text-emerald-400">
                                         Selesai
                                     </span>
-                                    <div class="text-[9px] text-gray-400 mt-1 font-bold">{{ $task->completed_at?->format('H:i') }} WIB</div>
+                                    <div class="text-[9px] text-gray-400 mt-1 font-bold">{{ $task->completed_at?->format('d/m/Y H:i') }} WIB</div>
+                                    @if($task->completion_report)
+                                        <div class="text-xs font-semibold bg-gray-50 dark:bg-gray-900 p-2 border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-lg mt-2 text-slate-700 dark:text-slate-300 max-w-xs break-words">
+                                            Laporan: {{ $task->completion_report }}
+                                        </div>
+                                    @endif
                                 @else
                                     <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-amber-50 text-amber-600 dark:bg-amber-950/30 dark:text-amber-400">
                                         Pending
                                     </span>
+                                @endif
+                            </td>
+                            <td class="py-4">
+                                @if($task->is_completed && $task->proof_image)
+                                    <a href="{{ asset('storage/' . $task->proof_image) }}" target="_blank" class="inline-flex items-center gap-1.5 text-xs font-black text-primary-blue hover:text-blue-900 transition-colors uppercase italic">
+                                        <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                        Lihat Foto Bukti
+                                    </a>
+                                @else
+                                    <span class="text-xs text-gray-400 italic">Tidak ada bukti</span>
                                 @endif
                             </td>
                             <td class="py-4 text-right pr-4">
@@ -81,7 +97,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="py-8 text-center text-gray-400 italic font-semibold">Belum ada tugas ditambahkan</td>
+                            <td colspan="6" class="py-8 text-center text-gray-400 italic font-semibold">Belum ada tugas ditambahkan</td>
                         </tr>
                     @endforelse
                 </tbody>
