@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -52,6 +53,15 @@ class DailyRecap extends Model
                 }
             }
         });
+    }
+
+    /**
+     * @param  Builder<DailyRecap>  $query
+     * @return Builder<DailyRecap>
+     */
+    public function scopeForReporting($query)
+    {
+        return $query->withoutGlobalScope('active');
     }
 
     /**

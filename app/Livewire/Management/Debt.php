@@ -147,11 +147,11 @@ class Debt extends Component
     public function openSettleModal($reference)
     {
         $this->selectedReference = $reference;
-        $trx = Transaction::where('reference', $reference)->first();
+        $trx = Transaction::forReporting()->where('reference', $reference)->first();
 
         if ($trx) {
             $this->currentBuyerName = $trx->buyer_name;
-            $this->maxAmount = Transaction::where('reference', $reference)
+            $this->maxAmount = Transaction::forReporting()->where('reference', $reference)
                 ->sum($this->activeTab === 'change' ? 'change_due' : 'debt_amount');
 
             $this->settleAmount = $this->maxAmount;

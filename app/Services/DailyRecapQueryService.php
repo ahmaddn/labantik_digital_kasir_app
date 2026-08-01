@@ -9,7 +9,7 @@ class DailyRecapQueryService
 {
     public function getRecapData(string $selectedDate, ?string $activeJurusanId): array
     {
-        $allTransactions = Transaction::with(['product.category'])
+        $allTransactions = Transaction::forReporting()->with(['product.category'])
             ->whereDate('transacted_at', $selectedDate)
             ->when($activeJurusanId, function ($q) use ($activeJurusanId) {
                 return $q->where('jurusan_id', $activeJurusanId);

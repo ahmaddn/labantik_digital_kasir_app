@@ -96,12 +96,19 @@ class Transactions extends Component
 
     public function delete($reference)
     {
-        $transactions = Transaction::where('reference', $reference)->get();
+        $transactions = Transaction::forReporting()->where('reference', $reference)->get();
+
+        if ($transactions->contains(fn ($tx) => $tx->is_archived)) {
+            $this->dispatch('toast', message: 'Transaksi tutup buku tidak dapat dihapus.', type: 'error');
+
+            return;
+        }
+
         foreach ($transactions as $tx) {
             $this->cascadeStockUpdate($tx->product_id, $tx->transacted_at, -$tx->quantity);
         }
 
-        Transaction::where('reference', $reference)->delete();
+        Transaction::forReporting()->where('reference', $reference)->delete();
         $this->dispatch('toast', message: 'Seluruh transaksi berhasil dihapus.');
     }
 
@@ -117,13 +124,13 @@ class Transactions extends Component
             return collect();
         }
 
-        return Transaction::withoutGlobalScope('active')->with('product')->where('reference', $this->detailReference)->get();
+        return Transaction::forReporting()->with('product')->where('reference', $this->detailReference)->get();
     }
 
     public function edit($reference)
     {
         $this->editingReference = $reference;
-        $transactions = Transaction::where('reference', $reference)->get();
+        $transactions = Transaction::forReporting()->where('reference', $reference)->get();
 
         if ($transactions->isEmpty()) {
             return;
@@ -154,7 +161,7 @@ class Transactions extends Component
         ]);
 
         foreach ($this->editItems as $item) {
-            $tx = Transaction::find($item['id']);
+            $tx = Transaction::forReporting()->find($item['id']);
             if ($tx) {
                 $qtyDiff = $item['quantity'] - $tx->quantity;
                 if ($qtyDiff != 0) {
@@ -177,13 +184,13 @@ class Transactions extends Component
     public function render()
     {
         $activeJurusanId = session('active_jurusan_id');
-        $query = $this->showArchived 
+        $query = $this->showArchived
             ? Transaction::withoutGlobalScope('active')->where('is_archived', true)
             : Transaction::query();
 
         $query->when($activeJurusanId, function ($q) use ($activeJurusanId) {
-                return $q->where('jurusan_id', $activeJurusanId);
-            })
+            return $q->where('jurusan_id', $activeJurusanId);
+        })
             ->when(! $activeJurusanId && $this->filterJurusan, function ($q) {
                 return $q->where('jurusan_id', $this->filterJurusan);
             });

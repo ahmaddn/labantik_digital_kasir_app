@@ -2,25 +2,29 @@
 
 namespace App\Livewire\Reports;
 
-use App\Models\Transaction;
-use App\Models\DailyRecap;
+use App\Exports\MonthlyRecapExport;
 use App\Models\CashTransaction;
+use App\Models\DailyRecap;
+use App\Models\Transaction;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
+use Maatwebsite\Excel\Facades\Excel;
 
 class MonthlyRecap extends Component
 {
     public $selectedMonth;
+
     public $selectedYear;
+
     public $availableYears = [];
 
     public function mount($month = null, $year = null)
     {
         $this->selectedMonth = $month ?? now()->month;
         $this->selectedYear = $year ?? now()->year;
-        
-        $this->availableYears = Transaction::selectRaw('YEAR(transacted_at) as year')
+
+        $this->availableYears = Transaction::forReporting()->selectRaw('YEAR(transacted_at) as year')
             ->distinct()
             ->orderBy('year', 'desc')
             ->pluck('year')
@@ -33,14 +37,14 @@ class MonthlyRecap extends Component
 
     private function getRecapData($activeJurusanId)
     {
-        $monthlyExpenses = CashTransaction::where('jurusan_id', $activeJurusanId)
+        $monthlyExpenses = CashTransaction::forReporting()->where('jurusan_id', $activeJurusanId)
             ->whereYear('date', $this->selectedYear)
             ->whereMonth('date', $this->selectedMonth)
             ->where('type', 'expense')
             ->sum('amount');
 
         // 1. Calculate monthly aggregates
-        $aggregates = Transaction::whereMonth('transacted_at', $this->selectedMonth)
+        $aggregates = Transaction::forReporting()->whereMonth('transacted_at', $this->selectedMonth)
             ->whereYear('transacted_at', $this->selectedYear)
             ->when($activeJurusanId, function ($q) use ($activeJurusanId) {
                 return $q->where('jurusan_id', $activeJurusanId);
@@ -56,7 +60,7 @@ class MonthlyRecap extends Component
             ")
             ->first();
 
-        if (!$aggregates || !$aggregates->total_transactions) {
+        if (! $aggregates || ! $aggregates->total_transactions) {
             return null;
         }
 
@@ -75,11 +79,11 @@ class MonthlyRecap extends Component
             'total_profit' => $totalProfit,
             'total_modal' => $totalModal,
             'total_transactions' => $aggregates->total_transactions ?? 0,
-            'days_count' => $daysCount ?: 1
+            'days_count' => $daysCount ?: 1,
         ];
 
         // 2. Fetch daily breakdown with profit calculated in DB
-        $dailyBreakdown = Transaction::selectRaw('
+        $dailyBreakdown = Transaction::forReporting()->selectRaw('
                 DATE(transacted_at) as date,
                 COUNT(*) as total_transactions,
                 SUM(total_price) as total_revenue_all,
@@ -98,10 +102,10 @@ class MonthlyRecap extends Component
         // 3. Load daily recaps and calculate starting change cash in-memory
         $dates = $dailyBreakdown->pluck('date')->sort()->values();
         $firstDate = $dates->first();
-        
+
         $initialPrev = null;
         if ($firstDate) {
-            $initialPrev = DailyRecap::where('jurusan_id', $activeJurusanId)
+            $initialPrev = DailyRecap::forReporting()->where('jurusan_id', $activeJurusanId)
                 ->where('date', '<', $firstDate)
                 ->orderBy('date', 'desc')
                 ->first();
@@ -111,7 +115,7 @@ class MonthlyRecap extends Component
         $recapsWithPrevious = [];
         if ($firstDate) {
             $lastDate = $dates->last();
-            $allRecaps = DailyRecap::where('jurusan_id', $activeJurusanId)
+            $allRecaps = DailyRecap::forReporting()->where('jurusan_id', $activeJurusanId)
                 ->whereBetween('date', [$firstDate, $lastDate])
                 ->orderBy('date')
                 ->get();
@@ -139,7 +143,7 @@ class MonthlyRecap extends Component
         }
 
         // 4. Category breakdown directly from DB
-        $categoryRecap = Transaction::whereMonth('transacted_at', $this->selectedMonth)
+        $categoryRecap = Transaction::forReporting()->whereMonth('transacted_at', $this->selectedMonth)
             ->whereYear('transacted_at', $this->selectedYear)
             ->when($activeJurusanId, function ($q) use ($activeJurusanId) {
                 return $q->where('jurusan_id', $activeJurusanId);
@@ -162,7 +166,7 @@ class MonthlyRecap extends Component
         return [
             'recap' => $recap,
             'categoryRecap' => $categoryRecap,
-            'dailyBreakdown' => $dailyBreakdown
+            'dailyBreakdown' => $dailyBreakdown,
         ];
     }
 
@@ -171,17 +175,17 @@ class MonthlyRecap extends Component
         $activeJurusanId = session('active_jurusan_id');
         $data = $this->getRecapData($activeJurusanId);
 
-        if (!$data) {
+        if (! $data) {
             return;
         }
 
-        $monthName = Carbon::create(null, $this->selectedMonth)->translatedFormat('F') . ' ' . $this->selectedYear;
-        $filename = 'Rekap_Bulanan_' . str_replace(' ', '_', $monthName) . '.xlsx';
+        $monthName = Carbon::create(null, $this->selectedMonth)->translatedFormat('F').' '.$this->selectedYear;
+        $filename = 'Rekap_Bulanan_'.str_replace(' ', '_', $monthName).'.xlsx';
 
-        return \Maatwebsite\Excel\Facades\Excel::download(new \App\Exports\MonthlyRecapExport(
-            $data['recap'], 
-            $data['categoryRecap'], 
-            $data['dailyBreakdown'], 
+        return Excel::download(new MonthlyRecapExport(
+            $data['recap'],
+            $data['categoryRecap'],
+            $data['dailyBreakdown'],
             $monthName
         ), $filename);
     }
@@ -191,18 +195,18 @@ class MonthlyRecap extends Component
         $activeJurusanId = session('active_jurusan_id');
         $data = $this->getRecapData($activeJurusanId);
 
-        if (!$data) {
+        if (! $data) {
             return view('livewire.reports.monthly-recap', [
                 'recap' => null,
                 'categoryRecap' => [],
-                'dailyBreakdown' => []
+                'dailyBreakdown' => [],
             ])->layout('layouts.app', ['title' => 'Rekap Bulanan']);
         }
 
         return view('livewire.reports.monthly-recap', [
             'recap' => $data['recap'],
             'categoryRecap' => $data['categoryRecap'],
-            'dailyBreakdown' => $data['dailyBreakdown']
+            'dailyBreakdown' => $data['dailyBreakdown'],
         ])->layout('layouts.app', ['title' => 'Rekap Bulanan']);
     }
 }

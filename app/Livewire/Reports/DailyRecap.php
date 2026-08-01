@@ -68,7 +68,7 @@ class DailyRecap extends Component
     protected function loadCashAudit(): void
     {
         $activeJurusanId = session('active_jurusan_id');
-        $recap = DailyRecapModel::where('date', $this->selectedDate)
+        $recap = DailyRecapModel::forReporting()->where('date', $this->selectedDate)
             ->when($activeJurusanId, function ($q) use ($activeJurusanId) {
                 return $q->where('jurusan_id', $activeJurusanId);
             })
@@ -83,13 +83,13 @@ class DailyRecap extends Component
             $this->cashNote = '';
         }
 
-        $previousRecap = DailyRecapModel::where('jurusan_id', $activeJurusanId)
+        $previousRecap = DailyRecapModel::forReporting()->where('jurusan_id', $activeJurusanId)
             ->where('date', '<', $this->selectedDate)
             ->orderBy('date', 'desc')
             ->first();
         $this->startingChangeCash = $previousRecap ? ($previousRecap->retained_change_cash ?? 0) : 0;
 
-        $this->isPosted = CashTransaction::where('date', $this->selectedDate)
+        $this->isPosted = CashTransaction::forReporting()->where('date', $this->selectedDate)
             ->when($activeJurusanId, function ($q) use ($activeJurusanId) {
                 return $q->where('jurusan_id', $activeJurusanId);
             })
@@ -145,7 +145,7 @@ class DailyRecap extends Component
     {
         $activeJurusanId = session('active_jurusan_id');
 
-        $query = Transaction::query()
+        $query = Transaction::forReporting()
             ->whereDate('transacted_at', $this->selectedDate)
             ->when($activeJurusanId, function ($q) use ($activeJurusanId) {
                 return $q->where('jurusan_id', $activeJurusanId);
@@ -198,7 +198,7 @@ class DailyRecap extends Component
             return collect();
         }
 
-        return Transaction::with('product')->where('reference', $this->detailReference)->get();
+        return Transaction::forReporting()->with('product')->where('reference', $this->detailReference)->get();
     }
 
     public function exportCSV()

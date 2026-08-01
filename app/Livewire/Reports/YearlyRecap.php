@@ -2,23 +2,26 @@
 
 namespace App\Livewire\Reports;
 
-use App\Models\Transaction;
-use App\Models\DailyRecap;
+use App\Exports\YearlyRecapExport;
 use App\Models\CashTransaction;
+use App\Models\DailyRecap;
+use App\Models\Transaction;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
+use Maatwebsite\Excel\Facades\Excel;
 
 class YearlyRecap extends Component
 {
     public $selectedYear;
+
     public $availableYears = [];
 
     public function mount($year = null)
     {
         $this->selectedYear = $year ?? now()->year;
-        
-        $this->availableYears = Transaction::selectRaw('YEAR(transacted_at) as year')
+
+        $this->availableYears = Transaction::forReporting()->selectRaw('YEAR(transacted_at) as year')
             ->distinct()
             ->orderBy('year', 'desc')
             ->pluck('year')
@@ -31,13 +34,13 @@ class YearlyRecap extends Component
 
     private function getRecapData($activeJurusanId)
     {
-        $yearlyExpenses = CashTransaction::where('jurusan_id', $activeJurusanId)
+        $yearlyExpenses = CashTransaction::forReporting()->where('jurusan_id', $activeJurusanId)
             ->whereYear('date', $this->selectedYear)
             ->where('type', 'expense')
             ->sum('amount');
 
         // 1. Calculate yearly aggregates directly from DB
-        $aggregates = Transaction::whereYear('transacted_at', $this->selectedYear)
+        $aggregates = Transaction::forReporting()->whereYear('transacted_at', $this->selectedYear)
             ->when($activeJurusanId, function ($q) use ($activeJurusanId) {
                 return $q->where('jurusan_id', $activeJurusanId);
             })
@@ -52,7 +55,7 @@ class YearlyRecap extends Component
             ")
             ->first();
 
-        if (!$aggregates || !$aggregates->total_transactions) {
+        if (! $aggregates || ! $aggregates->total_transactions) {
             return null;
         }
 
@@ -71,11 +74,11 @@ class YearlyRecap extends Component
             'total_profit' => $totalProfit,
             'total_modal' => $totalModal,
             'total_transactions' => $aggregates->total_transactions ?? 0,
-            'months_count' => $monthsCount ?: 1
+            'months_count' => $monthsCount ?: 1,
         ];
 
         // 2. Fetch monthly stats
-        $monthlyTxStats = Transaction::whereYear('transacted_at', $this->selectedYear)
+        $monthlyTxStats = Transaction::forReporting()->whereYear('transacted_at', $this->selectedYear)
             ->when($activeJurusanId, function ($q) use ($activeJurusanId) {
                 return $q->where('jurusan_id', $activeJurusanId);
             })
@@ -90,7 +93,7 @@ class YearlyRecap extends Component
             ->keyBy('month_num');
 
         // 3. Cache and optimize CashTransaction expenses by month
-        $yearlyExpensesByMonth = CashTransaction::where('jurusan_id', $activeJurusanId)
+        $yearlyExpensesByMonth = CashTransaction::forReporting()->where('jurusan_id', $activeJurusanId)
             ->whereYear('date', $this->selectedYear)
             ->where('type', 'expense')
             ->selectRaw('MONTH(date) as month_num, SUM(amount) as total_amount')
@@ -99,7 +102,7 @@ class YearlyRecap extends Component
             ->toArray();
 
         // 4. Load all DailyRecaps for the selected year once
-        $recaps = DailyRecap::whereYear('date', $this->selectedYear)
+        $recaps = DailyRecap::forReporting()->whereYear('date', $this->selectedYear)
             ->when($activeJurusanId, function ($q) use ($activeJurusanId) {
                 return $q->where('jurusan_id', $activeJurusanId);
             })
@@ -110,7 +113,7 @@ class YearlyRecap extends Component
         $firstRecapDate = $recaps->first()?->date;
         $initialPrev = null;
         if ($firstRecapDate) {
-            $initialPrev = DailyRecap::where('jurusan_id', $activeJurusanId)
+            $initialPrev = DailyRecap::forReporting()->where('jurusan_id', $activeJurusanId)
                 ->where('date', '<', $firstRecapDate)
                 ->orderBy('date', 'desc')
                 ->first();
@@ -129,7 +132,7 @@ class YearlyRecap extends Component
             $txStat = $monthlyTxStats->get($m);
             if ($txStat && $txStat->total_transactions > 0) {
                 // Filter recaps for this month in-memory
-                $monthRecaps = $recaps->filter(fn($r) => Carbon::parse($r->date)->month == $m);
+                $monthRecaps = $recaps->filter(fn ($r) => Carbon::parse($r->date)->month == $m);
 
                 $totalActual = 0;
                 $totalRetained = 0;
@@ -163,7 +166,7 @@ class YearlyRecap extends Component
         }
 
         // 5. Category breakdown
-        $categoryRecap = Transaction::whereYear('transacted_at', $this->selectedYear)
+        $categoryRecap = Transaction::forReporting()->whereYear('transacted_at', $this->selectedYear)
             ->when($activeJurusanId, function ($q) use ($activeJurusanId) {
                 return $q->where('jurusan_id', $activeJurusanId);
             })
@@ -185,7 +188,7 @@ class YearlyRecap extends Component
         return [
             'recap' => $recap,
             'categoryRecap' => $categoryRecap,
-            'monthlyBreakdown' => $monthlyBreakdown
+            'monthlyBreakdown' => $monthlyBreakdown,
         ];
     }
 
@@ -194,15 +197,16 @@ class YearlyRecap extends Component
         $activeJurusanId = session('active_jurusan_id');
         $data = $this->getRecapData($activeJurusanId);
 
-        if (!$data) {
+        if (! $data) {
             return;
         }
 
-        $filename = 'Rekap_Tahunan_' . $this->selectedYear . '.xlsx';
-        return \Maatwebsite\Excel\Facades\Excel::download(new \App\Exports\YearlyRecapExport(
-            $data['recap'], 
-            $data['categoryRecap'], 
-            $data['monthlyBreakdown'], 
+        $filename = 'Rekap_Tahunan_'.$this->selectedYear.'.xlsx';
+
+        return Excel::download(new YearlyRecapExport(
+            $data['recap'],
+            $data['categoryRecap'],
+            $data['monthlyBreakdown'],
             $this->selectedYear
         ), $filename);
     }
@@ -212,17 +216,17 @@ class YearlyRecap extends Component
         $activeJurusanId = session('active_jurusan_id');
         $data = $this->getRecapData($activeJurusanId);
 
-        if (!$data) {
+        if (! $data) {
             return view('livewire.reports.yearly-recap', [
                 'recap' => null,
-                'monthlyBreakdown' => []
+                'monthlyBreakdown' => [],
             ])->layout('layouts.app', ['title' => 'Rekap Tahunan']);
         }
 
         return view('livewire.reports.yearly-recap', [
             'recap' => $data['recap'],
             'categoryRecap' => $data['categoryRecap'],
-            'monthlyBreakdown' => $data['monthlyBreakdown']
+            'monthlyBreakdown' => $data['monthlyBreakdown'],
         ])->layout('layouts.app', ['title' => 'Rekap Tahunan']);
     }
 }

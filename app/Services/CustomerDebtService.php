@@ -18,7 +18,7 @@ class CustomerDebtService
         string $userId
     ): void {
         DB::transaction(function () use ($reference, $settleAmount, $settleMethod, $activeTab, $spentItems, $userId) {
-            $transactions = Transaction::where('reference', $reference)->get();
+            $transactions = Transaction::forReporting()->where('reference', $reference)->get();
             $remainingToSettle = $settleAmount;
 
             foreach ($transactions as $trx) {
@@ -49,11 +49,11 @@ class CustomerDebtService
                 $trx->update($updates);
             }
 
-            $totalRemaining = Transaction::where('reference', $reference)
+            $totalRemaining = Transaction::forReporting()->where('reference', $reference)
                 ->sum($activeTab === 'change' ? 'change_due' : 'debt_amount');
 
             if ($totalRemaining <= 0) {
-                $allTrx = Transaction::where('reference', $reference)->get();
+                $allTrx = Transaction::forReporting()->where('reference', $reference)->get();
                 foreach ($allTrx as $t) {
                     if ($t->status !== 'uang_diterima') {
                         $t->update([
@@ -89,7 +89,7 @@ class CustomerDebtService
     public function cancelSettle(string $reference): void
     {
         DB::transaction(function () use ($reference) {
-            $transactions = Transaction::where('reference', $reference)->get();
+            $transactions = Transaction::forReporting()->where('reference', $reference)->get();
 
             $isChangeTrx = false;
             foreach ($transactions as $t) {

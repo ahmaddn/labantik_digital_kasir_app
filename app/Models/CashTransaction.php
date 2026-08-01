@@ -66,6 +66,15 @@ class CashTransaction extends Model
      * @param  Builder<CashTransaction>  $query
      * @return Builder<CashTransaction>
      */
+    public function scopeForReporting($query)
+    {
+        return $query->withoutGlobalScope('active');
+    }
+
+    /**
+     * @param  Builder<CashTransaction>  $query
+     * @return Builder<CashTransaction>
+     */
     public function scopeExcludeCarryForward($query)
     {
         return $query->where(function ($query) {

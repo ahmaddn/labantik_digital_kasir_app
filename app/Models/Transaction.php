@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Observers\TransactionObserver;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -63,6 +64,15 @@ class Transaction extends Model
     public function scopeUnreturnedChange($query)
     {
         return $query->where('status', 'belum_kembalian');
+    }
+
+    /**
+     * @param  Builder<Transaction>  $query
+     * @return Builder<Transaction>
+     */
+    public function scopeForReporting($query)
+    {
+        return $query->withoutGlobalScope('active');
     }
 
     protected static function booted()
