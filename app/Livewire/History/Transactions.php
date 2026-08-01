@@ -98,7 +98,7 @@ class Transactions extends Component
     {
         $transactions = Transaction::forReporting()->where('reference', $reference)->get();
 
-        if ($transactions->contains(fn ($tx) => $tx->is_archived)) {
+        if ($transactions->contains(fn($tx) => $tx->is_archived)) {
             $this->dispatch('toast', message: 'Transaksi tutup buku tidak dapat dihapus.', type: 'error');
 
             return;
@@ -199,10 +199,10 @@ class Transactions extends Component
             $query->where('reference', $this->highlight);
         } elseif ($this->search) {
             $query->where(function ($q) {
-                $q->where('reference', 'like', '%'.$this->search.'%')
-                    ->orWhere('buyer_name', 'like', '%'.$this->search.'%')
+                $q->where('reference', 'like', '%' . $this->search . '%')
+                    ->orWhere('buyer_name', 'like', '%' . $this->search . '%')
                     ->orWhereHas('product', function ($pq) {
-                        $pq->where('name', 'like', '%'.$this->search.'%');
+                        $pq->where('name', 'like', '%' . $this->search . '%');
                     });
             });
         }

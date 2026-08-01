@@ -163,7 +163,7 @@ class Debt extends Component
     public function settle(CustomerDebtService $debtService)
     {
         $this->validate([
-            'settleAmount' => 'required|numeric|min:1|max:'.$this->maxAmount,
+            'settleAmount' => 'required|numeric|min:1|max:' . $this->maxAmount,
             'settleMethod' => 'required|in:dibayarkan,dicicil,dijajankan',
         ]);
 
@@ -226,7 +226,7 @@ class Debt extends Component
         }
 
         return Product::where('is_active', true)
-            ->where('name', 'like', '%'.$this->productSearch.'%')
+            ->where('name', 'like', '%' . $this->productSearch . '%')
             ->limit(5)
             ->get();
     }
@@ -350,7 +350,7 @@ class Debt extends Component
     public function settleStoreDebt(StoreDebtService $debtService)
     {
         $this->validate([
-            'settleStoreDebtAmount' => 'required|numeric|min:1|max:'.$this->maxStoreDebtAmount,
+            'settleStoreDebtAmount' => 'required|numeric|min:1|max:' . $this->maxStoreDebtAmount,
             'settleStoreDebtMethod' => 'required|in:dibayarkan,dicicil',
         ]);
 
@@ -376,7 +376,7 @@ class Debt extends Component
             $debt->update([
                 'status' => 'dihapus',
                 'remaining_amount' => 0,
-                'note' => $debt->note ? $debt->note.' [Dihapus oleh Superadmin]' : '[Dihapus oleh Superadmin]',
+                'note' => $debt->note ? $debt->note . ' [Dihapus oleh Superadmin]' : '[Dihapus oleh Superadmin]',
             ]);
             $this->dispatch('toast', message: 'Hutang toko berhasil dihapus oleh Superadmin.');
 
@@ -396,12 +396,12 @@ class Debt extends Component
     {
         $this->validate([
             'deleteStoreDebtReason' => 'required|string|min:10',
-            'deleteStoreDebtVerification' => 'required|string|in:'.$this->deleteStoreDebtCreditorName,
+            'deleteStoreDebtVerification' => 'required|string|in:' . $this->deleteStoreDebtCreditorName,
             'deleteStoreDebtStatement' => 'accepted',
         ], [
             'deleteStoreDebtReason.required' => 'Alasan penghapusan wajib diisi.',
             'deleteStoreDebtReason.min' => 'Alasan harus diisi minimal 10 karakter untuk pertanggungjawaban.',
-            'deleteStoreDebtVerification.in' => 'Konfirmasi nama salah. Harus sesuai kreditor: "'.$this->deleteStoreDebtCreditorName.'".',
+            'deleteStoreDebtVerification.in' => 'Konfirmasi nama salah. Harus sesuai kreditor: "' . $this->deleteStoreDebtCreditorName . '".',
             'deleteStoreDebtStatement.accepted' => 'Anda harus menyetujui pernyataan pertanggungjawaban.',
         ]);
 

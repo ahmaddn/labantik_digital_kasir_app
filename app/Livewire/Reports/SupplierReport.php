@@ -32,7 +32,7 @@ class SupplierReport extends Component
 
     public function exportExcel()
     {
-        $filename = 'Laporan_Supplier_'.Carbon::parse($this->dateFrom)->format('Ymd').'-'.Carbon::parse($this->dateTo)->format('Ymd').'.xlsx';
+        $filename = 'Laporan_Supplier_' . Carbon::parse($this->dateFrom)->format('Ymd') . '-' . Carbon::parse($this->dateTo)->format('Ymd') . '.xlsx';
 
         return Excel::download(new SupplierReportExport($this->dateFrom, $this->dateTo, $this->supplierId), $filename);
     }
@@ -80,7 +80,7 @@ class SupplierReport extends Component
                 } else {
                     $sold = Transaction::forReporting()->where('product_id', $product->id)
                         ->whereIn('status', ['uang_diterima', 'belum_kembalian'])
-                        ->whereBetween('transacted_at', [$this->dateFrom.' 00:00:00', $this->dateTo.' 23:59:59'])
+                        ->whereBetween('transacted_at', [$this->dateFrom . ' 00:00:00', $this->dateTo . ' 23:59:59'])
                         ->sum('quantity');
                 }
 
@@ -101,7 +101,7 @@ class SupplierReport extends Component
                 'total_shop_profit' => $totalShopProfit,
                 'is_settled' => CashTransaction::forReporting()->where('reference', "SETTLE-SUPPLIER-{$supplier->id}-{$this->dateFrom}-{$this->dateTo}")->exists(),
             ];
-        })->filter(fn ($r) => $r->total_qty > 0);
+        })->filter(fn($r) => $r->total_qty > 0);
 
         return view('livewire.reports.supplier-report', [
             'reports' => $reports,
@@ -140,7 +140,7 @@ class SupplierReport extends Component
             'cash_type' => 'modal',
             'cash_category_id' => $category->id,
             'amount' => $amount,
-            'description' => "Pelunasan bagi hasil supplier {$supplierName} periode ".Carbon::parse($this->dateFrom)->translatedFormat('d M Y').' s/d '.Carbon::parse($this->dateTo)->translatedFormat('d M Y'),
+            'description' => "Pelunasan bagi hasil supplier {$supplierName} periode " . Carbon::parse($this->dateFrom)->translatedFormat('d M Y') . ' s/d ' . Carbon::parse($this->dateTo)->translatedFormat('d M Y'),
             'reference' => $reference,
         ]);
 
@@ -153,12 +153,12 @@ class SupplierReport extends Component
 
         $msg = "📢 *LAPORAN BAGI HASIL SUPPLIER*\n";
         $msg .= "👤 *Supplier:* {$supplierName}\n";
-        $msg .= '📅 *Periode:* '.Carbon::parse($this->dateFrom)->translatedFormat('d M Y').' s/d '.Carbon::parse($this->dateTo)->translatedFormat('d M Y')."\n";
-        $msg .= '💰 *Total Hak Supplier:* Rp'.number_format($amount, 0, ',', '.')."\n\n";
+        $msg .= '📅 *Periode:* ' . Carbon::parse($this->dateFrom)->translatedFormat('d M Y') . ' s/d ' . Carbon::parse($this->dateTo)->translatedFormat('d M Y') . "\n";
+        $msg .= '💰 *Total Hak Supplier:* Rp' . number_format($amount, 0, ',', '.') . "\n\n";
         $msg .= "*Status:* ✅ LUNAS (Sudah dibayarkan)\n\n";
         $msg .= '_Terima kasih atas kerjasamanya._';
 
-        $waUrl = 'https://api.whatsapp.com/send?text='.urlencode($msg);
+        $waUrl = 'https://api.whatsapp.com/send?text=' . urlencode($msg);
 
         $this->dispatch('open-link', url: $waUrl);
     }
