@@ -8,6 +8,7 @@ use App\Models\MonthlyClosingRecord;
 use App\Models\Transaction;
 use App\Models\User;
 use Carbon\Carbon;
+use Carbon\CarbonInterface;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
@@ -110,7 +111,7 @@ class MonthlyClosing extends Component
         $this->canCancel = $this->isClosed && $this->cancelBlockedReason === null;
     }
 
-    protected function isInLastWeekOfMonth(Carbon $date): bool
+    protected function isInLastWeekOfMonth(CarbonInterface $date): bool
     {
         return $date->day >= ($date->daysInMonth - 6);
     }
