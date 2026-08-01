@@ -467,89 +467,65 @@ class CashManagement extends Component
         $activeJurusanId = session('active_jurusan_id');
         $jurusan = \App\Models\Jurusan::find($activeJurusanId);
         $isSubUnit = $jurusan && $jurusan->parent_id;
+        $selectedMonth = $this->filterMonth ?: now()->format('Y-m');
+        $selectedYear = Carbon::parse($selectedMonth . '-01')->year;
+        $selectedMonthNumber = Carbon::parse($selectedMonth . '-01')->month;
 
-        // Cache all-time balances and category sums
-        $cacheKey = 'cash_balances_' . ($activeJurusanId ?: 'global');
-        $cachedData = \Illuminate\Support\Facades\Cache::remember($cacheKey, 3600, function () use ($activeJurusanId) {
-            // 1. Global Balance
-            $balances = CashTransaction::where('jurusan_id', $activeJurusanId)
-                ->selectRaw("
-                    SUM(CASE WHEN cash_type = 'modal' AND type = 'income' THEN amount ELSE 0 END) as modal_income,
-                    SUM(CASE WHEN cash_type = 'modal' AND type = 'expense' THEN amount ELSE 0 END) as modal_expense,
-                    SUM(CASE WHEN cash_type = 'keuntungan' AND type = 'income' THEN amount ELSE 0 END) as profit_income,
-                    SUM(CASE WHEN cash_type = 'keuntungan' AND type = 'expense' THEN amount ELSE 0 END) as profit_expense
-                ")
-                ->first();
+        $query = CashTransaction::where('jurusan_id', $activeJurusanId)
+            ->whereYear('date', $selectedYear)
+            ->whereMonth('date', $selectedMonthNumber);
 
-            $currentModalBalance = ($balances->modal_income ?? 0) - ($balances->modal_expense ?? 0);
-            $currentProfitBalance = ($balances->profit_income ?? 0) - ($balances->profit_expense ?? 0);
+        $balances = (clone $query)
+            ->selectRaw("
+                SUM(CASE WHEN cash_type = 'modal' AND type = 'income' THEN amount ELSE 0 END) as modal_income,
+                SUM(CASE WHEN cash_type = 'modal' AND type = 'expense' THEN amount ELSE 0 END) as modal_expense,
+                SUM(CASE WHEN cash_type = 'keuntungan' AND type = 'income' THEN amount ELSE 0 END) as profit_income,
+                SUM(CASE WHEN cash_type = 'keuntungan' AND type = 'expense' THEN amount ELSE 0 END) as profit_expense
+            ")
+            ->first();
 
-            // 2. Category aggregates
-            $categorySums = CashTransaction::where('jurusan_id', $activeJurusanId)
-                ->selectRaw("
-                    cash_category_id,
-                    SUM(CASE WHEN type = 'income' THEN amount ELSE 0 END) as cat_income,
-                    SUM(CASE WHEN type = 'expense' THEN amount ELSE 0 END) as cat_expense,
-                    SUM(CASE WHEN cash_type = 'modal' AND type = 'income' THEN amount ELSE 0 END) as modal_income,
-                    SUM(CASE WHEN cash_type = 'modal' AND type = 'expense' THEN amount ELSE 0 END) as modal_expense,
-                    SUM(CASE WHEN cash_type = 'keuntungan' AND type = 'income' THEN amount ELSE 0 END) as profit_income,
-                    SUM(CASE WHEN cash_type = 'keuntungan' AND type = 'expense' THEN amount ELSE 0 END) as profit_expense
-                ")
-                ->groupBy('cash_category_id')
+        $currentModalBalance = ($balances->modal_income ?? 0) - ($balances->modal_expense ?? 0);
+        $currentProfitBalance = ($balances->profit_income ?? 0) - ($balances->profit_expense ?? 0);
+
+        $categorySums = (clone $query)
+            ->selectRaw("
+                cash_category_id,
+                SUM(CASE WHEN type = 'income' THEN amount ELSE 0 END) as cat_income,
+                SUM(CASE WHEN type = 'expense' THEN amount ELSE 0 END) as cat_expense,
+                SUM(CASE WHEN cash_type = 'modal' AND type = 'income' THEN amount ELSE 0 END) as modal_income,
+                SUM(CASE WHEN cash_type = 'modal' AND type = 'expense' THEN amount ELSE 0 END) as modal_expense,
+                SUM(CASE WHEN cash_type = 'keuntungan' AND type = 'income' THEN amount ELSE 0 END) as profit_income,
+                SUM(CASE WHEN cash_type = 'keuntungan' AND type = 'expense' THEN amount ELSE 0 END) as profit_expense
+            ")
+            ->groupBy('cash_category_id')
+            ->get()
+            ->keyBy('cash_category_id');
+
+        $catBagiHasil = \App\Models\CashCategory::where('jurusan_id', $activeJurusanId)->where('name', 'Bagi Hasil Mingguan')->first();
+        $bagiHasilTransactions = [];
+        if ($catBagiHasil) {
+            $bagiHasilTransactions = (clone $query)
+                ->where('cash_category_id', $catBagiHasil->id)
                 ->get()
-                ->keyBy('cash_category_id');
+                ->toArray();
+        }
 
-            // 3. Bagi Hasil transactions (for deduction logic)
-            $catBagiHasil = \App\Models\CashCategory::where('jurusan_id', $activeJurusanId)->where('name', 'Bagi Hasil Mingguan')->first();
-            $bagiHasilTransactions = [];
-            if ($catBagiHasil) {
-                $bagiHasilTransactions = CashTransaction::where('jurusan_id', $activeJurusanId)
-                    ->where('cash_category_id', $catBagiHasil->id)
-                    ->get()
-                    ->toArray();
-            }
+        $monthlyStats = (clone $query)
+            ->selectRaw("
+                SUM(CASE WHEN type = 'income' THEN amount ELSE 0 END) as income,
+                SUM(CASE WHEN type = 'expense' THEN amount ELSE 0 END) as expense
+            ")
+            ->first();
 
-            return [
-                'currentModalBalance' => $currentModalBalance,
-                'currentProfitBalance' => $currentProfitBalance,
-                'categorySums' => $categorySums->toArray(),
-                'bagiHasilTransactions' => $bagiHasilTransactions,
-            ];
-        });
+        $monthlyIncome = $monthlyStats->income ?? 0;
+        $monthlyExpense = $monthlyStats->expense ?? 0;
 
-        $currentModalBalance = $cachedData['currentModalBalance'];
-        $currentProfitBalance = $cachedData['currentProfitBalance'];
-        $categorySums = collect($cachedData['categorySums']);
-        $bagiHasilTransactions = $cachedData['bagiHasilTransactions'];
-
-        // Cache Monthly Stats based on filterMonth
-        $monthlyCacheKey = 'cash_monthly_stats_' . ($activeJurusanId ?: 'global') . '_' . $this->filterMonth;
-        $monthlyStats = \Illuminate\Support\Facades\Cache::remember($monthlyCacheKey, 3600, function () use ($activeJurusanId) {
-            $stats = CashTransaction::where('jurusan_id', $activeJurusanId)
-                ->whereYear('date', Carbon::parse($this->filterMonth)->year)
-                ->whereMonth('date', Carbon::parse($this->filterMonth)->month)
-                ->selectRaw("
-                    SUM(CASE WHEN type = 'income' THEN amount ELSE 0 END) as income,
-                    SUM(CASE WHEN type = 'expense' THEN amount ELSE 0 END) as expense
-                ")
-                ->first();
-
-            return [
-                'income' => $stats->income ?? 0,
-                'expense' => $stats->expense ?? 0,
-            ];
-        });
-
-        $monthlyIncome = $monthlyStats['income'];
-        $monthlyExpense = $monthlyStats['expense'];
-
-        // Category Stats list
         $categories = \App\Models\CashCategory::where('jurusan_id', $activeJurusanId)->get();
         $categoryStats = [];
 
         foreach ($categories as $category) {
             $catSum = (object) ($categorySums->get($category->id) ?? []);
-            
+
             $catIncome = $catSum->cat_income ?? 0;
             $catExpense = $catSum->cat_expense ?? 0;
             $modalBalance = ($catSum->modal_income ?? 0) - ($catSum->modal_expense ?? 0);
@@ -578,7 +554,6 @@ class CashManagement extends Component
                 $profitBalance -= $bagiHasilDeduction;
             }
 
-            // Override profit_balance to 0 for Bagi Hasil Mingguan card
             if ($category->name === 'Bagi Hasil Mingguan') {
                 $profitBalance = 0;
             }
@@ -594,10 +569,7 @@ class CashManagement extends Component
             ];
         }
 
-        // Paginated Data
-        $transactions = CashTransaction::where('jurusan_id', $activeJurusanId)
-            ->whereYear('date', Carbon::parse($this->filterMonth)->year)
-            ->whereMonth('date', Carbon::parse($this->filterMonth)->month)
+        $transactions = (clone $query)
             ->orderBy('date', 'desc')
             ->orderBy('id', 'desc')
             ->paginate(15);
