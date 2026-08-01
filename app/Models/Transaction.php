@@ -75,10 +75,4 @@ class Transaction extends Model
         return $query->withoutGlobalScope('active');
     }
 
-    protected static function booted()
-    {
-        static::addGlobalScope('active', function ($builder) {
-            $builder->where('is_archived', false);
-        });
-    }
 }

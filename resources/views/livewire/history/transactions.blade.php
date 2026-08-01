@@ -45,11 +45,6 @@
                     <input type="date" wire:model.live="filterDate" class="border-none p-0 focus:ring-0 font-black text-[11px] bg-transparent dark:text-white uppercase tracking-widest cursor-pointer w-full">
                 </div>
 
-                <!-- Archive Selector -->
-                <label class="flex items-center bg-white dark:bg-gray-800 px-6 py-3.5 rounded-2xl shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-800 cursor-pointer select-none w-full lg:w-auto justify-center sm:justify-start">
-                    <input type="checkbox" wire:model.live="showArchived" class="rounded border-gray-300 text-primary-blue focus:ring-primary-blue mr-3 w-4 h-4">
-                    <span class="text-[10px] font-black uppercase tracking-widest text-slate-500 shrink-0">Tampilkan Arsip</span>
-                </label>
             </div>
         </div>
     </div>

@@ -121,7 +121,6 @@ Route::middleware(['auth', 'verified', EnsureRoleSelected::class])->group(functi
 
     // Finance
     Route::get('/cash-management', CashManagement::class)->name('buku-kas');
-    Route::get('/monthly-closing', \App\Livewire\Finance\MonthlyClosing::class)->name('monthly-closing');
 
     // User Management
     Route::get('/users', UserManagement::class)->name('users');

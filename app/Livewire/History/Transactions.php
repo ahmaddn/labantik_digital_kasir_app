@@ -22,9 +22,9 @@ class Transactions extends Component
 
     public $filterDate = '';
 
-    public $filterJurusan = '';
+    public $filterMonth = '';
 
-    public $showArchived = false;
+    public $filterJurusan = '';
 
     public $successMessage = '';
 
@@ -44,9 +44,9 @@ class Transactions extends Component
 
     public $editItems = []; // Array of transaction items for editing
 
-    protected $queryString = ['search', 'filterStatus', 'filterDate', 'filterJurusan', 'showArchived'];
+    protected $queryString = ['search', 'filterStatus', 'filterDate', 'filterMonth', 'filterJurusan'];
 
-    public function updatedShowArchived()
+    public function updatedFilterMonth()
     {
         $this->resetPage();
     }
@@ -97,12 +97,6 @@ class Transactions extends Component
     public function delete($reference)
     {
         $transactions = Transaction::forReporting()->where('reference', $reference)->get();
-
-        if ($transactions->contains(fn($tx) => $tx->is_archived)) {
-            $this->dispatch('toast', message: 'Transaksi tutup buku tidak dapat dihapus.', type: 'error');
-
-            return;
-        }
 
         foreach ($transactions as $tx) {
             $this->cascadeStockUpdate($tx->product_id, $tx->transacted_at, -$tx->quantity);
@@ -184,9 +178,7 @@ class Transactions extends Component
     public function render()
     {
         $activeJurusanId = session('active_jurusan_id');
-        $query = $this->showArchived
-            ? Transaction::withoutGlobalScope('active')->where('is_archived', true)
-            : Transaction::query();
+        $query = Transaction::query();
 
         $query->when($activeJurusanId, function ($q) use ($activeJurusanId) {
             return $q->where('jurusan_id', $activeJurusanId);
@@ -211,7 +203,11 @@ class Transactions extends Component
             $query->where('status', $this->filterStatus);
         }
 
-        if ($this->filterDate) {
+        if ($this->filterMonth) {
+            $date = Carbon::parse($this->filterMonth . '-01');
+            $query->whereYear('transacted_at', $date->year)
+                ->whereMonth('transacted_at', $date->month);
+        } elseif ($this->filterDate) {
             $query->whereDate('transacted_at', $this->filterDate);
         }
 

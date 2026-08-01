@@ -370,12 +370,6 @@
                         </div>
                     </div>
 
-                    <div class="space-y-4 pt-4 border-t border-gray-100 dark:border-gray-800">
-                        <h3 class="font-black text-gray-900 dark:text-white text-base">2. Tutup Buku Bulanan (Monthly Closing)</h3>
-                        <p class="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
-                            Di akhir bulan, Pengelola Jurusan akan mengeksekusi menu <strong>Tutup Buku Bulanan</strong>. Proses ini akan mengarsipkan seluruh data transaksi bulan tersebut agar pembukuan tidak dapat diubah kembali dan mentransfer sisa saldo kas ke saldo awal modal bulan berikutnya.
-                        </p>
-                    </div>
                 </div>
             </div>
 
