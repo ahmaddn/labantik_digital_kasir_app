@@ -4,41 +4,54 @@ namespace App\Livewire\Finance;
 
 use App\Models\CashTransaction;
 use App\Models\DailyRecap;
+use App\Models\MonthlyClosingRecord;
 use App\Models\Transaction;
+use App\Models\User;
 use Carbon\Carbon;
-use Livewire\Component;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
+use Livewire\Component;
 
 class MonthlyClosing extends Component
 {
     public $selectedMonth;
+
     public $availableMonths = [];
-    
-    // Carry Forward Inputs (editable)
+
     public $carryForwardModal = 0;
+
     public $carryForwardProfit = 0;
-    
+
     public $isClosed = false;
+
+    public $canClose = false;
+
+    public $canCancel = false;
+
+    public $closeBlockedReason = null;
+
+    public $cancelBlockedReason = null;
+
+    public $showCancelConfirmation = false;
+
     public $monthStats = [];
 
-    public function mount()
+    public function mount(): void
     {
         $this->selectedMonth = now()->subMonth()->format('Y-m');
         $this->calculateMonths();
         $this->loadMonthStats();
     }
 
-    public function updatedSelectedMonth()
+    public function updatedSelectedMonth(): void
     {
         $this->loadMonthStats();
     }
 
-    protected function calculateMonths()
+    protected function calculateMonths(): void
     {
         $activeJurusanId = session('active_jurusan_id');
-        
-        // Find distinct months from transactions
+
         $dates = Transaction::withoutGlobalScope('active')
             ->where('jurusan_id', $activeJurusanId)
             ->selectRaw("DATE_FORMAT(transacted_at, '%Y-%m') as month")
@@ -52,13 +65,12 @@ class MonthlyClosing extends Component
         }
     }
 
-    public function loadMonthStats()
+    public function loadMonthStats(): void
     {
         $activeJurusanId = session('active_jurusan_id');
         $year = Carbon::parse($this->selectedMonth)->year;
         $month = Carbon::parse($this->selectedMonth)->month;
 
-        // Check if already closed
         $this->isClosed = Transaction::withoutGlobalScope('active')
             ->where('jurusan_id', $activeJurusanId)
             ->whereYear('transacted_at', $year)
@@ -66,7 +78,6 @@ class MonthlyClosing extends Component
             ->where('is_archived', true)
             ->exists();
 
-        // Calculate stats for this month
         $balances = CashTransaction::withoutGlobalScope('active')
             ->where('jurusan_id', $activeJurusanId)
             ->whereYear('date', $year)
@@ -85,16 +96,98 @@ class MonthlyClosing extends Component
         $this->monthStats = [
             'modal' => $modalBalance,
             'profit' => $profitBalance,
-            'total' => $modalBalance + $profitBalance
+            'total' => $modalBalance + $profitBalance,
         ];
 
-        if (!$this->isClosed) {
+        if (! $this->isClosed) {
             $this->carryForwardModal = $modalBalance;
             $this->carryForwardProfit = $profitBalance;
         }
+
+        $this->closeBlockedReason = $this->resolveCloseBlockedReason();
+        $this->canClose = $this->closeBlockedReason === null;
+        $this->cancelBlockedReason = $this->resolveCancelBlockedReason();
+        $this->canCancel = $this->isClosed && $this->cancelBlockedReason === null;
     }
 
-    public function closeMonth()
+    protected function isInLastWeekOfMonth(Carbon $date): bool
+    {
+        return $date->day >= ($date->daysInMonth - 6);
+    }
+
+    protected function canCloseSelectedMonth(): bool
+    {
+        return $this->resolveCloseBlockedReason() === null;
+    }
+
+    protected function resolveCloseBlockedReason(): ?string
+    {
+        $selected = Carbon::parse($this->selectedMonth.'-01');
+        $now = now();
+
+        if ($selected->format('Y-m') > $now->format('Y-m')) {
+            return 'Bulan ini belum dapat ditutup buku.';
+        }
+
+        if ($selected->format('Y-m') === $now->format('Y-m') && ! $this->isInLastWeekOfMonth($now)) {
+            return 'Tutup buku bulan berjalan hanya dapat dilakukan pada minggu terakhir bulan (7 hari terakhir).';
+        }
+
+        return null;
+    }
+
+    protected function resolveCancelBlockedReason(): ?string
+    {
+        if (! $this->isClosed) {
+            return null;
+        }
+
+        $activeJurusanId = session('active_jurusan_id');
+        $year = Carbon::parse($this->selectedMonth)->year;
+        $month = Carbon::parse($this->selectedMonth)->month;
+
+        if ($this->nextMonthHasNonCarryForwardActivity($year, $month, $activeJurusanId)) {
+            return 'Batalkan tutup buku tidak dapat dilakukan karena bulan berikutnya sudah memiliki transaksi atau rekap harian.';
+        }
+
+        return null;
+    }
+
+    protected function nextMonthHasNonCarryForwardActivity(int $year, int $month, string $jurusanId): bool
+    {
+        $nextMonth = Carbon::create($year, $month, 1)->addMonth();
+        $closingLabel = $this->getClosingPeriodLabel($year, $month);
+
+        if (Transaction::withoutGlobalScope('active')
+            ->where('jurusan_id', $jurusanId)
+            ->whereYear('transacted_at', $nextMonth->year)
+            ->whereMonth('transacted_at', $nextMonth->month)
+            ->exists()) {
+            return true;
+        }
+
+        if (DailyRecap::withoutGlobalScope('active')
+            ->where('jurusan_id', $jurusanId)
+            ->whereYear('date', $nextMonth->year)
+            ->whereMonth('date', $nextMonth->month)
+            ->exists()) {
+            return true;
+        }
+
+        return CashTransaction::withoutGlobalScope('active')
+            ->where('jurusan_id', $jurusanId)
+            ->whereYear('date', $nextMonth->year)
+            ->whereMonth('date', $nextMonth->month)
+            ->where('description', 'not like', '%Tutup Buku '.$closingLabel.'%')
+            ->exists();
+    }
+
+    protected function getClosingPeriodLabel(int $year, int $month): string
+    {
+        return Carbon::create($year, $month, 1)->translatedFormat('F Y');
+    }
+
+    public function closeMonth(): void
     {
         $activeJurusanId = session('active_jurusan_id');
         $year = Carbon::parse($this->selectedMonth)->year;
@@ -102,32 +195,37 @@ class MonthlyClosing extends Component
 
         if ($this->isClosed) {
             $this->dispatch('toast', message: 'Bulan ini sudah ditutup buku sebelumnya!', type: 'error');
+
             return;
         }
 
-        DB::transaction(function () use ($year, $month, $activeJurusanId) {
-            // 1. Mark transactions as archived
+        if (! $this->canCloseSelectedMonth()) {
+            $this->dispatch('toast', message: $this->closeBlockedReason ?? 'Tutup buku tidak dapat dilakukan saat ini.', type: 'error');
+
+            return;
+        }
+
+        $pendingPointsSnapshot = [];
+
+        DB::transaction(function () use ($year, $month, $activeJurusanId, &$pendingPointsSnapshot) {
             Transaction::withoutGlobalScope('active')
                 ->where('jurusan_id', $activeJurusanId)
                 ->whereYear('transacted_at', $year)
                 ->whereMonth('transacted_at', $month)
                 ->update(['is_archived' => true]);
 
-            // 2. Mark cash transactions as archived
             CashTransaction::withoutGlobalScope('active')
                 ->where('jurusan_id', $activeJurusanId)
                 ->whereYear('date', $year)
                 ->whereMonth('date', $month)
                 ->update(['is_archived' => true]);
 
-            // 3. Mark daily recaps as archived
             DailyRecap::withoutGlobalScope('active')
                 ->where('jurusan_id', $activeJurusanId)
                 ->whereYear('date', $year)
                 ->whereMonth('date', $month)
                 ->update(['is_archived' => true]);
 
-            // 4. Consolidate pending points of active cashiers in this month/jurusan
             $userIds = Transaction::withoutGlobalScope('active')
                 ->where('jurusan_id', $activeJurusanId)
                 ->whereYear('transacted_at', $year)
@@ -137,17 +235,24 @@ class MonthlyClosing extends Component
                 ->filter()
                 ->toArray();
 
-            if (!empty($userIds)) {
+            if (! empty($userIds)) {
+                $users = User::query()->whereIn('id', $userIds)->get(['id', 'pending_points']);
+
+                foreach ($users as $user) {
+                    if ($user->pending_points > 0) {
+                        $pendingPointsSnapshot[(string) $user->id] = $user->pending_points;
+                    }
+                }
+
                 DB::table('users')->whereIn('id', $userIds)->update([
                     'points' => DB::raw('points + pending_points'),
-                    'pending_points' => 0
+                    'pending_points' => 0,
                 ]);
             }
 
-            // 5. Create carry forward starting transactions for the next month
             $nextMonthFirstDay = Carbon::create($year, $month, 1)->addMonth()->startOfMonth()->toDateString();
-            
-            // Modal Carry Forward
+            $closingLabel = $this->getClosingPeriodLabel($year, $month);
+
             if ($this->carryForwardModal != 0) {
                 $type = $this->carryForwardModal > 0 ? 'income' : 'expense';
                 CashTransaction::create([
@@ -156,11 +261,10 @@ class MonthlyClosing extends Component
                     'cash_type' => 'modal',
                     'type' => $type,
                     'amount' => abs($this->carryForwardModal),
-                    'description' => "Saldo Awal Modal Bawaan (Tutup Buku " . Carbon::create($year, $month, 1)->translatedFormat('F Y') . ")",
+                    'description' => 'Saldo Awal Modal Bawaan (Tutup Buku '.$closingLabel.')',
                 ]);
             }
 
-            // Profit Carry Forward
             if ($this->carryForwardProfit != 0) {
                 $type = $this->carryForwardProfit > 0 ? 'income' : 'expense';
                 CashTransaction::create([
@@ -169,16 +273,116 @@ class MonthlyClosing extends Component
                     'cash_type' => 'keuntungan',
                     'type' => $type,
                     'amount' => abs($this->carryForwardProfit),
-                    'description' => "Saldo Awal Keuntungan Bawaan (Tutup Buku " . Carbon::create($year, $month, 1)->translatedFormat('F Y') . ")",
+                    'description' => 'Saldo Awal Keuntungan Bawaan (Tutup Buku '.$closingLabel.')',
                 ]);
             }
+
+            MonthlyClosingRecord::query()->updateOrCreate(
+                [
+                    'jurusan_id' => $activeJurusanId,
+                    'period' => $this->selectedMonth,
+                ],
+                [
+                    'pending_points_snapshot' => $pendingPointsSnapshot,
+                    'carry_forward_modal' => $this->carryForwardModal,
+                    'carry_forward_profit' => $this->carryForwardProfit,
+                    'closed_at' => now(),
+                ]
+            );
         });
 
-        // Clear all cache
         Cache::flush();
 
         $this->loadMonthStats();
         $this->dispatch('toast', message: 'Tutup buku berhasil! Saldo baru telah dibawa ke bulan berikutnya.');
+    }
+
+    public function confirmCancelClosing(): void
+    {
+        if (! $this->canCancel) {
+            $this->dispatch('toast', message: $this->cancelBlockedReason ?? 'Batalkan tutup buku tidak dapat dilakukan.', type: 'error');
+
+            return;
+        }
+
+        $this->showCancelConfirmation = true;
+    }
+
+    public function cancelClosing(): void
+    {
+        $this->showCancelConfirmation = false;
+
+        if (! $this->isClosed) {
+            $this->dispatch('toast', message: 'Bulan ini belum ditutup buku.', type: 'error');
+
+            return;
+        }
+
+        if ($this->cancelBlockedReason !== null) {
+            $this->dispatch('toast', message: $this->cancelBlockedReason, type: 'error');
+
+            return;
+        }
+
+        $activeJurusanId = session('active_jurusan_id');
+        $year = Carbon::parse($this->selectedMonth)->year;
+        $month = Carbon::parse($this->selectedMonth)->month;
+        $closingLabel = $this->getClosingPeriodLabel($year, $month);
+        $nextMonth = Carbon::create($year, $month, 1)->addMonth();
+        $closingRecord = MonthlyClosingRecord::query()
+            ->where('jurusan_id', $activeJurusanId)
+            ->where('period', $this->selectedMonth)
+            ->first();
+
+        DB::transaction(function () use ($year, $month, $activeJurusanId, $closingLabel, $nextMonth, $closingRecord) {
+            Transaction::withoutGlobalScope('active')
+                ->where('jurusan_id', $activeJurusanId)
+                ->whereYear('transacted_at', $year)
+                ->whereMonth('transacted_at', $month)
+                ->update(['is_archived' => false]);
+
+            CashTransaction::withoutGlobalScope('active')
+                ->where('jurusan_id', $activeJurusanId)
+                ->whereYear('date', $year)
+                ->whereMonth('date', $month)
+                ->update(['is_archived' => false]);
+
+            DailyRecap::withoutGlobalScope('active')
+                ->where('jurusan_id', $activeJurusanId)
+                ->whereYear('date', $year)
+                ->whereMonth('date', $month)
+                ->update(['is_archived' => false]);
+
+            CashTransaction::withoutGlobalScope('active')
+                ->where('jurusan_id', $activeJurusanId)
+                ->whereDate('date', $nextMonth->copy()->startOfMonth()->toDateString())
+                ->where('description', 'like', '%Tutup Buku '.$closingLabel.'%')
+                ->delete();
+
+            if ($closingRecord && ! empty($closingRecord->pending_points_snapshot)) {
+                foreach ($closingRecord->pending_points_snapshot as $userId => $pendingPoints) {
+                    $pendingPoints = (int) $pendingPoints;
+
+                    if ($pendingPoints <= 0) {
+                        continue;
+                    }
+
+                    User::query()
+                        ->where('id', $userId)
+                        ->update([
+                            'points' => DB::raw('GREATEST(points - '.$pendingPoints.', 0)'),
+                            'pending_points' => DB::raw('pending_points + '.$pendingPoints),
+                        ]);
+                }
+            }
+
+            $closingRecord?->delete();
+        });
+
+        Cache::flush();
+
+        $this->loadMonthStats();
+        $this->dispatch('toast', message: 'Tutup buku berhasil dibatalkan. Transaksi bulan ini kembali aktif.');
     }
 
     public function render()
