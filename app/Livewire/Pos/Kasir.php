@@ -2,16 +2,19 @@
 
 namespace App\Livewire\Pos;
 
+use App\Models\CashCategory;
+use App\Models\CashierAttendance;
+use App\Models\CashierSchedule;
+use App\Models\CashierTask;
+use App\Models\CashTransaction;
 use App\Models\DailyRecap;
 use App\Models\Jurusan;
 use App\Models\Product;
 use App\Models\StockEntry;
 use App\Models\Transaction;
-use App\Models\CashierSchedule;
-use App\Models\CashierAttendance;
-use App\Models\CashierTask;
 use App\Services\PosQueryService;
 use App\Services\PosSessionService;
+use Illuminate\Support\Facades\Cache;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -46,6 +49,7 @@ class Kasir extends Component
 
     // Closing report properties
     public bool $showClosingReportModal = false;
+
     public string $closingReportText = '';
 
     public function refreshProducts(): void
@@ -71,15 +75,16 @@ class Kasir extends Component
                 ->whereIn('roles.name', ['superadmin', 'pengelola_jurusan'])
                 ->exists();
 
-            if (!$hasHigherRole) {
+            if (! $hasHigherRole) {
                 $isScheduled = CashierSchedule::where('user_id', auth()->id())
                     ->where('jurusan_id', $activeJurusanId)
                     ->where('date', now()->toDateString())
                     ->exists();
 
-                if (!$isScheduled) {
+                if (! $isScheduled) {
                     session()->flash('error', 'Anda tidak memiliki jadwal jaga kasir hari ini.');
                     $this->redirectRoute('dashboard', navigate: true);
+
                     return;
                 }
             }
@@ -93,10 +98,11 @@ class Kasir extends Component
             if ($attendance && $attendance->clock_out) {
                 session()->flash('error', 'Anda sudah melakukan clock-out untuk hari ini.');
                 $this->redirectRoute('dashboard', navigate: true);
+
                 return;
             }
 
-            if (!$attendance && !$hasHigherRole) {
+            if (! $attendance && ! $hasHigherRole) {
                 // Auto clock-in: first POS entry of the day counts as clock in
                 $schedule = CashierSchedule::where('user_id', auth()->id())
                     ->where('jurusan_id', $activeJurusanId)
@@ -127,20 +133,22 @@ class Kasir extends Component
                 ->whereIn('roles.name', ['superadmin', 'pengelola_jurusan'])
                 ->exists();
 
-            if (!$hasHigherRole) {
+            if (! $hasHigherRole) {
                 // If they haven't clocked out yet, redirect to late report
                 $attendance = CashierAttendance::where('user_id', auth()->id())
                     ->where('jurusan_id', $activeJurusanId)
                     ->where('date', now()->toDateString())
                     ->first();
 
-                if ($attendance && !$attendance->clock_out) {
+                if ($attendance && ! $attendance->clock_out) {
                     $this->redirectRoute('late-report', navigate: true);
+
                     return;
                 }
 
                 session()->flash('error', 'Sesi kasir hari ini telah berakhir. Anda tidak dapat melakukan transaksi lagi.');
                 $this->redirectRoute('dashboard', navigate: true);
+
                 return;
             }
 
@@ -148,6 +156,7 @@ class Kasir extends Component
             // is locked too — block re-entry (can only be reopened via emergency reactivate)
             session()->flash('error', 'Sesi kasir hari ini telah diselesaikan. Mode kasir terkunci.');
             $this->redirectRoute('dashboard', navigate: true);
+
             return;
         }
 
@@ -338,15 +347,14 @@ class Kasir extends Component
                 'clock_out' => now(),
                 'closing_cash' => $closingCash,
                 'closing_report' => $report,
-                'points_at_closing' => (int)(auth()->user()->points + auth()->user()->pending_points),
+                'points_at_closing' => (int) (auth()->user()->points + auth()->user()->pending_points),
             ]);
         }
 
         // Always make sure DailyRecap is locked for today
-        DailyRecap::updateOrCreate(
-            ['date' => $today, 'jurusan_id' => $activeJurusanId],
-            ['actual_cash' => $closingCash]
-        );
+        DailyRecap::upsertForSession($today, $activeJurusanId, [
+            'actual_cash' => $closingCash,
+        ]);
 
         $this->showClosingStockModal = false;
         $this->showClosingReportModal = false;
@@ -402,7 +410,7 @@ class Kasir extends Component
             $reachedAmount = $newMultiple * 50000;
             $this->dispatch(
                 'toast',
-                message: 'Total transaksi hari ini telah mencapai Rp' . number_format($reachedAmount, 0, ',', '.') . '. Segera cek uang tunai di laci!',
+                message: 'Total transaksi hari ini telah mencapai Rp'.number_format($reachedAmount, 0, ',', '.').'. Segera cek uang tunai di laci!',
                 type: 'warning'
             );
         }
@@ -475,18 +483,18 @@ class Kasir extends Component
     {
         $activeJurusanId = session('active_jurusan_id');
 
-        \App\Models\CashTransaction::create([
+        CashTransaction::create([
             'jurusan_id' => $activeJurusanId,
             'date' => $this->transactionDate ?: now()->toDateString(),
             'cash_type' => 'modal',
             'cash_category_id' => $categoryId,
             'type' => 'expense',
             'amount' => (float) $amount,
-            'description' => trim($description) . ' (Sistem - Pengeluaran Cepat)',
+            'description' => trim($description).' (Sistem - Pengeluaran Cepat)',
         ]);
 
         // Invalidate cache
-        \Illuminate\Support\Facades\Cache::forget('cash_balances_' . ($activeJurusanId ?: 'global'));
+        Cache::forget('cash_balances_'.($activeJurusanId ?: 'global'));
 
         $this->dispatch('toast', message: 'Pengeluaran berhasil dicatat!');
     }
@@ -502,7 +510,7 @@ class Kasir extends Component
             ->where('actual_cash', '>', 0)
             ->exists();
 
-        $categories = \App\Models\CashCategory::where('jurusan_id', $activeJurusanId)->get();
+        $categories = CashCategory::where('jurusan_id', $activeJurusanId)->get();
 
         // Get daily tasks for the logged in cashier
         $dailyTasks = CashierTask::where('assigned_to', auth()->id())

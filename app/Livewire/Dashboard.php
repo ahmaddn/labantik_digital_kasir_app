@@ -2,9 +2,12 @@
 
 namespace App\Livewire;
 
+use App\Models\CashTransaction;
 use App\Models\DailyRecap;
 use App\Models\Jurusan;
 use App\Models\Transaction;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Cache;
 use Livewire\Component;
 
 class Dashboard extends Component
@@ -14,6 +17,29 @@ class Dashboard extends Component
     public function updatedFilterJurusan()
     {
         // No action needed, page will re-render
+    }
+
+    public function cleanupOrphanCarryForward(): void
+    {
+        if (! in_array(session('active_role_name'), ['pengelola_jurusan', 'superadmin'], true)) {
+            abort(403);
+        }
+
+        $activeJurusanId = session('active_jurusan_id');
+
+        if (! $activeJurusanId) {
+            return;
+        }
+
+        $deleted = CashTransaction::withoutGlobalScope('active')
+            ->where('jurusan_id', $activeJurusanId)
+            ->whereDate('date', now()->startOfMonth()->toDateString())
+            ->carryForwardOnly()
+            ->delete();
+
+        Cache::flush();
+
+        $this->dispatch('toast', message: 'Saldo bawaan tutup buku yatim berhasil dibersihkan ('.$deleted.' catatan).');
     }
 
     public function render()
@@ -36,17 +62,17 @@ class Dashboard extends Component
             })
             ->get();
 
-        $todayExpenses = \App\Models\CashTransaction::when($activeJurusanId, function ($q) use ($activeJurusanId) {
-                return $q->where('jurusan_id', $activeJurusanId);
-            })
+        $todayExpenses = CashTransaction::when($activeJurusanId, function ($q) use ($activeJurusanId) {
+            return $q->where('jurusan_id', $activeJurusanId);
+        })
             ->whereDate('date', $today)
             ->where('type', 'expense')
             ->where('cash_type', 'keuntungan')
             ->sum('amount');
 
-        $yesterdayExpenses = \App\Models\CashTransaction::when($activeJurusanId, function ($q) use ($activeJurusanId) {
-                return $q->where('jurusan_id', $activeJurusanId);
-            })
+        $yesterdayExpenses = CashTransaction::when($activeJurusanId, function ($q) use ($activeJurusanId) {
+            return $q->where('jurusan_id', $activeJurusanId);
+        })
             ->whereDate('date', $yesterday)
             ->where('type', 'expense')
             ->where('cash_type', 'keuntungan')
@@ -74,36 +100,36 @@ class Dashboard extends Component
             ->when($activeJurusanId, function ($q) use ($activeJurusanId) {
                 return $q->where('jurusan_id', $activeJurusanId);
             });
-        $allTimeProfitIncome = \App\Models\CashTransaction::when($activeJurusanId, function ($q) use ($activeJurusanId) {
-                return $q->where('jurusan_id', $activeJurusanId);
-            })
+        $allTimeProfitIncome = CashTransaction::when($activeJurusanId, function ($q) use ($activeJurusanId) {
+            return $q->where('jurusan_id', $activeJurusanId);
+        })
             ->where('cash_type', 'keuntungan')
             ->where('type', 'income')
             ->sum('amount');
-        $allTimeProfitExpense = \App\Models\CashTransaction::when($activeJurusanId, function ($q) use ($activeJurusanId) {
-                return $q->where('jurusan_id', $activeJurusanId);
-            })
+        $allTimeProfitExpense = CashTransaction::when($activeJurusanId, function ($q) use ($activeJurusanId) {
+            return $q->where('jurusan_id', $activeJurusanId);
+        })
             ->where('cash_type', 'keuntungan')
             ->where('type', 'expense')
             ->sum('amount');
 
         $totalAllTimeProfit = $allTimeProfitIncome - $allTimeProfitExpense;
- 
+
         $totalAllTimeRevenue = (float) $allTimeBase->sum('total_price');
         $totalAllTimeTransactions = $allTimeBase->count();
 
-        $cashIncome = \App\Models\CashTransaction::when($activeJurusanId, function ($q) use ($activeJurusanId) {
-                return $q->where('jurusan_id', $activeJurusanId);
-            })
+        $cashIncome = CashTransaction::when($activeJurusanId, function ($q) use ($activeJurusanId) {
+            return $q->where('jurusan_id', $activeJurusanId);
+        })
             ->where('type', 'income')
             ->sum('amount');
-            
-        $cashExpense = \App\Models\CashTransaction::when($activeJurusanId, function ($q) use ($activeJurusanId) {
-                return $q->where('jurusan_id', $activeJurusanId);
-            })
+
+        $cashExpense = CashTransaction::when($activeJurusanId, function ($q) use ($activeJurusanId) {
+            return $q->where('jurusan_id', $activeJurusanId);
+        })
             ->where('type', 'expense')
             ->sum('amount');
-            
+
         $totalAuditCash = $cashIncome - $cashExpense;
 
         $totalOutstandingDebt = Transaction::whereIn('status', ['belum_menerima_uang', 'uang_dipinjam'])
@@ -115,30 +141,32 @@ class Dashboard extends Component
         $startOfMonth = now()->startOfMonth()->toDateString();
         $endOfMonth = now()->endOfMonth()->toDateString();
 
-        $monthlyIncome = \App\Models\CashTransaction::when($activeJurusanId, function ($q) use ($activeJurusanId) {
-                return $q->where('jurusan_id', $activeJurusanId);
-            })
+        $monthlyIncome = CashTransaction::when($activeJurusanId, function ($q) use ($activeJurusanId) {
+            return $q->where('jurusan_id', $activeJurusanId);
+        })
+            ->excludeCarryForward()
             ->whereBetween('date', [$startOfMonth, $endOfMonth])
             ->where('type', 'income')
             ->sum('amount');
 
-        $monthlyExpense = \App\Models\CashTransaction::when($activeJurusanId, function ($q) use ($activeJurusanId) {
-                return $q->where('jurusan_id', $activeJurusanId);
-            })
+        $monthlyExpense = CashTransaction::when($activeJurusanId, function ($q) use ($activeJurusanId) {
+            return $q->where('jurusan_id', $activeJurusanId);
+        })
+            ->excludeCarryForward()
             ->whereBetween('date', [$startOfMonth, $endOfMonth])
             ->where('type', 'expense')
             ->sum('amount');
 
-        $modalIncome = \App\Models\CashTransaction::when($activeJurusanId, function ($q) use ($activeJurusanId) {
-                return $q->where('jurusan_id', $activeJurusanId);
-            })
+        $modalIncome = CashTransaction::when($activeJurusanId, function ($q) use ($activeJurusanId) {
+            return $q->where('jurusan_id', $activeJurusanId);
+        })
             ->where('cash_type', 'modal')
             ->where('type', 'income')
             ->sum('amount');
 
-        $modalExpense = \App\Models\CashTransaction::when($activeJurusanId, function ($q) use ($activeJurusanId) {
-                return $q->where('jurusan_id', $activeJurusanId);
-            })
+        $modalExpense = CashTransaction::when($activeJurusanId, function ($q) use ($activeJurusanId) {
+            return $q->where('jurusan_id', $activeJurusanId);
+        })
             ->where('cash_type', 'modal')
             ->where('type', 'expense')
             ->sum('amount');
@@ -177,9 +205,9 @@ class Dashboard extends Component
             })
             ->get();
 
-        $weeklyExpenses = \App\Models\CashTransaction::when($activeJurusanId, function ($q) use ($activeJurusanId) {
-                return $q->where('jurusan_id', $activeJurusanId);
-            })
+        $weeklyExpenses = CashTransaction::when($activeJurusanId, function ($q) use ($activeJurusanId) {
+            return $q->where('jurusan_id', $activeJurusanId);
+        })
             ->whereBetween('date', [today()->subDays(6)->toDateString(), today()->toDateString()])
             ->where('type', 'expense')
             ->selectRaw('date, SUM(amount) as total_amount')
@@ -191,7 +219,7 @@ class Dashboard extends Component
         for ($i = 6; $i >= 0; $i--) {
             $date = today()->subDays($i);
             $dateString = $date->toDateString();
-            
+
             $dayTxs = $weeklyTransactions->filter(function ($tx) use ($dateString) {
                 return substr($tx->transacted_at, 0, 10) === $dateString;
             });
@@ -246,9 +274,9 @@ class Dashboard extends Component
             })
             ->get();
 
-        $monthlyExpenses = \App\Models\CashTransaction::when($activeJurusanId, function ($q) use ($activeJurusanId) {
-                return $q->where('jurusan_id', $activeJurusanId);
-            })
+        $monthlyExpenses = CashTransaction::when($activeJurusanId, function ($q) use ($activeJurusanId) {
+            return $q->where('jurusan_id', $activeJurusanId);
+        })
             ->whereBetween('date', [today()->subMonths(5)->startOfMonth()->toDateString(), today()->toDateString()])
             ->where('type', 'expense')
             ->selectRaw("DATE_FORMAT(date, '%Y-%m') as expense_month, SUM(amount) as total_amount")
@@ -262,9 +290,10 @@ class Dashboard extends Component
             $yearMonthKey = $month->format('Y-m');
 
             $monthExpenses = (float) ($monthlyExpenses[$yearMonthKey] ?? 0);
-            
+
             $monthTxs = $monthlyTransactions->filter(function ($tx) use ($month) {
-                $txDate = \Carbon\Carbon::parse($tx->transacted_at);
+                $txDate = Carbon::parse($tx->transacted_at);
+
                 return $txDate->month === $month->month && $txDate->year === $month->year;
             });
 
@@ -282,6 +311,15 @@ class Dashboard extends Component
             ->where('actual_cash', '>', 0)
             ->exists();
 
+        $orphanCarryForwardAmount = 0;
+        if ($activeJurusanId) {
+            $orphanCarryForwardAmount = (int) CashTransaction::withoutGlobalScope('active')
+                ->where('jurusan_id', $activeJurusanId)
+                ->whereDate('date', now()->startOfMonth()->toDateString())
+                ->carryForwardOnly()
+                ->sum('amount');
+        }
+
         return view('livewire.dashboard', [
             'today' => $today,
             'stats' => $stats,
@@ -291,6 +329,7 @@ class Dashboard extends Component
             'categoryData' => $categoryData,
             'monthlyData' => $monthlyData,
             'isSessionFinished' => $isSessionFinished,
+            'orphanCarryForwardAmount' => $orphanCarryForwardAmount,
             'jurusans' => Jurusan::all(),
         ])->layout('layouts.app', ['title' => 'Dashboard Overview']);
     }

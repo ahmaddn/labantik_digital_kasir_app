@@ -16,6 +16,7 @@ class MonthlyClosingRecord extends Model
         'pending_points_snapshot',
         'carry_forward_modal',
         'carry_forward_profit',
+        'carry_forward_transaction_ids',
         'closed_at',
     ];
 
@@ -26,6 +27,7 @@ class MonthlyClosingRecord extends Model
     {
         return [
             'pending_points_snapshot' => 'array',
+            'carry_forward_transaction_ids' => 'array',
             'closed_at' => 'datetime',
         ];
     }

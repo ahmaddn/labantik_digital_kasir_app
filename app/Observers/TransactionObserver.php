@@ -39,25 +39,19 @@ class TransactionObserver
             ")
             ->first();
 
-        DailyRecap::updateOrCreate(
-            [
-                'date' => $date,
-                'jurusan_id' => $jurusanId,
-            ],
-            [
-                'month_week' => ceil($carbonDate->day / 7),
-                'month_name' => $carbonDate->translatedFormat('F'),
-                'total_revenue_real' => $stats->revenue_real ?? 0,
-                'total_revenue_all' => $stats->revenue_all ?? 0,
-                'total_profit' => $stats->profit ?? 0,
-                'total_modal' => $stats->modal ?? 0,
-                'count_received' => $stats->count_received ?? 0,
-                'count_unpaid_change' => $stats->count_unpaid_change ?? 0,
-                'count_no_payment' => $stats->count_no_payment ?? 0,
-                'count_borrowed' => $stats->count_borrowed ?? 0,
-                'generated_at' => now(),
-            ]
-        );
+        DailyRecap::upsertForSession($date, $jurusanId, [
+            'month_week' => ceil($carbonDate->day / 7),
+            'month_name' => $carbonDate->translatedFormat('F'),
+            'total_revenue_real' => $stats->revenue_real ?? 0,
+            'total_revenue_all' => $stats->revenue_all ?? 0,
+            'total_profit' => $stats->profit ?? 0,
+            'total_modal' => $stats->modal ?? 0,
+            'count_received' => $stats->count_received ?? 0,
+            'count_unpaid_change' => $stats->count_unpaid_change ?? 0,
+            'count_no_payment' => $stats->count_no_payment ?? 0,
+            'count_borrowed' => $stats->count_borrowed ?? 0,
+            'generated_at' => now(),
+        ]);
     }
 
     protected function updateStock(string $productId, string $date): void

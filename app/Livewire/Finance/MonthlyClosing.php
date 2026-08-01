@@ -157,7 +157,6 @@ class MonthlyClosing extends Component
     protected function nextMonthHasNonCarryForwardActivity(int $year, int $month, string $jurusanId): bool
     {
         $nextMonth = Carbon::create($year, $month, 1)->addMonth();
-        $closingLabel = $this->getClosingPeriodLabel($year, $month);
 
         if (Transaction::withoutGlobalScope('active')
             ->where('jurusan_id', $jurusanId)
@@ -179,8 +178,24 @@ class MonthlyClosing extends Component
             ->where('jurusan_id', $jurusanId)
             ->whereYear('date', $nextMonth->year)
             ->whereMonth('date', $nextMonth->month)
-            ->where('description', 'not like', '%Tutup Buku '.$closingLabel.'%')
+            ->excludeCarryForward()
             ->exists();
+    }
+
+    protected function deleteCarryForwardTransactions(string $jurusanId, string $nextMonthFirstDay, ?MonthlyClosingRecord $closingRecord): void
+    {
+        if ($closingRecord && ! empty($closingRecord->carry_forward_transaction_ids)) {
+            CashTransaction::withoutGlobalScope('active')
+                ->where('jurusan_id', $jurusanId)
+                ->whereIn('id', $closingRecord->carry_forward_transaction_ids)
+                ->delete();
+        }
+
+        CashTransaction::withoutGlobalScope('active')
+            ->where('jurusan_id', $jurusanId)
+            ->whereDate('date', $nextMonthFirstDay)
+            ->carryForwardOnly()
+            ->delete();
     }
 
     protected function getClosingPeriodLabel(int $year, int $month): string
@@ -253,29 +268,30 @@ class MonthlyClosing extends Component
 
             $nextMonthFirstDay = Carbon::create($year, $month, 1)->addMonth()->startOfMonth()->toDateString();
             $closingLabel = $this->getClosingPeriodLabel($year, $month);
+            $carryForwardTransactionIds = [];
 
             if ($this->carryForwardModal != 0) {
                 $type = $this->carryForwardModal > 0 ? 'income' : 'expense';
-                CashTransaction::create([
+                $carryForwardTransactionIds[] = CashTransaction::create([
                     'jurusan_id' => $activeJurusanId,
                     'date' => $nextMonthFirstDay,
                     'cash_type' => 'modal',
                     'type' => $type,
                     'amount' => abs($this->carryForwardModal),
                     'description' => 'Saldo Awal Modal Bawaan (Tutup Buku '.$closingLabel.')',
-                ]);
+                ])->id;
             }
 
             if ($this->carryForwardProfit != 0) {
                 $type = $this->carryForwardProfit > 0 ? 'income' : 'expense';
-                CashTransaction::create([
+                $carryForwardTransactionIds[] = CashTransaction::create([
                     'jurusan_id' => $activeJurusanId,
                     'date' => $nextMonthFirstDay,
                     'cash_type' => 'keuntungan',
                     'type' => $type,
                     'amount' => abs($this->carryForwardProfit),
                     'description' => 'Saldo Awal Keuntungan Bawaan (Tutup Buku '.$closingLabel.')',
-                ]);
+                ])->id;
             }
 
             MonthlyClosingRecord::query()->updateOrCreate(
@@ -287,6 +303,7 @@ class MonthlyClosing extends Component
                     'pending_points_snapshot' => $pendingPointsSnapshot,
                     'carry_forward_modal' => $this->carryForwardModal,
                     'carry_forward_profit' => $this->carryForwardProfit,
+                    'carry_forward_transaction_ids' => $carryForwardTransactionIds,
                     'closed_at' => now(),
                 ]
             );
@@ -328,14 +345,13 @@ class MonthlyClosing extends Component
         $activeJurusanId = session('active_jurusan_id');
         $year = Carbon::parse($this->selectedMonth)->year;
         $month = Carbon::parse($this->selectedMonth)->month;
-        $closingLabel = $this->getClosingPeriodLabel($year, $month);
-        $nextMonth = Carbon::create($year, $month, 1)->addMonth();
+        $nextMonthFirstDay = Carbon::create($year, $month, 1)->addMonth()->startOfMonth()->toDateString();
         $closingRecord = MonthlyClosingRecord::query()
             ->where('jurusan_id', $activeJurusanId)
             ->where('period', $this->selectedMonth)
             ->first();
 
-        DB::transaction(function () use ($year, $month, $activeJurusanId, $closingLabel, $nextMonth, $closingRecord) {
+        DB::transaction(function () use ($year, $month, $activeJurusanId, $nextMonthFirstDay, $closingRecord) {
             Transaction::withoutGlobalScope('active')
                 ->where('jurusan_id', $activeJurusanId)
                 ->whereYear('transacted_at', $year)
@@ -354,11 +370,7 @@ class MonthlyClosing extends Component
                 ->whereMonth('date', $month)
                 ->update(['is_archived' => false]);
 
-            CashTransaction::withoutGlobalScope('active')
-                ->where('jurusan_id', $activeJurusanId)
-                ->whereDate('date', $nextMonth->copy()->startOfMonth()->toDateString())
-                ->where('description', 'like', '%Tutup Buku '.$closingLabel.'%')
-                ->delete();
+            $this->deleteCarryForwardTransactions($activeJurusanId, $nextMonthFirstDay, $closingRecord);
 
             if ($closingRecord && ! empty($closingRecord->pending_points_snapshot)) {
                 foreach ($closingRecord->pending_points_snapshot as $userId => $pendingPoints) {

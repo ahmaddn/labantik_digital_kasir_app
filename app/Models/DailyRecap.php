@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -42,7 +43,7 @@ class DailyRecap extends Model
 
         static::creating(function (DailyRecap $dailyRecap) {
             if ($dailyRecap->date) {
-                $carbonDate = \Carbon\Carbon::parse($dailyRecap->date);
+                $carbonDate = Carbon::parse($dailyRecap->date);
                 if (empty($dailyRecap->month_week)) {
                     $dailyRecap->month_week = ceil($carbonDate->day / 7);
                 }
@@ -51,6 +52,29 @@ class DailyRecap extends Model
                 }
             }
         });
+    }
+
+    /**
+     * @param  array<string, mixed>  $attributes
+     */
+    public static function upsertForSession(string $date, ?string $jurusanId, array $attributes = []): self
+    {
+        return static::withoutGlobalScope('active')->updateOrCreate(
+            [
+                'date' => $date,
+                'jurusan_id' => $jurusanId,
+            ],
+            $attributes
+        );
+    }
+
+    public static function isSessionFinished(string $date, ?string $jurusanId): bool
+    {
+        return static::withoutGlobalScope('active')
+            ->where('date', $date)
+            ->where('jurusan_id', $jurusanId)
+            ->where('actual_cash', '>', 0)
+            ->exists();
     }
 
     protected $casts = [

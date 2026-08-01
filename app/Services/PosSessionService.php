@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\DailyRecap;
 use App\Models\StockEntry;
 use App\Models\Transaction;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -23,14 +24,11 @@ class PosSessionService
             ->value('date');
 
         if ($lastSessionDate) {
-            $isFinished = DailyRecap::where('date', $lastSessionDate)
-                ->where('jurusan_id', $activeJurusanId)
-                ->where('actual_cash', '>', 0)
-                ->exists();
-
-            if (! $isFinished) {
-                return $lastSessionDate;
+            if (DailyRecap::isSessionFinished($lastSessionDate, $activeJurusanId)) {
+                return null;
             }
+
+            return $lastSessionDate;
         }
 
         return null;
@@ -52,16 +50,10 @@ class PosSessionService
                 }
             }
 
-            DailyRecap::updateOrCreate(
-                [
-                    'date' => $date,
-                    'jurusan_id' => $activeJurusanId,
-                ],
-                [
-                    'actual_cash' => 1,
-                    'cash_note' => 'Auto-finished by system (Forgot to click finish)',
-                ]
-            );
+            DailyRecap::upsertForSession($date, $activeJurusanId, [
+                'actual_cash' => 1,
+                'cash_note' => 'Auto-finished by system (Forgot to click finish)',
+            ]);
         });
     }
 
@@ -132,20 +124,16 @@ class PosSessionService
                 );
             }
 
-            DailyRecap::updateOrCreate(
-                [
-                    'date' => $today,
-                    'jurusan_id' => $activeJurusanId,
-                ],
-                ['actual_cash' => 1]
-            );
+            DailyRecap::upsertForSession($today, $activeJurusanId, [
+                'actual_cash' => 1,
+            ]);
 
             // Award closing session points and reset current streak
             $user = auth()->user();
             if ($user) {
                 $user->update([
                     'streak' => 0,
-                    'pending_points' => $user->pending_points + 15
+                    'pending_points' => $user->pending_points + 15,
                 ]);
             }
         });
@@ -211,7 +199,7 @@ class PosSessionService
             }
 
             // Award transaction points and increment streak
-            $user = \App\Models\User::find($userId);
+            $user = User::find($userId);
             if ($user) {
                 $user->increment('pending_points', 5);
                 $user->increment('streak', 1);

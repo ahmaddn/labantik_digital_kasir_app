@@ -115,6 +115,22 @@
         </div>
     </div>
 
+    @if($orphanCarryForwardAmount > 0 && in_array(session('active_role_name'), ['pengelola_jurusan', 'superadmin']))
+        <div class="mb-8 bg-amber-500/10 border-2 border-dashed border-amber-500 rounded-3xl p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+                <h3 class="text-sm font-black uppercase tracking-wider text-amber-700 dark:text-amber-400">Saldo Bawaan Tutup Buku Tertinggal</h3>
+                <p class="text-xs font-bold text-amber-600/80 dark:text-amber-400/80 mt-1">
+                    Ditemukan saldo bawaan sebesar Rp{{ number_format($orphanCarryForwardAmount, 0, ',', '.') }} tanggal {{ now()->startOfMonth()->translatedFormat('d F Y') }}.
+                    Ini membuat statistik kas terlihat lebih besar dari transaksi riil bulan ini.
+                </p>
+            </div>
+            <button wire:click="cleanupOrphanCarryForward"
+                class="px-6 py-4 bg-amber-500 text-white rounded-2xl font-black italic uppercase text-xs tracking-widest shadow-xl shadow-amber-500/20 hover:scale-[1.02] active:scale-[0.98] transition-all whitespace-nowrap">
+                Bersihkan Saldo Yatim
+            </button>
+        </div>
+    @endif
+
     <!-- Summary Cards (Today vs Yesterday) -->
     <div class="mb-8 md:mb-10">
         <div class="flex items-center gap-4 mb-6 md:mb-8">
