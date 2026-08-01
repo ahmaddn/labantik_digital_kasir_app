@@ -22,7 +22,7 @@ class CashManagement extends Component
     public string $type = 'expense';
     public $amount;
     public string $description = '';
-    
+
     // Split details
     public $amountModal;
     public $amountProfit;
@@ -113,7 +113,7 @@ class CashManagement extends Component
 
         $profitIncome = CashTransaction::where('jurusan_id', $activeJurusanId)->where('cash_category_id', $categoryId)->where('cash_type', 'keuntungan')->where('type', 'income')->sum('amount');
         $profitExpense = CashTransaction::where('jurusan_id', $activeJurusanId)->where('cash_category_id', $categoryId)->where('cash_type', 'keuntungan')->where('type', 'expense')->sum('amount');
-        
+
         // Handle Bagi Hasil Mingguan deduction if applicable
         $category = \App\Models\CashCategory::find($categoryId);
         $bagiHasilDeduction = 0;
@@ -123,7 +123,7 @@ class CashManagement extends Component
                 $bagiHasilTransactions = CashTransaction::where('jurusan_id', $activeJurusanId)
                     ->where('cash_category_id', $catBagiHasil->id)
                     ->get();
-                
+
                 $prodCatName = str_replace('Penjualan ', '', $category->name);
                 foreach ($bagiHasilTransactions as $tx) {
                     if (str_contains(strtolower($tx->description), 'kategori:')) {
@@ -145,7 +145,7 @@ class CashManagement extends Component
         if ($bagiHasilDeduction > 0) {
             $profitBalance -= $bagiHasilDeduction;
         }
-        
+
         if ($category && $category->name === 'Bagi Hasil Mingguan') {
             $profitBalance = 0;
         }
@@ -208,7 +208,7 @@ class CashManagement extends Component
             // Create new transaction(s)
             if ($this->cashType === 'keduanya') {
                 $splitRef = 'SPLIT-' . \Illuminate\Support\Str::uuid()->toString();
-                
+
                 if ($this->amountModal > 0) {
                     CashTransaction::create([
                         'jurusan_id' => $activeJurusanId,
@@ -221,7 +221,7 @@ class CashManagement extends Component
                         'reference' => $splitRef,
                     ]);
                 }
-                
+
                 if ($this->amountProfit > 0) {
                     CashTransaction::create([
                         'jurusan_id' => $activeJurusanId,
@@ -270,7 +270,7 @@ class CashManagement extends Component
                 $siblings = CashTransaction::where('reference', $transaction->reference)->get();
                 $modalTx = $siblings->where('cash_type', 'modal')->first();
                 $profitTx = $siblings->where('cash_type', 'keuntungan')->first();
-                
+
                 $this->amountModal = $modalTx ? $modalTx->amount : 0;
                 $this->amountProfit = $profitTx ? $profitTx->amount : 0;
                 $this->amount = $this->amountModal + $this->amountProfit;
