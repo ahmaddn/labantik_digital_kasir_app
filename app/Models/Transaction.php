@@ -74,5 +74,4 @@ class Transaction extends Model
     {
         return $query->withoutGlobalScope('active');
     }
-
 }

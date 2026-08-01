@@ -29,20 +29,20 @@ class CashTransaction extends Model
     {
         static::saved(function ($transaction) {
             if ($transaction->jurusan_id) {
-                Cache::forget('cash_balances_'.$transaction->jurusan_id);
+                Cache::forget('cash_balances_' . $transaction->jurusan_id);
                 if ($transaction->date) {
                     $month = Carbon::parse($transaction->date)->format('Y-m');
-                    Cache::forget('cash_monthly_stats_'.$transaction->jurusan_id.'_'.$month);
+                    Cache::forget('cash_monthly_stats_' . $transaction->jurusan_id . '_' . $month);
                 }
             }
         });
 
         static::deleted(function ($transaction) {
             if ($transaction->jurusan_id) {
-                Cache::forget('cash_balances_'.$transaction->jurusan_id);
+                Cache::forget('cash_balances_' . $transaction->jurusan_id);
                 if ($transaction->date) {
                     $month = Carbon::parse($transaction->date)->format('Y-m');
-                    Cache::forget('cash_monthly_stats_'.$transaction->jurusan_id.'_'.$month);
+                    Cache::forget('cash_monthly_stats_' . $transaction->jurusan_id . '_' . $month);
                 }
             }
         });

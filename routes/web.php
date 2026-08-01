@@ -134,7 +134,7 @@ Route::middleware(['auth', 'verified', EnsureRoleSelected::class])->group(functi
     Route::get('/my-tasks', \App\Livewire\Reports\MyTasks::class)->name('my-tasks');
     Route::get('/reports/attendances', \App\Livewire\Reports\AttendanceReport::class)->name('attendances');
     Route::get('/guide', \App\Livewire\Guide\CashierGuide::class)->name('guide');
-    
+
     // Security Audit Log alerts
     Route::post('/log-security-alert', function (\Illuminate\Http\Request $request) {
         $user = auth()->user();
@@ -142,11 +142,11 @@ Route::middleware(['auth', 'verified', EnsureRoleSelected::class])->group(functi
         $userEmail = $user ? $user->email : 'N/A';
         $pageUrl = $request->input('url', 'Unknown Page');
         $type = $request->input('type', 'screenshot');
-        
+
         \Illuminate\Support\Facades\Log::warning("SECURITY ALERT: User '{$userName}' ({$userEmail}) triggered a possible {$type} action on page: {$pageUrl}");
-        
+
         return response()->json(['status' => 'logged']);
     })->name('security.log-alert');
 });
 
-require __DIR__.'/settings.php';
+require __DIR__ . '/settings.php';
