@@ -156,6 +156,23 @@
                             Buka Mode Kasir
                         </a>
                     @endif
+                @elseif(!$isScheduled)
+                    <div
+                        class="flex flex-col gap-2 px-6 py-4 rounded-[2rem] bg-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-400 shadow-xl opacity-90 cursor-not-allowed">
+                        <div class="flex items-center text-xs font-black uppercase italic tracking-wider">
+                            <svg class="w-5 h-5 mr-3 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"
+                                stroke-linejoin="round">
+                                <rect width="18" height="18" x="3" y="4" rx="2" ry="2" />
+                                <line x1="16" x2="16" y1="2" y2="6" />
+                                <line x1="8" x2="8" y1="2" y2="6" />
+                                <line x1="3" x2="21" y1="10" y2="10" />
+                            </svg>
+                            Tidak Ada Jadwal
+                        </div>
+                        <span class="text-[9px] font-bold leading-normal uppercase">Anda tidak dijadwalkan jaga kasir
+                            hari ini.</span>
+                    </div>
                 @elseif($hasClockedOut)
                     <div
                         class="flex items-center px-6 py-5 text-sm font-black rounded-[2rem] bg-gray-400 dark:bg-gray-800 text-white shadow-xl opacity-80 cursor-not-allowed uppercase italic tracking-wider">
@@ -179,23 +196,6 @@
                         </svg>
                         Isi Laporan & Clock Out
                     </a>
-                @elseif(!$isScheduled)
-                    <div
-                        class="flex flex-col gap-2 px-6 py-4 rounded-[2rem] bg-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-400 shadow-xl opacity-90 cursor-not-allowed">
-                        <div class="flex items-center text-xs font-black uppercase italic tracking-wider">
-                            <svg class="w-5 h-5 mr-3 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
-                                fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"
-                                stroke-linejoin="round">
-                                <rect width="18" height="18" x="3" y="4" rx="2" ry="2" />
-                                <line x1="16" x2="16" y1="2" y2="6" />
-                                <line x1="8" x2="8" y1="2" y2="6" />
-                                <line x1="3" x2="21" y1="10" y2="10" />
-                            </svg>
-                            Tidak Ada Jadwal
-                        </div>
-                        <span class="text-[9px] font-bold leading-normal uppercase">Anda tidak dijadwalkan jaga kasir
-                            hari ini.</span>
-                    </div>
                 @else
                     <a href="{{ route('kasir') }}"
                         class="flex items-center px-6 py-5 text-sm font-black rounded-[2rem] bg-primary-red text-white shadow-2xl shadow-red-500/30 hover:scale-105 active:scale-95 transition-all uppercase italic tracking-wider">

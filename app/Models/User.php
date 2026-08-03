@@ -56,6 +56,14 @@ class User extends Authenticatable
     }
 
     /**
+     * Check if user has a role
+     */
+    public function hasRole(string $roleName): bool
+    {
+        return $this->roles()->where('roles.name', $roleName)->exists();
+    }
+
+    /**
      * Get user accesses (role + jurusan context)
      */
     public function getAvailableAccesses()
