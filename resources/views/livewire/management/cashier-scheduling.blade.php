@@ -302,27 +302,79 @@
             useCORS: true,
             logging: false,
             onclone: (clonedDoc) => {
-                // 1. Purge oklch rules from CSSOM stylesheets
+                // Mathematically convert OKLCH to SRGB/RGB
+                function oklchToRgb(l, c, h, alpha) {
+                    const hRad = h * Math.PI / 180;
+                    const L = l;
+                    const a = c * Math.cos(hRad);
+                    const b = c * Math.sin(hRad);
+                    
+                    const l_ = L + 0.3963377774 * a + 0.2158037573 * b;
+                    const m_ = L - 0.1055613458 * a - 0.0638541728 * b;
+                    const s_ = L - 0.0894841775 * a - 1.2914855480 * b;
+                    
+                    const l3 = l_ * l_ * l_;
+                    const m3 = m_ * m_ * m_;
+                    const s3 = s_ * s_ * s_;
+                    
+                    const rL = +4.0767416621 * l3 - 3.3077115913 * m3 + 0.2309699292 * s3;
+                    const gL = -1.2684380046 * l3 + 2.6097574011 * m3 - 0.3413193965 * s3;
+                    const bL = -0.0041960863 * l3 - 0.7034186147 * m3 + 1.7076147010 * s3;
+                    
+                    const f = (x) => x <= 0.0031308 ? 12.92 * x : 1.055 * Math.pow(x, 1/2.4) - 0.055;
+                    
+                    const r = Math.max(0, Math.min(255, Math.round(f(rL) * 255)));
+                    const g = Math.max(0, Math.min(255, Math.round(f(gL) * 255)));
+                    const _b = Math.max(0, Math.min(255, Math.round(f(bL) * 255)));
+                    
+                    if (alpha !== undefined && alpha !== null && !isNaN(parseFloat(alpha))) {
+                        return `rgba(${r}, ${g}, ${_b}, ${alpha})`;
+                    }
+                    return `rgb(${r}, ${g}, ${_b})`;
+                }
+
+                function replaceOklchInCss(css) {
+                    return css.replace(/oklch\(\s*([0-9.]+%?)\s+([0-9.]+%?)\s+([0-9.]+deg|grad|rad|turn|[0-9.]+)(?:\s*\/\s*([0-9.]+%?))?\s*\)/gi, (match, l, c, h, a) => {
+                        let lNum = l.endsWith('%') ? parseFloat(l) / 100 : parseFloat(l);
+                        let cNum = c.endsWith('%') ? parseFloat(c) / 100 : parseFloat(c);
+                        let hNum = parseFloat(h);
+                        let aNum = a ? (a.endsWith('%') ? parseFloat(a) / 100 : parseFloat(a)) : 1;
+                        return oklchToRgb(lNum, cNum, hNum, aNum);
+                    });
+                }
+
+                // Gather all CSS rules from document stylesheets
+                let cssText = '';
                 for (let sheet of Array.from(clonedDoc.styleSheets)) {
                     try {
                         const rules = sheet.cssRules || sheet.rules;
-                        if (!rules) continue;
-                        for (let i = rules.length - 1; i >= 0; i--) {
-                            const rule = rules[i];
-                            if (rule.cssText && rule.cssText.includes('oklch')) {
-                                try {
-                                    sheet.deleteRule(i);
-                                } catch (err) {
-                                    // Ignore failed rule deletions
-                                }
+                        if (rules) {
+                            for (let rule of Array.from(rules)) {
+                                cssText += rule.cssText + '\n';
                             }
                         }
                     } catch (e) {
-                        // Ignore cross-origin stylesheet access errors
+                        // Ignore cross-origin stylesheet access blocks
                     }
                 }
-                
-                // 2. Clear inline oklch styles from captured element tree
+
+                // Translate all oklch values to rgb/rgba
+                const processedCss = replaceOklchInCss(cssText);
+
+                // Disable/Remove all existing style tags and link stylesheet tags in the clone
+                const styles = Array.from(clonedDoc.getElementsByTagName('style'));
+                styles.forEach(s => s.remove());
+                const links = Array.from(clonedDoc.getElementsByTagName('link'));
+                links.forEach(l => {
+                    if (l.rel === 'stylesheet') l.remove();
+                });
+
+                // Inject the converted CSS rules
+                const newStyle = clonedDoc.createElement('style');
+                newStyle.innerHTML = processedCss;
+                clonedDoc.head.appendChild(newStyle);
+
+                // Replace any inline styles that might still contain oklch
                 const captureArea = clonedDoc.getElementById('schedule-capture-area');
                 if (captureArea) {
                     const elements = captureArea.getElementsByTagName('*');
@@ -332,7 +384,8 @@
                                 const propName = el.style[j];
                                 const propVal = el.style.getPropertyValue(propName);
                                 if (propVal && propVal.includes('oklch')) {
-                                    el.style.removeProperty(propName);
+                                    const parsedVal = replaceOklchInCss(propVal);
+                                    el.style.setProperty(propName, parsedVal);
                                 }
                             }
                         }
