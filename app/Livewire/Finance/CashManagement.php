@@ -535,17 +535,41 @@ class CashManagement extends Component
             ->get()
             ->keyBy('cash_category_id');
 
+        // Calculate monthly income/expense stats
+        $monthlyStats = (clone $query)
+            ->selectRaw("
+                SUM(CASE WHEN type = 'income' THEN amount ELSE 0 END) as income,
+                SUM(CASE WHEN type = 'expense' THEN amount ELSE 0 END) as expense
+            ")
+            ->first();
+        $monthlyIncome = $monthlyStats->income ?? 0;
+        $monthlyExpense = $monthlyStats->expense ?? 0;
+
+        // Calculate cumulative income/expense stats
+        $cumulativeStats = (clone $cumulativeQuery)
+            ->selectRaw("
+                SUM(CASE WHEN type = 'income' THEN amount ELSE 0 END) as income,
+                SUM(CASE WHEN type = 'expense' THEN amount ELSE 0 END) as expense
+            ")
+            ->first();
+        $cumulativeIncome = $cumulativeStats->income ?? 0;
+        $cumulativeExpense = $cumulativeStats->expense ?? 0;
+
         // Select variables based on active tab
         if ($this->activeTab === 'cumulative') {
             $categorySums = $cumulativeCategorySums;
             $activeQuery = $cumulativeQuery;
             $currentModalBalance = $cumulativeModalBalance;
             $currentProfitBalance = $cumulativeProfitBalance;
+            $displayIncome = $cumulativeIncome;
+            $displayExpense = $cumulativeExpense;
         } else {
             $categorySums = $monthlyCategorySums;
             $activeQuery = $query;
             $currentModalBalance = $monthlyModalBalance;
             $currentProfitBalance = $monthlyProfitBalance;
+            $displayIncome = $monthlyIncome;
+            $displayExpense = $monthlyExpense;
         }
 
         $catBagiHasil = \App\Models\CashCategory::where('jurusan_id', $activeJurusanId)->where('name', 'Bagi Hasil Mingguan')->first();
@@ -556,16 +580,6 @@ class CashManagement extends Component
                 ->get()
                 ->toArray();
         }
-
-        $monthlyStats = (clone $query)
-            ->selectRaw("
-                SUM(CASE WHEN type = 'income' THEN amount ELSE 0 END) as income,
-                SUM(CASE WHEN type = 'expense' THEN amount ELSE 0 END) as expense
-            ")
-            ->first();
-
-        $monthlyIncome = $monthlyStats->income ?? 0;
-        $monthlyExpense = $monthlyStats->expense ?? 0;
 
         $categories = \App\Models\CashCategory::where('jurusan_id', $activeJurusanId)->get();
         if ($categories->isEmpty()) {
@@ -643,8 +657,8 @@ class CashManagement extends Component
             'transactions' => $transactions,
             'currentModalBalance' => $currentModalBalance,
             'currentProfitBalance' => $currentProfitBalance,
-            'monthlyIncome' => $monthlyIncome,
-            'monthlyExpense' => $monthlyExpense,
+            'displayIncome' => $displayIncome,
+            'displayExpense' => $displayExpense,
             'categories' => $categories,
             'categoryStats' => collect($categoryStats),
             'isSubUnit' => $isSubUnit,

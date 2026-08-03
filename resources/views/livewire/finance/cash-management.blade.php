@@ -78,8 +78,8 @@
             <div class="absolute -right-6 -bottom-6 opacity-5 group-hover:scale-110 transition-transform duration-700">
                 <svg class="w-40 h-40 text-green-500" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
             </div>
-            <h3 class="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 mb-3">Pemasukan (Bulan Ini)</h3>
-            <p class="text-2xl xl:text-3xl font-black italic text-green-500" :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($monthlyIncome, 0, ',', '.') }}</p>
+            <h3 class="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 mb-3">Pemasukan {{ $activeTab === 'cumulative' ? '(Kumulatif)' : '(Bulan Ini)' }}</h3>
+            <p class="text-2xl xl:text-3xl font-black italic text-green-500" :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($displayIncome, 0, ',', '.') }}</p>
         </div>
 
         <!-- Pengeluaran Card -->
@@ -87,8 +87,8 @@
             <div class="absolute -right-6 -bottom-6 opacity-5 group-hover:scale-110 transition-transform duration-700">
                 <svg class="w-40 h-40 text-primary-red" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 17 13.5 8.5 8.5 13.5 2 7"/><polyline points="16 17 22 17 22 11"/></svg>
             </div>
-            <h3 class="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 mb-3">Pengeluaran (Bulan Ini)</h3>
-            <p class="text-2xl xl:text-3xl font-black italic text-primary-red" :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($monthlyExpense, 0, ',', '.') }}</p>
+            <h3 class="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 mb-3">Pengeluaran {{ $activeTab === 'cumulative' ? '(Kumulatif)' : '(Bulan Ini)' }}</h3>
+            <p class="text-2xl xl:text-3xl font-black italic text-primary-red" :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($displayExpense, 0, ',', '.') }}</p>
         </div>
     </div>
 
