@@ -298,7 +298,14 @@
             quality: 0.95,
             pixelRatio: 2, // Double quality for high-definition screenshot
             backgroundColor: document.documentElement.classList.contains('dark') ? '#111827' : '#ffffff',
-            skipFonts: true // Fix CORS/SecurityError with remote Google Fonts
+            skipFonts: true, // Fix CORS/SecurityError with remote Google Fonts
+            filter: (node) => {
+                // Exclude action buttons (like delete) from being drawn in the exported image
+                if (node.tagName === 'BUTTON' || (node.classList && node.classList.contains('capture-exclude'))) {
+                    return false;
+                }
+                return true;
+            }
         })
         .then(function (dataUrl) {
             const link = document.createElement('a');
