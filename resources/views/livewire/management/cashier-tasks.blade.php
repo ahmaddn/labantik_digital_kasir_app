@@ -540,19 +540,19 @@
 
                         <!-- Completion Status Banner -->
                         @if ($reviewTask->approval_status === 'approved')
-                            <div class="p-4 bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-300/30 rounded-2xl flex items-center gap-3">
+                            <div class="p-4 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-250 dark:border-emerald-900/50 rounded-2xl flex items-center gap-3">
                                 <div class="w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">✓</div>
                                 <div>
                                     <div class="text-xs font-black text-emerald-800 dark:text-emerald-400 uppercase tracking-wide">Tugas Disetujui (ACC)</div>
-                                    <div class="text-[10px] font-bold text-emerald-600 dark:text-emerald-500 mt-0.5">Disetujui oleh {{ $reviewTask->reviewer->name ?? 'Admin' }} pada {{ $reviewTask->reviewed_at?->format('d/m/Y H:i') }} WIB</div>
+                                    <div class="text-[10px] font-bold text-emerald-600 dark:text-emerald-300 mt-0.5">Disetujui oleh {{ $reviewTask->reviewer->name ?? 'Admin' }} pada {{ $reviewTask->reviewed_at?->format('d/m/Y H:i') }} WIB</div>
                                 </div>
                             </div>
                         @elseif ($reviewTask->approval_status === 'rejected')
-                            <div class="p-4 bg-red-50 dark:bg-red-950/20 border border-red-300/30 rounded-2xl flex items-start gap-3">
+                            <div class="p-4 bg-red-50 dark:bg-red-950/30 border border-red-250 dark:border-red-900/50 rounded-2xl flex items-start gap-3">
                                 <div class="w-8 h-8 rounded-full bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 flex items-center justify-center shrink-0">!</div>
                                 <div>
                                     <div class="text-xs font-black text-red-800 dark:text-red-400 uppercase tracking-wide">Tugas Ditolak - Butuh Revisi</div>
-                                    <div class="text-[10px] font-bold text-red-600 dark:text-red-500 mt-0.5">Catatan Penolakan: "{{ $reviewTask->rejection_note }}"</div>
+                                    <div class="text-[10px] font-bold text-red-600 dark:text-red-300 mt-0.5">Catatan Penolakan: "{{ $reviewTask->rejection_note }}"</div>
                                 </div>
                             </div>
                         @endif
