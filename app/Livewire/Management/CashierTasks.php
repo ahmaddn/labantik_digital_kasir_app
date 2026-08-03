@@ -127,7 +127,7 @@ class CashierTasks extends Component
                 Notification::create([
                     'user_id' => $cashier->id,
                     'title' => 'Tugas Rutin Baru',
-                    'body' => 'Anda mendapatkan tugas rutin: "'.$this->taskName.'" untuk tanggal '.Carbon::parse($this->date)->format('d M Y'),
+                    'body' => 'Anda mendapatkan tugas rutin: "' . $this->taskName . '" untuk tanggal ' . Carbon::parse($this->date)->format('d M Y'),
                     'type' => 'task',
                     'action_url' => '/cashier',
                 ]);
@@ -141,7 +141,7 @@ class CashierTasks extends Component
             Notification::create([
                 'user_id' => $this->assignedTo,
                 'title' => 'Tugas Baru Ditugaskan',
-                'body' => 'Anda mendapatkan tugas: "'.$this->taskName.'" pada tanggal '.Carbon::parse($this->date)->format('d M Y'),
+                'body' => 'Anda mendapatkan tugas: "' . $this->taskName . '" pada tanggal ' . Carbon::parse($this->date)->format('d M Y'),
                 'type' => 'task',
                 'action_url' => '/cashier',
             ]);
@@ -198,7 +198,7 @@ class CashierTasks extends Component
         Notification::create([
             'user_id' => $task->assigned_to,
             'title' => 'Tugas Disetujui',
-            'body' => 'Laporan tugas "'.$task->task_name.'" telah di-ACC admin. +10 poin untukmu!',
+            'body' => 'Laporan tugas "' . $task->task_name . '" telah di-ACC admin. +10 poin untukmu!',
             'type' => 'task',
             'action_url' => '/my-tasks',
         ]);
@@ -234,7 +234,7 @@ class CashierTasks extends Component
         Notification::create([
             'user_id' => $task->assigned_to,
             'title' => 'Tugas Ditolak — Perlu Revisi',
-            'body' => 'Laporan tugas "'.$task->task_name.'" ditolak: '.$this->rejectionNote.'. Silakan revisi & kirim ulang.',
+            'body' => 'Laporan tugas "' . $task->task_name . '" ditolak: ' . $this->rejectionNote . '. Silakan revisi & kirim ulang.',
             'type' => 'task',
             'action_url' => '/my-tasks',
         ]);
@@ -268,8 +268,8 @@ class CashierTasks extends Component
                 $q->where('jurusan_id', $activeJurusanId);
             })
             ->when($this->search, function ($q) {
-                $q->where('task_name', 'like', '%'.$this->search.'%')
-                    ->orWhere('description', 'like', '%'.$this->search.'%');
+                $q->where('task_name', 'like', '%' . $this->search . '%')
+                    ->orWhere('description', 'like', '%' . $this->search . '%');
             })
             ->orderBy('date', 'desc')
             ->orderBy('created_at', 'desc')
