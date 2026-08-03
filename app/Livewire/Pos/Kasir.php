@@ -93,38 +93,38 @@ class Kasir extends Component
 
                     return;
                 }
-            }
 
-            // 2. Check if already clocked in/out for today
-            $attendance = CashierAttendance::where('user_id', auth()->id())
-                ->where('jurusan_id', $activeJurusanId)
-                ->where('date', now()->toDateString())
-                ->first();
-
-            if ($attendance && $attendance->clock_out) {
-                session()->flash('error', 'Anda sudah melakukan clock-out untuk hari ini.');
-                $this->redirectRoute('dashboard', navigate: true);
-
-                return;
-            }
-
-            if (! $attendance && ! $hasHigherRole) {
-                // Auto clock-in: first POS entry of the day counts as clock in
-                $schedule = CashierSchedule::where('user_id', auth()->id())
+                // 2. Check if already clocked in/out for today
+                $attendance = CashierAttendance::where('user_id', auth()->id())
                     ->where('jurusan_id', $activeJurusanId)
                     ->where('date', now()->toDateString())
                     ->first();
 
-                CashierAttendance::create([
-                    'cashier_schedule_id' => $schedule ? $schedule->id : null,
-                    'user_id' => auth()->id(),
-                    'jurusan_id' => $activeJurusanId,
-                    'date' => now()->toDateString(),
-                    'clock_in' => now(),
-                    'status' => 'present',
-                ]);
+                if ($attendance && $attendance->clock_out) {
+                    session()->flash('error', 'Anda sudah melakukan clock-out untuk hari ini.');
+                    $this->redirectRoute('dashboard', navigate: true);
 
-                $this->dispatch('toast', message: 'Clock in otomatis tercatat. Selamat bertugas!');
+                    return;
+                }
+
+                if (! $attendance) {
+                    // Auto clock-in: first POS entry of the day counts as clock in
+                    $schedule = CashierSchedule::where('user_id', auth()->id())
+                        ->where('jurusan_id', $activeJurusanId)
+                        ->where('date', now()->toDateString())
+                        ->first();
+
+                    CashierAttendance::create([
+                        'cashier_schedule_id' => $schedule ? $schedule->id : null,
+                        'user_id' => auth()->id(),
+                        'jurusan_id' => $activeJurusanId,
+                        'date' => now()->toDateString(),
+                        'clock_in' => now(),
+                        'status' => 'present',
+                    ]);
+
+                    $this->dispatch('toast', message: 'Clock in otomatis tercatat. Selamat bertugas!');
+                }
             }
         }
 
