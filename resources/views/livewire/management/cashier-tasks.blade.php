@@ -579,7 +579,7 @@
                                     <div>
                                         <span class="text-[9px] font-black uppercase tracking-widest text-gray-400 block mb-2">Foto / Gambar Bukti Kerja (Klik untuk Perbesar)</span>
                                         <div class="relative cursor-zoom-in rounded-3xl overflow-hidden border-2 border-gray-150 dark:border-gray-700 hover:opacity-95 transition-opacity max-w-md mx-auto"
-                                             @click="lightboxImg = '{{ asset('storage/' . $reviewTask->proof_image) }}'; showLightbox = true">
+                                             @click="$dispatch('open-lightbox', { img: '{{ asset('storage/' . $reviewTask->proof_image) }}' })">
                                             <img src="{{ asset('storage/' . $reviewTask->proof_image) }}" class="w-full object-cover max-h-64" alt="Bukti Tugas" />
                                         </div>
                                     </div>
@@ -607,12 +607,20 @@
             @endif
         </div>
 
-        <!-- Lightbox Overlay -->
-        <div x-show="showLightbox" x-transition.opacity class="fixed inset-0 z-60 bg-black/90 flex items-center justify-center p-4 backdrop-blur-xs" @click="showLightbox = false" x-cloak>
-            <button class="absolute top-6 right-6 text-white hover:text-gray-300 p-3 rounded-full bg-black/40 hover:bg-black/60 transition-colors">
-                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
-            </button>
-            <img :src="lightboxImg" class="max-w-full max-h-[90vh] rounded-3xl shadow-2xl border-4 border-white/10" @click.stop />
         </div>
+    </div>
+
+    <!-- Global Lightbox Overlay (Triggered by Window Events) -->
+    <div x-data="{ open: false, img: '' }" 
+         @open-lightbox.window="img = $event.detail.img; open = true"
+         x-show="open" 
+         x-transition.opacity 
+         class="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center p-4 backdrop-blur-xs" 
+         @click="open = false" 
+         x-cloak>
+        <button class="absolute top-6 right-6 text-white hover:text-gray-300 p-3 rounded-full bg-black/40 hover:bg-black/60 transition-colors">
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+        <img :src="img" class="max-w-full max-h-[90vh] rounded-3xl shadow-2xl border-4 border-white/10" @click.stop />
     </div>
 </div>
