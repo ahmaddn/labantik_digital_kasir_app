@@ -43,6 +43,8 @@ class CashierTasks extends Component
 
     public $isRoutine = false;
 
+    public $requiresProof = true;
+
     // Modal UI states
     public $showCreateModal = false;
 
@@ -120,6 +122,7 @@ class CashierTasks extends Component
         $this->priority = 'medium';
         $this->deadlineAt = '';
         $this->isRoutine = false;
+        $this->requiresProof = true;
         $this->date = now()->toDateString();
         $this->isEditMode = false;
         $this->editingTaskId = null;
@@ -145,6 +148,7 @@ class CashierTasks extends Component
         $this->priority = $task->priority;
         $this->deadlineAt = $task->deadline_at ? $task->deadline_at->format('Y-m-d\TH:i') : '';
         $this->isRoutine = $task->is_routine;
+        $this->requiresProof = (bool)$task->requires_proof;
 
         $this->showCreateModal = true;
     }
@@ -234,6 +238,7 @@ class CashierTasks extends Component
                 'priority' => $this->priority,
                 'category' => $this->category ?: null,
                 'is_routine' => $this->isRoutine,
+                'requires_proof' => $this->requiresProof,
                 'created_by' => $task->created_by,
                 'approval_status' => $task->approval_status,
                 'rejection_note' => $task->rejection_note,
@@ -271,6 +276,7 @@ class CashierTasks extends Component
                 'priority' => $this->priority,
                 'category' => $this->category ?: null,
                 'is_routine' => $this->isRoutine,
+                'requires_proof' => $this->requiresProof,
                 'created_by' => auth()->id(),
             ];
 

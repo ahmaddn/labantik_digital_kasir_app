@@ -83,11 +83,15 @@ class MyTasks extends Component
             'taskCompletionReport' => 'required|string|min:5',
         ];
 
-        // A new proof image is required on first submission; on revision the old one may be kept
-        if (! $task->proof_image) {
-            $rules['taskProofImage'] = 'required|image|max:2048'; // Max 2MB
+        // A new proof image is required on first submission if requires_proof is true; on revision the old one may be kept
+        if ($task->requires_proof) {
+            if (! $task->proof_image) {
+                $rules['taskProofImage'] = 'required|image|max:2048'; // Max 2MB
+            } else {
+                $rules['taskProofImage'] = 'nullable|image|max:2048';
+            }
         } else {
-            $rules['taskProofImage'] = 'nullable|image|max:2048';
+            $rules['taskProofImage'] = 'nullable';
         }
 
         $this->validate($rules);

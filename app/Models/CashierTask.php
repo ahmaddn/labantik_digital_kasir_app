@@ -31,6 +31,7 @@ class CashierTask extends Model
         'rejection_note',
         'reviewed_by',
         'reviewed_at',
+        'requires_proof',
     ];
 
     protected $casts = [
@@ -38,6 +39,7 @@ class CashierTask extends Model
         'deadline_at' => 'datetime',
         'is_completed' => 'boolean',
         'is_routine' => 'boolean',
+        'requires_proof' => 'boolean',
         'completed_at' => 'datetime',
         'reviewed_at' => 'datetime',
     ];

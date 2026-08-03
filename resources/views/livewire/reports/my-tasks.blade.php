@@ -230,25 +230,27 @@
                                     <span class="text-xs text-red-500 font-bold mt-1 block">{{ $message }}</span>
                                 @enderror
                             </div>
-                            <div>
-                                <label
-                                    class="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2">Foto
-                                    / Gambar Bukti
-                                    {{ $selectedTaskModel->proof_image ? '(kosongkan jika tetap pakai bukti lama)' : '' }}</label>
-                                <input type="file" wire:model="taskProofImage"
-                                    class="w-full p-3 text-xs bg-gray-50 dark:bg-gray-900 rounded-2xl font-semibold dark:text-white">
-                                @error('taskProofImage')
-                                    <span class="text-xs text-red-500 font-bold mt-1 block">{{ $message }}</span>
-                                @enderror
-                                <div wire:loading wire:target="taskProofImage"
-                                    class="text-[10px] font-black text-amber-500 uppercase mt-2">Mengunggah gambar...
+                            @if ($selectedTaskModel->requires_proof)
+                                <div>
+                                    <label
+                                        class="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2">Foto
+                                        / Gambar Bukti
+                                        {{ $selectedTaskModel->proof_image ? '(kosongkan jika tetap pakai bukti lama)' : '' }}</label>
+                                    <input type="file" wire:model="taskProofImage"
+                                        class="w-full p-3 text-xs bg-gray-55 dark:bg-gray-900 rounded-2xl font-semibold dark:text-white">
+                                    @error('taskProofImage')
+                                        <span class="text-xs text-red-500 font-bold mt-1 block">{{ $message }}</span>
+                                    @enderror
+                                    <div wire:loading wire:target="taskProofImage"
+                                        class="text-[10px] font-black text-amber-500 uppercase mt-2">Mengunggah gambar...
+                                    </div>
+                                    @if ($selectedTaskModel->proof_image)
+                                        <a href="{{ asset('storage/' . $selectedTaskModel->proof_image) }}" target="_blank"
+                                            class="inline-block text-[10px] font-black text-primary-blue uppercase mt-2 underline">Lihat
+                                            bukti yang sudah diunggah</a>
+                                    @endif
                                 </div>
-                                @if ($selectedTaskModel->proof_image)
-                                    <a href="{{ asset('storage/' . $selectedTaskModel->proof_image) }}" target="_blank"
-                                        class="inline-block text-[10px] font-black text-primary-blue uppercase mt-2 underline">Lihat
-                                        bukti yang sudah diunggah</a>
-                                @endif
-                            </div>
+                            @endif
                         </div>
                     @endif
                 @endif

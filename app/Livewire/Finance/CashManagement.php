@@ -475,7 +475,10 @@ class CashManagement extends Component
             ->whereYear('date', $selectedYear)
             ->whereMonth('date', $selectedMonthNumber);
 
-        $balances = (clone $query)
+        // Overall cumulative balances (from the beginning of time up to the end of the filtered month)
+        $endOfFilteredMonth = Carbon::parse($selectedMonth . '-01')->endOfMonth()->toDateString();
+        $overallBalances = CashTransaction::where('jurusan_id', $activeJurusanId)
+            ->where('date', '<=', $endOfFilteredMonth)
             ->selectRaw("
                 SUM(CASE WHEN cash_type = 'modal' AND type = 'income' THEN amount ELSE 0 END) as modal_income,
                 SUM(CASE WHEN cash_type = 'modal' AND type = 'expense' THEN amount ELSE 0 END) as modal_expense,
@@ -484,8 +487,8 @@ class CashManagement extends Component
             ")
             ->first();
 
-        $currentModalBalance = ($balances->modal_income ?? 0) - ($balances->modal_expense ?? 0);
-        $currentProfitBalance = ($balances->profit_income ?? 0) - ($balances->profit_expense ?? 0);
+        $currentModalBalance = ($overallBalances->modal_income ?? 0) - ($overallBalances->modal_expense ?? 0);
+        $currentProfitBalance = ($overallBalances->profit_income ?? 0) - ($overallBalances->profit_expense ?? 0);
 
         $categorySums = (clone $query)
             ->selectRaw("
@@ -521,6 +524,24 @@ class CashManagement extends Component
         $monthlyExpense = $monthlyStats->expense ?? 0;
 
         $categories = \App\Models\CashCategory::where('jurusan_id', $activeJurusanId)->get();
+        if ($categories->isEmpty()) {
+            $defaultCategories = [
+                'Modal Awal',
+                'Penjualan Toko / POS',
+                'Pembelian Stok Barang',
+                'Biaya Operasional',
+                'Gaji & Insentif Kasir',
+                'Bagi Hasil Mingguan',
+                'Lain-lain / Dana Darurat'
+            ];
+            foreach ($defaultCategories as $catName) {
+                \App\Models\CashCategory::create([
+                    'jurusan_id' => $activeJurusanId,
+                    'name' => $catName
+                ]);
+            }
+            $categories = \App\Models\CashCategory::where('jurusan_id', $activeJurusanId)->get();
+        }
         $categoryStats = [];
 
         foreach ($categories as $category) {

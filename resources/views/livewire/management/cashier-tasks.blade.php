@@ -348,12 +348,18 @@
                                 pertama kasir).</div>
                         </div>
                     @endunless
-                    <div class="flex flex-col justify-end">
+                    <div class="flex flex-col justify-end gap-3">
                         <label
                             class="inline-flex items-center gap-3 py-3 px-4 bg-gray-55 dark:bg-gray-900 rounded-xl text-sm font-semibold text-gray-700 dark:text-gray-200 cursor-pointer">
                             <input wire:model.live="isRoutine" type="checkbox"
                                 class="form-checkbox h-5 w-5 text-primary-blue rounded" />
                             <span>Tugas rutin harian untuk semua kasir</span>
+                        </label>
+                        <label
+                            class="inline-flex items-center gap-3 py-3 px-4 bg-gray-55 dark:bg-gray-900 rounded-xl text-sm font-semibold text-gray-700 dark:text-gray-200 cursor-pointer">
+                            <input wire:model="requiresProof" type="checkbox"
+                                class="form-checkbox h-5 w-5 text-primary-blue rounded" />
+                            <span>Memerlukan bukti foto / gambar dari kasir</span>
                         </label>
                     </div>
                 </div>
