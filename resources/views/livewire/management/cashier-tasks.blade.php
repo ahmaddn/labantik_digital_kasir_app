@@ -201,7 +201,7 @@
         <div x-show="show" x-transition.opacity class="fixed inset-0 bg-black/60 backdrop-blur-xs"
             wire:click="$set('showCreateModal', false)"></div>
         <div x-show="show" x-transition.scale
-            class="relative w-full max-w-3xl bg-white dark:bg-gray-800 rounded-[2.5rem] shadow-2xl p-10 border border-gray-100 dark:border-gray-700 z-10 animate-fade-in">
+            class="relative w-full max-w-2xl md:max-w-3xl lg:max-w-4xl bg-white dark:bg-gray-800 rounded-[2.5rem] shadow-2xl p-10 border border-gray-100 dark:border-gray-700 z-10 animate-fade-in">
             <h2 class="text-3xl font-black text-gray-850 dark:text-white uppercase italic tracking-tight mb-6">Tambah
                 Tugas Harian</h2>
 
