@@ -3,19 +3,24 @@
 namespace App\Livewire\Reports;
 
 use App\Models\CashierTask;
+use App\Models\Notification;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use Livewire\WithPagination;
 
 class MyTasks extends Component
 {
-    use WithPagination, WithFileUploads;
+    use WithFileUploads, WithPagination;
 
     // Task completion modal state
     public bool $showTaskCompletionModal = false;
+
     public $selectedTaskId = null;
+
     public $selectedTaskModel = null;
+
     public string $taskCompletionReport = '';
+
     public $taskProofImage = null;
 
     public function selectTaskForCompletion($taskId): void
@@ -25,8 +30,12 @@ class MyTasks extends Component
             ->first();
 
         if ($task) {
+            if ($task->status === 'new') {
+                $task->update(['status' => 'pending']);
+            }
+
             $this->selectedTaskId = $taskId;
-            $this->selectedTaskModel = $task;
+            $this->selectedTaskModel = $task->fresh();
             $this->taskCompletionReport = $task->completion_report ?? '';
             $this->taskProofImage = null;
             $this->showTaskCompletionModal = true;
@@ -39,13 +48,14 @@ class MyTasks extends Component
             ->where('id', $this->selectedTaskId)
             ->first();
 
-        if (!$task) {
+        if (! $task) {
             return;
         }
 
         // Approved tasks are locked, no resubmission allowed
         if ($task->approval_status === 'approved') {
             $this->dispatch('toast', message: 'Tugas sudah disetujui admin dan tidak bisa diubah.', type: 'warning');
+
             return;
         }
 
@@ -54,7 +64,7 @@ class MyTasks extends Component
         ];
 
         // A new proof image is required on first submission; on revision the old one may be kept
-        if (!$task->proof_image) {
+        if (! $task->proof_image) {
             $rules['taskProofImage'] = 'required|image|max:2048'; // Max 2MB
         } else {
             $rules['taskProofImage'] = 'nullable|image|max:2048';
@@ -66,6 +76,7 @@ class MyTasks extends Component
             'completion_report' => $this->taskCompletionReport,
             'is_completed' => true,
             'completed_at' => now(),
+            'status' => 'pending',
             'approval_status' => 'pending',
         ];
 
@@ -78,12 +89,12 @@ class MyTasks extends Component
         $task->update($data);
 
         // Notify the admin who created the task to review it
-        \App\Models\Notification::create([
+        Notification::create([
             'user_id' => $task->created_by,
             'title' => $isRevision ? 'Revisi Tugas Menunggu ACC' : 'Laporan Tugas Menunggu ACC',
-            'body' => auth()->user()->name . ' menyelesaikan tugas "' . $task->task_name . '". Silakan review & ACC.',
+            'body' => auth()->user()->name.' menyelesaikan tugas "'.$task->task_name.'". Silakan review & ACC.',
             'type' => 'task',
-            'action_url' => '/management/tasks'
+            'action_url' => '/management/tasks',
         ]);
 
         $this->showTaskCompletionModal = false;

@@ -62,9 +62,23 @@
 
             <div class="p-6 max-h-[60vh] overflow-y-auto no-scrollbar space-y-4 text-left">
                 @if($selectedTaskModel)
-                    <div>
-                        <span class="text-[9px] font-black uppercase tracking-widest text-gray-400 block mb-1">Nama Tugas</span>
-                        <h4 class="text-sm font-black uppercase text-gray-800 dark:text-white">{{ $selectedTaskModel->task_name }}</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <span class="text-[9px] font-black uppercase tracking-widest text-gray-400 block mb-1">Nama Tugas</span>
+                            <h4 class="text-sm font-black uppercase text-gray-800 dark:text-white">{{ $selectedTaskModel->task_name }}</h4>
+                        </div>
+                        <div>
+                            <span class="text-[9px] font-black uppercase tracking-widest text-gray-400 block mb-1">Kategori</span>
+                            <div class="text-xs font-black uppercase tracking-widest text-slate-700 dark:text-slate-300">{{ $selectedTaskModel->category ?: 'Umum' }}</div>
+                        </div>
+                        <div>
+                            <span class="text-[9px] font-black uppercase tracking-widest text-gray-400 block mb-1">Prioritas</span>
+                            <div class="text-xs font-black uppercase tracking-widest {{ $selectedTaskModel->priorityBadgeClass }} inline-flex items-center px-2 py-1 rounded-full">{{ $selectedTaskModel->priority_label }}</div>
+                        </div>
+                        <div>
+                            <span class="text-[9px] font-black uppercase tracking-widest text-gray-400 block mb-1">Deadline</span>
+                            <div class="text-xs font-semibold text-gray-700 dark:text-gray-300">{{ $selectedTaskModel->deadline_at ? $selectedTaskModel->deadline_at->translatedFormat('d M Y H:i') . ' WIB' : 'Belum ditetapkan' }}</div>
+                        </div>
                     </div>
                     @if($selectedTaskModel->description)
                         <div>

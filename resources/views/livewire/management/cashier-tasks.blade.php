@@ -41,8 +41,11 @@
                     <tr class="border-b border-gray-100 dark:border-gray-700">
                         <th class="pb-4 text-xs font-black uppercase tracking-widest text-gray-400 pl-4">Tanggal</th>
                         <th class="pb-4 text-xs font-black uppercase tracking-widest text-gray-400">Tugas</th>
+                        <th class="pb-4 text-xs font-black uppercase tracking-widest text-gray-400">Kategori</th>
+                        <th class="pb-4 text-xs font-black uppercase tracking-widest text-gray-400">Prioritas</th>
                         <th class="pb-4 text-xs font-black uppercase tracking-widest text-gray-400">Ditugaskan Ke</th>
                         <th class="pb-4 text-xs font-black uppercase tracking-widest text-gray-400">Status & Laporan</th>
+                        <th class="pb-4 text-xs font-black uppercase tracking-widest text-gray-400">Deadline</th>
                         <th class="pb-4 text-xs font-black uppercase tracking-widest text-gray-400">Bukti Tugas</th>
                         <th class="pb-4 text-xs font-black uppercase tracking-widest text-gray-400 text-right pr-4 w-32">Aksi</th>
                     </tr>
@@ -58,6 +61,17 @@
                                 @if($task->description)
                                     <div class="text-xs text-gray-400 mt-0.5">{{ $task->description }}</div>
                                 @endif
+                            </td>
+                            <td class="py-4 text-sm text-gray-700 dark:text-gray-300 font-semibold">
+                                {{ $task->category ?: 'Umum' }}
+                                @if($task->is_routine)
+                                    <div class="text-[10px] font-black uppercase tracking-widest text-primary-blue mt-1">Rutin Harian</div>
+                                @endif
+                            </td>
+                            <td class="py-4">
+                                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-black uppercase tracking-wider {{ $task->priorityBadgeClass }}">
+                                    {{ $task->priority_label }}
+                                </span>
                             </td>
                             <td class="py-4 text-sm text-gray-700 dark:text-gray-300 font-semibold">
                                 {{ $task->user->name }}
@@ -95,6 +109,9 @@
                                         Laporan: {{ $task->completion_report }}
                                     </div>
                                 @endif
+                            </td>
+                            <td class="py-4 text-sm text-gray-500 dark:text-gray-400 font-semibold">
+                                {{ $task->deadline_at ? $task->deadline_at->translatedFormat('d M Y H:i') . ' WIB' : '-' }}
                             </td>
                             <td class="py-4">
                                 @if($task->proof_image)
@@ -170,6 +187,38 @@
                     <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">Deskripsi Tambahan</label>
                     <textarea wire:model="description" placeholder="Instruksi tambahan jika ada..." rows="3" class="w-full px-4 py-3 bg-gray-55 dark:bg-gray-900 border-none rounded-xl focus:ring-2 focus:ring-primary-blue dark:text-white text-sm"></textarea>
                     @error('description') <span class="text-xs text-red-500 font-bold mt-1 block">{{ $message }}</span> @enderror
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">Kategori Tugas</label>
+                        <input wire:model="category" type="text" placeholder="Contoh: Rutin Harian, Penataan Produk" class="w-full px-4 py-3 bg-gray-55 dark:bg-gray-900 border-none rounded-xl focus:ring-2 focus:ring-primary-blue dark:text-white text-sm">
+                        @error('category') <span class="text-xs text-red-500 font-bold mt-1 block">{{ $message }}</span> @enderror
+                    </div>
+                    <div>
+                        <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">Prioritas</label>
+                        <select wire:model="priority" class="w-full px-4 py-3 bg-gray-55 dark:bg-gray-900 border-none rounded-xl focus:ring-2 focus:ring-primary-blue dark:text-white text-sm">
+                            <option value="low">Rendah</option>
+                            <option value="medium">Sedang</option>
+                            <option value="high">Tinggi</option>
+                            <option value="critical">Paling Penting</option>
+                        </select>
+                        @error('priority') <span class="text-xs text-red-500 font-bold mt-1 block">{{ $message }}</span> @enderror
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">Deadline</label>
+                        <input wire:model="deadlineAt" type="datetime-local" class="w-full px-4 py-3 bg-gray-55 dark:bg-gray-900 border-none rounded-xl focus:ring-2 focus:ring-primary-blue dark:text-white text-sm">
+                        @error('deadlineAt') <span class="text-xs text-red-500 font-bold mt-1 block">{{ $message }}</span> @enderror
+                    </div>
+                    <div class="flex flex-col justify-end">
+                        <label class="inline-flex items-center gap-3 py-3 px-4 bg-gray-55 dark:bg-gray-900 rounded-xl text-sm font-semibold text-gray-700 dark:text-gray-200 cursor-pointer">
+                            <input wire:model="isRoutine" type="checkbox" class="form-checkbox h-5 w-5 text-primary-blue rounded" />
+                            <span>Tugas rutin harian untuk semua kasir</span>
+                        </label>
+                    </div>
                 </div>
 
                 <div class="flex gap-3 pt-4">

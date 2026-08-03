@@ -14,10 +14,10 @@ return new class extends Migration
         Schema::table('cashier_tasks', function (Blueprint $table) {
             // null = belum disubmit, pending = menunggu review admin,
             // approved = disetujui, rejected = ditolak (harus direvisi & submit ulang)
-            $table->string('approval_status')->nullable()->after('proof_image');
-            $table->text('rejection_note')->nullable()->after('approval_status');
-            $table->foreignUuid('reviewed_by')->nullable()->after('rejection_note')->constrained('users')->nullOnDelete();
-            $table->timestamp('reviewed_at')->nullable()->after('reviewed_by');
+            $table->string('approval_status')->nullable();
+            $table->text('rejection_note')->nullable();
+            $table->foreignUuid('reviewed_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->timestamp('reviewed_at')->nullable();
         });
     }
 
