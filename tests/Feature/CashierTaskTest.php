@@ -4,7 +4,9 @@ namespace Tests\Feature;
 
 use App\Livewire\Management\CashierTasks;
 use App\Models\CashierTask;
+use App\Models\CashierSchedule;
 use App\Models\Jurusan;
+use App\Models\Role;
 use App\Models\TaskCategory;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -71,4 +73,34 @@ class CashierTaskTest extends TestCase
 
         $this->assertSame('Operasional', TaskCategory::where('jurusan_id', $jurusan->id)->first()->name);
     }
+
+    public function test_assignee_mode_scheduled_returns_only_today_scheduled_cashiers(): void
+    {
+        $jurusan = Jurusan::create(['name' => 'Test Jurusan']);
+        $role = Role::create(['name' => 'kasir', 'label' => 'Kasir']);
+        $scheduledCashier = User::factory()->create(['name' => 'Scheduled Kasir']);
+        $unscheduledCashier = User::factory()->create(['name' => 'Unscheduled Kasir']);
+
+        $scheduledCashier->roles()->attach($role->id, ['jurusan_id' => $jurusan->id]);
+        $unscheduledCashier->roles()->attach($role->id, ['jurusan_id' => $jurusan->id]);
+
+        CashierSchedule::create([
+            'jurusan_id' => $jurusan->id,
+            'user_id' => $scheduledCashier->id,
+            'date' => now()->toDateString(),
+        ]);
+
+        Livewire::actingAs($scheduledCashier)
+            ->withSession([
+                'active_jurusan_id' => $jurusan->id,
+                'active_role_name' => 'superadmin',
+            ])
+            ->test(CashierTasks::class)
+            ->set('assigneeMode', 'scheduled')
+            ->assertViewHas('cashiers', function ($cashiers) use ($scheduledCashier, $unscheduledCashier) {
+                return $cashiers->contains('id', $scheduledCashier->id)
+                    && ! $cashiers->contains('id', $unscheduledCashier->id);
+            });
+    }
 }
+        \

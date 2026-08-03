@@ -201,40 +201,62 @@
         <div x-show="show" x-transition.opacity class="fixed inset-0 bg-black/60 backdrop-blur-xs"
             wire:click="$set('showCreateModal', false)"></div>
         <div x-show="show" x-transition.scale
-            class="relative w-full max-w-lg bg-white dark:bg-gray-800 rounded-[2rem] shadow-2xl p-8 border border-gray-100 dark:border-gray-700 z-10 animate-fade-in">
-            <h2 class="text-2xl font-black text-gray-850 dark:text-white uppercase italic tracking-tight mb-6">Tambah
+            class="relative w-full max-w-3xl bg-white dark:bg-gray-800 rounded-[2.5rem] shadow-2xl p-10 border border-gray-100 dark:border-gray-700 z-10 animate-fade-in">
+            <h2 class="text-3xl font-black text-gray-850 dark:text-white uppercase italic tracking-tight mb-6">Tambah
                 Tugas Harian</h2>
 
             <form wire:submit.prevent="prepareTask" class="space-y-4">
                 @unless ($isRoutine)
-                    <div>
-                        <div class="flex items-center gap-3 mb-2">
-                            <label class="text-xs font-black uppercase tracking-widest text-gray-400 ml-1">Mode Pilihan
-                                Kasir</label>
-                            <div class="flex items-center gap-2">
-                                <label class="inline-flex items-center text-xs">
-                                    <input type="radio" wire:model="assigneeMode" value="scheduled"
-                                        class="form-radio" />
-                                    <span class="ml-2 font-black uppercase text-[10px]">Sesuai Jadwal Hari Ini</span>
-                                </label>
-                                <label class="inline-flex items-center text-xs">
-                                    <input type="radio" wire:model="assigneeMode" value="all" class="form-radio" />
-                                    <span class="ml-2 font-black uppercase text-[10px]">Umum (Semua Kasir)</span>
-                                </label>
+                    <div class="space-y-4">
+                        <div>
+                            <p class="text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">Mode Pilihan Kasir</p>
+                            <div class="inline-flex rounded-full border border-gray-200 dark:border-gray-700 overflow-hidden bg-white dark:bg-gray-900">
+                                <button type="button" wire:click="setAssigneeMode('scheduled')"
+                                    class="px-4 py-3 text-xs font-black uppercase tracking-widest transition-all {{ $assigneeMode === 'scheduled' ? 'bg-primary-blue text-white' : 'text-gray-700 dark:text-gray-200' }}">
+                                    Sesuai Jadwal Hari Ini
+                                </button>
+                                <button type="button" wire:click="setAssigneeMode('all')"
+                                    class="px-4 py-3 text-xs font-black uppercase tracking-widest transition-all {{ $assigneeMode === 'all' ? 'bg-primary-blue text-white' : 'text-gray-700 dark:text-gray-200' }}">
+                                    Umum (Semua Kasir)
+                                </button>
                             </div>
                         </div>
 
-                        <label
-                            class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">Ditugaskan
-                            Ke</label>
-                        <select wire:model="assignedTo" multiple size="4"
-                            class="w-full px-4 py-3 bg-gray-55 dark:bg-gray-900 border-none rounded-xl focus:ring-2 focus:ring-primary-blue dark:text-white text-sm">
-                            @foreach ($cashiers as $c)
-                                <option value="{{ $c->id }}">{{ $c->name }}</option>
-                            @endforeach
-                        </select>
-                        <div class="text-[10px] text-gray-400 mt-1">Pilih lebih dari satu kasir jika diperlukan
-                            (Ctrl/Cmd+klik).</div>
+                        <div x-data="{ open: false, query: '', selected: @entangle('assignedTo') }" class="relative">
+                        <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">Ditugaskan Ke</label>
+                        <button type="button" @click="open = !open"
+                            class="w-full text-left px-4 py-3 bg-gray-55 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-sm flex items-center justify-between gap-2">
+                            <span x-text="selected.length > 0 ? selected.length + ' kasir dipilih' : 'Pilih kasir...'"
+                                class="truncate"></span>
+                            <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </button>
+
+                        <div x-show="open" x-cloak @click.outside="open = false"
+                            class="absolute z-40 mt-2 w-full max-h-72 overflow-hidden rounded-3xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-950 shadow-2xl">
+                            <div class="p-3 border-b border-gray-200 dark:border-gray-700">
+                                <input type="text" x-model="query" placeholder="Cari kasir..."
+                                    class="w-full px-4 py-3 bg-gray-100 dark:bg-gray-900 rounded-2xl text-sm text-gray-900 dark:text-white border border-gray-200 dark:border-gray-700 focus:outline-none">
+                            </div>
+                            <div class="max-h-56 overflow-y-auto">
+                                @forelse ($cashiers as $c)
+                                    <label x-show="query === '' || '{{ strtolower($c->name) }}'.includes(query.toLowerCase())"
+                                        class="flex items-center justify-between gap-3 px-4 py-3 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-900 text-sm text-gray-900 dark:text-gray-100">
+                                        <span>{{ $c->name }}</span>
+                                        <input type="checkbox" value="{{ $c->id }}" wire:model="assignedTo"
+                                            class="h-4 w-4 text-primary-blue rounded border-gray-300 dark:border-gray-600" />
+                                    </label>
+                                @empty
+                                    <div class="px-4 py-4 text-xs text-gray-500">Tidak ada kasir tersedia.</div>
+                                @endforelse
+                            </div>
+                        </div>
+
+                        <div class="mt-2 text-[10px] text-gray-400">Pilih lebih dari satu kasir jika diperlukan.</div>
+                    </div>
+
                         @error('assignedTo')
                             <span class="text-xs text-red-500 font-bold mt-1 block">{{ $message }}</span>
                         @enderror
