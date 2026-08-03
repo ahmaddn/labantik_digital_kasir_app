@@ -300,7 +300,22 @@
             backgroundColor: document.documentElement.classList.contains('dark') ? '#111827' : '#ffffff',
             scale: 2, // Double scale for high-definition quality
             useCORS: true,
-            logging: false
+            logging: false,
+            onclone: (clonedDoc) => {
+                const styleTags = clonedDoc.getElementsByTagName('style');
+                for (let i = 0; i < styleTags.length; i++) {
+                    try {
+                        let css = styleTags[i].innerHTML;
+                        if (css.includes('oklch')) {
+                            // Replace oklch(...) colors with a safe rgb fallback for html2canvas compatibility
+                            css = css.replace(/oklch\([^\)]+\)/g, 'rgb(120, 130, 140)');
+                            styleTags[i].innerHTML = css;
+                        }
+                    } catch (e) {
+                        console.error('Failed to patch style tag:', e);
+                    }
+                }
+            }
         }).then(canvas => {
             const link = document.createElement('a');
             let rangeStr = '{{ $weekRange }}'.replace(/ /g, '_');
