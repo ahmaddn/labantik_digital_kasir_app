@@ -114,8 +114,46 @@
         <!-- FullCalendar Scripts -->
         <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
         
-        <div wire:ignore>
-            <div id="cashier-calendar" class="dark:text-white w-full"></div>
+        <style>
+            /* Responsive styling for FullCalendar toolbar on mobile */
+            @media (max-width: 640px) {
+                .fc .fc-toolbar {
+                    flex-direction: column !important;
+                    gap: 0.75rem !important;
+                    align-items: center !important;
+                }
+                .fc .fc-toolbar-title {
+                    font-size: 1.25rem !important;
+                    text-align: center !important;
+                }
+                .fc .fc-button-group {
+                    display: inline-flex !important;
+                }
+                .fc .fc-toolbar-chunk {
+                    display: flex !important;
+                    justify-content: center !important;
+                    width: 100% !important;
+                }
+            }
+            
+            /* Custom Scrollbar for horizontal scrolling calendar */
+            .calendar-scroll::-webkit-scrollbar {
+                height: 6px;
+            }
+            .calendar-scroll::-webkit-scrollbar-track {
+                background: transparent;
+            }
+            .calendar-scroll::-webkit-scrollbar-thumb {
+                background: #cbd5e1;
+                border-radius: 9999px;
+            }
+            .dark .calendar-scroll::-webkit-scrollbar-thumb {
+                background: #475569;
+            }
+        </style>
+        
+        <div wire:ignore class="overflow-x-auto w-full calendar-scroll pb-2">
+            <div id="cashier-calendar" class="dark:text-white w-full min-w-[700px] md:min-w-0"></div>
         </div>
 
         <script>
