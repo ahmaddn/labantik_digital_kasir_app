@@ -333,10 +333,14 @@ class Kasir extends Component
             ->whereIn('roles.name', ['superadmin', 'pengelola_jurusan'])
             ->exists();
 
-        if ($hasHigherRole) {
-            // Save stock
-            $posSessionService->saveClosingStock($filteredStockItems, $today, $activeJurusanId);
+        // Save stock
+        $posSessionService->saveClosingStock($filteredStockItems, $today, $activeJurusanId);
 
+        $hasHigherRole = auth()->user()->roles()
+            ->whereIn('roles.name', ['superadmin', 'pengelola_jurusan'])
+            ->exists();
+
+        if ($hasHigherRole) {
             // Higher-role cashier: no closing report needed, finish immediately
             $this->completeSession(null);
 
