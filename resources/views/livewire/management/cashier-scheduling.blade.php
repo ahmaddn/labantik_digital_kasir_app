@@ -302,17 +302,40 @@
             useCORS: true,
             logging: false,
             onclone: (clonedDoc) => {
-                const styleTags = clonedDoc.getElementsByTagName('style');
-                for (let i = 0; i < styleTags.length; i++) {
+                // 1. Purge oklch rules from CSSOM stylesheets
+                for (let sheet of Array.from(clonedDoc.styleSheets)) {
                     try {
-                        let css = styleTags[i].innerHTML;
-                        if (css.includes('oklch')) {
-                            // Replace oklch(...) colors with a safe rgb fallback for html2canvas compatibility
-                            css = css.replace(/oklch\([^\)]+\)/g, 'rgb(120, 130, 140)');
-                            styleTags[i].innerHTML = css;
+                        const rules = sheet.cssRules || sheet.rules;
+                        if (!rules) continue;
+                        for (let i = rules.length - 1; i >= 0; i--) {
+                            const rule = rules[i];
+                            if (rule.cssText && rule.cssText.includes('oklch')) {
+                                try {
+                                    sheet.deleteRule(i);
+                                } catch (err) {
+                                    // Ignore failed rule deletions
+                                }
+                            }
                         }
                     } catch (e) {
-                        console.error('Failed to patch style tag:', e);
+                        // Ignore cross-origin stylesheet access errors
+                    }
+                }
+                
+                // 2. Clear inline oklch styles from captured element tree
+                const captureArea = clonedDoc.getElementById('schedule-capture-area');
+                if (captureArea) {
+                    const elements = captureArea.getElementsByTagName('*');
+                    for (let el of Array.from(elements)) {
+                        if (el.style) {
+                            for (let j = el.style.length - 1; j >= 0; j--) {
+                                const propName = el.style[j];
+                                const propVal = el.style.getPropertyValue(propName);
+                                if (propVal && propVal.includes('oklch')) {
+                                    el.style.removeProperty(propName);
+                                }
+                            }
+                        }
                     }
                 }
             }
