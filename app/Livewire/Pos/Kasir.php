@@ -224,10 +224,10 @@ class Kasir extends Component
             $first = $newTasks->first();
             $this->dispatch('toast', message: 'Tugas baru: "' . $first->task_name . '"', type: 'success');
             // Also dispatch a custom event carrying CTA url
-            $this->dispatchBrowserEvent('new-task', [
-                'message' => 'Terdapat tugas baru: "' . $first->task_name . '" — buka halaman tugas Anda.',
-                'cta_url' => route('my-tasks'),
-            ]);
+            $this->dispatch('new-task',
+                message: 'Terdapat tugas baru: "' . $first->task_name . '" — buka halaman tugas Anda.',
+                cta_url: route('my-tasks')
+            );
             // update last check
             $this->lastTaskCheckAt = now();
         } else {

@@ -1,4 +1,4 @@
-<div wire:loading.delay.longest class="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-md transition-all duration-300">
+<div wire:loading.delay.longest wire:target="selectAccess, checkout, saveQuickExpense, saveOpeningStock, saveClosingStockAndNext, submitClosingReport, save, update, store, delete, exportExcel, importExcel, importFile, submitTaskCompletion" style="display: none;" class="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-md transition-all duration-300">
     <div class="nb-card p-12 bg-white dark:bg-dark-soft flex flex-col items-center gap-8 animate-brutal-bounce">
         <div class="relative w-24 h-24">
             <div class="absolute inset-0 border-[6px] border-black/10 dark:border-white/10 rounded-none"></div>
