@@ -218,7 +218,7 @@
     >
         <div 
             @click.away="show = false"
-            class="bg-white dark:bg-gray-900 w-full max-w-lg rounded-[3rem] shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-300"
+            class="bg-white dark:bg-gray-900 w-full max-w-lg rounded-[3rem] shadow-2xl flex flex-col max-h-[90vh] overflow-y-auto no-scrollbar animate-in zoom-in-95 duration-300"
         >
             <div class="p-10 bg-primary-blue text-white relative">
                 <div class="absolute right-10 top-10">

@@ -365,7 +365,7 @@
         <div 
             x-show="show"
             @click.away="show = false"
-            class="bg-white dark:bg-gray-800 rounded-[2.5rem] sm:rounded-[3rem] sm:p-10 p-6 max-w-2xl w-full max-h-[90vh] sm:max-h-none overflow-y-auto sm:overflow-visible no-scrollbar shadow-2xl border border-gray-100 dark:border-gray-700 relative"
+            class="bg-white dark:bg-gray-800 rounded-[2.5rem] sm:rounded-[3rem] sm:p-10 p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto no-scrollbar shadow-2xl border border-gray-100 dark:border-gray-700 relative"
             x-transition:enter="transition cubic-bezier(0.34, 1.56, 0.64, 1) duration-300 transform"
             x-transition:enter-start="opacity-0 scale-75 translate-y-20"
             x-transition:enter-end="opacity-100 scale-100 translate-y-0"
