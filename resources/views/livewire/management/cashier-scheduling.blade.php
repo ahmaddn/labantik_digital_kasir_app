@@ -32,6 +32,16 @@
                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
                     Tambah
                 </button>
+
+                <button wire:click="exportExcel" class="flex-1 sm:flex-initial inline-flex items-center justify-center px-4 py-3 bg-green-500 hover:bg-green-600 text-white rounded-xl font-black text-xs uppercase italic tracking-wider transition-all duration-300 shadow-xl shadow-green-900/10 active:scale-95">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                    Excel
+                </button>
+
+                <button type="button" onclick="exportScheduleToImage()" class="flex-1 sm:flex-initial inline-flex items-center justify-center px-4 py-3 bg-indigo-500 hover:bg-indigo-600 text-white rounded-xl font-black text-xs uppercase italic tracking-wider transition-all duration-300 shadow-xl shadow-indigo-900/10 active:scale-95">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                    Gambar
+                </button>
             @endif
         </div>
     </div>
@@ -49,41 +59,52 @@
     </div>
 
     <!-- Calendar view / list -->
-    <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-6">
-        @php
-            $daysOfWeek = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
-        @endphp
-        @foreach($daysOfWeek as $index => $dayName)
-            @php
-                $targetDate = \Carbon\Carbon::parse($currentWeekStart)->addDays($index);
-                $daySchedules = $weekSchedules->filter(fn($s) => $s->date->toDateString() === $targetDate->toDateString());
-            @endphp
-            <div class="bg-white dark:bg-gray-800 rounded-3xl p-5 border border-gray-100 dark:border-gray-700/50 shadow-lg flex flex-col min-h-[300px]">
-                <div class="border-b border-gray-100 dark:border-gray-700 pb-3 mb-4">
-                    <h3 class="font-black text-gray-800 dark:text-white text-lg leading-none uppercase italic">{{ $dayName }}</h3>
-                    <span class="text-xs text-gray-400 font-bold mt-1 block">{{ $targetDate->translatedFormat('d M Y') }}</span>
-                </div>
-                
-                <div class="flex-1 space-y-3">
-                    @forelse($daySchedules as $sched)
-                        <div class="bg-gray-50 dark:bg-gray-900/50 rounded-2xl p-4 border border-gray-100 dark:border-gray-800 relative group">
-                            <h4 class="font-bold text-gray-800 dark:text-white text-sm">{{ $sched->user->name }}</h4>
-                            @if($sched->notes)
-                                <p class="text-[10px] text-gray-400 font-medium mt-1">{{ $sched->notes }}</p>
-                            @endif
-                            
-                            @if(in_array(session('active_role_name'), ['superadmin', 'pengelola_jurusan']))
-                                <button wire:click="confirmDelete('{{ $sched->id }}')" class="absolute top-2 right-2 p-1 text-gray-400 hover:text-red-500 rounded-lg bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                                </button>
-                            @endif
-                        </div>
-                    @empty
-                        <div class="text-xs text-gray-400 italic text-center py-8">Tidak ada jadwal</div>
-                    @endforelse
-                </div>
+    <div id="schedule-capture-area" class="p-6 bg-white dark:bg-gray-900 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 shadow-md">
+        <div class="mb-6 flex flex-col md:flex-row md:items-center justify-between border-b border-gray-100 dark:border-gray-800 pb-4">
+            <div>
+                <h2 class="text-xl font-black italic uppercase tracking-tighter text-primary-blue dark:text-primary-yellow">JADWAL JAGA KASIR</h2>
+                <p class="text-xs font-bold text-gray-450 dark:text-gray-400 uppercase tracking-widest">Periode: {{ $weekRange }}</p>
             </div>
-        @endforeach
+            <div class="text-[10px] font-black text-primary-red uppercase italic tracking-wider mt-2 md:mt-0">
+                Unit TEFA: {{ session('active_jurusan_name') ?: 'Semua Unit' }}
+            </div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-6">
+            @php
+                $daysOfWeek = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+            @endphp
+            @foreach($daysOfWeek as $index => $dayName)
+                @php
+                    $targetDate = \Carbon\Carbon::parse($currentWeekStart)->addDays($index);
+                    $daySchedules = $weekSchedules->filter(fn($s) => $s->date->toDateString() === $targetDate->toDateString());
+                @endphp
+                <div class="bg-gray-50 dark:bg-gray-800/50 rounded-3xl p-5 border border-gray-100 dark:border-gray-700/50 shadow-sm flex flex-col min-h-[300px]">
+                    <div class="border-b border-gray-150 dark:border-gray-700 pb-3 mb-4">
+                        <h3 class="font-black text-gray-800 dark:text-white text-lg leading-none uppercase italic">{{ $dayName }}</h3>
+                        <span class="text-xs text-gray-400 font-bold mt-1 block">{{ $targetDate->translatedFormat('d M Y') }}</span>
+                    </div>
+                    
+                    <div class="flex-1 space-y-3">
+                        @forelse($daySchedules as $sched)
+                            <div class="bg-white dark:bg-gray-900 rounded-2xl p-4 border border-gray-150 dark:border-gray-800 relative group shadow-sm">
+                                <h4 class="font-bold text-gray-800 dark:text-white text-sm">{{ $sched->user->name }}</h4>
+                                @if($sched->notes)
+                                    <p class="text-[10px] text-gray-400 font-medium mt-1">{{ $sched->notes }}</p>
+                                @endif
+                                
+                                @if(in_array(session('active_role_name'), ['superadmin', 'pengelola_jurusan']))
+                                    <button wire:click="confirmDelete('{{ $sched->id }}')" class="absolute top-2 right-2 p-1 text-gray-400 hover:text-red-500 rounded-lg bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                    </button>
+                                @endif
+                            </div>
+                        @empty
+                            <div class="text-xs text-gray-400 italic text-center py-8">Tidak ada jadwal</div>
+                        @endforelse
+                    </div>
+                </div>
+            @endforeach
+        </div>
     </div>
 
     <!-- FullCalendar Section -->
@@ -267,3 +288,25 @@
         </div>
     </div>
 </div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script>
+    function exportScheduleToImage() {
+        const element = document.getElementById('schedule-capture-area');
+        if (!element) return;
+        
+        // Generate canvas from captured area
+        html2canvas(element, {
+            backgroundColor: document.documentElement.classList.contains('dark') ? '#111827' : '#ffffff',
+            scale: 2, // Double scale for high-definition quality
+            useCORS: true,
+            logging: false
+        }).then(canvas => {
+            const link = document.createElement('a');
+            let rangeStr = '{{ $weekRange }}'.replace(/ /g, '_');
+            link.download = 'Jadwal_Kasir_' + rangeStr + '.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        });
+    }
+</script>

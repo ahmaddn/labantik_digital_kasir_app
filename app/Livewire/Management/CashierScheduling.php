@@ -366,6 +366,23 @@ class CashierScheduling extends Component
             ->toArray();
     }
 
+    public function exportExcel()
+    {
+        $activeRole = session('active_role_name');
+        if (!in_array($activeRole, ['superadmin', 'pengelola_jurusan'])) {
+            abort(403, 'Unauthorized.');
+        }
+
+        $activeJurusanId = session('active_jurusan_id') ?: $this->selectedJurusanId;
+        $start = Carbon::parse($this->currentWeekStart);
+        $filename = 'Jadwal_Kasir_' . $start->format('Y-m-d') . '.xlsx';
+
+        return \Maatwebsite\Excel\Facades\Excel::download(
+            new \App\Exports\CashierScheduleExport($this->currentWeekStart, $activeJurusanId),
+            $filename
+        );
+    }
+
     public function render()
     {
         $activeRole = session('active_role_name');
