@@ -192,7 +192,7 @@ document.addEventListener('keydown', (e) => {
 
     <!-- Global Loading Indicator (only for key actions, exclude short polling) -->
     <div wire:loading.flex.delay
-        wire:target="checkout,saveQuickExpense,saveOpeningStock,saveClosingStockAndNext,submitClosingReport"
+        wire:target="checkout saveQuickExpense saveOpeningStock saveClosingStockAndNext submitClosingReport"
         class="fixed inset-0 z-[9999] bg-white/40 dark:bg-black/60 backdrop-blur-md items-center justify-center flex-col gap-6">
         <div class="nb-card p-12 bg-white dark:bg-dark-soft flex flex-col items-center gap-8 animate-brutal-bounce">
             <div class="relative w-24 h-24">
