@@ -606,8 +606,6 @@
                 @endif
             @endif
         </div>
-
-        </div>
     </div>
 
     <!-- Global Lightbox Overlay (Triggered by Window Events) -->
