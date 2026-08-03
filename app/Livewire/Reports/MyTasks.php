@@ -25,6 +25,8 @@ class MyTasks extends Component
 
     public $taskProofImage = null;
 
+    public string $activeTab = 'today';
+
     public function selectTaskForCompletion($taskId): void
     {
         $task = CashierTask::where('assigned_to', auth()->id())

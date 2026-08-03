@@ -9,46 +9,57 @@
         </div>
     </div>
 
-    <!-- Tugas Hari Ini -->
-    <div
-        class="bg-white dark:bg-gray-800 rounded-[2.5rem] shadow-2xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700/50 p-6 md:p-8">
-        <div class="flex items-center gap-3 mb-6">
-            <h2 class="text-sm font-black uppercase tracking-widest text-gray-800 dark:text-white">Tugas Hari Ini</h2>
-            <span
-                class="px-2.5 py-1 rounded-full bg-primary-blue text-white text-[10px] font-black">{{ now()->translatedFormat('d F Y') }}</span>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-            @forelse($todayTasks as $task)
-                @include('livewire.reports.partials.my-task-card', ['task' => $task])
-            @empty
-                <div class="col-span-full text-center py-12 text-sm text-gray-400 italic font-semibold">
-                    Tidak ada tugas untuk hari ini. Santai dulu!
-                </div>
-            @endforelse
-        </div>
+    <!-- Tabs Navigation -->
+    <div class="flex border-b border-gray-200 dark:border-gray-700 mb-6">
+        <button wire:click="$set('activeTab', 'today')"
+            class="px-6 py-3 text-sm font-black uppercase tracking-wider border-b-4 transition-all duration-300 {{ $activeTab === 'today' ? 'border-primary-blue text-primary-blue dark:border-primary-yellow dark:text-primary-yellow' : 'border-transparent text-gray-400 hover:text-gray-600 dark:hover:text-gray-300' }}">
+            Tugas Hari Ini ({{ count($todayTasks) }})
+        </button>
+        <button wire:click="$set('activeTab', 'history')"
+            class="px-6 py-3 text-sm font-black uppercase tracking-wider border-b-4 transition-all duration-300 {{ $activeTab === 'history' ? 'border-primary-blue text-primary-blue dark:border-primary-yellow dark:text-primary-yellow' : 'border-transparent text-gray-400 hover:text-gray-600 dark:hover:text-gray-300' }}">
+            Riwayat Tugas Sebelumnya
+        </button>
     </div>
 
-    <!-- Riwayat Tugas -->
-    <div
-        class="bg-white dark:bg-gray-800 rounded-[2.5rem] shadow-2xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700/50 p-6 md:p-8">
-        <h2 class="text-sm font-black uppercase tracking-widest text-gray-800 dark:text-white mb-6">Riwayat Tugas
-            Sebelumnya</h2>
+    <!-- Active Tab Content -->
+    @if ($activeTab === 'today')
+        <!-- Tugas Hari Ini -->
+        <div class="bg-white dark:bg-gray-800 rounded-[2.5rem] shadow-2xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700/50 p-6 md:p-8">
+            <div class="flex items-center gap-3 mb-6">
+                <h2 class="text-sm font-black uppercase tracking-widest text-gray-800 dark:text-white">Tugas Hari Ini</h2>
+                <span class="px-2.5 py-1 rounded-full bg-primary-blue text-white text-[10px] font-black">{{ now()->translatedFormat('d F Y') }}</span>
+            </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-            @forelse($historyTasks as $task)
-                @include('livewire.reports.partials.my-task-card', ['task' => $task])
-            @empty
-                <div class="col-span-full text-center py-12 text-sm text-gray-400 italic font-semibold">
-                    Belum ada riwayat tugas.
-                </div>
-            @endforelse
+            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                @forelse($todayTasks as $task)
+                    @include('livewire.reports.partials.my-task-card', ['task' => $task])
+                @empty
+                    <div class="col-span-full text-center py-12 text-sm text-gray-400 italic font-semibold">
+                        Tidak ada tugas untuk hari ini. Santai dulu!
+                    </div>
+                @endforelse
+            </div>
         </div>
+    @else
+        <!-- Riwayat Tugas -->
+        <div class="bg-white dark:bg-gray-800 rounded-[2.5rem] shadow-2xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700/50 p-6 md:p-8">
+            <h2 class="text-sm font-black uppercase tracking-widest text-gray-800 dark:text-white mb-6">Riwayat Tugas Sebelumnya</h2>
 
-        <div class="mt-6">
-            {{ $historyTasks->links() }}
+            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                @forelse($historyTasks as $task)
+                    @include('livewire.reports.partials.my-task-card', ['task' => $task])
+                @empty
+                    <div class="col-span-full text-center py-12 text-sm text-gray-400 italic font-semibold">
+                        Belum ada riwayat tugas.
+                    </div>
+                @endforelse
+            </div>
+
+            <div class="mt-6">
+                {{ $historyTasks->links() }}
+            </div>
         </div>
-    </div>
+    @endif
 
     <!-- Task Completion Modal -->
     <div x-data="{ show: @entangle('showTaskCompletionModal') }" x-show="show" x-cloak @keydown.window.escape="show = false"
