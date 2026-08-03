@@ -302,12 +302,9 @@
             useCORS: true,
             logging: false,
             onclone: (clonedDoc) => {
-                // Mathematically convert OKLCH to SRGB/RGB
-                function oklchToRgb(l, c, h, alpha) {
-                    const hRad = h * Math.PI / 180;
+                // Mathematically convert OKLAB to SRGB/RGB
+                function oklabToRgb(l, a, b, alpha) {
                     const L = l;
-                    const a = c * Math.cos(hRad);
-                    const b = c * Math.sin(hRad);
                     
                     const l_ = L + 0.3963377774 * a + 0.2158037573 * b;
                     const m_ = L - 0.1055613458 * a - 0.0638541728 * b;
@@ -333,14 +330,32 @@
                     return `rgb(${r}, ${g}, ${_b})`;
                 }
 
-                function replaceOklchInCss(css) {
-                    return css.replace(/oklch\(\s*([0-9.]+%?)\s+([0-9.]+%?)\s+([0-9.]+deg|grad|rad|turn|[0-9.]+)(?:\s*\/\s*([0-9.]+%?))?\s*\)/gi, (match, l, c, h, a) => {
+                // Mathematically convert OKLCH to SRGB/RGB
+                function oklchToRgb(l, c, h, alpha) {
+                    const hRad = h * Math.PI / 180;
+                    return oklabToRgb(l, c * Math.cos(hRad), c * Math.sin(hRad), alpha);
+                }
+
+                function replaceColorsInCss(css) {
+                    // 1. Replace oklch(...)
+                    let parsed = css.replace(/oklch\(\s*([0-9.]+%?)\s+([0-9.]+%?)\s+([0-9.-]+deg|grad|rad|turn|[0-9.-]+)(?:\s*\/\s*([0-9.]+%?))?\s*\)/gi, (match, l, c, h, a) => {
                         let lNum = l.endsWith('%') ? parseFloat(l) / 100 : parseFloat(l);
                         let cNum = c.endsWith('%') ? parseFloat(c) / 100 : parseFloat(c);
                         let hNum = parseFloat(h);
                         let aNum = a ? (a.endsWith('%') ? parseFloat(a) / 100 : parseFloat(a)) : 1;
                         return oklchToRgb(lNum, cNum, hNum, aNum);
                     });
+
+                    // 2. Replace oklab(...)
+                    parsed = parsed.replace(/oklab\(\s*([0-9.]+%?)\s+([0-9.-]+%?)\s+([0-9.-]+)(?:\s*\/\s*([0-9.]+%?))?\s*\)/gi, (match, l, a, b, alpha) => {
+                        let lNum = l.endsWith('%') ? parseFloat(l) / 100 : parseFloat(l);
+                        let aNum = a.endsWith('%') ? parseFloat(a) / 100 : parseFloat(a);
+                        let bNum = parseFloat(b);
+                        let alphaNum = alpha ? (alpha.endsWith('%') ? parseFloat(alpha) / 100 : parseFloat(alpha)) : 1;
+                        return oklabToRgb(lNum, aNum, bNum, alphaNum);
+                    });
+
+                    return parsed;
                 }
 
                 // Gather all CSS rules from document stylesheets
@@ -358,8 +373,8 @@
                     }
                 }
 
-                // Translate all oklch values to rgb/rgba
-                const processedCss = replaceOklchInCss(cssText);
+                // Translate all oklch/oklab values to rgb/rgba
+                const processedCss = replaceColorsInCss(cssText);
 
                 // Disable/Remove all existing style tags and link stylesheet tags in the clone
                 const styles = Array.from(clonedDoc.getElementsByTagName('style'));
@@ -374,7 +389,7 @@
                 newStyle.innerHTML = processedCss;
                 clonedDoc.head.appendChild(newStyle);
 
-                // Replace any inline styles that might still contain oklch
+                // Replace any inline styles that might still contain oklch/oklab
                 const captureArea = clonedDoc.getElementById('schedule-capture-area');
                 if (captureArea) {
                     const elements = captureArea.getElementsByTagName('*');
@@ -383,8 +398,8 @@
                             for (let j = el.style.length - 1; j >= 0; j--) {
                                 const propName = el.style[j];
                                 const propVal = el.style.getPropertyValue(propName);
-                                if (propVal && propVal.includes('oklch')) {
-                                    const parsedVal = replaceOklchInCss(propVal);
+                                if (propVal && (propVal.includes('oklch') || propVal.includes('oklab'))) {
+                                    const parsedVal = replaceColorsInCss(propVal);
                                     el.style.setProperty(propName, parsedVal);
                                 }
                             }
