@@ -95,10 +95,13 @@
                             <span
                                 class="text-[9px] font-black uppercase tracking-widest text-gray-400 block mb-1">Deadline</span>
                             <div class="text-xs font-semibold text-gray-700 dark:text-gray-300">
-                                @if($selectedTaskModel->deadline_at)
+                                @if ($selectedTaskModel->deadline_at)
                                     {{ $selectedTaskModel->deadline_at->translatedFormat('d M Y H:i') . ' WIB' }}
-                                @elseif($selectedTaskModel->is_routine && isset($selectedTaskModel->computed_deadline) && $selectedTaskModel->computed_deadline)
-                                    {{ 	\Carbon\Carbon::parse($selectedTaskModel->computed_deadline)->translatedFormat('d M Y H:i') . ' WIB' }}
+                                @elseif(
+                                    $selectedTaskModel->is_routine &&
+                                        isset($selectedTaskModel->computed_deadline) &&
+                                        $selectedTaskModel->computed_deadline)
+                                    {{ \Carbon\Carbon::parse($selectedTaskModel->computed_deadline)->translatedFormat('d M Y H:i') . ' WIB' }}
                                 @else
                                     Belum ditetapkan
                                 @endif

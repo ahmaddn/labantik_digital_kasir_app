@@ -222,10 +222,10 @@ class Kasir extends Component
 
         if ($newTasks->isNotEmpty()) {
             $first = $newTasks->first();
-            $this->dispatch('toast', message: 'Tugas baru: "'.$first->task_name.'"', type: 'success');
+            $this->dispatch('toast', message: 'Tugas baru: "' . $first->task_name . '"', type: 'success');
             // Also dispatch a custom event carrying CTA url
             $this->dispatchBrowserEvent('new-task', [
-                'message' => 'Terdapat tugas baru: "'.$first->task_name.'" — buka halaman tugas Anda.',
+                'message' => 'Terdapat tugas baru: "' . $first->task_name . '" — buka halaman tugas Anda.',
                 'cta_url' => route('my-tasks'),
             ]);
             // update last check
@@ -437,7 +437,7 @@ class Kasir extends Component
             $reachedAmount = $newMultiple * 50000;
             $this->dispatch(
                 'toast',
-                message: 'Total transaksi hari ini telah mencapai Rp'.number_format($reachedAmount, 0, ',', '.').'. Segera cek uang tunai di laci!',
+                message: 'Total transaksi hari ini telah mencapai Rp' . number_format($reachedAmount, 0, ',', '.') . '. Segera cek uang tunai di laci!',
                 type: 'warning'
             );
         }
@@ -517,11 +517,11 @@ class Kasir extends Component
             'cash_category_id' => $categoryId,
             'type' => 'expense',
             'amount' => (float) $amount,
-            'description' => trim($description).' (Sistem - Pengeluaran Cepat)',
+            'description' => trim($description) . ' (Sistem - Pengeluaran Cepat)',
         ]);
 
         // Invalidate cache
-        Cache::forget('cash_balances_'.($activeJurusanId ?: 'global'));
+        Cache::forget('cash_balances_' . ($activeJurusanId ?: 'global'));
 
         $this->dispatch('toast', message: 'Pengeluaran berhasil dicatat!');
     }

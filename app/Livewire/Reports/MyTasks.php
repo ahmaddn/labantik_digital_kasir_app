@@ -110,7 +110,7 @@ class MyTasks extends Component
         Notification::create([
             'user_id' => $task->created_by,
             'title' => $isRevision ? 'Revisi Tugas Menunggu ACC' : 'Laporan Tugas Menunggu ACC',
-            'body' => auth()->user()->name.' menyelesaikan tugas "'.$task->task_name.'". Silakan review & ACC.',
+            'body' => auth()->user()->name . ' menyelesaikan tugas "' . $task->task_name . '". Silakan review & ACC.',
             'type' => 'task',
             'action_url' => '/management/tasks',
         ]);

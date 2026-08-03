@@ -143,7 +143,7 @@
         this.$wire.checkout(this.cart, this.total, this.change, this.buyer_name, this.status, this.note, this.$wire.transactionDate).then(() => {
             this.clearCart();
             this.loading = false;
-            
+
             // Show Change Due Modal
             this.lastChangeData = { total: totalVal, payment: paymentVal, change: changeVal };
             this.showChangeModal = true;
@@ -234,7 +234,8 @@ document.addEventListener('keydown', (e) => {
                     @endphp
                     <a href="{{ route('dashboard') }}"
                         class="theme-no-card nb-card-flat p-2 w-14 h-14 bg-white flex items-center justify-center hover:scale-110 transition-transform">
-                        <img src="{{ $tefaLogo ? asset('storage/' . $tefaLogo) : asset('favicon.png') }}" class="w-full h-full object-contain">
+                        <img src="{{ $tefaLogo ? asset('storage/' . $tefaLogo) : asset('favicon.png') }}"
+                            class="w-full h-full object-contain">
                     </a>
                     <div>
                         <h1 class="text-xl lg:text-2xl font-black uppercase tracking-tighter text-white leading-none">
@@ -249,16 +250,19 @@ document.addEventListener('keydown', (e) => {
                 </div>
 
                 <div class="flex-1 w-full max-w-lg">
-                    <input type="text" id="pos-search-input" x-ref="searchInput" x-model="search" placeholder="CARI MENU (INSTAN)..."
+                    <input type="text" id="pos-search-input" x-ref="searchInput" x-model="search"
+                        placeholder="CARI MENU (INSTAN)..."
                         class="nb-input w-full p-3 text-sm uppercase placeholder:text-gray-400 bg-white dark:bg-slate-800 border-white shadow-none focus:ring-0">
                 </div>
 
-                 <div class="flex flex-wrap items-center gap-3">
+                <div class="flex flex-wrap items-center gap-3">
                     <!-- Global Notifications Bell -->
                     @livewire('note-notifications')
-                    <button @click="showQuickExpenseModal = true" class="nb-btn px-4 py-3 bg-primary-red text-white shadow-none border-2 border-black flex items-center gap-2 hover:scale-105 transition-transform text-xs font-black uppercase tracking-wider">
+                    <button @click="showQuickExpenseModal = true"
+                        class="nb-btn px-4 py-3 bg-primary-red text-white shadow-none border-2 border-black flex items-center gap-2 hover:scale-105 transition-transform text-xs font-black uppercase tracking-wider">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                         Catat Pengeluaran
                     </button>
@@ -303,7 +307,8 @@ document.addEventListener('keydown', (e) => {
                     'bg-gray-100 text-black dark:bg-dark-soft dark:text-white'"
                 class="nb-btn text-[10px] py-1.5 px-4 shadow-none border-2">SEMUA</button>
             @foreach ($this->categories as $cat)
-                <button type="button" @click="selectedCategory = (selectedCategory == '{{ $cat->id }}' ? null : '{{ $cat->id }}')"
+                <button type="button"
+                    @click="selectedCategory = (selectedCategory == '{{ $cat->id }}' ? null : '{{ $cat->id }}')"
                     :class="selectedCategory == '{{ $cat->id }}' ? 'bg-primary-blue text-white' :
                         'bg-gray-100 text-black dark:bg-dark-soft dark:text-white'"
                     class="nb-btn text-[10px] py-1.5 px-4 whitespace-nowrap shadow-none border-2">{{ $cat->name }}</button>
@@ -403,8 +408,9 @@ document.addEventListener('keydown', (e) => {
                     @php
                         $pendingTasksCount = collect($dailyTasks)->where('approval_status', '!=', 'approved')->count();
                     @endphp
-                    @if($pendingTasksCount > 0)
-                        <span class="px-1.5 py-0.5 text-[9px] font-black bg-rose-500 text-white rounded-full border border-white dark:border-gray-800 leading-none min-w-[16px] text-center">
+                    @if ($pendingTasksCount > 0)
+                        <span
+                            class="px-1.5 py-0.5 text-[9px] font-black bg-rose-500 text-white rounded-full border border-white dark:border-gray-800 leading-none min-w-[16px] text-center">
                             {{ $pendingTasksCount }}
                         </span>
                     @endif
@@ -453,31 +459,48 @@ document.addEventListener('keydown', (e) => {
 
             <!-- Tasks Content -->
             <div x-show="tab === 'tasks'" class="flex-1 overflow-y-auto p-5 space-y-3 no-scrollbar">
-                <div class="text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Tugas Harian Anda Hari Ini</div>
+                <div class="text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Tugas Harian Anda Hari Ini
+                </div>
                 @forelse($dailyTasks as $task)
-                    <a href="{{ route('my-tasks') }}" target="_blank" class="nb-card p-4 flex flex-col gap-3 bg-white dark:bg-dark-soft border-2 shadow-sm hover:shadow-none transition-shadow cursor-pointer">
+                    <a href="{{ route('my-tasks') }}" target="_blank"
+                        class="nb-card p-4 flex flex-col gap-3 bg-white dark:bg-dark-soft border-2 shadow-sm hover:shadow-none transition-shadow cursor-pointer">
                         <div class="flex justify-between items-start">
-                            <h4 class="text-xs font-bold uppercase tracking-tight {{ $task->approval_status === 'approved' ? 'line-through text-gray-400' : 'text-slate-800 dark:text-white' }}">{{ $task->task_name }}</h4>
-                            @if($task->approval_status === 'approved')
-                                <span class="text-[8px] font-black uppercase bg-green-500 text-white px-2 py-0.5 rounded border border-white">DISETUJUI</span>
+                            <h4
+                                class="text-xs font-bold uppercase tracking-tight {{ $task->approval_status === 'approved' ? 'line-through text-gray-400' : 'text-slate-800 dark:text-white' }}">
+                                {{ $task->task_name }}</h4>
+                            @if ($task->approval_status === 'approved')
+                                <span
+                                    class="text-[8px] font-black uppercase bg-green-500 text-white px-2 py-0.5 rounded border border-white">DISETUJUI</span>
                             @elseif($task->approval_status === 'rejected')
-                                <span class="text-[8px] font-black uppercase bg-red-500 text-white px-2 py-0.5 rounded border border-white">DITOLAK - REVISI</span>
+                                <span
+                                    class="text-[8px] font-black uppercase bg-red-500 text-white px-2 py-0.5 rounded border border-white">DITOLAK
+                                    - REVISI</span>
                             @elseif($task->approval_status === 'pending')
-                                <span class="text-[8px] font-black uppercase bg-primary-blue text-white px-2 py-0.5 rounded border border-white">MENUNGGU ACC</span>
+                                <span
+                                    class="text-[8px] font-black uppercase bg-primary-blue text-white px-2 py-0.5 rounded border border-white">MENUNGGU
+                                    ACC</span>
                             @else
-                                <span class="text-[8px] font-black uppercase bg-amber-500 text-white px-2 py-0.5 rounded border border-white">BELUM SELESAI</span>
+                                <span
+                                    class="text-[8px] font-black uppercase bg-amber-500 text-white px-2 py-0.5 rounded border border-white">BELUM
+                                    SELESAI</span>
                             @endif
                         </div>
-                        @if($task->description)
+                        @if ($task->description)
                             <p class="text-[10px] text-gray-400">{{ $task->description }}</p>
                         @endif
-                        <span class="text-[9px] font-black uppercase tracking-widest text-primary-blue flex items-center gap-1.5 mt-1">
+                        <span
+                            class="text-[9px] font-black uppercase tracking-widest text-primary-blue flex items-center gap-1.5 mt-1">
                             Kerjakan di Halaman Tugas Saya
-                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"/></svg>
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                stroke-width="3">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+                            </svg>
                         </span>
                     </a>
                 @empty
-                    <div class="text-center py-10 text-xs text-gray-400 italic font-semibold">Tidak ada tugas khusus hari ini</div>
+                    <div class="text-center py-10 text-xs text-gray-400 italic font-semibold">Tidak ada tugas khusus
+                        hari ini</div>
                 @endforelse
             </div>
 
@@ -615,7 +638,8 @@ document.addEventListener('keydown', (e) => {
             <p class="text-[11px] font-bold uppercase tracking-widest text-gray-500 mb-6 leading-relaxed">Session on
                 <span
                     class="text-primary-blue font-black">{{ $unfinishedSessionDate ? \Carbon\Carbon::parse($unfinishedSessionDate)->translatedFormat('d F Y') : '-' }}</span>
-                was not closed.</p>
+                was not closed.
+            </p>
 
             <div class="nb-card-flat bg-gray-50 dark:bg-black p-5 mb-8 text-left border-2 shadow-none">
                 <p class="text-[9px] font-black uppercase mb-1 dark:text-gray-400">AUTO-FIX:</p>
@@ -743,12 +767,14 @@ document.addEventListener('keydown', (e) => {
             </div>
             <div class="flex-1 overflow-y-auto p-6 no-scrollbar bg-gray-50 dark:bg-black">
                 @php
-                    $hasHigherRole = auth()->user()->roles()
+                    $hasHigherRole = auth()
+                        ->user()
+                        ->roles()
                         ->whereIn('roles.name', ['superadmin', 'pengelola_jurusan'])
                         ->exists();
                 @endphp
 
-                @if($hasHigherRole)
+                @if ($hasHigherRole)
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         @php
                             $rekapNames = collect($this->stockComparison)->pluck('name')->toArray();
@@ -765,7 +791,8 @@ document.addEventListener('keydown', (e) => {
                                             class="text-xs font-black border-2 border-black dark:border-white px-3 py-1 uppercase tracking-widest dark:text-white bg-gray-100 dark:bg-slate-800">{{ $item['opening'] }}</span>
                                     </div>
                                     <div class="flex flex-col">
-                                        <span class="text-[9px] font-black uppercase text-primary-blue mb-1">LAKU</span>
+                                        <span
+                                            class="text-[9px] font-black uppercase text-primary-blue mb-1">LAKU</span>
                                         <span
                                             class="text-xs font-black bg-primary-blue text-white px-3 py-1 uppercase tracking-widest">{{ $item['sold'] }}</span>
                                     </div>
@@ -776,7 +803,8 @@ document.addEventListener('keydown', (e) => {
                                     </div>
                                 </div>
                                 <div class="space-y-1">
-                                    <label class="text-[10px] font-black uppercase tracking-widest dark:text-gray-400">STOK
+                                    <label
+                                        class="text-[10px] font-black uppercase tracking-widest dark:text-gray-400">STOK
                                         FISIK SEKARANG</label>
                                     <input type="number" wire:model="stockItems.{{ $item['id'] }}"
                                         class="nb-input w-full text-center text-2xl p-3 shadow-none border-2 bg-white dark:bg-black">
@@ -792,9 +820,11 @@ document.addEventListener('keydown', (e) => {
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
-                            <div class="text-gray-400 font-bold text-xs uppercase tracking-widest italic mb-1">PRODUK TIDAK
+                            <div class="text-gray-400 font-bold text-xs uppercase tracking-widest italic mb-1">PRODUK
+                                TIDAK
                                 DITEMUKAN</div>
-                            <div class="text-gray-300 dark:text-gray-600 font-black text-2xl uppercase tracking-tighter">
+                            <div
+                                class="text-gray-300 dark:text-gray-600 font-black text-2xl uppercase tracking-tighter">
                                 "<span x-text="modalSearch"></span>"</div>
                         </div>
                     </div>
@@ -813,14 +843,19 @@ document.addEventListener('keydown', (e) => {
         class="fixed inset-0 z-[500] flex items-center justify-center p-6 bg-white/20 dark:bg-black/40 backdrop-blur-md">
         <div class="nb-card bg-white dark:bg-dark-soft w-full max-w-md p-10 border-4 border-black text-center">
             <div class="mb-6">
-                <span class="text-[9px] font-black bg-primary-red text-white px-3 py-1 uppercase tracking-widest border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">LAPORAN AKHIR SHIFT</span>
+                <span
+                    class="text-[9px] font-black bg-primary-red text-white px-3 py-1 uppercase tracking-widest border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">LAPORAN
+                    AKHIR SHIFT</span>
                 <h2 class="text-2xl font-black uppercase italic mt-4 dark:text-white">CLOSING REPORT</h2>
-                <p class="text-xs text-gray-500 font-semibold mt-1">Tulis laporan aktivitas Anda sebelum menyelesaikan sesi</p>
+                <p class="text-xs text-gray-500 font-semibold mt-1">Tulis laporan aktivitas Anda sebelum menyelesaikan
+                    sesi</p>
             </div>
 
             <div class="space-y-4 mb-6 text-left">
                 @php
-                    $hasHigherRole = auth()->user()->roles()
+                    $hasHigherRole = auth()
+                        ->user()
+                        ->roles()
                         ->whereIn('roles.name', ['superadmin', 'pengelola_jurusan'])
                         ->exists();
                 @endphp
@@ -828,12 +863,17 @@ document.addEventListener('keydown', (e) => {
                     <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">
                         Laporan Aktivitas Selama Shift {!! $hasHigherRole ? '<span class="text-amber-500 font-black">(OPSIONAL)</span>' : '' !!}
                     </label>
-                    <textarea wire:model="closingReportText" placeholder="Jelaskan apa saja yang Anda lakukan selama shift ini..." rows="4" class="nb-input w-full p-4 text-sm font-bold bg-white dark:bg-slate-800 border-2 border-black"></textarea>
-                    @error('closingReportText') <span class="text-xs text-red-500 font-bold mt-1 block">{{ $message }}</span> @enderror
+                    <textarea wire:model="closingReportText" placeholder="Jelaskan apa saja yang Anda lakukan selama shift ini..."
+                        rows="4" class="nb-input w-full p-4 text-sm font-bold bg-white dark:bg-slate-800 border-2 border-black"></textarea>
+                    @error('closingReportText')
+                        <span class="text-xs text-red-500 font-bold mt-1 block">{{ $message }}</span>
+                    @enderror
                 </div>
             </div>
 
-            <button wire:click="submitClosingReport" class="nb-btn w-full bg-primary-red text-white text-base py-4 font-black uppercase tracking-widest">KIRIM LAPORAN & CLOCK OUT</button>
+            <button wire:click="submitClosingReport"
+                class="nb-btn w-full bg-primary-red text-white text-base py-4 font-black uppercase tracking-widest">KIRIM
+                LAPORAN & CLOCK OUT</button>
         </div>
     </div>
 
@@ -929,11 +969,11 @@ document.addEventListener('keydown', (e) => {
 
 
     <!-- Change Due Modal -->
-    <div x-show="showChangeModal" x-cloak 
+    <div x-show="showChangeModal" x-cloak
         x-on:keydown.window.escape="showChangeModal = false; $nextTick(() => { const el = document.getElementById('pos-search-input'); if (el) el.focus(); })"
         x-on:keydown.window.enter="if (showChangeModal) { showChangeModal = false; $nextTick(() => { const el = document.getElementById('pos-search-input'); if (el) el.focus(); }); }"
         class="fixed inset-0 z-[600] flex items-center justify-center p-6">
-        
+
         <!-- Backdrop -->
         <div x-show="showChangeModal" x-transition:enter="transition ease-out duration-300"
             x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
@@ -942,34 +982,44 @@ document.addEventListener('keydown', (e) => {
         </div>
 
         <!-- Modal Box -->
-        <div x-show="showChangeModal" @click.away="showChangeModal = false; $nextTick(() => { const el = document.getElementById('pos-search-input'); if (el) el.focus(); })"
+        <div x-show="showChangeModal"
+            @click.away="showChangeModal = false; $nextTick(() => { const el = document.getElementById('pos-search-input'); if (el) el.focus(); })"
             x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 scale-95"
             x-transition:enter-end="opacity-100 scale-100" x-transition:leave="transition ease-in duration-200"
             x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95"
             class="nb-card bg-white dark:bg-dark-soft w-full max-w-md p-10 relative z-10 border-t-8 border-t-primary-blue">
-            
+
             <div class="text-center mb-8">
-                <span class="text-[9px] font-black bg-green-500 text-white px-3 py-1 uppercase tracking-widest border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">TRANSAKSI SUKSES</span>
+                <span
+                    class="text-[9px] font-black bg-green-500 text-white px-3 py-1 uppercase tracking-widest border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">TRANSAKSI
+                    SUKSES</span>
                 <h2 class="text-2xl font-black uppercase italic mt-4 dark:text-white">UANG KEMBALIAN</h2>
             </div>
 
             <div class="space-y-4 mb-10">
-                <div class="flex justify-between items-center py-3 border-b-2 border-dashed border-black dark:border-slate-800">
+                <div
+                    class="flex justify-between items-center py-3 border-b-2 border-dashed border-black dark:border-slate-800">
                     <span class="text-xs font-black uppercase tracking-widest text-slate-400">Total Belanja</span>
-                    <span class="text-lg font-black dark:text-white" x-text="'Rp' + formatRupiah(lastChangeData.total).replace('Rp', '').trim()"></span>
+                    <span class="text-lg font-black dark:text-white"
+                        x-text="'Rp' + formatRupiah(lastChangeData.total).replace('Rp', '').trim()"></span>
                 </div>
-                <div class="flex justify-between items-center py-3 border-b-2 border-dashed border-black dark:border-slate-800">
+                <div
+                    class="flex justify-between items-center py-3 border-b-2 border-dashed border-black dark:border-slate-800">
                     <span class="text-xs font-black uppercase tracking-widest text-slate-400">Uang Diterima</span>
-                    <span class="text-lg font-black dark:text-white" x-text="'Rp' + formatRupiah(lastChangeData.payment).replace('Rp', '').trim()"></span>
+                    <span class="text-lg font-black dark:text-white"
+                        x-text="'Rp' + formatRupiah(lastChangeData.payment).replace('Rp', '').trim()"></span>
                 </div>
                 <div class="flex justify-between items-center py-5">
                     <span class="text-sm font-black uppercase tracking-widest text-slate-500">Kembalian</span>
-                    <span class="text-3xl font-black italic text-green-600 dark:text-emerald-400" x-text="'Rp' + formatRupiah(lastChangeData.change).replace('Rp', '').trim()"></span>
+                    <span class="text-3xl font-black italic text-green-600 dark:text-emerald-400"
+                        x-text="'Rp' + formatRupiah(lastChangeData.change).replace('Rp', '').trim()"></span>
                 </div>
             </div>
 
-            <button @click="showChangeModal = false; $nextTick(() => { const el = document.getElementById('pos-search-input'); if (el) el.focus(); })"
-                class="nb-btn w-full bg-black text-white text-base py-4 font-black uppercase tracking-widest">TUTUP (ENTER)</button>
+            <button
+                @click="showChangeModal = false; $nextTick(() => { const el = document.getElementById('pos-search-input'); if (el) el.focus(); })"
+                class="nb-btn w-full bg-black text-white text-base py-4 font-black uppercase tracking-widest">TUTUP
+                (ENTER)</button>
         </div>
     </div>
 
@@ -977,7 +1027,7 @@ document.addEventListener('keydown', (e) => {
     <!-- Quick Expense Modal -->
     <div x-show="showQuickExpenseModal" x-cloak @keydown.window.escape="showQuickExpenseModal = false"
         class="fixed inset-0 z-[600] flex items-center justify-center p-6">
-        
+
         <!-- Backdrop -->
         <div x-show="showQuickExpenseModal" x-transition:enter="transition ease-out duration-300"
             x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
@@ -991,30 +1041,35 @@ document.addEventListener('keydown', (e) => {
             x-transition:enter-end="opacity-100 scale-100" x-transition:leave="transition ease-in duration-200"
             x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95"
             class="nb-card bg-white dark:bg-dark-soft w-full max-w-md p-10 relative z-10 border-t-8 border-t-primary-red">
-            
+
             <div class="text-center mb-8">
-                <span class="text-[9px] font-black bg-primary-red text-white px-3 py-1 uppercase tracking-widest border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">OPERASIONAL</span>
+                <span
+                    class="text-[9px] font-black bg-primary-red text-white px-3 py-1 uppercase tracking-widest border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">OPERASIONAL</span>
                 <h2 class="text-2xl font-black uppercase italic mt-4 dark:text-white">CATAT PENGELUARAN CEPAT</h2>
             </div>
 
             <div class="space-y-5 mb-8">
                 <div>
-                    <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Nominal Pengeluaran (Rp)</label>
+                    <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Nominal
+                        Pengeluaran (Rp)</label>
                     <input type="number" x-model="quickExpenseAmount" placeholder="Contoh: 10000"
                         class="nb-input w-full p-4 text-base font-bold bg-white dark:bg-slate-800 border-2 border-black">
                 </div>
                 <div>
-                    <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Kategori Kas</label>
+                    <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Kategori
+                        Kas</label>
                     <select x-model="quickExpenseCategoryId"
                         class="nb-input w-full p-4 text-sm font-bold bg-white dark:bg-slate-800 border-2 border-black uppercase">
                         <option value="">-- Pilihlah Kategori --</option>
-                        @foreach($categories as $cat)
+                        @foreach ($categories as $cat)
                             <option value="{{ $cat->id }}">{{ $cat->name }}</option>
                         @endforeach
                     </select>
                 </div>
                 <div>
-                    <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Keterangan / Keperluan</label>
+                    <label
+                        class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Keterangan /
+                        Keperluan</label>
                     <textarea x-model="quickExpenseDescription" placeholder="Contoh: Beli Kantong Plastik Besar" rows="3"
                         class="nb-input w-full p-4 text-sm font-bold bg-white dark:bg-slate-800 border-2 border-black uppercase"></textarea>
                 </div>
@@ -1023,7 +1078,8 @@ document.addEventListener('keydown', (e) => {
             <div class="flex gap-4">
                 <button type="button" @click="showQuickExpenseModal = false"
                     class="nb-btn w-1/3 bg-white text-black border-2 border-black hover:bg-slate-100 py-4 font-black uppercase tracking-widest text-xs">BATAL</button>
-                <button type="button" @click="
+                <button type="button"
+                    @click="
                     if (!quickExpenseAmount || !quickExpenseCategoryId || !quickExpenseDescription) {
                         alert('Harap isi semua kolom!');
                         return;
@@ -1038,7 +1094,8 @@ document.addEventListener('keydown', (e) => {
                     }).catch(() => {
                         quickExpenseLoading = false;
                     });
-                " :disabled="quickExpenseLoading"
+                "
+                    :disabled="quickExpenseLoading"
                     class="nb-btn w-2/3 bg-primary-red text-white py-4 font-black uppercase tracking-widest text-xs flex items-center justify-center">
                     <span x-show="!quickExpenseLoading">SIMPAN</span>
                     <span x-show="quickExpenseLoading">MENYIMPAN...</span>
@@ -1049,16 +1106,16 @@ document.addEventListener('keydown', (e) => {
 
 
     <!-- Mobile Cart FAB Trigger -->
-    <button 
-        @click="showCart = true" 
-        x-show="!showCart" 
-        class="lg:hidden fixed bottom-6 right-6 z-40 px-6 py-4 bg-primary-blue text-white rounded-2xl shadow-2xl font-black uppercase tracking-widest flex items-center gap-3 border-2 border-black active:scale-95 transition-transform"
-    >
-        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z"/>
+    <button @click="showCart = true" x-show="!showCart"
+        class="lg:hidden fixed bottom-6 right-6 z-40 px-6 py-4 bg-primary-blue text-white rounded-2xl shadow-2xl font-black uppercase tracking-widest flex items-center gap-3 border-2 border-black active:scale-95 transition-transform">
+        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+            stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round"
+                d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z" />
         </svg>
         <span>Lihat Keranjang</span>
-        <span class="bg-primary-red text-white text-[10px] px-2.5 py-1 rounded-full border border-white" x-text="cart.length"></span>
+        <span class="bg-primary-red text-white text-[10px] px-2.5 py-1 rounded-full border border-white"
+            x-text="cart.length"></span>
     </button>
 
     <script>

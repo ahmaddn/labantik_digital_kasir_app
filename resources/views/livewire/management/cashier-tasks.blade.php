@@ -206,13 +206,15 @@
                 Tugas Harian</h2>
 
             <form wire:submit.prevent="prepareTask" class="space-y-4">
-                @unless($isRoutine)
+                @unless ($isRoutine)
                     <div>
                         <div class="flex items-center gap-3 mb-2">
-                            <label class="text-xs font-black uppercase tracking-widest text-gray-400 ml-1">Mode Pilihan Kasir</label>
+                            <label class="text-xs font-black uppercase tracking-widest text-gray-400 ml-1">Mode Pilihan
+                                Kasir</label>
                             <div class="flex items-center gap-2">
                                 <label class="inline-flex items-center text-xs">
-                                    <input type="radio" wire:model="assigneeMode" value="scheduled" class="form-radio" />
+                                    <input type="radio" wire:model="assigneeMode" value="scheduled"
+                                        class="form-radio" />
                                     <span class="ml-2 font-black uppercase text-[10px]">Sesuai Jadwal Hari Ini</span>
                                 </label>
                                 <label class="inline-flex items-center text-xs">
@@ -226,12 +228,13 @@
                             class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">Ditugaskan
                             Ke</label>
                         <select wire:model="assignedTo" multiple size="4"
-                                class="w-full px-4 py-3 bg-gray-55 dark:bg-gray-900 border-none rounded-xl focus:ring-2 focus:ring-primary-blue dark:text-white text-sm">
-                                @foreach ($cashiers as $c)
-                                    <option value="{{ $c->id }}">{{ $c->name }}</option>
-                                @endforeach
-                            </select>
-                            <div class="text-[10px] text-gray-400 mt-1">Pilih lebih dari satu kasir jika diperlukan (Ctrl/Cmd+klik).</div>
+                            class="w-full px-4 py-3 bg-gray-55 dark:bg-gray-900 border-none rounded-xl focus:ring-2 focus:ring-primary-blue dark:text-white text-sm">
+                            @foreach ($cashiers as $c)
+                                <option value="{{ $c->id }}">{{ $c->name }}</option>
+                            @endforeach
+                        </select>
+                        <div class="text-[10px] text-gray-400 mt-1">Pilih lebih dari satu kasir jika diperlukan
+                            (Ctrl/Cmd+klik).</div>
                         @error('assignedTo')
                             <span class="text-xs text-red-500 font-bold mt-1 block">{{ $message }}</span>
                         @enderror
@@ -277,7 +280,7 @@
                             <select wire:model="category"
                                 class="flex-1 px-4 py-3 bg-gray-55 dark:bg-gray-900 border-none rounded-xl focus:ring-2 focus:ring-primary-blue dark:text-white text-sm">
                                 <option value="">-- Pilih Kategori --</option>
-                                @foreach($categories as $cat)
+                                @foreach ($categories as $cat)
                                     <option value="{{ $cat }}">{{ $cat }}</option>
                                 @endforeach
                             </select>
@@ -305,7 +308,7 @@
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    @unless($isRoutine)
+                    @unless ($isRoutine)
                         <div>
                             <label
                                 class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">Deadline</label>
@@ -317,7 +320,8 @@
                         </div>
                     @else
                         <div class="flex items-center h-full">
-                            <div class="text-xs text-gray-500">Deadline akan otomatis ditentukan (8 jam sejak clock-in pertama kasir).</div>
+                            <div class="text-xs text-gray-500">Deadline akan otomatis ditentukan (8 jam sejak clock-in
+                                pertama kasir).</div>
                         </div>
                     @endunless
                     <div class="flex flex-col justify-end">
@@ -345,28 +349,39 @@
     </div>
 
     <!-- Add Category Modal -->
-    <div x-data="{ show: @entangle('showAddCategoryModal') }" x-show="show" class="fixed inset-0 z-50 flex items-center justify-center p-4" x-cloak>
-        <div x-show="show" x-transition.opacity class="fixed inset-0 bg-black/60 backdrop-blur-xs" wire:click="$set('showAddCategoryModal', false)"></div>
-        <div x-show="show" x-transition.scale class="relative w-full max-w-sm bg-white dark:bg-gray-800 rounded-[2rem] shadow-2xl p-6 border border-gray-100 dark:border-gray-700 z-10">
+    <div x-data="{ show: @entangle('showAddCategoryModal') }" x-show="show" class="fixed inset-0 z-50 flex items-center justify-center p-4"
+        x-cloak>
+        <div x-show="show" x-transition.opacity class="fixed inset-0 bg-black/60 backdrop-blur-xs"
+            wire:click="$set('showAddCategoryModal', false)"></div>
+        <div x-show="show" x-transition.scale
+            class="relative w-full max-w-sm bg-white dark:bg-gray-800 rounded-[2rem] shadow-2xl p-6 border border-gray-100 dark:border-gray-700 z-10">
             <h3 class="text-lg font-black mb-4">Tambah Kategori Tugas</h3>
             <div>
                 <input wire:model="newCategoryName" type="text" placeholder="Nama kategori"
                     class="w-full px-4 py-3 bg-gray-55 dark:bg-gray-900 border-none rounded-xl focus:ring-2 focus:ring-primary-blue text-sm">
-                @error('newCategoryName') <div class="text-xs text-red-500 mt-1">{{ $message }}</div> @enderror
+                @error('newCategoryName')
+                    <div class="text-xs text-red-500 mt-1">{{ $message }}</div>
+                @enderror
             </div>
             <div class="flex gap-3 mt-4">
-                <button type="button" wire:click="$set('showAddCategoryModal', false)" class="flex-1 py-2 bg-gray-100 rounded-xl">Batal</button>
-                <button type="button" wire:click="storeCategory" class="flex-1 py-2 bg-primary-blue text-white rounded-xl">Simpan</button>
+                <button type="button" wire:click="$set('showAddCategoryModal', false)"
+                    class="flex-1 py-2 bg-gray-100 rounded-xl">Batal</button>
+                <button type="button" wire:click="storeCategory"
+                    class="flex-1 py-2 bg-primary-blue text-white rounded-xl">Simpan</button>
             </div>
         </div>
     </div>
 
     <!-- Confirm Modal for multiple assignees -->
-    <div x-data="{ show: @entangle('showConfirmModal') }" x-show="show" class="fixed inset-0 z-50 flex items-center justify-center p-4" x-cloak>
-        <div x-show="show" x-transition.opacity class="fixed inset-0 bg-black/60 backdrop-blur-xs" wire:click="$set('showConfirmModal', false)"></div>
-        <div x-show="show" x-transition.scale class="relative w-full max-w-lg bg-white dark:bg-gray-800 rounded-[2rem] shadow-2xl p-6 border border-gray-100 dark:border-gray-700 z-10">
+    <div x-data="{ show: @entangle('showConfirmModal') }" x-show="show" class="fixed inset-0 z-50 flex items-center justify-center p-4"
+        x-cloak>
+        <div x-show="show" x-transition.opacity class="fixed inset-0 bg-black/60 backdrop-blur-xs"
+            wire:click="$set('showConfirmModal', false)"></div>
+        <div x-show="show" x-transition.scale
+            class="relative w-full max-w-lg bg-white dark:bg-gray-800 rounded-[2rem] shadow-2xl p-6 border border-gray-100 dark:border-gray-700 z-10">
             <h3 class="text-lg font-black mb-2">Konfirmasi Tugas untuk Banyak Kasir</h3>
-            <p class="text-sm text-gray-500 mb-4">Anda akan membuat tugas ini untuk <strong>{{ count($pendingAssignees) }}</strong> kasir. Pastikan data sudah benar.</p>
+            <p class="text-sm text-gray-500 mb-4">Anda akan membuat tugas ini untuk
+                <strong>{{ count($pendingAssignees) }}</strong> kasir. Pastikan data sudah benar.</p>
             <div class="space-y-2 pb-4">
                 <div class="text-xs font-black uppercase text-gray-400">Nama Tugas</div>
                 <div class="font-bold">{{ $taskName }}</div>
@@ -376,8 +391,10 @@
                 <div>{{ \App\Models\CashierTask::priorityLabels()[$priority] ?? $priority }}</div>
             </div>
             <div class="flex gap-3">
-                <button type="button" wire:click="$set('showConfirmModal', false)" class="flex-1 py-2 bg-gray-100 rounded-xl">Batal</button>
-                <button type="button" wire:click="finalSaveTask" class="flex-1 py-2 bg-primary-blue text-white rounded-xl">Konfirmasi & Simpan</button>
+                <button type="button" wire:click="$set('showConfirmModal', false)"
+                    class="flex-1 py-2 bg-gray-100 rounded-xl">Batal</button>
+                <button type="button" wire:click="finalSaveTask"
+                    class="flex-1 py-2 bg-primary-blue text-white rounded-xl">Konfirmasi & Simpan</button>
             </div>
         </div>
     </div>
