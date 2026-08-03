@@ -56,6 +56,10 @@ class CashierTasks extends Component
 
     public $rejectionNote = '';
 
+    public $isEditMode = false;
+
+    public $editingTaskId = null;
+
     protected $rules = [
         'date' => 'required|date',
         'taskName' => 'required|string|max:255',
@@ -113,6 +117,26 @@ class CashierTasks extends Component
         $this->deadlineAt = '';
         $this->isRoutine = false;
         $this->date = now()->toDateString();
+        $this->isEditMode = false;
+        $this->editingTaskId = null;
+    }
+
+    public function editTask($id): void
+    {
+        $task = CashierTask::findOrFail($id);
+        $this->editingTaskId = $id;
+        $this->isEditMode = true;
+
+        $this->date = $task->date->toDateString();
+        $this->taskName = $task->task_name;
+        $this->description = $task->description;
+        $this->assignedTo = [$task->assigned_to];
+        $this->category = $task->category;
+        $this->priority = $task->priority;
+        $this->deadlineAt = $task->deadline_at ? $task->deadline_at->format('Y-m-d\TH:i') : '';
+        $this->isRoutine = $task->is_routine;
+
+        $this->showCreateModal = true;
     }
 
     public function saveTask()
@@ -176,62 +200,83 @@ class CashierTasks extends Component
             return;
         }
 
-        $taskPayload = [
-            'jurusan_id' => $activeJurusanId,
-            'date' => $this->date,
-            'task_name' => $this->taskName,
-            'description' => $this->description,
-            'deadline_at' => $this->deadlineAt ?: null,
-            'status' => 'new',
-            'priority' => $this->priority,
-            'category' => $this->category ?: null,
-            'is_routine' => $this->isRoutine,
-            'created_by' => auth()->id(),
-        ];
+        if ($this->isEditMode) {
+            $task = CashierTask::findOrFail($this->editingTaskId);
 
-        if ($this->isRoutine) {
-            $cashiers = User::whereHas('roles', function ($q) use ($activeJurusanId) {
-                $q->where('roles.name', 'kasir')
-                    ->where('role_user.jurusan_id', $activeJurusanId);
-            })->get();
+            $taskPayload = [
+                'date' => $this->date,
+                'task_name' => $this->taskName,
+                'description' => $this->description,
+                'deadline_at' => $this->deadlineAt ?: null,
+                'priority' => $this->priority,
+                'category' => $this->category ?: null,
+                'is_routine' => $this->isRoutine,
+            ];
 
-            if ($cashiers->isEmpty()) {
-                $this->dispatch('toast', message: 'Tidak ada kasir di jurusan ini untuk membuat tugas rutin.', type: 'warning');
-
-                return;
+            if (! $this->isRoutine) {
+                $taskPayload['assigned_to'] = head((array) $this->assignedTo);
             }
 
-            foreach ($cashiers as $cashier) {
-                CashierTask::create($taskPayload + ['assigned_to' => $cashier->id]);
-
-                Notification::create([
-                    'user_id' => $cashier->id,
-                    'title' => 'Tugas Rutin Baru',
-                    'body' => 'Anda mendapatkan tugas rutin: "' . $this->taskName . '" untuk tanggal ' . Carbon::parse($this->date)->format('d M Y'),
-                    'type' => 'task',
-                    'action_url' => '/cashier',
-                ]);
-            }
-
-            $message = 'Tugas rutin harian berhasil ditambahkan untuk semua kasir.';
+            $task->update($taskPayload);
+            $message = 'Tugas berhasil diperbarui!';
         } else {
-            $assignees = $this->pendingAssignees ?: (array) $this->assignedTo;
-            $createdCount = 0;
-            foreach ($assignees as $assigneeId) {
-                CashierTask::create($taskPayload + ['assigned_to' => $assigneeId]);
+            $taskPayload = [
+                'jurusan_id' => $activeJurusanId,
+                'date' => $this->date,
+                'task_name' => $this->taskName,
+                'description' => $this->description,
+                'deadline_at' => $this->deadlineAt ?: null,
+                'status' => 'new',
+                'priority' => $this->priority,
+                'category' => $this->category ?: null,
+                'is_routine' => $this->isRoutine,
+                'created_by' => auth()->id(),
+            ];
 
-                Notification::create([
-                    'user_id' => $assigneeId,
-                    'title' => 'Tugas Baru Ditugaskan',
-                    'body' => 'Anda mendapatkan tugas: "' . $this->taskName . '" pada tanggal ' . Carbon::parse($this->date)->format('d M Y'),
-                    'type' => 'task',
-                    'action_url' => '/cashier',
-                ]);
+            if ($this->isRoutine) {
+                $cashiers = User::whereHas('roles', function ($q) use ($activeJurusanId) {
+                    $q->where('roles.name', 'kasir')
+                        ->where('role_user.jurusan_id', $activeJurusanId);
+                })->get();
 
-                $createdCount++;
+                if ($cashiers->isEmpty()) {
+                    $this->dispatch('toast', message: 'Tidak ada kasir di jurusan ini untuk membuat tugas rutin.', type: 'warning');
+
+                    return;
+                }
+
+                foreach ($cashiers as $cashier) {
+                    CashierTask::create($taskPayload + ['assigned_to' => $cashier->id]);
+
+                    Notification::create([
+                        'user_id' => $cashier->id,
+                        'title' => 'Tugas Rutin Baru',
+                        'body' => 'Anda mendapatkan tugas rutin: "' . $this->taskName . '" untuk tanggal ' . Carbon::parse($this->date)->format('d M Y'),
+                        'type' => 'task',
+                        'action_url' => '/cashier',
+                    ]);
+                }
+
+                $message = 'Tugas rutin harian berhasil ditambahkan untuk semua kasir.';
+            } else {
+                $assignees = $this->pendingAssignees ?: (array) $this->assignedTo;
+                $createdCount = 0;
+                foreach ($assignees as $assigneeId) {
+                    CashierTask::create($taskPayload + ['assigned_to' => $assigneeId]);
+
+                    Notification::create([
+                        'user_id' => $assigneeId,
+                        'title' => 'Tugas Baru Ditugaskan',
+                        'body' => 'Anda mendapatkan tugas: "' . $this->taskName . '" pada tanggal ' . Carbon::parse($this->date)->format('d M Y'),
+                        'type' => 'task',
+                        'action_url' => '/cashier',
+                    ]);
+
+                    $createdCount++;
+                }
+
+                $message = $createdCount > 1 ? $createdCount . ' tugas berhasil ditambahkan untuk kasir terpilih.' : 'Tugas harian kasir berhasil ditambahkan!';
             }
-
-            $message = $createdCount > 1 ? $createdCount . ' tugas berhasil ditambahkan untuk kasir terpilih.' : 'Tugas harian kasir berhasil ditambahkan!';
         }
 
         $this->showConfirmModal = false;

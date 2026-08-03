@@ -42,19 +42,33 @@
                 class="text-[9px] font-bold text-gray-400 uppercase tracking-widest">{{ $task->date->translatedFormat('d M Y') }}</span>
             @if ($task->category)
                 <span
-                    class="text-[9px] font-black uppercase tracking-widest bg-slate-100 text-slate-700 dark:bg-slate-950/40 dark:text-slate-300 px-2 py-1 rounded-full">{{ $task->category }}</span>
+                    class="text-[9px] font-black uppercase tracking-widest bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 px-2 py-1 rounded-full">{{ $task->category }}</span>
             @endif
+            @php
+                $statusBadgeClass = match ($task->status) {
+                    'new' => 'bg-amber-50 text-amber-600 dark:bg-amber-950/30 dark:text-amber-400',
+                    'pending' => 'bg-blue-50 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400',
+                    'completed' => 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/30 dark:text-emerald-400',
+                    default => 'bg-gray-50 text-gray-600 dark:bg-gray-900/30 dark:text-gray-300',
+                };
+                $priorityBadgeClass = match ($task->priority) {
+                    'low' => 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300',
+                    'high' => 'bg-orange-50 text-orange-700 dark:bg-orange-950/30 dark:text-orange-400',
+                    'critical' => 'bg-red-50 text-red-700 dark:bg-red-950/30 dark:text-red-400',
+                    default => 'bg-blue-50 text-blue-700 dark:bg-blue-950/30 dark:text-blue-400',
+                };
+            @endphp
             <span
-                class="text-[9px] font-black uppercase tracking-widest {{ $task->statusBadgeClass }} px-2 py-1 rounded-full">{{ $task->status_label }}</span>
+                class="text-[9px] font-black uppercase tracking-widest {{ $statusBadgeClass }} px-2 py-1 rounded-full">{{ $task->status_label }}</span>
             <span
-                class="text-[9px] font-black uppercase tracking-widest {{ $task->priorityBadgeClass }} px-2 py-1 rounded-full">{{ $task->priority_label }}</span>
+                class="text-[9px] font-black uppercase tracking-widest {{ $priorityBadgeClass }} px-2 py-1 rounded-full">{{ $task->priority_label }}</span>
             @if ($task->deadline_at)
                 <span
-                    class="text-[9px] font-black uppercase tracking-widest bg-slate-100 text-slate-700 dark:bg-slate-950/40 dark:text-slate-300 px-2 py-1 rounded-full">Deadline
+                    class="text-[9px] font-black uppercase tracking-widest bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 px-2 py-1 rounded-full">Deadline
                     {{ $task->deadline_at->translatedFormat('d M H:i') }}</span>
             @elseif($task->is_routine && isset($task->computed_deadline) && $task->computed_deadline)
                 <span
-                    class="text-[9px] font-black uppercase tracking-widest bg-slate-100 text-slate-700 dark:bg-slate-950/40 dark:text-slate-300 px-2 py-1 rounded-full">Deadline
+                    class="text-[9px] font-black uppercase tracking-widest bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 px-2 py-1 rounded-full">Deadline
                     {{ \Carbon\Carbon::parse($task->computed_deadline)->translatedFormat('d M H:i') }}</span>
             @endif
         </div>

@@ -169,6 +169,15 @@
                                             Tolak
                                         </button>
                                     @endif
+                                    <button wire:click="editTask('{{ $task->id }}')"
+                                        class="p-2 text-gray-400 hover:text-primary-blue hover:bg-blue-50 dark:hover:bg-blue-950/30 rounded-xl transition-all"
+                                        title="Edit tugas">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
+                                            </path>
+                                        </svg>
+                                    </button>
                                     <button wire:click="confirmDelete('{{ $task->id }}')"
                                         class="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-xl transition-all">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -202,8 +211,8 @@
             wire:click="$set('showCreateModal', false)"></div>
         <div x-show="show" x-transition.scale
             class="relative w-full max-w-2xl md:max-w-3xl lg:max-w-4xl bg-white dark:bg-gray-800 rounded-[2.5rem] shadow-2xl p-10 border border-gray-100 dark:border-gray-700 z-10 animate-fade-in">
-            <h2 class="text-3xl font-black text-gray-850 dark:text-white uppercase italic tracking-tight mb-6">Tambah
-                Tugas Harian</h2>
+            <h2 class="text-3xl font-black text-gray-850 dark:text-white uppercase italic tracking-tight mb-6">
+                {{ $isEditMode ? 'Edit Tugas Harian' : 'Tambah Tugas Harian' }}</h2>
 
             <form wire:submit.prevent="prepareTask" class="space-y-4">
                 @unless ($isRoutine)
@@ -369,7 +378,7 @@
                     </button>
                     <button type="submit"
                         class="flex-1 py-3 bg-primary-blue hover:bg-blue-900 text-primary-yellow rounded-xl font-black text-xs uppercase tracking-wider transition-all shadow-md">
-                        Kirim Tugas
+                        {{ $isEditMode ? 'Simpan Perubahan' : 'Kirim Tugas' }}
                     </button>
                 </div>
             </form>

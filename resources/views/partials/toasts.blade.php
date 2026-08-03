@@ -48,7 +48,7 @@
     @if(session()->has('error'))
     $dispatch('toast', { message: '{{ session('error') }}', type: 'error' });
     @endif"
-    class="fixed top-6 inset-x-4 sm:inset-x-auto sm:top-10 sm:right-10 z-[1000] flex flex-col gap-4 pointer-events-none">
+    class="fixed top-6 right-6 sm:top-10 sm:right-10 z-[1000] flex flex-col gap-4 pointer-events-none">
     <template x-for="msg in messages" :key="msg.id">
         <div x-show="msg.show" x-transition:enter="transition cubic-bezier(0.34, 1.56, 0.64, 1) duration-500"
             x-transition:enter-start="opacity-0 translate-y-10 scale-50"
