@@ -13,6 +13,7 @@ class CashManagement extends Component
 
     // Filters
     public string $filterMonth = '';
+    public string $activeTab = 'cumulative';
 
     // Form inputs
     public string $date = '';
@@ -475,10 +476,13 @@ class CashManagement extends Component
             ->whereYear('date', $selectedYear)
             ->whereMonth('date', $selectedMonthNumber);
 
-        // Overall cumulative balances (from the beginning of time up to the end of the filtered month)
+        // Overall cumulative query (from the beginning of time up to the end of the filtered month)
         $endOfFilteredMonth = Carbon::parse($selectedMonth . '-01')->endOfMonth()->toDateString();
-        $overallBalances = CashTransaction::where('jurusan_id', $activeJurusanId)
-            ->where('date', '<=', $endOfFilteredMonth)
+        $cumulativeQuery = CashTransaction::where('jurusan_id', $activeJurusanId)
+            ->where('date', '<=', $endOfFilteredMonth);
+
+        // Calculate cumulative balances
+        $cumulativeBalances = (clone $cumulativeQuery)
             ->selectRaw("
                 SUM(CASE WHEN cash_type = 'modal' AND type = 'income' THEN amount ELSE 0 END) as modal_income,
                 SUM(CASE WHEN cash_type = 'modal' AND type = 'expense' THEN amount ELSE 0 END) as modal_expense,
@@ -486,11 +490,23 @@ class CashManagement extends Component
                 SUM(CASE WHEN cash_type = 'keuntungan' AND type = 'expense' THEN amount ELSE 0 END) as profit_expense
             ")
             ->first();
+        $cumulativeModalBalance = ($cumulativeBalances->modal_income ?? 0) - ($cumulativeBalances->modal_expense ?? 0);
+        $cumulativeProfitBalance = ($cumulativeBalances->profit_income ?? 0) - ($cumulativeBalances->profit_expense ?? 0);
 
-        $currentModalBalance = ($overallBalances->modal_income ?? 0) - ($overallBalances->modal_expense ?? 0);
-        $currentProfitBalance = ($overallBalances->profit_income ?? 0) - ($overallBalances->profit_expense ?? 0);
+        // Calculate monthly balances
+        $monthlyBalances = (clone $query)
+            ->selectRaw("
+                SUM(CASE WHEN cash_type = 'modal' AND type = 'income' THEN amount ELSE 0 END) as modal_income,
+                SUM(CASE WHEN cash_type = 'modal' AND type = 'expense' THEN amount ELSE 0 END) as modal_expense,
+                SUM(CASE WHEN cash_type = 'keuntungan' AND type = 'income' THEN amount ELSE 0 END) as profit_income,
+                SUM(CASE WHEN cash_type = 'keuntungan' AND type = 'expense' THEN amount ELSE 0 END) as profit_expense
+            ")
+            ->first();
+        $monthlyModalBalance = ($monthlyBalances->modal_income ?? 0) - ($monthlyBalances->modal_expense ?? 0);
+        $monthlyProfitBalance = ($monthlyBalances->profit_income ?? 0) - ($monthlyBalances->profit_expense ?? 0);
 
-        $categorySums = (clone $query)
+        // Fetch cumulative category sums
+        $cumulativeCategorySums = (clone $cumulativeQuery)
             ->selectRaw("
                 cash_category_id,
                 SUM(CASE WHEN type = 'income' THEN amount ELSE 0 END) as cat_income,
@@ -504,10 +520,38 @@ class CashManagement extends Component
             ->get()
             ->keyBy('cash_category_id');
 
+        // Fetch monthly category sums
+        $monthlyCategorySums = (clone $query)
+            ->selectRaw("
+                cash_category_id,
+                SUM(CASE WHEN type = 'income' THEN amount ELSE 0 END) as cat_income,
+                SUM(CASE WHEN type = 'expense' THEN amount ELSE 0 END) as cat_expense,
+                SUM(CASE WHEN cash_type = 'modal' AND type = 'income' THEN amount ELSE 0 END) as modal_income,
+                SUM(CASE WHEN cash_type = 'modal' AND type = 'expense' THEN amount ELSE 0 END) as modal_expense,
+                SUM(CASE WHEN cash_type = 'keuntungan' AND type = 'income' THEN amount ELSE 0 END) as profit_income,
+                SUM(CASE WHEN cash_type = 'keuntungan' AND type = 'expense' THEN amount ELSE 0 END) as profit_expense
+            ")
+            ->groupBy('cash_category_id')
+            ->get()
+            ->keyBy('cash_category_id');
+
+        // Select variables based on active tab
+        if ($this->activeTab === 'cumulative') {
+            $categorySums = $cumulativeCategorySums;
+            $activeQuery = $cumulativeQuery;
+            $currentModalBalance = $cumulativeModalBalance;
+            $currentProfitBalance = $cumulativeProfitBalance;
+        } else {
+            $categorySums = $monthlyCategorySums;
+            $activeQuery = $query;
+            $currentModalBalance = $monthlyModalBalance;
+            $currentProfitBalance = $monthlyProfitBalance;
+        }
+
         $catBagiHasil = \App\Models\CashCategory::where('jurusan_id', $activeJurusanId)->where('name', 'Bagi Hasil Mingguan')->first();
         $bagiHasilTransactions = [];
         if ($catBagiHasil) {
-            $bagiHasilTransactions = (clone $query)
+            $bagiHasilTransactions = (clone $activeQuery)
                 ->where('cash_category_id', $catBagiHasil->id)
                 ->get()
                 ->toArray();

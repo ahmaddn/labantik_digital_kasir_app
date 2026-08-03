@@ -32,6 +32,18 @@
         </div>
     </div>
 
+    <!-- Tab Navigation -->
+    <div class="flex items-center gap-2 mb-8 bg-gray-50 dark:bg-gray-800 p-1.5 rounded-2xl w-fit border border-gray-100 dark:border-gray-700/50">
+        <button wire:click="$set('activeTab', 'cumulative')" 
+            class="px-5 py-2.5 rounded-xl text-xs font-black italic uppercase tracking-wider transition-all {{ $activeTab === 'cumulative' ? 'bg-primary-blue text-white shadow-md' : 'text-gray-500 hover:text-gray-855 dark:hover:text-white dark:text-gray-400' }}">
+            Kumulatif (Semua)
+        </button>
+        <button wire:click="$set('activeTab', 'monthly')" 
+            class="px-5 py-2.5 rounded-xl text-xs font-black italic uppercase tracking-wider transition-all {{ $activeTab === 'monthly' ? 'bg-primary-blue text-white shadow-md' : 'text-gray-500 hover:text-gray-855 dark:hover:text-white dark:text-gray-400' }}">
+            Bulan Ini
+        </button>
+    </div>
+
     <!-- Stats Cards -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-8 mb-12">
         <!-- Total Saldo Kas Card -->
@@ -39,7 +51,7 @@
             <div class="absolute -right-6 -bottom-6 opacity-10 group-hover:scale-110 transition-transform duration-700">
                 <svg class="w-40 h-40 text-white" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="12" x="2" y="6" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/></svg>
             </div>
-            <h3 class="text-[10px] font-black uppercase tracking-[0.3em] opacity-80 mb-3 text-emerald-300">Total Saldo Kas (Kumulatif)</h3>
+            <h3 class="text-[10px] font-black uppercase tracking-[0.3em] opacity-80 mb-3 text-emerald-300">Total Saldo Kas {{ $activeTab === 'cumulative' ? '(Kumulatif)' : '(Bulan Ini)' }}</h3>
             <p class="text-2xl xl:text-3xl font-black italic text-white {{ ($currentModalBalance + $currentProfitBalance) < 0 ? 'text-primary-red' : '' }}" :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($currentModalBalance + $currentProfitBalance, 0, ',', '.') }}</p>
         </div>
 
@@ -48,7 +60,7 @@
             <div class="absolute -right-6 -bottom-6 opacity-10 group-hover:scale-110 transition-transform duration-700">
                 <svg class="w-40 h-40 text-white" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg>
             </div>
-            <h3 class="text-[10px] font-black uppercase tracking-[0.3em] opacity-60 mb-3">Saldo Kas Modal (Kumulatif)</h3>
+            <h3 class="text-[10px] font-black uppercase tracking-[0.3em] opacity-60 mb-3">Saldo Kas Modal {{ $activeTab === 'cumulative' ? '(Kumulatif)' : '(Bulan Ini)' }}</h3>
             <p class="text-2xl xl:text-3xl font-black italic text-white {{ $currentModalBalance < 0 ? 'text-primary-red' : '' }}" :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($currentModalBalance, 0, ',', '.') }}</p>
         </div>
 
@@ -57,7 +69,7 @@
             <div class="absolute -right-6 -bottom-6 opacity-10 group-hover:scale-110 transition-transform duration-700">
                 <svg class="w-40 h-40 text-white" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m16 12-4-4-4 4"/><path d="M12 16V8"/></svg>
             </div>
-            <h3 class="text-[10px] font-black uppercase tracking-[0.3em] opacity-80 mb-3">Saldo Kas Keuntungan (Kumulatif)</h3>
+            <h3 class="text-[10px] font-black uppercase tracking-[0.3em] opacity-80 mb-3">Saldo Kas Keuntungan {{ $activeTab === 'cumulative' ? '(Kumulatif)' : '(Bulan Ini)' }}</h3>
             <p class="text-2xl xl:text-3xl font-black italic text-white {{ $currentProfitBalance < 0 ? 'text-red-300' : '' }}" :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($currentProfitBalance, 0, ',', '.') }}</p>
         </div>
 
@@ -111,7 +123,7 @@
                         <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Saldo</span>
                         <span class="text-lg font-black italic {{ $stat['balance'] >= 0 ? 'text-primary-blue' : 'text-primary-red' }}" :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($stat['balance'], 0, ',', '.') }}</span>
                     </div>
-                    @if($stat['name'] !== 'Bagi Hasil Mingguan')
+                    @if($activeTab === 'cumulative' && $stat['name'] !== 'Bagi Hasil Mingguan')
                         <div class="mt-3 pt-2 border-t border-dashed border-gray-150 dark:border-gray-700">
                             <button wire:click="openAdjustModal('{{ $stat['id'] }}', '{{ $stat['name'] }}', {{ $stat['balance'] }})" class="w-full text-center py-2.5 bg-gray-50 hover:bg-primary-blue hover:text-white dark:bg-gray-700/50 dark:hover:bg-primary-blue dark:text-gray-300 dark:hover:text-white text-[9px] font-black uppercase tracking-wider rounded-xl transition-all shadow-sm">
                                 Sesuaikan Saldo Fisik
