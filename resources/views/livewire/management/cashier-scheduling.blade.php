@@ -289,177 +289,26 @@
     </div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/dist/html-to-image.min.js"></script>
 <script>
     function exportScheduleToImage() {
         const element = document.getElementById('schedule-capture-area');
         if (!element) return;
-        
-        // Generate canvas from captured area
-        html2canvas(element, {
-            backgroundColor: document.documentElement.classList.contains('dark') ? '#111827' : '#ffffff',
-            scale: 2, // Double scale for high-definition quality
-            useCORS: true,
-            logging: false,
-            onclone: (clonedDoc) => {
-                // Mathematically convert OKLAB to SRGB/RGB
-                function oklabToRgb(l, a, b, alpha) {
-                    const L = l;
-                    const l_ = L + 0.3963377774 * a + 0.2158037573 * b;
-                    const m_ = L - 0.1055613458 * a - 0.0638541728 * b;
-                    const s_ = L - 0.0894841775 * a - 1.2914855480 * b;
-                    
-                    const l3 = l_ * l_ * l_;
-                    const m3 = m_ * m_ * m_;
-                    const s3 = s_ * s_ * s_;
-                    
-                    const rL = +4.0767416621 * l3 - 3.3077115913 * m3 + 0.2309699292 * s3;
-                    const gL = -1.2684380046 * l3 + 2.6097574011 * m3 - 0.3413193965 * s3;
-                    const bL = -0.0041960863 * l3 - 0.7034186147 * m3 + 1.7076147010 * s3;
-                    
-                    const f = (x) => x <= 0.0031308 ? 12.92 * x : 1.055 * Math.pow(x, 1/2.4) - 0.055;
-                    
-                    const r = Math.max(0, Math.min(255, Math.round(f(rL) * 255)));
-                    const g = Math.max(0, Math.min(255, Math.round(f(gL) * 255)));
-                    const _b = Math.max(0, Math.min(255, Math.round(f(bL) * 255)));
-                    
-                    if (alpha !== undefined && alpha !== null && !isNaN(parseFloat(alpha))) {
-                        return `rgba(${r}, ${g}, ${_b}, ${alpha})`;
-                    }
-                    return `rgb(${r}, ${g}, ${_b})`;
-                }
 
-                // Mathematically convert OKLCH to SRGB/RGB
-                function oklchToRgb(l, c, h, alpha) {
-                    const hRad = h * Math.PI / 180;
-                    return oklabToRgb(l, c * Math.cos(hRad), c * Math.sin(hRad), alpha);
-                }
-
-                function replaceColorsInCss(css) {
-                    if (typeof css !== 'string') return css;
-                    // Match oklch(...) or oklab(...) including nested parentheses (like var(...) calls)
-                    return css.replace(/(oklch|oklab)\([^\)]*(?:\([^\)]*\)[^\)]*)*\)/gi, (match) => {
-                        const isOklch = match.toLowerCase().startsWith('oklch');
-                        const argsStart = match.indexOf('(') + 1;
-                        const argsEnd = match.lastIndexOf(')');
-                        const argsStr = match.substring(argsStart, argsEnd);
-                        
-                        const cleanArgs = argsStr.trim().replace(/deg|grad|rad|turn/gi, '');
-                        const parts = cleanArgs.split(/\s+/);
-                        
-                        let rgbVal = 'rgb(120, 130, 140)'; // default fallback
-                        try {
-                            if (isOklch) {
-                                let l = parseFloat(parts[0]);
-                                let c = parseFloat(parts[1]);
-                                let h = parseFloat(parts[2]);
-                                if (!isNaN(l) && !isNaN(c) && !isNaN(h)) {
-                                    let alpha = 1;
-                                    let slashIdx = parts.indexOf('/');
-                                    if (slashIdx !== -1 && parts[slashIdx + 1]) {
-                                        let aVal = parseFloat(parts[slashIdx + 1]);
-                                        if (!isNaN(aVal)) alpha = aVal;
-                                    }
-                                    rgbVal = oklchToRgb(l, c, h, alpha);
-                                }
-                            } else {
-                                let l = parseFloat(parts[0]);
-                                let a = parseFloat(parts[1]);
-                                let b = parseFloat(parts[2]);
-                                if (!isNaN(l) && !isNaN(a) && !isNaN(b)) {
-                                    let alpha = 1;
-                                    let slashIdx = parts.indexOf('/');
-                                    if (slashIdx !== -1 && parts[slashIdx + 1]) {
-                                        let aVal = parseFloat(parts[slashIdx + 1]);
-                                        if (!isNaN(aVal)) alpha = aVal;
-                                    }
-                                    rgbVal = oklabToRgb(l, a, b, alpha);
-                                }
-                            }
-                        } catch (e) {
-                            // Stay with fallback
-                        }
-                        return rgbVal;
-                    });
-                }
-
-                // 1. Intercept getComputedStyle at window level
-                const originalGetComputedStyle = clonedDoc.defaultView.getComputedStyle;
-                clonedDoc.defaultView.getComputedStyle = function(el, pseudoElt) {
-                    const style = originalGetComputedStyle.call(clonedDoc.defaultView, el, pseudoElt);
-                    if (!style) return style;
-                    return new Proxy(style, {
-                        get(target, prop) {
-                            const val = target[prop];
-                            if (typeof val === 'string' && (val.toLowerCase().includes('oklch') || val.toLowerCase().includes('oklab'))) {
-                                return replaceColorsInCss(val);
-                            }
-                            if (prop === 'getPropertyValue') {
-                                return function(propertyName) {
-                                    const val = target.getPropertyValue(propertyName);
-                                    if (typeof val === 'string' && (val.toLowerCase().includes('oklch') || val.toLowerCase().includes('oklab'))) {
-                                        return replaceColorsInCss(val);
-                                    }
-                                    return val;
-                                };
-                            }
-                            return typeof val === 'function' ? val.bind(target) : val;
-                        }
-                    });
-                };
-
-                // 2. Gather and convert CSS rules from document stylesheets
-                let cssText = '';
-                for (let sheet of Array.from(clonedDoc.styleSheets)) {
-                    try {
-                        const rules = sheet.cssRules || sheet.rules;
-                        if (rules) {
-                            for (let rule of Array.from(rules)) {
-                                cssText += rule.cssText + '\n';
-                            }
-                        }
-                    } catch (e) {
-                        // Ignore cross-origin stylesheet access blocks
-                    }
-                }
-
-                const processedCss = replaceColorsInCss(cssText);
-
-                const styles = Array.from(clonedDoc.getElementsByTagName('style'));
-                styles.forEach(s => s.remove());
-                const links = Array.from(clonedDoc.getElementsByTagName('link'));
-                links.forEach(l => {
-                    if (l.rel === 'stylesheet') l.remove();
-                });
-
-                const newStyle = clonedDoc.createElement('style');
-                newStyle.innerHTML = processedCss;
-                clonedDoc.head.appendChild(newStyle);
-
-                // 3. Replace any inline styles that might still contain oklch/oklab
-                const captureArea = clonedDoc.getElementById('schedule-capture-area');
-                if (captureArea) {
-                    const elements = [captureArea, ...Array.from(captureArea.getElementsByTagName('*'))];
-                    for (let el of elements) {
-                        if (el.style) {
-                            for (let j = el.style.length - 1; j >= 0; j--) {
-                                const propName = el.style[j];
-                                const propVal = el.style.getPropertyValue(propName);
-                                if (propVal && (propVal.toLowerCase().includes('oklch') || propVal.toLowerCase().includes('oklab'))) {
-                                    const parsedVal = replaceColorsInCss(propVal);
-                                    el.style.setProperty(propName, parsedVal);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }).then(canvas => {
+        htmlToImage.toPng(element, {
+            quality: 1.0,
+            pixelRatio: 2, // Double quality for high-definition screenshot
+            backgroundColor: document.documentElement.classList.contains('dark') ? '#111827' : '#ffffff'
+        })
+        .then(function (dataUrl) {
             const link = document.createElement('a');
             let rangeStr = '{{ $weekRange }}'.replace(/ /g, '_');
             link.download = 'Jadwal_Kasir_' + rangeStr + '.png';
-            link.href = canvas.toDataURL('image/png');
+            link.href = dataUrl;
             link.click();
+        })
+        .catch(function (error) {
+            console.error('Oops, something went wrong!', error);
         });
     }
 </script>
