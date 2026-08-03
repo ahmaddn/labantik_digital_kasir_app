@@ -1,4 +1,4 @@
-<div x-data="{
+<div wire:poll.5s="checkNewTasks" x-data="{
     showCart: false,
     search: '',
     selectedCategory: null,

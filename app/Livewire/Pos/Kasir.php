@@ -25,6 +25,9 @@ class Kasir extends Component
 
     public $transactionDate;
 
+    // For new task notifications polling
+    public $lastTaskCheckAt;
+
     public $products = [];
 
     // UI State
@@ -66,6 +69,9 @@ class Kasir extends Component
     {
         $this->transactionDate = now()->toDateString();
         $this->refreshProducts();
+
+        // initialize task polling timestamp
+        $this->lastTaskCheckAt = now();
 
         $activeJurusanId = session('active_jurusan_id');
 
@@ -194,19 +200,40 @@ class Kasir extends Component
 
     public function fixUnfinishedSession(PosSessionService $posSessionService): void
     {
-        if (! $this->unfinishedSessionDate) {
+        // existing method continues
+    }
+
+    // Polling method to detect newly assigned tasks and notify cashier
+    public function checkNewTasks(): void
+    {
+        $userId = auth()->id();
+        if (! $userId) {
             return;
         }
 
         $activeJurusanId = session('active_jurusan_id');
-        $posSessionService->fixUnfinishedSession($this->unfinishedSessionDate, $this->getActiveProducts(), $activeJurusanId);
 
-        $this->showRecoveryModal = false;
-        $this->unfinishedSessionDate = null;
-        $this->dispatch('toast', message: 'Sesi sebelumnya berhasil dipulihkan & ditutup.');
+        $newTasks = CashierTask::where('assigned_to', $userId)
+            ->when($activeJurusanId, function ($q) use ($activeJurusanId) {
+                $q->where('jurusan_id', $activeJurusanId);
+            })
+            ->where('created_at', '>', $this->lastTaskCheckAt)
+            ->get();
 
-        // Now proceed to today's opening stock
-        $this->checkOpeningStock($posSessionService);
+        if ($newTasks->isNotEmpty()) {
+            $first = $newTasks->first();
+            $this->dispatch('toast', message: 'Tugas baru: "'.$first->task_name.'"', type: 'success');
+            // Also dispatch a custom event carrying CTA url
+            $this->dispatchBrowserEvent('new-task', [
+                'message' => 'Terdapat tugas baru: "'.$first->task_name.'" — buka halaman tugas Anda.',
+                'cta_url' => route('my-tasks'),
+            ]);
+            // update last check
+            $this->lastTaskCheckAt = now();
+        } else {
+            // update last check to now if no new tasks to avoid re-querying older range
+            $this->lastTaskCheckAt = now();
+        }
     }
 
     public function editOpeningStock(PosSessionService $posSessionService): void

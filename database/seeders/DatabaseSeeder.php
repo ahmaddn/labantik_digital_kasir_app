@@ -18,6 +18,7 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
             ProductCategorySeeder::class,
             ProductSeeder::class,
+            TaskCategorySeeder::class,
         ]);
 
         // Link default admin to all roles/jurusans for testing

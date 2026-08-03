@@ -52,6 +52,10 @@
                 <span
                     class="text-[9px] font-black uppercase tracking-widest bg-slate-100 text-slate-700 dark:bg-slate-950/40 dark:text-slate-300 px-2 py-1 rounded-full">Deadline
                     {{ $task->deadline_at->translatedFormat('d M H:i') }}</span>
+            @elseif($task->is_routine && isset($task->computed_deadline) && $task->computed_deadline)
+                <span
+                    class="text-[9px] font-black uppercase tracking-widest bg-slate-100 text-slate-700 dark:bg-slate-950/40 dark:text-slate-300 px-2 py-1 rounded-full">Deadline
+                    {{ \Carbon\Carbon::parse($task->computed_deadline)->translatedFormat('d M H:i') }}</span>
             @endif
         </div>
 

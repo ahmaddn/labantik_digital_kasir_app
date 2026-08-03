@@ -23,8 +23,25 @@
             if (msg) msg.show = false;
             setTimeout(() => remove(id), 500);
         }, 5000);
-    "
-    x-init="
+    "    @new-task.window = "
+        const id = Date.now();
+        messages.push({
+            id,
+            type: 'success',
+            text: $event.detail.message,
+            cta: $event.detail.cta_url || null,
+            show: false
+        });
+        $nextTick(() => {
+            const msg = messages.find(m => m.id === id);
+            if (msg) msg.show = true;
+        });
+        setTimeout(() => {
+            const msg = messages.find(m => m.id === id);
+            if (msg) msg.show = false;
+            setTimeout(() => remove(id), 500);
+        }, 5000);
+    "    x-init="
         @if (session()->has('toast'))
             $dispatch('toast', { message: '{{ session('toast') }}', type: 'success' });
         @endif
@@ -94,6 +111,11 @@
                    x-text="msg.type === 'success' ? 'Sukses' : (msg.type === 'warning' ? 'Perhatian' : 'Kesalahan Sistem')">
                 </p>
                 <p class="text-sm font-black uppercase tracking-tight text-gray-800 dark:text-white leading-tight italic" x-text="msg.text"></p>
+            </div>
+
+            <!-- CTA Button -->
+            <div x-show="msg.cta" class="flex-shrink-0">
+                <a :href="msg.cta" class="nb-btn px-3 py-2 bg-primary-blue text-white rounded-xl text-xs font-black uppercase tracking-wider" target="_blank">Lihat Tugas</a>
             </div>
 
             <!-- Close Button -->

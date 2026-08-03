@@ -2,10 +2,13 @@
 
 namespace Tests\Feature;
 
+use App\Livewire\Management\CashierTasks;
 use App\Models\CashierTask;
 use App\Models\Jurusan;
+use App\Models\TaskCategory;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Livewire\Livewire;
 use Tests\TestCase;
 
 class CashierTaskTest extends TestCase
@@ -45,5 +48,27 @@ class CashierTaskTest extends TestCase
         $this->assertTrue($task->is_routine);
         $this->assertSame('Tinggi', $task->priority_label);
         $this->assertSame('Baru', $task->status_label);
+    }
+
+    public function test_it_can_create_and_retrieve_task_categories_for_selected_jurusan(): void
+    {
+        $jurusan = Jurusan::create(['name' => 'Test Jurusan']);
+        $user = User::factory()->create();
+
+        Livewire::actingAs($user)
+            ->withSession([
+                'active_jurusan_id' => $jurusan->id,
+                'active_role_name' => 'superadmin',
+            ])
+            ->test(CashierTasks::class)
+            ->set('newCategoryName', 'Operasional')
+            ->call('storeCategory');
+
+        $this->assertDatabaseHas('task_categories', [
+            'jurusan_id' => $jurusan->id,
+            'name' => 'Operasional',
+        ]);
+
+        $this->assertSame('Operasional', TaskCategory::where('jurusan_id', $jurusan->id)->first()->name);
     }
 }

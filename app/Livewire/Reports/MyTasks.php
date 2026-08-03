@@ -2,8 +2,10 @@
 
 namespace App\Livewire\Reports;
 
+use App\Models\CashierAttendance;
 use App\Models\CashierTask;
 use App\Models\Notification;
+use Carbon\Carbon;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use Livewire\WithPagination;
@@ -35,8 +37,24 @@ class MyTasks extends Component
             }
 
             $this->selectedTaskId = $taskId;
-            $this->selectedTaskModel = $task->fresh();
-            $this->taskCompletionReport = $task->completion_report ?? '';
+            $fresh = $task->fresh();
+
+            // Compute deadline for routine tasks: 8 hours after first clock-in of the day
+            if ($fresh->is_routine && ! $fresh->deadline_at) {
+                $attendance = CashierAttendance::where('user_id', auth()->id())
+                    ->where('date', $fresh->date)
+                    ->orderBy('clock_in', 'asc')
+                    ->first();
+
+                if ($attendance && $attendance->clock_in) {
+                    $fresh->computed_deadline = Carbon::parse($attendance->clock_in)->addHours(8);
+                } else {
+                    $fresh->computed_deadline = null;
+                }
+            }
+
+            $this->selectedTaskModel = $fresh;
+            $this->taskCompletionReport = $fresh->completion_report ?? '';
             $this->taskProofImage = null;
             $this->showTaskCompletionModal = true;
         }
@@ -92,7 +110,7 @@ class MyTasks extends Component
         Notification::create([
             'user_id' => $task->created_by,
             'title' => $isRevision ? 'Revisi Tugas Menunggu ACC' : 'Laporan Tugas Menunggu ACC',
-            'body' => auth()->user()->name . ' menyelesaikan tugas "' . $task->task_name . '". Silakan review & ACC.',
+            'body' => auth()->user()->name.' menyelesaikan tugas "'.$task->task_name.'". Silakan review & ACC.',
             'type' => 'task',
             'action_url' => '/management/tasks',
         ]);
@@ -113,12 +131,43 @@ class MyTasks extends Component
             ->orderBy('created_at', 'desc')
             ->get();
 
+        // Compute computed_deadline for routine tasks per user
+        foreach ($todayTasks as $t) {
+            if ($t->is_routine && ! $t->deadline_at) {
+                $attendance = CashierAttendance::where('user_id', $userId)
+                    ->where('date', $t->date)
+                    ->orderBy('clock_in', 'asc')
+                    ->first();
+
+                if ($attendance && $attendance->clock_in) {
+                    $t->computed_deadline = Carbon::parse($attendance->clock_in)->addHours(8);
+                } else {
+                    $t->computed_deadline = null;
+                }
+            }
+        }
+
         $historyTasks = CashierTask::with('reviewer')
             ->where('assigned_to', $userId)
             ->where('date', '<', now()->toDateString())
             ->orderBy('date', 'desc')
             ->orderBy('created_at', 'desc')
             ->paginate(10);
+
+        foreach ($historyTasks as $t) {
+            if ($t->is_routine && ! $t->deadline_at) {
+                $attendance = CashierAttendance::where('user_id', $userId)
+                    ->where('date', $t->date)
+                    ->orderBy('clock_in', 'asc')
+                    ->first();
+
+                if ($attendance && $attendance->clock_in) {
+                    $t->computed_deadline = Carbon::parse($attendance->clock_in)->addHours(8);
+                } else {
+                    $t->computed_deadline = null;
+                }
+            }
+        }
 
         return view('livewire.reports.my-tasks', [
             'todayTasks' => $todayTasks,
