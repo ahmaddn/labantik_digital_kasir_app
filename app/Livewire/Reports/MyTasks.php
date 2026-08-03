@@ -106,7 +106,12 @@ class MyTasks extends Component
         }
 
         $isRevision = $task->approval_status === 'rejected';
-        $task->update($data);
+        
+        if ($task->group_id) {
+            CashierTask::where('group_id', $task->group_id)->update($data);
+        } else {
+            $task->update($data);
+        }
 
         // Notify the admin who created the task to review it
         Notification::create([

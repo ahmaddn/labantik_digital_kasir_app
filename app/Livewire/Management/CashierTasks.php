@@ -56,6 +56,10 @@ class CashierTasks extends Component
 
     public $rejectionNote = '';
 
+    public $showReviewModal = false;
+
+    public $reviewingTaskId = null;
+
     public $isEditMode = false;
 
     public $editingTaskId = null;
@@ -130,13 +134,25 @@ class CashierTasks extends Component
         $this->date = $task->date->toDateString();
         $this->taskName = $task->task_name;
         $this->description = $task->description;
-        $this->assignedTo = [$task->assigned_to];
+        if ($task->group_id) {
+            $this->assignedTo = CashierTask::where('group_id', $task->group_id)
+                ->pluck('assigned_to')
+                ->toArray();
+        } else {
+            $this->assignedTo = [$task->assigned_to];
+        }
         $this->category = $task->category;
         $this->priority = $task->priority;
         $this->deadlineAt = $task->deadline_at ? $task->deadline_at->format('Y-m-d\TH:i') : '';
         $this->isRoutine = $task->is_routine;
 
         $this->showCreateModal = true;
+    }
+
+    public function openReviewModal($id): void
+    {
+        $this->reviewingTaskId = $id;
+        $this->showReviewModal = true;
     }
 
     public function saveTask()
@@ -202,26 +218,51 @@ class CashierTasks extends Component
 
         if ($this->isEditMode) {
             $task = CashierTask::findOrFail($this->editingTaskId);
+            $groupId = $task->group_id ?: (string) \Illuminate\Support\Str::uuid();
+
+            // Delete all tasks currently in this group to handle changes in assignees/routine status
+            CashierTask::where('group_id', $groupId)->delete();
 
             $taskPayload = [
+                'jurusan_id' => $activeJurusanId,
+                'group_id' => $groupId,
                 'date' => $this->date,
                 'task_name' => $this->taskName,
                 'description' => $this->description,
                 'deadline_at' => $this->deadlineAt ?: null,
+                'status' => $task->status,
                 'priority' => $this->priority,
                 'category' => $this->category ?: null,
                 'is_routine' => $this->isRoutine,
+                'created_by' => $task->created_by,
+                'approval_status' => $task->approval_status,
+                'rejection_note' => $task->rejection_note,
+                'reviewed_by' => $task->reviewed_by,
+                'reviewed_at' => $task->reviewed_at,
             ];
 
-            if (! $this->isRoutine) {
-                $taskPayload['assigned_to'] = head((array) $this->assignedTo);
+            if ($this->isRoutine) {
+                $cashiers = User::whereHas('roles', function ($q) use ($activeJurusanId) {
+                    $q->where('roles.name', 'kasir')
+                        ->where('role_user.jurusan_id', $activeJurusanId);
+                })->get();
+
+                foreach ($cashiers as $cashier) {
+                    CashierTask::create($taskPayload + ['assigned_to' => $cashier->id]);
+                }
+            } else {
+                $assignees = (array) $this->assignedTo;
+                foreach ($assignees as $assigneeId) {
+                    CashierTask::create($taskPayload + ['assigned_to' => $assigneeId]);
+                }
             }
 
-            $task->update($taskPayload);
             $message = 'Tugas berhasil diperbarui!';
         } else {
+            $groupId = (string) \Illuminate\Support\Str::uuid();
             $taskPayload = [
                 'jurusan_id' => $activeJurusanId,
+                'group_id' => $groupId,
                 'date' => $this->date,
                 'task_name' => $this->taskName,
                 'description' => $this->description,
@@ -295,7 +336,12 @@ class CashierTasks extends Component
     public function deleteTask()
     {
         if ($this->deletingTaskId) {
-            CashierTask::findOrFail($this->deletingTaskId)->delete();
+            $task = CashierTask::findOrFail($this->deletingTaskId);
+            if ($task->group_id) {
+                CashierTask::where('group_id', $task->group_id)->delete();
+            } else {
+                $task->delete();
+            }
             $this->showDeleteModal = false;
             $this->deletingTaskId = null;
             $this->dispatch('toast', message: 'Tugas berhasil dihapus.');
@@ -312,29 +358,55 @@ class CashierTasks extends Component
             return;
         }
 
-        $task->update([
+        $updateData = [
             'approval_status' => 'approved',
             'status' => 'completed',
             'rejection_note' => null,
             'reviewed_by' => auth()->id(),
             'reviewed_at' => now(),
-        ]);
+        ];
 
-        // Award gamification points only after admin approval
-        $cashier = User::find($task->assigned_to);
-        if ($cashier) {
-            $cashier->increment('pending_points', 10);
-            $cashier->increment('streak', 1);
+        if ($task->group_id) {
+            $tasksInGroup = CashierTask::where('group_id', $task->group_id)->get();
+            foreach ($tasksInGroup as $t) {
+                $t->update($updateData);
+
+                // Award gamification points only after admin approval
+                $cashier = User::find($t->assigned_to);
+                if ($cashier) {
+                    $cashier->increment('pending_points', 10);
+                    $cashier->increment('streak', 1);
+                }
+
+                Notification::create([
+                    'user_id' => $t->assigned_to,
+                    'title' => 'Tugas Disetujui',
+                    'body' => 'Laporan tugas "' . $t->task_name . '" telah di-ACC admin. +10 poin untukmu!',
+                    'type' => 'task',
+                    'action_url' => '/my-tasks',
+                ]);
+            }
+        } else {
+            $task->update($updateData);
+
+            // Award gamification points only after admin approval
+            $cashier = User::find($task->assigned_to);
+            if ($cashier) {
+                $cashier->increment('pending_points', 10);
+                $cashier->increment('streak', 1);
+            }
+
+            Notification::create([
+                'user_id' => $task->assigned_to,
+                'title' => 'Tugas Disetujui',
+                'body' => 'Laporan tugas "' . $task->task_name . '" telah di-ACC admin. +10 poin untukmu!',
+                'type' => 'task',
+                'action_url' => '/my-tasks',
+            ]);
         }
 
-        Notification::create([
-            'user_id' => $task->assigned_to,
-            'title' => 'Tugas Disetujui',
-            'body' => 'Laporan tugas "' . $task->task_name . '" telah di-ACC admin. +10 poin untukmu!',
-            'type' => 'task',
-            'action_url' => '/my-tasks',
-        ]);
-
+        $this->showReviewModal = false;
+        $this->reviewingTaskId = null;
         $this->dispatch('toast', message: 'Tugas disetujui, poin diberikan ke kasir.');
     }
 
@@ -354,23 +426,42 @@ class CashierTasks extends Component
         $task = CashierTask::findOrFail($this->rejectingTaskId);
 
         // Reopen the task so the cashier must revise & resubmit
-        $task->update([
+        $updateData = [
             'approval_status' => 'rejected',
             'status' => 'pending',
             'rejection_note' => $this->rejectionNote,
             'reviewed_by' => auth()->id(),
             'reviewed_at' => now(),
             'is_completed' => false,
-        ]);
+        ];
 
-        Notification::create([
-            'user_id' => $task->assigned_to,
-            'title' => 'Tugas Ditolak — Perlu Revisi',
-            'body' => 'Laporan tugas "' . $task->task_name . '" ditolak: ' . $this->rejectionNote . '. Silakan revisi & kirim ulang.',
-            'type' => 'task',
-            'action_url' => '/my-tasks',
-        ]);
+        if ($task->group_id) {
+            $tasksInGroup = CashierTask::where('group_id', $task->group_id)->get();
+            foreach ($tasksInGroup as $t) {
+                $t->update($updateData);
 
+                Notification::create([
+                    'user_id' => $t->assigned_to,
+                    'title' => 'Tugas Ditolak — Perlu Revisi',
+                    'body' => 'Laporan tugas "' . $t->task_name . '" ditolak: ' . $this->rejectionNote . '. Silakan revisi & kirim ulang.',
+                    'type' => 'task',
+                    'action_url' => '/my-tasks',
+                ]);
+            }
+        } else {
+            $task->update($updateData);
+
+            Notification::create([
+                'user_id' => $task->assigned_to,
+                'title' => 'Tugas Ditolak — Perlu Revisi',
+                'body' => 'Laporan tugas "' . $task->task_name . '" ditolak: ' . $this->rejectionNote . '. Silakan revisi & kirim ulang.',
+                'type' => 'task',
+                'action_url' => '/my-tasks',
+            ]);
+        }
+
+        $this->showReviewModal = false;
+        $this->reviewingTaskId = null;
         $this->showRejectModal = false;
         $this->rejectingTaskId = null;
         $this->rejectionNote = '';
@@ -421,8 +512,15 @@ class CashierTasks extends Component
                 $q->where('jurusan_id', $activeJurusanId);
             })
             ->when($this->search, function ($q) {
-                $q->where('task_name', 'like', '%' . $this->search . '%')
-                    ->orWhere('description', 'like', '%' . $this->search . '%');
+                $q->where(function ($sq) {
+                    $sq->where('task_name', 'like', '%' . $this->search . '%')
+                        ->orWhere('description', 'like', '%' . $this->search . '%');
+                });
+            })
+            ->whereIn('id', function ($query) {
+                $query->selectRaw('MIN(id)')
+                    ->from('cashier_tasks')
+                    ->groupByRaw('COALESCE(group_id, id)');
             })
             ->orderBy('date', 'desc')
             ->orderBy('created_at', 'desc')

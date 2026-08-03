@@ -74,8 +74,8 @@
         </div>
 
         @if ($task->description)
-            <p class="text-xs text-gray-500 dark:text-gray-400 font-semibold leading-relaxed line-clamp-2">
-                {{ $task->description }}</p>
+            <div class="text-xs text-gray-500 dark:text-gray-400 font-semibold leading-relaxed line-clamp-2">
+                {!! $task->description !!}</div>
         @endif
 
         @if ($task->approval_status === 'rejected' && $task->rejection_note)

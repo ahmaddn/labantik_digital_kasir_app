@@ -132,8 +132,8 @@
                             <span
                                 class="text-[9px] font-black uppercase tracking-widest text-gray-400 block mb-1">Deskripsi
                                 Tugas</span>
-                            <p class="text-xs text-gray-600 dark:text-gray-300 font-semibold">
-                                {{ $selectedTaskModel->description }}</p>
+                            <div class="text-xs text-gray-600 dark:text-gray-300 font-semibold">
+                                {!! $selectedTaskModel->description !!}</div>
                         </div>
                     @endif
 
@@ -162,9 +162,9 @@
                                 <span
                                     class="text-[9px] font-black uppercase tracking-widest text-gray-400 block mb-1">Laporan
                                     Hasil</span>
-                                <p
+                                <div
                                     class="text-xs font-semibold text-gray-800 dark:text-white bg-gray-50 dark:bg-gray-900 p-4 border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-xl leading-relaxed">
-                                    {{ $selectedTaskModel->completion_report }}</p>
+                                    {!! $selectedTaskModel->completion_report !!}</div>
                             </div>
                             @if ($selectedTaskModel->proof_image)
                                 <div>
@@ -188,13 +188,44 @@
                                     Menunggu ACC Admin — Anda masih bisa memperbarui laporan
                                 </span>
                             @endif
-                            <div>
-                                <label
-                                    class="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2">Laporan
-                                    Hasil Pekerjaan</label>
-                                <textarea wire:model.defer="taskCompletionReport"
-                                    placeholder="Jelaskan detail pekerjaan/tugas yang telah selesai dilakukan..." rows="3"
-                                    class="w-full p-4 text-sm font-semibold bg-gray-50 dark:bg-gray-900 border-none rounded-2xl focus:ring-2 focus:ring-primary-blue dark:text-white"></textarea>
+                            <div wire:ignore 
+                                 x-data="{ 
+                                     content: @entangle('taskCompletionReport'),
+                                     init() {
+                                         const initQuill = () => {
+                                             if (typeof Quill === 'undefined') {
+                                                 setTimeout(initQuill, 50);
+                                                 return;
+                                             }
+                                             const quill = new Quill(this.$refs.editor, {
+                                                 theme: 'snow',
+                                                 placeholder: 'Jelaskan detail pekerjaan/tugas yang telah selesai dilakukan...',
+                                                 modules: {
+                                                     toolbar: [
+                                                         ['bold', 'italic', 'underline'],
+                                                         [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                                                         ['clean']
+                                                     ]
+                                                 }
+                                             });
+
+                                             quill.root.innerHTML = this.content || '';
+
+                                             quill.on('text-change', () => {
+                                                 this.content = quill.root.innerHTML;
+                                             });
+
+                                             this.$watch('content', value => {
+                                                 if (quill.root.innerHTML !== value) {
+                                                     quill.root.innerHTML = value || '';
+                                                 }
+                                             });
+                                         };
+                                         initQuill();
+                                     }
+                                 }">
+                                <label class="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2">Laporan Hasil Pekerjaan</label>
+                                <div x-ref="editor" class="bg-gray-50 dark:bg-gray-900 border-none rounded-2xl text-gray-800 dark:text-white" style="min-height: 120px;"></div>
                                 @error('taskCompletionReport')
                                     <span class="text-xs text-red-500 font-bold mt-1 block">{{ $message }}</span>
                                 @enderror

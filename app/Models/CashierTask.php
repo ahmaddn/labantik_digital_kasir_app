@@ -12,6 +12,7 @@ class CashierTask extends Model
 
     protected $fillable = [
         'jurusan_id',
+        'group_id',
         'assigned_to',
         'date',
         'task_name',
@@ -88,6 +89,27 @@ class CashierTask extends Model
             'completed' => 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/30 dark:text-emerald-400',
             default => 'bg-gray-50 text-gray-600 dark:bg-gray-900/30 dark:text-gray-300',
         };
+    }
+
+    public function getGroupAssigneesNamesAttribute(): string
+    {
+        if ($this->is_routine) {
+            return 'Semua Kasir';
+        }
+
+        if (! $this->group_id) {
+            return $this->user?->name ?: '-';
+        }
+
+        $assigneeNames = \App\Models\CashierTask::where('group_id', $this->group_id)
+            ->with('user')
+            ->get()
+            ->pluck('user.name')
+            ->filter()
+            ->unique()
+            ->join(', ');
+
+        return $assigneeNames ?: ($this->user?->name ?: '-');
     }
 
     public function user(): BelongsTo
