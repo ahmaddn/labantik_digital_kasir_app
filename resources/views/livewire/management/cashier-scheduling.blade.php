@@ -337,25 +337,88 @@
                 }
 
                 function replaceColorsInCss(css) {
-                    // 1. Replace oklch(...)
-                    let parsed = css.replace(/oklch\(\s*([0-9.]+%?)\s+([0-9.]+%?)\s+([0-9.-]+deg|grad|rad|turn|[0-9.-]+)(?:\s*\/\s*([0-9.]+%?))?\s*\)/gi, (match, l, c, h, a) => {
-                        let lNum = l.endsWith('%') ? parseFloat(l) / 100 : parseFloat(l);
-                        let cNum = c.endsWith('%') ? parseFloat(c) / 100 : parseFloat(c);
-                        let hNum = parseFloat(h);
-                        let aNum = a ? (a.endsWith('%') ? parseFloat(a) / 100 : parseFloat(a)) : 1;
-                        return oklchToRgb(lNum, cNum, hNum, aNum);
-                    });
-
-                    // 2. Replace oklab(...)
-                    parsed = parsed.replace(/oklab\(\s*([0-9.]+%?)\s+([0-9.-]+%?)\s+([0-9.-]+)(?:\s*\/\s*([0-9.]+%?))?\s*\)/gi, (match, l, a, b, alpha) => {
-                        let lNum = l.endsWith('%') ? parseFloat(l) / 100 : parseFloat(l);
-                        let aNum = a.endsWith('%') ? parseFloat(a) / 100 : parseFloat(a);
-                        let bNum = parseFloat(b);
-                        let alphaNum = alpha ? (alpha.endsWith('%') ? parseFloat(alpha) / 100 : parseFloat(alpha)) : 1;
-                        return oklabToRgb(lNum, aNum, bNum, alphaNum);
-                    });
-
-                    return parsed;
+                    let output = '';
+                    let pos = 0;
+                    
+                    while (pos < css.length) {
+                        let oklchIdx = css.indexOf('oklch(', pos);
+                        let oklabIdx = css.indexOf('oklab(', pos);
+                        
+                        let idx = -1;
+                        let isOklch = false;
+                        
+                        if (oklchIdx !== -1 && oklabIdx !== -1) {
+                            if (oklchIdx < oklabIdx) {
+                                idx = oklchIdx;
+                                isOklch = true;
+                            } else {
+                                idx = oklabIdx;
+                            }
+                        } else if (oklchIdx !== -1) {
+                            idx = oklchIdx;
+                            isOklch = true;
+                        } else if (oklabIdx !== -1) {
+                            idx = oklabIdx;
+                        }
+                        
+                        if (idx === -1) {
+                            output += css.substring(pos);
+                            break;
+                        }
+                        
+                        output += css.substring(pos, idx);
+                        
+                        // Find matching closing parenthesis
+                        let parenCount = 1;
+                        let scanPos = idx + 6; // length of 'oklch(' or 'oklab('
+                        while (scanPos < css.length && parenCount > 0) {
+                            if (css[scanPos] === '(') parenCount++;
+                            else if (css[scanPos] === ')') parenCount--;
+                            scanPos++;
+                        }
+                        
+                        const argsStr = css.substring(idx + 6, scanPos - 1);
+                        let rgbVal = 'rgb(120, 130, 140)'; // Safe fallback
+                        
+                        try {
+                            const cleanArgs = argsStr.trim().replace(/deg|grad|rad|turn/gi, '');
+                            const parts = cleanArgs.split(/\s+/);
+                            if (isOklch) {
+                                let l = parseFloat(parts[0]);
+                                let c = parseFloat(parts[1]);
+                                let h = parseFloat(parts[2]);
+                                if (!isNaN(l) && !isNaN(c) && !isNaN(h)) {
+                                    let alpha = 1;
+                                    let slashIdx = parts.indexOf('/');
+                                    if (slashIdx !== -1 && parts[slashIdx + 1]) {
+                                        let aVal = parseFloat(parts[slashIdx + 1]);
+                                        if (!isNaN(aVal)) alpha = aVal;
+                                    }
+                                    rgbVal = oklchToRgb(l, c, h, alpha);
+                                }
+                            } else {
+                                let l = parseFloat(parts[0]);
+                                let a = parseFloat(parts[1]);
+                                let b = parseFloat(parts[2]);
+                                if (!isNaN(l) && !isNaN(a) && !isNaN(b)) {
+                                    let alpha = 1;
+                                    let slashIdx = parts.indexOf('/');
+                                    if (slashIdx !== -1 && parts[slashIdx + 1]) {
+                                        let aVal = parseFloat(parts[slashIdx + 1]);
+                                        if (!isNaN(aVal)) alpha = aVal;
+                                    }
+                                    rgbVal = oklabToRgb(l, a, b, alpha);
+                                }
+                            }
+                        } catch (err) {
+                            // Stay with fallback
+                        }
+                        
+                        output += rgbVal;
+                        pos = scanPos;
+                    }
+                    
+                    return output;
                 }
 
                 // Gather all CSS rules from document stylesheets
