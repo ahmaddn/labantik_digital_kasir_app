@@ -305,7 +305,6 @@
                 // Mathematically convert OKLAB to SRGB/RGB
                 function oklabToRgb(l, a, b, alpha) {
                     const L = l;
-                    
                     const l_ = L + 0.3963377774 * a + 0.2158037573 * b;
                     const m_ = L - 0.1055613458 * a - 0.0638541728 * b;
                     const s_ = L - 0.0894841775 * a - 1.2914855480 * b;
@@ -337,6 +336,7 @@
                 }
 
                 function replaceColorsInCss(css) {
+                    if (typeof css !== 'string') return css;
                     // Match oklch(...) or oklab(...) including nested parentheses (like var(...) calls)
                     return css.replace(/(oklch|oklab)\([^\)]*(?:\([^\)]*\)[^\)]*)*\)/gi, (match) => {
                         const isOklch = match.toLowerCase().startsWith('oklch');
@@ -383,7 +383,32 @@
                     });
                 }
 
-                // Gather all CSS rules from document stylesheets
+                // 1. Intercept getComputedStyle at window level
+                const originalGetComputedStyle = clonedDoc.defaultView.getComputedStyle;
+                clonedDoc.defaultView.getComputedStyle = function(el, pseudoElt) {
+                    const style = originalGetComputedStyle.call(clonedDoc.defaultView, el, pseudoElt);
+                    if (!style) return style;
+                    return new Proxy(style, {
+                        get(target, prop) {
+                            const val = target[prop];
+                            if (typeof val === 'string' && (val.toLowerCase().includes('oklch') || val.toLowerCase().includes('oklab'))) {
+                                return replaceColorsInCss(val);
+                            }
+                            if (prop === 'getPropertyValue') {
+                                return function(propertyName) {
+                                    const val = target.getPropertyValue(propertyName);
+                                    if (typeof val === 'string' && (val.toLowerCase().includes('oklch') || val.toLowerCase().includes('oklab'))) {
+                                        return replaceColorsInCss(val);
+                                    }
+                                    return val;
+                                };
+                            }
+                            return typeof val === 'function' ? val.bind(target) : val;
+                        }
+                    });
+                };
+
+                // 2. Gather and convert CSS rules from document stylesheets
                 let cssText = '';
                 for (let sheet of Array.from(clonedDoc.styleSheets)) {
                     try {
@@ -398,10 +423,8 @@
                     }
                 }
 
-                // Translate all oklch/oklab values to rgb/rgba
                 const processedCss = replaceColorsInCss(cssText);
 
-                // Disable/Remove all existing style tags and link stylesheet tags in the clone
                 const styles = Array.from(clonedDoc.getElementsByTagName('style'));
                 styles.forEach(s => s.remove());
                 const links = Array.from(clonedDoc.getElementsByTagName('link'));
@@ -409,12 +432,11 @@
                     if (l.rel === 'stylesheet') l.remove();
                 });
 
-                // Inject the converted CSS rules
                 const newStyle = clonedDoc.createElement('style');
                 newStyle.innerHTML = processedCss;
                 clonedDoc.head.appendChild(newStyle);
 
-                // Replace any inline styles that might still contain oklch/oklab
+                // 3. Replace any inline styles that might still contain oklch/oklab
                 const captureArea = clonedDoc.getElementById('schedule-capture-area');
                 if (captureArea) {
                     const elements = [captureArea, ...Array.from(captureArea.getElementsByTagName('*'))];
