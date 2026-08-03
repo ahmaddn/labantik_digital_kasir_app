@@ -111,8 +111,7 @@
     <div class="bg-white dark:bg-gray-800 rounded-[2.5rem] shadow-2xl p-6 md:p-8 border border-gray-100 dark:border-gray-700/50">
         <h2 class="text-xl font-black text-gray-850 dark:text-white uppercase italic tracking-tight mb-6">Kalender Jadwal Kasir</h2>
         
-        <!-- FullCalendar Stylesheet and Scripts -->
-        <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.css" rel="stylesheet" />
+        <!-- FullCalendar Scripts -->
         <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
         
         <div wire:ignore>
@@ -296,9 +295,10 @@
         if (!element) return;
 
         htmlToImage.toPng(element, {
-            quality: 1.0,
+            quality: 0.95,
             pixelRatio: 2, // Double quality for high-definition screenshot
-            backgroundColor: document.documentElement.classList.contains('dark') ? '#111827' : '#ffffff'
+            backgroundColor: document.documentElement.classList.contains('dark') ? '#111827' : '#ffffff',
+            skipFonts: true // Fix CORS/SecurityError with remote Google Fonts
         })
         .then(function (dataUrl) {
             const link = document.createElement('a');
