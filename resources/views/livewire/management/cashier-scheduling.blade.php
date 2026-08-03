@@ -337,52 +337,18 @@
                 }
 
                 function replaceColorsInCss(css) {
-                    let output = '';
-                    let pos = 0;
-                    
-                    while (pos < css.length) {
-                        let oklchIdx = css.indexOf('oklch(', pos);
-                        let oklabIdx = css.indexOf('oklab(', pos);
+                    // Match oklch(...) or oklab(...) including nested parentheses (like var(...) calls)
+                    return css.replace(/(oklch|oklab)\([^\)]*(?:\([^\)]*\)[^\)]*)*\)/gi, (match) => {
+                        const isOklch = match.toLowerCase().startsWith('oklch');
+                        const argsStart = match.indexOf('(') + 1;
+                        const argsEnd = match.lastIndexOf(')');
+                        const argsStr = match.substring(argsStart, argsEnd);
                         
-                        let idx = -1;
-                        let isOklch = false;
+                        const cleanArgs = argsStr.trim().replace(/deg|grad|rad|turn/gi, '');
+                        const parts = cleanArgs.split(/\s+/);
                         
-                        if (oklchIdx !== -1 && oklabIdx !== -1) {
-                            if (oklchIdx < oklabIdx) {
-                                idx = oklchIdx;
-                                isOklch = true;
-                            } else {
-                                idx = oklabIdx;
-                            }
-                        } else if (oklchIdx !== -1) {
-                            idx = oklchIdx;
-                            isOklch = true;
-                        } else if (oklabIdx !== -1) {
-                            idx = oklabIdx;
-                        }
-                        
-                        if (idx === -1) {
-                            output += css.substring(pos);
-                            break;
-                        }
-                        
-                        output += css.substring(pos, idx);
-                        
-                        // Find matching closing parenthesis
-                        let parenCount = 1;
-                        let scanPos = idx + 6; // length of 'oklch(' or 'oklab('
-                        while (scanPos < css.length && parenCount > 0) {
-                            if (css[scanPos] === '(') parenCount++;
-                            else if (css[scanPos] === ')') parenCount--;
-                            scanPos++;
-                        }
-                        
-                        const argsStr = css.substring(idx + 6, scanPos - 1);
-                        let rgbVal = 'rgb(120, 130, 140)'; // Safe fallback
-                        
+                        let rgbVal = 'rgb(120, 130, 140)'; // default fallback
                         try {
-                            const cleanArgs = argsStr.trim().replace(/deg|grad|rad|turn/gi, '');
-                            const parts = cleanArgs.split(/\s+/);
                             if (isOklch) {
                                 let l = parseFloat(parts[0]);
                                 let c = parseFloat(parts[1]);
@@ -410,15 +376,11 @@
                                     rgbVal = oklabToRgb(l, a, b, alpha);
                                 }
                             }
-                        } catch (err) {
+                        } catch (e) {
                             // Stay with fallback
                         }
-                        
-                        output += rgbVal;
-                        pos = scanPos;
-                    }
-                    
-                    return output;
+                        return rgbVal;
+                    });
                 }
 
                 // Gather all CSS rules from document stylesheets
@@ -455,13 +417,13 @@
                 // Replace any inline styles that might still contain oklch/oklab
                 const captureArea = clonedDoc.getElementById('schedule-capture-area');
                 if (captureArea) {
-                    const elements = captureArea.getElementsByTagName('*');
-                    for (let el of Array.from(elements)) {
+                    const elements = [captureArea, ...Array.from(captureArea.getElementsByTagName('*'))];
+                    for (let el of elements) {
                         if (el.style) {
                             for (let j = el.style.length - 1; j >= 0; j--) {
                                 const propName = el.style[j];
                                 const propVal = el.style.getPropertyValue(propName);
-                                if (propVal && (propVal.includes('oklch') || propVal.includes('oklab'))) {
+                                if (propVal && (propVal.toLowerCase().includes('oklch') || propVal.toLowerCase().includes('oklab'))) {
                                     const parsedVal = replaceColorsInCss(propVal);
                                     el.style.setProperty(propName, parsedVal);
                                 }
