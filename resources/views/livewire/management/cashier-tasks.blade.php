@@ -355,7 +355,7 @@
                     <div class="flex flex-col justify-end">
                         <label
                             class="inline-flex items-center gap-3 py-3 px-4 bg-gray-55 dark:bg-gray-900 rounded-xl text-sm font-semibold text-gray-700 dark:text-gray-200 cursor-pointer">
-                            <input wire:model="isRoutine" type="checkbox"
+                            <input wire:model.live="isRoutine" type="checkbox"
                                 class="form-checkbox h-5 w-5 text-primary-blue rounded" />
                             <span>Tugas rutin harian untuk semua kasir</span>
                         </label>
@@ -421,7 +421,7 @@
             </div>
             <div class="flex gap-3">
                 <button type="button" wire:click="$set('showConfirmModal', false)"
-                    class="flex-1 py-2 bg-gray-100 rounded-xl">Batal</button>
+                    class="flex-1 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-white rounded-xl font-black text-xs uppercase tracking-wider transition-all">Batal</button>
                 <button type="button" wire:click="finalSaveTask"
                     class="flex-1 py-2 bg-primary-blue text-white rounded-xl">Konfirmasi & Simpan</button>
             </div>

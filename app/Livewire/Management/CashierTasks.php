@@ -131,6 +131,13 @@ class CashierTasks extends Component
         $this->assignedTo = [];
     }
 
+    public function updatedIsRoutine($value): void
+    {
+        if ($value) {
+            $this->assignedTo = [];
+        }
+    }
+
     // Prepare before creating: if multiple assignees, show confirm modal
     public function prepareTask()
     {
