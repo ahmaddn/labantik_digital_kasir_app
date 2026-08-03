@@ -143,17 +143,42 @@
             };
 
             const showPopup = () => {
-                const body = 'Anda mendapatkan tugas, catatan, atau pesan baru!';
+                // Try to extract the title and body of the latest notification from the DOM
+                const firstNotif = document.querySelector('#global-notifications-container a');
+                let title = 'LabAntik Kasir';
+                let body = 'Anda mendapatkan tugas, catatan, atau pesan baru!';
+                if (firstNotif) {
+                    const titleEl = firstNotif.querySelector('p.text-xs');
+                    const bodyEl = firstNotif.querySelector('p.text-\\[10px\\]');
+                    if (titleEl && titleEl.textContent.trim()) {
+                        title = titleEl.textContent.trim();
+                    }
+                    if (bodyEl && bodyEl.textContent.trim()) {
+                        body = bodyEl.textContent.trim();
+                    }
+                }
 
                 // Always give haptic + audible feedback while the app is open
                 triggerVibration();
                 playAlertSound();
 
                 if (nativeSupported && Notification.permission === 'granted') {
-                    // 1. Preferred: through the Service Worker — this is the only way
-                    //    the notification shows up in the phone's notification tray
-                    if (swRegistration) {
-                        swRegistration.showNotification('LabAntik Kasir', {
+                    let shown = false;
+                    // 1. Desktop/Laptop: Prefer direct constructor since it is extremely reliable in active tab
+                    try {
+                        new Notification(title, {
+                            body: body,
+                            icon: '/favicon.png',
+                            silent: false
+                        });
+                        shown = true;
+                    } catch (e) {
+                        // Desktop constructor failed (likely on mobile Chrome/Android), fall through
+                    }
+
+                    // 2. Mobile/Service Worker: If constructor failed or wasn't supported, use SW
+                    if (!shown && swRegistration) {
+                        swRegistration.showNotification(title, {
                             body: body,
                             icon: '/favicon.png',
                             badge: '/favicon.png',
@@ -163,21 +188,10 @@
                             renotify: true,
                             data: { url: '/' }
                         }).catch(() => {});
-                        return;
+                        shown = true;
                     }
 
-                    // 2. Desktop fallback: direct constructor
-                    try {
-                        new Notification('LabAntik Kasir', {
-                            body: body,
-                            icon: '/favicon.png',
-                            silent: false
-                        });
-                        return;
-                    } catch (e) {
-                        // Android Chrome blocks the constructor (needs a Service Worker),
-                        // fall through to the in-app toast popup below
-                    }
+                    if (shown) return;
                 }
 
                 // 3. In-app popup fallback (iOS Safari / permission denied)
