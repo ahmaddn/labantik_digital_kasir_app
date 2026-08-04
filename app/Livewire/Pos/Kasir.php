@@ -608,36 +608,31 @@ class Kasir extends Component
             ->exists();
 
         if ($isScheduledToday) {
-            // Find all unique routine tasks in this jurusan (from any date)
-            $routineTemplates = CashierTask::where('jurusan_id', $activeJurusanId)
+            // Find all unique routine task definitions in this jurusan
+            $routineDefinitions = CashierTaskDefinition::where('jurusan_id', $activeJurusanId)
                 ->where('is_routine', true)
-                ->get()
-                ->groupBy('group_id');
+                ->get();
 
-            foreach ($routineTemplates as $groupId => $tasks) {
-                // Check if this cashier already has this routine task cloned for TODAY
-                $hasTaskToday = CashierTask::where('assigned_to', $userId)
-                    ->where('group_id', $groupId)
-                    ->where('date', $today)
+            foreach ($routineDefinitions as $taskDef) {
+                // Check if this cashier already has this routine task assignment for TODAY
+                $hasAssignmentToday = CashierTaskAssignment::where('assigned_to', $userId)
+                    ->whereHas('taskDefinition', function ($q) use ($taskDef, $today) {
+                        $q->where('id', $taskDef->id)
+                            ->where('date', $today);
+                    })
                     ->exists();
 
-                if (!$hasTaskToday && $tasks->isNotEmpty()) {
-                    // Clone one of the tasks in the group for this user with TODAY's date
-                    $template = $tasks->first();
-                    CashierTask::create([
-                        'jurusan_id' => $template->jurusan_id,
-                        'group_id' => $template->group_id,
+                if (!$hasAssignmentToday) {
+                    // Create new assignment for this user with TODAY's date
+                    $newTaskDef = $taskDef->replicate();
+                    $newTaskDef->date = $today;
+                    $newTaskDef->save();
+
+                    CashierTaskAssignment::create([
+                        'task_definition_id' => $newTaskDef->id,
                         'assigned_to' => $userId,
-                        'date' => $today, // Today's date!
-                        'task_name' => $template->task_name,
-                        'description' => $template->description,
-                        'deadline_at' => null, // Dynamic deadline (8 hours from clock-in)
-                        'status' => 'new',
-                        'priority' => $template->priority,
-                        'category' => $template->category,
-                        'is_routine' => true,
-                        'requires_proof' => $template->requires_proof,
-                        'created_by' => $template->created_by,
+                        'jurusan_id' => $activeJurusanId,
+                        'assignment_status' => 'new',
                     ]);
                 }
             }

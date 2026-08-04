@@ -295,9 +295,13 @@ class CashierTasks extends Component
 
         $service = app(CashierTaskService::class);
         
-        // Get ALL submissions untuk task ini (not just pending)
-        $allSubmissions = $service->getSubmissionsForTask($taskDef);
-        $this->currentReviewingSubmissions = $allSubmissions->toArray();
+        // Get ONLY submissions yang pending (bukan semua assignments)
+        $allSubmissions = $service->getSubmissionsForTask($taskDef)
+            ->where('approval_status', 'pending')
+            ->values()
+            ->toArray();
+            
+        $this->currentReviewingSubmissions = $allSubmissions;
 
         // Auto-select first submission if available
         if (count($this->currentReviewingSubmissions) > 0) {
