@@ -596,6 +596,50 @@ class Kasir extends Component
     {
         $today = now()->toDateString();
         $activeJurusanId = session('active_jurusan_id');
+        $userId = auth()->id();
+
+        // Auto-assign routine tasks of today to the logged in cashier if they are scheduled but don't have them yet
+        $isScheduledToday = \App\Models\CashierSchedule::where('user_id', $userId)
+            ->where('jurusan_id', $activeJurusanId)
+            ->where('date', $today)
+            ->exists();
+
+        if ($isScheduledToday) {
+            // Find all routine tasks created for today in this jurusan
+            $routineTasksToday = CashierTask::where('jurusan_id', $activeJurusanId)
+                ->where('date', $today)
+                ->where('is_routine', true)
+                ->get()
+                ->groupBy('group_id');
+
+            foreach ($routineTasksToday as $groupId => $tasks) {
+                // Check if this cashier already has a task in this group
+                $hasTask = CashierTask::where('assigned_to', $userId)
+                    ->where('group_id', $groupId)
+                    ->exists();
+
+                if (!$hasTask && $tasks->isNotEmpty()) {
+                    // Clone one of the tasks in the group for this user
+                    $template = $tasks->first();
+                    CashierTask::create([
+                        'jurusan_id' => $template->jurusan_id,
+                        'group_id' => $template->group_id,
+                        'assigned_to' => $userId,
+                        'date' => $template->date,
+                        'task_name' => $template->task_name,
+                        'description' => $template->description,
+                        'deadline_at' => $template->deadline_at,
+                        'status' => 'new',
+                        'priority' => $template->priority,
+                        'category' => $template->category,
+                        'is_routine' => true,
+                        'requires_proof' => $template->requires_proof,
+                        'created_by' => $template->created_by,
+                    ]);
+                }
+            }
+        }
+
         $allProducts = $this->getProductsForAlpine($posQueryService);
 
         $isSessionFinished = false;

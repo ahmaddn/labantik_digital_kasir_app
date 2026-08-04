@@ -57,60 +57,96 @@
         @php
             $top3 = $leaderboard->take(3);
         @endphp
-        <div class="grid grid-cols-3 gap-4 items-end justify-center pt-8 pb-10 border-b border-gray-150 dark:border-gray-800">
-            <!-- Rank 2 -->
+        <div class="grid grid-cols-3 gap-6 items-end justify-center pt-10 pb-12 border-b border-gray-100 dark:border-gray-800 max-w-3xl mx-auto">
+            <!-- Rank 2 (Silver) -->
             @if ($top3->count() > 1)
                 @php $u2 = $top3->values()->get(1); @endphp
-                <div class="flex flex-col items-center">
-                    <div class="w-14 h-14 bg-gray-200 dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-700 rounded-full flex items-center justify-center font-black text-gray-700 dark:text-gray-300 uppercase text-xs">
-                        {{ substr($u2->name, 0, 2) }}
+                <div class="flex flex-col items-center animate-fade-in">
+                    <div class="relative group">
+                        <!-- Shiny Aura -->
+                        <div class="absolute inset-0 rounded-full bg-slate-400/20 blur-md group-hover:blur-lg transition-all"></div>
+                        <!-- Silver Badge/Medal -->
+                        <div class="absolute -top-3 -right-2 bg-slate-300 text-slate-800 dark:bg-slate-700 dark:text-slate-100 w-6 h-6 rounded-full flex items-center justify-center font-black text-[10px] border-2 border-white dark:border-gray-900 shadow">
+                            2nd
+                        </div>
+                        <div class="relative w-16 h-16 bg-gradient-to-tr from-slate-400 to-slate-205 dark:from-slate-800 dark:to-slate-700 border-4 border-slate-350 dark:border-slate-650 rounded-full flex items-center justify-center font-black text-slate-700 dark:text-slate-205 uppercase text-sm shadow-xl">
+                            {{ substr($u2->name, 0, 2) }}
+                        </div>
                     </div>
-                    <div class="text-center mt-2 min-w-0 w-full">
-                        <p class="text-xs font-black text-gray-800 dark:text-white truncate">{{ $u2->name }}</p>
-                        <p class="text-[10px] font-bold text-gray-400 mt-0.5">{{ $u2->total_score }} Pts</p>
+                    <div class="text-center mt-3 min-w-0 w-full px-2">
+                        <p class="text-xs font-black text-gray-850 dark:text-white truncate leading-tight">{{ $u2->name }}</p>
+                        <span class="inline-block px-2.5 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-full text-[10px] font-black mt-1">
+                            {{ $u2->total_score }} Pts
+                        </span>
                     </div>
-                    <div class="w-full h-16 bg-gray-100 dark:bg-gray-800 rounded-t-xl mt-3 flex items-center justify-center font-black text-gray-500 dark:text-gray-400 text-lg">
-                        2
+                    <!-- Silver Podium Block -->
+                    <div class="w-full h-24 bg-gradient-to-b from-slate-300/40 to-slate-400/10 dark:from-slate-850/60 dark:to-slate-900/20 border-t-4 border-slate-400 dark:border-slate-600 rounded-t-3xl mt-4 flex flex-col items-center justify-center shadow-lg relative overflow-hidden">
+                        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-5xl font-black text-slate-400/20 dark:text-slate-600/20">2</div>
+                        <span class="text-xl font-black text-slate-500 dark:text-slate-300 relative z-10">II</span>
                     </div>
                 </div>
             @endif
 
-            <!-- Rank 1 -->
+            <!-- Rank 1 (Gold) -->
             @if ($top3->count() > 0)
                 @php $u1 = $top3->values()->get(0); @endphp
-                <div class="flex flex-col items-center">
-                    <div class="relative">
-                        <svg class="w-6 h-6 text-amber-500 absolute -top-5 left-1/2 transform -translate-x-1/2"
-                            fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                        </svg>
-                        <div class="w-18 h-18 bg-amber-500/20 border-4 border-amber-500 rounded-full flex items-center justify-center font-black text-amber-600 dark:text-amber-400 uppercase text-sm">
+                <div class="flex flex-col items-center animate-fade-in">
+                    <div class="relative group -mt-6">
+                        <!-- Golden Glow Aura -->
+                        <div class="absolute inset-0 rounded-full bg-amber-500/30 blur-lg group-hover:blur-xl transition-all animate-pulse"></div>
+                        <!-- Crown Header -->
+                        <div class="absolute -top-7 left-1/2 transform -translate-x-1/2">
+                            <svg class="w-8 h-8 text-amber-500 drop-shadow-lg" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                            </svg>
+                        </div>
+                        <!-- Gold Badge/Medal -->
+                        <div class="absolute -top-2 -right-2 bg-amber-500 text-white w-7 h-7 rounded-full flex items-center justify-center font-black text-xs border-2 border-white dark:border-gray-900 shadow-lg">
+                            1st
+                        </div>
+                        <div class="relative w-20 h-20 bg-gradient-to-tr from-amber-400 to-yellow-200 dark:from-amber-600 dark:to-yellow-500 border-4 border-amber-500 rounded-full flex items-center justify-center font-black text-amber-955 dark:text-amber-100 uppercase text-lg shadow-2xl">
                             {{ substr($u1->name, 0, 2) }}
                         </div>
                     </div>
-                    <div class="text-center mt-2 min-w-0 w-full">
-                        <p class="text-sm font-black text-gray-900 dark:text-white truncate">{{ $u1->name }}</p>
-                        <p class="text-xs font-black text-amber-500 mt-0.5">{{ $u1->total_score }} Pts</p>
+                    <div class="text-center mt-3 min-w-0 w-full px-2">
+                        <p class="text-sm font-black text-amber-550 truncate leading-tight">{{ $u1->name }}</p>
+                        <span class="inline-block px-3 py-1 bg-amber-550/20 text-amber-650 dark:text-amber-400 rounded-full text-xs font-black mt-1 border border-amber-500/20">
+                            {{ $u1->total_score }} Pts
+                        </span>
                     </div>
-                    <div class="w-full h-24 bg-amber-500/10 dark:bg-amber-500/20 border-t-2 border-amber-500 rounded-t-xl mt-3 flex items-center justify-center font-black text-amber-600 dark:text-amber-400 text-2xl">
-                        1
+                    <!-- Gold Podium Block -->
+                    <div class="w-full h-36 bg-gradient-to-b from-amber-500/40 to-yellow-500/10 dark:from-amber-650/50 dark:to-amber-900/10 border-t-4 border-amber-500 rounded-t-3xl mt-4 flex flex-col items-center justify-center shadow-2xl relative overflow-hidden">
+                        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-7xl font-black text-amber-500/15 dark:text-amber-500/10">1</div>
+                        <span class="text-2xl font-black text-amber-600 dark:text-amber-400 relative z-10">I</span>
                     </div>
                 </div>
             @endif
 
-            <!-- Rank 3 -->
+            <!-- Rank 3 (Bronze) -->
             @if ($top3->count() > 2)
                 @php $u3 = $top3->values()->get(2); @endphp
-                <div class="flex flex-col items-center">
-                    <div class="w-12 h-12 bg-amber-900/10 dark:bg-amber-955/20 border-2 border-amber-800/30 rounded-full flex items-center justify-center font-black text-amber-800 dark:text-amber-600 uppercase text-[10px]">
-                        {{ substr($u3->name, 0, 2) }}
+                <div class="flex flex-col items-center animate-fade-in">
+                    <div class="relative group">
+                        <!-- Shiny Aura -->
+                        <div class="absolute inset-0 rounded-full bg-amber-700/20 blur-md group-hover:blur-lg transition-all"></div>
+                        <!-- Bronze Badge/Medal -->
+                        <div class="absolute -top-3 -right-2 bg-amber-700 text-white w-6 h-6 rounded-full flex items-center justify-center font-black text-[10px] border-2 border-white dark:border-gray-900 shadow">
+                            3rd
+                        </div>
+                        <div class="relative w-14 h-14 bg-gradient-to-tr from-amber-600 to-amber-405 dark:from-amber-800 dark:to-amber-700 border-4 border-amber-700 rounded-full flex items-center justify-center font-black text-amber-955 dark:text-amber-205 uppercase text-xs shadow-lg">
+                            {{ substr($u3->name, 0, 2) }}
+                        </div>
                     </div>
-                    <div class="text-center mt-2 min-w-0 w-full">
-                        <p class="text-xs font-black text-gray-800 dark:text-white truncate">{{ $u3->name }}</p>
-                        <p class="text-[10px] font-bold text-gray-455 mt-0.5">{{ $u3->total_score }} Pts</p>
+                    <div class="text-center mt-3 min-w-0 w-full px-2">
+                        <p class="text-xs font-black text-gray-850 dark:text-white truncate leading-tight">{{ $u3->name }}</p>
+                        <span class="inline-block px-2.5 py-0.5 bg-amber-900/10 dark:bg-amber-900/30 text-amber-800 dark:text-amber-400 rounded-full text-[10px] font-black mt-1">
+                            {{ $u3->total_score }} Pts
+                        </span>
                     </div>
-                    <div class="w-full h-12 bg-gray-50 dark:bg-gray-900 rounded-t-xl mt-3 flex items-center justify-center font-black text-gray-455 text-base">
-                        3
+                    <!-- Bronze Podium Block -->
+                    <div class="w-full h-16 bg-gradient-to-b from-amber-700/30 to-amber-900/10 dark:from-amber-800/40 dark:to-amber-950/10 border-t-4 border-amber-700 rounded-t-3xl mt-4 flex flex-col items-center justify-center shadow-md relative overflow-hidden">
+                        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-4xl font-black text-amber-700/20 dark:text-amber-850/10">3</div>
+                        <span class="text-lg font-black text-amber-705 dark:text-amber-500 relative z-10">III</span>
                     </div>
                 </div>
             @endif

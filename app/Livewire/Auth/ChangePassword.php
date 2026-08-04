@@ -23,12 +23,12 @@ class ChangePassword extends Component
     {
         $this->validate([
             'currentPassword' => 'required',
-            'newPassword' => 'required|min:6|confirmed',
+            'newPassword' => 'required|min:6|same:newPasswordConfirmation',
         ], [
             'currentPassword.required' => 'Password saat ini wajib diisi.',
             'newPassword.required' => 'Password baru wajib diisi.',
             'newPassword.min' => 'Password baru minimal 6 karakter.',
-            'newPassword.confirmed' => 'Konfirmasi password baru tidak cocok.',
+            'newPassword.same' => 'Konfirmasi password baru tidak cocok.',
         ]);
 
         $user = User::find(auth()->id());
