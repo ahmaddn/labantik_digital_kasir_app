@@ -72,7 +72,6 @@
         </div>
 
         <div class="overflow-x-auto">
-            <div class="text-xs text-gray-500 mb-2">Items: {{ $tasks->count() }} | Total: {{ $tasks->total() }} | Tab: {{ $activeTab }}</div>
             <table class="w-full text-left border-collapse">
                 <thead>
                     <tr class="border-b border-gray-100 dark:border-gray-700">
@@ -90,16 +89,9 @@
                 </thead>
                 <tbody class="divide-y divide-gray-50 dark:divide-gray-700/50">
                     @forelse($tasks as $task)
-                        @php
-                            try {
-                                $taskDate = $task->date ? $task->date->translatedFormat('d M Y') : 'N/A';
-                            } catch(\Exception $e) {
-                                $taskDate = 'ERROR: ' . $e->getMessage();
-                            }
-                        @endphp
                         <tr class="group hover:bg-gray-50/50 dark:hover:bg-gray-900/30 transition-colors">
                             <td class="py-4 pl-4 text-sm font-bold text-gray-800 dark:text-white">
-                                {{ $taskDate }}
+                                {{ $task->date?->translatedFormat('d M Y') ?? '-' }}
                             </td>
                             <td class="py-4">
                                 <div class="font-bold text-gray-855 dark:text-gray-200">{{ $task->task_name }}</div>

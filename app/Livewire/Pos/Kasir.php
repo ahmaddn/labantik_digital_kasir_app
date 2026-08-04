@@ -601,42 +601,9 @@ class Kasir extends Component
         $activeJurusanId = session('active_jurusan_id');
         $userId = auth()->id();
 
-        // Auto-assign routine tasks of today to the logged in cashier if they are scheduled but don't have them yet
-        $isScheduledToday = \App\Models\CashierSchedule::where('user_id', $userId)
-            ->where('jurusan_id', $activeJurusanId)
-            ->where('date', $today)
-            ->exists();
-
-        if ($isScheduledToday) {
-            // Find all unique routine task definitions in this jurusan
-            $routineDefinitions = CashierTaskDefinition::where('jurusan_id', $activeJurusanId)
-                ->where('is_routine', true)
-                ->get();
-
-            foreach ($routineDefinitions as $taskDef) {
-                // Check if this cashier already has this routine task assignment for TODAY
-                $hasAssignmentToday = CashierTaskAssignment::where('assigned_to', $userId)
-                    ->whereHas('taskDefinition', function ($q) use ($taskDef, $today) {
-                        $q->where('id', $taskDef->id)
-                            ->where('date', $today);
-                    })
-                    ->exists();
-
-                if (!$hasAssignmentToday) {
-                    // Create new assignment for this user with TODAY's date
-                    $newTaskDef = $taskDef->replicate();
-                    $newTaskDef->date = $today;
-                    $newTaskDef->save();
-
-                    CashierTaskAssignment::create([
-                        'task_definition_id' => $newTaskDef->id,
-                        'assigned_to' => $userId,
-                        'jurusan_id' => $activeJurusanId,
-                        'assignment_status' => 'new',
-                    ]);
-                }
-            }
-        }
+        // Auto-assign routine tasks to kasir jika mereka terjadwal hari ini
+        $service = app(\App\Services\CashierTaskService::class);
+        $service->autoAssignRoutineTasksForCashier($userId, $activeJurusanId);
 
         $allProducts = $this->getProductsForAlpine($posQueryService);
 

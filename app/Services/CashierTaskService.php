@@ -55,26 +55,64 @@ class CashierTaskService
     }
 
     /**
-     * Assign task to all cashiers in jurusan (routine tasks)
+     * Assign routine task to cashiers scheduled on the task's date
      */
     public function assignTaskToAllCashiers(CashierTaskDefinition $taskDef): void
     {
-        $cashiers = User::whereHas('roles', function ($q) use ($taskDef) {
-            $q->where('roles.name', 'kasir')
-                ->where('role_user.jurusan_id', $taskDef->jurusan_id);
-        })->get();
+        // Only assign to cashiers who are SCHEDULED on the task's date
+        $scheduledUserIds = \App\Models\CashierSchedule::where('date', $taskDef->date)
+            ->where('jurusan_id', $taskDef->jurusan_id)
+            ->pluck('user_id')
+            ->unique();
 
-        foreach ($cashiers as $cashier) {
+        foreach ($scheduledUserIds as $userId) {
             CashierTaskAssignment::firstOrCreate(
                 [
                     'task_definition_id' => $taskDef->id,
-                    'assigned_to' => $cashier->id,
+                    'assigned_to' => $userId,
                 ],
                 [
                     'jurusan_id' => $taskDef->jurusan_id,
                     'assignment_status' => 'new',
                 ]
             );
+        }
+    }
+
+    /**
+     * Auto-assign routine tasks to a kasir when they clock in / open kasir page
+     * Called per kasir - only assigns tasks where kasir is scheduled today
+     */
+    public function autoAssignRoutineTasksForCashier(string $userId, string $jurusanId): void
+    {
+        $today = now()->toDateString();
+
+        // Check if this kasir has schedule today
+        $isScheduled = \App\Models\CashierSchedule::where('user_id', $userId)
+            ->where('jurusan_id', $jurusanId)
+            ->where('date', $today)
+            ->exists();
+
+        if (!$isScheduled) {
+            return;
+        }
+
+        // Find all routine task definitions for today that kasir doesn't have assignment yet
+        $routineTaskDefs = CashierTaskDefinition::where('jurusan_id', $jurusanId)
+            ->where('is_routine', true)
+            ->where('date', $today)
+            ->whereDoesntHave('assignments', function ($q) use ($userId) {
+                $q->where('assigned_to', $userId);
+            })
+            ->get();
+
+        foreach ($routineTaskDefs as $taskDef) {
+            CashierTaskAssignment::create([
+                'task_definition_id' => $taskDef->id,
+                'assigned_to' => $userId,
+                'jurusan_id' => $jurusanId,
+                'assignment_status' => 'new',
+            ]);
         }
     }
 
