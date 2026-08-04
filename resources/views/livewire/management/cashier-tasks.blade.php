@@ -30,6 +30,22 @@
         </div>
     </div>
 
+    <!-- Tabs -->
+    <div class="flex items-center gap-2 border-b border-gray-200 dark:border-gray-700">
+        <button wire:click="$set('activeTab', 'active')"
+            class="px-6 py-3 font-black text-sm uppercase tracking-wider {{ $activeTab === 'active' ? 'text-primary-blue dark:text-primary-yellow border-b-2 border-primary-blue dark:border-primary-yellow' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300' }}">
+            📋 Daftar Tugas
+        </button>
+        <button wire:click="$set('activeTab', 'pending_review')"
+            class="px-6 py-3 font-black text-sm uppercase tracking-wider {{ $activeTab === 'pending_review' ? 'text-primary-blue dark:text-primary-yellow border-b-2 border-primary-blue dark:border-primary-yellow' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300' }}">
+            ⏳ Menunggu Review
+        </button>
+        <button wire:click="$set('activeTab', 'history')"
+            class="px-6 py-3 font-black text-sm uppercase tracking-wider {{ $activeTab === 'history' ? 'text-primary-blue dark:text-primary-yellow border-b-2 border-primary-blue dark:border-primary-yellow' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300' }}">
+            ✓ Riwayat Tugas
+        </button>
+    </div>
+
     <!-- Filters & Table -->
     <div
         class="bg-white dark:bg-gray-800 rounded-[2.5rem] shadow-2xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700/50 p-6 md:p-8">

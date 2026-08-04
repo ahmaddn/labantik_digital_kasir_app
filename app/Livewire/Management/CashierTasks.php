@@ -22,6 +22,7 @@ class CashierTasks extends Component
 
     public $search = '';
     public $selectedJurusanId = '';
+    public $activeTab = 'active'; // 'active', 'pending_review', 'history'
     public $date = '';
     public $taskName = '';
     public $description = '';
@@ -417,8 +418,8 @@ class CashierTasks extends Component
             $q->where('jurusan_id', $activeJurusanId);
         })->orderBy('name')->pluck('name')->all();
 
-        // Query Task Definitions (bukan old tasks)
-        $tasks = CashierTaskDefinition::with(['assignments.assignee', 'creator', 'assignments.latestSubmission'])
+        // Query Task Definitions based on active tab
+        $baseQuery = CashierTaskDefinition::with(['assignments.assignee', 'creator', 'assignments.latestSubmission'])
             ->when($activeJurusanId, function ($q) use ($activeJurusanId) {
                 $q->where('jurusan_id', $activeJurusanId);
             })
@@ -427,10 +428,38 @@ class CashierTasks extends Component
                     $sq->where('task_name', 'like', '%' . $this->search . '%')
                         ->orWhere('description', 'like', '%' . $this->search . '%');
                 });
-            })
-            ->orderBy('date', 'desc')
-            ->orderBy('created_at', 'desc')
-            ->paginate(15);
+            });
+
+        // Filter by tab
+        if ($this->activeTab === 'pending_review') {
+            // Tasks dengan pending submissions
+            $tasks = $baseQuery
+                ->whereHas('assignments.submissions', function ($q) {
+                    $q->where('approval_status', 'pending');
+                })
+                ->orderBy('date', 'desc')
+                ->orderBy('created_at', 'desc')
+                ->paginate(15);
+        } elseif ($this->activeTab === 'history') {
+            // Tasks yang sudah selesai (semua submissions approved)
+            $tasks = $baseQuery
+                ->where('date', '<', now()->toDateString())
+                ->orderBy('date', 'desc')
+                ->orderBy('created_at', 'desc')
+                ->paginate(15);
+        } else {
+            // Active tab: tasks yang belum selesai atau hari ini
+            $tasks = $baseQuery
+                ->where(function ($q) {
+                    $q->where('date', '>=', now()->toDateString())
+                        ->orWhereHas('assignments.submissions', function ($q2) {
+                            $q2->where('approval_status', '!=', 'approved');
+                        });
+                })
+                ->orderBy('date', 'desc')
+                ->orderBy('created_at', 'desc')
+                ->paginate(15);
+        }
 
         $jurusans = session('active_role_name') === 'superadmin' 
             ? Jurusan::all() 
