@@ -189,10 +189,12 @@ class MyTasks extends Component
             'submissions' => fn($q) => $q->orderBy('submission_version', 'desc'),
         ])
             ->where('assigned_to', $userId)
-            ->whereHas('taskDefinition', function ($q) use ($today) {
-                $q->where(function ($sq) use ($today) {
-                    $sq->where('date', '<', $today)
-                        ->orWhereHas('submissions', fn($q2) => $q2->where('approval_status', 'approved'));
+            ->where(function ($query) use ($today) {
+                $query->whereHas('taskDefinition', function ($q) use ($today) {
+                    $q->where('date', '<', $today);
+                })
+                ->orWhereHas('submissions', function ($q2) {
+                    $q2->where('approval_status', 'approved');
                 });
             })
             ->orderBy('created_at', 'desc')
