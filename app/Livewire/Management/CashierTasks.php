@@ -153,6 +153,7 @@ class CashierTasks extends Component
         }
 
         $service = app(CashierTaskService::class);
+        $deadline = !empty($this->deadlineAt) ? $this->deadlineAt : null;
 
         try {
             if ($this->isEditMode) {
@@ -165,7 +166,7 @@ class CashierTasks extends Component
                     'date' => $this->date,
                     'priority' => $this->priority,
                     'category' => $this->category,
-                    'deadline_at' => $this->deadlineAt,
+                    'deadline_at' => $deadline,
                     'requires_proof' => $this->requiresProof,
                 ]);
 
@@ -191,7 +192,7 @@ class CashierTasks extends Component
                     'category' => $this->category,
                     'is_routine' => $this->isRoutine,
                     'requires_proof' => $this->requiresProof,
-                    'deadline_at' => $this->deadlineAt,
+                    'deadline_at' => $deadline,
                     'created_by' => auth()->id(),
                 ]);
 
