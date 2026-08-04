@@ -57,7 +57,9 @@
                         <th class="pb-4 text-xs font-black uppercase tracking-widest text-gray-400">Ditugaskan Ke</th>
                         <th class="pb-4 text-xs font-black uppercase tracking-widest text-gray-400">Status</th>
                         <th class="pb-4 text-xs font-black uppercase tracking-widest text-gray-400">Deadline</th>
-                        <th class="pb-4 text-xs font-black uppercase tracking-widest text-gray-400 text-right pr-4 w-40">Aksi</th>
+                        <th
+                            class="pb-4 text-xs font-black uppercase tracking-widest text-gray-400 text-right pr-4 w-40">
+                            Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-50 dark:divide-gray-700/50">
@@ -75,11 +77,14 @@
                             <td class="py-4 text-sm text-gray-700 dark:text-gray-300 font-semibold">
                                 {{ $task->category ?: 'Umum' }}
                                 @if ($task->is_routine)
-                                    <div class="text-[10px] font-black uppercase tracking-widest text-primary-blue mt-1">Rutin Harian</div>
+                                    <div
+                                        class="text-[10px] font-black uppercase tracking-widest text-primary-blue mt-1">
+                                        Rutin Harian</div>
                                 @endif
                             </td>
                             <td class="py-4">
-                                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-black uppercase tracking-wider {{ $task->priorityBadgeClass }}">
+                                <span
+                                    class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-black uppercase tracking-wider {{ $task->priorityBadgeClass }}">
                                     {{ $task->priority_label }}
                                 </span>
                             </td>
@@ -88,19 +93,23 @@
                             </td>
                             <td class="py-4">
                                 @if ($task->approval_status === 'approved')
-                                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-emerald-50 text-emerald-600 dark:bg-emerald-950/30 dark:text-emerald-400">
+                                    <span
+                                        class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-emerald-50 text-emerald-600 dark:bg-emerald-950/30 dark:text-emerald-400">
                                         Disetujui
                                     </span>
                                 @elseif($task->approval_status === 'rejected')
-                                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-red-50 text-red-600 dark:bg-red-950/30 dark:text-red-400">
+                                    <span
+                                        class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-red-50 text-red-600 dark:bg-red-950/30 dark:text-red-400">
                                         Ditolak
                                     </span>
                                 @elseif($task->approval_status === 'pending')
-                                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-blue-50 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400">
+                                    <span
+                                        class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-blue-50 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400">
                                         Menunggu ACC
                                     </span>
                                 @else
-                                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-amber-50 text-amber-600 dark:bg-amber-950/30 dark:text-amber-400">
+                                    <span
+                                        class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-amber-50 text-amber-600 dark:bg-amber-950/30 dark:text-amber-400">
                                         Belum Dikerjakan
                                     </span>
                                 @endif
@@ -159,8 +168,7 @@
     </div>
 
     <!-- Create Modal -->
-    <div x-data="{ show: @entangle('showCreateModal') }" x-show="show" class="fixed inset-0 z-50 flex items-center justify-center p-4"
-        x-cloak>
+    <div x-data="{ show: @entangle('showCreateModal') }" x-show="show" class="fixed inset-0 z-50 flex items-center justify-center p-4" x-cloak>
         <div x-show="show" x-transition.opacity class="fixed inset-0 bg-black/60 backdrop-blur-xs"
             wire:click="$set('showCreateModal', false)"></div>
         <div x-show="show" x-transition.scale
@@ -252,44 +260,46 @@
                     @enderror
                 </div>
 
-                <div wire:ignore 
-                                     x-data="{ 
-                                         content: @entangle('description'),
-                                         init() {
-                                             const initQuill = () => {
-                                                 if (typeof Quill === 'undefined') {
-                                                     setTimeout(initQuill, 50);
-                                                     return;
-                                                 }
-                                                 const quill = new Quill(this.$refs.editor, {
-                                                     theme: 'snow',
-                                                     placeholder: 'Instruksi tambahan jika ada...',
-                                                     modules: {
-                                                         toolbar: [
-                                                             ['bold', 'italic', 'underline'],
-                                                             [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                                                             ['clean']
-                                                         ]
-                                                     }
-                                                 });
-
-                                                 quill.root.innerHTML = this.content || '';
-
-                                                 quill.on('text-change', () => {
-                                                     this.content = quill.root.innerHTML;
-                                                 });
-
-                                                 this.$watch('content', value => {
-                                                     if (quill.root.innerHTML !== value) {
-                                                         quill.root.innerHTML = value || '';
-                                                     }
-                                                 });
-                                             };
-                                             initQuill();
-                                         }
-                                     }">
-                    <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">Deskripsi Tambahan</label>
-                    <div x-ref="editor" class="bg-gray-55 dark:bg-gray-900 border-none rounded-xl text-gray-800 dark:text-white text-sm" style="min-height: 120px;"></div>
+                <div wire:ignore x-data="{
+                    content: @entangle('description'),
+                    init() {
+                        const initQuill = () => {
+                            if (typeof Quill === 'undefined') {
+                                setTimeout(initQuill, 50);
+                                return;
+                            }
+                            const quill = new Quill(this.$refs.editor, {
+                                theme: 'snow',
+                                placeholder: 'Instruksi tambahan jika ada...',
+                                modules: {
+                                    toolbar: [
+                                        ['bold', 'italic', 'underline'],
+                                        [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+                                        ['clean']
+                                    ]
+                                }
+                            });
+                
+                            quill.root.innerHTML = this.content || '';
+                
+                            quill.on('text-change', () => {
+                                this.content = quill.root.innerHTML;
+                            });
+                
+                            this.$watch('content', value => {
+                                if (quill.root.innerHTML !== value) {
+                                    quill.root.innerHTML = value || '';
+                                }
+                            });
+                        };
+                        initQuill();
+                    }
+                }">
+                    <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">Deskripsi
+                        Tambahan</label>
+                    <div x-ref="editor"
+                        class="bg-gray-55 dark:bg-gray-900 border-none rounded-xl text-gray-800 dark:text-white text-sm"
+                        style="min-height: 120px;"></div>
                     @error('description')
                         <span class="text-xs text-red-500 font-bold mt-1 block">{{ $message }}</span>
                     @enderror
@@ -486,59 +496,89 @@
                     </button>
                 </div>
             </form>
-         </div>
-     </div>
+        </div>
+    </div>
 
     <!-- Task Review Modal -->
-    <div x-data="{ show: @entangle('showReviewModal'), showLightbox: false, lightboxImg: '' }" x-show="show" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/60 backdrop-blur-sm" x-cloak>
-        <div x-show="show" x-transition.opacity class="fixed inset-0 bg-black/60 backdrop-blur-xs" wire:click="$set('showReviewModal', false)"></div>
-        <div x-show="show" x-transition.scale class="relative w-full max-w-2xl bg-white dark:bg-gray-800 rounded-[2.5rem] shadow-2xl p-10 border border-gray-100 dark:border-gray-700 z-10 max-h-[90vh] overflow-y-auto no-scrollbar">
+    <div x-data="{ show: @entangle('showReviewModal'), showLightbox: false, lightboxImg: '' }" x-show="show"
+        class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/60 backdrop-blur-sm" x-cloak>
+        <div x-show="show" x-transition.opacity class="fixed inset-0 bg-black/60 backdrop-blur-xs"
+            wire:click="$set('showReviewModal', false)"></div>
+        <div x-show="show" x-transition.scale
+            class="relative w-full max-w-2xl bg-white dark:bg-gray-800 rounded-[2.5rem] shadow-2xl p-10 border border-gray-100 dark:border-gray-700 z-10 max-h-[90vh] overflow-y-auto no-scrollbar">
             <!-- Modal Header -->
             <div class="flex items-start justify-between pb-4 border-b border-gray-100 dark:border-gray-700 mb-6">
                 <div>
-                    <span class="text-[10px] font-black uppercase tracking-widest text-primary-blue dark:text-blue-400">Detail & Review Tugas</span>
-                    <h3 class="text-2xl font-black uppercase text-gray-850 dark:text-white tracking-tight mt-1">Review Laporan Kerja</h3>
+                    <span
+                        class="text-[10px] font-black uppercase tracking-widest text-primary-blue dark:text-blue-400">Detail
+                        & Review Tugas</span>
+                    <h3 class="text-2xl font-black uppercase text-gray-850 dark:text-white tracking-tight mt-1">Review
+                        Laporan Kerja</h3>
                 </div>
-                <button wire:click="$set('showReviewModal', false)" class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-white rounded-xl">
-                    <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                <button wire:click="$set('showReviewModal', false)"
+                    class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-white rounded-xl">
+                    <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor" stroke-width="2.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
                 </button>
             </div>
 
             @if ($reviewingTaskId)
                 @php
-                    $reviewTask = \App\Models\CashierTask::with(['user', 'creator', 'reviewer'])->find($reviewingTaskId);
+                    $reviewTask = \App\Models\CashierTask::with(['user', 'creator', 'reviewer'])->find(
+                        $reviewingTaskId,
+                    );
                 @endphp
                 @if ($reviewTask)
                     <div class="space-y-6 text-left">
                         <!-- Task Details Grid -->
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 p-6 bg-gray-50 dark:bg-gray-900 rounded-3xl border border-gray-100 dark:border-gray-800">
+                        <div
+                            class="grid grid-cols-1 sm:grid-cols-2 gap-6 p-6 bg-gray-50 dark:bg-gray-900 rounded-3xl border border-gray-100 dark:border-gray-800">
                             <div>
-                                <span class="text-[9px] font-black uppercase tracking-widest text-gray-400 block mb-1">Nama Tugas</span>
-                                <h4 class="text-sm font-black uppercase text-gray-800 dark:text-white">{{ $reviewTask->task_name }}</h4>
+                                <span
+                                    class="text-[9px] font-black uppercase tracking-widest text-gray-400 block mb-1">Nama
+                                    Tugas</span>
+                                <h4 class="text-sm font-black uppercase text-gray-800 dark:text-white">
+                                    {{ $reviewTask->task_name }}</h4>
                             </div>
                             <div>
-                                <span class="text-[9px] font-black uppercase tracking-widest text-gray-400 block mb-1">Tanggal Tugas</span>
-                                <div class="text-xs font-semibold text-gray-750 dark:text-gray-300">{{ \Carbon\Carbon::parse($reviewTask->date)->translatedFormat('d F Y') }}</div>
+                                <span
+                                    class="text-[9px] font-black uppercase tracking-widest text-gray-400 block mb-1">Tanggal
+                                    Tugas</span>
+                                <div class="text-xs font-semibold text-gray-750 dark:text-gray-300">
+                                    {{ \Carbon\Carbon::parse($reviewTask->date)->translatedFormat('d F Y') }}</div>
                             </div>
                             <div>
-                                <span class="text-[9px] font-black uppercase tracking-widest text-gray-400 block mb-1">Kategori</span>
-                                <div class="text-xs font-black uppercase text-slate-700 dark:text-slate-300">{{ $reviewTask->category ?: 'Umum' }}</div>
+                                <span
+                                    class="text-[9px] font-black uppercase tracking-widest text-gray-400 block mb-1">Kategori</span>
+                                <div class="text-xs font-black uppercase text-slate-700 dark:text-slate-300">
+                                    {{ $reviewTask->category ?: 'Umum' }}</div>
                             </div>
                             <div>
-                                <span class="text-[9px] font-black uppercase tracking-widest text-gray-400 block mb-1">Prioritas</span>
-                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider {{ $reviewTask->priorityBadgeClass }}">{{ $reviewTask->priority_label }}</span>
+                                <span
+                                    class="text-[9px] font-black uppercase tracking-widest text-gray-400 block mb-1">Prioritas</span>
+                                <span
+                                    class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider {{ $reviewTask->priorityBadgeClass }}">{{ $reviewTask->priority_label }}</span>
                             </div>
                             <div class="sm:col-span-2">
-                                <span class="text-[9px] font-black uppercase tracking-widest text-gray-400 block mb-1">Kasir Pelapor</span>
-                                <div class="text-xs font-bold text-gray-750 dark:text-gray-200">{{ $reviewTask->user?->name ?? '-' }}</div>
+                                <span
+                                    class="text-[9px] font-black uppercase tracking-widest text-gray-400 block mb-1">Kasir
+                                    Pelapor</span>
+                                <div class="text-xs font-bold text-gray-750 dark:text-gray-200">
+                                    {{ $reviewTask->user?->name ?? '-' }}</div>
                             </div>
                         </div>
 
                         <!-- Task Description -->
                         @if ($reviewTask->description)
                             <div>
-                                <span class="text-[9px] font-black uppercase tracking-widest text-gray-400 block mb-1">Deskripsi Tugas</span>
-                                <div class="text-xs font-semibold text-gray-750 dark:text-gray-250 prose prose-sm max-w-none">{!! $reviewTask->description !!}</div>
+                                <span
+                                    class="text-[9px] font-black uppercase tracking-widest text-gray-400 block mb-1">Deskripsi
+                                    Tugas</span>
+                                <div
+                                    class="text-xs font-semibold text-gray-750 dark:text-gray-250 prose prose-sm max-w-none">
+                                    {!! $reviewTask->description !!}</div>
                             </div>
                         @endif
 
@@ -546,19 +586,32 @@
 
                         <!-- Completion Status Banner -->
                         @if ($reviewTask->approval_status === 'approved')
-                            <div class="p-4 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-250 dark:border-emerald-900/50 rounded-2xl flex items-center gap-3">
-                                <div class="w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">✓</div>
+                            <div
+                                class="p-4 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-250 dark:border-emerald-900/50 rounded-2xl flex items-center gap-3">
+                                <div
+                                    class="w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                                    ✓</div>
                                 <div>
-                                    <div class="text-xs font-black text-emerald-800 dark:text-emerald-400 uppercase tracking-wide">Tugas Disetujui (ACC)</div>
-                                    <div class="text-[10px] font-bold text-emerald-600 dark:text-emerald-300 mt-0.5">Disetujui oleh {{ $reviewTask->reviewer->name ?? 'Admin' }} pada {{ $reviewTask->reviewed_at?->format('d/m/Y H:i') }} WIB</div>
+                                    <div
+                                        class="text-xs font-black text-emerald-800 dark:text-emerald-400 uppercase tracking-wide">
+                                        Tugas Disetujui (ACC)</div>
+                                    <div class="text-[10px] font-bold text-emerald-600 dark:text-emerald-300 mt-0.5">
+                                        Disetujui oleh {{ $reviewTask->reviewer->name ?? 'Admin' }} pada
+                                        {{ $reviewTask->reviewed_at?->format('d/m/Y H:i') }} WIB</div>
                                 </div>
                             </div>
                         @elseif ($reviewTask->approval_status === 'rejected')
-                            <div class="p-4 bg-red-50 dark:bg-red-950/30 border border-red-250 dark:border-red-900/50 rounded-2xl flex items-start gap-3">
-                                <div class="w-8 h-8 rounded-full bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 flex items-center justify-center shrink-0">!</div>
+                            <div
+                                class="p-4 bg-red-50 dark:bg-red-950/30 border border-red-250 dark:border-red-900/50 rounded-2xl flex items-start gap-3">
+                                <div
+                                    class="w-8 h-8 rounded-full bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 flex items-center justify-center shrink-0">
+                                    !</div>
                                 <div>
-                                    <div class="text-xs font-black text-red-800 dark:text-red-400 uppercase tracking-wide">Tugas Ditolak - Butuh Revisi</div>
-                                    <div class="text-[10px] font-bold text-red-600 dark:text-red-300 mt-0.5">Catatan Penolakan: "{{ $reviewTask->rejection_note }}"</div>
+                                    <div
+                                        class="text-xs font-black text-red-800 dark:text-red-400 uppercase tracking-wide">
+                                        Tugas Ditolak - Butuh Revisi</div>
+                                    <div class="text-[10px] font-bold text-red-600 dark:text-red-300 mt-0.5">Catatan
+                                        Penolakan: "{{ $reviewTask->rejection_note }}"</div>
                                 </div>
                             </div>
                         @endif
@@ -568,8 +621,11 @@
                             <div class="space-y-4">
                                 @if ($reviewTask->completion_report)
                                     <div>
-                                        <span class="text-[9px] font-black uppercase tracking-widest text-gray-400 block mb-1">Laporan Hasil Pekerjaan Kasir</span>
-                                        <div class="text-sm font-semibold bg-gray-50 dark:bg-gray-900 p-4 border-2 border-dashed border-gray-100 dark:border-gray-700 rounded-2xl leading-relaxed text-gray-800 dark:text-white prose prose-sm max-w-none">
+                                        <span
+                                            class="text-[9px] font-black uppercase tracking-widest text-gray-400 block mb-1">Laporan
+                                            Hasil Pekerjaan Kasir</span>
+                                        <div
+                                            class="text-sm font-semibold bg-gray-50 dark:bg-gray-900 p-4 border-2 border-dashed border-gray-100 dark:border-gray-700 rounded-2xl leading-relaxed text-gray-800 dark:text-white prose prose-sm max-w-none">
                                             {!! $reviewTask->completion_report !!}
                                         </div>
                                     </div>
@@ -577,16 +633,20 @@
 
                                 @if ($reviewTask->proof_image)
                                     <div>
-                                        <span class="text-[9px] font-black uppercase tracking-widest text-gray-400 block mb-2">Foto / Gambar Bukti Kerja (Klik untuk Perbesar)</span>
+                                        <span
+                                            class="text-[9px] font-black uppercase tracking-widest text-gray-400 block mb-2">Foto
+                                            / Gambar Bukti Kerja (Klik untuk Perbesar)</span>
                                         <div class="relative cursor-zoom-in rounded-3xl overflow-hidden border-2 border-gray-150 dark:border-gray-700 hover:opacity-95 transition-opacity max-w-md mx-auto"
-                                             @click="$dispatch('open-lightbox', { img: '{{ asset('storage/' . $reviewTask->proof_image) }}' })">
-                                            <img src="{{ asset('storage/' . $reviewTask->proof_image) }}" class="w-full object-cover max-h-64" alt="Bukti Tugas" />
+                                            @click="$dispatch('open-lightbox', { img: '{{ asset('storage/' . $reviewTask->proof_image) }}' })">
+                                            <img src="{{ asset('storage/' . $reviewTask->proof_image) }}"
+                                                class="w-full object-cover max-h-64" alt="Bukti Tugas" />
                                         </div>
                                     </div>
                                 @endif
                             </div>
                         @else
-                            <div class="text-center py-6 text-xs text-gray-400 italic font-semibold uppercase tracking-wider">
+                            <div
+                                class="text-center py-6 text-xs text-gray-400 italic font-semibold uppercase tracking-wider">
                                 Kasir belum mengirimkan laporan hasil pekerjaan.
                             </div>
                         @endif
@@ -594,10 +654,12 @@
                         <!-- Action Buttons inside Modal -->
                         @if ($reviewTask->approval_status === 'pending')
                             <div class="flex gap-4 pt-6 border-t border-gray-100 dark:border-gray-700 mt-6">
-                                <button type="button" wire:click="openRejectModal('{{ $reviewTask->id }}')" class="flex-1 py-4 bg-red-500 hover:bg-red-600 text-white rounded-2xl font-black text-xs uppercase tracking-wider transition-all active:scale-95 shadow-md shadow-red-500/20">
+                                <button type="button" wire:click="openRejectModal('{{ $reviewTask->id }}')"
+                                    class="flex-1 py-4 bg-red-500 hover:bg-red-600 text-white rounded-2xl font-black text-xs uppercase tracking-wider transition-all active:scale-95 shadow-md shadow-red-500/20">
                                     TOLAK & REVISI
                                 </button>
-                                <button type="button" wire:click="approveTask('{{ $reviewTask->id }}')" class="flex-1 py-4 bg-emerald-500 hover:bg-emerald-600 text-white rounded-2xl font-black text-xs uppercase tracking-wider transition-all active:scale-95 shadow-md shadow-emerald-500/20">
+                                <button type="button" wire:click="approveTask('{{ $reviewTask->id }}')"
+                                    class="flex-1 py-4 bg-emerald-500 hover:bg-emerald-600 text-white rounded-2xl font-black text-xs uppercase tracking-wider transition-all active:scale-95 shadow-md shadow-emerald-500/20">
                                     SETUJUI (ACC)
                                 </button>
                             </div>
@@ -609,16 +671,17 @@
     </div>
 
     <!-- Global Lightbox Overlay (Triggered by Window Events) -->
-    <div x-data="{ open: false, img: '' }" 
-         @open-lightbox.window="img = $event.detail.img; open = true"
-         x-show="open" 
-         x-transition.opacity 
-         class="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center p-4 backdrop-blur-xs" 
-         @click="open = false" 
-         x-cloak>
-        <button class="absolute top-6 right-6 text-white hover:text-gray-300 p-3 rounded-full bg-black/40 hover:bg-black/60 transition-colors">
-            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
+    <div x-data="{ open: false, img: '' }" @open-lightbox.window="img = $event.detail.img; open = true" x-show="open"
+        x-transition.opacity
+        class="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center p-4 backdrop-blur-xs"
+        @click="open = false" x-cloak>
+        <button
+            class="absolute top-6 right-6 text-white hover:text-gray-300 p-3 rounded-full bg-black/40 hover:bg-black/60 transition-colors">
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" />
+            </svg>
         </button>
-        <img :src="img" class="max-w-full max-h-[90vh] rounded-3xl shadow-2xl border-4 border-white/10" @click.stop />
+        <img :src="img" class="max-w-full max-h-[90vh] rounded-3xl shadow-2xl border-4 border-white/10"
+            @click.stop />
     </div>
 </div>
