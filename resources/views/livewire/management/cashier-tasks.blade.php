@@ -280,10 +280,88 @@
                     @enderror
                 </div>
     
-                <div>
+                <!-- Description with Quill Rich Text Editor -->
+                <div wire:ignore 
+                     x-data="{ 
+                         description: @entangle('description').live,
+                         init() {
+                             const initQuill = () => {
+                                 if (typeof Quill === 'undefined') {
+                                     setTimeout(initQuill, 50);
+                                     return;
+                                 }
+                                 const quill = new Quill(this.$refs.editor, {
+                                     theme: 'snow',
+                                     placeholder: 'Instruksi tambahan jika ada...',
+                                     modules: {
+                                         toolbar: [
+                                             ['bold', 'italic', 'underline'],
+                                             [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                                             ['clean']
+                                         ]
+                                     }
+                                 });
+
+                                 // Set initial value
+                                 quill.root.innerHTML = this.description || '';
+
+                                 // Listen for text changes inside Quill
+                                 quill.on('text-change', () => {
+                                     this.description = quill.root.innerHTML;
+                                 });
+
+                                 // Watch Alpine state changes to sync Quill
+                                 this.$watch('description', value => {
+                                     if (quill.root.innerHTML !== value) {
+                                         quill.root.innerHTML = value || '';
+                                     }
+                                 });
+                                 
+                                 // Listen to specific edit event to reset Quill content
+                                 window.addEventListener('quill-update', event => {
+                                     quill.root.innerHTML = event.detail.content || '';
+                                 });
+                             };
+                             initQuill();
+                         }
+                     }" 
+                     class="relative">
                     <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">Deskripsi Tambahan</label>
-                    <textarea wire:model="description" rows="4" placeholder="Instruksi tambahan jika ada..."
-                        class="w-full px-4 py-3 bg-gray-55 dark:bg-gray-900 border-none rounded-xl focus:ring-2 focus:ring-primary-blue dark:text-white text-sm"></textarea>
+                    <style>
+                        /* Custom styles to match theme inputs */
+                        .ql-toolbar.ql-snow {
+                            border: 1px solid rgba(0, 0, 0, 0.05) !important;
+                            border-top-left-radius: 1rem !important;
+                            border-top-right-radius: 1rem !important;
+                            background: rgba(248, 250, 252, 0.8);
+                        }
+                        .dark .ql-toolbar.ql-snow {
+                            border-color: rgba(255, 255, 255, 0.05) !important;
+                            background: rgba(15, 23, 42, 0.8);
+                        }
+                        .ql-container.ql-snow {
+                            border: 1px solid rgba(0, 0, 0, 0.05) !important;
+                            border-bottom-left-radius: 1rem !important;
+                            border-bottom-right-radius: 1rem !important;
+                            min-height: 120px !important;
+                            max-height: 300px !important;
+                            overflow-y: auto !important;
+                            font-family: inherit !important;
+                            font-size: 0.875rem !important;
+                        }
+                        .dark .ql-container.ql-snow {
+                            border-color: rgba(255, 255, 255, 0.05) !important;
+                            color: white !important;
+                        }
+                        .ql-editor.ql-blank::before {
+                            color: #9ca3af !important;
+                            font-style: normal !important;
+                        }
+                        .dark .ql-editor.ql-blank::before {
+                            color: #6b7280 !important;
+                        }
+                    </style>
+                    <div x-ref="editor" class="bg-gray-55 dark:bg-gray-900 rounded-xl"></div>
                     @error('description')
                         <span class="text-xs text-red-500 font-bold mt-1 block">{{ $message }}</span>
                     @enderror

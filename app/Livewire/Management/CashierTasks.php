@@ -75,6 +75,7 @@ class CashierTasks extends Component
     public function openCreateModal()
     {
         $this->resetForm();
+        $this->dispatch('quill-update', content: '');
         $this->showCreateModal = true;
     }
 
@@ -264,6 +265,7 @@ class CashierTasks extends Component
                 ->toArray();
         }
 
+        $this->dispatch('quill-update', content: $this->description);
         $this->showCreateModal = true;
     }
 

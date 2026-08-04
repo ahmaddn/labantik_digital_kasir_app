@@ -163,21 +163,10 @@
                 playAlertSound();
 
                 if (nativeSupported && Notification.permission === 'granted') {
-                    let shown = false;
-                    // 1. Desktop/Laptop: Prefer direct constructor since it is extremely reliable in active tab
-                    try {
-                        new Notification(title, {
-                            body: body,
-                            icon: '/favicon.png',
-                            silent: false
-                        });
-                        shown = true;
-                    } catch (e) {
-                        // Desktop constructor failed (likely on mobile Chrome/Android), fall through
-                    }
+                    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
-                    // 2. Mobile/Service Worker: If constructor failed or wasn't supported, use SW
-                    if (!shown && swRegistration) {
+                    if (isMobile && swRegistration) {
+                        // Use Service Worker directly on mobile
                         swRegistration.showNotification(title, {
                             body: body,
                             icon: '/favicon.png',
@@ -188,10 +177,33 @@
                             renotify: true,
                             data: { url: '/' }
                         }).catch(() => {});
-                        shown = true;
+                        return;
+                    } else {
+                        // Use standard Notification constructor on desktop
+                        try {
+                            new Notification(title, {
+                                body: body,
+                                icon: '/favicon.png',
+                                silent: false
+                            });
+                            return;
+                        } catch (e) {
+                            // Fallback to Service Worker if standard constructor fails on desktop
+                            if (swRegistration) {
+                                swRegistration.showNotification(title, {
+                                    body: body,
+                                    icon: '/favicon.png',
+                                    badge: '/favicon.png',
+                                    vibrate: [200, 100, 200],
+                                    silent: false,
+                                    tag: 'labantik-notif',
+                                    renotify: true,
+                                    data: { url: '/' }
+                                }).catch(() => {});
+                                return;
+                            }
+                        }
                     }
-
-                    if (shown) return;
                 }
 
                 // 3. In-app popup fallback (iOS Safari / permission denied)
