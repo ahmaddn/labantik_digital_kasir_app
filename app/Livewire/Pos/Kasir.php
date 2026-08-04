@@ -5,7 +5,8 @@ namespace App\Livewire\Pos;
 use App\Models\CashCategory;
 use App\Models\CashierAttendance;
 use App\Models\CashierSchedule;
-use App\Models\CashierTask;
+use App\Models\CashierTaskDefinition;
+use App\Models\CashierTaskAssignment;
 use App\Models\CashTransaction;
 use App\Models\DailyRecap;
 use App\Models\Jurusan;
@@ -235,6 +236,7 @@ class Kasir extends Component
 
     // Polling method to detect newly assigned tasks and notify cashier
     public function checkNewTasks(): void
+    public function checkNewTasks(): void
     {
         $userId = auth()->id();
         if (! $userId) {
@@ -243,19 +245,21 @@ class Kasir extends Component
 
         $activeJurusanId = session('active_jurusan_id');
 
-        $newTasks = CashierTask::where('assigned_to', $userId)
+        // Get new task assignments (not submissions)
+        $newAssignments = CashierTaskAssignment::with('taskDefinition')
+            ->where('assigned_to', $userId)
             ->when($activeJurusanId, function ($q) use ($activeJurusanId) {
                 $q->where('jurusan_id', $activeJurusanId);
             })
             ->where('created_at', '>', $this->lastTaskCheckAt)
             ->get();
 
-        if ($newTasks->isNotEmpty()) {
-            $first = $newTasks->first();
-            $this->dispatch('toast', message: 'Tugas baru: "' . $first->task_name . '"', type: 'success');
+        if ($newAssignments->isNotEmpty()) {
+            $first = $newAssignments->first();
+            $this->dispatch('toast', message: 'Tugas baru: "' . $first->taskDefinition->task_name . '"', type: 'success');
             // Also dispatch a custom event carrying CTA url
             $this->dispatch('new-task',
-                message: 'Terdapat tugas baru: "' . $first->task_name . '" — buka halaman tugas Anda.',
+                message: 'Terdapat tugas baru: "' . $first->taskDefinition->task_name . '" — buka halaman tugas Anda.',
                 cta_url: route('my-tasks')
             );
             // update last check

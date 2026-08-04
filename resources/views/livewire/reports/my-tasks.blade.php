@@ -181,9 +181,8 @@
             </div>
         </div>
     @endif
-</div>
 
-<!-- Task Detail Modal -->
+    <!-- Task Detail Modal -->
 <div x-data="{ show: @entangle('showTaskDetailModal') }" x-show="show" class="fixed inset-0 z-50 flex items-center justify-center p-4" x-cloak>
     <div x-show="show" x-transition.opacity class="fixed inset-0 bg-black/60 backdrop-blur-xs"
         wire:click="$set('showTaskDetailModal', false)"></div>
