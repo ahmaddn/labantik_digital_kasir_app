@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('cashier_task_definitions', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->foreignUuid('jurusan_id')->constrained('jurusans')->cascadeOnDelete();
-            $table->uuid('group_id')->index();
+            $table->uuid('group_id')->nullable()->index(); // Made nullable for migration
 
             // Task information (immutable after creation)
             $table->string('task_name');
