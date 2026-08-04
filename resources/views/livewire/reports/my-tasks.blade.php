@@ -4,8 +4,7 @@
         <div>
             <h1 class="text-3xl font-black italic uppercase tracking-tighter text-primary-blue dark:text-primary-yellow">
                 Tugas Saya</h1>
-            <p class="text-gray-400 text-sm font-semibold uppercase tracking-widest mt-1">Kerjakan tugas, kirim laporan &
-                bukti, lalu tunggu ACC admin</p>
+            <p class="text-gray-400 text-sm font-semibold uppercase tracking-widest mt-1">Lihat instruksi tugas, kirim laporan hasil kerja kasir & bukti, lalu tunggu review/admin ACC</p>
         </div>
     </div>
 
@@ -155,9 +154,8 @@
                             d="M6 18L18 6M6 6l12 12" />
                     </svg>
                 </button>
-                <h3 class="text-xl font-black uppercase italic tracking-tighter">DETAIL & LAPORAN TUGAS</h3>
-                <p class="text-[9px] font-black uppercase tracking-[0.3em] mt-1.5 opacity-60">PROSES PENYELESAIAN TUGAS
-                    KASIR</p>
+                <h3 class="text-xl font-black uppercase italic tracking-tighter">DETAIL INSTRUKSI & LAPORAN KASIR</h3>
+                <p class="text-[9px] font-black uppercase tracking-[0.3em] mt-1.5 opacity-60">Lihat instruksi tugas, isi laporan hasil kerja kasir, lalu kirim untuk review admin.</p>
             </div>
 
             <div class="p-6 max-h-[60vh] overflow-y-auto no-scrollbar space-y-4 text-left">

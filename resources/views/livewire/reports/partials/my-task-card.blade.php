@@ -106,25 +106,22 @@
     @if ($task->approval_status === 'approved')
         <button wire:click="showTaskDetail('{{ $task->id }}')"
             class="mt-auto w-full py-2.5 px-4 rounded-xl text-[10px] font-black uppercase tracking-wider bg-gray-150 dark:bg-gray-800 text-gray-500 dark:text-gray-400 transition-all text-center">
-            Lihat Detail & Laporan
+            Lihat Instruksi & Laporan
         </button>
     @else
         <div class="mt-auto flex gap-2">
             <button wire:click="showTaskDetail('{{ $task->id }}')"
                 class="flex-1 py-2.5 px-3 rounded-xl text-[10px] font-black uppercase tracking-wider bg-gray-105 hover:bg-gray-205 dark:bg-gray-800 text-gray-505 dark:text-gray-300 transition-all text-center">
-                Detail Tugas
+                Detail Instruksi
             </button>
             <button wire:click="selectTaskForCompletion('{{ $task->id }}')"
-                class="flex-1 py-2.5 px-3 rounded-xl text-[10px] font-black uppercase tracking-wider text-center transition-all active:scale-95
-                {{ $task->approval_status === 'rejected'
-                    ? 'bg-primary-blue hover:bg-blue-900 text-white shadow-lg shadow-blue-900/10'
-                    : 'bg-primary-blue hover:bg-blue-900 text-white shadow-lg shadow-blue-900/10' }}">
+                class="flex-1 py-2.5 px-3 rounded-xl text-[10px] font-black uppercase tracking-wider text-center transition-all active:scale-95 bg-primary-blue hover:bg-blue-900 text-white shadow-lg shadow-blue-900/10">
                 @if ($task->approval_status === 'rejected')
-                    Revisi
+                    Revisi Laporan
                 @elseif($task->approval_status === 'pending')
                     Edit Laporan
                 @else
-                    Selesaikan
+                    Kirim Laporan
                 @endif
             </button>
         </div>

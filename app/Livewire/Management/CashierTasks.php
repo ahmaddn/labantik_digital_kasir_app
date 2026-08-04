@@ -372,55 +372,27 @@ class CashierTasks extends Component
             'reviewed_at' => now(),
         ];
 
-        if ($task->group_id) {
-            $tasksInGroup = CashierTask::where('group_id', $task->group_id)->get();
-            foreach ($tasksInGroup as $t) {
-                $t->update($updateData);
+        $task->update($updateData);
 
-                // Award gamification points only after admin approval
-                $cashier = User::find($t->assigned_to);
-                if ($cashier) {
-                    $points = match ($t->priority) {
-                        'low' => 5,
-                        'high' => 20,
-                        'critical' => 30,
-                        default => 10,
-                    };
-                    $cashier->increment('pending_points', $points);
-                    $cashier->increment('streak', 1);
+        // Award gamification points only after admin approval
+        $cashier = User::find($task->assigned_to);
+        if ($cashier) {
+            $points = match ($task->priority) {
+                'low' => 5,
+                'high' => 20,
+                'critical' => 30,
+                default => 10,
+            };
+            $cashier->increment('pending_points', $points);
+            $cashier->increment('streak', 1);
 
-                    Notification::create([
-                        'user_id' => $t->assigned_to,
-                        'title' => 'Tugas Disetujui',
-                        'body' => 'Laporan tugas "' . $t->task_name . '" telah di-ACC admin. +' . $points . ' poin untukmu!',
-                        'type' => 'task',
-                        'action_url' => '/my-tasks',
-                    ]);
-                }
-            }
-        } else {
-            $task->update($updateData);
-
-            // Award gamification points only after admin approval
-            $cashier = User::find($task->assigned_to);
-            if ($cashier) {
-                $points = match ($task->priority) {
-                    'low' => 5,
-                    'high' => 20,
-                    'critical' => 30,
-                    default => 10,
-                };
-                $cashier->increment('pending_points', $points);
-                $cashier->increment('streak', 1);
-
-                Notification::create([
-                    'user_id' => $task->assigned_to,
-                    'title' => 'Tugas Disetujui',
-                    'body' => 'Laporan tugas "' . $task->task_name . '" telah di-ACC admin. +' . $points . ' poin untukmu!',
-                    'type' => 'task',
-                    'action_url' => '/my-tasks',
-                ]);
-            }
+            Notification::create([
+                'user_id' => $task->assigned_to,
+                'title' => 'Tugas Disetujui',
+                'body' => 'Laporan tugas "' . $task->task_name . '" telah di-ACC admin. +' . $points . ' poin untukmu!',
+                'type' => 'task',
+                'action_url' => '/my-tasks',
+            ]);
         }
 
         $this->showReviewModal = false;
@@ -462,30 +434,15 @@ class CashierTasks extends Component
             'is_completed' => false,
         ];
 
-        if ($task->group_id) {
-            $tasksInGroup = CashierTask::where('group_id', $task->group_id)->get();
-            foreach ($tasksInGroup as $t) {
-                $t->update($updateData);
+        $task->update($updateData);
 
-                Notification::create([
-                    'user_id' => $t->assigned_to,
-                    'title' => 'Tugas Ditolak — Perlu Revisi',
-                    'body' => 'Laporan tugas "' . $t->task_name . '" ditolak: ' . $this->rejectionNote . '. Silakan revisi & kirim ulang.',
-                    'type' => 'task',
-                    'action_url' => '/my-tasks',
-                ]);
-            }
-        } else {
-            $task->update($updateData);
-
-            Notification::create([
-                'user_id' => $task->assigned_to,
-                'title' => 'Tugas Ditolak — Perlu Revisi',
-                'body' => 'Laporan tugas "' . $task->task_name . '" ditolak: ' . $this->rejectionNote . '. Silakan revisi & kirim ulang.',
-                'type' => 'task',
-                'action_url' => '/my-tasks',
-            ]);
-        }
+        Notification::create([
+            'user_id' => $task->assigned_to,
+            'title' => 'Tugas Ditolak — Perlu Revisi',
+            'body' => 'Laporan tugas "' . $task->task_name . '" ditolak: ' . $this->rejectionNote . '. Silakan revisi & kirim ulang.',
+            'type' => 'task',
+            'action_url' => '/my-tasks',
+        ]);
 
         $this->showReviewModal = false;
         $this->reviewingTaskId = null;
