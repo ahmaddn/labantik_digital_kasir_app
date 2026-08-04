@@ -39,12 +39,14 @@
 
         <div class="flex flex-wrap gap-2 items-center">
             <!-- Tanggal Tugas -->
-            <span class="text-[10px] font-bold bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-350 px-2.5 py-1 rounded-full">
+            <span
+                class="text-[10px] font-bold bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-350 px-2.5 py-1 rounded-full">
                 Tgl: {{ $task->date->translatedFormat('d M Y') }}
             </span>
 
             @if ($task->category)
-                <span class="text-[10px] font-bold bg-purple-50 text-purple-700 dark:bg-purple-950/30 dark:text-purple-400 px-2.5 py-1 rounded-full">
+                <span
+                    class="text-[10px] font-bold bg-purple-50 text-purple-700 dark:bg-purple-950/30 dark:text-purple-400 px-2.5 py-1 rounded-full">
                     Kategori: {{ $task->category }}
                 </span>
             @endif
@@ -79,13 +81,23 @@
             </span>
 
             @if ($task->deadline_at)
-                <span class="text-[10px] font-bold bg-rose-50 text-rose-700 dark:bg-rose-950/30 dark:text-rose-450 px-2.5 py-1 rounded-full flex items-center gap-1">
-                    <svg class="w-3 h-3 text-rose-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span
+                    class="text-[10px] font-bold bg-rose-50 text-rose-700 dark:bg-rose-950/30 dark:text-rose-450 px-2.5 py-1 rounded-full flex items-center gap-1">
+                    <svg class="w-3 h-3 text-rose-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                        stroke-width="2.5">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
                     Batas: {{ $task->deadline_at->translatedFormat('d M H:i') }} WIB
                 </span>
             @elseif($task->is_routine && isset($task->computed_deadline) && $task->computed_deadline)
-                <span class="text-[10px] font-bold bg-rose-50 text-rose-700 dark:bg-rose-950/30 dark:text-rose-450 px-2.5 py-1 rounded-full flex items-center gap-1">
-                    <svg class="w-3 h-3 text-rose-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span
+                    class="text-[10px] font-bold bg-rose-50 text-rose-700 dark:bg-rose-950/30 dark:text-rose-450 px-2.5 py-1 rounded-full flex items-center gap-1">
+                    <svg class="w-3 h-3 text-rose-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                        stroke-width="2.5">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
                     Batas: {{ \Carbon\Carbon::parse($task->computed_deadline)->translatedFormat('d M H:i') }} WIB
                 </span>
             @endif

@@ -212,7 +212,7 @@ class MyTasks extends Component
                 $query->where('date', now()->toDateString())
                     ->orWhere(function ($q) {
                         $q->where('is_routine', true)
-                          ->where('approval_status', '!=', 'approved');
+                            ->where('approval_status', '!=', 'approved');
                     });
             })
             ->orderBy('created_at', 'desc')

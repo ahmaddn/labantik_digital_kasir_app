@@ -4,7 +4,8 @@
         <div>
             <h1 class="text-3xl font-black italic uppercase tracking-tighter text-primary-blue dark:text-primary-yellow">
                 Tugas Saya</h1>
-            <p class="text-gray-400 text-sm font-semibold uppercase tracking-widest mt-1">Lihat instruksi tugas, kirim laporan hasil kerja kasir & bukti, lalu tunggu review/admin ACC</p>
+            <p class="text-gray-400 text-sm font-semibold uppercase tracking-widest mt-1">Lihat instruksi tugas, kirim
+                laporan hasil kerja kasir & bukti, lalu tunggu review/admin ACC</p>
         </div>
     </div>
 
@@ -23,10 +24,13 @@
     <!-- Active Tab Content -->
     @if ($activeTab === 'today')
         <!-- Tugas Hari Ini -->
-        <div class="bg-white dark:bg-gray-800 rounded-[2.5rem] shadow-2xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700/50 p-6 md:p-8">
+        <div
+            class="bg-white dark:bg-gray-800 rounded-[2.5rem] shadow-2xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700/50 p-6 md:p-8">
             <div class="flex items-center gap-3 mb-6">
-                <h2 class="text-sm font-black uppercase tracking-widest text-gray-800 dark:text-white">Tugas Hari Ini</h2>
-                <span class="px-2.5 py-1 rounded-full bg-primary-blue text-white text-[10px] font-black">{{ now()->translatedFormat('d F Y') }}</span>
+                <h2 class="text-sm font-black uppercase tracking-widest text-gray-800 dark:text-white">Tugas Hari Ini
+                </h2>
+                <span
+                    class="px-2.5 py-1 rounded-full bg-primary-blue text-white text-[10px] font-black">{{ now()->translatedFormat('d F Y') }}</span>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
@@ -41,8 +45,10 @@
         </div>
     @else
         <!-- Riwayat Tugas -->
-        <div class="bg-white dark:bg-gray-800 rounded-[2.5rem] shadow-2xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700/50 p-6 md:p-8">
-            <h2 class="text-sm font-black uppercase tracking-widest text-gray-800 dark:text-white mb-6">Riwayat Tugas Sebelumnya</h2>
+        <div
+            class="bg-white dark:bg-gray-800 rounded-[2.5rem] shadow-2xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700/50 p-6 md:p-8">
+            <h2 class="text-sm font-black uppercase tracking-widest text-gray-800 dark:text-white mb-6">Riwayat Tugas
+                Sebelumnya</h2>
 
             <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
                 @forelse($historyTasks as $task)
@@ -68,30 +74,37 @@
             <div class="p-6 bg-slate-100 dark:bg-slate-900 text-slate-800 dark:text-white relative">
                 <button @click="show = false"
                     class="absolute right-6 top-6 p-2 bg-black/5 hover:bg-black/10 dark:bg-white/10 dark:hover:bg-white/20 rounded-xl transition-all">
-                    <svg class="w-4 h-4 text-slate-600 dark:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-4 h-4 text-slate-600 dark:text-white" fill="none" stroke="currentColor"
+                        viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
                             d="M6 18L18 6M6 6l12 12" />
                     </svg>
                 </button>
                 <h3 class="text-xl font-black uppercase italic tracking-tighter">DETAIL INSTRUKSI TUGAS</h3>
-                <p class="text-[9px] font-black uppercase tracking-[0.3em] mt-1.5 opacity-60 text-slate-500 dark:text-slate-400">DETAIL & PENJELASAN TUGAS KASIR</p>
+                <p
+                    class="text-[9px] font-black uppercase tracking-[0.3em] mt-1.5 opacity-60 text-slate-500 dark:text-slate-400">
+                    DETAIL & PENJELASAN TUGAS KASIR</p>
             </div>
 
             <div class="p-6 max-h-[60vh] overflow-y-auto no-scrollbar space-y-5 text-left">
                 @if ($selectedTaskModel)
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <span class="text-[9px] font-black uppercase tracking-widest text-gray-400 block mb-1">Nama Tugas</span>
+                            <span class="text-[9px] font-black uppercase tracking-widest text-gray-400 block mb-1">Nama
+                                Tugas</span>
                             <h4 class="text-sm font-black uppercase text-gray-800 dark:text-white">
                                 {{ $selectedTaskModel->task_name }}</h4>
                         </div>
                         <div>
-                            <span class="text-[9px] font-black uppercase tracking-widest text-gray-400 block mb-1">Kategori</span>
-                            <div class="text-xs font-black uppercase tracking-widest text-slate-700 dark:text-slate-300">
+                            <span
+                                class="text-[9px] font-black uppercase tracking-widest text-gray-400 block mb-1">Kategori</span>
+                            <div
+                                class="text-xs font-black uppercase tracking-widest text-slate-700 dark:text-slate-300">
                                 {{ $selectedTaskModel->category ?: 'Umum' }}</div>
                         </div>
                         <div>
-                            <span class="text-[9px] font-black uppercase tracking-widest text-gray-400 block mb-1">Prioritas</span>
+                            <span
+                                class="text-[9px] font-black uppercase tracking-widest text-gray-400 block mb-1">Prioritas</span>
                             @php
                                 $detailPriorityClass = match ($selectedTaskModel->priority) {
                                     'low' => 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300',
@@ -106,15 +119,20 @@
                                     default => 'Sedang',
                                 };
                             @endphp
-                            <div class="text-xs font-black uppercase tracking-widest {{ $detailPriorityClass }} inline-flex items-center px-2.5 py-1 rounded-lg">
+                            <div
+                                class="text-xs font-black uppercase tracking-widest {{ $detailPriorityClass }} inline-flex items-center px-2.5 py-1 rounded-lg">
                                 {{ $detailPriorityText }}</div>
                         </div>
                         <div>
-                            <span class="text-[9px] font-black uppercase tracking-widest text-gray-400 block mb-1">Batas Waktu (Deadline)</span>
+                            <span class="text-[9px] font-black uppercase tracking-widest text-gray-400 block mb-1">Batas
+                                Waktu (Deadline)</span>
                             <div class="text-xs font-semibold text-gray-700 dark:text-gray-300">
                                 @if ($selectedTaskModel->deadline_at)
                                     {{ $selectedTaskModel->deadline_at->translatedFormat('d M Y H:i') . ' WIB' }}
-                                @elseif($selectedTaskModel->is_routine && isset($selectedTaskModel->computed_deadline) && $selectedTaskModel->computed_deadline)
+                                @elseif(
+                                    $selectedTaskModel->is_routine &&
+                                        isset($selectedTaskModel->computed_deadline) &&
+                                        $selectedTaskModel->computed_deadline)
                                     {{ \Carbon\Carbon::parse($selectedTaskModel->computed_deadline)->translatedFormat('d M Y H:i') . ' WIB' }}
                                 @else
                                     Belum ditetapkan
@@ -124,17 +142,22 @@
                     </div>
 
                     @if ($selectedTaskModel->description)
-                        <div class="bg-gray-50 dark:bg-gray-900/60 p-5 rounded-2xl border border-gray-100 dark:border-gray-800">
-                            <span class="text-[9px] font-black uppercase tracking-widest text-gray-400 block mb-2">Deskripsi & Instruksi Tugas</span>
+                        <div
+                            class="bg-gray-50 dark:bg-gray-900/60 p-5 rounded-2xl border border-gray-100 dark:border-gray-800">
+                            <span
+                                class="text-[9px] font-black uppercase tracking-widest text-gray-400 block mb-2">Deskripsi
+                                & Instruksi Tugas</span>
                             <div class="text-xs text-gray-700 dark:text-gray-250 font-semibold leading-relaxed">
                                 {!! $selectedTaskModel->description !!}</div>
                         </div>
                     @endif
                 @endif
             </div>
-            
-            <div class="p-6 bg-gray-50 dark:bg-gray-900/40 border-t border-gray-100 dark:border-gray-800 flex justify-end">
-                <button type="button" @click="show = false" class="px-6 py-2.5 bg-primary-blue text-white rounded-xl font-black text-xs uppercase italic tracking-wider transition-all">
+
+            <div
+                class="p-6 bg-gray-50 dark:bg-gray-900/40 border-t border-gray-100 dark:border-gray-800 flex justify-end">
+                <button type="button" @click="show = false"
+                    class="px-6 py-2.5 bg-primary-blue text-white rounded-xl font-black text-xs uppercase italic tracking-wider transition-all">
                     Tutup Detail
                 </button>
             </div>
@@ -155,7 +178,8 @@
                     </svg>
                 </button>
                 <h3 class="text-xl font-black uppercase italic tracking-tighter">DETAIL INSTRUKSI & LAPORAN KASIR</h3>
-                <p class="text-[9px] font-black uppercase tracking-[0.3em] mt-1.5 opacity-60">Lihat instruksi tugas, isi laporan hasil kerja kasir, lalu kirim untuk review admin.</p>
+                <p class="text-[9px] font-black uppercase tracking-[0.3em] mt-1.5 opacity-60">Lihat instruksi tugas, isi
+                    laporan hasil kerja kasir, lalu kirim untuk review admin.</p>
             </div>
 
             <div class="p-6 max-h-[60vh] overflow-y-auto no-scrollbar space-y-4 text-left">
@@ -267,44 +291,47 @@
                                     Menunggu ACC Admin — Anda masih bisa memperbarui laporan
                                 </span>
                             @endif
-                            <div wire:ignore 
-                                 x-data="{ 
-                                     content: @entangle('taskCompletionReport'),
-                                     init() {
-                                         const initQuill = () => {
-                                             if (typeof Quill === 'undefined') {
-                                                 setTimeout(initQuill, 50);
-                                                 return;
-                                             }
-                                             const quill = new Quill(this.$refs.editor, {
-                                                 theme: 'snow',
-                                                 placeholder: 'Jelaskan detail pekerjaan/tugas yang telah selesai dilakukan...',
-                                                 modules: {
-                                                     toolbar: [
-                                                         ['bold', 'italic', 'underline'],
-                                                         [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                                                         ['clean']
-                                                     ]
-                                                 }
-                                             });
-
-                                             quill.root.innerHTML = this.content || '';
-
-                                             quill.on('text-change', () => {
-                                                 this.content = quill.root.innerHTML;
-                                             });
-
-                                             this.$watch('content', value => {
-                                                 if (quill.root.innerHTML !== value) {
-                                                     quill.root.innerHTML = value || '';
-                                                 }
-                                             });
-                                         };
-                                         initQuill();
-                                     }
-                                 }">
-                                <label class="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2">Laporan Hasil Pekerjaan</label>
-                                <div x-ref="editor" class="bg-gray-50 dark:bg-gray-900 border-none rounded-2xl text-gray-800 dark:text-white" style="min-height: 120px;"></div>
+                            <div wire:ignore x-data="{
+                                content: @entangle('taskCompletionReport'),
+                                init() {
+                                    const initQuill = () => {
+                                        if (typeof Quill === 'undefined') {
+                                            setTimeout(initQuill, 50);
+                                            return;
+                                        }
+                                        const quill = new Quill(this.$refs.editor, {
+                                            theme: 'snow',
+                                            placeholder: 'Jelaskan detail pekerjaan/tugas yang telah selesai dilakukan...',
+                                            modules: {
+                                                toolbar: [
+                                                    ['bold', 'italic', 'underline'],
+                                                    [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+                                                    ['clean']
+                                                ]
+                                            }
+                                        });
+                            
+                                        quill.root.innerHTML = this.content || '';
+                            
+                                        quill.on('text-change', () => {
+                                            this.content = quill.root.innerHTML;
+                                        });
+                            
+                                        this.$watch('content', value => {
+                                            if (quill.root.innerHTML !== value) {
+                                                quill.root.innerHTML = value || '';
+                                            }
+                                        });
+                                    };
+                                    initQuill();
+                                }
+                            }">
+                                <label
+                                    class="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2">Laporan
+                                    Hasil Pekerjaan</label>
+                                <div x-ref="editor"
+                                    class="bg-gray-50 dark:bg-gray-900 border-none rounded-2xl text-gray-800 dark:text-white"
+                                    style="min-height: 120px;"></div>
                                 @error('taskCompletionReport')
                                     <span class="text-xs text-red-500 font-bold mt-1 block">{{ $message }}</span>
                                 @enderror
@@ -321,10 +348,12 @@
                                         <span class="text-xs text-red-500 font-bold mt-1 block">{{ $message }}</span>
                                     @enderror
                                     <div wire:loading wire:target="taskProofImage"
-                                        class="text-[10px] font-black text-amber-500 uppercase mt-2">Mengunggah gambar...
+                                        class="text-[10px] font-black text-amber-500 uppercase mt-2">Mengunggah
+                                        gambar...
                                     </div>
                                     @if ($selectedTaskModel->proof_image)
-                                        <a href="{{ asset('storage/' . $selectedTaskModel->proof_image) }}" target="_blank"
+                                        <a href="{{ asset('storage/' . $selectedTaskModel->proof_image) }}"
+                                            target="_blank"
                                             class="inline-block text-[10px] font-black text-primary-blue uppercase mt-2 underline">Lihat
                                             bukti yang sudah diunggah</a>
                                     @endif
