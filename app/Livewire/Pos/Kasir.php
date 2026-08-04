@@ -236,7 +236,6 @@ class Kasir extends Component
 
     // Polling method to detect newly assigned tasks and notify cashier
     public function checkNewTasks(): void
-    public function checkNewTasks(): void
     {
         $userId = auth()->id();
         if (! $userId) {
