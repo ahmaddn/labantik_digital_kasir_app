@@ -529,8 +529,8 @@
                                 <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider {{ $reviewTask->priorityBadgeClass }}">{{ $reviewTask->priority_label }}</span>
                             </div>
                             <div class="sm:col-span-2">
-                                <span class="text-[9px] font-black uppercase tracking-widest text-gray-400 block mb-1">Ditugaskan Ke</span>
-                                <div class="text-xs font-bold text-gray-750 dark:text-gray-200">{{ $reviewTask->group_assignees_names }}</div>
+                                <span class="text-[9px] font-black uppercase tracking-widest text-gray-400 block mb-1">Kasir Pelapor</span>
+                                <div class="text-xs font-bold text-gray-750 dark:text-gray-200">{{ $reviewTask->user?->name ?? '-' }}</div>
                             </div>
                         </div>
 

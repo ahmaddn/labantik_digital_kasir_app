@@ -501,11 +501,6 @@ class CashierTasks extends Component
                         ->orWhere('description', 'like', '%' . $this->search . '%');
                 });
             })
-            ->whereIn('id', function ($query) {
-                $query->selectRaw('MIN(id)')
-                    ->from('cashier_tasks')
-                    ->groupByRaw('COALESCE(group_id, id)');
-            })
             ->orderBy('date', 'desc')
             ->orderBy('created_at', 'desc')
             ->paginate(15);
