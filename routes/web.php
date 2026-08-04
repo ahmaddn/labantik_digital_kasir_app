@@ -134,6 +134,7 @@ Route::middleware(['auth', 'verified', EnsureRoleSelected::class])->group(functi
     Route::get('/my-tasks', \App\Livewire\Reports\MyTasks::class)->name('my-tasks');
     Route::get('/reports/attendances', \App\Livewire\Reports\AttendanceReport::class)->name('attendances');
     Route::get('/guide', \App\Livewire\Guide\CashierGuide::class)->name('guide');
+    Route::get('/leaderboard', \App\Livewire\Guide\Leaderboard::class)->name('leaderboard');
 
     // Security Audit Log alerts
     Route::post('/log-security-alert', function (\Illuminate\Http\Request $request) {

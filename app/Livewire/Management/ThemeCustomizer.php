@@ -34,6 +34,15 @@ class ThemeCustomizer extends Component
 
     public $existingTefaLogo = '';
 
+    // Attendance & Penalty configurations
+    public $clockInTime = '07:00';
+
+    public $clockOutTime = '15:00';
+
+    public $lateClockInPenalty = 0;
+
+    public $lateClockOutPenalty = 0;
+
     // Color presets
     public $colorPresets = [
         ['name' => 'Royal Blue & Crimson', 'primary' => '#2563EB', 'secondary' => '#EF4444'],
@@ -132,6 +141,10 @@ class ThemeCustomizer extends Component
             $this->docPrefixInvoice = $settings['doc_prefix_invoice'] ?? 'INV-SUP';
             $this->docPrefixTransaction = $settings['doc_prefix_transaction'] ?? 'LBK';
             $this->existingTefaLogo = $settings['tefa_logo'] ?? '';
+            $this->clockInTime = $settings['clock_in_time'] ?? '07:00';
+            $this->clockOutTime = $settings['clock_out_time'] ?? '15:00';
+            $this->lateClockInPenalty = $settings['late_clock_in_penalty'] ?? 0;
+            $this->lateClockOutPenalty = $settings['late_clock_out_penalty'] ?? 0;
         } else {
             // Default settings
             $this->primaryColor = '#2563EB';
@@ -142,6 +155,10 @@ class ThemeCustomizer extends Component
             $this->docPrefixInvoice = 'INV-SUP';
             $this->docPrefixTransaction = 'LBK';
             $this->existingTefaLogo = '';
+            $this->clockInTime = '07:00';
+            $this->clockOutTime = '15:00';
+            $this->lateClockInPenalty = 0;
+            $this->lateClockOutPenalty = 0;
         }
     }
 
@@ -172,6 +189,10 @@ class ThemeCustomizer extends Component
             'doc_prefix_invoice' => $this->docPrefixInvoice,
             'doc_prefix_transaction' => $this->docPrefixTransaction,
             'tefa_logo' => $logoPath,
+            'clock_in_time' => $this->clockInTime,
+            'clock_out_time' => $this->clockOutTime,
+            'late_clock_in_penalty' => (int) $this->lateClockInPenalty,
+            'late_clock_out_penalty' => (int) $this->lateClockOutPenalty,
         ];
 
         $jurusan->update([

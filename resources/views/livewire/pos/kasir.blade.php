@@ -490,6 +490,18 @@ document.addEventListener('keydown', (e) => {
                         @if ($task->description)
                             <p class="text-[10px] text-gray-400">{{ $task->description }}</p>
                         @endif
+                        <div class="flex flex-wrap gap-1.5 items-center mt-1">
+                            <span class="text-[8px] font-bold text-gray-400 uppercase tracking-widest">{{ $task->date->translatedFormat('d M Y') }}</span>
+                            @if ($task->deadline_at)
+                                <span class="text-[8px] font-black uppercase tracking-widest bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300 px-2 py-0.5 rounded border border-gray-200 dark:border-gray-700">
+                                    Deadline: {{ $task->deadline_at->translatedFormat('d M H:i') }}
+                                </span>
+                            @elseif($task->is_routine && isset($task->computed_deadline) && $task->computed_deadline)
+                                <span class="text-[8px] font-black uppercase tracking-widest bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300 px-2 py-0.5 rounded border border-gray-200 dark:border-gray-700">
+                                    Deadline: {{ \Carbon\Carbon::parse($task->computed_deadline)->translatedFormat('d M H:i') }}
+                                </span>
+                            @endif
+                        </div>
                         <span
                             class="text-[9px] font-black uppercase tracking-widest text-primary-blue flex items-center gap-1.5 mt-1">
                             Kerjakan di Halaman Tugas Saya

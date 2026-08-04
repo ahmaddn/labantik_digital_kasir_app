@@ -158,6 +158,33 @@
                         </div>
                     </div>
 
+                    <!-- Attendance & Penalties Configuration -->
+                    <div class="p-6 bg-gray-50 dark:bg-gray-900 rounded-[2rem] space-y-4 border border-gray-100 dark:border-gray-800">
+                        <label class="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] italic">
+                            Pengaturan Absensi & Sanksi Poin
+                        </label>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 ml-2">Target Clock In</label>
+                                <input type="time" wire:model="clockInTime" class="w-full px-4 py-3 bg-white dark:bg-gray-950 border-none rounded-xl text-xs font-black text-gray-700 dark:text-white">
+                            </div>
+                            <div>
+                                <label class="block text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 ml-2">Target Clock Out</label>
+                                <input type="time" wire:model="clockOutTime" class="w-full px-4 py-3 bg-white dark:bg-gray-950 border-none rounded-xl text-xs font-black text-gray-700 dark:text-white">
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 ml-2">Denda Telat Clock In (Poin)</label>
+                                <input type="number" wire:model="lateClockInPenalty" class="w-full px-4 py-3 bg-white dark:bg-gray-950 border-none rounded-xl text-xs font-black text-gray-700 dark:text-white" min="0">
+                            </div>
+                            <div>
+                                <label class="block text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 ml-2">Denda Telat Clock Out (Poin)</label>
+                                <input type="number" wire:model="lateClockOutPenalty" class="w-full px-4 py-3 bg-white dark:bg-gray-950 border-none rounded-xl text-xs font-black text-gray-700 dark:text-white" min="0">
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Submit Button -->
                     <div class="pt-4">
                         <button type="submit" class="w-full py-5 bg-primary-blue text-white rounded-[2rem] shadow-2xl shadow-blue-900/20 font-black italic uppercase tracking-wider transform hover:-translate-y-1 transition-all">

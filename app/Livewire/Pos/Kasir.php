@@ -114,16 +114,48 @@ class Kasir extends Component
                         ->where('date', now()->toDateString())
                         ->first();
 
+                    $currentTime = now();
+                    $isLate = false;
+                    $deducted = 0;
+
+                    $jurusan = Jurusan::find($activeJurusanId);
+                    $settings = $jurusan ? ($jurusan->theme_settings ?: []) : [];
+                    $targetClockIn = $settings['clock_in_time'] ?? '07:00';
+                    $penalty = (int) ($settings['late_clock_in_penalty'] ?? 0);
+
+                    if ($targetClockIn) {
+                        try {
+                            $targetTime = \Carbon\Carbon::createFromFormat('H:i', $targetClockIn);
+                            $targetTime->setDate($currentTime->year, $currentTime->month, $currentTime->day);
+                            if ($currentTime->gt($targetTime)) {
+                                $isLate = true;
+                                if ($penalty > 0) {
+                                    $deducted = $penalty;
+                                    auth()->user()->decrement('points', $penalty);
+                                    if (auth()->user()->points < 0) {
+                                        auth()->user()->update(['points' => 0]);
+                                    }
+                                }
+                            }
+                        } catch (\Exception $e) {
+                            // ignore format error
+                        }
+                    }
+
                     CashierAttendance::create([
                         'cashier_schedule_id' => $schedule ? $schedule->id : null,
                         'user_id' => auth()->id(),
                         'jurusan_id' => $activeJurusanId,
                         'date' => now()->toDateString(),
-                        'clock_in' => now(),
-                        'status' => 'present',
+                        'clock_in' => $currentTime,
+                        'status' => $isLate ? 'late' : 'present',
                     ]);
 
-                    $this->dispatch('toast', message: 'Clock in otomatis tercatat. Selamat bertugas!');
+                    if ($isLate && $deducted > 0) {
+                        $this->dispatch('toast', message: 'Clock in otomatis tercatat. Anda TERLAMBAT! Poin berkurang ' . $deducted, type: 'warning');
+                    } else {
+                        $this->dispatch('toast', message: 'Clock in otomatis tercatat. Selamat bertugas!');
+                    }
                 }
             }
         }
@@ -140,30 +172,28 @@ class Kasir extends Component
                 ->exists();
 
             if (! $hasHigherRole) {
-                // If they haven't clocked out yet, redirect to late report
+                // If they haven't clocked out yet, allow them to continue
                 $attendance = CashierAttendance::where('user_id', auth()->id())
                     ->where('jurusan_id', $activeJurusanId)
                     ->where('date', now()->toDateString())
                     ->first();
 
                 if ($attendance && ! $attendance->clock_out) {
-                    $this->redirectRoute('late-report', navigate: true);
+                    // Do not block or redirect, allow them to check stock and do transactions
+                } else {
+                    session()->flash('error', 'Sesi kasir hari ini telah berakhir. Anda tidak dapat melakukan transaksi lagi.');
+                    $this->redirectRoute('dashboard', navigate: true);
 
                     return;
                 }
-
-                session()->flash('error', 'Sesi kasir hari ini telah berakhir. Anda tidak dapat melakukan transaksi lagi.');
+            } else {
+                // Higher-role cashier: once the session is finished, the cashier mode
+                // is locked too — block re-entry (can only be reopened via emergency reactivate)
+                session()->flash('error', 'Sesi kasir hari ini telah diselesaikan. Mode kasir terkunci.');
                 $this->redirectRoute('dashboard', navigate: true);
 
                 return;
             }
-
-            // Higher-role cashier: once the session is finished, the cashier mode
-            // is locked too — block re-entry (can only be reopened via emergency reactivate)
-            session()->flash('error', 'Sesi kasir hari ini telah diselesaikan. Mode kasir terkunci.');
-            $this->redirectRoute('dashboard', navigate: true);
-
-            return;
         }
 
         // Detect if there's an unfinished session from a previous day
@@ -371,11 +401,39 @@ class Kasir extends Component
             ->where('date', now()->toDateString())
             ->first();
 
+        $currentTime = now();
+        $isLateClockOut = false;
+        $deductedClockOut = 0;
+
+        $jurusan = Jurusan::find($activeJurusanId);
+        $settings = $jurusan ? ($jurusan->theme_settings ?: []) : [];
+        $targetClockOut = $settings['clock_out_time'] ?? '15:00';
+        $penaltyClockOut = (int) ($settings['late_clock_out_penalty'] ?? 0);
+
+        if ($targetClockOut) {
+            try {
+                $targetTime = \Carbon\Carbon::createFromFormat('H:i', $targetClockOut);
+                $targetTime->setDate($currentTime->year, $currentTime->month, $currentTime->day);
+                if ($currentTime->gt($targetTime)) {
+                    $isLateClockOut = true;
+                    if ($penaltyClockOut > 0) {
+                        $deductedClockOut = $penaltyClockOut;
+                        auth()->user()->decrement('points', $penaltyClockOut);
+                        if (auth()->user()->points < 0) {
+                            auth()->user()->update(['points' => 0]);
+                        }
+                    }
+                }
+            } catch (\Exception $e) {
+                // ignore
+            }
+        }
+
         $closingCash = 1; // Default to 1 to lock the session (actual_cash > 0)
 
         if ($attendance) {
             $attendance->update([
-                'clock_out' => now(),
+                'clock_out' => $currentTime,
                 'closing_cash' => $closingCash,
                 'closing_report' => $report,
                 'points_at_closing' => (int) (auth()->user()->points + auth()->user()->pending_points),
@@ -391,7 +449,11 @@ class Kasir extends Component
         $this->showClosingReportModal = false;
         $this->stockItems = [];
 
-        session()->flash('toast', 'Sesi kasir berhasil diselesaikan.');
+        if ($isLateClockOut && $deductedClockOut > 0) {
+            session()->flash('toast', 'Sesi kasir berhasil diselesaikan. Anda TERLAMBAT clock-out! Poin berkurang ' . $deductedClockOut);
+        } else {
+            session()->flash('toast', 'Sesi kasir berhasil diselesaikan.');
+        }
         $this->redirectRoute('dashboard', navigate: true);
     }
 
@@ -536,17 +598,48 @@ class Kasir extends Component
         $activeJurusanId = session('active_jurusan_id');
         $allProducts = $this->getProductsForAlpine($posQueryService);
 
-        $isSessionFinished = DailyRecap::where('date', $today)
-            ->where('jurusan_id', $activeJurusanId)
-            ->where('actual_cash', '>', 0)
-            ->exists();
+        $isSessionFinished = false;
+        if (session('active_role_name') === 'kasir') {
+            $attendance = CashierAttendance::where('user_id', auth()->id())
+                ->where('jurusan_id', $activeJurusanId)
+                ->where('date', $today)
+                ->first();
+            $isSessionFinished = $attendance && $attendance->clock_out;
+        } else {
+            $isSessionFinished = DailyRecap::where('date', $today)
+                ->where('jurusan_id', $activeJurusanId)
+                ->where('actual_cash', '>', 0)
+                ->exists();
+        }
 
         $categories = CashCategory::where('jurusan_id', $activeJurusanId)->get();
 
         // Get daily tasks for the logged in cashier
         $dailyTasks = CashierTask::where('assigned_to', auth()->id())
-            ->where('date', now()->toDateString())
+            ->where(function ($query) {
+                $query->where('date', now()->toDateString())
+                    ->orWhere(function ($q) {
+                        $q->where('is_routine', true)
+                          ->where('approval_status', '!=', 'approved');
+                    });
+            })
             ->get();
+
+        // Compute computed_deadline for routine tasks
+        foreach ($dailyTasks as $t) {
+            if ($t->is_routine && ! $t->deadline_at) {
+                $attendance = CashierAttendance::where('user_id', auth()->id())
+                    ->where('date', $t->date)
+                    ->orderBy('clock_in', 'asc')
+                    ->first();
+
+                if ($attendance && $attendance->clock_in) {
+                    $t->computed_deadline = \Carbon\Carbon::parse($attendance->clock_in)->addHours(8);
+                } else {
+                    $t->computed_deadline = null;
+                }
+            }
+        }
 
         return view('livewire.pos.kasir', [
             'allProductsJson' => $allProducts,

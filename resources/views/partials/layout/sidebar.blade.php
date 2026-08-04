@@ -85,6 +85,16 @@
                 Petunjuk & SOP
             </a>
 
+            <a href="{{ route('leaderboard') }}"
+                class="flex items-center px-6 py-4 text-sm font-black rounded-2xl transition-all {{ request()->routeIs('leaderboard') ? 'bg-primary-blue text-white shadow-xl shadow-blue-900/20' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
+                <svg class="w-5 h-5 mr-4 text-amber-500" xmlns="http://www.w3.org/205 20" fill="none"
+                    viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.206" />
+                </svg>
+                Sistem Peringkat & Poin
+            </a>
+
             @if (auth()->check() && count(auth()->user()->getAvailableAccesses()) > 1)
                 <a href="{{ route('select-role') }}"
                     class="flex items-center px-6 py-4 text-sm font-black rounded-2xl text-amber-500 dark:text-amber-400 hover:bg-amber-500/5 transition-all">
@@ -185,7 +195,7 @@
                         </svg>
                         Sesi Kasir Selesai
                     </div>
-                @elseif($isSessionFinished)
+                @elseif($isSessionFinished && session('active_role_name') !== 'kasir')
                     <a href="{{ route('late-report') }}"
                         class="flex items-center px-6 py-5 text-sm font-black rounded-[2rem] bg-primary-red text-white shadow-2xl shadow-red-500/30 hover:scale-105 active:scale-95 transition-all uppercase italic tracking-wider">
                         <svg class="w-6 h-6 mr-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24"

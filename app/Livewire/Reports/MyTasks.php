@@ -138,7 +138,13 @@ class MyTasks extends Component
         $userId = auth()->id();
 
         $todayTasks = CashierTask::where('assigned_to', $userId)
-            ->where('date', now()->toDateString())
+            ->where(function ($query) {
+                $query->where('date', now()->toDateString())
+                    ->orWhere(function ($q) {
+                        $q->where('is_routine', true)
+                          ->where('approval_status', '!=', 'approved');
+                    });
+            })
             ->orderBy('created_at', 'desc')
             ->get();
 
@@ -161,6 +167,10 @@ class MyTasks extends Component
         $historyTasks = CashierTask::with('reviewer')
             ->where('assigned_to', $userId)
             ->where('date', '<', now()->toDateString())
+            ->where(function ($query) {
+                $query->where('is_routine', false)
+                    ->orWhere('approval_status', 'approved');
+            })
             ->orderBy('date', 'desc')
             ->orderBy('created_at', 'desc')
             ->paginate(10);

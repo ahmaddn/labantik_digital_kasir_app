@@ -380,17 +380,23 @@ class CashierTasks extends Component
                 // Award gamification points only after admin approval
                 $cashier = User::find($t->assigned_to);
                 if ($cashier) {
-                    $cashier->increment('pending_points', 10);
+                    $points = match ($t->priority) {
+                        'low' => 5,
+                        'high' => 20,
+                        'critical' => 30,
+                        default => 10,
+                    };
+                    $cashier->increment('pending_points', $points);
                     $cashier->increment('streak', 1);
-                }
 
-                Notification::create([
-                    'user_id' => $t->assigned_to,
-                    'title' => 'Tugas Disetujui',
-                    'body' => 'Laporan tugas "' . $t->task_name . '" telah di-ACC admin. +10 poin untukmu!',
-                    'type' => 'task',
-                    'action_url' => '/my-tasks',
-                ]);
+                    Notification::create([
+                        'user_id' => $t->assigned_to,
+                        'title' => 'Tugas Disetujui',
+                        'body' => 'Laporan tugas "' . $t->task_name . '" telah di-ACC admin. +' . $points . ' poin untukmu!',
+                        'type' => 'task',
+                        'action_url' => '/my-tasks',
+                    ]);
+                }
             }
         } else {
             $task->update($updateData);
@@ -398,17 +404,23 @@ class CashierTasks extends Component
             // Award gamification points only after admin approval
             $cashier = User::find($task->assigned_to);
             if ($cashier) {
-                $cashier->increment('pending_points', 10);
+                $points = match ($task->priority) {
+                    'low' => 5,
+                    'high' => 20,
+                    'critical' => 30,
+                    default => 10,
+                };
+                $cashier->increment('pending_points', $points);
                 $cashier->increment('streak', 1);
-            }
 
-            Notification::create([
-                'user_id' => $task->assigned_to,
-                'title' => 'Tugas Disetujui',
-                'body' => 'Laporan tugas "' . $task->task_name . '" telah di-ACC admin. +10 poin untukmu!',
-                'type' => 'task',
-                'action_url' => '/my-tasks',
-            ]);
+                Notification::create([
+                    'user_id' => $task->assigned_to,
+                    'title' => 'Tugas Disetujui',
+                    'body' => 'Laporan tugas "' . $task->task_name . '" telah di-ACC admin. +' . $points . ' poin untukmu!',
+                    'type' => 'task',
+                    'action_url' => '/my-tasks',
+                ]);
+            }
         }
 
         $this->showReviewModal = false;
