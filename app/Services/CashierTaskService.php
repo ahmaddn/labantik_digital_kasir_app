@@ -100,7 +100,7 @@ class CashierTaskService
         // Find all routine task definitions for today that kasir doesn't have assignment yet
         $routineTaskDefs = CashierTaskDefinition::where('jurusan_id', $jurusanId)
             ->where('is_routine', true)
-            ->where('date', $today)
+            ->where('date', '<=', $today)
             ->whereDoesntHave('assignments', function ($q) use ($userId) {
                 $q->where('assigned_to', $userId);
             })

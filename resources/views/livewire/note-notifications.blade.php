@@ -163,11 +163,30 @@
                 playAlertSound();
 
                 if (nativeSupported && Notification.permission === 'granted') {
-                    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+                    let shown = false;
 
-                    if (isMobile) {
-                        // Use Service Worker directly on mobile using .ready promise
-                        if ('serviceWorker' in navigator) {
+                    // 1. Try active Service Worker registration (most reliable on Android Chrome)
+                    if (swRegistration) {
+                        try {
+                            swRegistration.showNotification(title, {
+                                body: body,
+                                icon: '/favicon.png',
+                                badge: '/favicon.png',
+                                vibrate: [200, 100, 200],
+                                silent: false,
+                                tag: 'labantik-notif',
+                                renotify: true,
+                                data: { url: '/' }
+                            });
+                            shown = true;
+                        } catch (e) {
+                            // SW display failed, try next
+                        }
+                    }
+
+                    // 2. Try Service Worker ready promise
+                    if (!shown && 'serviceWorker' in navigator) {
+                        try {
                             navigator.serviceWorker.ready.then((reg) => {
                                 reg.showNotification(title, {
                                     body: body,
@@ -179,50 +198,28 @@
                                     renotify: true,
                                     data: { url: '/' }
                                 });
-                            }).catch(() => {
-                                if (swRegistration) {
-                                    swRegistration.showNotification(title, {
-                                        body: body,
-                                        icon: '/favicon.png',
-                                        badge: '/favicon.png',
-                                        vibrate: [200, 100, 200],
-                                        silent: false,
-                                        tag: 'labantik-notif',
-                                        renotify: true,
-                                        data: { url: '/' }
-                                    });
-                                }
-                            });
+                            }).catch(() => {});
+                            shown = true;
+                        } catch (e) {
+                            // Ready promise failed, try next
                         }
-                        return;
-                    } else {
-                        // Use standard Notification constructor on desktop
+                    }
+
+                    // 3. Try standard desktop constructor (works on Safari/Chrome Desktop)
+                    if (!shown) {
                         try {
                             new Notification(title, {
                                 body: body,
                                 icon: '/favicon.png',
                                 silent: false
                             });
-                            return;
+                            shown = true;
                         } catch (e) {
-                            // Fallback to Service Worker if standard constructor fails on desktop
-                            if ('serviceWorker' in navigator) {
-                                navigator.serviceWorker.ready.then((reg) => {
-                                    reg.showNotification(title, {
-                                        body: body,
-                                        icon: '/favicon.png',
-                                        badge: '/favicon.png',
-                                        vibrate: [200, 100, 200],
-                                        silent: false,
-                                        tag: 'labantik-notif',
-                                        renotify: true,
-                                        data: { url: '/' }
-                                    });
-                                }).catch(() => {});
-                            }
-                            return;
+                            // Standard constructor failed
                         }
                     }
+
+                    if (shown) return;
                 }
 
                 // 3. In-app popup fallback (iOS Safari / permission denied)

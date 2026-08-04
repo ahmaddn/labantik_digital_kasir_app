@@ -144,24 +144,27 @@ class MyTasks extends Component
         $activeJurusanId = session('active_jurusan_id');
         $today = now()->toDateString();
 
+        // Auto-assign routine tasks to kasir jika mereka terjadwal hari ini
+        $service = app(\App\Services\CashierTaskService::class);
+        $service->autoAssignRoutineTasksForCashier($userId, $activeJurusanId);
+
         // Get task assignments untuk kasir ini
         $todayAssignments = CashierTaskAssignment::with([
             'taskDefinition',
             'submissions' => fn($q) => $q->orderBy('submission_version', 'desc'),
         ])
             ->where('assigned_to', $userId)
-            ->whereHas('taskDefinition', function ($q) use ($today) {
-                $q->where(function ($sq) use ($today) {
-                    // Tasks for today or routine tasks not yet approved
-                    $sq->where('date', $today)
-                        ->orWhere(function ($sq2) {
-                            $sq2->where('is_routine', true)
-                                ->whereNotIn('id', function ($q3) {
-                                    $q3->select('task_definition_id')
-                                        ->from('cashier_task_submissions')
-                                        ->where('approval_status', 'approved');
-                                });
-                        });
+            ->where(function ($query) use ($today) {
+                $query->whereHas('taskDefinition', function ($q) use ($today) {
+                    $q->where('date', $today);
+                })
+                ->orWhere(function ($q) {
+                    $q->whereHas('taskDefinition', function ($sq) {
+                        $sq->where('is_routine', true);
+                    })
+                    ->whereDoesntHave('submissions', function ($sq2) {
+                        $sq2->where('approval_status', 'approved');
+                    });
                 });
             })
             ->orderBy('created_at', 'desc')

@@ -626,17 +626,17 @@ class Kasir extends Component
         // Get daily tasks for the logged in cashier (from task assignments)
         $dailyAssignments = CashierTaskAssignment::with(['taskDefinition', 'submissions'])
             ->where('assigned_to', auth()->id())
-            ->whereHas('taskDefinition', function ($query) {
-                $query->where(function ($sq) {
-                    $sq->where('date', now()->toDateString())
-                        ->orWhere(function ($q) {
-                            $q->where('is_routine', true)
-                              ->whereNotIn('id', function ($q2) {
-                                  $q2->select('task_definition_id')
-                                      ->from('cashier_task_submissions')
-                                      ->where('approval_status', 'approved');
-                              });
-                        });
+            ->where(function ($query) use ($today) {
+                $query->whereHas('taskDefinition', function ($q) use ($today) {
+                    $q->where('date', $today);
+                })
+                ->orWhere(function ($q) {
+                    $q->whereHas('taskDefinition', function ($sq) {
+                        $sq->where('is_routine', true);
+                    })
+                    ->whereDoesntHave('submissions', function ($sq2) {
+                        $sq2->where('approval_status', 'approved');
+                    });
                 });
             })
             ->get();

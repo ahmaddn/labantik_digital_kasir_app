@@ -103,4 +103,3 @@ class CashierTaskTest extends TestCase
             });
     }
 }
-        \
