@@ -476,7 +476,7 @@
                 </div>
 
                 <div class="flex gap-3 pt-2">
-                    <button type="button" wire:click="$set('showRejectModal', false)"
+                    <button type="button" wire:click="cancelRejection"
                         class="flex-1 py-3 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:text-white rounded-xl font-black text-xs uppercase tracking-wider transition-all">
                         Batal
                     </button>

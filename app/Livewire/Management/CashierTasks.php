@@ -433,6 +433,15 @@ class CashierTasks extends Component
         $this->rejectingTaskId = $id;
         $this->rejectionNote = '';
         $this->showRejectModal = true;
+        $this->showReviewModal = false; // Hide review modal so it doesn't overlap
+    }
+
+    public function cancelRejection()
+    {
+        $this->showRejectModal = false;
+        $this->rejectingTaskId = null;
+        $this->rejectionNote = '';
+        $this->showReviewModal = true; // Show review modal back
     }
 
     public function rejectTask()
