@@ -423,27 +423,33 @@ class CashierTasks extends Component
         })->orderBy('name')->pluck('name')->all();
 
         // Query Task Definitions based on active tab
-        $baseQuery = CashierTaskDefinition::with([
+        $with = [
             'assignments',
             'assignments.assignee',
             'assignments.submissions',
             'assignments.latestSubmission',
             'creator',
-        ])
-            ->when($activeJurusanId, function ($q) use ($activeJurusanId) {
+        ];
+
+        $jurusanFilter = function ($q) use ($activeJurusanId) {
+            if ($activeJurusanId) {
                 $q->where('jurusan_id', $activeJurusanId);
-            })
-            ->when($this->search, function ($q) {
+            }
+        };
+
+        $searchFilter = function ($q) {
+            if ($this->search) {
                 $q->where(function ($sq) {
                     $sq->where('task_name', 'like', '%' . $this->search . '%')
                         ->orWhere('description', 'like', '%' . $this->search . '%');
                 });
-            });
+            }
+        };
 
-        // Filter by tab
         if ($this->activeTab === 'pending_review') {
-            // Tasks dengan pending submissions - gunakan nested whereHas bukan dot notation
-            $tasks = $baseQuery
+            $tasks = CashierTaskDefinition::with($with)
+                ->when($activeJurusanId, $jurusanFilter)
+                ->when($this->search, $searchFilter)
                 ->whereHas('assignments', function ($q) {
                     $q->whereHas('submissions', function ($q2) {
                         $q2->where('approval_status', 'pending');
@@ -452,17 +458,22 @@ class CashierTasks extends Component
                 ->orderBy('date', 'desc')
                 ->orderBy('created_at', 'desc')
                 ->paginate(15);
+
         } elseif ($this->activeTab === 'history') {
-            $tasks = $baseQuery
+            $tasks = CashierTaskDefinition::with($with)
+                ->when($activeJurusanId, $jurusanFilter)
+                ->when($this->search, $searchFilter)
                 ->where('date', '<', now()->toDateString())
                 ->orderBy('date', 'desc')
                 ->orderBy('created_at', 'desc')
                 ->paginate(15);
+
         } else {
-            // Active tab: tasks hari ini dan seterusnya
-            $tasks = $baseQuery
+            $tasks = CashierTaskDefinition::with($with)
+                ->when($activeJurusanId, $jurusanFilter)
+                ->when($this->search, $searchFilter)
                 ->where('date', '>=', now()->toDateString())
-                ->orderBy('date', 'desc')
+                ->orderBy('date', 'asc')
                 ->orderBy('created_at', 'desc')
                 ->paginate(15);
         }
