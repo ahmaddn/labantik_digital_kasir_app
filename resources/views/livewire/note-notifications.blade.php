@@ -88,7 +88,7 @@
             // Register the service worker so notifications can reach the phone's
             // notification tray (Android Chrome requires registration.showNotification())
             if (nativeSupported && 'serviceWorker' in navigator) {
-                navigator.serviceWorker.register('/js/sw.js')
+                navigator.serviceWorker.register('/sw.js')
                     .then((reg) => { swRegistration = reg; })
                     .catch(() => { /* SW unavailable, fall back to other methods */ });
             }

@@ -1,4 +1,4 @@
-// LabAntik Kasir - Service Worker untuk notifikasi
+// LabAntik Kasir - Service Worker untuk notifikasi (Root Scope)
 // Diperlukan agar notifikasi bisa tampil di tray notifikasi HP (Android Chrome
 // melarang new Notification() dari halaman, wajib lewat registration.showNotification()).
 
