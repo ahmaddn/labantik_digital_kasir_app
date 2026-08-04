@@ -33,16 +33,25 @@
     <!-- Tabs -->
     <div class="flex items-center gap-2 border-b border-gray-200 dark:border-gray-700">
         <button wire:click="$set('activeTab', 'active')"
-            class="px-6 py-3 font-black text-sm uppercase tracking-wider {{ $activeTab === 'active' ? 'text-primary-blue dark:text-primary-yellow border-b-2 border-primary-blue dark:border-primary-yellow' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300' }}">
-            📋 Daftar Tugas
+            class="px-6 py-3 font-black text-sm uppercase tracking-wider flex items-center gap-2 {{ $activeTab === 'active' ? 'text-primary-blue dark:text-primary-yellow border-b-2 border-primary-blue dark:border-primary-yellow' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300' }}">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
+            </svg>
+            Daftar Tugas
         </button>
         <button wire:click="$set('activeTab', 'pending_review')"
-            class="px-6 py-3 font-black text-sm uppercase tracking-wider {{ $activeTab === 'pending_review' ? 'text-primary-blue dark:text-primary-yellow border-b-2 border-primary-blue dark:border-primary-yellow' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300' }}">
-            ⏳ Menunggu Review
+            class="px-6 py-3 font-black text-sm uppercase tracking-wider flex items-center gap-2 {{ $activeTab === 'pending_review' ? 'text-primary-blue dark:text-primary-yellow border-b-2 border-primary-blue dark:border-primary-yellow' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300' }}">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            Menunggu Review
         </button>
         <button wire:click="$set('activeTab', 'history')"
-            class="px-6 py-3 font-black text-sm uppercase tracking-wider {{ $activeTab === 'history' ? 'text-primary-blue dark:text-primary-yellow border-b-2 border-primary-blue dark:border-primary-yellow' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300' }}">
-            ✓ Riwayat Tugas
+            class="px-6 py-3 font-black text-sm uppercase tracking-wider flex items-center gap-2 {{ $activeTab === 'history' ? 'text-primary-blue dark:text-primary-yellow border-b-2 border-primary-blue dark:border-primary-yellow' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300' }}">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            Riwayat Tugas
         </button>
     </div>
 
@@ -119,16 +128,28 @@
                                 @endphp
                                 <div class="text-xs space-y-1">
                                     @if ($submissions->get('approved', 0) > 0)
-                                        <span class="block text-emerald-600 dark:text-emerald-400">✓ {{ $submissions->get('approved') }} ACC</span>
+                                        <span class="block text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                                            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+                                            {{ $submissions->get('approved') }} ACC
+                                        </span>
                                     @endif
                                     @if ($submissions->get('pending', 0) > 0)
-                                        <span class="block text-blue-600 dark:text-blue-400">⏳ {{ $submissions->get('pending') }} Pending</span>
+                                        <span class="block text-blue-600 dark:text-blue-400 flex items-center gap-1">
+                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                            {{ $submissions->get('pending') }} Pending
+                                        </span>
                                     @endif
                                     @if ($submissions->get('rejected', 0) > 0)
-                                        <span class="block text-red-600 dark:text-red-400">✗ {{ $submissions->get('rejected') }} Rejected</span>
+                                        <span class="block text-red-600 dark:text-red-400 flex items-center gap-1">
+                                            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path></svg>
+                                            {{ $submissions->get('rejected') }} Rejected
+                                        </span>
                                     @endif
                                     @if ($submissions->isEmpty() && $task->assignments->count() > 0)
-                                        <span class="block text-gray-500">— Belum ada submission</span>
+                                        <span class="block text-gray-500 flex items-center gap-1">
+                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path></svg>
+                                            Belum ada submission
+                                        </span>
                                     @endif
                                 </div>
                             </td>
@@ -364,11 +385,20 @@
                                     
                                     <div class="text-xs mt-1">
                                         @if($sub['approval_status'] === 'approved')
-                                            <span class="text-emerald-600 dark:text-emerald-400">✓ Approved</span>
+                                            <span class="text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                                                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+                                                Approved
+                                            </span>
                                         @elseif($sub['approval_status'] === 'rejected')
-                                            <span class="text-red-600 dark:text-red-400">✗ Rejected</span>
+                                            <span class="text-red-600 dark:text-red-400 flex items-center gap-1">
+                                                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path></svg>
+                                                Rejected
+                                            </span>
                                         @else
-                                            <span class="text-blue-600 dark:text-blue-400">⏳ Pending</span>
+                                            <span class="text-blue-600 dark:text-blue-400 flex items-center gap-1">
+                                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                                Pending
+                                            </span>
                                         @endif
                                     </div>
                                     
@@ -408,11 +438,20 @@
                                     <div>
                                         <div class="text-xs font-black uppercase tracking-widest text-gray-400 mb-2">Status</div>
                                         @if($selectedSub['approval_status'] === 'approved')
-                                            <span class="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-black bg-emerald-100 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400">✓ DISETUJUI</span>
+                                            <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-black bg-emerald-100 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400">
+                                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+                                                DISETUJUI
+                                            </span>
                                         @elseif($selectedSub['approval_status'] === 'rejected')
-                                            <span class="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-black bg-red-100 text-red-700 dark:bg-red-950/40 dark:text-red-400">✗ DITOLAK</span>
+                                            <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-black bg-red-100 text-red-700 dark:bg-red-950/40 dark:text-red-400">
+                                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path></svg>
+                                                DITOLAK
+                                            </span>
                                         @else
-                                            <span class="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-black bg-blue-100 text-blue-700 dark:bg-blue-950/40 dark:text-blue-400">⏳ MENUNGGU REVIEW</span>
+                                            <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-black bg-blue-100 text-blue-700 dark:bg-blue-950/40 dark:text-blue-400">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                                MENUNGGU REVIEW
+                                            </span>
                                         @endif
                                     </div>
     

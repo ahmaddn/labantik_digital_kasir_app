@@ -227,10 +227,12 @@
 
             @if (session('active_role_name') === 'kasir')
                 @php
-                    $myPendingTasksCount = \App\Models\CashierTask::where('assigned_to', auth()->id())
-                        ->where('date', now()->toDateString())
-                        ->where(function ($q) {
-                            $q->whereNull('approval_status')->orWhere('approval_status', '!=', 'approved');
+                    $myPendingTasksCount = \App\Models\CashierTaskAssignment::where('assigned_to', auth()->id())
+                        ->whereHas('taskDefinition', function ($q) {
+                            $q->where('date', '>=', now()->toDateString());
+                        })
+                        ->whereDoesntHave('submissions', function ($q) {
+                            $q->where('approval_status', 'approved');
                         })
                         ->count();
                 @endphp
