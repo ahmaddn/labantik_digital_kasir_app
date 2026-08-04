@@ -468,16 +468,16 @@ document.addEventListener('keydown', (e) => {
                         class="nb-card p-4 flex flex-col gap-3 bg-white dark:bg-dark-soft border-2 shadow-sm hover:shadow-none transition-shadow cursor-pointer">
                         <div class="flex justify-between items-start">
                             <h4
-                                class="text-xs font-bold uppercase tracking-tight {{ $task->approval_status === 'approved' ? 'line-through text-gray-400' : 'text-slate-800 dark:text-white' }}">
-                                {{ $task->task_name }}</h4>
-                            @if ($task->approval_status === 'approved')
+                                class="text-xs font-bold uppercase tracking-tight {{ $task->latestSubmission?->approval_status === 'approved' ? 'line-through text-gray-400' : 'text-slate-800 dark:text-white' }}">
+                                {{ $task->taskDefinition->task_name }}</h4>
+                            @if ($task->latestSubmission?->approval_status === 'approved')
                                 <span
                                     class="text-[8px] font-black uppercase bg-green-500 text-white px-2 py-0.5 rounded border border-white">DISETUJUI</span>
-                            @elseif($task->approval_status === 'rejected')
+                            @elseif($task->latestSubmission?->approval_status === 'rejected')
                                 <span
                                     class="text-[8px] font-black uppercase bg-red-500 text-white px-2 py-0.5 rounded border border-white">DITOLAK
                                     - REVISI</span>
-                            @elseif($task->approval_status === 'pending')
+                            @elseif($task->latestSubmission?->approval_status === 'pending')
                                 <span
                                     class="text-[8px] font-black uppercase bg-primary-blue text-white px-2 py-0.5 rounded border border-white">MENUNGGU
                                     ACC</span>
@@ -487,18 +487,18 @@ document.addEventListener('keydown', (e) => {
                                     SELESAI</span>
                             @endif
                         </div>
-                        @if ($task->description)
-                            <p class="text-[10px] text-gray-400">{{ $task->description }}</p>
+                        @if ($task->taskDefinition->description)
+                            <p class="text-[10px] text-gray-400">{{ $task->taskDefinition->description }}</p>
                         @endif
                         <div class="flex flex-wrap gap-1.5 items-center mt-1">
-                            <span class="text-[8px] font-bold text-gray-400 uppercase tracking-widest">{{ $task->date->translatedFormat('d M Y') }}</span>
-                            @if ($task->deadline_at)
+                            <span class="text-[8px] font-bold text-gray-400 uppercase tracking-widest">{{ $task->taskDefinition->date->translatedFormat('d M Y') }}</span>
+                            @if ($task->taskDefinition->deadline_at)
                                 <span class="text-[8px] font-black uppercase tracking-widest bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300 px-2 py-0.5 rounded border border-gray-200 dark:border-gray-700">
-                                    Deadline: {{ $task->deadline_at->translatedFormat('d M H:i') }}
+                                    Deadline: {{ $task->taskDefinition->deadline_at->translatedFormat('d M H:i') }}
                                 </span>
-                            @elseif($task->is_routine && isset($task->computed_deadline) && $task->computed_deadline)
+                            @elseif($task->taskDefinition->is_routine && isset($task->taskDefinition->computed_deadline) && $task->taskDefinition->computed_deadline)
                                 <span class="text-[8px] font-black uppercase tracking-widest bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300 px-2 py-0.5 rounded border border-gray-200 dark:border-gray-700">
-                                    Deadline: {{ \Carbon\Carbon::parse($task->computed_deadline)->translatedFormat('d M H:i') }}
+                                    Deadline: {{ \Carbon\Carbon::parse($task->taskDefinition->computed_deadline)->translatedFormat('d M H:i') }}
                                 </span>
                             @endif
                         </div>
