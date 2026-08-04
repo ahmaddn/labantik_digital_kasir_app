@@ -8,48 +8,46 @@ return new class extends Migration
 {
     /**
      * Run the migrations.
-     * Migrate data dari cashier_tasks lama ke 3 tabel baru dengan grouping:
-     * - GROUP by (task_name, date) → 1 task_definition
+     * Migrate data dari cashier_tasks lama ke 3 tabel baru dengan DEDUPLICATION:
+     * - GROUP by (task_name, date, jurusan_id) → 1 task_definition
      * - Setiap assigned_to yang unik → 1 task_assignment
      * - Jika ada completion_report → 1 task_submission per kasir
      */
     public function up(): void
     {
-        // Map untuk track task_definition yang sudah dibuat: key = "task_name|date|jurusan_id"
-        $taskDefMap = [];
+        // Get all old tasks (including soft deleted)
+        $oldTasks = DB::table('cashier_tasks')->get();
 
-        // Group old tasks by (task_name, date, jurusan_id)
-        $groupedTasks = DB::table('cashier_tasks')
-            ->get()
-            ->groupBy(function($task) {
-                return $task->task_name . '|' . $task->date . '|' . $task->jurusan_id;
-            });
+        // Group by (task_name, date, jurusan_id) untuk deduplicate
+        $grouped = $oldTasks->groupBy(function($task) {
+            return $task->task_name . '|||' . $task->date . '|||' . $task->jurusan_id;
+        });
 
-        foreach ($groupedTasks as $groupKey => $tasksGroup) {
-            // Get sample task dari group (semua field sama kecuali assigned_to)
-            $sampleTask = $tasksGroup->first();
+        foreach ($grouped as $groupKey => $tasksInGroup) {
+            // Use first task as template
+            $templateTask = $tasksInGroup->first();
             
-            // 1. Create task_definition (sekali per group)
+            // 1. Create ONE task_definition untuk group ini
             $taskDefinitionId = Str::uuid();
             
             DB::table('cashier_task_definitions')->insert([
                 'id' => $taskDefinitionId,
-                'jurusan_id' => $sampleTask->jurusan_id,
-                'task_name' => $sampleTask->task_name,
-                'description' => $sampleTask->description,
-                'date' => $sampleTask->date,
-                'priority' => $sampleTask->priority ?? 'medium',
-                'category' => $sampleTask->category,
-                'is_routine' => $sampleTask->is_routine ?? false,
-                'requires_proof' => $sampleTask->requires_proof ?? true,
-                'deadline_at' => $sampleTask->deadline_at,
-                'created_by' => $sampleTask->created_by,
-                'created_at' => $sampleTask->created_at ?? now(),
-                'updated_at' => $sampleTask->updated_at ?? now(),
+                'jurusan_id' => $templateTask->jurusan_id,
+                'task_name' => $templateTask->task_name,
+                'description' => $templateTask->description,
+                'date' => $templateTask->date,
+                'priority' => $templateTask->priority ?? 'medium',
+                'category' => $templateTask->category,
+                'is_routine' => $templateTask->is_routine ?? false,
+                'requires_proof' => $templateTask->requires_proof ?? true,
+                'deadline_at' => $templateTask->deadline_at,
+                'created_by' => $templateTask->created_by,
+                'created_at' => $templateTask->created_at ?? now(),
+                'updated_at' => $templateTask->updated_at ?? now(),
             ]);
 
-            // 2. Untuk setiap kasir yang berbeda di group ini, create assignment & submission
-            foreach ($tasksGroup as $oldTask) {
+            // 2. Untuk SETIAP kasir yang berbeda di group ini, create assignment + submission
+            foreach ($tasksInGroup as $oldTask) {
                 // Create task_assignment
                 $assignmentId = Str::uuid();
                 
@@ -63,7 +61,7 @@ return new class extends Migration
                     'updated_at' => $oldTask->updated_at ?? now(),
                 ]);
 
-                // 3. Jika ada completion_report, create task_submission
+                // 3. Jika ada completion_report/proof, create ONE submission per kasir
                 if ($oldTask->completion_report || $oldTask->proof_image || $oldTask->is_completed) {
                     $submissionId = Str::uuid();
                     
@@ -86,7 +84,7 @@ return new class extends Migration
             }
         }
 
-        echo "Migration complete! " . count($groupedTasks) . " unique tasks created with multiple kasir assignments.\n";
+        echo "Migration complete! " . count($grouped) . " unique tasks created.\n";
     }
 
     /**
@@ -94,9 +92,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        // Delete all migrated data
-        DB::table('cashier_task_submissions')->delete();
-        DB::table('cashier_task_assignments')->delete();
-        DB::table('cashier_task_definitions')->delete();
+        DB::table('cashier_task_submissions')->truncate();
+        DB::table('cashier_task_assignments')->truncate();
+        DB::table('cashier_task_definitions')->truncate();
     }
 };
