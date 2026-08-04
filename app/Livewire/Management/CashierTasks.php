@@ -445,21 +445,16 @@ class CashierTasks extends Component
                 ->orderBy('created_at', 'desc')
                 ->paginate(15);
         } elseif ($this->activeTab === 'history') {
-            // Tasks yang sudah selesai (semua submissions approved)
+            // Tasks yang sudah selesai (date < hari ini)
             $tasks = $baseQuery
                 ->where('date', '<', now()->toDateString())
                 ->orderBy('date', 'desc')
                 ->orderBy('created_at', 'desc')
                 ->paginate(15);
         } else {
-            // Active tab: tasks yang belum selesai atau hari ini
+            // Active tab: tasks untuk hari ini dan seterusnya (default: tampilkan semua yang date >= hari ini)
             $tasks = $baseQuery
-                ->where(function ($q) {
-                    $q->where('date', '>=', now()->toDateString())
-                        ->orWhereHas('assignments.submissions', function ($q2) {
-                            $q2->where('approval_status', '!=', 'approved');
-                        });
-                })
+                ->where('date', '>=', now()->toDateString())
                 ->orderBy('date', 'desc')
                 ->orderBy('created_at', 'desc')
                 ->paginate(15);
