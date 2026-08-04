@@ -72,7 +72,6 @@
         </div>
 
         <div class="overflow-x-auto">
-            <div class="mb-4 text-xs text-gray-500">Debug: Total items = {{ $tasks->count() }}, Total = {{ $tasks->total() }}</div>
             <table class="w-full text-left border-collapse">
                 <thead>
                     <tr class="border-b border-gray-100 dark:border-gray-700">

@@ -423,7 +423,13 @@ class CashierTasks extends Component
         })->orderBy('name')->pluck('name')->all();
 
         // Query Task Definitions based on active tab
-        $baseQuery = CashierTaskDefinition::with(['assignments.assignee', 'creator', 'assignments.latestSubmission'])
+        $baseQuery = CashierTaskDefinition::with([
+            'assignments',
+            'assignments.assignee',
+            'assignments.submissions',
+            'assignments.latestSubmission',
+            'creator',
+        ])
             ->when($activeJurusanId, function ($q) use ($activeJurusanId) {
                 $q->where('jurusan_id', $activeJurusanId);
             })
@@ -436,23 +442,24 @@ class CashierTasks extends Component
 
         // Filter by tab
         if ($this->activeTab === 'pending_review') {
-            // Tasks dengan pending submissions
+            // Tasks dengan pending submissions - gunakan nested whereHas bukan dot notation
             $tasks = $baseQuery
-                ->whereHas('assignments.submissions', function ($q) {
-                    $q->where('approval_status', 'pending');
+                ->whereHas('assignments', function ($q) {
+                    $q->whereHas('submissions', function ($q2) {
+                        $q2->where('approval_status', 'pending');
+                    });
                 })
                 ->orderBy('date', 'desc')
                 ->orderBy('created_at', 'desc')
                 ->paginate(15);
         } elseif ($this->activeTab === 'history') {
-            // Tasks yang sudah selesai (date < hari ini)
             $tasks = $baseQuery
                 ->where('date', '<', now()->toDateString())
                 ->orderBy('date', 'desc')
                 ->orderBy('created_at', 'desc')
                 ->paginate(15);
         } else {
-            // Active tab: tasks untuk hari ini dan seterusnya (default: tampilkan semua yang date >= hari ini)
+            // Active tab: tasks hari ini dan seterusnya
             $tasks = $baseQuery
                 ->where('date', '>=', now()->toDateString())
                 ->orderBy('date', 'desc')
