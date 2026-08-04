@@ -55,7 +55,7 @@
                         <th class="pb-4 text-xs font-black uppercase tracking-widest text-gray-400">Kategori</th>
                         <th class="pb-4 text-xs font-black uppercase tracking-widest text-gray-400">Prioritas</th>
                         <th class="pb-4 text-xs font-black uppercase tracking-widest text-gray-400">Ditugaskan Ke</th>
-                        <th class="pb-4 text-xs font-black uppercase tracking-widest text-gray-400">Status</th>
+                        <th class="pb-4 text-xs font-black uppercase tracking-widest text-gray-400">Status Submission</th>
                         <th class="pb-4 text-xs font-black uppercase tracking-widest text-gray-400">Deadline</th>
                         <th
                             class="pb-4 text-xs font-black uppercase tracking-widest text-gray-400 text-right pr-4 w-40">
@@ -66,12 +66,12 @@
                     @forelse($tasks as $task)
                         <tr class="group hover:bg-gray-50/50 dark:hover:bg-gray-900/30 transition-colors">
                             <td class="py-4 pl-4 text-sm font-bold text-gray-800 dark:text-white">
-                                {{ \Carbon\Carbon::parse($task->date)->translatedFormat('d M Y') }}
+                                {{ $task->date->translatedFormat('d M Y') }}
                             </td>
                             <td class="py-4">
                                 <div class="font-bold text-gray-855 dark:text-gray-200">{{ $task->task_name }}</div>
                                 @if ($task->description)
-                                    <div class="text-xs text-gray-400 mt-0.5">{!! $task->description !!}</div>
+                                    <div class="text-xs text-gray-400 mt-0.5">{!! \Str::limit($task->description, 100) !!}</div>
                                 @endif
                             </td>
                             <td class="py-4 text-sm text-gray-700 dark:text-gray-300 font-semibold">
@@ -89,49 +89,43 @@
                                 </span>
                             </td>
                             <td class="py-4 text-sm text-gray-700 dark:text-gray-300 font-semibold">
-                                {{ $task->group_assignees_names }}
-                            </td>
-                            <td class="py-4">
-                                @if ($task->approval_status === 'approved')
-                                    <span
-                                        class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-emerald-50 text-emerald-600 dark:bg-emerald-950/30 dark:text-emerald-400">
-                                        Disetujui
-                                    </span>
-                                @elseif($task->approval_status === 'rejected')
-                                    <span
-                                        class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-red-50 text-red-600 dark:bg-red-950/30 dark:text-red-400">
-                                        Ditolak
-                                    </span>
-                                @elseif($task->approval_status === 'pending')
-                                    <span
-                                        class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-blue-50 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400">
-                                        Menunggu ACC
-                                    </span>
+                                @if ($task->is_routine)
+                                    <span>Semua Kasir</span>
                                 @else
-                                    <span
-                                        class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-amber-50 text-amber-600 dark:bg-amber-950/30 dark:text-amber-400">
-                                        Belum Dikerjakan
-                                    </span>
+                                    @foreach ($task->assignments as $assignment)
+                                        <div class="text-xs">{{ $assignment->assignee->name }}</div>
+                                    @endforeach
                                 @endif
+                            </td>
+                            <td class="py-4 text-sm">
+                                @php
+                                    $submissions = $task->assignments->flatMap(fn($a) => $a->submissions)->countBy('approval_status');
+                                @endphp
+                                <div class="text-xs space-y-1">
+                                    @if ($submissions->get('approved', 0) > 0)
+                                        <span class="block text-emerald-600 dark:text-emerald-400">✓ {{ $submissions->get('approved') }} ACC</span>
+                                    @endif
+                                    @if ($submissions->get('pending', 0) > 0)
+                                        <span class="block text-blue-600 dark:text-blue-400">⏳ {{ $submissions->get('pending') }} Pending</span>
+                                    @endif
+                                    @if ($submissions->get('rejected', 0) > 0)
+                                        <span class="block text-red-600 dark:text-red-400">✗ {{ $submissions->get('rejected') }} Rejected</span>
+                                    @endif
+                                    @if ($submissions->isEmpty() && $task->assignments->count() > 0)
+                                        <span class="block text-gray-500">— Belum ada submission</span>
+                                    @endif
+                                </div>
                             </td>
                             <td class="py-4 text-sm text-gray-500 dark:text-gray-400 font-semibold">
                                 {{ $task->deadline_at ? $task->deadline_at->translatedFormat('d M Y H:i') . ' WIB' : '-' }}
                             </td>
                             <td class="py-4 text-right pr-4">
                                 <div class="flex items-center justify-end gap-1.5">
-                                    @if ($task->is_completed || $task->approval_status === 'pending' || $task->completion_report)
-                                        <button wire:click="openReviewModal('{{ $task->id }}')"
-                                            title="Review Laporan & Bukti"
-                                            class="px-2.5 py-1.5 bg-primary-blue hover:bg-blue-950 text-primary-yellow rounded-xl text-[10px] font-black uppercase tracking-wider transition-all active:scale-95 shadow-md">
-                                            Review
-                                        </button>
-                                    @else
-                                        <button wire:click="openReviewModal('{{ $task->id }}')"
-                                            title="Lihat Detail Tugas"
-                                            class="px-2.5 py-1.5 bg-gray-150 hover:bg-gray-200 dark:bg-gray-700 dark:text-white rounded-xl text-[10px] font-black uppercase tracking-wider transition-all active:scale-95">
-                                            Detail
-                                        </button>
-                                    @endif
+                                    <button wire:click="openReviewModal('{{ $task->id }}')"
+                                        title="Review Submissions dari Kasir"
+                                        class="px-2.5 py-1.5 bg-primary-blue hover:bg-blue-950 text-primary-yellow rounded-xl text-[10px] font-black uppercase tracking-wider transition-all active:scale-95 shadow-md">
+                                        Review
+                                    </button>
                                     <button wire:click="editTask('{{ $task->id }}')"
                                         class="p-1.5 text-gray-400 hover:text-primary-blue hover:bg-blue-50 dark:hover:bg-blue-950/30 rounded-xl transition-all"
                                         title="Edit tugas">
@@ -154,8 +148,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="8" class="py-8 text-center text-gray-400 italic font-semibold">Belum ada
-                                tugas ditambahkan</td>
+                            <td colspan="8" class="py-8 text-center text-gray-400 italic font-semibold">Belum ada tugas ditambahkan</td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -166,522 +159,428 @@
             {{ $tasks->links() }}
         </div>
     </div>
+</div>
 
-    <!-- Create Modal -->
-    <div x-data="{ show: @entangle('showCreateModal') }" x-show="show" class="fixed inset-0 z-50 flex items-center justify-center p-4" x-cloak>
-        <div x-show="show" x-transition.opacity class="fixed inset-0 bg-black/60 backdrop-blur-xs"
-            wire:click="$set('showCreateModal', false)"></div>
-        <div x-show="show" x-transition.scale
-            class="relative w-full max-w-2xl md:max-w-3xl lg:max-w-4xl bg-white dark:bg-gray-800 rounded-[2.5rem] shadow-2xl p-10 border border-gray-100 dark:border-gray-700 z-10 animate-fade-in max-h-[90vh] overflow-y-auto no-scrollbar">
-            <h2 class="text-3xl font-black text-gray-850 dark:text-white uppercase italic tracking-tight mb-6">
-                {{ $isEditMode ? 'Edit Tugas Harian' : 'Tambah Tugas Harian' }}</h2>
+<!-- Create/Edit Modal -->
+<div x-data="{ show: @entangle('showCreateModal') }" x-show="show" class="fixed inset-0 z-50 flex items-center justify-center p-4" x-cloak>
+    <div x-show="show" x-transition.opacity class="fixed inset-0 bg-black/60 backdrop-blur-xs"
+        wire:click="$set('showCreateModal', false)"></div>
+    <div x-show="show" x-transition.scale
+        class="relative w-full max-w-2xl md:max-w-3xl lg:max-w-4xl bg-white dark:bg-gray-800 rounded-[2.5rem] shadow-2xl p-10 border border-gray-100 dark:border-gray-700 z-10 max-h-[90vh] overflow-y-auto">
+        <h2 class="text-3xl font-black text-gray-850 dark:text-white uppercase italic tracking-tight mb-6">
+            {{ $isEditMode ? 'Edit Tugas Harian' : 'Tambah Tugas Harian' }}</h2>
 
-            <form wire:submit.prevent="prepareTask" class="space-y-4">
-                @unless ($isRoutine)
-                    <div class="space-y-4">
-                        <div>
-                            <p class="text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">Mode Pilihan
-                                Kasir</p>
-                            <div
-                                class="inline-flex rounded-full border border-gray-200 dark:border-gray-700 overflow-hidden bg-white dark:bg-gray-900">
-                                <button type="button" wire:click="setAssigneeMode('scheduled')"
-                                    class="px-4 py-3 text-xs font-black uppercase tracking-widest transition-all {{ $assigneeMode === 'scheduled' ? 'bg-primary-blue text-white' : 'text-gray-700 dark:text-gray-200' }}">
-                                    Sesuai Jadwal Hari Ini
-                                </button>
-                                <button type="button" wire:click="setAssigneeMode('all')"
-                                    class="px-4 py-3 text-xs font-black uppercase tracking-widest transition-all {{ $assigneeMode === 'all' ? 'bg-primary-blue text-white' : 'text-gray-700 dark:text-gray-200' }}">
-                                    Umum (Semua Kasir)
-                                </button>
-                            </div>
-                        </div>
-
-                        <div x-data="{ open: false, query: '', selected: @entangle('assignedTo') }" class="relative">
-                            <label
-                                class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">Ditugaskan
-                                Ke</label>
-                            <button type="button" @click="open = !open"
-                                class="w-full text-left px-4 py-3 bg-gray-55 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-sm flex items-center justify-between gap-2">
-                                <span x-text="selected.length > 0 ? selected.length + ' kasir dipilih' : 'Pilih kasir...'"
-                                    class="truncate"></span>
-                                <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor"
-                                    viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M19 9l-7 7-7-7" />
-                                </svg>
+        <form wire:submit.prevent="prepareTask" class="space-y-4">
+            @unless ($isRoutine)
+                <div class="space-y-4">
+                    <div>
+                        <p class="text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">Mode Pilihan Kasir</p>
+                        <div class="inline-flex rounded-full border border-gray-200 dark:border-gray-700 overflow-hidden bg-white dark:bg-gray-900">
+                            <button type="button" wire:click="setAssigneeMode('scheduled')"
+                                class="px-4 py-3 text-xs font-black uppercase tracking-widest transition-all {{ $assigneeMode === 'scheduled' ? 'bg-primary-blue text-white' : 'text-gray-700 dark:text-gray-200' }}">
+                                Sesuai Jadwal Hari Ini
                             </button>
+                            <button type="button" wire:click="setAssigneeMode('all')"
+                                class="px-4 py-3 text-xs font-black uppercase tracking-widest transition-all {{ $assigneeMode === 'all' ? 'bg-primary-blue text-white' : 'text-gray-700 dark:text-gray-200' }}">
+                                Umum (Semua Kasir)
+                            </button>
+                        </div>
+                    </div>
 
-                            <div x-show="open" x-cloak @click.outside="open = false"
-                                class="absolute z-40 mt-2 w-full max-h-72 overflow-hidden rounded-3xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-950 shadow-2xl">
-                                <div class="p-3 border-b border-gray-200 dark:border-gray-700">
-                                    <input type="text" x-model="query" placeholder="Cari kasir..."
-                                        class="w-full px-4 py-3 bg-gray-100 dark:bg-gray-900 rounded-2xl text-sm text-gray-900 dark:text-white border border-gray-200 dark:border-gray-700 focus:outline-none">
-                                </div>
-                                <div class="max-h-56 overflow-y-auto">
-                                    @forelse ($cashiers as $c)
-                                        <label
-                                            x-show="query === '' || '{{ strtolower($c->name) }}'.includes(query.toLowerCase())"
-                                            class="flex items-center justify-between gap-3 px-4 py-3 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-900 text-sm text-gray-900 dark:text-gray-100">
-                                            <span>{{ $c->name }}</span>
-                                            <input type="checkbox" value="{{ $c->id }}" wire:model="assignedTo"
-                                                class="h-4 w-4 text-primary-blue rounded border-gray-300 dark:border-gray-600" />
-                                        </label>
-                                    @empty
-                                        <div class="px-4 py-4 text-xs text-gray-500">Tidak ada kasir tersedia.</div>
-                                    @endforelse
-                                </div>
+                    <div x-data="{ open: false, query: '', selected: @entangle('assignedTo') }" class="relative">
+                        <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">Ditugaskan Ke</label>
+                        <button type="button" @click="open = !open"
+                            class="w-full text-left px-4 py-3 bg-gray-55 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-sm flex items-center justify-between gap-2">
+                            <span x-text="selected.length > 0 ? selected.length + ' kasir dipilih' : 'Pilih kasir...'" class="truncate"></span>
+                            <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </button>
+
+                        <div x-show="open" x-cloak @click.outside="open = false"
+                            class="absolute z-40 mt-2 w-full max-h-72 overflow-hidden rounded-3xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-950 shadow-2xl">
+                            <div class="p-3 border-b border-gray-200 dark:border-gray-700">
+                                <input type="text" x-model="query" placeholder="Cari kasir..."
+                                    class="w-full px-4 py-3 bg-gray-100 dark:bg-gray-900 rounded-2xl text-sm text-gray-900 dark:text-white border border-gray-200 dark:border-gray-700 focus:outline-none">
                             </div>
-
-                            <div class="mt-2 text-[10px] text-gray-400">Pilih lebih dari satu kasir jika diperlukan.</div>
+                            <div class="max-h-56 overflow-y-auto">
+                                @forelse ($cashiers as $c)
+                                    <label x-show="query === '' || '{{ strtolower($c->name) }}'.includes(query.toLowerCase())"
+                                        class="flex items-center justify-between gap-3 px-4 py-3 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-900 text-sm text-gray-900 dark:text-gray-100">
+                                        <span>{{ $c->name }}</span>
+                                        <input type="checkbox" value="{{ $c->id }}" wire:model="assignedTo"
+                                            class="h-4 w-4 text-primary-blue rounded border-gray-300 dark:border-gray-600" />
+                                    </label>
+                                @empty
+                                    <div class="px-4 py-4 text-xs text-gray-500">Tidak ada kasir tersedia.</div>
+                                @endforelse
+                            </div>
                         </div>
 
-                        @error('assignedTo')
-                            <span class="text-xs text-red-500 font-bold mt-1 block">{{ $message }}</span>
-                        @enderror
-                    </div>
-                @endunless
-
-                <div>
-                    <label
-                        class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">Tanggal</label>
-                    <input type="date" wire:model="date"
-                        class="w-full px-4 py-3 bg-gray-55 dark:bg-gray-900 border-none rounded-xl focus:ring-2 focus:ring-primary-blue dark:text-white text-sm">
-                    @error('date')
-                        <span class="text-xs text-red-500 font-bold mt-1 block">{{ $message }}</span>
-                    @enderror
-                </div>
-
-                <div>
-                    <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">Nama
-                        Tugas</label>
-                    <input type="text" wire:model="taskName" placeholder="Contoh: Bersihkan meja pos kasir"
-                        class="w-full px-4 py-3 bg-gray-55 dark:bg-gray-900 border-none rounded-xl focus:ring-2 focus:ring-primary-blue dark:text-white text-sm">
-                    @error('taskName')
-                        <span class="text-xs text-red-500 font-bold mt-1 block">{{ $message }}</span>
-                    @enderror
-                </div>
-
-                <div wire:ignore x-data="{
-                    content: @entangle('description'),
-                    init() {
-                        const initQuill = () => {
-                            if (typeof Quill === 'undefined') {
-                                setTimeout(initQuill, 50);
-                                return;
-                            }
-                            const quill = new Quill(this.$refs.editor, {
-                                theme: 'snow',
-                                placeholder: 'Instruksi tambahan jika ada...',
-                                modules: {
-                                    toolbar: [
-                                        ['bold', 'italic', 'underline'],
-                                        [{ 'list': 'ordered' }, { 'list': 'bullet' }],
-                                        ['clean']
-                                    ]
-                                }
-                            });
-                
-                            quill.root.innerHTML = this.content || '';
-                
-                            quill.on('text-change', () => {
-                                this.content = quill.root.innerHTML;
-                            });
-                
-                            this.$watch('content', value => {
-                                if (quill.root.innerHTML !== value) {
-                                    quill.root.innerHTML = value || '';
-                                }
-                            });
-                        };
-                        initQuill();
-                    }
-                }">
-                    <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">Deskripsi
-                        Tambahan</label>
-                    <div x-ref="editor"
-                        class="bg-gray-55 dark:bg-gray-900 border-none rounded-xl text-gray-800 dark:text-white text-sm"
-                        style="min-height: 120px;"></div>
-                    @error('description')
-                        <span class="text-xs text-red-500 font-bold mt-1 block">{{ $message }}</span>
-                    @enderror
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label
-                            class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">Kategori
-                            Tugas</label>
-                        <div class="flex gap-2">
-                            <select wire:model="category"
-                                class="flex-1 px-4 py-3 bg-gray-55 dark:bg-gray-900 border-none rounded-xl focus:ring-2 focus:ring-primary-blue dark:text-white text-sm">
-                                <option value="">-- Pilih Kategori --</option>
-                                @foreach ($categories as $cat)
-                                    <option value="{{ $cat }}">{{ $cat }}</option>
-                                @endforeach
-                            </select>
-                            <button type="button" wire:click="openAddCategoryModal"
-                                class="px-3 py-2 bg-gray-100 dark:bg-gray-700 rounded-xl text-xs font-black">Tambah</button>
-                        </div>
-                        @error('category')
-                            <span class="text-xs text-red-500 font-bold mt-1 block">{{ $message }}</span>
-                        @enderror
-                    </div>
-                    <div>
-                        <label
-                            class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">Prioritas</label>
-                        <select wire:model="priority"
-                            class="w-full px-4 py-3 bg-gray-55 dark:bg-gray-900 border-none rounded-xl focus:ring-2 focus:ring-primary-blue dark:text-white text-sm">
-                            <option value="low">Rendah</option>
-                            <option value="medium">Sedang</option>
-                            <option value="high">Tinggi</option>
-                            <option value="critical">Paling Penting</option>
-                        </select>
-                        @error('priority')
-                            <span class="text-xs text-red-500 font-bold mt-1 block">{{ $message }}</span>
-                        @enderror
+                        <div class="mt-2 text-[10px] text-gray-400">Pilih lebih dari satu kasir jika diperlukan.</div>
                     </div>
                 </div>
+            @endunless
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    @unless ($isRoutine)
-                        <div>
-                            <label
-                                class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">Deadline</label>
-                            <input wire:model="deadlineAt" type="datetime-local"
-                                class="w-full px-4 py-3 bg-gray-55 dark:bg-gray-900 border-none rounded-xl focus:ring-2 focus:ring-primary-blue dark:text-white text-sm">
-                            @error('deadlineAt')
-                                <span class="text-xs text-red-500 font-bold mt-1 block">{{ $message }}</span>
-                            @enderror
-                        </div>
-                    @else
-                        <div class="flex items-center h-full">
-                            <div class="text-xs text-gray-500">Deadline akan otomatis ditentukan (8 jam sejak clock-in
-                                pertama kasir).</div>
-                        </div>
-                    @endunless
-                    <div class="flex flex-col justify-end gap-3">
-                        <label
-                            class="inline-flex items-center gap-3 py-3 px-4 bg-gray-55 dark:bg-gray-900 rounded-xl text-sm font-semibold text-gray-700 dark:text-gray-200 cursor-pointer">
-                            <input wire:model.live="isRoutine" type="checkbox"
-                                class="form-checkbox h-5 w-5 text-primary-blue rounded" />
-                            <span>Tugas rutin harian untuk semua kasir</span>
-                        </label>
-                        <label
-                            class="inline-flex items-center gap-3 py-3 px-4 bg-gray-55 dark:bg-gray-900 rounded-xl text-sm font-semibold text-gray-700 dark:text-gray-200 cursor-pointer">
-                            <input wire:model="requiresProof" type="checkbox"
-                                class="form-checkbox h-5 w-5 text-primary-blue rounded" />
-                            <span>Memerlukan bukti foto / gambar dari kasir</span>
-                        </label>
-                    </div>
-                </div>
-
-                <div class="flex gap-3 pt-4">
-                    <button type="button" wire:click="$set('showCreateModal', false)"
-                        class="flex-1 py-3 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:text-white rounded-xl font-black text-xs uppercase tracking-wider transition-all">
-                        Batal
-                    </button>
-                    <button type="submit"
-                        class="flex-1 py-3 bg-primary-blue hover:bg-blue-900 text-primary-yellow rounded-xl font-black text-xs uppercase tracking-wider transition-all shadow-md">
-                        {{ $isEditMode ? 'Simpan Perubahan' : 'Kirim Tugas' }}
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Add Category Modal -->
-    <div x-data="{ show: @entangle('showAddCategoryModal') }" x-show="show" class="fixed inset-0 z-50 flex items-center justify-center p-4"
-        x-cloak>
-        <div x-show="show" x-transition.opacity class="fixed inset-0 bg-black/60 backdrop-blur-xs"
-            wire:click="$set('showAddCategoryModal', false)"></div>
-        <div x-show="show" x-transition.scale
-            class="relative w-full max-w-sm bg-white dark:bg-gray-800 rounded-[2rem] shadow-2xl p-6 border border-gray-100 dark:border-gray-700 z-10">
-            <h3 class="text-lg font-black mb-4">Tambah Kategori Tugas</h3>
             <div>
-                <input wire:model="newCategoryName" type="text" placeholder="Nama kategori"
-                    class="w-full px-4 py-3 bg-gray-55 dark:bg-gray-900 border-none rounded-xl focus:ring-2 focus:ring-primary-blue text-sm">
-                @error('newCategoryName')
-                    <div class="text-xs text-red-500 mt-1">{{ $message }}</div>
+                <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">Tanggal</label>
+                <input type="date" wire:model="date"
+                    class="w-full px-4 py-3 bg-gray-55 dark:bg-gray-900 border-none rounded-xl focus:ring-2 focus:ring-primary-blue dark:text-white text-sm">
+                @error('date')
+                    <span class="text-xs text-red-500 font-bold mt-1 block">{{ $message }}</span>
                 @enderror
             </div>
-            <div class="flex gap-3 mt-4">
-                <button type="button" wire:click="$set('showAddCategoryModal', false)"
-                    class="flex-1 py-2 bg-gray-100 rounded-xl">Batal</button>
-                <button type="button" wire:click="storeCategory"
-                    class="flex-1 py-2 bg-primary-blue text-white rounded-xl">Simpan</button>
-            </div>
-        </div>
-    </div>
 
-    <!-- Confirm Modal for multiple assignees -->
-    <div x-data="{ show: @entangle('showConfirmModal') }" x-show="show" class="fixed inset-0 z-50 flex items-center justify-center p-4"
-        x-cloak>
-        <div x-show="show" x-transition.opacity class="fixed inset-0 bg-black/60 backdrop-blur-xs"
-            wire:click="$set('showConfirmModal', false)"></div>
-        <div x-show="show" x-transition.scale
-            class="relative w-full max-w-lg bg-white dark:bg-gray-800 rounded-[2rem] shadow-2xl p-6 border border-gray-100 dark:border-gray-700 z-10">
-            <h3 class="text-lg font-black mb-2">Konfirmasi Tugas untuk Banyak Kasir</h3>
-            <p class="text-sm text-gray-500 mb-4">Anda akan membuat tugas ini untuk
-                <strong>{{ count($pendingAssignees) }}</strong> kasir. Pastikan data sudah benar.
-            </p>
-            <div class="space-y-2 pb-4">
-                <div class="text-xs font-black uppercase text-gray-400">Nama Tugas</div>
-                <div class="font-bold">{{ $taskName }}</div>
-                <div class="text-xs font-black uppercase text-gray-400 mt-2">Tanggal</div>
-                <div>{{ $date }}</div>
-                <div class="text-xs font-black uppercase text-gray-400 mt-2">Prioritas</div>
-                <div>{{ \App\Models\CashierTask::priorityLabels()[$priority] ?? $priority }}</div>
+            <div>
+                <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">Nama Tugas</label>
+                <input type="text" wire:model="taskName" placeholder="Contoh: Bersihkan meja pos kasir"
+                    class="w-full px-4 py-3 bg-gray-55 dark:bg-gray-900 border-none rounded-xl focus:ring-2 focus:ring-primary-blue dark:text-white text-sm">
+                @error('taskName')
+                    <span class="text-xs text-red-500 font-bold mt-1 block">{{ $message }}</span>
+                @enderror
             </div>
-            <div class="flex gap-3">
-                <button type="button" wire:click="$set('showConfirmModal', false)"
-                    class="flex-1 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-white rounded-xl font-black text-xs uppercase tracking-wider transition-all">Batal</button>
-                <button type="button" wire:click="finalSaveTask"
-                    class="flex-1 py-2 bg-primary-blue text-white rounded-xl">Konfirmasi & Simpan</button>
-            </div>
-        </div>
-    </div>
 
-    <!-- Delete Modal -->
-    <div x-data="{ show: @entangle('showDeleteModal') }" x-show="show" class="fixed inset-0 z-50 flex items-center justify-center p-4"
-        x-cloak>
-        <div x-show="show" x-transition.opacity class="fixed inset-0 bg-black/60 backdrop-blur-xs"
-            wire:click="$set('showDeleteModal', false)"></div>
-        <div x-show="show" x-transition.scale
-            class="relative w-full max-w-sm bg-white dark:bg-gray-800 rounded-[2rem] shadow-2xl p-8 border border-gray-100 dark:border-gray-700 z-10 text-center">
-            <h2 class="text-xl font-black text-gray-850 dark:text-white uppercase italic mb-4">Hapus Tugas?</h2>
-            <p class="text-gray-400 text-sm mb-6">Apakah Anda yakin ingin menghapus tugas harian ini?</p>
-            <div class="flex gap-3">
-                <button wire:click="$set('showDeleteModal', false)"
-                    class="flex-1 py-3 bg-gray-105 hover:bg-gray-200 dark:bg-gray-700 dark:text-white rounded-xl font-black text-xs uppercase tracking-wider transition-all">
+            <div>
+                <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">Deskripsi Tambahan</label>
+                <textarea wire:model="description" rows="4" placeholder="Instruksi tambahan jika ada..."
+                    class="w-full px-4 py-3 bg-gray-55 dark:bg-gray-900 border-none rounded-xl focus:ring-2 focus:ring-primary-blue dark:text-white text-sm"></textarea>
+                @error('description')
+                    <span class="text-xs text-red-500 font-bold mt-1 block">{{ $message }}</span>
+                @enderror
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">Kategori Tugas</label>
+                    <div class="flex gap-2">
+                        <select wire:model="category"
+                            class="flex-1 px-4 py-3 bg-gray-55 dark:bg-gray-900 border-none rounded-xl focus:ring-2 focus:ring-primary-blue dark:text-white text-sm">
+                            <option value="">-- Pilih Kategori --</option>
+                            @foreach ($categories as $cat)
+                                <option value="{{ $cat }}">{{ $cat }}</option>
+                            @endforeach
+                        </select>
+                        <button type="button" wire:click="openAddCategoryModal"
+                            class="px-3 py-2 bg-gray-100 dark:bg-gray-700 rounded-xl text-xs font-black">Tambah</button>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">Prioritas</label>
+                    <select wire:model="priority"
+                        class="w-full px-4 py-3 bg-gray-55 dark:bg-gray-900 border-none rounded-xl focus:ring-2 focus:ring-primary-blue dark:text-white text-sm">
+                        <option value="low">Rendah</option>
+                        <option value="medium">Sedang</option>
+                        <option value="high">Tinggi</option>
+                        <option value="critical">Paling Penting</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                @unless ($isRoutine)
+                    <div>
+                        <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">Deadline</label>
+                        <input wire:model="deadlineAt" type="datetime-local"
+                            class="w-full px-4 py-3 bg-gray-55 dark:bg-gray-900 border-none rounded-xl focus:ring-2 focus:ring-primary-blue dark:text-white text-sm">
+                    </div>
+                @else
+                    <div class="flex items-center h-full">
+                        <div class="text-xs text-gray-500">Deadline akan otomatis ditentukan per kasir.</div>
+                    </div>
+                @endunless
+                <div class="flex flex-col justify-end gap-3">
+                    <label class="inline-flex items-center gap-3 py-3 px-4 bg-gray-55 dark:bg-gray-900 rounded-xl text-sm font-semibold text-gray-700 dark:text-gray-200 cursor-pointer">
+                        <input wire:model.live="isRoutine" type="checkbox"
+                            class="form-checkbox h-5 w-5 text-primary-blue rounded" />
+                        <span>Tugas rutin harian untuk semua kasir</span>
+                    </label>
+                    <label class="inline-flex items-center gap-3 py-3 px-4 bg-gray-55 dark:bg-gray-900 rounded-xl text-sm font-semibold text-gray-700 dark:text-gray-200 cursor-pointer">
+                        <input wire:model="requiresProof" type="checkbox"
+                            class="form-checkbox h-5 w-5 text-primary-blue rounded" />
+                        <span>Memerlukan bukti foto / gambar dari kasir</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="flex gap-3 pt-4">
+                <button type="button" wire:click="$set('showCreateModal', false)"
+                    class="flex-1 py-3 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:text-white rounded-xl font-black text-xs uppercase tracking-wider transition-all">
                     Batal
                 </button>
-                <button wire:click="deleteTask"
-                    class="flex-1 py-3 bg-red-500 hover:bg-red-600 text-white rounded-xl font-black text-xs uppercase tracking-wider transition-all">
-                    Ya, Hapus
+                <button type="submit"
+                    class="flex-1 py-3 bg-primary-blue hover:bg-blue-900 text-primary-yellow rounded-xl font-black text-xs uppercase tracking-wider transition-all shadow-md">
+                    {{ $isEditMode ? 'Simpan Perubahan' : 'Kirim Tugas' }}
                 </button>
             </div>
-        </div>
+        </form>
     </div>
+</div>
 
-    <!-- Reject Modal -->
-    <div x-data="{ show: @entangle('showRejectModal') }" x-show="show" class="fixed inset-0 z-50 flex items-center justify-center p-4"
-        x-cloak>
-        <div x-show="show" x-transition.opacity class="fixed inset-0 bg-black/60 backdrop-blur-xs"
-            wire:click="$set('showRejectModal', false)"></div>
-        <div x-show="show" x-transition.scale
-            class="relative w-full max-w-md bg-white dark:bg-gray-800 rounded-[2rem] shadow-2xl p-8 border border-gray-100 dark:border-gray-700 z-10">
-            <h2 class="text-xl font-black text-gray-850 dark:text-white uppercase italic mb-2">Tolak Laporan Tugas</h2>
-            <p class="text-gray-400 text-sm mb-6">Tugas akan dikembalikan ke kasir untuk direvisi. Berikan catatan agar
-                kasir tahu apa yang harus diperbaiki.</p>
-
-            <form wire:submit.prevent="rejectTask" class="space-y-4">
-                <div>
-                    <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">Catatan
-                        Penolakan</label>
-                    <textarea wire:model="rejectionNote" placeholder="Contoh: Foto bukti kurang jelas, mohon foto ulang..."
-                        rows="3"
-                        class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 border-none rounded-xl focus:ring-2 focus:ring-red-500 dark:text-white text-sm"></textarea>
-                    @error('rejectionNote')
-                        <span class="text-xs text-red-500 font-bold mt-1 block">{{ $message }}</span>
-                    @enderror
-                </div>
-
-                <div class="flex gap-3 pt-2">
-                    <button type="button" wire:click="cancelRejection"
-                        class="flex-1 py-3 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:text-white rounded-xl font-black text-xs uppercase tracking-wider transition-all">
-                        Batal
-                    </button>
-                    <button type="submit"
-                        class="flex-1 py-3 bg-red-500 hover:bg-red-600 text-white rounded-xl font-black text-xs uppercase tracking-wider transition-all shadow-md">
-                        Tolak & Minta Revisi
-                    </button>
-                </div>
-            </form>
+<!-- Review Modal - Menampilkan SUBMISSIONS TERPISAH per Kasir -->
+<div x-data="{ show: @entangle('showReviewModal') }" x-show="show" class="fixed inset-0 z-50 flex items-center justify-center p-4" x-cloak>
+    <div x-show="show" x-transition.opacity class="fixed inset-0 bg-black/60 backdrop-blur-xs"
+        wire:click="$set('showReviewModal', false)"></div>
+    <div x-show="show" x-transition.scale
+        class="relative w-full max-w-4xl bg-white dark:bg-gray-800 rounded-[2.5rem] shadow-2xl p-8 border border-gray-100 dark:border-gray-700 z-10 max-h-[90vh] overflow-y-auto">
+        
+        <div class="mb-6">
+            <h2 class="text-2xl font-black text-gray-850 dark:text-white uppercase italic tracking-tight mb-2">
+                Review Submission - Tugas Kasir</h2>
+            <p class="text-sm text-gray-500">Setiap kasir memiliki submission INDEPENDENT yang bisa direview terpisah</p>
         </div>
-    </div>
 
-    <!-- Task Review Modal -->
-    <div x-data="{ show: @entangle('showReviewModal'), showLightbox: false, lightboxImg: '' }" x-show="show"
-        class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/60 backdrop-blur-sm" x-cloak>
-        <div x-show="show" x-transition.opacity class="fixed inset-0 bg-black/60 backdrop-blur-xs"
-            wire:click="$set('showReviewModal', false)"></div>
-        <div x-show="show" x-transition.scale
-            class="relative w-full max-w-2xl bg-white dark:bg-gray-800 rounded-[2.5rem] shadow-2xl p-10 border border-gray-100 dark:border-gray-700 z-10 max-h-[90vh] overflow-y-auto no-scrollbar">
-            <!-- Modal Header -->
-            <div class="flex items-start justify-between pb-4 border-b border-gray-100 dark:border-gray-700 mb-6">
-                <div>
-                    <span
-                        class="text-[10px] font-black uppercase tracking-widest text-primary-blue dark:text-blue-400">Detail
-                        & Review Tugas</span>
-                    <h3 class="text-2xl font-black uppercase text-gray-850 dark:text-white tracking-tight mt-1">Review
-                        Laporan Kerja</h3>
-                </div>
-                <button wire:click="$set('showReviewModal', false)"
-                    class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-white rounded-xl">
-                    <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                        stroke="currentColor" stroke-width="2.5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                </button>
+        @if(empty($currentReviewingSubmissions))
+            <div class="py-8 text-center text-gray-400 italic font-semibold">
+                Belum ada submission untuk tugas ini
             </div>
-
-            @if ($reviewingTaskId)
-                @php
-                    $reviewTask = \App\Models\CashierTask::with(['user', 'creator', 'reviewer'])->find(
-                        $reviewingTaskId,
-                    );
-                @endphp
-                @if ($reviewTask)
-                    <div class="space-y-6 text-left">
-                        <!-- Task Details Grid -->
-                        <div
-                            class="grid grid-cols-1 sm:grid-cols-2 gap-6 p-6 bg-gray-50 dark:bg-gray-900 rounded-3xl border border-gray-100 dark:border-gray-800">
-                            <div>
-                                <span
-                                    class="text-[9px] font-black uppercase tracking-widest text-gray-400 block mb-1">Nama
-                                    Tugas</span>
-                                <h4 class="text-sm font-black uppercase text-gray-800 dark:text-white">
-                                    {{ $reviewTask->task_name }}</h4>
-                            </div>
-                            <div>
-                                <span
-                                    class="text-[9px] font-black uppercase tracking-widest text-gray-400 block mb-1">Tanggal
-                                    Tugas</span>
-                                <div class="text-xs font-semibold text-gray-750 dark:text-gray-300">
-                                    {{ \Carbon\Carbon::parse($reviewTask->date)->translatedFormat('d F Y') }}</div>
-                            </div>
-                            <div>
-                                <span
-                                    class="text-[9px] font-black uppercase tracking-widest text-gray-400 block mb-1">Kategori</span>
-                                <div class="text-xs font-black uppercase text-slate-700 dark:text-slate-300">
-                                    {{ $reviewTask->category ?: 'Umum' }}</div>
-                            </div>
-                            <div>
-                                <span
-                                    class="text-[9px] font-black uppercase tracking-widest text-gray-400 block mb-1">Prioritas</span>
-                                <span
-                                    class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider {{ $reviewTask->priorityBadgeClass }}">{{ $reviewTask->priority_label }}</span>
-                            </div>
-                            <div class="sm:col-span-2">
-                                <span
-                                    class="text-[9px] font-black uppercase tracking-widest text-gray-400 block mb-1">Kasir
-                                    Pelapor</span>
-                                <div class="text-xs font-bold text-gray-750 dark:text-gray-200">
-                                    {{ $reviewTask->user?->name ?? '-' }}</div>
-                            </div>
-                        </div>
-
-                        <!-- Task Description -->
-                        @if ($reviewTask->description)
-                            <div>
-                                <span
-                                    class="text-[9px] font-black uppercase tracking-widest text-gray-400 block mb-1">Deskripsi
-                                    Tugas</span>
-                                <div
-                                    class="text-xs font-semibold text-gray-750 dark:text-gray-250 prose prose-sm max-w-none">
-                                    {!! $reviewTask->description !!}</div>
-                            </div>
-                        @endif
-
-                        <hr class="border-gray-100 dark:border-gray-700" />
-
-                        <!-- Completion Status Banner -->
-                        @if ($reviewTask->approval_status === 'approved')
-                            <div
-                                class="p-4 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-250 dark:border-emerald-900/50 rounded-2xl flex items-center gap-3">
-                                <div
-                                    class="w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
-                                    ✓</div>
-                                <div>
-                                    <div
-                                        class="text-xs font-black text-emerald-800 dark:text-emerald-400 uppercase tracking-wide">
-                                        Tugas Disetujui (ACC)</div>
-                                    <div class="text-[10px] font-bold text-emerald-600 dark:text-emerald-300 mt-0.5">
-                                        Disetujui oleh {{ $reviewTask->reviewer->name ?? 'Admin' }} pada
-                                        {{ $reviewTask->reviewed_at?->format('d/m/Y H:i') }} WIB</div>
+        @else
+            <!-- Submissions List (Sidebar-like) -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                <div class="md:col-span-1">
+                    <div class="bg-gray-50 dark:bg-gray-900 rounded-2xl p-4 space-y-2 max-h-96 overflow-y-auto">
+                        <div class="text-xs font-black uppercase tracking-widest text-gray-400 mb-3">Submissions</div>
+                        
+                        @foreach($currentReviewingSubmissions as $sub)
+                            <button 
+                                wire:click="selectSubmissionForReview('{{ $sub['id'] }}')"
+                                class="w-full text-left px-4 py-3 rounded-lg transition-all {{ $selectedSubmissionForReview === $sub['id'] ? 'bg-primary-blue text-white' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                                
+                                <div class="text-sm font-bold">{{ $sub['submitter']['name'] ?? 'Unknown' }}</div>
+                                
+                                <div class="text-xs mt-1">
+                                    @if($sub['approval_status'] === 'approved')
+                                        <span class="text-emerald-600 dark:text-emerald-400">✓ Approved</span>
+                                    @elseif($sub['approval_status'] === 'rejected')
+                                        <span class="text-red-600 dark:text-red-400">✗ Rejected</span>
+                                    @else
+                                        <span class="text-blue-600 dark:text-blue-400">⏳ Pending</span>
+                                    @endif
                                 </div>
-                            </div>
-                        @elseif ($reviewTask->approval_status === 'rejected')
-                            <div
-                                class="p-4 bg-red-50 dark:bg-red-950/30 border border-red-250 dark:border-red-900/50 rounded-2xl flex items-start gap-3">
-                                <div
-                                    class="w-8 h-8 rounded-full bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 flex items-center justify-center shrink-0">
-                                    !</div>
-                                <div>
-                                    <div
-                                        class="text-xs font-black text-red-800 dark:text-red-400 uppercase tracking-wide">
-                                        Tugas Ditolak - Butuh Revisi</div>
-                                    <div class="text-[10px] font-bold text-red-600 dark:text-red-300 mt-0.5">Catatan
-                                        Penolakan: "{{ $reviewTask->rejection_note }}"</div>
+                                
+                                <div class="text-xs text-gray-400 mt-1">
+                                    v{{ $sub['submission_version'] }} • {{ \Carbon\Carbon::parse($sub['submitted_at'])->format('d M H:i') }}
                                 </div>
-                            </div>
-                        @endif
-
-                        <!-- Completion Report & Proof Image -->
-                        @if ($reviewTask->completion_report || $reviewTask->proof_image)
-                            <div class="space-y-4">
-                                @if ($reviewTask->completion_report)
-                                    <div>
-                                        <span
-                                            class="text-[9px] font-black uppercase tracking-widest text-gray-400 block mb-1">Laporan
-                                            Hasil Pekerjaan Kasir</span>
-                                        <div
-                                            class="text-sm font-semibold bg-gray-50 dark:bg-gray-900 p-4 border-2 border-dashed border-gray-100 dark:border-gray-700 rounded-2xl leading-relaxed text-gray-800 dark:text-white prose prose-sm max-w-none">
-                                            {!! $reviewTask->completion_report !!}
-                                        </div>
-                                    </div>
-                                @endif
-
-                                @if ($reviewTask->proof_image)
-                                    <div>
-                                        <span
-                                            class="text-[9px] font-black uppercase tracking-widest text-gray-400 block mb-2">Foto
-                                            / Gambar Bukti Kerja (Klik untuk Perbesar)</span>
-                                        <div class="relative cursor-zoom-in rounded-3xl overflow-hidden border-2 border-gray-150 dark:border-gray-700 hover:opacity-95 transition-opacity max-w-md mx-auto"
-                                            @click="$dispatch('open-lightbox', { img: '{{ asset('storage/' . $reviewTask->proof_image) }}' })">
-                                            <img src="{{ asset('storage/' . $reviewTask->proof_image) }}"
-                                                class="w-full object-cover max-h-64" alt="Bukti Tugas" />
-                                        </div>
-                                    </div>
-                                @endif
-                            </div>
-                        @else
-                            <div
-                                class="text-center py-6 text-xs text-gray-400 italic font-semibold uppercase tracking-wider">
-                                Kasir belum mengirimkan laporan hasil pekerjaan.
-                            </div>
-                        @endif
-
-                        <!-- Action Buttons inside Modal -->
-                        @if ($reviewTask->approval_status === 'pending')
-                            <div class="flex gap-4 pt-6 border-t border-gray-100 dark:border-gray-700 mt-6">
-                                <button type="button" wire:click="openRejectModal('{{ $reviewTask->id }}')"
-                                    class="flex-1 py-4 bg-red-500 hover:bg-red-600 text-white rounded-2xl font-black text-xs uppercase tracking-wider transition-all active:scale-95 shadow-md shadow-red-500/20">
-                                    TOLAK & REVISI
-                                </button>
-                                <button type="button" wire:click="approveTask('{{ $reviewTask->id }}')"
-                                    class="flex-1 py-4 bg-emerald-500 hover:bg-emerald-600 text-white rounded-2xl font-black text-xs uppercase tracking-wider transition-all active:scale-95 shadow-md shadow-emerald-500/20">
-                                    SETUJUI (ACC)
-                                </button>
-                            </div>
-                        @endif
+                            </button>
+                        @endforeach
                     </div>
-                @endif
-            @endif
+                </div>
+
+                <!-- Detail Submission -->
+                <div class="md:col-span-2">
+                    @if($selectedSubmissionForReview)
+                        @php
+                            $selectedSub = collect($currentReviewingSubmissions)->firstWhere('id', $selectedSubmissionForReview);
+                        @endphp
+
+                        @if($selectedSub)
+                            <div class="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-gray-900 dark:to-gray-800 rounded-2xl p-6 space-y-4 border border-gray-200 dark:border-gray-700">
+                                
+                                <!-- Kasir Info -->
+                                <div>
+                                    <div class="text-xs font-black uppercase tracking-widest text-gray-400 mb-2">Kasir Yang Submit</div>
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-10 h-10 rounded-full bg-primary-blue text-white flex items-center justify-center font-black">
+                                            {{ strtoupper(substr($selectedSub['submitter']['name'] ?? 'U', 0, 1)) }}
+                                        </div>
+                                        <div>
+                                            <div class="font-bold text-gray-800 dark:text-white">{{ $selectedSub['submitter']['name'] }}</div>
+                                            <div class="text-xs text-gray-500">Submission v{{ $selectedSub['submission_version'] }}</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Status Badge -->
+                                <div>
+                                    <div class="text-xs font-black uppercase tracking-widest text-gray-400 mb-2">Status</div>
+                                    @if($selectedSub['approval_status'] === 'approved')
+                                        <span class="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-black bg-emerald-100 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400">✓ DISETUJUI</span>
+                                    @elseif($selectedSub['approval_status'] === 'rejected')
+                                        <span class="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-black bg-red-100 text-red-700 dark:bg-red-950/40 dark:text-red-400">✗ DITOLAK</span>
+                                    @else
+                                        <span class="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-black bg-blue-100 text-blue-700 dark:bg-blue-950/40 dark:text-blue-400">⏳ MENUNGGU REVIEW</span>
+                                    @endif
+                                </div>
+
+                                <!-- Submitted Time -->
+                                <div>
+                                    <div class="text-xs font-black uppercase tracking-widest text-gray-400 mb-1">Waktu Submit</div>
+                                    <div class="text-sm text-gray-700 dark:text-gray-300">{{ \Carbon\Carbon::parse($selectedSub['submitted_at'])->translatedFormat('d M Y H:i WIB') }}</div>
+                                </div>
+
+                                <!-- Report -->
+                                <div>
+                                    <div class="text-xs font-black uppercase tracking-widest text-gray-400 mb-2">Laporan</div>
+                                    <div class="p-3 bg-white dark:bg-gray-700 rounded-lg text-sm text-gray-700 dark:text-gray-300 min-h-24">
+                                        {!! nl2br(htmlspecialchars($selectedSub['report'] ?? '-')) !!}
+                                    </div>
+                                </div>
+
+                                <!-- Proof Image -->
+                                @if($selectedSub['proof_image'])
+                                    <div>
+                                        <div class="text-xs font-black uppercase tracking-widest text-gray-400 mb-2">Bukti Foto</div>
+                                        <div class="overflow-hidden rounded-lg">
+                                            <img src="{{ asset('storage/' . $selectedSub['proof_image']) }}" alt="Proof" class="w-full h-auto max-h-48 object-cover">
+                                        </div>
+                                    </div>
+                                @endif
+
+                                <!-- Rejection Note (jika ditolak) -->
+                                @if($selectedSub['approval_status'] === 'rejected' && $selectedSub['rejection_note'])
+                                    <div>
+                                        <div class="text-xs font-black uppercase tracking-widest text-red-600 dark:text-red-400 mb-2">Catatan Penolakan</div>
+                                        <div class="p-3 bg-red-50 dark:bg-red-950/30 rounded-lg text-sm text-red-700 dark:text-red-300">
+                                            {{ $selectedSub['rejection_note'] }}
+                                        </div>
+                                    </div>
+                                @endif
+
+                                <!-- Reviewed Info (jika sudah direview) -->
+                                @if($selectedSub['reviewed_by'])
+                                    <div class="pt-2 border-t border-gray-200 dark:border-gray-700">
+                                        <div class="text-xs font-black uppercase tracking-widest text-gray-400 mb-1">Direview Oleh</div>
+                                        <div class="text-sm text-gray-600 dark:text-gray-400">
+                                            {{ $selectedSub['reviewer']['name'] ?? 'Admin' }} • {{ \Carbon\Carbon::parse($selectedSub['reviewed_at'])->translatedFormat('d M Y H:i WIB') }}
+                                        </div>
+                                    </div>
+                                @endif
+
+                                <!-- Action Buttons -->
+                                @if($selectedSub['approval_status'] === 'pending')
+                                    <div class="flex gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+                                        <button wire:click="openRejectModal"
+                                            class="flex-1 py-2 px-3 bg-red-100 hover:bg-red-200 dark:bg-red-950/40 dark:hover:bg-red-950/60 text-red-700 dark:text-red-400 rounded-lg font-black text-xs uppercase transition-all">
+                                            Tolak & Revisi
+                                        </button>
+                                        <button wire:click="approveSubmission"
+                                            class="flex-1 py-2 px-3 bg-emerald-100 hover:bg-emerald-200 dark:bg-emerald-950/40 dark:hover:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 rounded-lg font-black text-xs uppercase transition-all">
+                                            Setujui ✓
+                                        </button>
+                                    </div>
+                                @endif
+                            </div>
+                        @endif
+                    @else
+                        <div class="text-center py-8 text-gray-400">
+                            Pilih submission di daftar untuk melihat detailnya
+                        </div>
+                    @endif
+                </div>
+            </div>
+        @endif
+
+        <!-- Close Button -->
+        <div class="flex justify-end pt-4 border-t border-gray-200 dark:border-gray-700">
+            <button wire:click="$set('showReviewModal', false)"
+                class="px-6 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-white rounded-lg font-black text-xs uppercase transition-all">
+                Tutup
+            </button>
         </div>
     </div>
+</div>
 
-    <!-- Global Lightbox Overlay (Triggered by Window Events) -->
-    <div x-data="{ open: false, img: '' }" @open-lightbox.window="img = $event.detail.img; open = true" x-show="open"
-        x-transition.opacity
-        class="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center p-4 backdrop-blur-xs"
-        @click="open = false" x-cloak>
-        <button
-            class="absolute top-6 right-6 text-white hover:text-gray-300 p-3 rounded-full bg-black/40 hover:bg-black/60 transition-colors">
-            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-        </button>
-        <img :src="img" class="max-w-full max-h-[90vh] rounded-3xl shadow-2xl border-4 border-white/10"
-            @click.stop />
+<!-- Reject Modal -->
+<div x-data="{ show: @entangle('showRejectModal') }" x-show="show" class="fixed inset-0 z-50 flex items-center justify-center p-4" x-cloak>
+    <div x-show="show" x-transition.opacity class="fixed inset-0 bg-black/60 backdrop-blur-xs"
+        wire:click="$set('showRejectModal', false)"></div>
+    <div x-show="show" x-transition.scale
+        class="relative w-full max-w-lg bg-white dark:bg-gray-800 rounded-[2rem] shadow-2xl p-6 border border-gray-100 dark:border-gray-700 z-10">
+        <h3 class="text-lg font-black mb-4">Tolak & Minta Revisi</h3>
+        <p class="text-sm text-gray-500 mb-4">Kasir akan menerima notifikasi dan bisa merevisi submission mereka.</p>
+        <div>
+            <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2">Catatan Penolakan</label>
+            <textarea wire:model="rejectionNote" rows="4" placeholder="Jelaskan apa yang perlu direvisi..."
+                class="w-full px-4 py-3 bg-gray-55 dark:bg-gray-900 border-none rounded-xl focus:ring-2 focus:ring-red-500 dark:text-white text-sm"></textarea>
+            @error('rejectionNote')
+                <span class="text-xs text-red-500 font-bold mt-1 block">{{ $message }}</span>
+            @enderror
+        </div>
+        <div class="flex gap-3 mt-6">
+            <button type="button" wire:click="$set('showRejectModal', false)"
+                class="flex-1 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-white rounded-xl font-black text-xs uppercase transition-all">
+                Batal
+            </button>
+            <button type="button" wire:click="rejectSubmission"
+                class="flex-1 py-2 bg-red-500 hover:bg-red-600 text-white rounded-xl font-black text-xs uppercase transition-all">
+                Tolak
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Modal -->
+<div x-data="{ show: @entangle('showDeleteModal') }" x-show="show" class="fixed inset-0 z-50 flex items-center justify-center p-4" x-cloak>
+    <div x-show="show" x-transition.opacity class="fixed inset-0 bg-black/60 backdrop-blur-xs"
+        wire:click="$set('showDeleteModal', false)"></div>
+    <div x-show="show" x-transition.scale
+        class="relative w-full max-w-sm bg-white dark:bg-gray-800 rounded-[2rem] shadow-2xl p-8 border border-gray-100 dark:border-gray-700 z-10 text-center">
+        <h2 class="text-xl font-black text-gray-850 dark:text-white mb-2">Hapus Tugas?</h2>
+        <p class="text-sm text-gray-500 mb-6">Tindakan ini tidak bisa dibatalkan. Semua data submission akan ikut terhapus.</p>
+        <div class="flex gap-3">
+            <button type="button" wire:click="$set('showDeleteModal', false)"
+                class="flex-1 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:text-white rounded-xl font-black text-xs uppercase transition-all">
+                Batal
+            </button>
+            <button type="button" wire:click="deleteTask"
+                class="flex-1 py-2 bg-red-500 hover:bg-red-600 text-white rounded-xl font-black text-xs uppercase transition-all">
+                Hapus
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Add Category Modal -->
+<div x-data="{ show: @entangle('showAddCategoryModal') }" x-show="show" class="fixed inset-0 z-50 flex items-center justify-center p-4" x-cloak>
+    <div x-show="show" x-transition.opacity class="fixed inset-0 bg-black/60 backdrop-blur-xs"
+        wire:click="$set('showAddCategoryModal', false)"></div>
+    <div x-show="show" x-transition.scale
+        class="relative w-full max-w-sm bg-white dark:bg-gray-800 rounded-[2rem] shadow-2xl p-6 border border-gray-100 dark:border-gray-700 z-10">
+        <h3 class="text-lg font-black mb-4">Tambah Kategori Tugas</h3>
+        <div>
+            <input wire:model="newCategoryName" type="text" placeholder="Nama kategori"
+                class="w-full px-4 py-3 bg-gray-55 dark:bg-gray-900 border-none rounded-xl focus:ring-2 focus:ring-primary-blue text-sm">
+            @error('newCategoryName')
+                <div class="text-xs text-red-500 mt-1">{{ $message }}</div>
+            @enderror
+        </div>
+        <div class="flex gap-3 mt-4">
+            <button type="button" wire:click="$set('showAddCategoryModal', false)"
+                class="flex-1 py-2 bg-gray-100 rounded-xl text-gray-800 dark:bg-gray-700 dark:text-white font-black text-xs uppercase">
+                Batal
+            </button>
+            <button type="button" wire:click="storeCategory"
+                class="flex-1 py-2 bg-primary-blue text-primary-yellow rounded-xl font-black text-xs uppercase">
+                Simpan
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Confirm Multiple Assignees Modal -->
+<div x-data="{ show: @entangle('showConfirmModal') }" x-show="show" class="fixed inset-0 z-50 flex items-center justify-center p-4" x-cloak>
+    <div x-show="show" x-transition.opacity class="fixed inset-0 bg-black/60 backdrop-blur-xs"
+        wire:click="$set('showConfirmModal', false)"></div>
+    <div x-show="show" x-transition.scale
+        class="relative w-full max-w-lg bg-white dark:bg-gray-800 rounded-[2rem] shadow-2xl p-6 border border-gray-100 dark:border-gray-700 z-10">
+        <h3 class="text-lg font-black mb-2">Konfirmasi Tugas untuk Banyak Kasir</h3>
+        <p class="text-sm text-gray-500 mb-4">Anda akan membuat tugas ini untuk <strong>{{ count($pendingAssignees) }}</strong> kasir. Laporan mereka akan di-track TERPISAH.</p>
+        <div class="space-y-2 pb-4 bg-gray-50 dark:bg-gray-900 p-3 rounded-lg">
+            <div class="text-xs font-black uppercase text-gray-400">Nama Tugas</div>
+            <div class="font-bold text-gray-800 dark:text-white">{{ $taskName }}</div>
+            <div class="text-xs font-black uppercase text-gray-400 mt-2">Tanggal</div>
+            <div class="text-gray-700 dark:text-gray-300">{{ $date }}</div>
+            <div class="text-xs font-black uppercase text-gray-400 mt-2">Prioritas</div>
+            <div class="text-gray-700 dark:text-gray-300">{{ \App\Models\CashierTaskDefinition::statusLabels()[$priority] ?? $priority }}</div>
+        </div>
+        <div class="flex gap-3">
+            <button type="button" wire:click="$set('showConfirmModal', false)"
+                class="flex-1 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-white rounded-xl font-black text-xs uppercase transition-all">
+                Batal
+            </button>
+            <button type="button" wire:click="finalSaveTask"
+                class="flex-1 py-2 bg-primary-blue text-primary-yellow rounded-xl font-black text-xs uppercase transition-all">
+                Konfirmasi & Simpan
+            </button>
+        </div>
     </div>
 </div>

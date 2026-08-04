@@ -86,4 +86,36 @@ class User extends Authenticatable
             )
             ->get();
     }
+
+    /**
+     * Relasi untuk task assignments (kasir yang ditugaskan)
+     */
+    public function taskAssignments()
+    {
+        return $this->hasMany(CashierTaskAssignment::class, 'assigned_to');
+    }
+
+    /**
+     * Relasi untuk task submissions (kasir yang submit laporan)
+     */
+    public function taskSubmissions()
+    {
+        return $this->hasMany(CashierTaskSubmission::class, 'submitted_by');
+    }
+
+    /**
+     * Relasi untuk tasks yang dibuat (old model, for backward compatibility)
+     */
+    public function createdTasks()
+    {
+        return $this->hasMany(CashierTask::class, 'created_by');
+    }
+
+    /**
+     * Relasi untuk task definitions yang dibuat
+     */
+    public function createdTaskDefinitions()
+    {
+        return $this->hasMany(CashierTaskDefinition::class, 'created_by');
+    }
 }

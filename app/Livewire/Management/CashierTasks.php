@@ -3,68 +3,57 @@
 namespace App\Livewire\Management;
 
 use App\Models\CashierSchedule;
-use App\Models\CashierTask;
+use App\Models\CashierTaskDefinition;
+use App\Models\CashierTaskAssignment;
+use App\Models\CashierTaskSubmission;
 use App\Models\Jurusan;
 use App\Models\Notification;
 use App\Models\TaskCategory;
 use App\Models\User;
+use App\Services\CashierTaskService;
 use Carbon\Carbon;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Livewire\WithFileUploads;
 
 class CashierTasks extends Component
 {
-    use WithPagination;
+    use WithPagination, WithFileUploads;
 
     public $search = '';
-
     public $selectedJurusanId = '';
-
     public $date = '';
-
     public $taskName = '';
-
     public $description = '';
-
     public $assignedTo = [];
-
-    // Assignee selection mode: 'scheduled' => only cashiers scheduled today, 'all' => all kasir
-    public $assigneeMode = 'scheduled';
-
+    public $assigneeMode = 'scheduled'; // 'scheduled' atau 'all'
     public $category = '';
-
     public $showAddCategoryModal = false;
-
     public $newCategoryName = '';
-
     public $priority = 'medium';
-
     public $deadlineAt = '';
-
     public $isRoutine = false;
-
     public $requiresProof = true;
 
-    // Modal UI states
+    // Modal states
     public $showCreateModal = false;
-
     public $showDeleteModal = false;
-
     public $deletingTaskId = null;
-
-    public $showRejectModal = false;
-
-    public $rejectingTaskId = null;
-
-    public $rejectionNote = '';
-
     public $showReviewModal = false;
-
     public $reviewingTaskId = null;
-
+    public $showRejectModal = false;
+    public $rejectingTaskId = null;
+    public $rejectionNote = '';
     public $isEditMode = false;
-
     public $editingTaskId = null;
+
+    // Review modal states
+    public $currentReviewingSubmissions = [];
+    public $selectedSubmissionForReview = null;
+
+    // Pagination
+    public $pendingAssignees = [];
+    public $showConfirmModal = false;
 
     protected $rules = [
         'date' => 'required|date',
@@ -88,6 +77,33 @@ class CashierTasks extends Component
         $this->showCreateModal = true;
     }
 
+    public function resetForm()
+    {
+        $this->reset([
+            'taskName',
+            'description',
+            'assignedTo',
+            'category',
+            'priority',
+            'deadlineAt',
+            'isRoutine',
+            'requiresProof',
+            'isEditMode',
+            'editingTaskId',
+            'assigneeMode',
+            'pendingAssignees',
+        ]);
+        $this->date = now()->toDateString();
+        $this->priority = 'medium';
+        $this->requiresProof = true;
+    }
+
+    public function setAssigneeMode($mode)
+    {
+        $this->assigneeMode = $mode;
+        $this->assignedTo = [];
+    }
+
     public function openAddCategoryModal()
     {
         $this->newCategoryName = '';
@@ -98,7 +114,7 @@ class CashierTasks extends Component
     {
         $this->validate([
             'newCategoryName' => 'required|string|max:255',
-        ]);
+        ], [], ['newCategoryName' => 'nama kategori']);
 
         $activeJurusanId = session('active_jurusan_id') ?: $this->selectedJurusanId;
 
@@ -108,229 +124,145 @@ class CashierTasks extends Component
             'created_by' => auth()->id(),
         ]);
 
-        $this->category = $this->newCategoryName;
+        $this->dispatch('toast', message: 'Kategori berhasil ditambahkan!');
         $this->showAddCategoryModal = false;
-        $this->dispatch('toast', message: 'Kategori tugas berhasil ditambahkan.');
+        $this->newCategoryName = '';
     }
 
-    public function resetForm()
-    {
-        $this->assignedTo = [];
-        $this->taskName = '';
-        $this->description = '';
-        $this->category = '';
-        $this->priority = 'medium';
-        $this->deadlineAt = '';
-        $this->isRoutine = false;
-        $this->requiresProof = true;
-        $this->date = now()->toDateString();
-        $this->isEditMode = false;
-        $this->editingTaskId = null;
-    }
-
-    public function editTask($id): void
-    {
-        $task = CashierTask::findOrFail($id);
-        $this->editingTaskId = $id;
-        $this->isEditMode = true;
-
-        $this->date = $task->date->toDateString();
-        $this->taskName = $task->task_name;
-        $this->description = $task->description;
-        if ($task->group_id) {
-            $this->assignedTo = CashierTask::where('group_id', $task->group_id)
-                ->pluck('assigned_to')
-                ->toArray();
-        } else {
-            $this->assignedTo = [$task->assigned_to];
-        }
-        $this->category = $task->category;
-        $this->priority = $task->priority;
-        $this->deadlineAt = $task->deadline_at ? $task->deadline_at->format('Y-m-d\TH:i') : '';
-        $this->isRoutine = $task->is_routine;
-        $this->requiresProof = (bool)$task->requires_proof;
-
-        $this->showCreateModal = true;
-    }
-
-    public function openReviewModal($id): void
-    {
-        $this->reviewingTaskId = $id;
-        $this->showReviewModal = true;
-    }
-
-    public function saveTask()
-    {
-        // kept for backward compatibility - not used directly anymore
-        $this->prepareTask();
-    }
-
-    public function setAssigneeMode(string $mode): void
-    {
-        if (! in_array($mode, ['scheduled', 'all'])) {
-            return;
-        }
-
-        $this->assigneeMode = $mode;
-        $this->assignedTo = [];
-    }
-
-    public function updatedIsRoutine($value): void
-    {
-        if ($value) {
-            $this->assignedTo = [];
-        }
-    }
-
-    // Prepare before creating: if multiple assignees, show confirm modal
     public function prepareTask()
     {
-        $dynamicRules = [];
-        if ($this->isRoutine) {
-            $dynamicRules['assignedTo'] = 'nullable';
-        } else {
-            $dynamicRules['assignedTo'] = 'required|array|min:1';
-            $dynamicRules['assignedTo.*'] = 'exists:users,id';
-        }
+        $this->validate();
 
-        $this->validate(array_merge($this->rules, $dynamicRules));
-
-        // If multiple assignees selected (non-routine), ask for confirmation
-        if (! $this->isRoutine && count((array) $this->assignedTo) > 1) {
+        if (!$this->isRoutine && count($this->assignedTo) > 1) {
+            // Confirm modal untuk multiple assignees
             $this->pendingAssignees = (array) $this->assignedTo;
             $this->showConfirmModal = true;
-
             return;
         }
 
-        // otherwise proceed to final save
         $this->finalSaveTask();
     }
-
-    public $showConfirmModal = false;
-
-    public $pendingAssignees = [];
 
     public function finalSaveTask()
     {
         $activeJurusanId = session('active_jurusan_id') ?: $this->selectedJurusanId;
-        if (! $activeJurusanId) {
+        if (!$activeJurusanId) {
             $this->dispatch('toast', message: 'Pilih jurusan terlebih dahulu.', type: 'danger');
-
             return;
         }
 
-        if ($this->isEditMode) {
-            $task = CashierTask::findOrFail($this->editingTaskId);
-            $groupId = $task->group_id ?: (string) \Illuminate\Support\Str::uuid();
+        $service = app(CashierTaskService::class);
 
-            // Delete all tasks currently in this group to handle changes in assignees/routine status
-            CashierTask::where('group_id', $groupId)->delete();
+        try {
+            if ($this->isEditMode) {
+                // Edit mode: update task definition
+                $taskDef = CashierTaskDefinition::findOrFail($this->editingTaskId);
+                
+                $taskDef->update([
+                    'task_name' => $this->taskName,
+                    'description' => $this->description,
+                    'date' => $this->date,
+                    'priority' => $this->priority,
+                    'category' => $this->category,
+                    'deadline_at' => $this->deadlineAt,
+                    'requires_proof' => $this->requiresProof,
+                ]);
 
-            $taskPayload = [
-                'jurusan_id' => $activeJurusanId,
-                'group_id' => $groupId,
-                'date' => $this->date,
-                'task_name' => $this->taskName,
-                'description' => $this->description,
-                'deadline_at' => $this->deadlineAt ?: null,
-                'status' => $task->status,
-                'priority' => $this->priority,
-                'category' => $this->category ?: null,
-                'is_routine' => $this->isRoutine,
-                'requires_proof' => $this->requiresProof,
-                'created_by' => $task->created_by,
-                'approval_status' => $task->approval_status,
-                'rejection_note' => $task->rejection_note,
-                'reviewed_by' => $task->reviewed_by,
-                'reviewed_at' => $task->reviewed_at,
-            ];
-
-            if ($this->isRoutine) {
-                $cashiers = User::whereHas('roles', function ($q) use ($activeJurusanId) {
-                    $q->where('roles.name', 'kasir')
-                        ->where('role_user.jurusan_id', $activeJurusanId);
-                })->get();
-
-                foreach ($cashiers as $cashier) {
-                    CashierTask::create($taskPayload + ['assigned_to' => $cashier->id]);
+                // Clear old assignments dan buat baru (if assignees changed)
+                if (!$this->isRoutine) {
+                    $taskDef->assignments()->delete();
+                    $assignees = $this->pendingAssignees ?: (array) $this->assignedTo;
+                    $service->assignTaskToUsers($taskDef, $assignees);
+                } else {
+                    // Routine task: ensure all current kasir have assignment
+                    $service->assignTaskToAllCashiers($taskDef);
                 }
+
+                $message = 'Tugas berhasil diperbarui!';
             } else {
-                $assignees = (array) $this->assignedTo;
-                foreach ($assignees as $assigneeId) {
-                    CashierTask::create($taskPayload + ['assigned_to' => $assigneeId]);
+                // Create mode
+                $taskDef = $service->createTask([
+                    'jurusan_id' => $activeJurusanId,
+                    'task_name' => $this->taskName,
+                    'description' => $this->description,
+                    'date' => $this->date,
+                    'priority' => $this->priority,
+                    'category' => $this->category,
+                    'is_routine' => $this->isRoutine,
+                    'requires_proof' => $this->requiresProof,
+                    'deadline_at' => $this->deadlineAt,
+                    'created_by' => auth()->id(),
+                ]);
+
+                if ($this->isRoutine) {
+                    $service->assignTaskToAllCashiers($taskDef);
+                    $cashiers = User::whereHas('roles', function ($q) use ($activeJurusanId) {
+                        $q->where('roles.name', 'kasir')
+                            ->where('role_user.jurusan_id', $activeJurusanId);
+                    })->get();
+
+                    foreach ($cashiers as $cashier) {
+                        Notification::create([
+                            'user_id' => $cashier->id,
+                            'title' => 'Tugas Rutin Baru',
+                            'body' => 'Anda mendapatkan tugas rutin: "' . $this->taskName . '" untuk tanggal ' . Carbon::parse($this->date)->format('d M Y'),
+                            'type' => 'task',
+                            'action_url' => '/my-tasks',
+                        ]);
+                    }
+
+                    $message = 'Tugas rutin harian berhasil ditambahkan untuk semua kasir.';
+                } else {
+                    $assignees = $this->pendingAssignees ?: (array) $this->assignedTo;
+                    $service->assignTaskToUsers($taskDef, $assignees);
+
+                    foreach ($assignees as $assigneeId) {
+                        Notification::create([
+                            'user_id' => $assigneeId,
+                            'title' => 'Tugas Baru Ditugaskan',
+                            'body' => 'Anda mendapatkan tugas: "' . $this->taskName . '" pada tanggal ' . Carbon::parse($this->date)->format('d M Y'),
+                            'type' => 'task',
+                            'action_url' => '/my-tasks',
+                        ]);
+                    }
+
+                    $count = count($assignees);
+                    $message = $count > 1 ? $count . ' tugas berhasil ditambahkan untuk kasir terpilih.' : 'Tugas harian kasir berhasil ditambahkan!';
                 }
             }
 
-            $message = 'Tugas berhasil diperbarui!';
-        } else {
-            $groupId = (string) \Illuminate\Support\Str::uuid();
-            $taskPayload = [
-                'jurusan_id' => $activeJurusanId,
-                'group_id' => $groupId,
-                'date' => $this->date,
-                'task_name' => $this->taskName,
-                'description' => $this->description,
-                'deadline_at' => $this->deadlineAt ?: null,
-                'status' => 'new',
-                'priority' => $this->priority,
-                'category' => $this->category ?: null,
-                'is_routine' => $this->isRoutine,
-                'requires_proof' => $this->requiresProof,
-                'created_by' => auth()->id(),
-            ];
+            $this->showConfirmModal = false;
+            $this->pendingAssignees = [];
+            $this->showCreateModal = false;
+            $this->resetForm();
+            $this->dispatch('toast', message: $message);
+        } catch (\Exception $e) {
+            $this->dispatch('toast', message: 'Error: ' . $e->getMessage(), type: 'danger');
+        }
+    }
 
-            if ($this->isRoutine) {
-                $cashiers = User::whereHas('roles', function ($q) use ($activeJurusanId) {
-                    $q->where('roles.name', 'kasir')
-                        ->where('role_user.jurusan_id', $activeJurusanId);
-                })->get();
+    public function editTask($id)
+    {
+        $taskDef = CashierTaskDefinition::findOrFail($id);
+        
+        $this->isEditMode = true;
+        $this->editingTaskId = $id;
+        $this->taskName = $taskDef->task_name;
+        $this->description = $taskDef->description;
+        $this->date = $taskDef->date->toDateString();
+        $this->priority = $taskDef->priority;
+        $this->category = $taskDef->category;
+        $this->isRoutine = $taskDef->is_routine;
+        $this->requiresProof = $taskDef->requires_proof;
+        $this->deadlineAt = $taskDef->deadline_at?->format('Y-m-d\TH:i');
 
-                if ($cashiers->isEmpty()) {
-                    $this->dispatch('toast', message: 'Tidak ada kasir di jurusan ini untuk membuat tugas rutin.', type: 'warning');
-
-                    return;
-                }
-
-                foreach ($cashiers as $cashier) {
-                    CashierTask::create($taskPayload + ['assigned_to' => $cashier->id]);
-
-                    Notification::create([
-                        'user_id' => $cashier->id,
-                        'title' => 'Tugas Rutin Baru',
-                        'body' => 'Anda mendapatkan tugas rutin: "' . $this->taskName . '" untuk tanggal ' . Carbon::parse($this->date)->format('d M Y'),
-                        'type' => 'task',
-                        'action_url' => '/cashier',
-                    ]);
-                }
-
-                $message = 'Tugas rutin harian berhasil ditambahkan untuk semua kasir.';
-            } else {
-                $assignees = $this->pendingAssignees ?: (array) $this->assignedTo;
-                $createdCount = 0;
-                foreach ($assignees as $assigneeId) {
-                    CashierTask::create($taskPayload + ['assigned_to' => $assigneeId]);
-
-                    Notification::create([
-                        'user_id' => $assigneeId,
-                        'title' => 'Tugas Baru Ditugaskan',
-                        'body' => 'Anda mendapatkan tugas: "' . $this->taskName . '" pada tanggal ' . Carbon::parse($this->date)->format('d M Y'),
-                        'type' => 'task',
-                        'action_url' => '/cashier',
-                    ]);
-
-                    $createdCount++;
-                }
-
-                $message = $createdCount > 1 ? $createdCount . ' tugas berhasil ditambahkan untuk kasir terpilih.' : 'Tugas harian kasir berhasil ditambahkan!';
-            }
+        if (!$this->isRoutine) {
+            $this->assignedTo = $taskDef->assignments()
+                ->pluck('assigned_to')
+                ->toArray();
         }
 
-        $this->showConfirmModal = false;
-        $this->pendingAssignees = [];
-        $this->showCreateModal = false;
-        $this->resetForm();
-        $this->dispatch('toast', message: $message);
+        $this->showCreateModal = true;
     }
 
     public function confirmDelete($id)
@@ -342,120 +274,116 @@ class CashierTasks extends Component
     public function deleteTask()
     {
         if ($this->deletingTaskId) {
-            $task = CashierTask::findOrFail($this->deletingTaskId);
-            if ($task->group_id) {
-                CashierTask::where('group_id', $task->group_id)->delete();
-            } else {
-                $task->delete();
-            }
-            $this->showDeleteModal = false;
-            $this->deletingTaskId = null;
+            $taskDef = CashierTaskDefinition::findOrFail($this->deletingTaskId);
+            
+            // Delete associated assignments dan submissions
+            CashierTaskAssignment::where('task_definition_id', $taskDef->id)->delete();
+            $taskDef->delete();
+
             $this->dispatch('toast', message: 'Tugas berhasil dihapus.');
         }
+
+        $this->showDeleteModal = false;
+        $this->deletingTaskId = null;
     }
 
-    public function approveTask($id)
+    public function openReviewModal($id)
     {
-        $task = CashierTask::findOrFail($id);
+        $taskDef = CashierTaskDefinition::findOrFail($id);
+        $this->reviewingTaskId = $id;
 
-        if ($task->approval_status !== 'pending') {
-            $this->dispatch('toast', message: 'Tugas ini tidak sedang menunggu review.', type: 'warning');
+        $service = app(CashierTaskService::class);
+        
+        // Get ALL submissions untuk task ini (not just pending)
+        $allSubmissions = $service->getSubmissionsForTask($taskDef);
+        $this->currentReviewingSubmissions = $allSubmissions->toArray();
 
+        // Auto-select first submission if available
+        if (count($this->currentReviewingSubmissions) > 0) {
+            $this->selectedSubmissionForReview = $this->currentReviewingSubmissions[0]['id'];
+        }
+
+        $this->showReviewModal = true;
+    }
+
+    public function selectSubmissionForReview($submissionId)
+    {
+        $this->selectedSubmissionForReview = $submissionId;
+    }
+
+    public function approveSubmission()
+    {
+        if (!$this->selectedSubmissionForReview) {
+            $this->dispatch('toast', message: 'Pilih submission terlebih dahulu.', type: 'warning');
             return;
         }
 
-        $updateData = [
-            'approval_status' => 'approved',
-            'status' => 'completed',
-            'rejection_note' => null,
-            'reviewed_by' => auth()->id(),
-            'reviewed_at' => now(),
-        ];
+        $submission = CashierTaskSubmission::findOrFail($this->selectedSubmissionForReview);
 
-        $task->update($updateData);
-
-        // Award gamification points only after admin approval
-        $cashier = User::find($task->assigned_to);
-        if ($cashier) {
-            $points = match ($task->priority) {
-                'low' => 5,
-                'high' => 20,
-                'critical' => 30,
-                default => 10,
-            };
-            $cashier->increment('pending_points', $points);
-            $cashier->increment('streak', 1);
-
-            Notification::create([
-                'user_id' => $task->assigned_to,
-                'title' => 'Tugas Disetujui',
-                'body' => 'Laporan tugas "' . $task->task_name . '" telah di-ACC admin. +' . $points . ' poin untukmu!',
-                'type' => 'task',
-                'action_url' => '/my-tasks',
-            ]);
+        if ($submission->approval_status !== 'pending') {
+            $this->dispatch('toast', message: 'Submission ini tidak sedang menunggu review.', type: 'warning');
+            return;
         }
 
-        $this->showReviewModal = false;
-        $this->reviewingTaskId = null;
-        $this->dispatch('toast', message: 'Tugas disetujui, poin diberikan ke kasir.');
-    }
+        $service = app(CashierTaskService::class);
+        $service->approveSubmission($submission, auth()->id());
 
-    public function openRejectModal($id)
-    {
-        $this->rejectingTaskId = $id;
-        $this->rejectionNote = '';
-        $this->showRejectModal = true;
-        $this->showReviewModal = false; // Hide review modal so it doesn't overlap
-    }
-
-    public function cancelRejection()
-    {
-        $this->showRejectModal = false;
-        $this->rejectingTaskId = null;
-        $this->rejectionNote = '';
-        $this->showReviewModal = true; // Show review modal back
-    }
-
-    public function rejectTask()
-    {
-        $this->validate([
-            'rejectionNote' => 'required|string|min:5',
-        ], [], ['rejectionNote' => 'catatan penolakan']);
-
-        $task = CashierTask::findOrFail($this->rejectingTaskId);
-
-        // Reopen the task so the cashier must revise & resubmit
-        $updateData = [
-            'approval_status' => 'rejected',
-            'status' => 'pending',
-            'rejection_note' => $this->rejectionNote,
-            'reviewed_by' => auth()->id(),
-            'reviewed_at' => now(),
-            'is_completed' => false,
-        ];
-
-        $task->update($updateData);
-
+        // Notify kasir
         Notification::create([
-            'user_id' => $task->assigned_to,
-            'title' => 'Tugas Ditolak — Perlu Revisi',
-            'body' => 'Laporan tugas "' . $task->task_name . '" ditolak: ' . $this->rejectionNote . '. Silakan revisi & kirim ulang.',
+            'user_id' => $submission->submitted_by,
+            'title' => 'Tugas Disetujui',
+            'body' => 'Laporan tugas "' . $submission->assignment->taskDefinition->task_name . '" telah di-ACC admin.',
             'type' => 'task',
             'action_url' => '/my-tasks',
         ]);
 
-        $this->showReviewModal = false;
-        $this->reviewingTaskId = null;
+        $this->dispatch('toast', message: 'Submission disetujui!');
+        $this->openReviewModal($this->reviewingTaskId); // Refresh submissions list
+    }
+
+    public function openRejectModal()
+    {
+        if (!$this->selectedSubmissionForReview) {
+            $this->dispatch('toast', message: 'Pilih submission terlebih dahulu.', type: 'warning');
+            return;
+        }
+
+        $this->rejectingTaskId = $this->selectedSubmissionForReview;
+        $this->rejectionNote = '';
+        $this->showRejectModal = true;
+    }
+
+    public function rejectSubmission()
+    {
+        $this->validate([
+            'rejectionNote' => 'required|string|min:5',
+        ]);
+
+        $submission = CashierTaskSubmission::findOrFail($this->rejectingTaskId);
+
+        $service = app(CashierTaskService::class);
+        $service->rejectSubmission($submission, $this->rejectionNote, auth()->id());
+
+        // Notify kasir
+        Notification::create([
+            'user_id' => $submission->submitted_by,
+            'title' => 'Tugas Ditolak — Perlu Revisi',
+            'body' => 'Laporan tugas "' . $submission->assignment->taskDefinition->task_name . '" ditolak: ' . $this->rejectionNote . '. Silakan revisi & kirim ulang.',
+            'type' => 'task',
+            'action_url' => '/my-tasks',
+        ]);
+
+        $this->dispatch('toast', message: 'Submission ditolak & dikembalikan ke kasir untuk direvisi.');
         $this->showRejectModal = false;
         $this->rejectingTaskId = null;
         $this->rejectionNote = '';
-        $this->dispatch('toast', message: 'Tugas ditolak & dikembalikan ke kasir untuk direvisi.');
+        $this->openReviewModal($this->reviewingTaskId); // Refresh submissions list
     }
 
     public function render()
     {
         $activeRole = session('active_role_name');
-        if (! in_array($activeRole, ['superadmin', 'pengelola_jurusan'])) {
+        if (!in_array($activeRole, ['superadmin', 'pengelola_jurusan'])) {
             abort(403, 'Unauthorized.');
         }
 
@@ -463,7 +391,6 @@ class CashierTasks extends Component
 
         // Fetch Cashiers for dropdown selection
         if ($this->assigneeMode === 'scheduled') {
-            // Only cashiers with a schedule for today in this jurusan
             $scheduledIds = CashierSchedule::where('date', now()->toDateString())
                 ->when($activeJurusanId, function ($q) use ($activeJurusanId) {
                     $q->where('jurusan_id', $activeJurusanId);
@@ -485,13 +412,13 @@ class CashierTasks extends Component
             })->get();
         }
 
-        // Categories persisted in TaskCategory for the active jurusan
+        // Categories
         $categories = TaskCategory::when($activeJurusanId, function ($q) use ($activeJurusanId) {
             $q->where('jurusan_id', $activeJurusanId);
         })->orderBy('name')->pluck('name')->all();
 
-        // Query Tasks
-        $tasks = CashierTask::with(['user', 'creator', 'reviewer'])
+        // Query Task Definitions (bukan old tasks)
+        $tasks = CashierTaskDefinition::with(['assignments.assignee', 'creator', 'assignments.latestSubmission'])
             ->when($activeJurusanId, function ($q) use ($activeJurusanId) {
                 $q->where('jurusan_id', $activeJurusanId);
             })
@@ -505,11 +432,16 @@ class CashierTasks extends Component
             ->orderBy('created_at', 'desc')
             ->paginate(15);
 
+        $jurusans = session('active_role_name') === 'superadmin' 
+            ? Jurusan::all() 
+            : collect();
+
         return view('livewire.management.cashier-tasks', [
             'tasks' => $tasks,
             'cashiers' => $cashiers,
-            'jurusans' => Jurusan::all(),
             'categories' => $categories,
-        ])->layout('layouts.app', ['title' => 'Tugas Kasir']);
+            'jurusans' => $jurusans,
+            'currentReviewingSubmissions' => $this->currentReviewingSubmissions,
+        ]);
     }
 }

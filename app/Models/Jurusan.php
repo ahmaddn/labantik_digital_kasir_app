@@ -36,4 +36,20 @@ class Jurusan extends Model
             ->withPivot('id', 'role_id')
             ->withTimestamps();
     }
+
+    /**
+     * Relasi untuk task definitions di jurusan ini
+     */
+    public function taskDefinitions()
+    {
+        return $this->hasMany(CashierTaskDefinition::class);
+    }
+
+    /**
+     * Relasi untuk task assignments di jurusan ini
+     */
+    public function taskAssignments()
+    {
+        return $this->hasMany(CashierTaskAssignment::class);
+    }
 }
