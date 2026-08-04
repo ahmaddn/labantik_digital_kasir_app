@@ -661,29 +661,37 @@ class Kasir extends Component
 
         $categories = CashCategory::where('jurusan_id', $activeJurusanId)->get();
 
-        // Get daily tasks for the logged in cashier
-        $dailyTasks = CashierTask::where('assigned_to', auth()->id())
-            ->where(function ($query) {
-                $query->where('date', now()->toDateString())
-                    ->orWhere(function ($q) {
-                        $q->where('is_routine', true)
-                          ->where('approval_status', '!=', 'approved');
-                    });
+        // Get daily tasks for the logged in cashier (from task assignments)
+        $dailyAssignments = CashierTaskAssignment::with(['taskDefinition', 'submissions'])
+            ->where('assigned_to', auth()->id())
+            ->whereHas('taskDefinition', function ($query) {
+                $query->where(function ($sq) {
+                    $sq->where('date', now()->toDateString())
+                        ->orWhere(function ($q) {
+                            $q->where('is_routine', true)
+                              ->whereNotIn('id', function ($q2) {
+                                  $q2->select('task_definition_id')
+                                      ->from('cashier_task_submissions')
+                                      ->where('approval_status', 'approved');
+                              });
+                        });
+                });
             })
             ->get();
 
         // Compute computed_deadline for routine tasks
-        foreach ($dailyTasks as $t) {
-            if ($t->is_routine && ! $t->deadline_at) {
+        foreach ($dailyAssignments as $assignment) {
+            $taskDef = $assignment->taskDefinition;
+            if ($taskDef->is_routine && ! $taskDef->deadline_at) {
                 $attendance = CashierAttendance::where('user_id', auth()->id())
-                    ->where('date', $t->date)
+                    ->where('date', $taskDef->date)
                     ->orderBy('clock_in', 'asc')
                     ->first();
 
                 if ($attendance && $attendance->clock_in) {
-                    $t->computed_deadline = \Carbon\Carbon::parse($attendance->clock_in)->addHours(8);
+                    $taskDef->computed_deadline = \Carbon\Carbon::parse($attendance->clock_in)->addHours(8);
                 } else {
-                    $t->computed_deadline = null;
+                    $taskDef->computed_deadline = null;
                 }
             }
         }
@@ -692,7 +700,7 @@ class Kasir extends Component
             'allProductsJson' => $allProducts,
             'isSessionFinished' => $isSessionFinished,
             'categories' => $categories,
-            'dailyTasks' => $dailyTasks,
+            'dailyTasks' => $dailyAssignments,
         ])->layout('layouts.kasir');
     }
 }
