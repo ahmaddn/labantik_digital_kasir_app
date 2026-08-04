@@ -165,18 +165,35 @@
                 if (nativeSupported && Notification.permission === 'granted') {
                     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
-                    if (isMobile && swRegistration) {
-                        // Use Service Worker directly on mobile
-                        swRegistration.showNotification(title, {
-                            body: body,
-                            icon: '/favicon.png',
-                            badge: '/favicon.png',
-                            vibrate: [200, 100, 200],
-                            silent: false,
-                            tag: 'labantik-notif',
-                            renotify: true,
-                            data: { url: '/' }
-                        }).catch(() => {});
+                    if (isMobile) {
+                        // Use Service Worker directly on mobile using .ready promise
+                        if ('serviceWorker' in navigator) {
+                            navigator.serviceWorker.ready.then((reg) => {
+                                reg.showNotification(title, {
+                                    body: body,
+                                    icon: '/favicon.png',
+                                    badge: '/favicon.png',
+                                    vibrate: [200, 100, 200],
+                                    silent: false,
+                                    tag: 'labantik-notif',
+                                    renotify: true,
+                                    data: { url: '/' }
+                                });
+                            }).catch(() => {
+                                if (swRegistration) {
+                                    swRegistration.showNotification(title, {
+                                        body: body,
+                                        icon: '/favicon.png',
+                                        badge: '/favicon.png',
+                                        vibrate: [200, 100, 200],
+                                        silent: false,
+                                        tag: 'labantik-notif',
+                                        renotify: true,
+                                        data: { url: '/' }
+                                    });
+                                }
+                            });
+                        }
                         return;
                     } else {
                         // Use standard Notification constructor on desktop
@@ -189,19 +206,21 @@
                             return;
                         } catch (e) {
                             // Fallback to Service Worker if standard constructor fails on desktop
-                            if (swRegistration) {
-                                swRegistration.showNotification(title, {
-                                    body: body,
-                                    icon: '/favicon.png',
-                                    badge: '/favicon.png',
-                                    vibrate: [200, 100, 200],
-                                    silent: false,
-                                    tag: 'labantik-notif',
-                                    renotify: true,
-                                    data: { url: '/' }
+                            if ('serviceWorker' in navigator) {
+                                navigator.serviceWorker.ready.then((reg) => {
+                                    reg.showNotification(title, {
+                                        body: body,
+                                        icon: '/favicon.png',
+                                        badge: '/favicon.png',
+                                        vibrate: [200, 100, 200],
+                                        silent: false,
+                                        tag: 'labantik-notif',
+                                        renotify: true,
+                                        data: { url: '/' }
+                                    });
                                 }).catch(() => {});
-                                return;
                             }
+                            return;
                         }
                     }
                 }
