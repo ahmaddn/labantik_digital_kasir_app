@@ -61,6 +61,87 @@
         </div>
     @endif
 
+    <!-- Task Detail Modal (Read-Only) -->
+    <div x-data="{ show: @entangle('showTaskDetailModal') }" x-show="show" x-cloak @keydown.window.escape="show = false"
+        class="fixed inset-0 z-[600] flex items-center justify-center p-6 bg-gray-950/40 backdrop-blur-sm">
+        <div @click.away="show = false"
+            class="bg-white dark:bg-gray-800 w-full max-w-lg rounded-3xl shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-300">
+            <div class="p-6 bg-slate-100 dark:bg-slate-900 text-slate-800 dark:text-white relative">
+                <button @click="show = false"
+                    class="absolute right-6 top-6 p-2 bg-black/5 hover:bg-black/10 dark:bg-white/10 dark:hover:bg-white/20 rounded-xl transition-all">
+                    <svg class="w-4 h-4 text-slate-600 dark:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
+                            d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+                <h3 class="text-xl font-black uppercase italic tracking-tighter">DETAIL INSTRUKSI TUGAS</h3>
+                <p class="text-[9px] font-black uppercase tracking-[0.3em] mt-1.5 opacity-60 text-slate-500 dark:text-slate-400">DETAIL & PENJELASAN TUGAS KASIR</p>
+            </div>
+
+            <div class="p-6 max-h-[60vh] overflow-y-auto no-scrollbar space-y-5 text-left">
+                @if ($selectedTaskModel)
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <span class="text-[9px] font-black uppercase tracking-widest text-gray-400 block mb-1">Nama Tugas</span>
+                            <h4 class="text-sm font-black uppercase text-gray-800 dark:text-white">
+                                {{ $selectedTaskModel->task_name }}</h4>
+                        </div>
+                        <div>
+                            <span class="text-[9px] font-black uppercase tracking-widest text-gray-400 block mb-1">Kategori</span>
+                            <div class="text-xs font-black uppercase tracking-widest text-slate-700 dark:text-slate-300">
+                                {{ $selectedTaskModel->category ?: 'Umum' }}</div>
+                        </div>
+                        <div>
+                            <span class="text-[9px] font-black uppercase tracking-widest text-gray-400 block mb-1">Prioritas</span>
+                            @php
+                                $detailPriorityClass = match ($selectedTaskModel->priority) {
+                                    'low' => 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300',
+                                    'high' => 'bg-orange-55 text-orange-700 dark:bg-orange-950/30 dark:text-orange-400',
+                                    'critical' => 'bg-red-50 text-red-700 dark:bg-red-950/30 dark:text-red-400',
+                                    default => 'bg-blue-50 text-blue-700 dark:bg-blue-950/30 dark:text-blue-400',
+                                };
+                                $detailPriorityText = match ($selectedTaskModel->priority) {
+                                    'low' => 'Rendah',
+                                    'high' => 'Tinggi',
+                                    'critical' => 'Paling Penting',
+                                    default => 'Sedang',
+                                };
+                            @endphp
+                            <div class="text-xs font-black uppercase tracking-widest {{ $detailPriorityClass }} inline-flex items-center px-2.5 py-1 rounded-lg">
+                                {{ $detailPriorityText }}</div>
+                        </div>
+                        <div>
+                            <span class="text-[9px] font-black uppercase tracking-widest text-gray-400 block mb-1">Batas Waktu (Deadline)</span>
+                            <div class="text-xs font-semibold text-gray-700 dark:text-gray-300">
+                                @if ($selectedTaskModel->deadline_at)
+                                    {{ $selectedTaskModel->deadline_at->translatedFormat('d M Y H:i') . ' WIB' }}
+                                @elseif($selectedTaskModel->is_routine && isset($selectedTaskModel->computed_deadline) && $selectedTaskModel->computed_deadline)
+                                    {{ \Carbon\Carbon::parse($selectedTaskModel->computed_deadline)->translatedFormat('d M Y H:i') . ' WIB' }}
+                                @else
+                                    Belum ditetapkan
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+
+                    @if ($selectedTaskModel->description)
+                        <div class="bg-gray-50 dark:bg-gray-900/60 p-5 rounded-2xl border border-gray-100 dark:border-gray-800">
+                            <span class="text-[9px] font-black uppercase tracking-widest text-gray-400 block mb-2">Deskripsi & Instruksi Tugas</span>
+                            <div class="text-xs text-gray-700 dark:text-gray-250 font-semibold leading-relaxed">
+                                {!! $selectedTaskModel->description !!}</div>
+                        </div>
+                    @endif
+                @endif
+            </div>
+            
+            <div class="p-6 bg-gray-50 dark:bg-gray-900/40 border-t border-gray-100 dark:border-gray-800 flex justify-end">
+                <button type="button" @click="show = false" class="px-6 py-2.5 bg-primary-blue text-white rounded-xl font-black text-xs uppercase italic tracking-wider transition-all">
+                    Tutup Detail
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Task Completion Modal -->
     <div x-data="{ show: @entangle('showTaskCompletionModal') }" x-show="show" x-cloak @keydown.window.escape="show = false"
         class="fixed inset-0 z-[600] flex items-center justify-center p-6 bg-gray-950/40 backdrop-blur-sm">

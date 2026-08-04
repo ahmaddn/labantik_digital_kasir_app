@@ -17,6 +17,8 @@ class MyTasks extends Component
     // Task completion modal state
     public bool $showTaskCompletionModal = false;
 
+    public bool $showTaskDetailModal = false;
+
     public $selectedTaskId = null;
 
     public $selectedTaskModel = null;
@@ -26,6 +28,34 @@ class MyTasks extends Component
     public $taskProofImage = null;
 
     public string $activeTab = 'today';
+
+    public function showTaskDetail($taskId): void
+    {
+        $task = CashierTask::where('assigned_to', auth()->id())
+            ->where('id', $taskId)
+            ->first();
+
+        if ($task) {
+            $fresh = $task->fresh();
+
+            // Compute deadline for routine tasks: 8 hours after first clock-in of the day
+            if ($fresh->is_routine && ! $fresh->deadline_at) {
+                $attendance = CashierAttendance::where('user_id', auth()->id())
+                    ->where('date', $fresh->date)
+                    ->orderBy('clock_in', 'asc')
+                    ->first();
+
+                if ($attendance && $attendance->clock_in) {
+                    $fresh->computed_deadline = Carbon::parse($attendance->clock_in)->addHours(8);
+                } else {
+                    $fresh->computed_deadline = null;
+                }
+            }
+
+            $this->selectedTaskModel = $fresh;
+            $this->showTaskDetailModal = true;
+        }
+    }
 
     public function selectTaskForCompletion($taskId): void
     {
