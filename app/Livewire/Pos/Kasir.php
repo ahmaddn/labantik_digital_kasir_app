@@ -605,30 +605,30 @@ class Kasir extends Component
             ->exists();
 
         if ($isScheduledToday) {
-            // Find all routine tasks created for today in this jurusan
-            $routineTasksToday = CashierTask::where('jurusan_id', $activeJurusanId)
-                ->where('date', $today)
+            // Find all unique routine tasks in this jurusan (from any date)
+            $routineTemplates = CashierTask::where('jurusan_id', $activeJurusanId)
                 ->where('is_routine', true)
                 ->get()
                 ->groupBy('group_id');
 
-            foreach ($routineTasksToday as $groupId => $tasks) {
-                // Check if this cashier already has a task in this group
-                $hasTask = CashierTask::where('assigned_to', $userId)
+            foreach ($routineTemplates as $groupId => $tasks) {
+                // Check if this cashier already has this routine task cloned for TODAY
+                $hasTaskToday = CashierTask::where('assigned_to', $userId)
                     ->where('group_id', $groupId)
+                    ->where('date', $today)
                     ->exists();
 
-                if (!$hasTask && $tasks->isNotEmpty()) {
-                    // Clone one of the tasks in the group for this user
+                if (!$hasTaskToday && $tasks->isNotEmpty()) {
+                    // Clone one of the tasks in the group for this user with TODAY's date
                     $template = $tasks->first();
                     CashierTask::create([
                         'jurusan_id' => $template->jurusan_id,
                         'group_id' => $template->group_id,
                         'assigned_to' => $userId,
-                        'date' => $template->date,
+                        'date' => $today, // Today's date!
                         'task_name' => $template->task_name,
                         'description' => $template->description,
-                        'deadline_at' => $template->deadline_at,
+                        'deadline_at' => null, // Dynamic deadline (8 hours from clock-in)
                         'status' => 'new',
                         'priority' => $template->priority,
                         'category' => $template->category,
