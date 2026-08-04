@@ -117,7 +117,7 @@ class ThemeCustomizer extends Component
             $this->primaryColor = $settings['primary_color'] ?? '#2563EB';
             $this->secondaryColor = $settings['secondary_color'] ?? '#EF4444';
             $this->fontFamily = $settings['font_family'] ?? 'Outfit';
-            
+
             $isSubUnit = !is_null($jurusan->parent_id);
             $loadedStyle = $settings['theme_style'] ?? null;
 
@@ -215,7 +215,7 @@ class ThemeCustomizer extends Component
         $filteredStyles = [];
         foreach ($this->stylePresets as $style) {
             $isBusinessStyle = in_array($style['value'], ['restaurant-aesthetic', 'retail-aesthetic', 'bank-aesthetic']);
-            
+
             if ($isSubUnit) {
                 // For sub-units: show only the business presets
                 if ($isBusinessStyle) {
