@@ -431,51 +431,42 @@ class CashierTasks extends Component
             'creator',
         ];
 
-        $jurusanFilter = function ($q) use ($activeJurusanId) {
-            if ($activeJurusanId) {
-                $q->where('jurusan_id', $activeJurusanId);
-            }
-        };
-
-        $searchFilter = function ($q) {
-            if ($this->search) {
-                $q->where(function ($sq) {
-                    $sq->where('task_name', 'like', '%' . $this->search . '%')
-                        ->orWhere('description', 'like', '%' . $this->search . '%');
-                });
-            }
-        };
+        $search = $this->search;
+        $today = now()->toDateString();
 
         if ($this->activeTab === 'pending_review') {
-            $tasks = CashierTaskDefinition::with($with)
-                ->when($activeJurusanId, $jurusanFilter)
-                ->when($this->search, $searchFilter)
-                ->whereHas('assignments', function ($q) {
-                    $q->whereHas('submissions', function ($q2) {
-                        $q2->where('approval_status', 'pending');
-                    });
-                })
-                ->orderBy('date', 'desc')
-                ->orderBy('created_at', 'desc')
-                ->paginate(15);
+            $query = CashierTaskDefinition::with($with);
+            if ($activeJurusanId) $query->where('jurusan_id', $activeJurusanId);
+            if ($search) $query->where(function($q) use ($search) {
+                $q->where('task_name', 'like', "%$search%")
+                  ->orWhere('description', 'like', "%$search%");
+            });
+            $query->whereHas('assignments', function ($q) {
+                $q->whereHas('submissions', function ($q2) {
+                    $q2->where('approval_status', 'pending');
+                });
+            });
+            $tasks = $query->orderBy('date', 'desc')->orderBy('created_at', 'desc')->paginate(15);
 
         } elseif ($this->activeTab === 'history') {
-            $tasks = CashierTaskDefinition::with($with)
-                ->when($activeJurusanId, $jurusanFilter)
-                ->when($this->search, $searchFilter)
-                ->where('date', '<', now()->toDateString())
-                ->orderBy('date', 'desc')
-                ->orderBy('created_at', 'desc')
-                ->paginate(15);
+            $query = CashierTaskDefinition::with($with);
+            if ($activeJurusanId) $query->where('jurusan_id', $activeJurusanId);
+            if ($search) $query->where(function($q) use ($search) {
+                $q->where('task_name', 'like', "%$search%")
+                  ->orWhere('description', 'like', "%$search%");
+            });
+            $query->where('date', '<', $today);
+            $tasks = $query->orderBy('date', 'desc')->orderBy('created_at', 'desc')->paginate(15);
 
         } else {
-            $tasks = CashierTaskDefinition::with($with)
-                ->when($activeJurusanId, $jurusanFilter)
-                ->when($this->search, $searchFilter)
-                ->where('date', '>=', now()->toDateString())
-                ->orderBy('date', 'asc')
-                ->orderBy('created_at', 'desc')
-                ->paginate(15);
+            $query = CashierTaskDefinition::with($with);
+            if ($activeJurusanId) $query->where('jurusan_id', $activeJurusanId);
+            if ($search) $query->where(function($q) use ($search) {
+                $q->where('task_name', 'like', "%$search%")
+                  ->orWhere('description', 'like', "%$search%");
+            });
+            $query->where('date', '>=', $today);
+            $tasks = $query->orderBy('date', 'asc')->orderBy('created_at', 'desc')->paginate(15);
         }
 
         $jurusans = session('active_role_name') === 'superadmin' 
