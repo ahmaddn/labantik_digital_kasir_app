@@ -57,69 +57,60 @@
         @php
             $top3 = $leaderboard->take(3);
         @endphp
-        <div class="grid grid-cols-3 gap-2 md:gap-4 items-end justify-center pt-8 pb-8 border-b border-gray-100 dark:border-gray-800 max-w-sm mx-auto">
-            <!-- Rank 2 (Silver/Orange Podium) -->
+        <div class="grid grid-cols-3 gap-4 items-end justify-center pt-8 pb-10 border-b border-gray-150 dark:border-gray-800">
+            <!-- Rank 2 -->
             @if ($top3->count() > 1)
                 @php $u2 = $top3->values()->get(1); @endphp
                 <div class="flex flex-col items-center">
-                    <!-- Avatar Area -->
-                    <div class="w-12 h-12 rounded-full bg-orange-100 dark:bg-orange-950/30 border-2 border-orange-400 flex items-center justify-center font-black text-orange-600 dark:text-orange-400 uppercase text-sm shadow-md">
+                    <div class="w-14 h-14 bg-gray-200 dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-700 rounded-full flex items-center justify-center font-black text-gray-700 dark:text-gray-300 uppercase text-xs">
                         {{ substr($u2->name, 0, 2) }}
                     </div>
-                    <!-- Name -->
-                    <p class="text-[11px] font-bold text-gray-700 dark:text-gray-300 mt-2 truncate w-20 text-center">{{ $u2->name }}</p>
-                    <!-- Points -->
-                    <div class="mt-1 mb-2 px-2 py-0.5 bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 rounded-full text-[9px] font-black flex items-center gap-0.5 shadow-xs">
-                        <span>🪙</span><span>{{ $u2->total_score }}</span>
+                    <div class="text-center mt-2 min-w-0 w-full">
+                        <p class="text-xs font-black text-gray-800 dark:text-white truncate">{{ $u2->name }}</p>
+                        <p class="text-[10px] font-bold text-gray-400 mt-0.5">{{ $u2->total_score }} Pts</p>
                     </div>
-                    <!-- Silver Podium Step -->
-                    <div class="w-16 h-28 bg-orange-400 dark:bg-orange-500 rounded-t-full flex items-center justify-center shadow-md">
-                        <span class="text-2xl font-black text-white">2</span>
+                    <div class="w-full h-16 bg-gray-100 dark:bg-gray-800 rounded-t-xl mt-3 flex items-center justify-center font-black text-gray-500 dark:text-gray-400 text-lg">
+                        2
                     </div>
                 </div>
             @endif
 
-            <!-- Rank 1 (Gold/Purple Podium) -->
+            <!-- Rank 1 -->
             @if ($top3->count() > 0)
                 @php $u1 = $top3->values()->get(0); @endphp
-                <div class="flex flex-col items-center z-10">
-                    <!-- Avatar Area with Crown -->
+                <div class="flex flex-col items-center">
                     <div class="relative">
-                        <div class="absolute -top-4 left-1/2 transform -translate-x-1/2 text-base">👑</div>
-                        <div class="w-16 h-16 rounded-full bg-indigo-100 dark:bg-indigo-950/40 border-2 border-indigo-500 flex items-center justify-center font-black text-indigo-600 dark:text-indigo-400 uppercase text-base shadow-lg">
+                        <svg class="w-6 h-6 text-amber-500 absolute -top-5 left-1/2 transform -translate-x-1/2"
+                            fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                        </svg>
+                        <div class="w-18 h-18 bg-amber-500/20 border-4 border-amber-500 rounded-full flex items-center justify-center font-black text-amber-600 dark:text-amber-400 uppercase text-sm">
                             {{ substr($u1->name, 0, 2) }}
                         </div>
                     </div>
-                    <!-- Name -->
-                    <p class="text-xs font-black text-gray-900 dark:text-white mt-2 truncate w-24 text-center">{{ $u1->name }}</p>
-                    <!-- Points -->
-                    <div class="mt-1 mb-2 px-2.5 py-0.5 bg-yellow-500/20 text-yellow-700 dark:text-yellow-400 rounded-full text-[10px] font-black flex items-center gap-0.5 shadow-xs">
-                        <span>🪙</span><span>{{ $u1->total_score }}</span>
+                    <div class="text-center mt-2 min-w-0 w-full">
+                        <p class="text-sm font-black text-gray-900 dark:text-white truncate">{{ $u1->name }}</p>
+                        <p class="text-xs font-black text-amber-500 mt-0.5">{{ $u1->total_score }} Pts</p>
                     </div>
-                    <!-- Gold/Purple Podium Step -->
-                    <div class="w-20 h-36 bg-indigo-500 dark:bg-indigo-600 rounded-t-full flex items-center justify-center shadow-lg">
-                        <span class="text-3xl font-black text-white">1</span>
+                    <div class="w-full h-24 bg-amber-500/10 dark:bg-amber-500/20 border-t-2 border-amber-500 rounded-t-xl mt-3 flex items-center justify-center font-black text-amber-600 dark:text-amber-400 text-2xl">
+                        1
                     </div>
                 </div>
             @endif
 
-            <!-- Rank 3 (Bronze/Light Orange Podium) -->
+            <!-- Rank 3 -->
             @if ($top3->count() > 2)
                 @php $u3 = $top3->values()->get(2); @endphp
                 <div class="flex flex-col items-center">
-                    <!-- Avatar Area -->
-                    <div class="w-10 h-10 rounded-full bg-orange-50 dark:bg-orange-950/20 border-2 border-orange-350 flex items-center justify-center font-black text-orange-500 dark:text-orange-400 uppercase text-xs shadow-md">
+                    <div class="w-12 h-12 bg-amber-900/10 dark:bg-amber-955/20 border-2 border-amber-800/30 rounded-full flex items-center justify-center font-black text-amber-800 dark:text-amber-600 uppercase text-[10px]">
                         {{ substr($u3->name, 0, 2) }}
                     </div>
-                    <!-- Name -->
-                    <p class="text-[11px] font-bold text-gray-700 dark:text-gray-300 mt-2 truncate w-20 text-center">{{ $u3->name }}</p>
-                    <!-- Points -->
-                    <div class="mt-1 mb-2 px-2 py-0.5 bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 rounded-full text-[9px] font-black flex items-center gap-0.5 shadow-xs">
-                        <span>🪙</span><span>{{ $u3->total_score }}</span>
+                    <div class="text-center mt-2 min-w-0 w-full">
+                        <p class="text-xs font-black text-gray-800 dark:text-white truncate">{{ $u3->name }}</p>
+                        <p class="text-[10px] font-bold text-gray-455 mt-0.5">{{ $u3->total_score }} Pts</p>
                     </div>
-                    <!-- Bronze Podium Step -->
-                    <div class="w-14 h-20 bg-orange-300 dark:bg-orange-400 rounded-t-full flex items-center justify-center shadow-md">
-                        <span class="text-xl font-black text-white">3</span>
+                    <div class="w-full h-12 bg-gray-50 dark:bg-gray-900 rounded-t-xl mt-3 flex items-center justify-center font-black text-gray-455 text-base">
+                        3
                     </div>
                 </div>
             @endif
@@ -202,6 +193,8 @@
                             Beserta <strong>+1 Streak</strong> setelah di-ACC.
                         </p>
                     </div>
+
+
                 </div>
 
                 <div class="p-4 bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 flex items-start gap-3">
