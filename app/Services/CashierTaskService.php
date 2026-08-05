@@ -172,7 +172,7 @@ class CashierTaskService
      */
     public function approveSubmission(
         CashierTaskSubmission $submission,
-        int $reviewedBy
+        string $reviewedBy
     ): void {
         $submission->update([
             'approval_status' => 'approved',
@@ -190,7 +190,7 @@ class CashierTaskService
     public function rejectSubmission(
         CashierTaskSubmission $submission,
         string $rejectionNote,
-        int $reviewedBy
+        string $reviewedBy
     ): void {
         $submission->update([
             'approval_status' => 'rejected',
