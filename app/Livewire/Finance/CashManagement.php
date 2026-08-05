@@ -581,15 +581,21 @@ class CashManagement extends Component
                 ->toArray();
         }
 
-        $categories = \App\Models\CashCategory::where('jurusan_id', $activeJurusanId)->get();
-        if ($categories->isEmpty()) {
+        $categories = \App\Models\CashCategory::where('jurusan_id', $activeJurusanId)
+            ->whereNotIn('name', [
+                'Bagi Hasil Mingguan', 
+                'Bagi Hasil Supplier', 
+                'Bagi Hasil Pengelola', 
+                'Bagi Hasil Labantik'
+            ])
+            ->get();
+        if (\App\Models\CashCategory::where('jurusan_id', $activeJurusanId)->count() === 0) {
             $defaultCategories = [
                 'Modal Awal',
                 'Penjualan Toko / POS',
                 'Pembelian Stok Barang',
                 'Biaya Operasional',
                 'Gaji & Insentif Kasir',
-                'Bagi Hasil Mingguan',
                 'Lain-lain / Dana Darurat'
             ];
             foreach ($defaultCategories as $catName) {
@@ -598,7 +604,14 @@ class CashManagement extends Component
                     'name' => $catName
                 ]);
             }
-            $categories = \App\Models\CashCategory::where('jurusan_id', $activeJurusanId)->get();
+            $categories = \App\Models\CashCategory::where('jurusan_id', $activeJurusanId)
+                ->whereNotIn('name', [
+                    'Bagi Hasil Mingguan', 
+                    'Bagi Hasil Supplier', 
+                    'Bagi Hasil Pengelola', 
+                    'Bagi Hasil Labantik'
+                ])
+                ->get();
         }
         $categoryStats = [];
 
