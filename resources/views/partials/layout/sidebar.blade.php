@@ -382,6 +382,19 @@
                     Jadwal Kasir
                 </a>
 
+                <a href="{{ route('labantik.candidates') }}"
+                    class="flex items-center px-6 py-4 text-sm font-black rounded-2xl transition-all {{ request()->routeIs('labantik.candidates') ? 'bg-primary-blue text-white shadow-xl shadow-blue-900/20' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
+                    <svg class="w-5 h-5 mr-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                        <circle cx="9" cy="7" r="4" />
+                        <path d="M19 8v2" />
+                        <path d="M20 18v2" />
+                    </svg>
+                    Data Calon Labantik
+                </a>
+
                 @if (session('active_role_name') === 'superadmin' || session('active_role_name') === 'pengelola_jurusan')
                     <a href="{{ route('tasks') }}"
                         class="flex items-center px-6 py-4 text-sm font-black rounded-2xl transition-all {{ request()->routeIs('tasks') ? 'bg-primary-blue text-white shadow-xl shadow-blue-900/20' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800' }}">

@@ -28,6 +28,8 @@ Route::get('/', function () {
     return redirect()->route('dashboard');
 })->name('home');
 
+Route::get('/labantik/form-registration', \App\Livewire\Auth\FormRegistration::class)->name('labantik.form-registration');
+
 Route::middleware(['auth'])->group(function () {
     Route::get('/select-role', SelectRole::class)->name('select-role');
     Route::get('/late-report', \App\Livewire\Auth\LateReport::class)->name('late-report');
@@ -135,6 +137,7 @@ Route::middleware(['auth', 'verified', EnsureRoleSelected::class])->group(functi
     Route::get('/reports/attendances', \App\Livewire\Reports\AttendanceReport::class)->name('attendances');
     Route::get('/guide', \App\Livewire\Guide\CashierGuide::class)->name('guide');
     Route::get('/leaderboard', \App\Livewire\Guide\Leaderboard::class)->name('leaderboard');
+    Route::get('/management/labantik-candidates', \App\Livewire\Management\LabantikCandidates::class)->name('labantik.candidates');
 
     // Security Audit Log alerts
     Route::post('/log-security-alert', function (\Illuminate\Http\Request $request) {
