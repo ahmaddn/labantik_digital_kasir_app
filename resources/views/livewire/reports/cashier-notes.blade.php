@@ -167,7 +167,7 @@
     <!-- Create / Edit Note Modal -->
     @if($showModal)
         <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/60 backdrop-blur-sm animate-in fade-in duration-300">
-            <div class="bg-white dark:bg-gray-800 w-full max-w-lg rounded-[2.5rem] shadow-2xl p-8 border border-gray-100 dark:border-gray-700 animate-in zoom-in-95 duration-300">
+            <div class="bg-white dark:bg-gray-800 w-full max-w-lg rounded-[2.5rem] shadow-2xl p-8 border border-gray-100 dark:border-gray-700 animate-in zoom-in-95 duration-300 max-h-[90vh] overflow-y-auto">
                 <div class="flex items-center justify-between mb-6">
                     <h3 class="text-2xl font-black italic uppercase tracking-tighter text-gray-800 dark:text-white leading-none">
                         {{ $noteId ? 'Edit Catatan' : 'Tambah Catatan Baru' }}
@@ -322,8 +322,8 @@
                                     ];
                                 @endphp
                                 @foreach($pickerColors as $c => $bg)
-                                    <button type="button" wire:click="$set('color', '{{ $c }}')" class="w-8 h-8 rounded-full {{ $bg }} transition-all flex items-center justify-center {{ $color === $c ? 'ring-4 ring-offset-2 ring-primary-blue dark:ring-offset-gray-800 scale-110' : 'hover:scale-105 opacity-80' }}">
-                                        @if($color === $c)
+                                    <button type="button" wire:click="$set('color', '{{ $c }}')" class="w-8 h-8 rounded-full {{ $bg }} transition-all flex items-center justify-center {{ $this->color === $c ? 'ring-4 ring-offset-2 ring-primary-blue dark:ring-offset-gray-800 scale-110' : 'hover:scale-105 opacity-80' }}">
+                                        @if($this->color === $c)
                                             <svg class="w-3.5 h-3.5 text-white dark:text-gray-900" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
                                         @endif
                                     </button>
