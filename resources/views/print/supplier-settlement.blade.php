@@ -324,7 +324,7 @@
             @if($whatsappUrl)
                 <button onclick="shareToWhatsApp('{{ $whatsappUrl }}')" class="btn-action btn-whatsapp">
                     <svg style="width: 14px; height: 14px;" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12.004 2c-5.51 0-9.99 4.48-9.99 9.99 0 2.05.62 3.96 1.7 5.56L2.3 22l4.62-1.37c1.51.91 3.27 1.44 5.08 1.44 5.51 0 10-4.48 10-9.99S17.514 2 12.004 2zm5.83 14.28c-.24.67-1.19 1.25-1.63 1.29-.44.04-.97.19-2.92-.58-2.49-.99-4.08-3.53-4.2-3.7-.12-.17-1.01-1.34-1.01-2.56 0-1.22.64-1.82.87-2.06.23-.24.51-.3.67-.3.16 0 .32 0 .46.01.15.01.35-.06.55.42.2.49.69 1.68.75 1.8.06.12.1.27.02.43-.08.16-.18.27-.3.41-.12.14-.26.31-.37.42-.12.12-.25.26-.11.51.14.25.64 1.05 1.37 1.7.94.84 1.73 1.1 1.97 1.22.24.12.38.1.52-.06.14-.16.61-.71.77-.96.16-.24.32-.2.53-.12.21.08 1.35.63 1.58.75.23.12.39.18.45.28.06.1.06.57-.18 1.24z"/></svg>
-                    Kirim &amp; Salin Gambar
+                    Kirim WA &amp; Tandai Lunas
                 </button>
             @endif
         </div>
@@ -437,6 +437,24 @@
         invoiceCard.style.border = 'none';
         
         try {
+            // Call API to mark as paid and record payout in Buku Kas
+            try {
+                await fetch('{{ route('supplier-settlement.pay', $supplier->id) }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({
+                        date_from: '{{ $dateFrom }}',
+                        date_to: '{{ $dateTo }}',
+                        amount: {{ $totalShare }}
+                    })
+                });
+            } catch (apiErr) {
+                console.error("Gagal mencatat pembayaran bagi hasil supplier:", apiErr);
+            }
+
             const h2c = window.html2canvas || window.html2canvasPro;
             if (!h2c) {
                 alert('Error: Gagal memuat library perekam gambar.');

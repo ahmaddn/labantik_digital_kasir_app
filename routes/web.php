@@ -119,6 +119,44 @@ Route::middleware(['auth', 'verified', EnsureRoleSelected::class])->group(functi
             'dateTo' => $dateTo,
         ]);
     })->name('supplier-settlement.print');
+
+    Route::post('/reports/supplier-settlement/{supplierId}/pay', function (\Illuminate\Http\Request $request, $supplierId) {
+        $supplier = \App\Models\Supplier::findOrFail($supplierId);
+        $dateFrom = $request->input('date_from');
+        $dateTo = $request->input('date_to');
+        $amount = $request->input('amount');
+        $activeJurusanId = session('active_jurusan_id');
+
+        // 1. Find or create the CashCategory
+        $cashCategoryName = 'Penjualan ' . trim($supplier->name);
+        $category = \App\Models\CashCategory::firstOrCreate([
+            'name' => $cashCategoryName,
+            'jurusan_id' => $activeJurusanId
+        ]);
+
+        // 2. Check if a transaction for this supplier and period has already been posted
+        $description = 'Pembayaran Settlement Supplier ' . $supplier->name . ' - Periode ' . \Carbon\Carbon::parse($dateFrom)->format('d/m/Y') . ' s.d ' . \Carbon\Carbon::parse($dateTo)->format('d/m/Y');
+        
+        $exists = \App\Models\CashTransaction::where('jurusan_id', $activeJurusanId)
+            ->where('description', $description)
+            ->exists();
+
+        if (!$exists && $amount > 0) {
+            \App\Models\CashTransaction::create([
+                'jurusan_id' => $activeJurusanId,
+                'date' => now()->toDateString(),
+                'cash_type' => 'modal',
+                'cash_category_id' => $category->id,
+                'type' => 'expense',
+                'amount' => $amount,
+                'description' => $description,
+                'reference' => 'PAY-SUPPLIER-' . now()->format('Ymd') . '-' . strtoupper(bin2hex(random_bytes(2))),
+            ]);
+        }
+
+        return response()->json(['success' => true]);
+    })->name('supplier-settlement.pay');
+
     Route::get('/profit-sharing', WeeklyProfit::class)->name('bagi-hasil');
 
     // Finance
