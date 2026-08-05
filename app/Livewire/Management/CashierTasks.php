@@ -199,21 +199,6 @@ class CashierTasks extends Component
 
                 if ($this->isRoutine) {
                     $service->assignTaskToAllCashiers($taskDef);
-                    $cashiers = User::whereHas('roles', function ($q) use ($activeJurusanId) {
-                        $q->where('roles.name', 'kasir')
-                            ->where('role_user.jurusan_id', $activeJurusanId);
-                    })->get();
-
-                    foreach ($cashiers as $cashier) {
-                        Notification::create([
-                            'user_id' => $cashier->id,
-                            'title' => 'Tugas Rutin Baru',
-                            'body' => 'Anda mendapatkan tugas rutin: "' . $this->taskName . '" untuk tanggal ' . Carbon::parse($this->date)->format('d M Y'),
-                            'type' => 'task',
-                            'action_url' => '/my-tasks',
-                        ]);
-                    }
-
                     $message = 'Tugas rutin harian berhasil ditambahkan untuk semua kasir.';
                 } else {
                     $assignees = $this->pendingAssignees ?: (array) $this->assignedTo;

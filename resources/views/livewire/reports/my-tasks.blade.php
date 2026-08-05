@@ -201,22 +201,22 @@
             
             @if($selectedAssignment)
                 @php
-                    $taskDef = $selectedAssignment['task_definition'];
-                    $submissions = $selectedAssignment['submissions'] ?? [];
-                    $latestSubmission = $submissions[0] ?? null;
+                    $taskDef = $selectedAssignment->taskDefinition;
+                    $submissions = $selectedAssignment->submissions;
+                    $latestSubmission = $selectedAssignment->latestSubmission;
                 @endphp
     
                 <h2 class="text-2xl font-black text-gray-850 dark:text-white uppercase italic tracking-tight mb-6">
-                    {{ $taskDef['task_name'] }}
+                    {{ $taskDef->task_name }}
                 </h2>
     
                 <!-- Task Info -->
                 <div class="space-y-4 mb-6 pb-6 border-b border-gray-200 dark:border-gray-700">
-                    @if ($taskDef['description'])
+                    @if ($taskDef->description)
                         <div>
                             <div class="text-xs font-black uppercase tracking-widest text-gray-400 mb-2">Deskripsi</div>
                             <div class="text-sm text-gray-700 dark:text-gray-300">
-                                {!! nl2br(htmlspecialchars($taskDef['description'])) !!}
+                                {!! nl2br(htmlspecialchars($taskDef->description)) !!}
                             </div>
                         </div>
                     @endif
@@ -224,24 +224,24 @@
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <div class="text-xs font-black uppercase tracking-widest text-gray-400 mb-1">Prioritas</div>
-                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-black {{ $taskDef['priority_badge_class'] }}">
-                                {{ $taskDef['priority_label'] }}
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-black {{ $taskDef->priorityBadgeClass }}">
+                                {{ $taskDef->priority_label }}
                             </span>
                         </div>
                         <div>
                             <div class="text-xs font-black uppercase tracking-widest text-gray-400 mb-1">Kategori</div>
-                            <div class="text-sm text-gray-700 dark:text-gray-300">{{ $taskDef['category'] ?? 'Umum' }}</div>
+                            <div class="text-sm text-gray-700 dark:text-gray-300">{{ $taskDef->category ?? 'Umum' }}</div>
                         </div>
                     </div>
     
-                    @if ($taskDef['deadline_at'] || $taskDef['computed_deadline'] ?? null)
+                    @if ($taskDef->deadline_at || $taskDef->computed_deadline ?? null)
                         <div>
                             <div class="text-xs font-black uppercase tracking-widest text-gray-400 mb-1">Deadline</div>
                             <div class="text-sm text-gray-700 dark:text-gray-300">
-                                @if($taskDef['computed_deadline'] ?? null)
-                                    {{ \Carbon\Carbon::parse($taskDef['computed_deadline'])->translatedFormat('d M Y H:i WIB') }}
+                                @if($taskDef->computed_deadline ?? null)
+                                    {{ \Carbon\Carbon::parse($taskDef->computed_deadline)->translatedFormat('d M Y H:i WIB') }}
                                 @else
-                                    {{ \Carbon\Carbon::parse($taskDef['deadline_at'])->translatedFormat('d M Y H:i WIB') }}
+                                    {{ \Carbon\Carbon::parse($taskDef->deadline_at)->translatedFormat('d M Y H:i WIB') }}
                                 @endif
                             </div>
                         </div>
@@ -249,7 +249,7 @@
                 </div>
     
                 <!-- Submission History -->
-                @if(!empty($submissions))
+                @if($submissions && $submissions->isNotEmpty())
                     <div class="mb-6">
                         <div class="text-xs font-black uppercase tracking-widest text-gray-400 mb-3">Riwayat Submission</div>
                         <div class="space-y-3">
@@ -258,18 +258,18 @@
                                     <div class="flex items-start justify-between mb-2">
                                         <div>
                                             <div class="font-bold text-gray-800 dark:text-white">
-                                                Version {{ $sub['submission_version'] }}
+                                                Version {{ $sub->submission_version }}
                                             </div>
                                             <div class="text-xs text-gray-500">
-                                                {{ \Carbon\Carbon::parse($sub['submitted_at'])->translatedFormat('d M Y H:i WIB') }}
+                                                {{ \Carbon\Carbon::parse($sub->submitted_at)->translatedFormat('d M Y H:i WIB') }}
                                             </div>
                                         </div>
-                                        @if($sub['approval_status'] === 'approved')
+                                        @if($sub->approval_status === 'approved')
                                             <span class="inline-flex items-center gap-2 px-2.5 py-1 rounded-full text-xs font-black bg-emerald-100 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400">
                                                 <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
                                                 APPROVED
                                             </span>
-                                        @elseif($sub['approval_status'] === 'rejected')
+                                        @elseif($sub->approval_status === 'rejected')
                                             <span class="inline-flex items-center gap-2 px-2.5 py-1 rounded-full text-xs font-black bg-red-100 text-red-700 dark:bg-red-950/40 dark:text-red-400">
                                                 <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path></svg>
                                                 REJECTED
@@ -283,18 +283,18 @@
                                     </div>
     
                                     <div class="text-sm text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 p-3 rounded mb-2">
-                                        {!! nl2br(htmlspecialchars($sub['report'])) !!}
+                                        {!! nl2br(htmlspecialchars($sub->report)) !!}
                                     </div>
     
-                                    @if($sub['proof_image'])
+                                    @if($sub->proof_image)
                                         <div class="mt-2">
-                                            <img src="{{ asset('storage/' . $sub['proof_image']) }}" alt="Proof" class="w-full h-auto max-h-32 object-cover rounded">
+                                            <img src="{{ asset('storage/' . $sub->proof_image) }}" alt="Proof" class="w-full h-auto max-h-32 object-cover rounded">
                                         </div>
                                     @endif
     
-                                    @if($sub['approval_status'] === 'rejected' && $sub['rejection_note'])
+                                    @if($sub->approval_status === 'rejected' && $sub->rejection_note)
                                         <div class="mt-2 p-2 bg-red-50 dark:bg-red-950/30 rounded text-sm text-red-700 dark:text-red-400">
-                                            <strong>Catatan Penolakan:</strong> {{ $sub['rejection_note'] }}
+                                            <strong>Catatan Penolakan:</strong> {{ $sub->rejection_note }}
                                         </div>
                                     @endif
                                 </div>
@@ -322,12 +322,12 @@
             
             @if($selectedAssignment)
                 @php
-                    $taskDef = $selectedAssignment['task_definition'];
-                    $latestSubmission = $selectedAssignment['submissions'][0] ?? null;
+                    $taskDef = $selectedAssignment->taskDefinition;
+                    $latestSubmission = $selectedAssignment->latestSubmission;
                 @endphp
     
                 <h2 class="text-2xl font-black text-gray-850 dark:text-white uppercase italic tracking-tight mb-6">
-                    {{ $latestSubmission && $latestSubmission['approval_status'] === 'rejected' ? 'Revisi Tugas' : 'Submit Laporan Tugas' }}
+                    {{ $latestSubmission && $latestSubmission->approval_status === 'rejected' ? 'Revisi Tugas' : 'Submit Laporan Tugas' }}
                 </h2>
     
                 <form wire:submit.prevent="submitTaskCompletion" class="space-y-4">
@@ -335,14 +335,14 @@
                     <div>
                         <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2">Laporan Pengerjaan</label>
                         <textarea wire:model="submissionReport" rows="6" placeholder="Jelaskan bagaimana Anda menyelesaikan tugas ini..."
-                            class="w-full px-4 py-3 bg-gray-55 dark:bg-gray-900 border-none rounded-xl focus:ring-2 focus:ring-primary-blue dark:text-white text-sm"></textarea>
+                             class="w-full px-4 py-3 bg-gray-55 dark:bg-gray-900 border-none rounded-xl focus:ring-2 focus:ring-primary-blue dark:text-white text-sm"></textarea>
                         @error('submissionReport')
                             <span class="text-xs text-red-500 font-bold mt-1 block">{{ $message }}</span>
                         @enderror
                     </div>
     
                     <!-- Proof Image -->
-                    @if($taskDef['requires_proof'])
+                    @if($taskDef->requires_proof)
                         <div>
                             <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2">Bukti Foto / Gambar</label>
                             <div class="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl p-4">
@@ -363,7 +363,7 @@
                         </button>
                         <button type="submit"
                             class="flex-1 py-3 bg-primary-blue hover:bg-blue-900 text-primary-yellow rounded-xl font-black text-xs uppercase tracking-wider transition-all shadow-md">
-                            {{ $latestSubmission && $latestSubmission['approval_status'] === 'rejected' ? 'Kirim Revisi' : 'Submit Laporan' }}
+                            {{ $latestSubmission && $latestSubmission->approval_status === 'rejected' ? 'Kirim Revisi' : 'Submit Laporan' }}
                         </button>
                     </div>
                 </form>

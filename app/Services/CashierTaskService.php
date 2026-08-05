@@ -66,7 +66,7 @@ class CashierTaskService
             ->unique();
 
         foreach ($scheduledUserIds as $userId) {
-            CashierTaskAssignment::firstOrCreate(
+            $assignment = CashierTaskAssignment::firstOrCreate(
                 [
                     'task_definition_id' => $taskDef->id,
                     'assigned_to' => $userId,
@@ -76,6 +76,16 @@ class CashierTaskService
                     'assignment_status' => 'new',
                 ]
             );
+
+            if ($assignment->wasRecentlyCreated) {
+                \App\Models\Notification::create([
+                    'user_id' => $userId,
+                    'title' => 'Tugas Rutin Baru',
+                    'body' => 'Anda mendapatkan tugas rutin: "' . $taskDef->task_name . '"',
+                    'type' => 'task',
+                    'action_url' => '/my-tasks',
+                ]);
+            }
         }
     }
 
@@ -112,6 +122,14 @@ class CashierTaskService
                 'assigned_to' => $userId,
                 'jurusan_id' => $jurusanId,
                 'assignment_status' => 'new',
+            ]);
+
+            \App\Models\Notification::create([
+                'user_id' => $userId,
+                'title' => 'Tugas Rutin Baru',
+                'body' => 'Anda mendapatkan tugas rutin hari ini: "' . $taskDef->task_name . '"',
+                'type' => 'task',
+                'action_url' => '/my-tasks',
             ]);
         }
     }
