@@ -443,7 +443,20 @@ class CashierTasks extends Component
                 $q->where('task_name', 'like', "%$search%")
                   ->orWhere('description', 'like', "%$search%");
             });
-            $query->where('date', '<', $today);
+            $query->where(function ($q) use ($today) {
+                $q->where('date', '<', $today)
+                  ->orWhere(function ($q2) {
+                      $q2->whereHas('assignments')
+                         ->whereDoesntHave('assignments', function ($aq) {
+                             $aq->whereDoesntHave('submissions', function ($sq) {
+                                 $sq->where('approval_status', 'approved');
+                             })
+                             ->whereHas('submissions', function ($sq) {
+                                 $sq->where('approval_status', 'rejected');
+                             }, '<', 3);
+                         });
+                  });
+            });
             $tasks = $query->orderBy('date', 'desc')->orderBy('created_at', 'desc')->simplePaginate(15);
 
         } else {
@@ -453,7 +466,18 @@ class CashierTasks extends Component
                 $q->where('task_name', 'like', "%$search%")
                   ->orWhere('description', 'like', "%$search%");
             });
-            $query->where('date', '>=', $today);
+            $query->where('date', '>=', $today)
+                  ->where(function ($q) {
+                      $q->whereDoesntHave('assignments')
+                        ->orWhereHas('assignments', function ($aq) {
+                            $aq->whereDoesntHave('submissions', function ($sq) {
+                                $sq->where('approval_status', 'approved');
+                            })
+                            ->whereHas('submissions', function ($sq) {
+                                $sq->where('approval_status', 'rejected');
+                            }, '<', 3);
+                        });
+                  });
             $tasks = $query->orderBy('date', 'asc')->orderBy('created_at', 'desc')->simplePaginate(15);
         }
 
