@@ -154,7 +154,7 @@
                                 </div>
                             </td>
                             <td class="py-4 text-sm text-gray-500 dark:text-gray-400 font-semibold">
-                                {{ $task->deadline_at ? $task->deadline_at->translatedFormat('d M Y H:i') . ' WIB' : '-' }}
+                                {{ $task->deadline_at ? $task->deadline_at->setTimezone('Asia/Jakarta')->translatedFormat('d M Y H:i') . ' WIB' : '-' }}
                             </td>
                             <td class="py-4 text-right pr-4">
                                 <div class="flex items-center justify-end gap-1.5">
@@ -435,7 +435,7 @@
     </div>
     
     <!-- Review Modal - Menampilkan SUBMISSIONS TERPISAH per Kasir -->
-    <div x-data="{ show: @entangle('showReviewModal') }" x-show="show" class="fixed inset-0 z-50 flex items-center justify-center p-4" x-cloak>
+    <div x-data="{ show: @entangle('showReviewModal'), lightboxOpen: false, lightboxImg: '' }" x-show="show" class="fixed inset-0 z-50 flex items-center justify-center p-4" x-cloak>
         <div x-show="show" x-transition.opacity class="fixed inset-0 bg-black/60 backdrop-blur-xs"
             wire:click="$set('showReviewModal', false)"></div>
         <div x-show="show" x-transition.scale
@@ -485,7 +485,7 @@
                                     </div>
                                     
                                     <div class="text-xs text-gray-400 mt-1">
-                                        v{{ $sub['submission_version'] }} • {{ \Carbon\Carbon::parse($sub['submitted_at'])->format('d M H:i') }}
+                                        v{{ $sub['submission_version'] }} • {{ \Carbon\Carbon::parse($sub['submitted_at'])->setTimezone('Asia/Jakarta')->format('d M H:i') }}
                                     </div>
                                 </button>
                             @endforeach
@@ -540,7 +540,7 @@
                                     <!-- Submitted Time -->
                                     <div>
                                         <div class="text-xs font-black uppercase tracking-widest text-gray-400 mb-1">Waktu Submit</div>
-                                        <div class="text-sm text-gray-700 dark:text-gray-300">{{ \Carbon\Carbon::parse($selectedSub['submitted_at'])->translatedFormat('d M Y H:i WIB') }}</div>
+                                        <div class="text-sm text-gray-700 dark:text-gray-300">{{ \Carbon\Carbon::parse($selectedSub['submitted_at'])->setTimezone('Asia/Jakarta')->translatedFormat('d M Y H:i WIB') }}</div>
                                     </div>
     
                                     <!-- Report -->
@@ -555,8 +555,10 @@
                                     @if($selectedSub['proof_image'])
                                         <div>
                                             <div class="text-xs font-black uppercase tracking-widest text-gray-400 mb-2">Bukti Foto</div>
-                                            <div class="overflow-hidden rounded-lg">
-                                                <img src="{{ asset('storage/' . $selectedSub['proof_image']) }}" alt="Proof" class="w-full h-auto max-h-48 object-cover">
+                                            <div class="overflow-hidden rounded-xl border border-gray-200 dark:border-gray-700 bg-black/5 hover:bg-black/10 dark:bg-white/5 dark:hover:bg-white/10 transition-all cursor-pointer group/img"
+                                                @click="lightboxOpen = true; lightboxImg = '{{ asset('storage/' . $selectedSub['proof_image']) }}'">
+                                                <img src="{{ asset('storage/' . $selectedSub['proof_image']) }}" alt="Proof" 
+                                                    class="w-full h-auto max-h-48 object-cover group-hover/img:scale-105 group-hover/img:opacity-90 transition-all duration-300">
                                             </div>
                                         </div>
                                     @endif
@@ -576,7 +578,7 @@
                                         <div class="pt-2 border-t border-gray-200 dark:border-gray-700">
                                             <div class="text-xs font-black uppercase tracking-widest text-gray-400 mb-1">Direview Oleh</div>
                                             <div class="text-sm text-gray-600 dark:text-gray-400">
-                                                {{ $selectedSub['reviewer']['name'] ?? 'Admin' }} • {{ \Carbon\Carbon::parse($selectedSub['reviewed_at'])->translatedFormat('d M Y H:i WIB') }}
+                                                {{ $selectedSub['reviewer']['name'] ?? 'Admin' }} • {{ \Carbon\Carbon::parse($selectedSub['reviewed_at'])->setTimezone('Asia/Jakarta')->translatedFormat('d M Y H:i WIB') }}
                                             </div>
                                         </div>
                                     @endif
@@ -611,6 +613,22 @@
                     class="px-6 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-white rounded-lg font-black text-xs uppercase transition-all">
                     Tutup
                 </button>
+            </div>
+        </div>
+        
+        <!-- Lightbox Overlay -->
+        <div x-show="lightboxOpen" 
+            class="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 p-4"
+            x-transition.opacity
+            @click="lightboxOpen = false"
+            x-cloak>
+            <div class="relative max-w-4xl max-h-full flex items-center justify-center">
+                <button type="button" class="absolute top-4 right-4 text-white hover:text-gray-300 focus:outline-none bg-black/50 p-2 rounded-full z-10" @click="lightboxOpen = false">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+                <img :src="lightboxImg" class="max-w-full max-h-[85vh] rounded-lg object-contain shadow-2xl">
             </div>
         </div>
     </div>

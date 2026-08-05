@@ -69,7 +69,7 @@
                             @endphp
                             @if ($deadline)
                                 <div class="mt-2 text-xs text-gray-500">
-                                    ⏱ Deadline: {{ \Carbon\Carbon::parse($deadline)->translatedFormat('d M Y H:i WIB') }}
+                                    ⏱ Deadline: {{ \Carbon\Carbon::parse($deadline)->setTimezone('Asia/Jakarta')->translatedFormat('d M Y H:i WIB') }}
                                 </div>
                             @endif
                         </div>
@@ -242,9 +242,9 @@
                             <div class="text-xs font-black uppercase tracking-widest text-gray-400 mb-1">Deadline</div>
                             <div class="text-sm text-gray-700 dark:text-gray-300">
                                 @if($taskDef->computed_deadline ?? null)
-                                    {{ \Carbon\Carbon::parse($taskDef->computed_deadline)->translatedFormat('d M Y H:i WIB') }}
+                                    {{ \Carbon\Carbon::parse($taskDef->computed_deadline)->setTimezone('Asia/Jakarta')->translatedFormat('d M Y H:i WIB') }}
                                 @else
-                                    {{ \Carbon\Carbon::parse($taskDef->deadline_at)->translatedFormat('d M Y H:i WIB') }}
+                                    {{ \Carbon\Carbon::parse($taskDef->deadline_at)->setTimezone('Asia/Jakarta')->translatedFormat('d M Y H:i WIB') }}
                                 @endif
                             </div>
                         </div>
@@ -264,7 +264,7 @@
                                                 Version {{ $sub->submission_version }}
                                             </div>
                                             <div class="text-xs text-gray-500">
-                                                {{ \Carbon\Carbon::parse($sub->submitted_at)->translatedFormat('d M Y H:i WIB') }}
+                                                {{ \Carbon\Carbon::parse($sub->submitted_at)->setTimezone('Asia/Jakarta')->translatedFormat('d M Y H:i WIB') }}
                                             </div>
                                         </div>
                                         @if($sub->approval_status === 'approved')
