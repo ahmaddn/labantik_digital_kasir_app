@@ -27,7 +27,7 @@ class DailyRecapActionService
         );
     }
 
-    public function postToCashBook(string $date, ?string $activeJurusanId): array
+    public function postToCashBook(string $date, ?string $activeJurusanId, ?string $userId = null): array
     {
         $recap = DailyRecapModel::where('date', $date)
             ->when($activeJurusanId, function ($q) use ($activeJurusanId) {
@@ -38,6 +38,8 @@ class DailyRecapActionService
         if (! $recap || $recap->actual_cash <= 1) {
             return [false, 'Lakukan audit uang kas fisik terlebih dahulu sebelum melakukan posting!'];
         }
+
+        $recap->update(['posted_by' => $userId]);
 
         $allTransactions = Transaction::with(['product.category', 'product.supplier'])
             ->whereDate('transacted_at', $date)

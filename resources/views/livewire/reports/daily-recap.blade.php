@@ -176,9 +176,16 @@
                     <div class="flex flex-col">
                         <span class="text-[9px] font-black text-gray-400 uppercase tracking-widest">Status Buku Kas</span>
                         @if($isPosted)
-                            <span class="text-xs font-black text-green-500 uppercase tracking-tighter flex items-center">
-                                <span class="w-2 h-2 rounded-full bg-green-500 mr-2 animate-pulse"></span>
-                                SUDAH DIPOSTING
+                            <span class="text-xs font-black text-green-500 uppercase tracking-tighter flex flex-col items-start">
+                                <span class="flex items-center">
+                                    <span class="w-2 h-2 rounded-full bg-green-500 mr-2 animate-pulse"></span>
+                                    SUDAH DIPOSTING
+                                </span>
+                                @if($dailyRecapModel && $dailyRecapModel->postedBy)
+                                    <span class="text-[9px] text-gray-400 font-bold uppercase tracking-wider pl-4 mt-0.5">
+                                        Oleh: {{ $dailyRecapModel->postedBy->name }}
+                                    </span>
+                                @endif
                             </span>
                         @else
                             <span class="text-xs font-black text-gray-400 uppercase tracking-tighter flex items-center">

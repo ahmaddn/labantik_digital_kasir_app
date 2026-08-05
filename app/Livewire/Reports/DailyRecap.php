@@ -113,7 +113,7 @@ class DailyRecap extends Component
     public function postToCashBook(DailyRecapActionService $service): void
     {
         $activeJurusanId = session('active_jurusan_id');
-        [$success, $msg] = $service->postToCashBook($this->selectedDate, $activeJurusanId);
+        [$success, $msg] = $service->postToCashBook($this->selectedDate, $activeJurusanId, auth()->id());
 
         if (! $success) {
             $this->dispatch('toast', message: $msg, type: 'error');
@@ -178,11 +178,20 @@ class DailyRecap extends Component
 
         $recapData = $service->getRecapData($this->selectedDate, $activeJurusanId);
 
+        $dailyRecapModel = DailyRecapModel::forReporting()
+            ->with('postedBy')
+            ->where('date', $this->selectedDate)
+            ->when($activeJurusanId, function ($q) use ($activeJurusanId) {
+                return $q->where('jurusan_id', $activeJurusanId);
+            })
+            ->first();
+
         return view('livewire.reports.daily-recap', [
             'recap' => $recapData['recap'],
             'categoryRecap' => $recapData['categoryRecap'],
             'transactions' => $transactions,
             'categories' => ProductCategory::orderBy('name')->get(),
+            'dailyRecapModel' => $dailyRecapModel,
         ])->layout('layouts.app', ['title' => 'Rekap Harian']);
     }
 

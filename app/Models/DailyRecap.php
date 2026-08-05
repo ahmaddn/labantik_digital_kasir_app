@@ -28,12 +28,18 @@ class DailyRecap extends Model
         'actual_cash',
         'retained_change_cash',
         'cash_note',
+        'posted_by',
         'generated_at',
     ];
 
     public function jurusan(): BelongsTo
     {
         return $this->belongsTo(Jurusan::class);
+    }
+
+    public function postedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'posted_by');
     }
 
     protected static function booted(): void
