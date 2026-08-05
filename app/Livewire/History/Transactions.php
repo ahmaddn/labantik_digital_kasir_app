@@ -190,13 +190,14 @@ class Transactions extends Component
         if ($this->highlight && ! $this->search) {
             $query->where('reference', $this->highlight);
         } elseif ($this->search) {
-            $query->where(function ($q) {
-                $q->where('reference', 'like', '%' . $this->search . '%')
-                    ->orWhere('buyer_name', 'like', '%' . $this->search . '%')
-                    ->orWhereHas('product', function ($pq) {
-                        $pq->where('name', 'like', '%' . $this->search . '%');
-                    });
-            });
+            $query->whereIn('reference', Transaction::query()
+                ->select('reference')
+                ->where('reference', 'like', '%' . $this->search . '%')
+                ->orWhere('buyer_name', 'like', '%' . $this->search . '%')
+                ->orWhereHas('product', function ($pq) {
+                    $pq->where('name', 'like', '%' . $this->search . '%');
+                })
+            );
         }
 
         if ($this->filterStatus) {
