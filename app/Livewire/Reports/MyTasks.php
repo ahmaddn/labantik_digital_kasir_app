@@ -158,15 +158,16 @@ class MyTasks extends Component
                 $query->whereHas('taskDefinition', function ($q) use ($today) {
                     $q->where('date', $today);
                 })
-                ->orWhere(function ($q) {
-                    $q->whereHas('taskDefinition', function ($sq) {
-                        $sq->where('is_routine', true);
-                    })
-                    ->whereDoesntHave('submissions', function ($sq2) {
-                        $sq2->where('approval_status', 'approved');
-                    });
+                ->orWhereHas('taskDefinition', function ($q) {
+                    $q->where('is_routine', true);
                 });
             })
+            ->whereDoesntHave('submissions', function ($q) {
+                $q->where('approval_status', 'approved');
+            })
+            ->whereHas('submissions', function ($q) {
+                $q->where('approval_status', 'rejected');
+            }, '<', 3)
             ->orderBy('created_at', 'desc')
             ->get();
 
@@ -186,18 +187,24 @@ class MyTasks extends Component
             }
         }
 
-        // History: assignments dari hari sebelumnya atau yang sudah approved
+        // History: assignments yang sudah disetujui (approved), ditolak >= 3 kali, atau tugas non-rutin yang lewat hari
         $historyAssignments = CashierTaskAssignment::with([
             'taskDefinition',
             'submissions' => fn($q) => $q->orderBy('submission_version', 'desc'),
         ])
             ->where('assigned_to', $userId)
             ->where(function ($query) use ($today) {
-                $query->whereHas('taskDefinition', function ($q) use ($today) {
-                    $q->where('date', '<', $today);
+                $query->whereHas('submissions', function ($q) {
+                    $q->where('approval_status', 'approved');
                 })
-                ->orWhereHas('submissions', function ($q2) {
-                    $q2->where('approval_status', 'approved');
+                ->orWhereHas('submissions', function ($q) {
+                    $q->where('approval_status', 'rejected');
+                }, '>=', 3)
+                ->orWhere(function ($q) use ($today) {
+                    $q->whereHas('taskDefinition', function ($sq) use ($today) {
+                        $sq->where('date', '<', $today)
+                           ->where('is_routine', false);
+                    });
                 });
             })
             ->orderBy('created_at', 'desc')

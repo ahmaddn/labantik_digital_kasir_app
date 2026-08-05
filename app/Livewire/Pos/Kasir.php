@@ -630,15 +630,16 @@ class Kasir extends Component
                 $query->whereHas('taskDefinition', function ($q) use ($today) {
                     $q->where('date', $today);
                 })
-                ->orWhere(function ($q) {
-                    $q->whereHas('taskDefinition', function ($sq) {
-                        $sq->where('is_routine', true);
-                    })
-                    ->whereDoesntHave('submissions', function ($sq2) {
-                        $sq2->where('approval_status', 'approved');
-                    });
+                ->orWhereHas('taskDefinition', function ($q) {
+                    $q->where('is_routine', true);
                 });
             })
+            ->whereDoesntHave('submissions', function ($q) {
+                $q->where('approval_status', 'approved');
+            })
+            ->whereHas('submissions', function ($q) {
+                $q->where('approval_status', 'rejected');
+            }, '<', 3)
             ->get();
 
         // Compute computed_deadline for routine tasks
