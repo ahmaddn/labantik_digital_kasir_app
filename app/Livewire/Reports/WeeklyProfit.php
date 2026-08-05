@@ -144,8 +144,8 @@ class WeeklyProfit extends Component
             'week_start' => $weekStart->toDateString(),
             'week_end' => $weekEnd->toDateString(),
             'total_profit' => $totalProfit,
-            'kas_amount' => $totalProfit * 0.5,
-            'shared_amount' => $totalProfit * 0.5,
+            'kas_amount' => $totalProfit * 0.40, // 40%
+            'shared_amount' => $totalProfit * 0.60, // 60% (Najmy 30% + Labantik 30%)
         ];
 
         WeeklyProfitShare::updateOrCreate(
@@ -157,83 +157,51 @@ class WeeklyProfit extends Component
             $data
         );
 
-        // Fetch contributors for this week grouped by user and product category/supplier
-        $adminContributionsRaw = Transaction::join('products', 'transactions.product_id', '=', 'products.id')
-            ->join('product_categories', 'products.category_id', '=', 'product_categories.id')
-            ->leftJoin('suppliers', 'products.supplier_id', '=', 'suppliers.id')
-            ->select(
-                'transactions.user_id',
-                'products.category_id',
-                'product_categories.name as category_name',
-                'products.supplier_id',
-                'suppliers.name as supplier_name',
-                DB::raw('SUM(transactions.unit_profit * transactions.quantity) as user_profit')
-            )
-            ->whereBetween('transactions.transacted_at', [
-                $weekStart->startOfDay()->toDateTimeString(),
-                $weekEnd->endOfDay()->toDateTimeString(),
-            ])
-            ->where('transactions.jurusan_id', $activeJurusanId)
-            ->whereIn('transactions.status', ['uang_diterima', 'belum_kembalian'])
-            ->groupBy('transactions.user_id', 'products.category_id', 'product_categories.name', 'products.supplier_id', 'suppliers.name')
-            ->get();
-
-        $adminContributions = [];
-        foreach ($adminContributionsRaw as $contrib) {
-            $contribUser = \App\Models\User::find($contrib->user_id);
-            $categoryNameClean = trim($contrib->supplier_id ? $contrib->supplier_name : $contrib->category_name);
-            
-            $adminContributions[] = (object) [
-                'user' => $contribUser,
-                'user_profit' => $contrib->user_profit,
-                'category_name' => $categoryNameClean,
-                'supplier_id' => $contrib->supplier_id,
-            ];
-        }
-
-        // Scale factor for contributions
-        $scaleFactor = ($systemProfit > 0) ? ($totalProfit / $systemProfit) : 1;
-
         // Delete old postings for this period first to prevent duplicates on regeneration
         $descriptionPattern = 'Bagi Hasil Mingguan%Periode '.$weekStart->format('d/m/Y').' s.d '.$weekEnd->format('d/m/Y').'%';
         CashTransaction::where('jurusan_id', $activeJurusanId)
             ->where('description', 'like', $descriptionPattern)
             ->delete();
 
-        foreach ($adminContributions as $contrib) {
-            $userName = $contrib->user ? $contrib->user->name : 'Unknown User';
-            $userShare = ($contrib->user_profit * $scaleFactor) * 0.5;
+        // 1. Post Najmy's portion (30%)
+        $najmyShare = $totalProfit * 0.30;
+        if ($najmyShare > 0) {
+            $najmyUser = \App\Models\User::where('name', 'like', '%Najmy%')->first();
+            $najmyName = $najmyUser ? $najmyUser->name : 'Najmy';
+            
+            $catBagiHasil = CashCategory::firstOrCreate(
+                ['name' => 'Bagi Hasil Pengelola', 'jurusan_id' => $activeJurusanId]
+            );
 
-            if ($userShare > 0) {
-                $categoryNameClean = trim($contrib->category_name);
-                $categoryNameLower = strtolower($categoryNameClean);
-                if ($contrib->supplier_id) {
-                    $cashCategoryName = 'Penjualan '.$categoryNameClean;
-                } else {
-                    if ($categoryNameLower === 'makanan' || $categoryNameLower === 'minuman' || $categoryNameLower === 'makanan & minuman' || $categoryNameLower === 'makanan dan minuman' || $categoryNameLower === 'snack') {
-                        $cashCategoryName = 'Jurusan Snack & Minuman';
-                    } else {
-                        $cashCategoryName = 'Penjualan '.$categoryNameClean;
-                    }
-                }
+            CashTransaction::create([
+                'jurusan_id' => $activeJurusanId,
+                'date' => now()->toDateString(),
+                'cash_type' => 'keuntungan',
+                'cash_category_id' => $catBagiHasil->id,
+                'type' => 'expense',
+                'amount' => $najmyShare,
+                'description' => 'Bagi Hasil Mingguan dengan ' . $najmyName . ' (30%) - Periode ' . $weekStart->format('d/m/Y') . ' s.d ' . $weekEnd->format('d/m/Y'),
+                'reference' => 'WD-PROFIT-NAJMY-' . now()->format('Ymd') . '-' . strtoupper(bin2hex(random_bytes(2))),
+            ]);
+        }
 
-                $catPenjualan = CashCategory::firstOrCreate(
-                    ['name' => $cashCategoryName, 'jurusan_id' => $activeJurusanId]
-                );
+        // 2. Post Labantik's portion (30%)
+        $labantikShare = $totalProfit * 0.30;
+        if ($labantikShare > 0) {
+            $catBagiHasilLabantik = CashCategory::firstOrCreate(
+                ['name' => 'Bagi Hasil Labantik', 'jurusan_id' => $activeJurusanId]
+            );
 
-                $userDescription = 'Bagi Hasil Mingguan dengan '.$userName.' (Kategori: '.$categoryNameClean.') - Periode '.$weekStart->format('d/m/Y').' s.d '.$weekEnd->format('d/m/Y');
-
-                CashTransaction::create([
-                    'jurusan_id' => $activeJurusanId,
-                    'date' => now()->toDateString(),
-                    'cash_type' => 'keuntungan',
-                    'cash_category_id' => $catPenjualan->id,
-                    'type' => 'expense',
-                    'amount' => $userShare,
-                    'description' => $userDescription,
-                    'reference' => 'WD-PROFIT-'.now()->format('Ymd').'-'.strtoupper(bin2hex(random_bytes(2))),
-                ]);
-            }
+            CashTransaction::create([
+                'jurusan_id' => $activeJurusanId,
+                'date' => now()->toDateString(),
+                'cash_type' => 'keuntungan',
+                'cash_category_id' => $catBagiHasilLabantik->id,
+                'type' => 'expense',
+                'amount' => $labantikShare,
+                'description' => 'Bagi Hasil Mingguan Labantik (30%) - Periode ' . $weekStart->format('d/m/Y') . ' s.d ' . $weekEnd->format('d/m/Y'),
+                'reference' => 'WD-PROFIT-LABANTIK-' . now()->format('Ymd') . '-' . strtoupper(bin2hex(random_bytes(2))),
+            ]);
         }
 
         $this->dispatch('toast', message: 'Laporan bagi hasil berhasil dibuat dan diposting ke Buku Kas!');
@@ -302,21 +270,23 @@ class WeeklyProfit extends Component
         $totalRevenue = $weeklyData->total_revenue ?? 0;
         $supplierHak = $weeklyData->supplier_hak ?? 0;
 
-        $adminContributions = Transaction::with('user')
-            ->select('user_id', DB::raw('SUM(unit_profit * quantity) as user_profit'))
-            ->whereBetween('transacted_at', [
-                $weekStart->startOfDay()->toDateTimeString(),
-                $weekEnd->endOfDay()->toDateTimeString(),
-            ])
-            ->where('jurusan_id', $activeJurusanId)
-            ->whereIn('status', ['uang_diterima', 'belum_kembalian'])
-            ->groupBy('user_id')
-            ->get();
+        $najmyUser = \App\Models\User::where('name', 'like', '%Najmy%')->first();
+        $najmyName = $najmyUser ? $najmyUser->name : 'Najmy';
 
-        $scaleFactor = ($systemProfit > 0) ? ($currentProfit / $systemProfit) : 1;
-        foreach ($adminContributions as $contrib) {
-            $contrib->user_profit = $contrib->user_profit * $scaleFactor;
-        }
+        $adminContributions = collect([
+            (object) [
+                'user' => (object) ['name' => $najmyName],
+                'portion_name' => 'Bagi Hasil Najmy',
+                'percentage' => '30%',
+                'user_profit' => $currentProfit * 0.30,
+            ],
+            (object) [
+                'user' => (object) ['name' => 'Labantik'],
+                'portion_name' => 'Bagi Hasil Labantik (Kasir)',
+                'percentage' => '30%',
+                'user_profit' => $currentProfit * 0.30,
+            ]
+        ]);
 
         // Monthly Summary Logic - Filter by month and current year
         $monthName = Carbon::createFromDate($this->currentYear, $this->selectedMonth, 1)->translatedFormat('F Y');

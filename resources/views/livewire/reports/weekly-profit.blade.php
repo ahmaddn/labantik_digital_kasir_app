@@ -143,10 +143,10 @@
                                     </div>
                                     <div>
                                         <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Kas
-                                            Jurusan (50%)</p>
+                                            Jurusan (40%)</p>
                                         <p
                                             class="text-2xl font-black text-gray-800 dark:text-white italic tracking-tighter mt-1" :class="censorMode ? 'privacy-blur' : ''">
-                                            Rp{{ number_format($currentWeek['profit'] * 0.5, 0, ',', '.') }}</p>
+                                            Rp{{ number_format($currentWeek['profit'] * 0.4, 0, ',', '.') }}</p>
                                     </div>
                                 </div>
                             </div>
@@ -164,9 +164,9 @@
                                     </div>
                                     <div>
                                         <p class="text-[10px] font-black text-white/60 uppercase tracking-widest">Bagi
-                                            Hasil Admin (50%)</p>
+                                            Hasil Eksternal (60%)</p>
                                         <p class="text-2xl font-black italic tracking-tighter mt-1" :class="censorMode ? 'privacy-blur' : ''">
-                                            Rp{{ number_format($currentWeek['profit'] * 0.5, 0, ',', '.') }}</p>
+                                            Rp{{ number_format($currentWeek['profit'] * 0.6, 0, ',', '.') }}</p>
                                     </div>
                                 </div>
                             </div>
@@ -181,9 +181,8 @@
                         <div>
                             <h3
                                 class="text-2xl font-black italic uppercase tracking-tighter text-gray-800 dark:text-white">
-                                Kontribusi Pengelola</h3>
-                            <p class="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mt-1">Keuntungan
-                                yang dihasilkan admin pada periode ini</p>
+                                Rincian Pembagian Eksternal</h3>
+                            <p class="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mt-1">Porsi pembagian bagi hasil mingguan (Najmy 30% & Labantik 30%)</p>
                         </div>
                     </div>
 
@@ -201,20 +200,19 @@
                                             class="text-sm font-black text-gray-800 dark:text-white uppercase tracking-tight">
                                             {{ $contrib->user->name ?? 'Unknown Admin' }}</p>
                                         <p class="text-[9px] font-black text-gray-400 uppercase tracking-widest mt-1">
-                                            Profit Internal</p>
+                                            {{ $contrib->portion_name }}</p>
                                     </div>
                                 </div>
                                 <div class="text-right">
                                     <p class="text-base font-black text-primary-blue italic">
                                         Rp{{ number_format($contrib->user_profit, 0, ',', '.') }}</p>
                                     <p class="text-[9px] font-bold text-green-500 uppercase tracking-widest mt-1">
-                                        Bagian: Rp{{ number_format($contrib->user_profit * 0.5, 0, ',', '.') }}</p>
+                                        Persentase: {{ $contrib->percentage }}</p>
                                 </div>
                             </div>
                         @empty
                             <div class="col-span-2 py-20 text-center opacity-20">
-                                <p class="text-xs font-black uppercase tracking-widest italic">Belum ada aktivitas
-                                    admin</p>
+                                <p class="text-xs font-black uppercase tracking-widest italic">Belum ada rincian pembagian</p>
                             </div>
                         @endforelse
                     </div>
