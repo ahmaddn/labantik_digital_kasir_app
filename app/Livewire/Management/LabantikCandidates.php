@@ -18,6 +18,10 @@ class LabantikCandidates extends Component
     public string $waGroupLink = '';
     public bool $showWaLinkModal = false;
 
+    // Delete properties
+    public string $deleteId = '';
+    public bool $showDeleteModal = false;
+
     protected $queryString = [
         'search' => ['except' => ''],
         'selectedJurusanId' => ['except' => ''],
@@ -89,6 +93,32 @@ class LabantikCandidates extends Component
             new \App\Exports\LabantikCandidatesExport($candidates), 
             $filename
         );
+    }
+
+    public function confirmDelete(string $id): void
+    {
+        $activeRole = session('active_role_name');
+        if (!in_array($activeRole, ['superadmin', 'pengelola_jurusan', 'kasir'])) {
+            abort(403, 'Unauthorized.');
+        }
+
+        $this->deleteId = $id;
+        $this->showDeleteModal = true;
+    }
+
+    public function deleteCandidate(): void
+    {
+        $activeRole = session('active_role_name');
+        if (!in_array($activeRole, ['superadmin', 'pengelola_jurusan', 'kasir'])) {
+            abort(403, 'Unauthorized.');
+        }
+
+        if ($this->deleteId) {
+            LabantikRegistration::findOrFail($this->deleteId)->delete();
+            $this->dispatch('toast', message: 'Data calon Labantik berhasil dihapus.');
+            $this->showDeleteModal = false;
+            $this->deleteId = '';
+        }
     }
 
     public function render()
