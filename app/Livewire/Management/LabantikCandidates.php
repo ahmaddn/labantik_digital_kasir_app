@@ -121,6 +121,20 @@ class LabantikCandidates extends Component
         }
     }
 
+    public function toggleJoinedGroup(string $id): void
+    {
+        $activeRole = session('active_role_name');
+        if (!in_array($activeRole, ['superadmin', 'pengelola_jurusan', 'kasir'])) {
+            abort(403, 'Unauthorized.');
+        }
+
+        $candidate = LabantikRegistration::findOrFail($id);
+        $candidate->is_joined_group = !$candidate->is_joined_group;
+        $candidate->save();
+
+        $this->dispatch('toast', message: 'Status grup WhatsApp berhasil diperbarui.');
+    }
+
     public function render()
     {
         $activeRole = session('active_role_name');

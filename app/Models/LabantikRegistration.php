@@ -21,6 +21,11 @@ class LabantikRegistration extends Model
         'parent_phone_number',
         'reason',
         'illness_history',
+        'is_joined_group',
+    ];
+
+    protected $casts = [
+        'is_joined_group' => 'boolean',
     ];
 
     public function jurusan(): BelongsTo

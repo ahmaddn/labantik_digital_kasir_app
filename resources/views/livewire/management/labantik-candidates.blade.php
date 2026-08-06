@@ -69,6 +69,7 @@
                         <th class="pb-4 text-xs font-black uppercase tracking-widest text-gray-400">Jurusan</th>
                         <th class="pb-4 text-xs font-black uppercase tracking-widest text-gray-400">No HP</th>
                         <th class="pb-4 text-xs font-black uppercase tracking-widest text-gray-400">Penyakit Bawaan</th>
+                        <th class="pb-4 text-xs font-black uppercase tracking-widest text-gray-400">Grup WA</th>
                         <th class="pb-4 text-xs font-black uppercase tracking-widest text-gray-400 text-right pr-4">Aksi</th>
                     </tr>
                 </thead>
@@ -99,6 +100,18 @@
                                     <span class="text-gray-400 font-semibold italic text-xs">Tidak ada</span>
                                 @endif
                             </td>
+                            <td class="py-4 text-sm font-semibold">
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" 
+                                        wire:click="toggleJoinedGroup('{{ $candidate->id }}')"
+                                        {{ $candidate->is_joined_group ? 'checked' : '' }}
+                                        class="sr-only peer">
+                                    <div class="w-9 h-5 bg-gray-200 dark:bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-500"></div>
+                                    <span class="ml-2 text-xs font-bold {{ $candidate->is_joined_group ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-400' }}">
+                                        {{ $candidate->is_joined_group ? 'Sudah' : 'Belum' }}
+                                    </span>
+                                </label>
+                            </td>
                             <td class="py-4 text-right pr-4 flex items-center justify-end gap-2">
                                 <button type="button"
                                     @click="selectedCandidate = {{ json_encode($candidate) }}; showModal = true"
@@ -114,7 +127,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="py-12 text-center text-gray-400 italic font-semibold">
+                            <td colspan="8" class="py-12 text-center text-gray-400 italic font-semibold">
                                 Belum ada pendaftaran calon Labantik
                             </td>
                         </tr>
@@ -155,7 +168,11 @@
                                 </div>
                                 <div>
                                     <div class="text-[10px] font-black uppercase tracking-widest text-gray-400">No HP Orang Tua</div>
-                                    <div class="text-sm font-semibold text-gray-850 dark:text-gray-200 mt-1" x-text="selectedCandidate.parent_phone_number"></div>
+                                    <div class="text-sm font-semibold text-gray-855 dark:text-gray-200 mt-1" x-text="selectedCandidate.parent_phone_number"></div>
+                                </div>
+                                <div>
+                                    <div class="text-[10px] font-black uppercase tracking-widest text-gray-400">Status Grup WA</div>
+                                    <div class="text-sm font-bold mt-1" :class="selectedCandidate.is_joined_group ? 'text-emerald-500' : 'text-amber-500'" x-text="selectedCandidate.is_joined_group ? 'Sudah Masuk' : 'Belum Masuk'"></div>
                                 </div>
                             </div>
 
