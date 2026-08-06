@@ -299,6 +299,30 @@ class CashierTasks extends Component
         $this->showReviewModal = true;
     }
 
+    public function openDetailModal($id)
+    {
+        $taskDef = CashierTaskDefinition::findOrFail($id);
+        $this->reviewingTaskId = $id;
+
+        $service = app(CashierTaskService::class);
+        
+        // Get ALL submissions (approved, rejected, pending)
+        $allSubmissions = $service->getSubmissionsForTask($taskDef)
+            ->values()
+            ->toArray();
+            
+        $this->currentReviewingSubmissions = $allSubmissions;
+
+        // Auto-select first submission if available
+        if (count($this->currentReviewingSubmissions) > 0) {
+            $this->selectedSubmissionForReview = $this->currentReviewingSubmissions[0]['id'];
+        } else {
+            $this->selectedSubmissionForReview = null;
+        }
+
+        $this->showReviewModal = true;
+    }
+
     public function selectSubmissionForReview($submissionId)
     {
         $this->selectedSubmissionForReview = $submissionId;

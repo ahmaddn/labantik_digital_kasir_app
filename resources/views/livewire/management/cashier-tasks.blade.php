@@ -165,6 +165,13 @@
                                             Review
                                         </button>
                                     @endif
+                                    @if ($activeTab === 'history')
+                                        <button wire:click="openDetailModal('{{ $task->id }}')"
+                                            title="Lihat Detail Submissions"
+                                            class="px-2.5 py-1.5 bg-primary-blue hover:bg-blue-950 text-primary-yellow rounded-xl text-[10px] font-black uppercase tracking-wider transition-all active:scale-95 shadow-md">
+                                            Detail
+                                        </button>
+                                    @endif
                                     @if ($activeTab === 'active')
                                         <button wire:click="editTask('{{ $task->id }}')"
                                             class="p-1.5 text-gray-400 hover:text-primary-blue hover:bg-blue-50 dark:hover:bg-blue-950/30 rounded-xl transition-all"
