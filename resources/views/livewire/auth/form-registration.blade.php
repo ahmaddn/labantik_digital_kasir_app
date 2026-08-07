@@ -22,7 +22,29 @@
             </div>
         </div>
 
-        @if ($isSubmitted)
+        @if (!$isOpen)
+            <!-- Registration Closed Screen -->
+            <div class="text-center py-10 space-y-6">
+                <div class="inline-block">
+                    <div
+                        class="w-24 h-24 bg-gray-800 text-amber-500 rounded-full flex items-center justify-center mx-auto shadow-md border border-gray-700">
+                        <svg class="w-12 h-12" fill="none" stroke="currentColor" stroke-width="2.5"
+                            viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+                        </svg>
+                    </div>
+                </div>
+
+                <div class="space-y-3">
+                    <h3 class="text-2xl sm:text-3xl font-black text-white uppercase tracking-tight italic">
+                        Pendaftaran Ditutup
+                    </h3>
+                    <p class="text-xs sm:text-sm text-gray-400 max-w-md mx-auto leading-relaxed font-semibold">
+                        Mohon maaf, pendaftaran calon anggota baru Labantik saat ini telah ditutup. Silakan hubungi pengurus atau guru pembimbing untuk informasi lebih lanjut.
+                    </p>
+                </div>
+            </div>
+        @elseif ($isSubmitted)
             <!-- Success Screen with WA Group Redirection (Dark Mode Only) -->
             <div class="text-center py-10 space-y-8">
                 <div class="inline-block">

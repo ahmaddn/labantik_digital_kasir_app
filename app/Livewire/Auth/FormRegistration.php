@@ -15,6 +15,7 @@ class FormRegistration extends Component
     public string $reason = '';
     public string $illnessHistory = '';
 
+    public bool $isOpen = false;
     public bool $isSubmitted = false;
     public string $waGroupLink = '';
 
