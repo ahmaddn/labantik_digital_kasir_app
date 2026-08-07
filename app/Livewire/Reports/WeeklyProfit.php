@@ -101,9 +101,9 @@ class WeeklyProfit extends Component
         $totalShortage = 0;
         $totalSurplus = 0;
         foreach ($dailyRecaps as $recap) {
-            // Lewati recap yang uang fisiknya belum diinput (0/null) agar seluruh
+            // Lewati recap yang uang fisiknya belum diinput (<= 1) agar seluruh
             // omzet hari itu tidak ikut terhitung sebagai kekurangan kas
-            if ((float) $recap->actual_cash <= 0) {
+            if ((float) $recap->actual_cash <= 1) {
                 continue;
             }
 
@@ -225,9 +225,9 @@ class WeeklyProfit extends Component
         $totalShortage = 0;
         $totalSurplus = 0;
         foreach ($dailyRecaps as $recap) {
-            // Lewati recap yang uang fisiknya belum diinput (0/null) agar seluruh
+            // Lewati recap yang uang fisiknya belum diinput (<= 1) agar seluruh
             // omzet hari itu tidak ikut terhitung sebagai kekurangan kas
-            if ((float) $recap->actual_cash <= 0) {
+            if ((float) $recap->actual_cash <= 1) {
                 continue;
             }
 
