@@ -19,6 +19,12 @@ class FormRegistration extends Component
     public bool $isSubmitted = false;
     public string $waGroupLink = '';
 
+    public function mount()
+    {
+        $settings = json_decode(@file_get_contents(storage_path('app/settings.json')), true) ?: [];
+        $this->isOpen = (bool) ($settings['is_registration_open'] ?? false);
+    }
+
     protected array $rules = [
         'fullName' => 'required|string|min:3|max:255',
         'className' => 'required|string|max:50',

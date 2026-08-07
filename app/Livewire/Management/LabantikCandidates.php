@@ -17,6 +17,7 @@ class LabantikCandidates extends Component
     // WhatsApp Group Link Settings
     public string $waGroupLink = '';
     public bool $showWaLinkModal = false;
+    public bool $isRegistrationOpen = false;
 
     // Delete properties
     public string $deleteId = '';
@@ -31,6 +32,7 @@ class LabantikCandidates extends Component
     {
         $settings = json_decode(@file_get_contents(storage_path('app/settings.json')), true) ?: [];
         $this->waGroupLink = $settings['wa_group_link'] ?? '';
+        $this->isRegistrationOpen = (bool) ($settings['is_registration_open'] ?? false);
     }
 
     public function updatingSearch(): void
@@ -133,6 +135,27 @@ class LabantikCandidates extends Component
         $candidate->save();
 
         $this->dispatch('toast', message: 'Status grup WhatsApp berhasil diperbarui.');
+    }
+
+    public function toggleRegistration(): void
+    {
+        $activeRole = session('active_role_name');
+        if (!in_array($activeRole, ['superadmin', 'pengelola_jurusan'])) {
+            abort(403, 'Unauthorized.');
+        }
+
+        $settings = json_decode(@file_get_contents(storage_path('app/settings.json')), true) ?: [];
+        $this->isRegistrationOpen = !$this->isRegistrationOpen;
+        $settings['is_registration_open'] = $this->isRegistrationOpen;
+
+        if (!file_exists(storage_path('app'))) {
+            mkdir(storage_path('app'), 0755, true);
+        }
+
+        file_put_contents(storage_path('app/settings.json'), json_encode($settings));
+        
+        $status = $this->isRegistrationOpen ? 'dibuka' : 'ditutup';
+        $this->dispatch('toast', message: "Pendaftaran calon anggota Labantik berhasil {$status}!");
     }
 
     public function render()
