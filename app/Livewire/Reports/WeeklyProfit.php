@@ -150,45 +150,77 @@ class WeeklyProfit extends Component
             ->where('description', 'like', $descriptionPattern)
             ->delete();
 
-        // 1. Post Najmy's portion (30%)
-        $najmyShare = $totalProfit * 0.30;
-        if ($najmyShare > 0) {
-            $najmyUser = \App\Models\User::where('name', 'like', '%Najmy%')->first();
-            $najmyName = $najmyUser ? $najmyUser->name : 'Najmy';
-            
-            $catBagiHasil = CashCategory::firstOrCreate(
-                ['name' => 'Bagi Hasil Pengelola', 'jurusan_id' => $activeJurusanId]
+        // 1. Fetch transactions for category grouping
+        $transactions = Transaction::with(['product.category', 'product.supplier'])
+            ->whereBetween('transacted_at', [
+                $weekStart->startOfDay()->toDateTimeString(),
+                $weekEnd->endOfDay()->toDateTimeString(),
+            ])
+            ->where('jurusan_id', $activeJurusanId)
+            ->whereIn('status', ['uang_diterima', 'belum_kembalian'])
+            ->get();
+
+        $grouped = $transactions->groupBy(fn($tx) => ($tx->product->supplier_id ?? $tx->supplier_id) ? 'supplier_' . ($tx->product->supplier_id ?? $tx->supplier_id) : 'category_' . ($tx->product->category_id ?? 'other'));
+
+        $najmyUser = \App\Models\User::where('name', 'like', '%Najmy%')->first();
+        $najmyName = $najmyUser ? $najmyUser->name : 'Najmy';
+
+        $scaleFactor = ($systemProfit > 0) ? ($totalProfit / $systemProfit) : 1;
+
+        foreach ($grouped as $key => $txs) {
+            $firstTx = $txs->first();
+            if (str_starts_with($key, 'supplier_')) {
+                $supplierName = $firstTx->product->supplier->name ?? 'Supplier';
+                $categoryNameClean = trim($supplierName);
+                $cashCategoryName = 'Penjualan '.$categoryNameClean;
+            } else {
+                $categoryName = $firstTx->product->category->name ?? 'Lainnya';
+                $categoryNameClean = trim($categoryName);
+
+                $categoryNameLower = strtolower($categoryNameClean);
+                if ($categoryNameLower === 'makanan' || $categoryNameLower === 'minuman' || $categoryNameLower === 'makanan & minuman' || $categoryNameLower === 'makanan dan minuman' || $categoryNameLower === 'snack') {
+                    $cashCategoryName = 'Jurusan Snack & Minuman';
+                } else {
+                    $cashCategoryName = 'Penjualan '.$categoryNameClean;
+                }
+            }
+
+            $catPenjualan = CashCategory::firstOrCreate(
+                ['name' => $cashCategoryName, 'jurusan_id' => $activeJurusanId]
             );
 
-            CashTransaction::create([
-                'jurusan_id' => $activeJurusanId,
-                'date' => now()->toDateString(),
-                'cash_type' => 'keuntungan',
-                'cash_category_id' => $catBagiHasil->id,
-                'type' => 'expense',
-                'amount' => $najmyShare,
-                'description' => 'Bagi Hasil Mingguan dengan ' . $najmyName . ' (30%) - Periode ' . $weekStart->format('d/m/Y') . ' s.d ' . $weekEnd->format('d/m/Y'),
-                'reference' => 'WD-PROFIT-NAJMY-' . now()->format('Ymd') . '-' . strtoupper(bin2hex(random_bytes(2))),
-            ]);
-        }
+            $groupProfit = $txs->sum(fn ($tx) => $tx->unit_profit * $tx->quantity);
+            $adjustedGroupProfit = $groupProfit * $scaleFactor;
 
-        // 2. Post Labantik's portion (30%)
-        $labantikShare = $totalProfit * 0.30;
-        if ($labantikShare > 0) {
-            $catBagiHasilLabantik = CashCategory::firstOrCreate(
-                ['name' => 'Bagi Hasil Labantik', 'jurusan_id' => $activeJurusanId]
-            );
+            // 1. Post Najmy's portion (30%)
+            $najmyShare = $adjustedGroupProfit * 0.30;
+            if ($najmyShare > 0) {
+                CashTransaction::create([
+                    'jurusan_id' => $activeJurusanId,
+                    'date' => now()->toDateString(),
+                    'cash_type' => 'keuntungan',
+                    'cash_category_id' => $catPenjualan->id,
+                    'type' => 'expense',
+                    'amount' => $najmyShare,
+                    'description' => 'Bagi Hasil Mingguan dengan ' . $najmyName . ' (30% - Kategori: ' . $categoryNameClean . ') - Periode ' . $weekStart->format('d/m/Y') . ' s.d ' . $weekEnd->format('d/m/Y'),
+                    'reference' => 'WD-PROFIT-NAJMY-' . now()->format('Ymd') . '-' . strtoupper(bin2hex(random_bytes(2))),
+                ]);
+            }
 
-            CashTransaction::create([
-                'jurusan_id' => $activeJurusanId,
-                'date' => now()->toDateString(),
-                'cash_type' => 'keuntungan',
-                'cash_category_id' => $catBagiHasilLabantik->id,
-                'type' => 'expense',
-                'amount' => $labantikShare,
-                'description' => 'Bagi Hasil Mingguan Labantik (30%) - Periode ' . $weekStart->format('d/m/Y') . ' s.d ' . $weekEnd->format('d/m/Y'),
-                'reference' => 'WD-PROFIT-LABANTIK-' . now()->format('Ymd') . '-' . strtoupper(bin2hex(random_bytes(2))),
-            ]);
+            // 2. Post Labantik's portion (30%)
+            $labantikShare = $adjustedGroupProfit * 0.30;
+            if ($labantikShare > 0) {
+                CashTransaction::create([
+                    'jurusan_id' => $activeJurusanId,
+                    'date' => now()->toDateString(),
+                    'cash_type' => 'keuntungan',
+                    'cash_category_id' => $catPenjualan->id,
+                    'type' => 'expense',
+                    'amount' => $labantikShare,
+                    'description' => 'Bagi Hasil Mingguan Labantik (30% - Kategori: ' . $categoryNameClean . ') - Periode ' . $weekStart->format('d/m/Y') . ' s.d ' . $weekEnd->format('d/m/Y'),
+                    'reference' => 'WD-PROFIT-LABANTIK-' . now()->format('Ymd') . '-' . strtoupper(bin2hex(random_bytes(2))),
+                ]);
+            }
         }
 
         $this->dispatch('toast', message: 'Laporan bagi hasil berhasil dibuat dan diposting ke Buku Kas!');
