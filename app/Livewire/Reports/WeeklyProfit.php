@@ -98,18 +98,6 @@ class WeeklyProfit extends Component
             ->where('jurusan_id', $activeJurusanId)
             ->get();
 
-        // Fetch daily revenues for the week in one query
-        $dailyRevenues = Transaction::whereBetween('transacted_at', [
-            $weekStart->startOfDay()->toDateTimeString(),
-            $weekEnd->endOfDay()->toDateTimeString(),
-        ])
-            ->where('jurusan_id', $activeJurusanId)
-            ->whereIn('status', ['uang_diterima', 'belum_kembalian'])
-            ->selectRaw('DATE(transacted_at) as date, SUM(total_price) as total_revenue')
-            ->groupBy('date')
-            ->pluck('total_revenue', 'date')
-            ->toArray();
-
         $totalShortage = 0;
         $totalSurplus = 0;
         foreach ($dailyRecaps as $recap) {
@@ -119,9 +107,8 @@ class WeeklyProfit extends Component
                 continue;
             }
 
-            $recapDateString = $recap->date instanceof \DateTimeInterface ? $recap->date->format('Y-m-d') : (string) $recap->date;
-            $totalRevenueReal = $dailyRevenues[$recapDateString] ?? 0;
-            $diff = ((float) $recap->actual_cash - (float) ($recap->retained_change_cash ?? 0)) - (float) $totalRevenueReal;
+            $totalRevenueReal = (float) ($recap->total_revenue_real ?? 0);
+            $diff = ((float) $recap->actual_cash - (float) ($recap->retained_change_cash ?? 0)) - $totalRevenueReal;
             if ($diff < 0) {
                 $totalShortage += abs($diff);
             } else {
@@ -235,18 +222,6 @@ class WeeklyProfit extends Component
             ->where('jurusan_id', $activeJurusanId)
             ->get();
 
-        // Fetch daily revenues for the week in one query
-        $dailyRevenues = Transaction::whereBetween('transacted_at', [
-            $weekStart->startOfDay()->toDateTimeString(),
-            $weekEnd->endOfDay()->toDateTimeString(),
-        ])
-            ->where('jurusan_id', $activeJurusanId)
-            ->whereIn('status', ['uang_diterima', 'belum_kembalian'])
-            ->selectRaw('DATE(transacted_at) as date, SUM(total_price) as total_revenue')
-            ->groupBy('date')
-            ->pluck('total_revenue', 'date')
-            ->toArray();
-
         $totalShortage = 0;
         $totalSurplus = 0;
         foreach ($dailyRecaps as $recap) {
@@ -256,9 +231,8 @@ class WeeklyProfit extends Component
                 continue;
             }
 
-            $recapDateString = $recap->date instanceof \DateTimeInterface ? $recap->date->format('Y-m-d') : (string) $recap->date;
-            $totalRevenueReal = $dailyRevenues[$recapDateString] ?? 0;
-            $diff = ((float) $recap->actual_cash - (float) ($recap->retained_change_cash ?? 0)) - (float) $totalRevenueReal;
+            $totalRevenueReal = (float) ($recap->total_revenue_real ?? 0);
+            $diff = ((float) $recap->actual_cash - (float) ($recap->retained_change_cash ?? 0)) - $totalRevenueReal;
             if ($diff < 0) {
                 $totalShortage += abs($diff);
             } else {
