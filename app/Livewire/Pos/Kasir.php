@@ -231,7 +231,24 @@ class Kasir extends Component
 
     public function fixUnfinishedSession(PosSessionService $posSessionService): void
     {
-        // existing method continues
+        if (! $this->unfinishedSessionDate) {
+            return;
+        }
+
+        $activeJurusanId = session('active_jurusan_id');
+        $allProducts = $this->getActiveProducts();
+
+        $posSessionService->fixUnfinishedSession($this->unfinishedSessionDate, $allProducts, $activeJurusanId);
+
+        $this->showRecoveryModal = false;
+        $this->unfinishedSessionDate = null;
+
+        $this->dispatch('toast', message: 'Sesi sebelumnya berhasil diselesaikan secara otomatis!', type: 'success');
+
+        // Check opening stock for today now that the previous session is fixed
+        $this->checkOpeningStock($posSessionService);
+
+        $this->refreshProducts();
     }
 
     // Polling method to detect newly assigned tasks and notify cashier
