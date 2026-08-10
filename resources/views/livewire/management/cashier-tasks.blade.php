@@ -45,6 +45,9 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
             </svg>
             Menunggu Review
+            @if($pendingReviewCount > 0)
+                <span class="px-2 py-0.5 text-[10px] font-black bg-rose-500 text-white rounded-full leading-none">{{ $pendingReviewCount }}</span>
+            @endif
         </button>
         <button wire:click="$set('activeTab', 'history')"
             class="px-6 py-3 font-black text-sm uppercase tracking-wider flex items-center gap-2 {{ $activeTab === 'history' ? 'text-primary-blue dark:text-primary-yellow border-b-2 border-primary-blue dark:border-primary-yellow' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300' }}">

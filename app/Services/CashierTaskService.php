@@ -107,12 +107,12 @@ class CashierTaskService
             return;
         }
 
-        // Find all routine task definitions for today that kasir doesn't have assignment yet
+        // Find all routine task definitions that kasir doesn't have assignment for today yet
         $routineTaskDefs = CashierTaskDefinition::where('jurusan_id', $jurusanId)
             ->where('is_routine', true)
-            ->where('date', '<=', $today)
-            ->whereDoesntHave('assignments', function ($q) use ($userId) {
-                $q->where('assigned_to', $userId);
+            ->whereDoesntHave('assignments', function ($q) use ($userId, $today) {
+                $q->where('assigned_to', $userId)
+                  ->whereDate('created_at', $today);
             })
             ->get();
 

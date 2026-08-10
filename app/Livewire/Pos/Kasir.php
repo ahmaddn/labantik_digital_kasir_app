@@ -422,8 +422,10 @@ class Kasir extends Component
             ->first();
 
         $currentTime = now();
-        $isLateClockOut = false;
+        $isEarlyClockOut = false;
+        $isBonusClockOut = false;
         $deductedClockOut = 0;
+        $bonusPoints = 10;
 
         $jurusan = Jurusan::find($activeJurusanId);
         $settings = $jurusan ? ($jurusan->theme_settings ?: []) : [];
@@ -434,8 +436,8 @@ class Kasir extends Component
             try {
                 $targetTime = \Carbon\Carbon::createFromFormat('H:i', $targetClockOut);
                 $targetTime->setDate($currentTime->year, $currentTime->month, $currentTime->day);
-                if ($currentTime->gt($targetTime)) {
-                    $isLateClockOut = true;
+                if ($currentTime->lt($targetTime)) {
+                    $isEarlyClockOut = true;
                     if ($penaltyClockOut > 0) {
                         $deductedClockOut = $penaltyClockOut;
                         auth()->user()->decrement('points', $penaltyClockOut);
@@ -443,6 +445,10 @@ class Kasir extends Component
                             auth()->user()->update(['points' => 0]);
                         }
                     }
+                } else {
+                    $isBonusClockOut = true;
+                    auth()->user()->increment('points', $bonusPoints);
+                    auth()->user()->increment('streak', 1);
                 }
             } catch (\Exception $e) {
                 // ignore
@@ -469,8 +475,10 @@ class Kasir extends Component
         $this->showClosingReportModal = false;
         $this->stockItems = [];
 
-        if ($isLateClockOut && $deductedClockOut > 0) {
-            session()->flash('toast', 'Sesi kasir berhasil diselesaikan. Anda TERLAMBAT clock-out! Poin berkurang ' . $deductedClockOut);
+        if ($isEarlyClockOut && $deductedClockOut > 0) {
+            session()->flash('toast', 'Sesi kasir berhasil diselesaikan. Anda clock-out TERLALU CEPAT! Poin berkurang ' . $deductedClockOut);
+        } elseif ($isBonusClockOut) {
+            session()->flash('toast', 'Sesi kasir berhasil diselesaikan. Selamat, Anda mendapat bonus +' . $bonusPoints . ' poin & +1 streak!');
         } else {
             session()->flash('toast', 'Sesi kasir berhasil diselesaikan.');
         }
@@ -647,8 +655,11 @@ class Kasir extends Component
                 $query->whereHas('taskDefinition', function ($q) use ($today) {
                     $q->where('date', $today);
                 })
-                ->orWhereHas('taskDefinition', function ($q) {
-                    $q->where('is_routine', true);
+                ->orWhere(function ($q) use ($today) {
+                    $q->whereHas('taskDefinition', function ($sq) {
+                        $sq->where('is_routine', true);
+                    })
+                    ->whereDate('created_at', $today);
                 });
             })
             ->whereDoesntHave('submissions', function ($q) {
@@ -664,7 +675,7 @@ class Kasir extends Component
             $taskDef = $assignment->taskDefinition;
             if ($taskDef->is_routine && ! $taskDef->deadline_at) {
                 $attendance = CashierAttendance::where('user_id', auth()->id())
-                    ->where('date', $taskDef->date)
+                    ->where('date', $assignment->created_at->toDateString())
                     ->orderBy('clock_in', 'asc')
                     ->first();
 

@@ -459,7 +459,6 @@ class CashierTasks extends Component
                 });
             });
             $tasks = $query->orderBy('date', 'desc')->orderBy('created_at', 'desc')->simplePaginate(15);
-
         } elseif ($this->activeTab === 'history') {
             $query = CashierTaskDefinition::with($with);
             if ($activeJurusanId) $query->where('jurusan_id', $activeJurusanId);
@@ -467,20 +466,21 @@ class CashierTasks extends Component
                 $q->where('task_name', 'like', "%$search%")
                   ->orWhere('description', 'like', "%$search%");
             });
-            $query->where(function ($q) use ($today) {
-                $q->where('date', '<', $today)
-                  ->orWhere(function ($q2) {
-                      $q2->whereHas('assignments')
-                         ->whereDoesntHave('assignments', function ($aq) {
-                             $aq->whereDoesntHave('submissions', function ($sq) {
-                                 $sq->where('approval_status', 'approved');
-                             })
-                             ->whereHas('submissions', function ($sq) {
-                                 $sq->where('approval_status', 'rejected');
-                             }, '<', 3);
-                         });
+            $query->where('is_routine', false)
+                  ->where(function ($q) use ($today) {
+                      $q->where('date', '<', $today)
+                        ->orWhere(function ($q2) {
+                            $q2->whereHas('assignments')
+                               ->whereDoesntHave('assignments', function ($aq) {
+                                   $aq->whereDoesntHave('submissions', function ($sq) {
+                                       $sq->where('approval_status', 'approved');
+                                   })
+                                   ->whereHas('submissions', function ($sq) {
+                                       $sq->where('approval_status', 'rejected');
+                                   }, '<', 3);
+                               });
+                        });
                   });
-            });
             $tasks = $query->orderBy('date', 'desc')->orderBy('created_at', 'desc')->simplePaginate(15);
 
         } else {
@@ -490,24 +490,39 @@ class CashierTasks extends Component
                 $q->where('task_name', 'like', "%$search%")
                   ->orWhere('description', 'like', "%$search%");
             });
-            $query->where('date', '>=', $today)
-                  ->where(function ($q) {
-                      $q->whereDoesntHave('assignments')
-                        ->orWhereHas('assignments', function ($aq) {
-                            $aq->whereDoesntHave('submissions', function ($sq) {
-                                $sq->where('approval_status', 'approved');
-                            })
-                            ->whereHas('submissions', function ($sq) {
-                                $sq->where('approval_status', 'rejected');
-                            }, '<', 3);
-                        });
+            $query->where(function ($q) use ($today) {
+                $q->where('is_routine', true)
+                  ->orWhere(function ($q2) use ($today) {
+                      $q2->where('is_routine', false)
+                         ->where('date', '>=', $today)
+                         ->where(function ($q3) {
+                             $q3->whereDoesntHave('assignments')
+                                ->orWhereHas('assignments', function ($aq) {
+                                    $aq->whereDoesntHave('submissions', function ($sq) {
+                                        $sq->where('approval_status', 'approved');
+                                    })
+                                    ->whereHas('submissions', function ($sq) {
+                                        $sq->where('approval_status', 'rejected');
+                                    }, '<', 3);
+                                });
+                         });
                   });
-            $tasks = $query->orderBy('date', 'asc')->orderBy('created_at', 'desc')->simplePaginate(15);
+            });
+            $tasks = $query->orderBy('is_routine', 'desc')->orderBy('date', 'asc')->orderBy('created_at', 'desc')->simplePaginate(15);
         }
 
         $jurusans = session('active_role_name') === 'superadmin' 
             ? Jurusan::all() 
             : collect();
+
+        $pendingReviewCount = CashierTaskDefinition::whereHas('assignments', function ($q) use ($activeJurusanId) {
+            if ($activeJurusanId) {
+                $q->where('jurusan_id', $activeJurusanId);
+            }
+            $q->whereHas('submissions', function ($q2) {
+                $q2->where('approval_status', 'pending');
+            });
+        })->count();
 
         return view('livewire.management.cashier-tasks', [
             'tasks' => $tasks,
@@ -515,6 +530,7 @@ class CashierTasks extends Component
             'categories' => $categories,
             'jurusans' => $jurusans,
             'currentReviewingSubmissions' => $this->currentReviewingSubmissions,
+            'pendingReviewCount' => $pendingReviewCount,
         ]);
     }
 }

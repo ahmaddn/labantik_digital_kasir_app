@@ -31,7 +31,7 @@
             @forelse($todayAssignments as $assignment)
                 <div
                     class="bg-white dark:bg-gray-800 rounded-[2rem] shadow-lg shadow-blue-900/5 border border-gray-100 dark:border-gray-700/50 p-6 hover:shadow-xl transition-all">
-                    <div class="flex items-start justify-between gap-4">
+                    <div class="flex flex-col md:flex-row md:items-start justify-between gap-4">
                         <div class="flex-1">
                             <!-- Task Name & Description -->
                             <div class="mb-3">
@@ -75,7 +75,7 @@
                         </div>
 
                         <!-- Status & Action -->
-                        <div class="flex flex-col items-end gap-3">
+                        <div class="flex flex-row md:flex-col items-center md:items-end justify-between md:justify-start w-full md:w-auto gap-3 border-t md:border-t-0 pt-4 md:pt-0 border-gray-100 dark:border-gray-700">
                             @php
                                 $latestSubmission = $assignment->submissions->first();
                             @endphp
@@ -140,7 +140,7 @@
             @forelse($historyAssignments as $assignment)
                 <div
                     class="bg-white dark:bg-gray-800 rounded-[2rem] shadow-lg shadow-blue-900/5 border border-gray-100 dark:border-gray-700/50 p-6 opacity-75 hover:opacity-100 transition-all">
-                    <div class="flex items-start justify-between gap-4">
+                    <div class="flex flex-col md:flex-row md:items-start justify-between gap-4">
                         <div class="flex-1">
                             <h3 class="text-lg font-black text-gray-850 dark:text-white uppercase tracking-tight">
                                 {{ $assignment->taskDefinition->task_name }}
@@ -150,7 +150,7 @@
                             </p>
                         </div>
 
-                        <div class="flex flex-col items-end gap-2">
+                        <div class="flex flex-row md:flex-col items-center md:items-end justify-between md:justify-start w-full md:w-auto gap-2 border-t md:border-t-0 pt-4 md:pt-0 border-gray-100 dark:border-gray-700">
                             @php
                                 $latestSubmission = $assignment->submissions->first();
                             @endphp

@@ -38,8 +38,10 @@ class LateReport extends Component
             ->first();
 
         $currentTime = now();
-        $isLateClockOut = false;
+        $isEarlyClockOut = false;
+        $isBonusClockOut = false;
         $deductedClockOut = 0;
+        $bonusPoints = 10;
 
         $jurusan = \App\Models\Jurusan::find($activeJurusanId);
         $settings = $jurusan ? ($jurusan->theme_settings ?: []) : [];
@@ -50,8 +52,8 @@ class LateReport extends Component
             try {
                 $targetTime = \Carbon\Carbon::createFromFormat('H:i', $targetClockOut);
                 $targetTime->setDate($currentTime->year, $currentTime->month, $currentTime->day);
-                if ($currentTime->gt($targetTime)) {
-                    $isLateClockOut = true;
+                if ($currentTime->lt($targetTime)) {
+                    $isEarlyClockOut = true;
                     if ($penaltyClockOut > 0) {
                         $deductedClockOut = $penaltyClockOut;
                         auth()->user()->decrement('points', $penaltyClockOut);
@@ -59,6 +61,10 @@ class LateReport extends Component
                             auth()->user()->update(['points' => 0]);
                         }
                     }
+                } else {
+                    $isBonusClockOut = true;
+                    auth()->user()->increment('points', $bonusPoints);
+                    auth()->user()->increment('streak', 1);
                 }
             } catch (\Exception $e) {
                 // ignore
@@ -74,8 +80,10 @@ class LateReport extends Component
             ]);
         }
 
-        if ($isLateClockOut && $deductedClockOut > 0) {
-            session()->flash('toast', 'Laporan closing berhasil dikirim. Anda TERLAMBAT clock-out! Poin berkurang ' . $deductedClockOut);
+        if ($isEarlyClockOut && $deductedClockOut > 0) {
+            session()->flash('toast', 'Laporan closing berhasil dikirim. Anda clock-out TERLALU CEPAT! Poin berkurang ' . $deductedClockOut);
+        } elseif ($isBonusClockOut) {
+            session()->flash('toast', 'Laporan closing berhasil dikirim. Selamat, Anda mendapat bonus +' . $bonusPoints . ' poin & +1 streak!');
         } else {
             session()->flash('toast', 'Laporan closing berhasil dikirim dan Anda telah clock-out.');
         }

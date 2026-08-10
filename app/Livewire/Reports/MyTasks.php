@@ -158,8 +158,11 @@ class MyTasks extends Component
                 $query->whereHas('taskDefinition', function ($q) use ($today) {
                     $q->where('date', $today);
                 })
-                ->orWhereHas('taskDefinition', function ($q) {
-                    $q->where('is_routine', true);
+                ->orWhere(function ($q) use ($today) {
+                    $q->whereHas('taskDefinition', function ($sq) {
+                        $sq->where('is_routine', true);
+                    })
+                    ->whereDate('created_at', $today);
                 });
             })
             ->whereDoesntHave('submissions', function ($q) {
@@ -175,7 +178,7 @@ class MyTasks extends Component
         foreach ($todayAssignments as $assignment) {
             if ($assignment->taskDefinition->is_routine && !$assignment->taskDefinition->deadline_at) {
                 $attendance = CashierAttendance::where('user_id', $userId)
-                    ->where('date', $assignment->taskDefinition->date)
+                    ->where('date', $assignment->created_at->toDateString())
                     ->orderBy('clock_in', 'asc')
                     ->first();
 
@@ -205,6 +208,12 @@ class MyTasks extends Component
                         $sq->where('date', '<', $today)
                            ->where('is_routine', false);
                     });
+                })
+                ->orWhere(function ($q) use ($today) {
+                    $q->whereHas('taskDefinition', function ($sq) {
+                        $sq->where('is_routine', true);
+                    })
+                    ->whereDate('created_at', '<', $today);
                 });
             })
             ->orderBy('created_at', 'desc')
@@ -213,7 +222,7 @@ class MyTasks extends Component
         foreach ($historyAssignments as $assignment) {
             if ($assignment->taskDefinition->is_routine && !$assignment->taskDefinition->deadline_at) {
                 $attendance = CashierAttendance::where('user_id', $userId)
-                    ->where('date', $assignment->taskDefinition->date)
+                    ->where('date', $assignment->created_at->toDateString())
                     ->orderBy('clock_in', 'asc')
                     ->first();
 
