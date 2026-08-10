@@ -253,7 +253,7 @@
                 </a>
             @endif
 
-            @if (session('active_role_name') === 'pengelola_jurusan' || session('active_role_name') === 'kasir')
+            @if (in_array(session('active_role_name'), ['superadmin', 'pengelola_jurusan', 'kasir']))
                 <a href="{{ route('buku-kas') }}"
                     class="flex items-center px-6 py-4 text-sm font-black rounded-2xl transition-all {{ request()->routeIs('buku-kas') ? 'bg-primary-blue text-white shadow-xl shadow-blue-900/20' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
                     <svg class="w-5 h-5 mr-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
@@ -296,7 +296,7 @@
                 History Transaksi
             </a>
 
-            @if (session('active_role_name') === 'pengelola_jurusan' || session('active_role_name') === 'kasir')
+            @if (in_array(session('active_role_name'), ['superadmin', 'pengelola_jurusan', 'kasir']))
                 <a href="{{ route('debts') }}"
                     class="flex items-center px-6 py-4 text-sm font-black rounded-2xl transition-all {{ request()->routeIs('debts') ? 'bg-primary-blue text-white shadow-xl shadow-blue-900/20' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
                     <svg class="w-5 h-5 mr-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24"

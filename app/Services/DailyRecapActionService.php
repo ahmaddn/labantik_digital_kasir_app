@@ -152,8 +152,8 @@ class DailyRecapActionService
             }
 
             if ($diff > 0) {
-                $catPenjualanUmum = CashCategory::firstOrCreate(
-                    ['name' => 'Penjualan Umum', 'jurusan_id' => $activeJurusanId]
+                $catSnackMinuman = CashCategory::firstOrCreate(
+                    ['name' => 'Jurusan Snack & Minuman', 'jurusan_id' => $activeJurusanId]
                 );
 
                 $baseDescription = 'Penyesuaian Selisih Lebih Uang Kas';
@@ -167,7 +167,7 @@ class DailyRecapActionService
                     ],
                     [
                         'cash_type' => 'keuntungan',
-                        'cash_category_id' => $catPenjualanUmum->id,
+                        'cash_category_id' => $catSnackMinuman->id,
                         'type' => 'income',
                         'amount' => $diff,
                     ]
