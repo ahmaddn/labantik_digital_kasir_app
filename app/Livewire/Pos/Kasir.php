@@ -83,8 +83,14 @@ class Kasir extends Component
                 ->exists();
 
             if (! $hasHigherRole) {
+                $activeJurusan = Jurusan::find($activeJurusanId);
+                $allowedJurusanIds = [$activeJurusanId];
+                if ($activeJurusan && $activeJurusan->parent_id) {
+                    $allowedJurusanIds[] = $activeJurusan->parent_id;
+                }
+
                 $isScheduled = CashierSchedule::where('user_id', auth()->id())
-                    ->where('jurusan_id', $activeJurusanId)
+                    ->whereIn('jurusan_id', $allowedJurusanIds)
                     ->where('date', now()->toDateString())
                     ->exists();
 
@@ -111,7 +117,7 @@ class Kasir extends Component
                 if (! $attendance) {
                     // Auto clock-in: first POS entry of the day counts as clock in
                     $schedule = CashierSchedule::where('user_id', auth()->id())
-                        ->where('jurusan_id', $activeJurusanId)
+                        ->whereIn('jurusan_id', $allowedJurusanIds)
                         ->where('date', now()->toDateString())
                         ->first();
 

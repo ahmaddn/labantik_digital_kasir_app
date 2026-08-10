@@ -36,8 +36,14 @@
                         ->exists();
                     $isScheduled = true;
                     if (session('active_role_name') === 'kasir' && !$hasHigherRole) {
+                        $activeJurusanId = session('active_jurusan_id');
+                        $activeJurusan = \App\Models\Jurusan::find($activeJurusanId);
+                        $allowedJurusanIds = [$activeJurusanId];
+                        if ($activeJurusan && $activeJurusan->parent_id) {
+                            $allowedJurusanIds[] = $activeJurusan->parent_id;
+                        }
                         $isScheduled = \App\Models\CashierSchedule::where('user_id', auth()->id())
-                            ->where('jurusan_id', session('active_jurusan_id'))
+                            ->whereIn('jurusan_id', $allowedJurusanIds)
                             ->where('date', now()->toDateString())
                             ->exists();
                     }
