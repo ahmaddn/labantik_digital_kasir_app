@@ -466,8 +466,7 @@ class CashierTasks extends Component
                 $q->where('task_name', 'like', "%$search%")
                   ->orWhere('description', 'like', "%$search%");
             });
-            $query->where('is_routine', false)
-                  ->where('date', '<', $today);
+            $query->where('date', '<', $today);
             $tasks = $query->orderBy('date', 'desc')->orderBy('created_at', 'desc')->simplePaginate(15);
 
         } else {
