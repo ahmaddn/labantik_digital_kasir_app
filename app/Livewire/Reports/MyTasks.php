@@ -98,16 +98,24 @@ class MyTasks extends Component
         if ($taskDef->requires_proof) {
             // New submission requires proof
             if (!$latestSubmission) {
-                $rules['submissionProofImage'] = 'required|image|max:2048';
+                $rules['submissionProofImage'] = 'required|image|max:5120';
             } else {
                 // Revision: proof is optional if already provided
-                $rules['submissionProofImage'] = 'nullable|image|max:2048';
+                $rules['submissionProofImage'] = 'nullable|image|max:5120';
             }
         } else {
             $rules['submissionProofImage'] = 'nullable';
         }
 
-        $this->validate($rules);
+        $messages = [
+            'submissionProofImage.required' => 'Bukti gambar wajib diunggah.',
+            'submissionProofImage.image' => 'File harus berupa gambar.',
+            'submissionProofImage.max' => 'Ukuran gambar maksimal adalah 5MB (kurangi resolusi kamera HP Anda jika melebihi batas).',
+            'submissionReport.required' => 'Laporan wajib diisi.',
+            'submissionReport.min' => 'Laporan minimal berisi 5 karakter.',
+        ];
+
+        $this->validate($rules, $messages);
 
         $proofImagePath = null;
         if ($this->submissionProofImage) {
