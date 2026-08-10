@@ -131,17 +131,16 @@
                         ->exists();
 
                     if (session('active_role_name') === 'kasir') {
-                            $activeJurusanId = session('active_jurusan_id');
-                            $activeJurusan = \App\Models\Jurusan::find($activeJurusanId);
-                            $allowedJurusanIds = [$activeJurusanId];
-                            if ($activeJurusan && $activeJurusan->parent_id) {
-                                $allowedJurusanIds[] = $activeJurusan->parent_id;
-                            }
-                            $isScheduled = \App\Models\CashierSchedule::where('user_id', auth()->id())
-                                ->whereIn('jurusan_id', $allowedJurusanIds)
-                                ->where('date', now()->toDateString())
-                                ->exists();
+                        $activeJurusanId = session('active_jurusan_id');
+                        $activeJurusan = \App\Models\Jurusan::find($activeJurusanId);
+                        $allowedJurusanIds = [$activeJurusanId];
+                        if ($activeJurusan && $activeJurusan->parent_id) {
+                            $allowedJurusanIds[] = $activeJurusan->parent_id;
                         }
+                        $isScheduled = \App\Models\CashierSchedule::where('user_id', auth()->id())
+                            ->whereIn('jurusan_id', $allowedJurusanIds)
+                            ->where('date', now()->toDateString())
+                            ->exists();
                     }
                 @endphp
 
