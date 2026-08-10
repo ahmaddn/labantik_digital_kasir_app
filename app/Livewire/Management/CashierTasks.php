@@ -467,20 +467,7 @@ class CashierTasks extends Component
                   ->orWhere('description', 'like', "%$search%");
             });
             $query->where('is_routine', false)
-                  ->where(function ($q) use ($today) {
-                      $q->where('date', '<', $today)
-                        ->orWhere(function ($q2) {
-                            $q2->whereHas('assignments')
-                               ->whereDoesntHave('assignments', function ($aq) {
-                                   $aq->whereDoesntHave('submissions', function ($sq) {
-                                       $sq->where('approval_status', 'approved');
-                                   })
-                                   ->whereHas('submissions', function ($sq) {
-                                       $sq->where('approval_status', 'rejected');
-                                   }, '<', 3);
-                               });
-                        });
-                  });
+                  ->where('date', '<', $today);
             $tasks = $query->orderBy('date', 'desc')->orderBy('created_at', 'desc')->simplePaginate(15);
 
         } else {
@@ -492,21 +479,7 @@ class CashierTasks extends Component
             });
             $query->where(function ($q) use ($today) {
                 $q->where('is_routine', true)
-                  ->orWhere(function ($q2) use ($today) {
-                      $q2->where('is_routine', false)
-                         ->where('date', '>=', $today)
-                         ->where(function ($q3) {
-                             $q3->whereDoesntHave('assignments')
-                                ->orWhereHas('assignments', function ($aq) {
-                                    $aq->whereDoesntHave('submissions', function ($sq) {
-                                        $sq->where('approval_status', 'approved');
-                                    })
-                                    ->whereHas('submissions', function ($sq) {
-                                        $sq->where('approval_status', 'rejected');
-                                    }, '<', 3);
-                                });
-                         });
-                  });
+                  ->orWhere('date', '>=', $today);
             });
             $tasks = $query->orderBy('is_routine', 'desc')->orderBy('date', 'asc')->orderBy('created_at', 'desc')->simplePaginate(15);
         }
