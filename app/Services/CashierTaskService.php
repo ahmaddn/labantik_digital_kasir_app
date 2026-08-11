@@ -59,9 +59,20 @@ class CashierTaskService
      */
     public function assignTaskToAllCashiers(CashierTaskDefinition $taskDef): void
     {
+        $targetJurusan = \App\Models\Jurusan::find($taskDef->jurusan_id);
+        $allowedJurusanIds = [$taskDef->jurusan_id];
+        if ($targetJurusan) {
+            if ($targetJurusan->parent_id) {
+                $allowedJurusanIds[] = $targetJurusan->parent_id;
+            }
+            $childIds = \App\Models\Jurusan::where('parent_id', $targetJurusan->id)->pluck('id')->toArray();
+            $allowedJurusanIds = array_merge($allowedJurusanIds, $childIds);
+        }
+        $allowedJurusanIds = array_unique(array_filter($allowedJurusanIds));
+
         // Only assign to cashiers who are SCHEDULED on the task's date
         $scheduledUserIds = \App\Models\CashierSchedule::where('date', $taskDef->date)
-            ->where('jurusan_id', $taskDef->jurusan_id)
+            ->whereIn('jurusan_id', $allowedJurusanIds)
             ->pluck('user_id')
             ->unique();
 
@@ -96,10 +107,21 @@ class CashierTaskService
     public function autoAssignRoutineTasksForCashier(string $userId, string $jurusanId): void
     {
         $today = now()->toDateString();
+        
+        $targetJurusan = \App\Models\Jurusan::find($jurusanId);
+        $allowedJurusanIds = [$jurusanId];
+        if ($targetJurusan) {
+            if ($targetJurusan->parent_id) {
+                $allowedJurusanIds[] = $targetJurusan->parent_id;
+            }
+            $childIds = \App\Models\Jurusan::where('parent_id', $targetJurusan->id)->pluck('id')->toArray();
+            $allowedJurusanIds = array_merge($allowedJurusanIds, $childIds);
+        }
+        $allowedJurusanIds = array_unique(array_filter($allowedJurusanIds));
 
         // Check if this kasir has schedule today
         $isScheduled = \App\Models\CashierSchedule::where('user_id', $userId)
-            ->where('jurusan_id', $jurusanId)
+            ->whereIn('jurusan_id', $allowedJurusanIds)
             ->where('date', $today)
             ->exists();
 
@@ -108,7 +130,7 @@ class CashierTaskService
         }
 
         // Find all routine task definitions that kasir doesn't have assignment for today yet
-        $routineTaskDefs = CashierTaskDefinition::where('jurusan_id', $jurusanId)
+        $routineTaskDefs = CashierTaskDefinition::whereIn('jurusan_id', $allowedJurusanIds)
             ->where('is_routine', true)
             ->whereDoesntHave('assignments', function ($q) use ($userId, $today) {
                 $q->where('assigned_to', $userId)
@@ -120,7 +142,7 @@ class CashierTaskService
             CashierTaskAssignment::create([
                 'task_definition_id' => $taskDef->id,
                 'assigned_to' => $userId,
-                'jurusan_id' => $jurusanId,
+                'jurusan_id' => $taskDef->jurusan_id,
                 'assignment_status' => 'new',
             ]);
 

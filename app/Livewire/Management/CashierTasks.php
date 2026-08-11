@@ -406,25 +406,39 @@ class CashierTasks extends Component
 
         $activeJurusanId = session('active_jurusan_id') ?: $this->selectedJurusanId;
 
+        $allowedJurusanIds = [];
+        if ($activeJurusanId) {
+            $allowedJurusanIds = [$activeJurusanId];
+            $targetJurusan = Jurusan::find($activeJurusanId);
+            if ($targetJurusan) {
+                if ($targetJurusan->parent_id) {
+                    $allowedJurusanIds[] = $targetJurusan->parent_id;
+                }
+                $childIds = Jurusan::where('parent_id', $targetJurusan->id)->pluck('id')->toArray();
+                $allowedJurusanIds = array_merge($allowedJurusanIds, $childIds);
+            }
+            $allowedJurusanIds = array_unique(array_filter($allowedJurusanIds));
+        }
+
         // Fetch Cashiers for dropdown selection
         if ($this->assigneeMode === 'scheduled') {
             $scheduledIds = CashierSchedule::where('date', now()->toDateString())
-                ->when($activeJurusanId, function ($q) use ($activeJurusanId) {
-                    $q->where('jurusan_id', $activeJurusanId);
+                ->when(!empty($allowedJurusanIds), function ($q) use ($allowedJurusanIds) {
+                    $q->whereIn('jurusan_id', $allowedJurusanIds);
                 })->pluck('user_id')->unique()->values();
 
             $cashiers = User::whereIn('id', $scheduledIds)
-                ->whereHas('roles', function ($q) use ($activeJurusanId) {
+                ->whereHas('roles', function ($q) use ($allowedJurusanIds) {
                     $q->where('roles.name', 'kasir')
-                        ->when($activeJurusanId, function ($sq) use ($activeJurusanId) {
-                            $sq->where('role_user.jurusan_id', $activeJurusanId);
+                        ->when(!empty($allowedJurusanIds), function ($sq) use ($allowedJurusanIds) {
+                            $sq->whereIn('role_user.jurusan_id', $allowedJurusanIds);
                         });
                 })->get();
         } else {
-            $cashiers = User::whereHas('roles', function ($q) use ($activeJurusanId) {
+            $cashiers = User::whereHas('roles', function ($q) use ($allowedJurusanIds) {
                 $q->where('roles.name', 'kasir')
-                    ->when($activeJurusanId, function ($sq) use ($activeJurusanId) {
-                        $sq->where('role_user.jurusan_id', $activeJurusanId);
+                    ->when(!empty($allowedJurusanIds), function ($sq) use ($allowedJurusanIds) {
+                        $sq->whereIn('role_user.jurusan_id', $allowedJurusanIds);
                     });
             })->get();
         }
