@@ -8,20 +8,20 @@
     </div>
 
     <!-- Tabs -->
-    <div class="flex items-center gap-2 border-b border-gray-200 dark:border-gray-700">
+    <div class="flex items-center gap-2 border-b border-gray-200 dark:border-gray-700 overflow-x-auto flex-nowrap [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         <button wire:click="$set('activeTab', 'today')"
-            class="px-6 py-3 font-black text-sm uppercase tracking-wider flex items-center gap-2 {{ $activeTab === 'today' ? 'text-primary-blue dark:text-primary-yellow border-b-2 border-primary-blue dark:border-primary-yellow' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300' }}">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            class="px-6 py-3 font-black text-sm uppercase tracking-wider flex items-center gap-2 shrink-0 {{ $activeTab === 'today' ? 'text-primary-blue dark:text-primary-yellow border-b-2 border-primary-blue dark:border-primary-yellow' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300' }}">
+            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
             </svg>
-            Tugas Hari Ini
+            <span class="shrink-0">Tugas Hari Ini</span>
         </button>
         <button wire:click="$set('activeTab', 'history')"
-            class="px-6 py-3 font-black text-sm uppercase tracking-wider flex items-center gap-2 {{ $activeTab === 'history' ? 'text-primary-blue dark:text-primary-yellow border-b-2 border-primary-blue dark:border-primary-yellow' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300' }}">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            class="px-6 py-3 font-black text-sm uppercase tracking-wider flex items-center gap-2 shrink-0 {{ $activeTab === 'history' ? 'text-primary-blue dark:text-primary-yellow border-b-2 border-primary-blue dark:border-primary-yellow' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300' }}">
+            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
             </svg>
-            Riwayat
+            <span class="shrink-0">Riwayat</span>
         </button>
     </div>
 

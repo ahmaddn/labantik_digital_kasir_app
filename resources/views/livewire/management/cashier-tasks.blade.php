@@ -7,9 +7,9 @@
             <p class="text-gray-400 text-sm font-semibold uppercase tracking-widest mt-1">Kelola tugas operasional untuk
                 kasir</p>
         </div>
-        <div class="flex items-center gap-3">
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
             @if (session('active_role_name') === 'superadmin')
-                <div class="w-64">
+                <div class="w-full sm:w-64">
                     <select wire:model.live="selectedJurusanId"
                         class="w-full px-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-semibold text-gray-700 dark:text-gray-200">
                         <option value="">-- Pilih Jurusan --</option>
@@ -21,8 +21,8 @@
             @endif
 
             <button wire:click="openCreateModal"
-                class="inline-flex items-center px-5 py-3.5 bg-primary-blue hover:bg-blue-900 text-primary-yellow rounded-xl font-black text-sm uppercase italic tracking-wider transition-all duration-300 shadow-xl shadow-blue-900/10 active:scale-95">
-                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                class="inline-flex items-center justify-center px-5 py-3.5 bg-primary-blue hover:bg-blue-900 text-primary-yellow rounded-xl font-black text-sm uppercase italic tracking-wider transition-all duration-300 shadow-xl shadow-blue-900/10 active:scale-95 w-full sm:w-auto">
+                <svg class="w-5 h-5 mr-2 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path>
                 </svg>
                 Tambah Tugas Baru
@@ -31,30 +31,30 @@
     </div>
 
     <!-- Tabs -->
-    <div class="flex items-center gap-2 border-b border-gray-200 dark:border-gray-700">
+    <div class="flex items-center gap-2 border-b border-gray-200 dark:border-gray-700 overflow-x-auto flex-nowrap [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         <button wire:click="$set('activeTab', 'active')"
-            class="px-6 py-3 font-black text-sm uppercase tracking-wider flex items-center gap-2 {{ $activeTab === 'active' ? 'text-primary-blue dark:text-primary-yellow border-b-2 border-primary-blue dark:border-primary-yellow' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300' }}">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            class="px-6 py-3 font-black text-sm uppercase tracking-wider flex items-center gap-2 shrink-0 {{ $activeTab === 'active' ? 'text-primary-blue dark:text-primary-yellow border-b-2 border-primary-blue dark:border-primary-yellow' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300' }}">
+            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
             </svg>
-            Daftar Tugas
+            <span class="shrink-0">Daftar Tugas</span>
         </button>
         <button wire:click="$set('activeTab', 'pending_review')"
-            class="px-6 py-3 font-black text-sm uppercase tracking-wider flex items-center gap-2 {{ $activeTab === 'pending_review' ? 'text-primary-blue dark:text-primary-yellow border-b-2 border-primary-blue dark:border-primary-yellow' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300' }}">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            class="px-6 py-3 font-black text-sm uppercase tracking-wider flex items-center gap-2 shrink-0 {{ $activeTab === 'pending_review' ? 'text-primary-blue dark:text-primary-yellow border-b-2 border-primary-blue dark:border-primary-yellow' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300' }}">
+            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
             </svg>
-            Menunggu Review
+            <span class="shrink-0">Menunggu Review</span>
             @if($pendingReviewCount > 0)
-                <span class="px-2 py-0.5 text-[10px] font-black bg-rose-500 text-white rounded-full leading-none">{{ $pendingReviewCount }}</span>
+                <span class="px-2 py-0.5 text-[10px] font-black bg-rose-500 text-white rounded-full leading-none shrink-0">{{ $pendingReviewCount }}</span>
             @endif
         </button>
         <button wire:click="$set('activeTab', 'history')"
-            class="px-6 py-3 font-black text-sm uppercase tracking-wider flex items-center gap-2 {{ $activeTab === 'history' ? 'text-primary-blue dark:text-primary-yellow border-b-2 border-primary-blue dark:border-primary-yellow' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300' }}">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            class="px-6 py-3 font-black text-sm uppercase tracking-wider flex items-center gap-2 shrink-0 {{ $activeTab === 'history' ? 'text-primary-blue dark:text-primary-yellow border-b-2 border-primary-blue dark:border-primary-yellow' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300' }}">
+            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
             </svg>
-            Riwayat Tugas
+            <span class="shrink-0">Riwayat Tugas</span>
         </button>
     </div>
 
