@@ -48,14 +48,14 @@ class Dashboard extends Component
         $yesterday = today()->subDay();
         $activeJurusanId = session('active_jurusan_id') ?: ($this->filterJurusan ?: null);
 
-        $todayTransactions = Transaction::with('product')
+        $todayTransactions = Transaction::forReporting()->with('product')
             ->whereDate('transacted_at', $today)
             ->when($activeJurusanId, function ($q) use ($activeJurusanId) {
                 return $q->where('jurusan_id', $activeJurusanId);
             })
             ->get();
 
-        $yesterdayTransactions = Transaction::with('product')
+        $yesterdayTransactions = Transaction::forReporting()->with('product')
             ->whereDate('transacted_at', $yesterday)
             ->when($activeJurusanId, function ($q) use ($activeJurusanId) {
                 return $q->where('jurusan_id', $activeJurusanId);
@@ -96,7 +96,7 @@ class Dashboard extends Component
         $countChange = $yesterdayCount > 0 ? (($todayCount - $yesterdayCount) / $yesterdayCount) * 100 : 100;
 
         // General Stats (All Time)
-        $allTimeBase = Transaction::whereIn('status', ['uang_diterima', 'belum_kembalian'])
+        $allTimeBase = Transaction::forReporting()->whereIn('status', ['uang_diterima', 'belum_kembalian'])
             ->when($activeJurusanId, function ($q) use ($activeJurusanId) {
                 return $q->where('jurusan_id', $activeJurusanId);
             });
@@ -132,7 +132,7 @@ class Dashboard extends Component
 
         $totalAuditCash = $cashIncome - $cashExpense;
 
-        $totalOutstandingDebt = Transaction::whereIn('status', ['belum_menerima_uang', 'uang_dipinjam'])
+        $totalOutstandingDebt = Transaction::forReporting()->whereIn('status', ['belum_menerima_uang', 'uang_dipinjam'])
             ->when($activeJurusanId, function ($q) use ($activeJurusanId) {
                 return $q->where('jurusan_id', $activeJurusanId);
             })
@@ -199,7 +199,7 @@ class Dashboard extends Component
         $startDate = today()->subDays(6)->startOfDay()->toDateTimeString();
         $endDate = today()->endOfDay()->toDateTimeString();
 
-        $weeklyTransactions = Transaction::whereBetween('transacted_at', [$startDate, $endDate])
+        $weeklyTransactions = Transaction::forReporting()->whereBetween('transacted_at', [$startDate, $endDate])
             ->when($activeJurusanId, function ($q) use ($activeJurusanId) {
                 return $q->where('jurusan_id', $activeJurusanId);
             })
@@ -221,7 +221,7 @@ class Dashboard extends Component
             $dateString = $date->toDateString();
 
             $dayTxs = $weeklyTransactions->filter(function ($tx) use ($dateString) {
-                return substr($tx->transacted_at, 0, 10) === $dateString;
+                return $tx->transacted_at->format('Y-m-d') === $dateString;
             });
 
             $dayExpenses = (float) ($weeklyExpenses[$dateString] ?? 0);
@@ -233,7 +233,7 @@ class Dashboard extends Component
             ];
         }
 
-        $recentTransactions = Transaction::with('product')
+        $recentTransactions = Transaction::forReporting()->with('product')
             ->when($activeJurusanId, function ($q) use ($activeJurusanId) {
                 return $q->where('jurusan_id', $activeJurusanId);
             })
@@ -241,7 +241,7 @@ class Dashboard extends Component
             ->limit(5)
             ->get();
 
-        $topProducts = Transaction::with('product')
+        $topProducts = Transaction::forReporting()->with('product')
             ->when($activeJurusanId, function ($q) use ($activeJurusanId) {
                 return $q->where('jurusan_id', $activeJurusanId);
             })
@@ -252,7 +252,7 @@ class Dashboard extends Component
             ->get();
 
         // Category Distribution (All Time)
-        $categoryData = Transaction::join('products', 'transactions.product_id', '=', 'products.id')
+        $categoryData = Transaction::forReporting()->join('products', 'transactions.product_id', '=', 'products.id')
             ->join('product_categories', 'products.category_id', '=', 'product_categories.id')
             ->whereIn('transactions.status', ['uang_diterima', 'belum_kembalian'])
             ->when($activeJurusanId, function ($q) use ($activeJurusanId) {
@@ -267,7 +267,7 @@ class Dashboard extends Component
         $startOfMonthRange = today()->subMonths(5)->startOfMonth()->startOfDay()->toDateTimeString();
         $endOfMonthRange = today()->endOfDay()->toDateTimeString();
 
-        $monthlyTransactions = Transaction::whereBetween('transacted_at', [$startOfMonthRange, $endOfMonthRange])
+        $monthlyTransactions = Transaction::forReporting()->whereBetween('transacted_at', [$startOfMonthRange, $endOfMonthRange])
             ->whereIn('status', ['uang_diterima', 'belum_kembalian'])
             ->when($activeJurusanId, function ($q) use ($activeJurusanId) {
                 return $q->where('jurusan_id', $activeJurusanId);

@@ -18,7 +18,7 @@
         
         <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full lg:w-auto">
             @if ($viewMode === 'weekly')
-                <div x-data="{ start: @entangle('startDate').live, end: @entangle('endDate').live, startInstance: null, endInstance: null }"
+                <div wire:ignore x-data="{ start: @entangle('startDate').live, end: @entangle('endDate').live, startInstance: null, endInstance: null }"
                     x-init="startInstance = flatpickr($refs.startDate, { dateFormat: 'Y-m-d', defaultDate: start, onChange: (s, d) => start = d }); $watch('start', v => startInstance.setDate(v, false)); endInstance = flatpickr($refs.endDate, { dateFormat: 'Y-m-d', defaultDate: end, onChange: (s, d) => end = d }); $watch('end', v => endInstance.setDate(v, false))"
                     class="flex items-center justify-between bg-white dark:bg-gray-900 p-2 rounded-[2rem] shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-800 cursor-pointer w-full sm:w-auto">
                     <div class="px-5 py-2 flex-1 sm:flex-initial">
