@@ -56,16 +56,6 @@
         }
     },
 
-    handleProductClick(e) {
-        if (e.target.closest('button[data-add-to-cart]')) {
-            const productId = e.target.closest('button').dataset.productId;
-            const product = this.products.find(p => p.id === productId);
-            if (product) {
-                this.addToCart(product);
-            }
-        }
-    },
-
     removeFromCart(productId) {
         const index = this.cart.findIndex(item => item.id === productId);
         if (index !== -1) {
@@ -164,12 +154,6 @@ $nextTick(() => {
     if (searchInput) searchInput.focus();
 });
 
-// Setup event listeners that persist even after idle
-const gridContainer = document.querySelector('[data-product-grid]');
-if (gridContainer) {
-    gridContainer.addEventListener('click', (e) => $dispatch('product-click', { event: e }));
-}
-
 // Setup keydown listener for checkout
 document.addEventListener('keydown', (e) => {
     if (e.key === 'Enter' && !e.ctrlKey && !e.shiftKey && !e.altKey) {
@@ -181,7 +165,6 @@ document.addEventListener('keydown', (e) => {
 });"
     class="flex flex-col lg:flex-row h-screen w-full bg-slate-50 dark:bg-dark-bg overflow-hidden font-outfit relative"
     x-on:stock-saved.window="products = $event.detail.products"
-    x-on:product-click="handleProductClick($event.detail.event)"
     x-on:keydown.window.escape="search = ''; $nextTick(() => { const el = document.getElementById('pos-search-input'); if (el) el.focus(); })"
     x-on:keydown.window.prevent.slash="if (document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') { $nextTick(() => { const el = document.getElementById('pos-search-input'); if (el) el.focus(); }) }">
 
@@ -328,7 +311,7 @@ document.addEventListener('keydown', (e) => {
             <div x-show="filteredProducts.length > 0"
                 class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
                 <template x-for="product in filteredProducts" :key="product.id">
-                    <button type="button" data-add-to-cart :data-product-id="product.id"
+                    <button type="button" @click="addToCart(product)"
                         :disabled="{{ $isSessionFinished ? 'true' : 'false' }}"
                         :class="getCategoryBorderColor(product.category_name)"
                         class="nb-card nb-card-hover group p-0 text-left overflow-hidden flex flex-col h-full bg-white dark:bg-slate-900">
@@ -369,7 +352,7 @@ document.addEventListener('keydown', (e) => {
     </div>
 
     <!-- 2. Right Sidebar (Cart) -->
-    <div x-show="window.innerWidth >= 1024 || showCart"
+    <div x-show="window.innerWidth >= 1024 || showCart" x-cloak
         class="fixed inset-y-0 right-0 w-full md:w-[420px] bg-white dark:bg-slate-900 lg:static lg:flex lg:w-[420px] flex flex-col z-[100] border-l-[var(--nb-border)] border-black dark:border-slate-800">
 
         <div
@@ -1048,17 +1031,5 @@ document.addEventListener('keydown', (e) => {
             }, 100);
         });
 
-        // Re-setup event listeners when Livewire updates
-        document.addEventListener('livewire:updated', () => {
-            const gridContainer = document.querySelector('[data-product-grid]');
-            if (gridContainer) {
-                gridContainer.addEventListener('click', (e) => {
-                    const alpine = document.querySelector('[x-data]').__alpine_$1;
-                    if (alpine) {
-                        alpine.handleProductClick(e);
-                    }
-                });
-            }
-        });
     </script>
 </div>
