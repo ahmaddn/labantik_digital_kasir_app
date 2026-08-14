@@ -52,7 +52,7 @@
                 <svg class="w-40 h-40 text-white" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="12" x="2" y="6" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/></svg>
             </div>
             <h3 class="text-[10px] font-black uppercase tracking-[0.3em] opacity-80 mb-3 text-emerald-300">Total Saldo Kas {{ $activeTab === 'cumulative' ? '(Kumulatif)' : '(Bulan Ini)' }}</h3>
-            <p class="text-2xl xl:text-3xl font-black italic text-white {{ ($currentModalBalance + $currentTotalProfitBalance) < 0 ? 'text-primary-red' : '' }}" :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($currentModalBalance + $currentTotalProfitBalance, 0, ',', '.') }}</p>
+            <p class="text-2xl xl:text-3xl font-black italic text-white {{ ($currentModalBalance + $currentProfitBalance) < 0 ? 'text-primary-red' : '' }}" :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($currentModalBalance + $currentProfitBalance, 0, ',', '.') }}</p>
         </div>
 
         <!-- Saldo Modal Card -->
