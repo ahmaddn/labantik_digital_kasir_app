@@ -417,14 +417,19 @@ class CashManagement extends Component
             'consolidateCashType' => 'required|in:modal,keuntungan',
         ]);
 
+        $catKeuntunganJurusan = \App\Models\CashCategory::where('jurusan_id', $activeJurusanId)
+            ->where('name', 'Keuntungan Jurusan')
+            ->first();
+        $keuntunganJurusanId = $catKeuntunganJurusan ? $catKeuntunganJurusan->id : 0;
+
         // Calculate current balance of sub-unit
         $balances = CashTransaction::where('jurusan_id', $activeJurusanId)
             ->selectRaw("
                 SUM(CASE WHEN cash_type = 'modal' AND type = 'income' THEN amount ELSE 0 END) as modal_income,
                 SUM(CASE WHEN cash_type = 'modal' AND type = 'expense' THEN amount ELSE 0 END) as modal_expense,
-                SUM(CASE WHEN cash_type = 'keuntungan' AND type = 'income' THEN amount ELSE 0 END) as profit_income,
-                SUM(CASE WHEN cash_type = 'keuntungan' AND type = 'expense' THEN amount ELSE 0 END) as profit_expense
-            ")
+                SUM(CASE WHEN cash_type = 'keuntungan' AND cash_category_id = ? AND type = 'income' THEN amount ELSE 0 END) as profit_income,
+                SUM(CASE WHEN cash_type = 'keuntungan' AND cash_category_id = ? AND type = 'expense' THEN amount ELSE 0 END) as profit_expense
+            ", [$keuntunganJurusanId, $keuntunganJurusanId])
             ->first();
 
         $currentModalBalance = ($balances->modal_income ?? 0) - ($balances->modal_expense ?? 0);
@@ -502,14 +507,20 @@ class CashManagement extends Component
         $cumulativeQuery = CashTransaction::where('jurusan_id', $activeJurusanId)
             ->where('date', '<=', $endOfFilteredMonth);
 
+        // Get Keuntungan Jurusan Category ID
+        $catKeuntunganJurusan = \App\Models\CashCategory::where('jurusan_id', $activeJurusanId)
+            ->where('name', 'Keuntungan Jurusan')
+            ->first();
+        $keuntunganJurusanId = $catKeuntunganJurusan ? $catKeuntunganJurusan->id : 0;
+
         // Calculate cumulative balances
         $cumulativeBalances = (clone $cumulativeQuery)
             ->selectRaw("
                 SUM(CASE WHEN cash_type = 'modal' AND type = 'income' THEN amount ELSE 0 END) as modal_income,
                 SUM(CASE WHEN cash_type = 'modal' AND type = 'expense' THEN amount ELSE 0 END) as modal_expense,
-                SUM(CASE WHEN cash_type = 'keuntungan' AND type = 'income' THEN amount ELSE 0 END) as profit_income,
-                SUM(CASE WHEN cash_type = 'keuntungan' AND type = 'expense' THEN amount ELSE 0 END) as profit_expense
-            ")
+                SUM(CASE WHEN cash_type = 'keuntungan' AND cash_category_id = ? AND type = 'income' THEN amount ELSE 0 END) as profit_income,
+                SUM(CASE WHEN cash_type = 'keuntungan' AND cash_category_id = ? AND type = 'expense' THEN amount ELSE 0 END) as profit_expense
+            ", [$keuntunganJurusanId, $keuntunganJurusanId])
             ->first();
         $cumulativeModalBalance = ($cumulativeBalances->modal_income ?? 0) - ($cumulativeBalances->modal_expense ?? 0);
         $cumulativeProfitBalance = ($cumulativeBalances->profit_income ?? 0) - ($cumulativeBalances->profit_expense ?? 0);
@@ -519,9 +530,9 @@ class CashManagement extends Component
             ->selectRaw("
                 SUM(CASE WHEN cash_type = 'modal' AND type = 'income' THEN amount ELSE 0 END) as modal_income,
                 SUM(CASE WHEN cash_type = 'modal' AND type = 'expense' THEN amount ELSE 0 END) as modal_expense,
-                SUM(CASE WHEN cash_type = 'keuntungan' AND type = 'income' THEN amount ELSE 0 END) as profit_income,
-                SUM(CASE WHEN cash_type = 'keuntungan' AND type = 'expense' THEN amount ELSE 0 END) as profit_expense
-            ")
+                SUM(CASE WHEN cash_type = 'keuntungan' AND cash_category_id = ? AND type = 'income' THEN amount ELSE 0 END) as profit_income,
+                SUM(CASE WHEN cash_type = 'keuntungan' AND cash_category_id = ? AND type = 'expense' THEN amount ELSE 0 END) as profit_expense
+            ", [$keuntunganJurusanId, $keuntunganJurusanId])
             ->first();
         $monthlyModalBalance = ($monthlyBalances->modal_income ?? 0) - ($monthlyBalances->modal_expense ?? 0);
         $monthlyProfitBalance = ($monthlyBalances->profit_income ?? 0) - ($monthlyBalances->profit_expense ?? 0);
