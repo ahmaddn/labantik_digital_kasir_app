@@ -126,7 +126,7 @@ class WeeklyProfit extends Component
             }
         }
 
-        $totalProfit = $systemProfit - $totalShortage + $totalSurplus;
+        $totalProfit = $systemProfit - $totalShortage;
 
         if ($totalProfit <= 0) {
             $this->dispatch('toast', message: 'Tidak ada keuntungan pada periode ini.', type: 'error');
@@ -292,7 +292,7 @@ class WeeklyProfit extends Component
             }
         }
 
-        $currentProfit = $systemProfit - $totalShortage + $totalSurplus;
+        $currentProfit = $systemProfit - $totalShortage;
         $totalRevenue = $weeklyData->total_revenue ?? 0;
         $supplierHak = $weeklyData->supplier_hak ?? 0;
 
@@ -353,7 +353,7 @@ class WeeklyProfit extends Component
                 }
             }
 
-            $dayNetProfit = $daySystemProfit - $dayShortage + $daySurplus;
+            $dayNetProfit = $daySystemProfit - $dayShortage;
 
             $dailyBreakdown[] = [
                 'date' => $tempDate->copy(),
