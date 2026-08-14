@@ -93,7 +93,9 @@ class DailyRecapActionService
 
                     $categoryNameLower = strtolower($categoryNameClean);
                     if ($categoryNameLower === 'makanan' || $categoryNameLower === 'minuman' || $categoryNameLower === 'makanan & minuman' || $categoryNameLower === 'makanan dan minuman' || $categoryNameLower === 'snack') {
-                        $cashCategoryName = 'Jurusan Snack & Minuman';
+                        $activeJurusan = \App\Models\Jurusan::find($activeJurusanId);
+                        $activeJurusanNameLower = $activeJurusan ? strtolower($activeJurusan->name) : '';
+                        $cashCategoryName = str_contains($activeJurusanNameLower, 'doku') ? 'Kas Doku' : 'Jurusan Snack & Minuman';
                     } elseif ($categoryNameLower === 'umum' || $categoryNameLower === 'lainnya' || $categoryNameLower === 'lain-lain') {
                         $cashCategoryName = 'Keuntungan Jurusan';
                     } else {

@@ -386,7 +386,9 @@ class Product extends Component
                 $categoryNameClean = trim($product->category->name ?? 'Lainnya');
                 $categoryNameLower = strtolower($categoryNameClean);
                 if (in_array($categoryNameLower, ['makanan', 'minuman', 'makanan & minuman', 'makanan dan minuman', 'snack'])) {
-                    $categoryName = 'Jurusan Snack & Minuman';
+                    $activeJurusan = Jurusan::find($product->jurusan_id);
+                    $activeJurusanNameLower = $activeJurusan ? strtolower($activeJurusan->name) : '';
+                    $categoryName = str_contains($activeJurusanNameLower, 'doku') ? 'Kas Doku' : 'Jurusan Snack & Minuman';
                 } elseif (in_array($categoryNameLower, ['umum', 'lainnya', 'lain-lain'])) {
                     $categoryName = 'Keuntungan Jurusan';
                 } else {

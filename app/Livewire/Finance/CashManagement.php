@@ -74,6 +74,40 @@ class CashManagement extends Component
                 $existingPenjualanUmum->update(['name' => 'Keuntungan Jurusan']);
             }
         }
+
+        // Clean up and rename categories dynamically for Doku
+        $activeJurusan = \App\Models\Jurusan::find($activeJurusanId);
+        $activeJurusanNameLower = $activeJurusan ? strtolower($activeJurusan->name) : '';
+        if ($activeJurusan && str_contains($activeJurusanNameLower, 'doku')) {
+            // Rename "Jurusan Snack & Minuman" to "Kas Doku"
+            $oldCat = \App\Models\CashCategory::where('jurusan_id', $activeJurusanId)
+                ->where('name', 'Jurusan Snack & Minuman')
+                ->first();
+            if ($oldCat) {
+                $newCat = \App\Models\CashCategory::where('jurusan_id', $activeJurusanId)
+                    ->where('name', 'Kas Doku')
+                    ->first();
+                if ($newCat) {
+                    \App\Models\CashTransaction::where('jurusan_id', $activeJurusanId)
+                        ->where('cash_category_id', $oldCat->id)
+                        ->update(['cash_category_id' => $newCat->id]);
+                    $oldCat->delete();
+                } else {
+                    $oldCat->update(['name' => 'Kas Doku']);
+                }
+            }
+
+            // Remove "Penjualan Cinuy" and "Penjualan Eskrim" categories and their transactions from Doku
+            $buggyCats = \App\Models\CashCategory::where('jurusan_id', $activeJurusanId)
+                ->whereIn('name', ['Penjualan Cinuy', 'Penjualan Eskrim'])
+                ->get();
+            foreach ($buggyCats as $buggyCat) {
+                \App\Models\CashTransaction::where('jurusan_id', $activeJurusanId)
+                    ->where('cash_category_id', $buggyCat->id)
+                    ->delete();
+                $buggyCat->delete();
+            }
+        }
     }
 
     public function updatedFilterMonth()
