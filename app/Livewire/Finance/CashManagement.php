@@ -552,24 +552,30 @@ class CashManagement extends Component
             ->selectRaw("
                 SUM(CASE WHEN cash_type = 'modal' AND type = 'income' THEN amount ELSE 0 END) as modal_income,
                 SUM(CASE WHEN cash_type = 'modal' AND type = 'expense' THEN amount ELSE 0 END) as modal_expense,
+                SUM(CASE WHEN cash_type = 'keuntungan' AND type = 'income' THEN amount ELSE 0 END) as total_profit_income,
+                SUM(CASE WHEN cash_type = 'keuntungan' AND type = 'expense' THEN amount ELSE 0 END) as total_profit_expense,
                 SUM(CASE WHEN cash_type = 'keuntungan' AND cash_category_id = ? AND type = 'income' THEN amount ELSE 0 END) as profit_income,
                 SUM(CASE WHEN cash_type = 'keuntungan' AND cash_category_id = ? AND type = 'expense' THEN amount ELSE 0 END) as profit_expense
             ", [$keuntunganJurusanId, $keuntunganJurusanId])
             ->first();
         $cumulativeModalBalance = ($cumulativeBalances->modal_income ?? 0) - ($cumulativeBalances->modal_expense ?? 0);
         $cumulativeProfitBalance = ($cumulativeBalances->profit_income ?? 0) - ($cumulativeBalances->profit_expense ?? 0);
+        $cumulativeTotalProfitBalance = ($cumulativeBalances->total_profit_income ?? 0) - ($cumulativeBalances->total_profit_expense ?? 0);
 
         // Calculate monthly balances
         $monthlyBalances = (clone $query)
             ->selectRaw("
                 SUM(CASE WHEN cash_type = 'modal' AND type = 'income' THEN amount ELSE 0 END) as modal_income,
                 SUM(CASE WHEN cash_type = 'modal' AND type = 'expense' THEN amount ELSE 0 END) as modal_expense,
+                SUM(CASE WHEN cash_type = 'keuntungan' AND type = 'income' THEN amount ELSE 0 END) as total_profit_income,
+                SUM(CASE WHEN cash_type = 'keuntungan' AND type = 'expense' THEN amount ELSE 0 END) as total_profit_expense,
                 SUM(CASE WHEN cash_type = 'keuntungan' AND cash_category_id = ? AND type = 'income' THEN amount ELSE 0 END) as profit_income,
                 SUM(CASE WHEN cash_type = 'keuntungan' AND cash_category_id = ? AND type = 'expense' THEN amount ELSE 0 END) as profit_expense
             ", [$keuntunganJurusanId, $keuntunganJurusanId])
             ->first();
         $monthlyModalBalance = ($monthlyBalances->modal_income ?? 0) - ($monthlyBalances->modal_expense ?? 0);
         $monthlyProfitBalance = ($monthlyBalances->profit_income ?? 0) - ($monthlyBalances->profit_expense ?? 0);
+        $monthlyTotalProfitBalance = ($monthlyBalances->total_profit_income ?? 0) - ($monthlyBalances->total_profit_expense ?? 0);
 
         // Fetch cumulative category sums
         $cumulativeCategorySums = (clone $cumulativeQuery)
@@ -627,6 +633,7 @@ class CashManagement extends Component
             $activeQuery = $cumulativeQuery;
             $currentModalBalance = $cumulativeModalBalance;
             $currentProfitBalance = $cumulativeProfitBalance;
+            $currentTotalProfitBalance = $cumulativeTotalProfitBalance;
             $displayIncome = $cumulativeIncome;
             $displayExpense = $cumulativeExpense;
         } else {
@@ -634,6 +641,7 @@ class CashManagement extends Component
             $activeQuery = $query;
             $currentModalBalance = $monthlyModalBalance;
             $currentProfitBalance = $monthlyProfitBalance;
+            $currentTotalProfitBalance = $monthlyTotalProfitBalance;
             $displayIncome = $monthlyIncome;
             $displayExpense = $monthlyExpense;
         }
@@ -736,6 +744,7 @@ class CashManagement extends Component
             'transactions' => $transactions,
             'currentModalBalance' => $currentModalBalance,
             'currentProfitBalance' => $currentProfitBalance,
+            'currentTotalProfitBalance' => $currentTotalProfitBalance,
             'displayIncome' => $displayIncome,
             'displayExpense' => $displayExpense,
             'categories' => $categories,
