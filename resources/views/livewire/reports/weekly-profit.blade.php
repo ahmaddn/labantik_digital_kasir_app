@@ -174,6 +174,51 @@
                     </div>
                 </div>
 
+                <!-- Daily Profit Breakdown -->
+                <div class="bg-gray-50 dark:bg-gray-900/50 rounded-[4rem] p-12 border border-gray-100 dark:border-gray-800/50 mb-10">
+                    <div class="flex justify-between items-center mb-10">
+                        <div>
+                            <h3 class="text-2xl font-black italic uppercase tracking-tighter text-gray-800 dark:text-white">
+                                Rincian Keuntungan Harian</h3>
+                            <p class="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mt-1">Detail keuntungan sistem dan penyesuaian selisih kas per hari</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 gap-6">
+                        @foreach($currentWeek['dailyBreakdown'] as $day)
+                            <div class="bg-white dark:bg-gray-900 rounded-[2.5rem] p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border border-gray-100 dark:border-gray-800 shadow-sm hover:shadow-xl transition-all">
+                                <div>
+                                    <p class="text-sm font-black text-gray-800 dark:text-white uppercase tracking-tight">
+                                        {{ $day['date']->translatedFormat('l, d F Y') }}
+                                    </p>
+                                    <div class="flex flex-wrap items-center gap-3 mt-2 text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+                                        <span>Sistem: <strong class="text-gray-700 dark:text-gray-200">Rp{{ number_format($day['system_profit'], 0, ',', '.') }}</strong></span>
+                                        @if($day['has_audit'])
+                                            <span>•</span>
+                                            @if($day['diff'] < 0)
+                                                <span class="text-primary-red font-black">Selisih Kurang: -Rp{{ number_format(abs($day['diff']), 0, ',', '.') }}</span>
+                                            @elseif($day['diff'] > 0)
+                                                <span class="text-amber-500 font-black">Selisih Lebih: +Rp{{ number_format($day['diff'], 0, ',', '.') }}</span>
+                                            @else
+                                                <span class="text-green-500 font-black">Uang Kas Match</span>
+                                            @endif
+                                        @else
+                                            <span>•</span>
+                                            <span class="text-gray-300 dark:text-gray-600">Belum Audit Fisik</span>
+                                        @endif
+                                    </div>
+                                </div>
+                                <div class="text-left sm:text-right">
+                                    <p class="text-[9px] font-black text-gray-400 uppercase tracking-widest">Keuntungan Riil</p>
+                                    <p class="text-xl font-black text-primary-blue italic mt-1">
+                                        Rp{{ number_format($day['net_profit'], 0, ',', '.') }}
+                                    </p>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+
                 <!-- Admin Contribution Breakdown -->
                 <div
                     class="bg-gray-50 dark:bg-gray-900/50 rounded-[4rem] p-12 border border-gray-100 dark:border-gray-800/50">

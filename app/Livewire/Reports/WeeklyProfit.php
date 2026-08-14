@@ -308,6 +308,57 @@ class WeeklyProfit extends Component
             ]
         ]);
 
+        $dailyBreakdown = [];
+        $tempDate = $weekStart->copy();
+        while ($tempDate->lte($weekEnd)) {
+            $dateStr = $tempDate->toDateString();
+
+            $daySystemProfit = Transaction::whereDate('transacted_at', $dateStr)
+                ->where('jurusan_id', $activeJurusanId)
+                ->whereIn('status', ['uang_diterima', 'belum_kembalian'])
+                ->sum(DB::raw('unit_profit * quantity'));
+
+            $recap = \App\Models\DailyRecap::where('date', $dateStr)
+                ->where('jurusan_id', $activeJurusanId)
+                ->first();
+
+            $dayShortage = 0;
+            $daySurplus = 0;
+            $dayDiff = 0;
+            $startingChangeCash = 0;
+
+            if ($recap && (float) $recap->actual_cash > 1) {
+                $previousRecap = \App\Models\DailyRecap::forReporting()
+                    ->where('jurusan_id', $activeJurusanId)
+                    ->where('date', '<', $dateStr)
+                    ->orderBy('date', 'desc')
+                    ->first();
+                $startingChangeCash = $previousRecap ? ($previousRecap->retained_change_cash ?? 0) : 0;
+
+                $totalRevenueReal = (float) ($recap->total_revenue_real ?? 0);
+                $dayDiff = ((float) $recap->actual_cash - (float) $startingChangeCash) - $totalRevenueReal;
+                if ($dayDiff < 0) {
+                    $dayShortage = abs($dayDiff);
+                } else {
+                    $daySurplus = $dayDiff;
+                }
+            }
+
+            $dayNetProfit = $daySystemProfit - $dayShortage + $daySurplus;
+
+            $dailyBreakdown[] = [
+                'date' => $tempDate->copy(),
+                'system_profit' => $daySystemProfit,
+                'shortage' => $dayShortage,
+                'surplus' => $daySurplus,
+                'diff' => $dayDiff,
+                'net_profit' => $dayNetProfit,
+                'has_audit' => $recap && (float) $recap->actual_cash > 1,
+            ];
+
+            $tempDate->addDay();
+        }
+
         // Monthly Summary Logic - Filter by month and current year
         $monthName = Carbon::createFromDate($this->currentYear, $this->selectedMonth, 1)->translatedFormat('F Y');
         $monthlyReports = WeeklyProfitShare::select(
@@ -369,6 +420,7 @@ class WeeklyProfit extends Component
                 'total_revenue' => $totalRevenue,
                 'supplier_hak' => $supplierHak,
                 'adminContributions' => $adminContributions,
+                'dailyBreakdown' => $dailyBreakdown,
             ],
             'canProcess' => in_array(now()->dayOfWeek, [Carbon::FRIDAY, Carbon::SATURDAY, Carbon::SUNDAY]),
         ])->layout('layouts.app', ['title' => 'Bagi Hasil Mingguan']);
