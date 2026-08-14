@@ -482,8 +482,22 @@ class Kasir extends Component
         }
 
         // Always make sure DailyRecap is locked for today
+        $existingRecap = DailyRecap::withoutGlobalScope('active')
+            ->where('date', $today)
+            ->where('jurusan_id', $activeJurusanId)
+            ->first();
+
+        $newActualCash = $closingCash;
+        if ($existingRecap) {
+            if ($existingRecap->actual_cash < 0) {
+                $newActualCash = abs($existingRecap->actual_cash);
+            } elseif ($existingRecap->actual_cash > 1) {
+                $newActualCash = $existingRecap->actual_cash;
+            }
+        }
+
         DailyRecap::upsertForSession($today, $activeJurusanId, [
-            'actual_cash' => $closingCash,
+            'actual_cash' => $newActualCash,
         ]);
 
         $this->showClosingStockModal = false;

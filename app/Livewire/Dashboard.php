@@ -346,11 +346,19 @@ class Dashboard extends Component
         }
 
         $activeJurusanId = session('active_jurusan_id');
-        DailyRecap::whereDate('date', now())
+        $recap = DailyRecap::withoutGlobalScope('active')
+            ->whereDate('date', now())
             ->when($activeJurusanId, function ($q) use ($activeJurusanId) {
                 return $q->where('jurusan_id', $activeJurusanId);
             })
-            ->delete();
+            ->first();
+
+        if ($recap) {
+            $recap->update([
+                'actual_cash' => -abs($recap->actual_cash ?: 1),
+            ]);
+        }
+
         $this->redirect(route('dashboard'), navigate: true);
     }
 }

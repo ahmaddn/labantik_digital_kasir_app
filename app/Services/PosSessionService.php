@@ -50,9 +50,25 @@ class PosSessionService
                 }
             }
 
+            $existingRecap = DailyRecap::withoutGlobalScope('active')
+                ->where('date', $date)
+                ->where('jurusan_id', $activeJurusanId)
+                ->first();
+
+            $newActualCash = 1;
+            if ($existingRecap) {
+                if ($existingRecap->actual_cash < 0) {
+                    $newActualCash = abs($existingRecap->actual_cash);
+                } elseif ($existingRecap->actual_cash > 1) {
+                    $newActualCash = $existingRecap->actual_cash;
+                }
+            }
+
             DailyRecap::upsertForSession($date, $activeJurusanId, [
-                'actual_cash' => 1,
-                'cash_note' => 'Auto-finished by system (Forgot to click finish)',
+                'actual_cash' => $newActualCash,
+                'cash_note' => $existingRecap && $existingRecap->actual_cash > 1 
+                    ? ($existingRecap->cash_note ?? 'Auto-finished by system') 
+                    : 'Auto-finished by system (Forgot to click finish)',
             ]);
         });
     }
@@ -124,8 +140,22 @@ class PosSessionService
                 );
             }
 
+            $existingRecap = DailyRecap::withoutGlobalScope('active')
+                ->where('date', $today)
+                ->where('jurusan_id', $activeJurusanId)
+                ->first();
+
+            $newActualCash = 1;
+            if ($existingRecap) {
+                if ($existingRecap->actual_cash < 0) {
+                    $newActualCash = abs($existingRecap->actual_cash);
+                } elseif ($existingRecap->actual_cash > 1) {
+                    $newActualCash = $existingRecap->actual_cash;
+                }
+            }
+
             DailyRecap::upsertForSession($today, $activeJurusanId, [
-                'actual_cash' => 1,
+                'actual_cash' => $newActualCash,
             ]);
 
             // Award closing session points and reset current streak
