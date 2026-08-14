@@ -92,6 +92,17 @@
                         <svg class="w-4 h-4 text-gray-400" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
                     </div>
                 </div>
+
+                <div class="w-full md:w-64 relative group">
+                    <select wire:model.live="filterStatus" class="w-full pl-6 pr-10 py-4 bg-gray-50 dark:bg-gray-900 border-none rounded-2xl focus:ring-2 focus:ring-primary-blue/20 font-black text-xs text-gray-800 dark:text-white uppercase tracking-widest appearance-none shadow-inner">
+                        <option value="">SEMUA STATUS SELISIH</option>
+                        <option value="bermasalah">BERMASALAH (ADA SELISIH)</option>
+                        <option value="normal">NORMAL (SESUAI)</option>
+                    </select>
+                    <div class="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
+                        <svg class="w-4 h-4 text-gray-400" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                    </div>
+                </div>
             </div>
         </div>
 

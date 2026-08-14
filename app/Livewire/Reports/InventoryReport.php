@@ -17,10 +17,12 @@ class InventoryReport extends Component
     public $selectedDate;
     public $search = '';
     public $filterCategory = '';
+    public $filterStatus = '';
 
     protected $queryString = [
         'search' => ['except' => ''],
         'filterCategory' => ['except' => ''],
+        'filterStatus' => ['except' => ''],
         'selectedDate' => ['except' => ''],
     ];
 
@@ -76,6 +78,11 @@ class InventoryReport extends Component
         $this->resetPage();
     }
 
+    public function updatingFilterStatus()
+    {
+        $this->resetPage();
+    }
+
     public function updatingSelectedDate()
     {
         $this->resetPage();
@@ -90,7 +97,33 @@ class InventoryReport extends Component
 
     public function render()
     {
-        $query = Product::with('category')->where('is_active', true);
+        $selectedDate = $this->selectedDate;
+        $activeJurusanId = session('active_jurusan_id');
+
+        $query = Product::with('category')
+            ->where('is_active', true)
+            ->when($activeJurusanId, function($q) use ($activeJurusanId) {
+                $q->where('jurusan_id', $activeJurusanId);
+            })
+            ->select('products.*')
+            ->selectSub(function($q) use ($selectedDate) {
+                $q->from('stock_entries')
+                    ->select('opening_stock')
+                    ->whereColumn('product_id', 'products.id')
+                    ->where('date', $selectedDate);
+            }, 'opening_stock')
+            ->selectSub(function($q) use ($selectedDate) {
+                $q->from('stock_entries')
+                    ->select('closing_stock')
+                    ->whereColumn('product_id', 'products.id')
+                    ->where('date', $selectedDate);
+            }, 'closing_stock')
+            ->selectSub(function($q) use ($selectedDate) {
+                $q->from('transactions')
+                    ->selectRaw('COALESCE(SUM(quantity), 0)')
+                    ->whereColumn('product_id', 'products.id')
+                    ->whereDate('transacted_at', $selectedDate);
+            }, 'total_sold');
 
         if ($this->search) {
             $query->where('name', 'like', '%' . $this->search . '%');
@@ -100,10 +133,15 @@ class InventoryReport extends Component
             $query->where('category_id', $this->filterCategory);
         }
 
+        if ($this->filterStatus === 'bermasalah') {
+            $query->havingRaw('(COALESCE(closing_stock, 0) - (COALESCE(opening_stock, 0) - COALESCE(total_sold, 0))) != 0');
+        } elseif ($this->filterStatus === 'normal') {
+            $query->havingRaw('(COALESCE(closing_stock, 0) - (COALESCE(opening_stock, 0) - COALESCE(total_sold, 0))) = 0');
+        }
+
         $products = $query->orderBy('name')->paginate(15);
 
         $reportData = [];
-
         $productIds = $products->pluck('id');
 
         $stockEntries = StockEntry::with('user')
@@ -112,19 +150,11 @@ class InventoryReport extends Component
             ->get()
             ->keyBy('product_id');
 
-        $sales = Transaction::whereIn('product_id', $productIds)
-            ->whereDate('transacted_at', $this->selectedDate)
-            ->selectRaw('product_id, SUM(quantity) as total_sold')
-            ->groupBy('product_id')
-            ->pluck('total_sold', 'product_id')
-            ->toArray();
-
         foreach ($products as $product) {
             $stockEntry = $stockEntries->get($product->id);
-            $sold = (int) ($sales[$product->id] ?? 0);
-
-            $opening = $stockEntry ? $stockEntry->opening_stock : 0;
-            $closing = $stockEntry ? $stockEntry->closing_stock : 0;
+            $opening = (int) ($product->opening_stock ?? 0);
+            $closing = (int) ($product->closing_stock ?? 0);
+            $sold = (int) ($product->total_sold ?? 0);
 
             $expected = $opening - $sold;
             $discrepancy = $closing - $expected;
