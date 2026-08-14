@@ -354,9 +354,13 @@ class Kasir extends Component
     public function finishSession(): void
     {
         $today = $this->transactionDate ?: now()->toDateString();
+        $activeJurusanId = session('active_jurusan_id');
         $allProducts = Product::where('is_active', true)
             ->whereHas('stockEntries', function ($q) use ($today) {
                 $q->where('date', $today)->where('opening_stock', '>', 0);
+            })
+            ->when($activeJurusanId, function ($q) use ($activeJurusanId) {
+                return $q->where('jurusan_id', $activeJurusanId);
             })
             ->get();
 
@@ -380,6 +384,11 @@ class Kasir extends Component
 
         $validProductIds = StockEntry::where('date', $today)
             ->where('opening_stock', '>', 0)
+            ->whereHas('product', function ($q) use ($activeJurusanId) {
+                if ($activeJurusanId) {
+                    $q->where('jurusan_id', $activeJurusanId);
+                }
+            })
             ->pluck('product_id')
             ->toArray();
 
@@ -498,6 +507,20 @@ class Kasir extends Component
         }
 
         $activeJurusanId = session('active_jurusan_id');
+
+        // Validate that all products in the cart belong to the active TEFA
+        if ($activeJurusanId) {
+            $productIds = collect($cart)->pluck('id')->toArray();
+            $invalidProductsExist = Product::whereIn('id', $productIds)
+                ->where('jurusan_id', '!=', $activeJurusanId)
+                ->exists();
+
+            if ($invalidProductsExist) {
+                $this->dispatch('toast', message: 'Gagal Checkout: Terdapat produk dari unit usaha/TEFA lain di keranjang belanja Anda!', type: 'error');
+                return;
+            }
+        }
+
         $themeSettings = session('active_jurusan_theme') ?? [];
         if (empty($themeSettings) && $activeJurusanId) {
             $jurusan = Jurusan::find($activeJurusanId);
