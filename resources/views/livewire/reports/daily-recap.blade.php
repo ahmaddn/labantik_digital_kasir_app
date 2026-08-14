@@ -230,7 +230,7 @@
         <div class="bg-gray-900 rounded-[3rem] p-10 text-white shadow-2xl shadow-gray-900/20 relative overflow-hidden flex flex-col justify-center border-t-8 border-primary-blue">
             <h3 class="text-[10px] font-black uppercase tracking-[0.3em] opacity-40 mb-2">Selisih Uang Kas</h3>
             @php
-                $diff = ((float)$actualCash - (float)$retainedChangeCash) - (float)$recap->total_revenue_real;
+                $diff = ((float)$actualCash - (float)$startingChangeCash) - (float)$recap->total_revenue_real;
             @endphp
             <p class="text-5xl font-black italic {{ $diff < 0 ? 'text-primary-red' : ($diff > 0 ? 'text-green-400' : 'text-white') }} tracking-tighter" :class="censorMode ? 'privacy-blur' : ''">
                 {{ $diff > 0 ? '+' : '' }}Rp{{ number_format($diff, 0, ',', '.') }}

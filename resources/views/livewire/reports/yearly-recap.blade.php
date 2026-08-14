@@ -153,7 +153,7 @@
                         </td>
                         <td class="px-10 py-8 text-sm font-black text-gray-800 dark:text-white">
                             @if($month->audited_days > 0)
-                                <div class="italic">Rp{{ number_format((float)$month->actual_cash - (float)$month->retained_change_cash, 0, ',', '.') }}</div>
+                                <div class="italic">Rp{{ number_format((float)$month->actual_cash - (float)$month->starting_change_cash, 0, ',', '.') }}</div>
                                 @if($month->retained_change_cash > 0)
                                     <div class="text-[9px] font-bold text-primary-blue uppercase tracking-wider mt-1">Kembalian: Rp{{ number_format($month->retained_change_cash, 0, ',', '.') }}</div>
                                 @endif
@@ -164,7 +164,7 @@
                         <td class="px-10 py-8 text-sm font-black">
                             @if($month->audited_days > 0)
                                 @php
-                                    $diff = ((float)$month->actual_cash - (float)$month->retained_change_cash) - (float)$month->total_revenue_real;
+                                    $diff = ((float)$month->actual_cash - (float)$month->starting_change_cash) - (float)$month->total_revenue_real;
                                 @endphp
                                 @if($diff == 0)
                                     <span class="text-green-500 uppercase text-xs font-black">Cocok</span>

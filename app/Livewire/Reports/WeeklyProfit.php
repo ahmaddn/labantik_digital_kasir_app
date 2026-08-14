@@ -107,8 +107,15 @@ class WeeklyProfit extends Component
                 continue;
             }
 
+            $previousRecap = \App\Models\DailyRecap::forReporting()
+                ->where('jurusan_id', $activeJurusanId)
+                ->where('date', '<', $recap->date)
+                ->orderBy('date', 'desc')
+                ->first();
+            $startingChangeCash = $previousRecap ? ($previousRecap->retained_change_cash ?? 0) : 0;
+
             $totalRevenueReal = (float) ($recap->total_revenue_real ?? 0);
-            $diff = ((float) $recap->actual_cash - (float) ($recap->retained_change_cash ?? 0)) - $totalRevenueReal;
+            $diff = ((float) $recap->actual_cash - (float) $startingChangeCash) - $totalRevenueReal;
             if ($diff < 0) {
                 $totalShortage += abs($diff);
             } else {
@@ -263,8 +270,15 @@ class WeeklyProfit extends Component
                 continue;
             }
 
+            $previousRecap = \App\Models\DailyRecap::forReporting()
+                ->where('jurusan_id', $activeJurusanId)
+                ->where('date', '<', $recap->date)
+                ->orderBy('date', 'desc')
+                ->first();
+            $startingChangeCash = $previousRecap ? ($previousRecap->retained_change_cash ?? 0) : 0;
+
             $totalRevenueReal = (float) ($recap->total_revenue_real ?? 0);
-            $diff = ((float) $recap->actual_cash - (float) ($recap->retained_change_cash ?? 0)) - $totalRevenueReal;
+            $diff = ((float) $recap->actual_cash - (float) $startingChangeCash) - $totalRevenueReal;
             if ($diff < 0) {
                 $totalShortage += abs($diff);
             } else {

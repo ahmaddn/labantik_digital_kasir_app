@@ -60,7 +60,14 @@ class DailyRecapActionService
 
         $totalProfit = $allTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->sum(fn ($tx) => $tx->unit_profit * $tx->quantity);
 
-        $diff = ((float) $recap->actual_cash - (float) ($recap->retained_change_cash ?? 0)) - (float) $totalRevenueReal;
+        $previousRecap = DailyRecapModel::forReporting()
+            ->where('jurusan_id', $activeJurusanId)
+            ->where('date', '<', $date)
+            ->orderBy('date', 'desc')
+            ->first();
+        $startingChangeCash = $previousRecap ? ($previousRecap->retained_change_cash ?? 0) : 0;
+
+        $diff = ((float) $recap->actual_cash - (float) $startingChangeCash) - (float) $totalRevenueReal;
 
         $grouped = $allTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])
             ->groupBy(fn($tx) => ($tx->product->supplier_id ?? $tx->supplier_id) ? 'supplier_' . ($tx->product->supplier_id ?? $tx->supplier_id) : 'category_' . ($tx->product->category_id ?? 'other'));
