@@ -175,16 +175,21 @@
                 </div>
 
                 <!-- Daily Profit Breakdown -->
-                <div class="bg-gray-50 dark:bg-gray-900/50 rounded-[4rem] p-12 border border-gray-100 dark:border-gray-800/50 mb-10">
-                    <div class="flex justify-between items-center mb-10">
+                <div x-data="{ open: false }" class="bg-gray-50 dark:bg-gray-900/50 rounded-[4rem] p-12 border border-gray-100 dark:border-gray-800/50 mb-10 transition-all duration-300">
+                    <button @click="open = !open" class="flex justify-between items-center w-full text-left focus:outline-none cursor-pointer">
                         <div>
                             <h3 class="text-2xl font-black italic uppercase tracking-tighter text-gray-800 dark:text-white">
                                 Rincian Keuntungan Harian</h3>
                             <p class="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mt-1">Detail keuntungan sistem dan penyesuaian selisih kas per hari</p>
                         </div>
-                    </div>
+                        <div class="w-12 h-12 bg-white dark:bg-gray-900 rounded-[1.5rem] flex items-center justify-center border border-gray-100 dark:border-gray-800 transition-transform duration-300 shadow-sm" :class="open ? 'rotate-180' : ''">
+                            <svg class="w-5 h-5 text-primary-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </div>
+                    </button>
 
-                    <div class="grid grid-cols-1 gap-6">
+                    <div x-show="open" x-collapse x-cloak class="grid grid-cols-1 gap-6 mt-10">
                         @foreach($currentWeek['dailyBreakdown'] as $day)
                             <div class="bg-white dark:bg-gray-900 rounded-[2.5rem] p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border border-gray-100 dark:border-gray-800 shadow-sm hover:shadow-xl transition-all">
                                 <div>
