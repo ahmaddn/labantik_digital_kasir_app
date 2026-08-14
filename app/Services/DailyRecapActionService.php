@@ -94,6 +94,8 @@ class DailyRecapActionService
                     $categoryNameLower = strtolower($categoryNameClean);
                     if ($categoryNameLower === 'makanan' || $categoryNameLower === 'minuman' || $categoryNameLower === 'makanan & minuman' || $categoryNameLower === 'makanan dan minuman' || $categoryNameLower === 'snack') {
                         $cashCategoryName = 'Jurusan Snack & Minuman';
+                    } elseif ($categoryNameLower === 'umum' || $categoryNameLower === 'lainnya' || $categoryNameLower === 'lain-lain') {
+                        $cashCategoryName = 'Keuntungan Jurusan';
                     } else {
                         $cashCategoryName = 'Penjualan '.$categoryNameClean;
                     }

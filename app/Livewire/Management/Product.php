@@ -387,6 +387,8 @@ class Product extends Component
                 $categoryNameLower = strtolower($categoryNameClean);
                 if (in_array($categoryNameLower, ['makanan', 'minuman', 'makanan & minuman', 'makanan dan minuman', 'snack'])) {
                     $categoryName = 'Jurusan Snack & Minuman';
+                } elseif (in_array($categoryNameLower, ['umum', 'lainnya', 'lain-lain'])) {
+                    $categoryName = 'Keuntungan Jurusan';
                 } else {
                     $categoryName = 'Penjualan ' . $categoryNameClean;
                 }

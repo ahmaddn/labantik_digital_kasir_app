@@ -53,6 +53,27 @@ class CashManagement extends Component
     {
         $this->filterMonth = now()->format('Y-m');
         $this->date = now()->format('Y-m-d');
+
+        // Automatically rename existing "Penjualan Umum" to "Keuntungan Jurusan"
+        $activeJurusanId = session('active_jurusan_id');
+        $existingPenjualanUmum = \App\Models\CashCategory::where('jurusan_id', $activeJurusanId)
+            ->where('name', 'Penjualan Umum')
+            ->first();
+        if ($existingPenjualanUmum) {
+            $keuntunganJurusan = \App\Models\CashCategory::where('jurusan_id', $activeJurusanId)
+                ->where('name', 'Keuntungan Jurusan')
+                ->first();
+            if ($keuntunganJurusan) {
+                // Merge transactions to existing Keuntungan Jurusan, then delete Penjualan Umum
+                \App\Models\CashTransaction::where('jurusan_id', $activeJurusanId)
+                    ->where('cash_category_id', $existingPenjualanUmum->id)
+                    ->update(['cash_category_id' => $keuntunganJurusan->id]);
+                $existingPenjualanUmum->delete();
+            } else {
+                // Simply rename
+                $existingPenjualanUmum->update(['name' => 'Keuntungan Jurusan']);
+            }
+        }
     }
 
     public function updatedFilterMonth()

@@ -43,6 +43,27 @@ class WeeklyProfit extends Component
         $this->endDate = now()->startOfWeek(Carbon::MONDAY)->addDays(4)->toDateString();
         $this->currentYear = now()->year;
         $this->selectedMonth = now()->month;
+
+        // Automatically rename existing "Penjualan Umum" to "Keuntungan Jurusan"
+        $activeJurusanId = session('active_jurusan_id');
+        $existingPenjualanUmum = \App\Models\CashCategory::where('jurusan_id', $activeJurusanId)
+            ->where('name', 'Penjualan Umum')
+            ->first();
+        if ($existingPenjualanUmum) {
+            $keuntunganJurusan = \App\Models\CashCategory::where('jurusan_id', $activeJurusanId)
+                ->where('name', 'Keuntungan Jurusan')
+                ->first();
+            if ($keuntunganJurusan) {
+                // Merge transactions to existing Keuntungan Jurusan, then delete Penjualan Umum
+                \App\Models\CashTransaction::where('jurusan_id', $activeJurusanId)
+                    ->where('cash_category_id', $existingPenjualanUmum->id)
+                    ->update(['cash_category_id' => $keuntunganJurusan->id]);
+                $existingPenjualanUmum->delete();
+            } else {
+                // Simply rename
+                $existingPenjualanUmum->update(['name' => 'Keuntungan Jurusan']);
+            }
+        }
     }
 
     public function confirmDelete($id)
@@ -190,6 +211,8 @@ class WeeklyProfit extends Component
                 $categoryNameLower = strtolower($categoryNameClean);
                 if ($categoryNameLower === 'makanan' || $categoryNameLower === 'minuman' || $categoryNameLower === 'makanan & minuman' || $categoryNameLower === 'makanan dan minuman' || $categoryNameLower === 'snack') {
                     $cashCategoryName = 'Jurusan Snack & Minuman';
+                } elseif ($categoryNameLower === 'umum' || $categoryNameLower === 'lainnya' || $categoryNameLower === 'lain-lain') {
+                    $cashCategoryName = 'Keuntungan Jurusan';
                 } else {
                     $cashCategoryName = 'Penjualan '.$categoryNameClean;
                 }
@@ -229,6 +252,38 @@ class WeeklyProfit extends Component
                     'amount' => $labantikShare,
                     'description' => 'Bagi Hasil Mingguan Labantik (30% - Kategori: ' . $categoryNameClean . ') - Periode ' . $weekStart->format('d/m/Y') . ' s.d ' . $weekEnd->format('d/m/Y'),
                     'reference' => 'WD-PROFIT-LABANTIK-' . now()->format('Ymd') . '-' . strtoupper(bin2hex(random_bytes(2))),
+                ]);
+            }
+
+            // 3. Post Jurusan's portion (40%)
+            $jurusanShare = $adjustedGroupProfit * 0.40;
+            if ($jurusanShare > 0 && $catPenjualan->name !== 'Keuntungan Jurusan') {
+                // Deduct from the original category
+                CashTransaction::create([
+                    'jurusan_id' => $activeJurusanId,
+                    'date' => now()->toDateString(),
+                    'cash_type' => 'keuntungan',
+                    'cash_category_id' => $catPenjualan->id,
+                    'type' => 'expense',
+                    'amount' => $jurusanShare,
+                    'description' => 'Bagi Hasil Mingguan Jurusan (40% - Kategori: ' . $categoryNameClean . ') - Periode ' . $weekStart->format('d/m/Y') . ' s.d ' . $weekEnd->format('d/m/Y'),
+                    'reference' => 'WD-PROFIT-JURUSAN-OUT-' . now()->format('Ymd') . '-' . strtoupper(bin2hex(random_bytes(2))),
+                ]);
+
+                // Post as income to "Keuntungan Jurusan" category
+                $catKeuntunganJurusan = CashCategory::firstOrCreate(
+                    ['name' => 'Keuntungan Jurusan', 'jurusan_id' => $activeJurusanId]
+                );
+
+                CashTransaction::create([
+                    'jurusan_id' => $activeJurusanId,
+                    'date' => now()->toDateString(),
+                    'cash_type' => 'keuntungan',
+                    'cash_category_id' => $catKeuntunganJurusan->id,
+                    'type' => 'income',
+                    'amount' => $jurusanShare,
+                    'description' => 'Terima Bagi Hasil Mingguan Jurusan (40% - Dari: ' . $categoryNameClean . ') - Periode ' . $weekStart->format('d/m/Y') . ' s.d ' . $weekEnd->format('d/m/Y'),
+                    'reference' => 'WD-PROFIT-JURUSAN-IN-' . now()->format('Ymd') . '-' . strtoupper(bin2hex(random_bytes(2))),
                 ]);
             }
         }
