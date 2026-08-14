@@ -107,28 +107,28 @@
                     </div>
 
                     <div class="relative z-10">
-                        <div class="flex justify-between items-start mb-12">
+                        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-12 gap-6">
                             <div>
                                 <span
                                     class="px-5 py-2 bg-blue-50 dark:bg-blue-900/20 text-primary-blue rounded-full text-[10px] font-black uppercase tracking-widest">Periode
                                     Terpilih</span>
                                 <h2
-                                    class="text-4xl font-black italic uppercase tracking-tighter text-gray-800 dark:text-white mt-4">
+                                    class="text-3xl sm:text-4xl font-black italic uppercase tracking-tighter text-gray-800 dark:text-white mt-4">
                                     Estimasi Keuntungan</h2>
                                 <p class="text-sm font-bold text-gray-400 mt-2 italic uppercase">
                                     {{ $currentWeek['start']->translatedFormat('d M') }} —
                                     {{ $currentWeek['end']->translatedFormat('d M Y') }}
                                 </p>
                             </div>
-                            <div class="text-right">
+                            <div class="text-left sm:text-right">
                                 <p class="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-2">Omzet
                                     Internal</p>
-                                <p class="text-5xl font-black text-primary-blue italic tracking-tighter" :class="censorMode ? 'privacy-blur' : ''">
+                                <p class="text-4xl sm:text-5xl font-black text-primary-blue italic tracking-tighter" :class="censorMode ? 'privacy-blur' : ''">
                                     Rp{{ number_format($currentWeek['profit'], 0, ',', '.') }}</p>
                             </div>
                         </div>
 
-                        <div class="grid grid-cols-2 gap-8">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-8">
                             <div
                                 class="bg-gray-50 dark:bg-gray-800/50 rounded-[3rem] p-10 border border-gray-100 dark:border-gray-700/50">
                                 <div class="flex items-center gap-4 mb-6">

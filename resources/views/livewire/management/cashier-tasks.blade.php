@@ -75,7 +75,7 @@
         </div>
 
         <div class="overflow-x-auto">
-            <table class="w-full text-left border-collapse">
+            <table class="w-full text-left border-collapse min-w-[800px]">
                 <thead>
                     <tr class="border-b border-gray-100 dark:border-gray-700">
                         <th class="pb-4 text-xs font-black uppercase tracking-widest text-gray-400 pl-4">Tanggal</th>

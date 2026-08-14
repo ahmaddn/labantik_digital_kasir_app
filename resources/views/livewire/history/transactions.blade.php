@@ -251,7 +251,7 @@
                                     <!-- Ref Code & Jurusan -->
                                     <div class="flex items-center gap-2">
                                         <span
-                                            class="text-base font-black text-primary-blue tracking-tight uppercase italic">{{ $tx->reference }}</span>
+                                            class="text-[11px] font-black text-primary-blue tracking-tight uppercase italic break-all leading-normal">{{ $tx->reference }}</span>
                                         @php
                                             $txJurusan = $tx->jurusan_id
                                                 ? $jurusans->firstWhere('id', $tx->jurusan_id)
