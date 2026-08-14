@@ -260,14 +260,7 @@ document.addEventListener('keydown', (e) => {
                 <div class="flex flex-wrap items-center gap-3">
                     <!-- Global Notifications Bell -->
                     @livewire('note-notifications')
-                    <button @click="showQuickExpenseModal = true"
-                        class="nb-btn px-4 py-3 bg-primary-red text-white shadow-none border-2 border-black flex items-center gap-2 hover:scale-105 transition-transform text-xs font-black uppercase tracking-wider">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        Catat Pengeluaran
-                    </button>
+                    @livewire('layout.tefa-switcher')
                     <button @click="toggleTheme()" class="nb-btn p-3 bg-white dark:bg-dark-soft shadow-none border-2">
                         <svg x-show="!darkMode" class="w-5 h-5 text-black" fill="none" stroke="currentColor"
                             viewBox="0 0 24 24">
