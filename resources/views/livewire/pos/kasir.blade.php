@@ -16,11 +16,6 @@
 
     showChangeModal: false,
     lastChangeData: { total: 0, payment: 0, change: 0 },
-    showQuickExpenseModal: false,
-    quickExpenseAmount: '',
-    quickExpenseCategoryId: '',
-    quickExpenseDescription: '',
-    quickExpenseLoading: false,
 
     get filteredProducts() {
         return this.products.filter(p => {
@@ -1029,85 +1024,7 @@ document.addEventListener('keydown', (e) => {
     </div>
 
 
-    <!-- Quick Expense Modal -->
-    <div x-show="showQuickExpenseModal" x-cloak @keydown.window.escape="showQuickExpenseModal = false"
-        class="fixed inset-0 z-[600] flex items-center justify-center p-6">
 
-        <!-- Backdrop -->
-        <div x-show="showQuickExpenseModal" x-transition:enter="transition ease-out duration-300"
-            x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
-            x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100"
-            x-transition:leave-end="opacity-0" class="absolute inset-0 bg-white/20 dark:bg-black/40 backdrop-blur-md">
-        </div>
-
-        <!-- Modal Box -->
-        <div x-show="showQuickExpenseModal" @click.away="showQuickExpenseModal = false"
-            x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 scale-95"
-            x-transition:enter-end="opacity-100 scale-100" x-transition:leave="transition ease-in duration-200"
-            x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95"
-            class="nb-card bg-white dark:bg-dark-soft w-full max-w-md p-10 relative z-10 border-t-8 border-t-primary-red">
-
-            <div class="text-center mb-8">
-                <span
-                    class="text-[9px] font-black bg-primary-red text-white px-3 py-1 uppercase tracking-widest border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">OPERASIONAL</span>
-                <h2 class="text-2xl font-black uppercase italic mt-4 dark:text-white">CATAT PENGELUARAN CEPAT</h2>
-            </div>
-
-            <div class="space-y-5 mb-8">
-                <div>
-                    <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Nominal
-                        Pengeluaran (Rp)</label>
-                    <input type="number" x-model="quickExpenseAmount" placeholder="Contoh: 10000"
-                        class="nb-input w-full p-4 text-base font-bold bg-white dark:bg-slate-800 border-2 border-black">
-                </div>
-                <div>
-                    <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Kategori
-                        Kas</label>
-                    <select x-model="quickExpenseCategoryId"
-                        class="nb-input w-full p-4 text-sm font-bold bg-white dark:bg-slate-800 border-2 border-black uppercase">
-                        <option value="">-- Pilihlah Kategori --</option>
-                        @foreach ($categories as $cat)
-                            <option value="{{ $cat->id }}">{{ $cat->name }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div>
-                    <label
-                        class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Keterangan /
-                        Keperluan</label>
-                    <textarea x-model="quickExpenseDescription" placeholder="Contoh: Beli Kantong Plastik Besar" rows="3"
-                        class="nb-input w-full p-4 text-sm font-bold bg-white dark:bg-slate-800 border-2 border-black uppercase"></textarea>
-                </div>
-            </div>
-
-            <div class="flex gap-4">
-                <button type="button" @click="showQuickExpenseModal = false"
-                    class="nb-btn w-1/3 bg-white text-black border-2 border-black hover:bg-slate-100 py-4 font-black uppercase tracking-widest text-xs">BATAL</button>
-                <button type="button"
-                    @click="
-                    if (!quickExpenseAmount || !quickExpenseCategoryId || !quickExpenseDescription) {
-                        alert('Harap isi semua kolom!');
-                        return;
-                    }
-                    quickExpenseLoading = true;
-                    $wire.saveQuickExpense(quickExpenseAmount, quickExpenseCategoryId, quickExpenseDescription).then(() => {
-                        showQuickExpenseModal = false;
-                        quickExpenseAmount = '';
-                        quickExpenseCategoryId = '';
-                        quickExpenseDescription = '';
-                        quickExpenseLoading = false;
-                    }).catch(() => {
-                        quickExpenseLoading = false;
-                    });
-                "
-                    :disabled="quickExpenseLoading"
-                    class="nb-btn w-2/3 bg-primary-red text-white py-4 font-black uppercase tracking-widest text-xs flex items-center justify-center">
-                    <span x-show="!quickExpenseLoading">SIMPAN</span>
-                    <span x-show="quickExpenseLoading">MENYIMPAN...</span>
-                </button>
-            </div>
-        </div>
-    </div>
 
 
     <!-- Mobile Cart FAB Trigger -->
