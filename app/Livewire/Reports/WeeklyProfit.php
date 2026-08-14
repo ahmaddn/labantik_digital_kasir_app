@@ -114,7 +114,10 @@ class WeeklyProfit extends Component
                 ->first();
             $startingChangeCash = $previousRecap ? ($previousRecap->retained_change_cash ?? 0) : 0;
 
-            $totalRevenueReal = (float) ($recap->total_revenue_real ?? 0);
+            $totalRevenueReal = Transaction::whereDate('transacted_at', $recap->date->toDateString())
+                ->where('jurusan_id', $activeJurusanId)
+                ->whereIn('status', ['uang_diterima', 'belum_kembalian'])
+                ->sum('total_price');
             $diff = ((float) $recap->actual_cash - (float) $startingChangeCash) - $totalRevenueReal;
             if ($diff < 0) {
                 $totalShortage += abs($diff);
@@ -277,7 +280,10 @@ class WeeklyProfit extends Component
                 ->first();
             $startingChangeCash = $previousRecap ? ($previousRecap->retained_change_cash ?? 0) : 0;
 
-            $totalRevenueReal = (float) ($recap->total_revenue_real ?? 0);
+            $totalRevenueReal = Transaction::whereDate('transacted_at', $recap->date->toDateString())
+                ->where('jurusan_id', $activeJurusanId)
+                ->whereIn('status', ['uang_diterima', 'belum_kembalian'])
+                ->sum('total_price');
             $diff = ((float) $recap->actual_cash - (float) $startingChangeCash) - $totalRevenueReal;
             if ($diff < 0) {
                 $totalShortage += abs($diff);
@@ -335,7 +341,10 @@ class WeeklyProfit extends Component
                     ->first();
                 $startingChangeCash = $previousRecap ? ($previousRecap->retained_change_cash ?? 0) : 0;
 
-                $totalRevenueReal = (float) ($recap->total_revenue_real ?? 0);
+                $totalRevenueReal = Transaction::whereDate('transacted_at', $dateStr)
+                    ->where('jurusan_id', $activeJurusanId)
+                    ->whereIn('status', ['uang_diterima', 'belum_kembalian'])
+                    ->sum('total_price');
                 $dayDiff = ((float) $recap->actual_cash - (float) $startingChangeCash) - $totalRevenueReal;
                 if ($dayDiff < 0) {
                     $dayShortage = abs($dayDiff);
