@@ -101,7 +101,7 @@ class SupplierReport extends Component
                 'total_shop_profit' => $totalShopProfit,
                 'is_settled' => CashTransaction::forReporting()->where('reference', "SETTLE-SUPPLIER-{$supplier->id}-{$this->dateFrom}-{$this->dateTo}")->exists(),
             ];
-        })->filter(fn($r) => $r->total_qty > 0);
+        })->filter(fn($r) => $r->total_qty > 0 && !$r->is_settled);
 
         return view('livewire.reports.supplier-report', [
             'reports' => $reports,
