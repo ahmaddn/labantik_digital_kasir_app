@@ -122,47 +122,17 @@ class Kasir extends Component
                         ->first();
 
                     $currentTime = now();
-                    $isLate = false;
-                    $deducted = 0;
-
-                    $jurusan = Jurusan::find($activeJurusanId);
-                    $settings = $jurusan ? ($jurusan->theme_settings ?: []) : [];
-                    $targetClockIn = $settings['clock_in_time'] ?? '07:00';
-                    $penalty = (int) ($settings['late_clock_in_penalty'] ?? 0);
-
-                    if ($targetClockIn) {
-                        try {
-                            $targetTime = \Carbon\Carbon::createFromFormat('H:i', $targetClockIn);
-                            $targetTime->setDate($currentTime->year, $currentTime->month, $currentTime->day);
-                            if ($currentTime->gt($targetTime)) {
-                                $isLate = true;
-                                if ($penalty > 0) {
-                                    $deducted = $penalty;
-                                    auth()->user()->decrement('points', $penalty);
-                                    if (auth()->user()->points < 0) {
-                                        auth()->user()->update(['points' => 0]);
-                                    }
-                                }
-                            }
-                        } catch (\Exception $e) {
-                            // ignore format error
-                        }
-                    }
-
+                    // Always record clock_in as present, no late check or late penalty
                     CashierAttendance::create([
                         'cashier_schedule_id' => $schedule ? $schedule->id : null,
                         'user_id' => auth()->id(),
                         'jurusan_id' => $activeJurusanId,
                         'date' => now()->toDateString(),
                         'clock_in' => $currentTime,
-                        'status' => $isLate ? 'late' : 'present',
+                        'status' => 'present',
                     ]);
 
-                    if ($isLate && $deducted > 0) {
-                        $this->dispatch('toast', message: 'Clock in otomatis tercatat. Anda TERLAMBAT! Poin berkurang ' . $deducted, type: 'warning');
-                    } else {
-                        $this->dispatch('toast', message: 'Clock in otomatis tercatat. Selamat bertugas!');
-                    }
+                    $this->dispatch('toast', message: 'Clock in otomatis tercatat. Selamat bertugas!');
                 }
             }
         }
@@ -447,12 +417,14 @@ class Kasir extends Component
         $targetClockOut = $settings['clock_out_time'] ?? '15:00';
         $penaltyClockOut = (int) ($settings['late_clock_out_penalty'] ?? 0);
 
+        $status = 'present';
         if ($targetClockOut) {
             try {
                 $targetTime = \Carbon\Carbon::createFromFormat('H:i', $targetClockOut);
                 $targetTime->setDate($currentTime->year, $currentTime->month, $currentTime->day);
                 if ($currentTime->lt($targetTime)) {
                     $isEarlyClockOut = true;
+                    $status = 'early_checkout';
                     if ($penaltyClockOut > 0) {
                         $deductedClockOut = $penaltyClockOut;
                         auth()->user()->decrement('points', $penaltyClockOut);
@@ -462,6 +434,7 @@ class Kasir extends Component
                     }
                 } else {
                     $isBonusClockOut = true;
+                    $status = 'overtime';
                     auth()->user()->increment('points', $bonusPoints);
                     auth()->user()->increment('streak', 1);
                 }
@@ -477,6 +450,7 @@ class Kasir extends Component
                 'clock_out' => $currentTime,
                 'closing_cash' => $closingCash,
                 'closing_report' => $report,
+                'status' => $status,
                 'points_at_closing' => (int) (auth()->user()->points + auth()->user()->pending_points),
             ]);
         }

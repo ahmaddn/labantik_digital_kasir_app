@@ -165,21 +165,21 @@
                         </label>
                         <div class="grid grid-cols-2 gap-4">
                             <div>
-                                <label class="block text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 ml-2">Target Clock In</label>
+                                <label class="block text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 ml-2">Waktu Mulai Shift (Clock In)</label>
                                 <input type="time" wire:model="clockInTime" class="w-full px-4 py-3 bg-white dark:bg-gray-950 border-none rounded-xl text-xs font-black text-gray-700 dark:text-white">
                             </div>
                             <div>
-                                <label class="block text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 ml-2">Target Clock Out</label>
+                                <label class="block text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 ml-2">Waktu Akhir Shift (Clock Out)</label>
                                 <input type="time" wire:model="clockOutTime" class="w-full px-4 py-3 bg-white dark:bg-gray-950 border-none rounded-xl text-xs font-black text-gray-700 dark:text-white">
                             </div>
                         </div>
                         <div class="grid grid-cols-2 gap-4">
                             <div>
-                                <label class="block text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 ml-2">Denda Telat Clock In (Poin)</label>
-                                <input type="number" wire:model="lateClockInPenalty" class="w-full px-4 py-3 bg-white dark:bg-gray-950 border-none rounded-xl text-xs font-black text-gray-700 dark:text-white" min="0">
+                                <label class="block text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 ml-2">Denda Telat Clock In <span class="text-rose-500">(Dinonaktifkan)</span></label>
+                                <input type="number" readonly disabled class="w-full px-4 py-3 bg-gray-100 dark:bg-gray-800 border-none rounded-xl text-xs font-black text-gray-400 dark:text-gray-500 cursor-not-allowed" value="0">
                             </div>
                             <div>
-                                <label class="block text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 ml-2">Denda Telat Clock Out (Poin)</label>
+                                <label class="block text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 ml-2">Denda Pulang Lebih Cepat (Poin)</label>
                                 <input type="number" wire:model="lateClockOutPenalty" class="w-full px-4 py-3 bg-white dark:bg-gray-950 border-none rounded-xl text-xs font-black text-gray-700 dark:text-white" min="0">
                             </div>
                         </div>

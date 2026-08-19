@@ -126,9 +126,45 @@ class AttendanceReport extends Component
             ->orderBy('clock_in', 'desc')
             ->paginate(15);
 
+        $allAttendances = CashierAttendance::with('user')
+            ->when($activeRole === 'kasir', function($q) {
+                return $q->where('user_id', auth()->id());
+            })
+            ->when($activeRole !== 'kasir' && $activeJurusanId, function($q) use ($activeJurusanId) {
+                $q->where('jurusan_id', $activeJurusanId);
+            })
+            ->get()
+            ->map(function($att) {
+                $statusText = $att->status === 'present' ? 'Tepat Waktu' : ($att->status === 'late' ? 'Terlambat' : $att->status);
+                $timeText = '';
+                if ($att->clock_in) {
+                    $timeText .= ' ' . $att->clock_in->format('H:i');
+                }
+                if ($att->clock_out) {
+                    $timeText .= '-' . $att->clock_out->format('H:i');
+                }
+                
+                $color = '#6b7280';
+                if ($att->status === 'present') {
+                    $color = '#10b981';
+                } elseif ($att->status === 'late') {
+                    $color = '#f43f5e';
+                }
+                
+                return [
+                    'id' => $att->id,
+                    'title' => $att->user->name . ($timeText ? ' (' . trim($timeText) . ')' : '') . ' - ' . $statusText,
+                    'start' => $att->date->toDateString(),
+                    'allDay' => true,
+                    'backgroundColor' => $color,
+                    'borderColor' => $color,
+                ];
+            });
+
         return view('livewire.reports.attendance-report', [
             'attendances' => $attendances,
             'jurusans' => Jurusan::all(),
+            'allAttendancesJson' => json_encode($allAttendances),
         ])->layout('layouts.app', ['title' => 'Laporan Absensi & Shift']);
     }
 }

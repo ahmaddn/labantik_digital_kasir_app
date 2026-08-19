@@ -101,7 +101,14 @@
                 <div class="absolute -right-4 -bottom-4 opacity-5 group-hover:scale-110 transition-transform duration-500">
                     <svg class="w-24 h-24 text-primary-blue" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
                 </div>
-                <h3 class="text-sm font-black uppercase tracking-widest text-gray-800 dark:text-white mb-4">{{ $stat['name'] }}</h3>
+                <div class="flex justify-between items-start mb-4 gap-2 relative z-10">
+                    <h3 class="text-sm font-black uppercase tracking-widest text-gray-800 dark:text-white">{{ $stat['name'] }}</h3>
+                    @if(!in_array($stat['name'], ['Modal Awal', 'Penjualan Toko / POS', 'Pembelian Stok Barang', 'Biaya Operasional', 'Gaji & Insentif Kasir', 'Lain-lain / Dana Darurat', 'Keuntungan Jurusan', 'Bagi Hasil Mingguan', 'Bagi Hasil Supplier', 'Bagi Hasil Pengelola', 'Bagi Hasil Labantik', 'Kas Doku', 'Konsolidasi Sub-Unit']))
+                    <button wire:click="confirmDeleteCategory('{{ $stat['id'] }}', '{{ $stat['name'] }}')" class="text-red-400 hover:text-red-600 transition-colors hover:scale-110 transform" title="Hapus Kategori">
+                        <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                    </button>
+                    @endif
+                </div>
                 <div class="space-y-2">
                     <div class="flex justify-between items-center text-xs">
                         <span class="text-gray-400 font-bold uppercase tracking-widest">Pemasukan</span>
@@ -406,6 +413,41 @@
                     Batal
                 </button>
                 <button wire:click="deleteTransaction" class="flex-1 py-4 bg-primary-red text-white rounded-2xl font-black italic uppercase text-xs tracking-widest shadow-xl shadow-red-500/20 hover:scale-105 active:scale-95 transition-all">
+                    Ya, Hapus
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Category Confirmation Modal -->
+    <div 
+        x-data="{ show: @entangle('showDeleteCategoryConfirmation') }" 
+        x-show="show" 
+        x-cloak
+        class="fixed inset-0 z-[300] flex items-center justify-center p-6 bg-gray-900/60 backdrop-blur-sm"
+        x-transition:enter="transition ease-out duration-300"
+        x-transition:enter-start="opacity-0"
+        x-transition:enter-end="opacity-100"
+        x-transition:leave="transition ease-in duration-200"
+        x-transition:leave-start="opacity-100"
+        x-transition:leave-end="opacity-0"
+    >
+        <div 
+            @click.away="show = false"
+            class="bg-white dark:bg-gray-900 w-full max-w-md rounded-[2.5rem] shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-300"
+        >
+            <div class="p-8 text-center">
+                <div class="w-16 h-16 bg-red-100 dark:bg-red-900/20 text-primary-red rounded-full flex items-center justify-center mx-auto mb-6">
+                    <svg class="w-8 h-8" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                </div>
+                <h3 class="text-2xl font-black italic uppercase tracking-tighter text-gray-800 dark:text-white mb-2">Hapus Kategori Kas</h3>
+                <p class="text-sm font-bold text-gray-400">Apakah Anda yakin ingin menghapus kategori kas "<span class="font-extrabold text-gray-800 dark:text-white">{{ $confirmingDeleteCategoryName }}</span>"? Tindakan ini tidak dapat dibatalkan.</p>
+            </div>
+            <div class="p-8 bg-gray-50 dark:bg-gray-800/50 flex gap-4">
+                <button @click="show = false" class="flex-1 py-4 bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-2xl font-black text-xs uppercase tracking-widest hover:scale-105 active:scale-95 transition-transform">
+                    Batal
+                </button>
+                <button wire:click="deleteCategory" class="flex-1 py-4 bg-primary-red text-white rounded-2xl font-black italic uppercase text-xs tracking-widest shadow-xl shadow-red-500/20 hover:scale-105 active:scale-95 transition-all">
                     Ya, Hapus
                 </button>
             </div>

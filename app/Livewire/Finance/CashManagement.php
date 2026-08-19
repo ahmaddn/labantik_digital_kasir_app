@@ -35,6 +35,9 @@ class CashManagement extends Component
     public $editingId = null;
     public bool $showDeleteConfirmation = false;
     public $confirmingDeleteId = null;
+    public bool $showDeleteCategoryConfirmation = false;
+    public $confirmingDeleteCategoryId = null;
+    public string $confirmingDeleteCategoryName = '';
 
     // Physical Cash Adjustment Modal properties
     public bool $showAdjustModal = false;
@@ -378,6 +381,37 @@ class CashManagement extends Component
             }
             $this->showDeleteConfirmation = false;
             $this->confirmingDeleteId = null;
+        }
+    }
+
+    public function confirmDeleteCategory($id, $name)
+    {
+        $this->confirmingDeleteCategoryId = $id;
+        $this->confirmingDeleteCategoryName = $name;
+        $this->showDeleteCategoryConfirmation = true;
+    }
+
+    public function deleteCategory()
+    {
+        if ($this->confirmingDeleteCategoryId) {
+            // Check if there are any transactions associated with this category
+            $hasTransactions = CashTransaction::where('cash_category_id', $this->confirmingDeleteCategoryId)->exists();
+            if ($hasTransactions) {
+                $this->dispatch('toast', message: 'Kategori tidak dapat dihapus karena masih memiliki transaksi.', type: 'error');
+                $this->showDeleteCategoryConfirmation = false;
+                $this->confirmingDeleteCategoryId = null;
+                $this->confirmingDeleteCategoryName = '';
+                return;
+            }
+
+            $category = \App\Models\CashCategory::find($this->confirmingDeleteCategoryId);
+            if ($category) {
+                $category->delete();
+                $this->dispatch('toast', message: 'Kategori berhasil dihapus.');
+            }
+            $this->showDeleteCategoryConfirmation = false;
+            $this->confirmingDeleteCategoryId = null;
+            $this->confirmingDeleteCategoryName = '';
         }
     }
 

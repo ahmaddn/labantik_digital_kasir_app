@@ -216,8 +216,8 @@
                         </svg>
                     </div>
                     <div>
-                        <p class="text-sm font-black text-gray-800 dark:text-white">Sanksi Keterlambatan</p>
-                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Clock-in atau clock-out terlambat: <strong>Pengurangan poin sesuai pengaturan absensi admin</strong>.</p>
+                        <p class="text-sm font-black text-gray-800 dark:text-white">Aturan Pulang Cepat & Lembur</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Clock-out lebih cepat dari jadwal: <strong>Pengurangan poin sesuai pengaturan absensi admin</strong>. Clock-out tepat waktu / melebihi waktu akhir: <strong>Bonus +10 Poin & +1 Streak (Lembur)</strong>.</p>
                     </div>
                 </div>
             </div>

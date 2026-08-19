@@ -48,12 +48,14 @@ class LateReport extends Component
         $targetClockOut = $settings['clock_out_time'] ?? '15:00';
         $penaltyClockOut = (int) ($settings['late_clock_out_penalty'] ?? 0);
 
+        $status = 'present';
         if ($targetClockOut) {
             try {
                 $targetTime = \Carbon\Carbon::createFromFormat('H:i', $targetClockOut);
                 $targetTime->setDate($currentTime->year, $currentTime->month, $currentTime->day);
                 if ($currentTime->lt($targetTime)) {
                     $isEarlyClockOut = true;
+                    $status = 'early_checkout';
                     if ($penaltyClockOut > 0) {
                         $deductedClockOut = $penaltyClockOut;
                         auth()->user()->decrement('points', $penaltyClockOut);
@@ -63,6 +65,7 @@ class LateReport extends Component
                     }
                 } else {
                     $isBonusClockOut = true;
+                    $status = 'overtime';
                     auth()->user()->increment('points', $bonusPoints);
                     auth()->user()->increment('streak', 1);
                 }
@@ -76,6 +79,7 @@ class LateReport extends Component
                 'clock_out' => $currentTime,
                 'closing_cash' => (float)$this->closingCashInput,
                 'closing_report' => $this->closingReportText,
+                'status' => $status,
                 'points_at_closing' => (int)(auth()->user()->points + auth()->user()->pending_points),
             ]);
         }

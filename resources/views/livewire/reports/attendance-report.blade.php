@@ -165,4 +165,85 @@
             </form>
         </div>
     </div>
+
+    <!-- Calendar Section -->
+    <div class="bg-white dark:bg-gray-800 rounded-[2.5rem] shadow-2xl p-6 md:p-8 border border-gray-100 dark:border-gray-700/50 mt-8">
+        <h2 class="text-xl font-black text-gray-855 dark:text-white uppercase italic tracking-tight mb-6">Kalender Absensi Kasir</h2>
+        
+        <!-- FullCalendar Scripts -->
+        <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
+        
+        <style>
+            /* Responsive styling for FullCalendar toolbar on mobile */
+            @media (max-width: 640px) {
+                .fc .fc-toolbar {
+                    flex-direction: column !important;
+                    gap: 0.75rem !important;
+                    align-items: center !important;
+                }
+                .fc .fc-toolbar-title {
+                    font-size: 1.25rem !important;
+                    text-align: center !important;
+                }
+                .fc .fc-button-group {
+                    display: inline-flex !important;
+                }
+                .fc .fc-toolbar-chunk {
+                    display: flex !important;
+                    justify-content: center !important;
+                    width: 100% !important;
+                }
+            }
+            
+            /* Custom Scrollbar for horizontal scrolling calendar */
+            .calendar-scroll::-webkit-scrollbar {
+                height: 6px;
+            }
+            .calendar-scroll::-webkit-scrollbar-track {
+                background: transparent;
+            }
+            .calendar-scroll::-webkit-scrollbar-thumb {
+                background: #cbd5e1;
+                border-radius: 9999px;
+            }
+            .dark .calendar-scroll::-webkit-scrollbar-thumb {
+                background: #475569;
+            }
+        </style>
+        
+        <div wire:ignore class="overflow-x-auto w-full calendar-scroll pb-2">
+            <div id="attendance-calendar" class="dark:text-white w-full min-w-[700px] md:min-w-0"></div>
+        </div>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                const calendarEl = document.getElementById('attendance-calendar');
+                const calendar = new FullCalendar.Calendar(calendarEl, {
+                    initialView: 'dayGridMonth',
+                    height: 'auto',
+                    headerToolbar: {
+                        left: 'prev,next today',
+                        center: 'title',
+                        right: 'dayGridMonth,timeGridWeek'
+                    },
+                    locale: 'id',
+                    events: {!! $allAttendancesJson !!},
+                });
+                calendar.render();
+                
+                // Force size update to fix width issues on mobile rendering
+                setTimeout(() => {
+                    calendar.updateSize();
+                }, 150);
+
+                // Re-render calendar when Livewire updates components
+                window.addEventListener('livewire:navigated', () => {
+                    calendar.refetchEvents();
+                    setTimeout(() => {
+                        calendar.updateSize();
+                    }, 150);
+                });
+            });
+        </script>
+    </div>
 </div>

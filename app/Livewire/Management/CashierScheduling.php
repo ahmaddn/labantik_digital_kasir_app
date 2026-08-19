@@ -146,7 +146,6 @@ class CashierScheduling extends Component
         $this->showCreateModal = false;
         $this->resetForm();
         $this->dispatch('toast', message: 'Jadwal berhasil ditambahkan!');
-        $this->dispatch('schedule-updated', schedules: $this->getSchedulesForCalendar());
     }
 
     public function randomizeSchedules()
@@ -301,7 +300,6 @@ class CashierScheduling extends Component
 
         $this->showRandomModal = false;
         $this->dispatch('toast', message: 'Jadwal minggu ini berhasil dirandomize secara merata!');
-        $this->dispatch('schedule-updated', schedules: $this->getSchedulesForCalendar());
     }
 
     public function confirmDelete($id)
@@ -317,7 +315,6 @@ class CashierScheduling extends Component
             $this->showDeleteModal = false;
             $this->deletingScheduleId = null;
             $this->dispatch('toast', message: 'Jadwal berhasil dihapus.');
-            $this->dispatch('schedule-updated', schedules: $this->getSchedulesForCalendar());
         }
     }
 
@@ -343,27 +340,6 @@ class CashierScheduling extends Component
 
         $this->showDeleteAllModal = false;
         $this->dispatch('toast', message: 'Semua jadwal minggu ini berhasil dihapus.');
-        $this->dispatch('schedule-updated', schedules: $this->getSchedulesForCalendar());
-    }
-
-    public function getSchedulesForCalendar()
-    {
-        $activeJurusanId = session('active_jurusan_id') ?: $this->selectedJurusanId;
-        return CashierSchedule::with('user')
-            ->when($activeJurusanId, function($q) use ($activeJurusanId) {
-                $q->where('jurusan_id', $activeJurusanId);
-            })
-            ->orderBy('date')
-            ->get()
-            ->map(function($s) {
-                return [
-                    'id' => $s->id,
-                    'title' => $s->user->name . ($s->notes ? ' (' . $s->notes . ')' : ''),
-                    'start' => $s->date->toDateString(),
-                    'allDay' => true,
-                ];
-            })
-            ->toArray();
     }
 
     public function exportExcel()
@@ -413,28 +389,11 @@ class CashierScheduling extends Component
             ->orderBy('date')
             ->get();
 
-        // Query all schedules for Calendar JS view
-        $allSchedules = CashierSchedule::with('user')
-            ->when($activeJurusanId, function($q) use ($activeJurusanId) {
-                $q->where('jurusan_id', $activeJurusanId);
-            })
-            ->orderBy('date')
-            ->get()
-            ->map(function($s) {
-                return [
-                    'id' => $s->id,
-                    'title' => $s->user->name . ($s->notes ? ' (' . $s->notes . ')' : ''),
-                    'start' => $s->date->toDateString(),
-                    'allDay' => true,
-                ];
-            });
-
         return view('livewire.management.cashier-scheduling', [
             'cashiers' => $cashiers,
             'weekSchedules' => $weekSchedules,
             'jurusans' => Jurusan::all(),
             'weekRange' => $startOfWeek->translatedFormat('d M Y') . ' - ' . $endOfWeek->translatedFormat('d M Y'),
-            'allSchedulesJson' => json_encode($allSchedules),
         ])->layout('layouts.app', ['title' => 'Penjadwalan Kasir']);
     }
 }
