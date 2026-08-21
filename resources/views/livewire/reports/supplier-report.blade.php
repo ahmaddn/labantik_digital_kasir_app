@@ -99,6 +99,9 @@
                                     <button wire:click="settleSupplier('{{ $report->supplier_id }}', '{{ addslashes($report->supplier_name) }}', {{ $report->total_supplier_share }})" class="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-all inline-flex items-center gap-1.5 shadow-md shadow-emerald-500/10">
                                         Bayar Lunas
                                     </button>
+                                    <button wire:click="settleSupplier('{{ $report->supplier_id }}', '{{ addslashes($report->supplier_name) }}', {{ $report->total_supplier_share }}, true)" class="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-all inline-flex items-center gap-1.5 shadow-md shadow-amber-500/10" title="Tandai lunas tanpa memotong kas (tidak mencatat pengeluaran)">
+                                        Tandai Lunas
+                                    </button>
                                     <button wire:click="settleAndShare('{{ $report->supplier_id }}', '{{ addslashes($report->supplier_name) }}', {{ $report->total_supplier_share }})" class="px-4 py-2 bg-green-500 hover:bg-green-600 text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-all inline-flex items-center gap-1.5 shadow-md shadow-green-500/10" title="Bayar & Kirim Rincian ke WhatsApp">
                                         WA & Lunas
                                     </button>

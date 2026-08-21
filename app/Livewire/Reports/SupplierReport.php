@@ -88,7 +88,7 @@ class SupplierReport extends Component
         ])->layout('layouts.app', ['title' => 'Laporan Supplier']);
     }
 
-    public function settleSupplier($supplierId, $supplierName, $amount)
+    public function settleSupplier($supplierId, $supplierName, $amount, $isNoCash = false)
     {
         $activeJurusanId = session('active_jurusan_id');
 
@@ -112,29 +112,32 @@ class SupplierReport extends Component
             return;
         }
 
+        $finalAmount = $isNoCash ? 0 : $amount;
+        $prefix = $isNoCash ? '[Tanpa Potong Kas] ' : '';
+
         CashTransaction::create([
             'jurusan_id' => $activeJurusanId,
             'date' => now()->toDateString(),
             'type' => 'expense',
             'cash_type' => 'modal',
             'cash_category_id' => $category->id,
-            'amount' => $amount,
-            'description' => "Pelunasan bagi hasil supplier {$supplierName} periode " . Carbon::parse($this->dateFrom)->translatedFormat('d M Y') . ' s/d ' . Carbon::parse($this->dateTo)->translatedFormat('d M Y'),
+            'amount' => $finalAmount,
+            'description' => $prefix . "Pelunasan bagi hasil supplier {$supplierName} periode " . Carbon::parse($this->dateFrom)->translatedFormat('d M Y') . ' s/d ' . Carbon::parse($this->dateTo)->translatedFormat('d M Y'),
             'reference' => $reference,
         ]);
 
         $this->dispatch('toast', message: "Berhasil melunasi bagi hasil {$supplierName}.");
     }
 
-    public function settleAndShare($supplierId, $supplierName, $amount)
+    public function settleAndShare($supplierId, $supplierName, $amount, $isNoCash = false)
     {
-        $this->settleSupplier($supplierId, $supplierName, $amount);
+        $this->settleSupplier($supplierId, $supplierName, $amount, $isNoCash);
 
         $msg = "📢 *LAPORAN BAGI HASIL SUPPLIER*\n";
         $msg .= "👤 *Supplier:* {$supplierName}\n";
         $msg .= '📅 *Periode:* ' . Carbon::parse($this->dateFrom)->translatedFormat('d M Y') . ' s/d ' . Carbon::parse($this->dateTo)->translatedFormat('d M Y') . "\n";
         $msg .= '💰 *Total Hak Supplier:* Rp' . number_format($amount, 0, ',', '.') . "\n\n";
-        $msg .= "*Status:* ✅ LUNAS (Sudah dibayarkan)\n\n";
+        $msg .= "*Status:* ✅ LUNAS" . ($isNoCash ? " (Di luar sistem kas)" : " (Sudah dibayarkan)") . "\n\n";
         $msg .= '_Terima kasih atas kerjasamanya._';
 
         $waUrl = 'https://api.whatsapp.com/send?text=' . urlencode($msg);
