@@ -221,7 +221,7 @@
                                         wire:model="scores.{{ $candidate->id }}.score"
                                         placeholder="-"
                                         {{ $isNotHadir ? 'disabled' : '' }}
-                                        class="w-20 px-3 py-2 text-center bg-gray-50 dark:bg-gray-955 border border-gray-250 dark:border-gray-700 rounded-xl font-black text-sm text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-blue disabled:opacity-30 disabled:cursor-not-allowed transition-all">
+                                        class="w-20 px-3 py-2 text-center bg-gray-55 dark:bg-gray-955 border border-gray-250 dark:border-gray-700 rounded-xl font-black text-sm text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-blue disabled:opacity-30 disabled:cursor-not-allowed transition-all">
                                 </td>
                                 <td class="py-4 px-6 text-center">
                                     <input type="number" min="0" max="100" 
@@ -231,7 +231,7 @@
                                         class="w-20 px-3 py-2 text-center bg-gray-55 dark:bg-gray-955 border border-gray-250 dark:border-gray-700 rounded-xl font-black text-sm text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-blue disabled:opacity-30 disabled:cursor-not-allowed transition-all">
                                 </td>
                                 <td class="py-4 px-6">
-                                    <div class="flex items-center justify-between gap-1 bg-gray-50 dark:bg-gray-955 border border-gray-250 dark:border-gray-700 p-1 rounded-xl max-w-[240px] mx-auto">
+                                    <div class="flex items-center justify-between gap-1 bg-gray-55 dark:bg-gray-955 border border-gray-250 dark:border-gray-700 p-1 rounded-xl max-w-[240px] mx-auto">
                                         @foreach([
                                             'hadir' => ['H', 'bg-emerald-500 hover:bg-emerald-600 text-white shadow-md shadow-emerald-500/20', 'Hadir'],
                                             'sakit' => ['S', 'bg-blue-500 hover:bg-blue-600 text-white shadow-md shadow-blue-500/20', 'Sakit'],
@@ -259,7 +259,7 @@
                                         <input type="text"
                                             wire:model="attendances.{{ $candidate->id }}.reason"
                                             placeholder="Tulis alasan {{ $statusVal }} (Wajib)..."
-                                            class="w-full px-4 py-2 bg-gray-55 dark:bg-gray-950 border border-dashed border-red-300 dark:border-red-800/40 rounded-xl font-semibold text-xs text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-red-500/20 transition-all">
+                                            class="w-full px-4 py-2 bg-gray-55 dark:bg-gray-955 border border-dashed border-red-300 dark:border-red-800/40 rounded-xl font-semibold text-xs text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-red-500/20 transition-all">
                                     @else
                                         <span class="text-xs text-gray-400 dark:text-gray-600 italic">Hadir/Alfa tidak perlu alasan</span>
                                     @endif
@@ -672,7 +672,7 @@
                                             wire:model="singleScores.{{ $w }}.score"
                                             placeholder="-"
                                             {{ $isNotHadir ? 'disabled' : '' }}
-                                            class="w-20 px-3 py-1.5 text-center bg-gray-50 dark:bg-gray-955 border border-gray-250 dark:border-gray-700 rounded-xl font-black text-sm text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-blue disabled:opacity-30 disabled:cursor-not-allowed">
+                                            class="w-20 px-3 py-1.5 text-center bg-gray-55 dark:bg-gray-955 border border-gray-250 dark:border-gray-700 rounded-xl font-black text-sm text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-blue disabled:opacity-30 disabled:cursor-not-allowed">
                                     </td>
                                     <td class="py-3 px-4 text-center">
                                         <input type="number" min="0" max="100" 
@@ -682,7 +682,7 @@
                                             class="w-20 px-3 py-1.5 text-center bg-gray-55 dark:bg-gray-955 border border-gray-250 dark:border-gray-700 rounded-xl font-black text-sm text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-blue disabled:opacity-30 disabled:cursor-not-allowed">
                                     </td>
                                     <td class="py-3 px-4 text-center">
-                                        <div class="flex items-center justify-between gap-1 bg-gray-50 dark:bg-gray-950 border border-gray-250 dark:border-gray-700 p-1 rounded-xl max-w-[240px] mx-auto">
+                                        <div class="flex items-center justify-between gap-1 bg-gray-55 dark:bg-gray-955 border border-gray-250 dark:border-gray-700 p-1 rounded-xl max-w-[240px] mx-auto">
                                             @foreach(['hadir' => 'H', 'sakit' => 'S', 'izin' => 'I', 'alfa' => 'A'] as $status => $label)
                                                 @php
                                                     $activeClass = ($singleAttendances[$w]['status'] ?? 'hadir') === $status
@@ -709,7 +709,7 @@
                                             <input type="text"
                                                 wire:model="singleAttendances.{{ $w }}.reason"
                                                 placeholder="Tulis alasan {{ $statusVal }} (Wajib)..."
-                                                class="w-full px-3 py-1.5 bg-gray-50 dark:bg-gray-955 border border-dashed border-red-300 dark:border-red-800/40 rounded-xl font-semibold text-xs text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-red-500/20 transition-all">
+                                                class="w-full px-3 py-1.5 bg-gray-55 dark:bg-gray-955 border border-dashed border-red-300 dark:border-red-800/40 rounded-xl font-semibold text-xs text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-red-500/20 transition-all">
                                         @else
                                             <span class="text-xs text-gray-400 dark:text-gray-600 italic">Hadir/Alfa tidak perlu alasan</span>
                                         @endif
