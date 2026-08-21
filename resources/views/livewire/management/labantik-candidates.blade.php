@@ -530,7 +530,7 @@
     <!-- Create Candidate Modal -->
     <div x-data="{ showCreate: @entangle('showCreateModal') }" x-show="showCreate" class="fixed inset-0 z-50 flex items-center justify-center p-4" x-cloak>
         <div x-show="showCreate" x-transition.opacity class="fixed inset-0 bg-black/60 backdrop-blur-xs" wire:click="$set('showCreateModal', false)"></div>
-        <div x-show="showCreate" x-transition.scale class="relative w-full max-w-2xl bg-white dark:bg-gray-800 rounded-[2.5rem] shadow-2xl p-8 border border-gray-100 dark:border-gray-700 z-10 max-h-[90vh] overflow-y-auto">
+        <div x-show="showCreate" x-transition.scale class="relative w-full max-w-4xl bg-white dark:bg-gray-800 rounded-[2.5rem] shadow-2xl p-8 border border-gray-100 dark:border-gray-700 z-10 max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center mb-6">
                 <h3 class="text-2xl font-black italic uppercase tracking-tighter text-gray-800 dark:text-white">
                     Tambah Calon Anggota
