@@ -14,6 +14,7 @@ class LabantikCandidateScore extends Model
 
     protected $fillable = [
         'registration_id',
+        'user_id',
         'week_number',
         'score',
         'attitude_score',
@@ -23,5 +24,10 @@ class LabantikCandidateScore extends Model
     public function registration(): BelongsTo
     {
         return $this->belongsTo(LabantikRegistration::class, 'registration_id');
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'user_id');
     }
 }

@@ -52,7 +52,7 @@
     </div>
 
     <!-- Navigation Tabs -->
-    <div class="flex border-b border-gray-200 dark:border-gray-700 gap-4">
+    <div class="flex border-b border-gray-200 dark:border-gray-700 gap-4 overflow-x-auto whitespace-nowrap scrollbar-none pb-1">
         <button wire:click="$set('activeTab', 'candidates')"
             class="pb-4 text-xs font-black uppercase tracking-widest border-b-2 {{ $activeTab === 'candidates' ? 'border-primary-blue dark:border-primary-yellow text-primary-blue dark:text-primary-yellow' : 'border-transparent text-gray-400 hover:text-gray-650' }}">
             Pendaftar
@@ -196,7 +196,7 @@
             <div class="overflow-x-auto rounded-3xl border border-gray-150 dark:border-gray-700/60">
                 <table class="w-full text-left border-collapse min-w-[1000px]">
                     <thead>
-                        <tr class="bg-gray-50 dark:bg-gray-900/60 text-gray-400 dark:text-gray-450 border-b border-gray-150 dark:border-gray-700/80">
+                        <tr class="bg-gray-100 dark:bg-gray-900 text-gray-500 dark:text-gray-400 border-b border-gray-150 dark:border-gray-700/80">
                             <th class="py-4 px-6 text-xs font-black uppercase tracking-widest w-48">Nama Calon</th>
                             <th class="py-4 px-6 text-xs font-black uppercase tracking-widest text-center w-28">Nilai Akademik</th>
                             <th class="py-4 px-6 text-xs font-black uppercase tracking-widest text-center w-28">Nilai Perilaku / Attitude</th>
@@ -205,7 +205,7 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100 dark:divide-gray-700/50">
-                        @foreach($candidates as $candidate)
+                        @foreach($scoringCandidates as $candidate)
                             @continue(!$candidate->id)
                             <tr class="hover:bg-gray-50/30 dark:hover:bg-gray-900/20 transition-all">
                                 <td class="py-4 px-6">
@@ -213,19 +213,25 @@
                                     <div class="text-[10px] text-gray-400 dark:text-gray-550 font-black uppercase tracking-wider mt-0.5">{{ $candidate->class_name }}</div>
                                 </td>
                                 <td class="py-4 px-6 text-center">
+                                    @php
+                                        $statusVal = $attendances[$candidate->id]['status'] ?? 'hadir';
+                                        $isNotHadir = $statusVal !== 'hadir';
+                                    @endphp
                                     <input type="number" min="0" max="100" 
                                         wire:model="scores.{{ $candidate->id }}.score"
                                         placeholder="-"
-                                        class="w-20 px-3 py-2 text-center bg-gray-50 dark:bg-gray-950 border border-gray-250 dark:border-gray-700 rounded-xl font-black text-sm text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-blue transition-all">
+                                        {{ $isNotHadir ? 'disabled' : '' }}
+                                        class="w-20 px-3 py-2 text-center bg-gray-50 dark:bg-gray-955 border border-gray-250 dark:border-gray-700 rounded-xl font-black text-sm text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-blue disabled:opacity-30 disabled:cursor-not-allowed transition-all">
                                 </td>
                                 <td class="py-4 px-6 text-center">
                                     <input type="number" min="0" max="100" 
                                         wire:model="scores.{{ $candidate->id }}.attitude_score"
                                         placeholder="-"
-                                        class="w-20 px-3 py-2 text-center bg-gray-55 dark:bg-gray-955 border border-gray-250 dark:border-gray-700 rounded-xl font-black text-sm text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-blue transition-all">
+                                        {{ $isNotHadir ? 'disabled' : '' }}
+                                        class="w-20 px-3 py-2 text-center bg-gray-55 dark:bg-gray-955 border border-gray-250 dark:border-gray-700 rounded-xl font-black text-sm text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-blue disabled:opacity-30 disabled:cursor-not-allowed transition-all">
                                 </td>
                                 <td class="py-4 px-6">
-                                    <div class="flex items-center justify-between gap-1 bg-gray-50 dark:bg-gray-950 border border-gray-250 dark:border-gray-700 p-1 rounded-xl max-w-[240px] mx-auto">
+                                    <div class="flex items-center justify-between gap-1 bg-gray-50 dark:bg-gray-955 border border-gray-250 dark:border-gray-700 p-1 rounded-xl max-w-[240px] mx-auto">
                                         @foreach([
                                             'hadir' => ['H', 'bg-emerald-500 hover:bg-emerald-600 text-white shadow-md shadow-emerald-500/20', 'Hadir'],
                                             'sakit' => ['S', 'bg-blue-500 hover:bg-blue-600 text-white shadow-md shadow-blue-500/20', 'Sakit'],
@@ -253,7 +259,7 @@
                                         <input type="text"
                                             wire:model="attendances.{{ $candidate->id }}.reason"
                                             placeholder="Tulis alasan {{ $statusVal }} (Wajib)..."
-                                            class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-950 border border-dashed border-red-300 dark:border-red-800/40 rounded-xl font-semibold text-xs text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-red-500/20 transition-all">
+                                            class="w-full px-4 py-2 bg-gray-55 dark:bg-gray-950 border border-dashed border-red-300 dark:border-red-800/40 rounded-xl font-semibold text-xs text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-red-500/20 transition-all">
                                     @else
                                         <span class="text-xs text-gray-400 dark:text-gray-600 italic">Hadir/Alfa tidak perlu alasan</span>
                                     @endif
@@ -264,8 +270,11 @@
                 </table>
             </div>
 
-            <div class="mt-6 flex justify-end">
-                <button wire:click="saveScoring" class="px-8 py-4 bg-emerald-500 hover:bg-emerald-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-emerald-500/20 active:scale-95 transition-all">
+            <div class="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div class="w-full sm:w-auto">
+                    {{ $scoringCandidates->links() }}
+                </div>
+                <button wire:click="saveScoring" class="w-full sm:w-auto px-8 py-4 bg-emerald-500 hover:bg-emerald-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-emerald-500/20 active:scale-95 transition-all">
                     Simpan Pekan Ini
                 </button>
             </div>
@@ -288,7 +297,7 @@
             <div class="overflow-x-auto rounded-3xl border border-gray-150 dark:border-gray-700/60">
                 <table class="w-full text-left border-collapse min-w-[800px]">
                     <thead>
-                        <tr class="bg-gray-50 dark:bg-gray-900/60 text-gray-400 dark:text-gray-450 border-b border-gray-150 dark:border-gray-700/80">
+                        <tr class="bg-gray-100 dark:bg-gray-900 text-gray-500 dark:text-gray-400 border-b border-gray-150 dark:border-gray-700/80">
                             <th class="py-4 px-6 text-xs font-black uppercase tracking-widest pl-6 w-24 text-center">Rank</th>
                             <th class="py-4 px-6 text-xs font-black uppercase tracking-widest">Nama Lengkap</th>
                             <th class="py-4 px-6 text-xs font-black uppercase tracking-widest">Kelas</th>
@@ -348,6 +357,10 @@
                         @endforelse
                     </tbody>
                 </table>
+            </div>
+
+            <div class="mt-6">
+                {{ $acceptedCandidates->links() }}
             </div>
         </div>
     @endif
@@ -607,7 +620,7 @@
                 Selesaikan Seleksi?
             </h3>
             <p class="text-sm font-semibold text-gray-400 leading-relaxed mb-6">
-                Sistem akan menghitung nilai rata-rata tiap peserta (nilai akademik + nilai attitude), memotong penalti absensi (-10 poin per Alfa, -2 poin per Izin), dan meloloskan 15 calon terbaik secara otomatis. Tindakan ini akan memperbarui status pendaftar.
+                Sistem akan menghitung nilai rata-rata tiap peserta (nilai akademik + nilai attitude) dari seluruh penginput, memberikan bonus kehadiran (+5 poin per Hadir), memotong penalti absensi (-10 poin per Alfa, -2 poin per Izin), dan meloloskan 15 calon terbaik secara otomatis. Tindakan ini akan memperbarui status pendaftar.
             </p>
             <div class="flex gap-4">
                 <button wire:click="$set('showFinishConfirmModal', false)" class="flex-1 py-4 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-white rounded-2xl font-black text-xs uppercase tracking-widest transition-transform">
@@ -638,7 +651,7 @@
                 <div class="overflow-x-auto rounded-2xl border border-gray-100 dark:border-gray-700/60">
                     <table class="w-full text-left border-collapse min-w-[900px]">
                         <thead>
-                            <tr class="bg-gray-50 dark:bg-gray-900/60 text-gray-405 dark:text-gray-400 border-b border-gray-100 dark:border-gray-700">
+                            <tr class="bg-gray-100 dark:bg-gray-900 text-gray-500 dark:text-gray-400 border-b border-gray-100 dark:border-gray-700">
                                 <th class="py-3 px-4 text-xs font-black uppercase tracking-widest w-24">Pekan</th>
                                 <th class="py-3 px-4 text-xs font-black uppercase tracking-widest text-center w-28">Nilai Akademik</th>
                                 <th class="py-3 px-4 text-xs font-black uppercase tracking-widest text-center w-28">Nilai Attitude</th>
@@ -650,17 +663,23 @@
                             @for ($w = 1; $w <= 12; $w++)
                                 <tr class="hover:bg-gray-50/20 dark:hover:bg-gray-900/10">
                                     <td class="py-3 px-4 text-sm font-bold text-gray-800 dark:text-white">Pekan {{ $w }}</td>
+                                    @php
+                                        $statusVal = $singleAttendances[$w]['status'] ?? 'hadir';
+                                        $isNotHadir = $statusVal !== 'hadir';
+                                    @endphp
                                     <td class="py-3 px-4 text-center">
                                         <input type="number" min="0" max="100" 
                                             wire:model="singleScores.{{ $w }}.score"
                                             placeholder="-"
-                                            class="w-20 px-3 py-1.5 text-center bg-gray-50 dark:bg-gray-950 border border-gray-250 dark:border-gray-700 rounded-xl font-black text-sm text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-blue">
+                                            {{ $isNotHadir ? 'disabled' : '' }}
+                                            class="w-20 px-3 py-1.5 text-center bg-gray-50 dark:bg-gray-955 border border-gray-250 dark:border-gray-700 rounded-xl font-black text-sm text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-blue disabled:opacity-30 disabled:cursor-not-allowed">
                                     </td>
                                     <td class="py-3 px-4 text-center">
                                         <input type="number" min="0" max="100" 
                                             wire:model="singleScores.{{ $w }}.attitude_score"
                                             placeholder="-"
-                                            class="w-20 px-3 py-1.5 text-center bg-gray-55 dark:bg-gray-955 border border-gray-250 dark:border-gray-700 rounded-xl font-black text-sm text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-blue">
+                                            {{ $isNotHadir ? 'disabled' : '' }}
+                                            class="w-20 px-3 py-1.5 text-center bg-gray-55 dark:bg-gray-955 border border-gray-250 dark:border-gray-700 rounded-xl font-black text-sm text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-blue disabled:opacity-30 disabled:cursor-not-allowed">
                                     </td>
                                     <td class="py-3 px-4 text-center">
                                         <div class="flex items-center justify-between gap-1 bg-gray-50 dark:bg-gray-950 border border-gray-250 dark:border-gray-700 p-1 rounded-xl max-w-[240px] mx-auto">

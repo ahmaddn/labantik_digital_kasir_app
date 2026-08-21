@@ -118,6 +118,9 @@ class LabantikCandidates extends Component
         foreach ($candidates as $candidate) {
             $scoreModel = LabantikCandidateScore::where('registration_id', $candidate->id)
                 ->where('week_number', $this->selectedWeek)
+                ->where(function($q) {
+                    $q->where('user_id', auth()->id())->orWhereNull('user_id');
+                })
                 ->first();
             
             $attendanceModel = LabantikCandidateAttendance::where('registration_id', $candidate->id)
@@ -145,24 +148,36 @@ class LabantikCandidates extends Component
         }
 
         foreach ($this->scores as $candidateId => $scoreData) {
-            $scoreVal = $scoreData['score'];
-            $attitudeVal = $scoreData['attitude_score'] ?? '';
-            $notesVal = $scoreData['notes'] ?? '';
-
-            if ($scoreVal !== '' || $attitudeVal !== '') {
-                LabantikCandidateScore::updateOrCreate(
-                    ['registration_id' => $candidateId, 'week_number' => $this->selectedWeek],
-                    [
-                        'score' => $scoreVal !== '' ? intval($scoreVal) : 0,
-                        'attitude_score' => $attitudeVal !== '' ? intval($attitudeVal) : 0,
-                        'notes' => $notesVal
-                    ]
-                );
-            }
-
             $attData = $this->attendances[$candidateId] ?? ['status' => 'hadir', 'reason' => ''];
             $statusVal = $attData['status'];
             $reasonVal = $attData['reason'];
+
+            if ($statusVal !== 'hadir') {
+                // Clear scores on database if not present
+                LabantikCandidateScore::where('registration_id', $candidateId)
+                    ->where('week_number', $this->selectedWeek)
+                    ->where('user_id', auth()->id())
+                    ->delete();
+            } else {
+                $scoreVal = $scoreData['score'];
+                $attitudeVal = $scoreData['attitude_score'] ?? '';
+                $notesVal = $scoreData['notes'] ?? '';
+
+                if ($scoreVal !== '' || $attitudeVal !== '') {
+                    LabantikCandidateScore::updateOrCreate(
+                        [
+                            'registration_id' => $candidateId, 
+                            'week_number' => $this->selectedWeek,
+                            'user_id' => auth()->id()
+                        ],
+                        [
+                            'score' => $scoreVal !== '' ? intval($scoreVal) : 0,
+                            'attitude_score' => $attitudeVal !== '' ? intval($attitudeVal) : 0,
+                            'notes' => $notesVal
+                        ]
+                    );
+                }
+            }
 
             if (in_array($statusVal, ['sakit', 'izin']) && empty(trim($reasonVal))) {
                 $this->dispatch('toast', message: 'Alasan sakit/izin wajib diisi untuk masing-masing peserta.');
@@ -205,27 +220,16 @@ class LabantikCandidates extends Component
 
         $calculated = [];
         foreach ($candidates as $candidate) {
-            $totalScore = 0;
-            $totalAttitude = 0;
-            $weeks = count($candidate->scores);
-            
-            if ($weeks > 0) {
-                foreach ($candidate->scores as $s) {
-                    $totalScore += $s->score;
-                    $totalAttitude += $s->attitude_score;
-                }
-                $avgScore = $totalScore / $weeks;
-                $avgAttitude = $totalAttitude / $weeks;
-            } else {
-                $avgScore = 0;
-                $avgAttitude = 0;
-            }
+            // Averages across all scores given by all users (graders) and weeks
+            $avgScore = $candidate->scores->avg('score') ?: 0;
+            $avgAttitude = $candidate->scores->avg('attitude_score') ?: 0;
 
-            // Deduct penalty: -10 for alfa, -2 for izin
+            // Attendance calculations: +5 for hadir, -10 for alfa, -2 for izin
+            $hadirCount = $candidate->attendances->where('status', 'hadir')->count();
             $alfaCount = $candidate->attendances->where('status', 'alfa')->count();
             $izinCount = $candidate->attendances->where('status', 'izin')->count();
             
-            $finalScore = $avgScore + $avgAttitude - ($alfaCount * 10) - ($izinCount * 2);
+            $finalScore = $avgScore + $avgAttitude + ($hadirCount * 5) - ($alfaCount * 10) - ($izinCount * 2);
 
             $calculated[] = [
                 'candidate' => $candidate,
@@ -286,6 +290,9 @@ class LabantikCandidates extends Component
         for ($w = 1; $w <= 12; $w++) {
             $scoreModel = LabantikCandidateScore::where('registration_id', $candidateId)
                 ->where('week_number', $w)
+                ->where(function($q) {
+                    $q->where('user_id', auth()->id())->orWhereNull('user_id');
+                })
                 ->first();
             
             $attendanceModel = LabantikCandidateAttendance::where('registration_id', $candidateId)
@@ -315,28 +322,36 @@ class LabantikCandidates extends Component
         }
 
         foreach ($this->singleScores as $w => $scoreData) {
-            $scoreVal = $scoreData['score'];
-            $attitudeVal = $scoreData['attitude_score'] ?? '';
-            $notesVal = $scoreData['notes'] ?? '';
-
-            if ($scoreVal !== '' || $attitudeVal !== '') {
-                LabantikCandidateScore::updateOrCreate(
-                    ['registration_id' => $this->scoringCandidate->id, 'week_number' => $w],
-                    [
-                        'score' => $scoreVal !== '' ? intval($scoreVal) : 0,
-                        'attitude_score' => $attitudeVal !== '' ? intval($attitudeVal) : 0,
-                        'notes' => $notesVal
-                    ]
-                );
-            } else {
-                LabantikCandidateScore::where('registration_id', $this->scoringCandidate->id)
-                    ->where('week_number', $w)
-                    ->delete();
-            }
-
             $attData = $this->singleAttendances[$w] ?? ['status' => 'hadir', 'reason' => ''];
             $statusVal = $attData['status'];
             $reasonVal = $attData['reason'];
+
+            if ($statusVal !== 'hadir') {
+                // Clear scores on database if not present
+                LabantikCandidateScore::where('registration_id', $this->scoringCandidate->id)
+                    ->where('week_number', $w)
+                    ->where('user_id', auth()->id())
+                    ->delete();
+            } else {
+                $scoreVal = $scoreData['score'];
+                $attitudeVal = $scoreData['attitude_score'] ?? '';
+                $notesVal = $scoreData['notes'] ?? '';
+
+                if ($scoreVal !== '' || $attitudeVal !== '') {
+                    LabantikCandidateScore::updateOrCreate(
+                        [
+                            'registration_id' => $this->scoringCandidate->id, 
+                            'week_number' => $w,
+                            'user_id' => auth()->id()
+                        ],
+                        [
+                            'score' => $scoreVal !== '' ? intval($scoreVal) : 0,
+                            'attitude_score' => $attitudeVal !== '' ? intval($attitudeVal) : 0,
+                            'notes' => $notesVal
+                        ]
+                    );
+                }
+            }
 
             if (in_array($statusVal, ['sakit', 'izin']) && empty(trim($reasonVal))) {
                 $this->dispatch('toast', message: "Alasan sakit/izin pada pekan {$w} wajib diisi.");
@@ -486,9 +501,18 @@ class LabantikCandidates extends Component
                   ->orWhere('class_name', 'like', '%' . $this->search . '%');
             });
         }
-        $candidates = $query->orderBy('created_at', 'desc')->paginate(15);
+        $candidates = $query->orderBy('created_at', 'desc')->paginate(10, ['*'], 'candidatesPage');
 
-        // 2. Tab Accepted (15 Besar Terpilih)
+        // 2. Tab scoring (Input Nilai & Absen)
+        $scoringQuery = LabantikRegistration::query();
+        if ($activeJurusanId) {
+            $scoringQuery->where(function ($q) use ($activeJurusanId) {
+                $q->where('jurusan_id', $activeJurusanId)->orWhereNull('jurusan_id');
+            });
+        }
+        $scoringCandidates = $scoringQuery->orderBy('created_at', 'desc')->paginate(10, ['*'], 'scoringPage');
+
+        // 3. Tab Accepted (15 Besar Terpilih)
         $acceptedQuery = LabantikRegistration::with(['scores', 'attendances'])->where('is_accepted', true);
         if ($activeJurusanId) {
             $acceptedQuery->where(function ($q) use ($activeJurusanId) {
@@ -498,15 +522,28 @@ class LabantikCandidates extends Component
         $acceptedCandidates = $acceptedQuery->get()->map(function($c) {
             $avg = $c->scores->avg('score') ?: 0;
             $avgAttitude = $c->scores->avg('attitude_score') ?: 0;
+            $hadir = $c->attendances->where('status', 'hadir')->count();
             $alfa = $c->attendances->where('status', 'alfa')->count();
             $izin = $c->attendances->where('status', 'izin')->count();
-            $c->final_score = max(0, $avg + $avgAttitude - ($alfa * 10) - ($izin * 2));
+            $c->final_score = max(0, $avg + $avgAttitude + ($hadir * 5) - ($alfa * 10) - ($izin * 2));
             return $c;
         })->sortByDesc('final_score');
 
+        $acceptedPage = $this->paginators['acceptedPage'] ?? 1;
+        $acceptedPerPage = 10;
+        $acceptedSliced = $acceptedCandidates->slice(($acceptedPage - 1) * $acceptedPerPage, $acceptedPerPage)->all();
+        $paginatedAccepted = new \Illuminate\Pagination\LengthAwarePaginator(
+            $acceptedSliced,
+            $acceptedCandidates->count(),
+            $acceptedPerPage,
+            $acceptedPage,
+            ['path' => request()->url(), 'pageName' => 'acceptedPage']
+        );
+
         return view('livewire.management.labantik-candidates', [
             'candidates' => $candidates,
-            'acceptedCandidates' => $acceptedCandidates,
+            'scoringCandidates' => $scoringCandidates,
+            'acceptedCandidates' => $paginatedAccepted,
             'jurusans' => $jurusans,
             'isSuperAdmin' => $activeRole === 'superadmin',
             'isPengelola' => $this->checkPermission(),
