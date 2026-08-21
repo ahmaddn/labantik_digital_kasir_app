@@ -28,7 +28,7 @@
             @endif
 
             <a href="{{ route('guide') }}"
-                class="px-6 py-3.5 md:py-5 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-800 text-gray-700 dark:text-gray-350 rounded-2xl md:rounded-[2rem] shadow-xl shadow-blue-900/5 font-black italic uppercase tracking-wider transition transform hover:-translate-y-1 active:scale-95 flex items-center">
+                class="px-6 py-3.5 md:py-5 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 text-gray-800 dark:text-white rounded-2xl md:rounded-[2rem] shadow-xl shadow-blue-900/5 font-black italic uppercase tracking-wider transition transform hover:-translate-y-1 hover:bg-gray-50 dark:hover:bg-gray-700 active:scale-95 flex items-center">
                 <svg class="w-5.5 h-5.5 mr-2.5 text-blue-600 dark:text-blue-400" xmlns="http://www.w3.org/2000/svg"
                     width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                     stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
@@ -40,7 +40,7 @@
             </a>
 
             <a href="{{ route('leaderboard') }}"
-                class="px-6 py-3.5 md:py-5 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-800 text-gray-700 dark:text-gray-350 rounded-2xl md:rounded-[2rem] shadow-xl shadow-blue-900/5 font-black italic uppercase tracking-wider transition transform hover:-translate-y-1 active:scale-95 flex items-center">
+                class="px-6 py-3.5 md:py-5 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 text-gray-800 dark:text-white rounded-2xl md:rounded-[2rem] shadow-xl shadow-blue-900/5 font-black italic uppercase tracking-wider transition transform hover:-translate-y-1 hover:bg-gray-50 dark:hover:bg-gray-700 active:scale-95 flex items-center">
                 <svg class="w-5.5 h-5.5 mr-2.5 text-amber-500" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
                     viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
                     stroke-linecap="round" stroke-linejoin="round">
