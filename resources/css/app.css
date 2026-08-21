@@ -862,5 +862,22 @@ html:not(.dark) [class*="theme-"] .theme-no-card.bg-gray-50 {
     fill: #3b82f6 !important;
 }
 
+/* Global Forms Dark Theme Integration (Native Dropdowns & Autofills) */
+select,
+select option,
+input,
+textarea {
+    color-scheme: light;
+}
 
+.dark select,
+.dark select option,
+.dark input,
+.dark textarea {
+    color-scheme: dark !important;
+}
 
+.dark select option {
+    background-color: #0f172a !important;
+    color: #f8fafc !important;
+}

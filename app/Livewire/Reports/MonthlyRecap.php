@@ -146,7 +146,7 @@ class MonthlyRecap extends Component
         $categoryRecap = Transaction::forReporting()->whereMonth('transacted_at', $this->selectedMonth)
             ->whereYear('transacted_at', $this->selectedYear)
             ->when($activeJurusanId, function ($q) use ($activeJurusanId) {
-                return $q->where('jurusan_id', $activeJurusanId);
+                return $q->where('transactions.jurusan_id', $activeJurusanId);
             })
             ->whereIn('status', ['uang_diterima', 'belum_kembalian'])
             ->join('products', 'transactions.product_id', '=', 'products.id')

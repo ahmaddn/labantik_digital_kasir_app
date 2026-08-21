@@ -7,11 +7,6 @@
         </div>
         
         <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
-            <div class="flex items-center bg-white dark:bg-gray-800 px-4 sm:px-6 py-3 rounded-2xl shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-800 transition-all justify-between sm:justify-start">
-                <svg class="w-4 h-4 text-primary-blue mr-3" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
-                <input type="month" wire:model.live="filterMonth" class="border-none p-0 focus:ring-0 font-black text-sm bg-transparent dark:text-white cursor-pointer">
-            </div>
-
             <button wire:click="exportExcel" wire:loading.attr="disabled" class="px-5 sm:px-8 py-3.5 sm:py-4 bg-green-500 text-white rounded-2xl shadow-xl shadow-green-500/20 font-black italic uppercase text-xs tracking-widest transform hover:-translate-y-1 transition-all flex items-center justify-center">
                 <svg class="w-4 h-4 mr-3" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
                 <span wire:loading.remove wire:target="exportExcel">Export Excel</span>
@@ -32,18 +27,6 @@
         </div>
     </div>
 
-    <!-- Tab Navigation -->
-    <div class="flex items-center gap-2 mb-8 bg-gray-50 dark:bg-gray-800 p-1.5 rounded-2xl w-fit border border-gray-100 dark:border-gray-700/50">
-        <button wire:click="$set('activeTab', 'cumulative')" 
-            class="px-5 py-2.5 rounded-xl text-xs font-black italic uppercase tracking-wider transition-all {{ $activeTab === 'cumulative' ? 'bg-primary-blue text-white shadow-md' : 'text-gray-500 hover:text-gray-855 dark:hover:text-white dark:text-gray-400' }}">
-            Kumulatif (Semua)
-        </button>
-        <button wire:click="$set('activeTab', 'monthly')" 
-            class="px-5 py-2.5 rounded-xl text-xs font-black italic uppercase tracking-wider transition-all {{ $activeTab === 'monthly' ? 'bg-primary-blue text-white shadow-md' : 'text-gray-500 hover:text-gray-855 dark:hover:text-white dark:text-gray-400' }}">
-            Bulan Ini
-        </button>
-    </div>
-
     <!-- Stats Cards -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-8 mb-12">
         <!-- Total Saldo Kas Card -->
@@ -51,7 +34,7 @@
             <div class="absolute -right-6 -bottom-6 opacity-10 group-hover:scale-110 transition-transform duration-700">
                 <svg class="w-40 h-40 text-white" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="12" x="2" y="6" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/></svg>
             </div>
-            <h3 class="text-[10px] font-black uppercase tracking-[0.3em] opacity-80 mb-3 text-emerald-300">Total Saldo Kas {{ $activeTab === 'cumulative' ? '(Kumulatif)' : '(Bulan Ini)' }}</h3>
+            <h3 class="text-[10px] font-black uppercase tracking-[0.3em] opacity-80 mb-3 text-emerald-300">Total Saldo Kas</h3>
             <p class="text-2xl xl:text-3xl font-black italic text-white {{ ($currentModalBalance + $currentProfitBalance) < 0 ? 'text-primary-red' : '' }}" :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($currentModalBalance + $currentProfitBalance, 0, ',', '.') }}</p>
         </div>
 
@@ -60,7 +43,7 @@
             <div class="absolute -right-6 -bottom-6 opacity-10 group-hover:scale-110 transition-transform duration-700">
                 <svg class="w-40 h-40 text-white" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg>
             </div>
-            <h3 class="text-[10px] font-black uppercase tracking-[0.3em] opacity-60 mb-3">Saldo Kas Modal {{ $activeTab === 'cumulative' ? '(Kumulatif)' : '(Bulan Ini)' }}</h3>
+            <h3 class="text-[10px] font-black uppercase tracking-[0.3em] opacity-60 mb-3">Saldo Kas Modal</h3>
             <p class="text-2xl xl:text-3xl font-black italic text-white {{ $currentModalBalance < 0 ? 'text-primary-red' : '' }}" :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($currentModalBalance, 0, ',', '.') }}</p>
         </div>
 
@@ -69,7 +52,7 @@
             <div class="absolute -right-6 -bottom-6 opacity-10 group-hover:scale-110 transition-transform duration-700">
                 <svg class="w-40 h-40 text-white" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m16 12-4-4-4 4"/><path d="M12 16V8"/></svg>
             </div>
-            <h3 class="text-[10px] font-black uppercase tracking-[0.3em] opacity-80 mb-3">Saldo Kas Keuntungan {{ $activeTab === 'cumulative' ? '(Kumulatif)' : '(Bulan Ini)' }}</h3>
+            <h3 class="text-[10px] font-black uppercase tracking-[0.3em] opacity-80 mb-3">Saldo Kas Keuntungan</h3>
             <p class="text-2xl xl:text-3xl font-black italic text-white {{ $currentProfitBalance < 0 ? 'text-red-300' : '' }}" :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($currentProfitBalance, 0, ',', '.') }}</p>
         </div>
 
@@ -78,7 +61,7 @@
             <div class="absolute -right-6 -bottom-6 opacity-5 group-hover:scale-110 transition-transform duration-700">
                 <svg class="w-40 h-40 text-green-500" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
             </div>
-            <h3 class="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 mb-3">Pemasukan {{ $activeTab === 'cumulative' ? '(Kumulatif)' : '(Bulan Ini)' }}</h3>
+            <h3 class="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 mb-3">Total Pemasukan</h3>
             <p class="text-2xl xl:text-3xl font-black italic text-green-500" :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($displayIncome, 0, ',', '.') }}</p>
         </div>
 
@@ -87,7 +70,7 @@
             <div class="absolute -right-6 -bottom-6 opacity-5 group-hover:scale-110 transition-transform duration-700">
                 <svg class="w-40 h-40 text-primary-red" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 17 13.5 8.5 8.5 13.5 2 7"/><polyline points="16 17 22 17 22 11"/></svg>
             </div>
-            <h3 class="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 mb-3">Pengeluaran {{ $activeTab === 'cumulative' ? '(Kumulatif)' : '(Bulan Ini)' }}</h3>
+            <h3 class="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 mb-3">Total Pengeluaran</h3>
             <p class="text-2xl xl:text-3xl font-black italic text-primary-red" :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($displayExpense, 0, ',', '.') }}</p>
         </div>
     </div>
@@ -440,15 +423,31 @@
                 <div class="w-16 h-16 bg-red-100 dark:bg-red-900/20 text-primary-red rounded-full flex items-center justify-center mx-auto mb-6">
                     <svg class="w-8 h-8" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
                 </div>
-                <h3 class="text-2xl font-black italic uppercase tracking-tighter text-gray-800 dark:text-white mb-2">Hapus Kategori Kas</h3>
-                <p class="text-sm font-bold text-gray-400">Apakah Anda yakin ingin menghapus kategori kas "<span class="font-extrabold text-gray-800 dark:text-white">{{ $confirmingDeleteCategoryName }}</span>"? Tindakan ini tidak dapat dibatalkan.</p>
+                <h3 class="text-2xl font-black italic uppercase tracking-tighter text-gray-800 dark:text-white mb-2">
+                    {{ $confirmingDeleteCategoryTxCount > 0 ? 'Hapus Paksa Kategori' : 'Hapus Kategori Kas' }}
+                </h3>
+                
+                @if($confirmingDeleteCategoryTxCount > 0)
+                    <div class="bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800/30 rounded-2xl p-5 mb-4 text-left">
+                        <p class="text-xs font-black uppercase text-primary-red tracking-widest mb-1">Peringatan Penting</p>
+                        <p class="text-xs font-bold text-red-650 dark:text-red-400">
+                            Kategori "<span class="font-extrabold">{{ $confirmingDeleteCategoryName }}</span>" memiliki <span class="font-extrabold text-sm">{{ $confirmingDeleteCategoryTxCount }}</span> transaksi kas di dalamnya.
+                        </p>
+                        <p class="text-xs font-bold text-red-500/80 dark:text-red-400/80 mt-2 leading-relaxed">
+                            Menghapus kategori ini akan **menghapus secara permanen seluruh {{ $confirmingDeleteCategoryTxCount }} transaksi** kas tersebut dari sistem keuangan.
+                        </p>
+                    </div>
+                    <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Apakah Anda yakin ingin menghapus paksa kategori ini beserta seluruh transaksinya?</p>
+                @else
+                    <p class="text-sm font-bold text-gray-400">Apakah Anda yakin ingin menghapus kategori kas "<span class="font-extrabold text-gray-800 dark:text-white">{{ $confirmingDeleteCategoryName }}</span>"? Tindakan ini tidak dapat dibatalkan.</p>
+                @endif
             </div>
             <div class="p-8 bg-gray-50 dark:bg-gray-800/50 flex gap-4">
                 <button @click="show = false" class="flex-1 py-4 bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-2xl font-black text-xs uppercase tracking-widest hover:scale-105 active:scale-95 transition-transform">
                     Batal
                 </button>
                 <button wire:click="deleteCategory" class="flex-1 py-4 bg-primary-red text-white rounded-2xl font-black italic uppercase text-xs tracking-widest shadow-xl shadow-red-500/20 hover:scale-105 active:scale-95 transition-all">
-                    Ya, Hapus
+                    {{ $confirmingDeleteCategoryTxCount > 0 ? 'Ya, Hapus Paksa' : 'Ya, Hapus' }}
                 </button>
             </div>
         </div>

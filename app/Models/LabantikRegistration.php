@@ -22,14 +22,26 @@ class LabantikRegistration extends Model
         'reason',
         'illness_history',
         'is_joined_group',
+        'is_accepted',
     ];
 
     protected $casts = [
         'is_joined_group' => 'boolean',
+        'is_accepted' => 'boolean',
     ];
 
     public function jurusan(): BelongsTo
     {
         return $this->belongsTo(Jurusan::class);
+    }
+
+    public function scores()
+    {
+        return $this->hasMany(LabantikCandidateScore::class, 'registration_id');
+    }
+
+    public function attendances()
+    {
+        return $this->hasMany(LabantikCandidateAttendance::class, 'registration_id');
     }
 }

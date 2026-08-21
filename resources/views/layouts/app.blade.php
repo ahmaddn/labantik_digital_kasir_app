@@ -131,26 +131,35 @@
         window.addEventListener('keydown', function(e) {
             // Ctrl+P or Cmd+P
             if ((e.ctrlKey || e.metaKey) && e.key === 'p') {
-                logSecurityAlert('Print Attempt (Ctrl+P / Cmd+P)');
+                logSecurityAlert('Pencetakan Halaman (Print)');
             }
             // Meta+Shift+S (Snipping Tool Shortcut)
             if (e.metaKey && e.shiftKey && (e.key === 's' || e.key === 'S')) {
-                logSecurityAlert('Screenshot Shortcut (Win+Shift+S)');
+                logSecurityAlert('Screenshot (Win+Shift+S)');
             }
-        });
-
-        // Track Window Blur on sensitive pages (Potential OS-level screen clipping/capture tool activity)
-        window.addEventListener('blur', function() {
-            const path = window.location.pathname;
-            const sensitivePages = ['/management', '/reports', '/cashier', '/transactions', '/daily-recap', '/monthly-recap', '/profit-sharing', '/cash-management'];
-            const isSensitive = sensitivePages.some(p => path.includes(p));
-            
-            if (isSensitive) {
-                logSecurityAlert('Window Blur (Possible Screen Capture)');
+            // Mac Screenshot Shortcuts (Cmd+Shift+3/4/5)
+            if (e.metaKey && e.shiftKey && (e.key === '3' || e.key === '4' || e.key === '5')) {
+                logSecurityAlert('Screenshot Mac (Cmd+Shift)');
+            }
+            // PrintScreen Key
+            if (e.key === 'PrintScreen') {
+                logSecurityAlert('Tombol PrintScreen');
+            }
+            // F12 or Ctrl+Shift+I
+            if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && (e.key === 'i' || e.key === 'I'))) {
+                logSecurityAlert('Buka DevTools (F12/Ctrl+Shift+I)');
             }
         });
 
         function logSecurityAlert(type) {
+            // Dispatch warning toast to user
+            window.dispatchEvent(new CustomEvent('toast', {
+                detail: {
+                    message: `PERINGATAN: Tindakan berpotensi bocorkan privasi (${type}) terdeteksi dan dicatat!`,
+                    type: 'error'
+                }
+            }));
+
             fetch('/log-security-alert', {
                 method: 'POST',
                 headers: {

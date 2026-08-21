@@ -3,9 +3,12 @@
 namespace App\Livewire\Management;
 
 use Livewire\Component;
+use Livewire\WithPagination;
 
 class SecurityLogs extends Component
 {
+    use WithPagination;
+
     public function getLogs()
     {
         $logPath = storage_path('logs/laravel.log');
@@ -34,8 +37,7 @@ class SecurityLogs extends Component
             }
         }
 
-        // Return latest first, limit to last 200 logs
-        return array_slice(array_reverse($logs), 0, 200);
+        return array_reverse($logs);
     }
 
     public function clearLogs()
@@ -52,12 +54,28 @@ class SecurityLogs extends Component
         }
 
         $this->dispatch('toast', message: 'Log keamanan berhasil dikosongkan.');
+        $this->resetPage();
     }
 
     public function render()
     {
+        $allLogs = $this->getLogs();
+        $currentPage = $this->getPage();
+        $perPage = 15;
+
+        $offset = ($currentPage - 1) * $perPage;
+        $paginatedLogs = array_slice($allLogs, $offset, $perPage);
+
+        $paginator = new \Illuminate\Pagination\LengthAwarePaginator(
+            $paginatedLogs,
+            count($allLogs),
+            $perPage,
+            $currentPage,
+            ['path' => \Illuminate\Pagination\Paginator::resolveCurrentPath()]
+        );
+
         return view('livewire.management.security-logs', [
-            'logs' => $this->getLogs()
+            'logs' => $paginator
         ]);
     }
 }

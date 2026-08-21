@@ -23,11 +23,15 @@ class CashTransactionsExport implements FromCollection, WithHeadings, WithMappin
 
     public function collection()
     {
-        return CashTransaction::whereYear('date', Carbon::parse($this->month)->year)
-            ->whereMonth('date', Carbon::parse($this->month)->month)
-            ->orderBy('date', 'asc')
-            ->orderBy('id', 'asc')
-            ->get();
+        $query = CashTransaction::orderBy('date', 'asc')
+            ->orderBy('id', 'asc');
+
+        if ($this->month) {
+            $query->whereYear('date', Carbon::parse($this->month)->year)
+                ->whereMonth('date', Carbon::parse($this->month)->month);
+        }
+
+        return $query->get();
     }
 
     public function map($tx): array
@@ -71,7 +75,11 @@ class CashTransactionsExport implements FromCollection, WithHeadings, WithMappin
         $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(16)->getColor()->setARGB('FF1E40AF');
 
         $sheet->mergeCells('A2:B2');
-        $sheet->setCellValue('A2', 'Bulan: ' . Carbon::parse($this->month)->translatedFormat('F Y'));
+        if ($this->month) {
+            $sheet->setCellValue('A2', 'Bulan: ' . Carbon::parse($this->month)->translatedFormat('F Y'));
+        } else {
+            $sheet->setCellValue('A2', 'Semua Periode (Kumulatif)');
+        }
 
         $sheet->mergeCells('A3:B3');
         $sheet->setCellValue('A3', 'Dicetak Pada: ' . now()->translatedFormat('d M Y H:i:s'));

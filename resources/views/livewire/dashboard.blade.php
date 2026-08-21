@@ -1,5 +1,5 @@
 <div class="p-4 md:p-6">
-    <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8 md:mb-12">
+    <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-8 md:mb-12">
         <div>
             <h1
                 class="text-3xl md:text-5xl font-black italic uppercase tracking-tighter text-primary-blue dark:text-primary-blue-light">
@@ -7,7 +7,7 @@
             <p class="text-gray-400 font-bold text-xs uppercase tracking-[0.3em] italic">
                 {{ \Carbon\Carbon::parse($today)->translatedFormat('l, d F Y') }}</p>
         </div>
-        <div class="flex flex-wrap items-center gap-4">
+        <div class="flex flex-wrap items-center gap-3 sm:gap-4 w-full lg:w-auto lg:justify-end">
             @if (!session('active_jurusan_id'))
                 <div
                     class="flex items-center bg-white dark:bg-gray-800 px-4 md:px-6 py-3 md:py-4 rounded-2xl shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-800">
@@ -28,7 +28,7 @@
             @endif
 
             <a href="{{ route('guide') }}"
-                class="px-6 py-3.5 md:py-5 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 text-gray-800 dark:text-white rounded-2xl md:rounded-[2rem] shadow-xl shadow-blue-900/5 font-black italic uppercase tracking-wider transition transform hover:-translate-y-1 hover:bg-gray-50 dark:hover:bg-gray-700 active:scale-95 flex items-center">
+                class="px-4 py-3 sm:px-6 sm:py-3.5 md:py-5 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 text-gray-800 dark:text-white rounded-2xl md:rounded-[2rem] shadow-xl shadow-blue-900/5 font-black italic uppercase tracking-wider transition transform hover:-translate-y-1 hover:bg-gray-50 dark:hover:bg-gray-700 active:scale-95 flex items-center">
                 <svg class="w-5.5 h-5.5 mr-2.5 text-blue-600 dark:text-blue-400" xmlns="http://www.w3.org/2000/svg"
                     width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                     stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
@@ -40,7 +40,7 @@
             </a>
 
             <a href="{{ route('leaderboard') }}"
-                class="px-6 py-3.5 md:py-5 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 text-gray-800 dark:text-white rounded-2xl md:rounded-[2rem] shadow-xl shadow-blue-900/5 font-black italic uppercase tracking-wider transition transform hover:-translate-y-1 hover:bg-gray-50 dark:hover:bg-gray-700 active:scale-95 flex items-center">
+                class="px-4 py-3 sm:px-6 sm:py-3.5 md:py-5 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 text-gray-800 dark:text-white rounded-2xl md:rounded-[2rem] shadow-xl shadow-blue-900/5 font-black italic uppercase tracking-wider transition transform hover:-translate-y-1 hover:bg-gray-50 dark:hover:bg-gray-700 active:scale-95 flex items-center">
                 <svg class="w-5.5 h-5.5 mr-2.5 text-amber-500" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
                     viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
                     stroke-linecap="round" stroke-linejoin="round">
@@ -76,7 +76,7 @@
                 @if ($isSessionFinished)
                     <div class="flex items-center space-x-2" x-data="{ showEmergencyConfirm: false }">
                         <button disabled
-                            class="px-6 md:px-10 py-3.5 md:py-5 bg-gray-400 text-white rounded-2xl md:rounded-[2rem] shadow-xl font-black italic uppercase tracking-wider cursor-not-allowed flex flex-col items-center leading-tight">
+                            class="px-4 py-3 sm:px-6 sm:py-3.5 md:py-5 bg-gray-400 text-white rounded-2xl md:rounded-[2rem] shadow-xl font-black italic uppercase tracking-wider cursor-not-allowed flex flex-col items-center leading-tight">
                             <div class="flex items-center">
                                 <svg class="w-6 h-6 mr-3" xmlns="http://www.w3.org/2000/svg" width="24"
                                     height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -90,7 +90,7 @@
                                 telah dikunci</span>
                         </button>
                         <button type="button" @click="showEmergencyConfirm = true" @class([
-                            'px-4 md:px-6 py-3.5 md:py-5 bg-red-600 hover:bg-red-700 text-white rounded-2xl md:rounded-[2rem] shadow-xl shadow-red-600/30 font-black italic uppercase tracking-wider flex flex-col items-center leading-tight transition transform hover:-translate-y-1 active:scale-95',
+                            'px-4 py-3 sm:px-6 sm:py-3.5 md:py-5 bg-red-600 hover:bg-red-700 text-white rounded-2xl md:rounded-[2rem] shadow-xl shadow-red-600/30 font-black italic uppercase tracking-wider flex flex-col items-center leading-tight transition transform hover:-translate-y-1 active:scale-95',
                             'hidden' => !$hasHigherRole,
                         ])>
                             <div class="flex items-center">
@@ -171,7 +171,7 @@
                     </div>
                 @elseif(!$isScheduled)
                     <div
-                        class="px-6 md:px-10 py-3.5 md:py-5 bg-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-400 rounded-2xl md:rounded-[2rem] shadow-xl opacity-90 cursor-not-allowed flex flex-col items-center justify-center leading-tight text-center">
+                        class="px-4 py-3 sm:px-6 sm:py-3.5 md:py-5 bg-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-400 rounded-2xl md:rounded-[2rem] shadow-xl opacity-90 cursor-not-allowed flex flex-col items-center justify-center leading-tight text-center">
                         <div class="flex items-center text-xs font-black uppercase italic tracking-wider">
                             <svg class="w-5 h-5 mr-2.5 shrink-0" xmlns="http://www.w3.org/2000/svg"
                                 viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
@@ -188,7 +188,7 @@
                     </div>
                 @else
                     <a href="{{ route('kasir') }}"
-                        class="px-6 md:px-10 py-3.5 md:py-5 bg-primary-red text-white rounded-2xl md:rounded-[2rem] shadow-2xl shadow-red-500/30 font-black italic uppercase tracking-wider transition transform hover:-translate-y-2 active:scale-95 flex items-center">
+                        class="px-4 py-3 sm:px-6 sm:py-3.5 md:py-5 bg-primary-red text-white rounded-2xl md:rounded-[2rem] shadow-2xl shadow-red-500/30 font-black italic uppercase tracking-wider transition transform hover:-translate-y-2 active:scale-95 flex items-center">
                         <svg class="w-6 h-6 mr-3" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
                             viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
                             stroke-linecap="round" stroke-linejoin="round">

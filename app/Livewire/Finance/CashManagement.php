@@ -38,6 +38,7 @@ class CashManagement extends Component
     public bool $showDeleteCategoryConfirmation = false;
     public $confirmingDeleteCategoryId = null;
     public string $confirmingDeleteCategoryName = '';
+    public int $confirmingDeleteCategoryTxCount = 0;
 
     // Physical Cash Adjustment Modal properties
     public bool $showAdjustModal = false;
@@ -388,30 +389,29 @@ class CashManagement extends Component
     {
         $this->confirmingDeleteCategoryId = $id;
         $this->confirmingDeleteCategoryName = $name;
+        $this->confirmingDeleteCategoryTxCount = CashTransaction::where('cash_category_id', $id)->count();
         $this->showDeleteCategoryConfirmation = true;
     }
 
     public function deleteCategory()
     {
         if ($this->confirmingDeleteCategoryId) {
-            // Check if there are any transactions associated with this category
-            $hasTransactions = CashTransaction::where('cash_category_id', $this->confirmingDeleteCategoryId)->exists();
-            if ($hasTransactions) {
-                $this->dispatch('toast', message: 'Kategori tidak dapat dihapus karena masih memiliki transaksi.', type: 'error');
-                $this->showDeleteCategoryConfirmation = false;
-                $this->confirmingDeleteCategoryId = null;
-                $this->confirmingDeleteCategoryName = '';
-                return;
-            }
+            // Delete all transactions associated with this category
+            CashTransaction::where('cash_category_id', $this->confirmingDeleteCategoryId)->delete();
 
             $category = \App\Models\CashCategory::find($this->confirmingDeleteCategoryId);
             if ($category) {
                 $category->delete();
-                $this->dispatch('toast', message: 'Kategori berhasil dihapus.');
+                $this->dispatch('toast', message: 'Kategori dan seluruh transaksi di dalamnya berhasil dihapus.');
             }
             $this->showDeleteCategoryConfirmation = false;
             $this->confirmingDeleteCategoryId = null;
             $this->confirmingDeleteCategoryName = '';
+            $this->confirmingDeleteCategoryTxCount = 0;
+
+            // Invalidate cache
+            $activeJurusanId = session('active_jurusan_id');
+            \Illuminate\Support\Facades\Cache::forget('cash_balances_' . ($activeJurusanId ?: 'global'));
         }
     }
 
@@ -553,8 +553,8 @@ class CashManagement extends Component
 
     public function exportExcel()
     {
-        $filename = 'Laporan_Kas_Internal_' . Carbon::parse($this->filterMonth)->translatedFormat('F_Y') . '.xlsx';
-        return \Maatwebsite\Excel\Facades\Excel::download(new \App\Exports\CashTransactionsExport($this->filterMonth), $filename);
+        $filename = 'Laporan_Buku_Kas_Internal_Kumulatif.xlsx';
+        return \Maatwebsite\Excel\Facades\Excel::download(new \App\Exports\CashTransactionsExport(null), $filename);
     }
 
     public function render()
@@ -562,18 +562,9 @@ class CashManagement extends Component
         $activeJurusanId = session('active_jurusan_id');
         $jurusan = \App\Models\Jurusan::find($activeJurusanId);
         $isSubUnit = $jurusan && $jurusan->parent_id;
-        $selectedMonth = $this->filterMonth ?: now()->format('Y-m');
-        $selectedYear = Carbon::parse($selectedMonth . '-01')->year;
-        $selectedMonthNumber = Carbon::parse($selectedMonth . '-01')->month;
 
-        $query = CashTransaction::where('jurusan_id', $activeJurusanId)
-            ->whereYear('date', $selectedYear)
-            ->whereMonth('date', $selectedMonthNumber);
-
-        // Overall cumulative query (from the beginning of time up to the end of the filtered month)
-        $endOfFilteredMonth = Carbon::parse($selectedMonth . '-01')->endOfMonth()->toDateString();
-        $cumulativeQuery = CashTransaction::where('jurusan_id', $activeJurusanId)
-            ->where('date', '<=', $endOfFilteredMonth);
+        // Overall cumulative query (all transactions)
+        $cumulativeQuery = CashTransaction::where('jurusan_id', $activeJurusanId);
 
         // Get Keuntungan Jurusan Category ID
         $catKeuntunganJurusan = \App\Models\CashCategory::where('jurusan_id', $activeJurusanId)
@@ -593,18 +584,6 @@ class CashManagement extends Component
         $cumulativeModalBalance = ($cumulativeBalances->modal_income ?? 0) - ($cumulativeBalances->modal_expense ?? 0);
         $cumulativeProfitBalance = ($cumulativeBalances->profit_income ?? 0) - ($cumulativeBalances->profit_expense ?? 0);
 
-        // Calculate monthly balances
-        $monthlyBalances = (clone $query)
-            ->selectRaw("
-                SUM(CASE WHEN cash_type = 'modal' AND type = 'income' THEN amount ELSE 0 END) as modal_income,
-                SUM(CASE WHEN cash_type = 'modal' AND type = 'expense' THEN amount ELSE 0 END) as modal_expense,
-                SUM(CASE WHEN cash_type = 'keuntungan' AND type = 'income' THEN amount ELSE 0 END) as profit_income,
-                SUM(CASE WHEN cash_type = 'keuntungan' AND type = 'expense' THEN amount ELSE 0 END) as profit_expense
-            ")
-            ->first();
-        $monthlyModalBalance = ($monthlyBalances->modal_income ?? 0) - ($monthlyBalances->modal_expense ?? 0);
-        $monthlyProfitBalance = ($monthlyBalances->profit_income ?? 0) - ($monthlyBalances->profit_expense ?? 0);
-
         // Fetch cumulative category sums
         $cumulativeCategorySums = (clone $cumulativeQuery)
             ->selectRaw("
@@ -620,31 +599,6 @@ class CashManagement extends Component
             ->get()
             ->keyBy('cash_category_id');
 
-        // Fetch monthly category sums
-        $monthlyCategorySums = (clone $query)
-            ->selectRaw("
-                cash_category_id,
-                SUM(CASE WHEN type = 'income' THEN amount ELSE 0 END) as cat_income,
-                SUM(CASE WHEN type = 'expense' THEN amount ELSE 0 END) as cat_expense,
-                SUM(CASE WHEN cash_type = 'modal' AND type = 'income' THEN amount ELSE 0 END) as modal_income,
-                SUM(CASE WHEN cash_type = 'modal' AND type = 'expense' THEN amount ELSE 0 END) as modal_expense,
-                SUM(CASE WHEN cash_type = 'keuntungan' AND type = 'income' THEN amount ELSE 0 END) as profit_income,
-                SUM(CASE WHEN cash_type = 'keuntungan' AND type = 'expense' THEN amount ELSE 0 END) as profit_expense
-            ")
-            ->groupBy('cash_category_id')
-            ->get()
-            ->keyBy('cash_category_id');
-
-        // Calculate monthly income/expense stats
-        $monthlyStats = (clone $query)
-            ->selectRaw("
-                SUM(CASE WHEN type = 'income' THEN amount ELSE 0 END) as income,
-                SUM(CASE WHEN type = 'expense' THEN amount ELSE 0 END) as expense
-            ")
-            ->first();
-        $monthlyIncome = $monthlyStats->income ?? 0;
-        $monthlyExpense = $monthlyStats->expense ?? 0;
-
         // Calculate cumulative income/expense stats
         $cumulativeStats = (clone $cumulativeQuery)
             ->selectRaw("
@@ -656,21 +610,12 @@ class CashManagement extends Component
         $cumulativeExpense = $cumulativeStats->expense ?? 0;
 
         // Select variables based on active tab
-        if ($this->activeTab === 'cumulative') {
-            $categorySums = $cumulativeCategorySums;
-            $activeQuery = $cumulativeQuery;
-            $currentModalBalance = $cumulativeModalBalance;
-            $currentProfitBalance = $cumulativeProfitBalance;
-            $displayIncome = $cumulativeIncome;
-            $displayExpense = $cumulativeExpense;
-        } else {
-            $categorySums = $monthlyCategorySums;
-            $activeQuery = $query;
-            $currentModalBalance = $monthlyModalBalance;
-            $currentProfitBalance = $monthlyProfitBalance;
-            $displayIncome = $monthlyIncome;
-            $displayExpense = $monthlyExpense;
-        }
+        $categorySums = $cumulativeCategorySums;
+        $activeQuery = $cumulativeQuery;
+        $currentModalBalance = $cumulativeModalBalance;
+        $currentProfitBalance = $cumulativeProfitBalance;
+        $displayIncome = $cumulativeIncome;
+        $displayExpense = $cumulativeExpense;
 
         $catBagiHasil = \App\Models\CashCategory::where('jurusan_id', $activeJurusanId)->where('name', 'Bagi Hasil Mingguan')->first();
         $bagiHasilTransactions = [];

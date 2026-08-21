@@ -42,65 +42,42 @@
             <table class="w-full min-w-[800px] text-left border-collapse">
                 <thead>
                     <tr class="border-b border-gray-100 dark:border-gray-700">
-                        <th class="pb-4 text-xs font-black uppercase tracking-widest text-gray-400 pl-4">Tanggal</th>
-                        <th class="pb-4 text-xs font-black uppercase tracking-widest text-gray-400">Kasir</th>
-                        <th class="pb-4 text-xs font-black uppercase tracking-widest text-gray-400">Buka (Opening)</th>
-                        <th class="pb-4 text-xs font-black uppercase tracking-widest text-gray-400">Tutup (Closing)</th>
-                        <th class="pb-4 text-xs font-black uppercase tracking-widest text-gray-400">Status</th>
-                        <th class="pb-4 text-xs font-black uppercase tracking-widest text-gray-400 text-right pr-4">Laporan Shift</th>
+                        <th class="pb-4 text-xs font-black uppercase tracking-widest text-gray-400 pl-4">Kasir</th>
+                        <th class="pb-4 text-xs font-black uppercase tracking-widest text-gray-400 text-center">Total Kehadiran</th>
+                        <th class="pb-4 text-xs font-black uppercase tracking-widest text-emerald-500 text-center">Tepat Waktu</th>
+                        <th class="pb-4 text-xs font-black uppercase tracking-widest text-rose-500 text-center">Terlambat</th>
+                        <th class="pb-4 text-xs font-black uppercase tracking-widest text-amber-500 text-center">Pulang Cepat</th>
+                        <th class="pb-4 text-xs font-black uppercase tracking-widest text-gray-400 text-right pr-4">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-50 dark:divide-gray-700/50">
-                    @forelse($attendances as $att)
+                    @forelse($cashiers as $cashier)
                         <tr class="group hover:bg-gray-50/50 dark:hover:bg-gray-900/30 transition-colors">
-                            <td class="py-4 pl-4 text-sm font-bold text-gray-800 dark:text-white">
-                                {{ $att->date->translatedFormat('d M Y') }}
+                            <td class="py-4 pl-4">
+                                <div class="text-sm font-bold text-gray-800 dark:text-white">{{ $cashier->name }}</div>
+                                <div class="text-[10px] text-gray-400 font-semibold mt-0.5">{{ $cashier->email }}</div>
                             </td>
-                            <td class="py-4 text-sm text-gray-850 dark:text-gray-200 font-bold">
-                                {{ $att->user->name }}
+                            <td class="py-4 text-center text-sm font-bold text-gray-800 dark:text-white">
+                                {{ $cashier->total_attendances }} Kali
                             </td>
-                            <td class="py-4">
-                                <div class="text-sm font-bold text-gray-800 dark:text-white">
-                                    {{ $att->clock_in ? $att->clock_in->format('H:i') . ' WIB' : '-' }}
-                                </div>
-                                <div class="text-[10px] text-gray-400 font-bold mt-0.5">Uang Awal: Rp{{ number_format($att->opening_cash, 0, ',', '.') }}</div>
+                            <td class="py-4 text-center text-sm font-bold text-emerald-500">
+                                {{ $cashier->present_count }} Kali
                             </td>
-                            <td class="py-4">
-                                <div class="text-sm font-bold text-gray-800 dark:text-white">
-                                    {{ $att->clock_out ? $att->clock_out->format('H:i') . ' WIB' : '-' }}
-                                </div>
-                                <div class="text-[10px] text-gray-400 font-bold mt-0.5">Uang Akhir: Rp{{ number_format($att->closing_cash, 0, ',', '.') }}</div>
+                            <td class="py-4 text-center text-sm font-bold text-rose-500">
+                                {{ $cashier->late_count }} Kali
                             </td>
-                            <td class="py-4">
-                                @php
-                                    $color = 'bg-gray-50 text-gray-500';
-                                    if ($att->status === 'present') { $color = 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/30 dark:text-emerald-400'; }
-                                    elseif ($att->status === 'late') { $color = 'bg-rose-50 text-rose-600 dark:bg-rose-955/30 dark:text-rose-450'; }
-                                @endphp
-                                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-black uppercase tracking-wider {{ $color }}">
-                                    {{ $att->status === 'present' ? 'Tepat Waktu' : ($att->status === 'late' ? 'Terlambat' : $att->status) }}
-                                </span>
+                            <td class="py-4 text-center text-sm font-bold text-amber-500">
+                                {{ $cashier->early_checkout_count }} Kali
                             </td>
                             <td class="py-4 text-right pr-4">
-                                @if($att->clock_out)
-                                    <div class="flex items-center justify-end gap-2">
-                                        <button wire:click="viewReport('{{ $att->id }}')" class="px-4 py-2 bg-primary-blue hover:bg-blue-900 text-primary-yellow rounded-xl font-black text-xs uppercase italic tracking-wider transition-all">
-                                            Lihat
-                                        </button>
-                                        @if(($att->user_id === auth()->id() && $att->edit_count < 1) || session('active_role_name') === 'superadmin')
-                                            <button wire:click="openEditReport('{{ $att->id }}')" class="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-black text-xs uppercase italic tracking-wider transition-all">
-                                                Edit
-                                            </button>
-                                        @endif
-                                    </div>
-                                @else
-                                    <span class="text-xs text-gray-400 italic">Belum Closing</span>
-                                @endif
+                                <button wire:click="showDetails('{{ $cashier->id }}')" class="px-4 py-2 bg-primary-blue hover:bg-blue-900 text-primary-yellow rounded-xl font-black text-xs uppercase italic tracking-wider transition-all">
+                                    Detail Absen
+                                </button>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="py-8 text-center text-gray-400 italic font-semibold">Tidak ada data absensi ditemukan</td>
+                            <td colspan="6" class="py-8 text-center text-gray-400 italic font-semibold">Tidak ada data kasir ditemukan</td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -108,16 +85,104 @@
         </div>
 
         <div class="mt-4">
-            {{ $attendances->links() }}
+            {{ $cashiers->links() }}
+        </div>
+    </div>
+
+    <!-- Details Attendance Modal -->
+    <div x-data="{ show: @entangle('showDetailModal') }" x-show="show" class="fixed inset-0 z-[200] flex items-center justify-center p-4" x-cloak>
+        <div x-show="show" x-transition.opacity class="fixed inset-0 bg-black/60 backdrop-blur-xs" wire:click="$set('showDetailModal', false)"></div>
+        <div x-show="show" x-transition.scale class="relative w-full max-w-4xl bg-white dark:bg-gray-800 rounded-[2.5rem] shadow-2xl p-8 border border-gray-100 dark:border-gray-700 z-10 max-h-[85vh] flex flex-col">
+            <div class="flex justify-between items-center mb-6 flex-shrink-0">
+                <div>
+                    <h2 class="text-xl font-black text-gray-850 dark:text-white uppercase italic tracking-tight">Rincian Absensi Kasir</h2>
+                    <p class="text-xs text-gray-400 font-bold uppercase mt-1">Nama: {{ $detailUserName }}</p>
+                </div>
+                <button wire:click="$set('showDetailModal', false)" class="text-gray-400 hover:text-white">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            
+            <div class="overflow-y-auto flex-grow pr-2">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="border-b border-gray-100 dark:border-gray-700">
+                            <th class="pb-3 text-xs font-black uppercase text-gray-400">Tanggal</th>
+                            <th class="pb-3 text-xs font-black uppercase text-gray-400">Buka (Opening)</th>
+                            <th class="pb-3 text-xs font-black uppercase text-gray-400">Tutup (Closing)</th>
+                            <th class="pb-3 text-xs font-black uppercase text-gray-400">Status</th>
+                            <th class="pb-3 text-xs font-black uppercase text-gray-400 text-right">Laporan Shift</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-50 dark:divide-gray-700/50">
+                        @forelse($detailAttendances as $att)
+                            <tr class="hover:bg-gray-50/50 dark:hover:bg-gray-900/10">
+                                <td class="py-4 text-sm font-bold text-gray-800 dark:text-white">
+                                    {{ $att->date->translatedFormat('d M Y') }}
+                                </td>
+                                <td class="py-4">
+                                    <div class="text-sm font-bold text-gray-800 dark:text-white">
+                                        {{ $att->clock_in ? $att->clock_in->format('H:i') . ' WIB' : '-' }}
+                                    </div>
+                                    <div class="text-[9px] text-gray-400 font-bold mt-0.5">Uang Awal: Rp{{ number_format($att->opening_cash, 0, ',', '.') }}</div>
+                                </td>
+                                <td class="py-4">
+                                    <div class="text-sm font-bold text-gray-800 dark:text-white">
+                                        {{ $att->clock_out ? $att->clock_out->format('H:i') . ' WIB' : '-' }}
+                                    </div>
+                                    <div class="text-[9px] text-gray-400 font-bold mt-0.5">Uang Akhir: Rp{{ number_format($att->closing_cash, 0, ',', '.') }}</div>
+                                </td>
+                                <td class="py-4">
+                                    @php
+                                        $color = 'bg-gray-50 text-gray-500';
+                                        if ($att->status === 'present') { $color = 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/30 dark:text-emerald-400'; }
+                                        elseif ($att->status === 'late') { $color = 'bg-rose-50 text-rose-600 dark:bg-rose-955/30 dark:text-rose-450'; }
+                                        elseif ($att->status === 'early_checkout') { $color = 'bg-amber-50 text-amber-600 dark:bg-amber-955/30 dark:text-amber-450'; }
+                                    @endphp
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider {{ $color }}">
+                                        {{ $att->status === 'present' ? 'Tepat Waktu' : ($att->status === 'late' ? 'Terlambat' : ($att->status === 'early_checkout' ? 'Pulang Cepat' : $att->status)) }}
+                                    </span>
+                                </td>
+                                <td class="py-4 text-right">
+                                    @if($att->clock_out)
+                                        <div class="flex items-center justify-end gap-1.5">
+                                            <button wire:click="viewReport('{{ $att->id }}')" class="px-3 py-1.5 bg-primary-blue hover:bg-blue-900 text-primary-yellow rounded-lg font-black text-[10px] uppercase italic tracking-wider transition-all">
+                                                Lihat
+                                            </button>
+                                            @if(($att->user_id === auth()->id() && $att->edit_count < 1) || session('active_role_name') === 'superadmin')
+                                                <button wire:click="openEditReport('{{ $att->id }}')" class="px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white rounded-lg font-black text-[10px] uppercase italic tracking-wider transition-all">
+                                                    Edit
+                                                </button>
+                                            @endif
+                                        </div>
+                                    @else
+                                        <span class="text-xs text-gray-400 italic">Belum Closing</span>
+                                    @endif
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="5" class="py-8 text-center text-gray-400 italic">Tidak ada data rincian absensi</td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="flex justify-end pt-6 flex-shrink-0 border-t border-gray-100 dark:border-gray-700/50 mt-4">
+                <button wire:click="$set('showDetailModal', false)" class="px-6 py-3 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:text-white rounded-xl font-black text-xs uppercase tracking-wider transition-all">
+                    Tutup
+                </button>
+            </div>
         </div>
     </div>
 
     <!-- Report Modal -->
-    <div x-data="{ show: @entangle('showReportModal') }" x-show="show" class="fixed inset-0 z-50 flex items-center justify-center p-4" x-cloak>
+    <div x-data="{ show: @entangle('showReportModal') }" x-show="show" class="fixed inset-0 z-[300] flex items-center justify-center p-4" x-cloak>
         <div x-show="show" x-transition.opacity class="fixed inset-0 bg-black/60 backdrop-blur-xs" wire:click="$set('showReportModal', false)"></div>
         <div x-show="show" x-transition.scale class="relative w-full max-w-lg bg-white dark:bg-gray-800 rounded-[2rem] shadow-2xl p-8 border border-gray-100 dark:border-gray-700 z-10">
             <div class="flex justify-between items-center mb-6">
-                <h2 class="text-xl font-black text-gray-850 dark:text-white uppercase italic tracking-tight">Laporan Closing Shift</h2>
+                <h2 class="text-xl font-black text-gray-855 dark:text-white uppercase italic tracking-tight">Laporan Closing Shift</h2>
                 <button wire:click="$set('showReportModal', false)" class="text-gray-400 hover:text-white">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
@@ -139,7 +204,7 @@
     </div>
 
     <!-- Edit Report Modal -->
-    <div x-data="{ show: @entangle('editingAttendanceId') }" x-show="show" class="fixed inset-0 z-50 flex items-center justify-center p-4" x-cloak>
+    <div x-data="{ show: @entangle('editingAttendanceId') }" x-show="show" class="fixed inset-0 z-[300] flex items-center justify-center p-4" x-cloak>
         <div x-show="show" x-transition.opacity class="fixed inset-0 bg-black/60 backdrop-blur-xs" wire:click="$set('editingAttendanceId', null)"></div>
         <div x-show="show" x-transition.scale class="relative w-full max-w-lg bg-white dark:bg-gray-800 rounded-[2rem] shadow-2xl p-8 border border-gray-100 dark:border-gray-700 z-10">
             <h2 class="text-xl font-black text-gray-855 dark:text-white uppercase italic mb-6">Edit Laporan Closing Shift</h2>

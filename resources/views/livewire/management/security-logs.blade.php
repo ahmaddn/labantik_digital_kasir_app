@@ -75,7 +75,7 @@
         <div>
             <h4 class="text-sm font-black uppercase tracking-wider italic leading-tight">Pengingat Audit Keamanan</h4>
             <p class="text-xs text-gray-500 dark:text-gray-400 mt-2 leading-relaxed font-semibold">
-                Sistem secara otomatis mendeteksi ketika pengguna pada halaman kasir & laporan keuangan kehilangan fokus jendela (window blur/mencoba screenshot), menggunakan kombinasi pintasan tangkapan layar, atau memicu dialog pencetakan data.
+                Sistem secara otomatis mendeteksi ketika pengguna melakukan screenshot, menggunakan kombinasi pintasan tangkapan layar, memicu dialog pencetakan data, atau mencoba membuka DevTools browser. Tindakan ini memicu peringatan keamanan langsung di layar pengguna dan mencatat log kejadiannya.
             </p>
         </div>
     </div>
@@ -139,6 +139,10 @@
                     @endforelse
                 </tbody>
             </table>
+        </div>
+
+        <div class="mt-6">
+            {{ $logs->links() }}
         </div>
     </div>
 </div>

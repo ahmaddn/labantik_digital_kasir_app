@@ -1,0 +1,36 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('labantik_candidate_scores', function (Blueprint $table) {
+            $table->uuid('id')->primary();
+            $table->uuid('registration_id');
+            $table->integer('week_number');
+            $table->integer('score');
+            $table->text('notes')->nullable();
+            $table->timestamps();
+
+            $table->foreign('registration_id')
+                ->references('id')
+                ->on('labantik_registrations')
+                ->onDelete('cascade');
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('labantik_candidate_scores');
+    }
+};

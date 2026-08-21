@@ -21,6 +21,16 @@ class AttendanceReport extends Component
     public $activeReportText = '';
     public $activeReportUser = '';
 
+    // Show detail attendance modal
+    public $showDetailModal = false;
+    public $detailUserId = null;
+    public $detailUserName = '';
+    public $detailAttendances = [];
+
+    // Edit report properties
+    public $editingAttendanceId = null;
+    public $editedClosingReport = '';
+
     public function mount()
     {
         $this->dateFrom = now()->startOfMonth()->toDateString();
@@ -38,9 +48,24 @@ class AttendanceReport extends Component
         $this->resetPage();
     }
 
-    // Edit report properties
-    public $editingAttendanceId = null;
-    public $editedClosingReport = '';
+    public function showDetails($userId)
+    {
+        $this->detailUserId = $userId;
+        $user = \App\Models\User::findOrFail($userId);
+        $this->detailUserName = $user->name;
+
+        $activeJurusanId = session('active_jurusan_id') ?: $this->selectedJurusanId;
+        $this->detailAttendances = CashierAttendance::where('user_id', $userId)
+            ->whereBetween('date', [$this->dateFrom, $this->dateTo])
+            ->when($activeJurusanId, function($q) use ($activeJurusanId) {
+                $q->where('jurusan_id', $activeJurusanId);
+            })
+            ->orderBy('date', 'desc')
+            ->orderBy('clock_in', 'desc')
+            ->get();
+
+        $this->showDetailModal = true;
+    }
 
     public function viewReport($id)
     {
@@ -97,6 +122,11 @@ class AttendanceReport extends Component
         $this->editingAttendanceId = null;
         $this->editedClosingReport = '';
         $this->dispatch('toast', message: 'Laporan shift berhasil diperbarui.');
+
+        // Refresh details modal
+        if ($this->detailUserId) {
+            $this->showDetails($this->detailUserId);
+        }
     }
 
     public function render()
@@ -108,24 +138,49 @@ class AttendanceReport extends Component
 
         $activeJurusanId = session('active_jurusan_id') ?: $this->selectedJurusanId;
 
-        $attendances = CashierAttendance::with(['user', 'schedule'])
+        // Fetch paginated cashier users with aggregate count
+        $cashiers = \App\Models\User::query()
+            ->whereHas('roles', function($q) {
+                $q->where('name', 'kasir');
+            })
             ->when($activeRole === 'kasir', function($q) {
-                // Cashiers can only view their own attendance records
-                return $q->where('user_id', auth()->id());
+                return $q->where('id', auth()->id());
             })
-            ->when($activeRole !== 'kasir' && $activeJurusanId, function($q) use ($activeJurusanId) {
-                $q->where('jurusan_id', $activeJurusanId);
+            ->when($this->search, function($q) {
+                $q->where('name', 'like', '%' . $this->search . '%');
             })
-            ->whereBetween('date', [$this->dateFrom, $this->dateTo])
-            ->when($this->search && $activeRole !== 'kasir', function($q) {
-                $q->whereHas('user', function($sq) {
-                    $sq->where('name', 'like', '%'.$this->search.'%');
-                });
-            })
-            ->orderBy('date', 'desc')
-            ->orderBy('clock_in', 'desc')
+            ->withCount([
+                'attendances as total_attendances' => function($q) use ($activeJurusanId, $activeRole) {
+                    $q->whereBetween('date', [$this->dateFrom, $this->dateTo])
+                        ->when($activeRole !== 'kasir' && $activeJurusanId, function($sq) use ($activeJurusanId) {
+                            $sq->where('jurusan_id', $activeJurusanId);
+                        });
+                },
+                'attendances as present_count' => function($q) use ($activeJurusanId, $activeRole) {
+                    $q->where('status', 'present')
+                        ->whereBetween('date', [$this->dateFrom, $this->dateTo])
+                        ->when($activeRole !== 'kasir' && $activeJurusanId, function($sq) use ($activeJurusanId) {
+                            $sq->where('jurusan_id', $activeJurusanId);
+                        });
+                },
+                'attendances as late_count' => function($q) use ($activeJurusanId, $activeRole) {
+                    $q->where('status', 'late')
+                        ->whereBetween('date', [$this->dateFrom, $this->dateTo])
+                        ->when($activeRole !== 'kasir' && $activeJurusanId, function($sq) use ($activeJurusanId) {
+                            $sq->where('jurusan_id', $activeJurusanId);
+                        });
+                },
+                'attendances as early_checkout_count' => function($q) use ($activeJurusanId, $activeRole) {
+                    $q->where('status', 'early_checkout')
+                        ->whereBetween('date', [$this->dateFrom, $this->dateTo])
+                        ->when($activeRole !== 'kasir' && $activeJurusanId, function($sq) use ($activeJurusanId) {
+                            $sq->where('jurusan_id', $activeJurusanId);
+                        });
+                }
+            ])
             ->paginate(15);
 
+        // Keep Calendar Events as fallback
         $allAttendances = CashierAttendance::with('user')
             ->when($activeRole === 'kasir', function($q) {
                 return $q->where('user_id', auth()->id());
@@ -133,6 +188,7 @@ class AttendanceReport extends Component
             ->when($activeRole !== 'kasir' && $activeJurusanId, function($q) use ($activeJurusanId) {
                 $q->where('jurusan_id', $activeJurusanId);
             })
+            ->whereBetween('date', [$this->dateFrom, $this->dateTo])
             ->get()
             ->map(function($att) {
                 $statusText = $att->status === 'present' ? 'Tepat Waktu' : ($att->status === 'late' ? 'Terlambat' : $att->status);
@@ -162,7 +218,7 @@ class AttendanceReport extends Component
             });
 
         return view('livewire.reports.attendance-report', [
-            'attendances' => $attendances,
+            'cashiers' => $cashiers,
             'jurusans' => Jurusan::all(),
             'allAttendancesJson' => json_encode($allAttendances),
         ])->layout('layouts.app', ['title' => 'Laporan Absensi & Shift']);
