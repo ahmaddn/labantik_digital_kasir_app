@@ -181,7 +181,7 @@
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
                 <div class="flex items-center gap-3">
                     <span class="text-xs font-black text-gray-400 dark:text-gray-300 uppercase tracking-widest">Input Penilaian Pekan:</span>
-                    <select wire:model.live="selectedWeek" class="px-5 py-3 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-750 rounded-2xl font-black text-sm text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-blue transition-all">
+                    <select wire:model.live="selectedWeek" class="px-5 py-3 bg-gray-55 dark:bg-gray-950 border border-gray-200 dark:border-gray-700 rounded-2xl font-black text-sm text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-blue transition-all">
                         @for ($w = 1; $w <= 12; $w++)
                             <option value="{{ $w }}">Pekan {{ $w }}</option>
                         @endfor
@@ -194,13 +194,14 @@
             </div>
 
             <div class="overflow-x-auto rounded-3xl border border-gray-150 dark:border-gray-700/60">
-                <table class="w-full text-left border-collapse min-w-[900px]">
+                <table class="w-full text-left border-collapse min-w-[1000px]">
                     <thead>
-                        <tr class="bg-gray-50 dark:bg-gray-900/60 text-gray-400 dark:text-gray-400 border-b border-gray-150 dark:border-gray-700/80">
+                        <tr class="bg-gray-50 dark:bg-gray-900/60 text-gray-400 dark:text-gray-450 border-b border-gray-150 dark:border-gray-700/80">
                             <th class="py-4 px-6 text-xs font-black uppercase tracking-widest w-48">Nama Calon</th>
-                            <th class="py-4 px-6 text-xs font-black uppercase tracking-widest text-center w-36">Nilai (0-100)</th>
-                            <th class="py-4 px-6 text-xs font-black uppercase tracking-widest text-center w-72">Kehadiran</th>
-                            <th class="py-4 px-6 text-xs font-black uppercase tracking-widest">Catatan Nilai / Alasan</th>
+                            <th class="py-4 px-6 text-xs font-black uppercase tracking-widest text-center w-28">Nilai Akademik</th>
+                            <th class="py-4 px-6 text-xs font-black uppercase tracking-widest text-center w-28">Nilai Perilaku / Attitude</th>
+                            <th class="py-4 px-6 text-xs font-black uppercase tracking-widest text-center w-64">Kehadiran</th>
+                            <th class="py-4 px-6 text-xs font-black uppercase tracking-widest">Alasan Sakit / Izin</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100 dark:divide-gray-700/50">
@@ -215,22 +216,28 @@
                                     <input type="number" min="0" max="100" 
                                         wire:model="scores.{{ $candidate->id }}.score"
                                         placeholder="-"
-                                        class="w-24 px-4 py-2.5 text-center bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-750 rounded-xl font-black text-sm text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-blue transition-all">
+                                        class="w-20 px-3 py-2 text-center bg-gray-50 dark:bg-gray-950 border border-gray-250 dark:border-gray-700 rounded-xl font-black text-sm text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-blue transition-all">
+                                </td>
+                                <td class="py-4 px-6 text-center">
+                                    <input type="number" min="0" max="100" 
+                                        wire:model="scores.{{ $candidate->id }}.attitude_score"
+                                        placeholder="-"
+                                        class="w-20 px-3 py-2 text-center bg-gray-55 dark:bg-gray-955 border border-gray-250 dark:border-gray-700 rounded-xl font-black text-sm text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-blue transition-all">
                                 </td>
                                 <td class="py-4 px-6">
-                                    <div class="flex items-center justify-between gap-1 bg-gray-100 dark:bg-gray-900 border border-gray-200 dark:border-gray-750 p-1 rounded-xl max-w-[260px] mx-auto">
+                                    <div class="flex items-center justify-between gap-1 bg-gray-50 dark:bg-gray-950 border border-gray-250 dark:border-gray-700 p-1 rounded-xl max-w-[240px] mx-auto">
                                         @foreach([
                                             'hadir' => ['H', 'bg-emerald-500 hover:bg-emerald-600 text-white shadow-md shadow-emerald-500/20', 'Hadir'],
                                             'sakit' => ['S', 'bg-blue-500 hover:bg-blue-600 text-white shadow-md shadow-blue-500/20', 'Sakit'],
                                             'izin' => ['I', 'bg-amber-500 hover:bg-amber-600 text-white shadow-md shadow-amber-500/20', 'Izin'],
-                                            'alfa' => ['A', 'bg-red-500 hover:bg-red-600 text-white shadow-md shadow-red-500/20', 'Alfa']
+                                            'alfa' => ['A', 'bg-red-500 hover:bg-red-650 text-white shadow-md shadow-red-500/20', 'Alfa']
                                         ] as $status => $meta)
                                             <button type="button" 
                                                 wire:click="$set('attendances.{{ $candidate->id }}.status', '{{ $status }}')"
-                                                class="w-10 h-10 rounded-lg font-black text-xs transition-all flex items-center justify-center
+                                                class="w-9 h-9 rounded-lg font-black text-xs transition-all flex items-center justify-center
                                                 {{ ($attendances[$candidate->id]['status'] ?? 'hadir') === $status 
                                                     ? $meta[1]
-                                                    : 'text-gray-400 dark:text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-800' }}"
+                                                    : 'text-gray-400 dark:text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-900' }}"
                                                 title="{{ $meta[2] }}">
                                                 {{ $meta[0] }}
                                             </button>
@@ -239,13 +246,17 @@
                                 </td>
                                 <td class="py-4 px-6">
                                     @php
-                                        $isReasonRequired = in_array(($attendances[$candidate->id]['status'] ?? 'hadir'), ['hadir', 'sakit']);
-                                        $placeholder = $isReasonRequired ? 'Tulis alasan hadir/sakit (Wajib)...' : 'Catatan opsional...';
+                                        $statusVal = $attendances[$candidate->id]['status'] ?? 'hadir';
+                                        $showReason = in_array($statusVal, ['sakit', 'izin']);
                                     @endphp
-                                    <input type="text"
-                                        wire:model="attendances.{{ $candidate->id }}.reason"
-                                        placeholder="{{ $placeholder }}"
-                                        class="w-full px-4 py-2.5 bg-gray-55 dark:bg-gray-900 border {{ $isReasonRequired ? 'border-dashed border-red-300 dark:border-red-800/40 focus:ring-red-500/20' : 'border-gray-200 dark:border-gray-750 focus:ring-primary-blue/20' }} rounded-xl font-semibold text-xs text-gray-800 dark:text-white focus:outline-none focus:ring-2 transition-all">
+                                    @if($showReason)
+                                        <input type="text"
+                                            wire:model="attendances.{{ $candidate->id }}.reason"
+                                            placeholder="Tulis alasan {{ $statusVal }} (Wajib)..."
+                                            class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-950 border border-dashed border-red-300 dark:border-red-800/40 rounded-xl font-semibold text-xs text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-red-500/20 transition-all">
+                                    @else
+                                        <span class="text-xs text-gray-400 dark:text-gray-600 italic">Hadir/Alfa tidak perlu alasan</span>
+                                    @endif
                                 </td>
                             </tr>
                         @endforeach
@@ -596,7 +607,7 @@
                 Selesaikan Seleksi?
             </h3>
             <p class="text-sm font-semibold text-gray-400 leading-relaxed mb-6">
-                Sistem akan menghitung nilai rata-rata tiap peserta, memotong penalti absensi (-5 poin per Alfa, -2 poin per Izin), dan meloloskan 15 calon terbaik secara otomatis. Tindakan ini akan memperbarui status pendaftar.
+                Sistem akan menghitung nilai rata-rata tiap peserta (nilai akademik + nilai attitude), memotong penalti absensi (-10 poin per Alfa, -2 poin per Izin), dan meloloskan 15 calon terbaik secara otomatis. Tindakan ini akan memperbarui status pendaftar.
             </p>
             <div class="flex gap-4">
                 <button wire:click="$set('showFinishConfirmModal', false)" class="flex-1 py-4 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-white rounded-2xl font-black text-xs uppercase tracking-widest transition-transform">
@@ -612,7 +623,7 @@
     <!-- Single Candidate Scoring Modal (Weeks 1-12) -->
     <div x-data="{ showSingleScoring: @entangle('showSingleScoringModal') }" x-show="showSingleScoring" class="fixed inset-0 z-50 flex items-center justify-center p-4" x-cloak>
         <div x-show="showSingleScoring" x-transition.opacity class="fixed inset-0 bg-black/60 backdrop-blur-xs" wire:click="$set('showSingleScoringModal', false)"></div>
-        <div x-show="showSingleScoring" x-transition.scale class="relative w-full max-w-4xl bg-white dark:bg-gray-800 rounded-[2.5rem] shadow-2xl p-8 border border-gray-100 dark:border-gray-700 z-10 max-h-[85vh] flex flex-col animate-in zoom-in-95 duration-200">
+        <div x-show="showSingleScoring" x-transition.scale class="relative w-full max-w-5xl bg-white dark:bg-gray-800 rounded-[2.5rem] shadow-2xl p-8 border border-gray-105 dark:border-gray-700 z-10 max-h-[85vh] flex flex-col animate-in zoom-in-95 duration-200">
             <div class="flex justify-between items-center mb-6 flex-shrink-0">
                 <div>
                     <h2 class="text-xl font-black text-gray-850 dark:text-white uppercase italic tracking-tight">Input Nilai & Absensi Calon</h2>
@@ -624,51 +635,65 @@
             </div>
 
             <form wire:submit.prevent="saveSingleScoring" class="flex-grow overflow-y-auto pr-2 space-y-4 flex flex-col justify-between">
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse min-w-[700px]">
+                <div class="overflow-x-auto rounded-2xl border border-gray-100 dark:border-gray-700/60">
+                    <table class="w-full text-left border-collapse min-w-[900px]">
                         <thead>
-                            <tr class="border-b border-gray-100 dark:border-gray-700">
-                                <th class="pb-3 text-xs font-black uppercase text-gray-400 w-24">Pekan</th>
-                                <th class="pb-3 text-xs font-black uppercase text-gray-400 text-center w-28">Nilai (0-100)</th>
-                                <th class="pb-3 text-xs font-black uppercase text-gray-400 text-center w-64">Kehadiran</th>
-                                <th class="pb-3 text-xs font-black uppercase text-gray-400">Catatan / Alasan</th>
+                            <tr class="bg-gray-50 dark:bg-gray-900/60 text-gray-405 dark:text-gray-400 border-b border-gray-100 dark:border-gray-700">
+                                <th class="py-3 px-4 text-xs font-black uppercase tracking-widest w-24">Pekan</th>
+                                <th class="py-3 px-4 text-xs font-black uppercase tracking-widest text-center w-28">Nilai Akademik</th>
+                                <th class="py-3 px-4 text-xs font-black uppercase tracking-widest text-center w-28">Nilai Attitude</th>
+                                <th class="py-3 px-4 text-xs font-black uppercase tracking-widest text-center w-64">Kehadiran</th>
+                                <th class="py-3 px-4 text-xs font-black uppercase tracking-widest">Alasan Sakit / Izin</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-gray-50 dark:divide-gray-700/50">
+                        <tbody class="divide-y divide-gray-55 dark:divide-gray-700/50">
                             @for ($w = 1; $w <= 12; $w++)
-                                <tr>
-                                    <td class="py-3 text-sm font-bold text-gray-800 dark:text-white">Pekan {{ $w }}</td>
-                                    <td class="py-3 text-center">
+                                <tr class="hover:bg-gray-50/20 dark:hover:bg-gray-900/10">
+                                    <td class="py-3 px-4 text-sm font-bold text-gray-800 dark:text-white">Pekan {{ $w }}</td>
+                                    <td class="py-3 px-4 text-center">
                                         <input type="number" min="0" max="100" 
                                             wire:model="singleScores.{{ $w }}.score"
                                             placeholder="-"
-                                            class="w-20 px-3 py-1.5 text-center bg-gray-55 dark:bg-gray-900 border-none rounded-xl font-black text-sm text-gray-800 dark:text-white focus:ring-2 focus:ring-primary-blue">
+                                            class="w-20 px-3 py-1.5 text-center bg-gray-50 dark:bg-gray-950 border border-gray-250 dark:border-gray-700 rounded-xl font-black text-sm text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-blue">
                                     </td>
-                                    <td class="py-3 text-center">
-                                        <div class="flex items-center justify-center gap-1.5 bg-gray-55 dark:bg-gray-900 p-1 rounded-xl max-w-xs mx-auto">
+                                    <td class="py-3 px-4 text-center">
+                                        <input type="number" min="0" max="100" 
+                                            wire:model="singleScores.{{ $w }}.attitude_score"
+                                            placeholder="-"
+                                            class="w-20 px-3 py-1.5 text-center bg-gray-55 dark:bg-gray-955 border border-gray-250 dark:border-gray-700 rounded-xl font-black text-sm text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-blue">
+                                    </td>
+                                    <td class="py-3 px-4 text-center">
+                                        <div class="flex items-center justify-between gap-1 bg-gray-50 dark:bg-gray-950 border border-gray-250 dark:border-gray-700 p-1 rounded-xl max-w-[240px] mx-auto">
                                             @foreach(['hadir' => 'H', 'sakit' => 'S', 'izin' => 'I', 'alfa' => 'A'] as $status => $label)
+                                                @php
+                                                    $activeClass = ($singleAttendances[$w]['status'] ?? 'hadir') === $status
+                                                        ? ($status === 'hadir' ? 'bg-emerald-500 hover:bg-emerald-600 text-white shadow-md' 
+                                                            : ($status === 'sakit' ? 'bg-blue-500 hover:bg-blue-600 text-white shadow-md' 
+                                                            : ($status === 'izin' ? 'bg-amber-500 hover:bg-amber-600 text-white shadow-md' 
+                                                            : 'bg-red-500 hover:bg-red-650 text-white shadow-md')))
+                                                        : 'text-gray-400 dark:text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-900';
+                                                @endphp
                                                 <button type="button" 
                                                     wire:click="$set('singleAttendances.{{ $w }}.status', '{{ $status }}')"
-                                                    class="w-8 h-8 rounded-lg font-black text-[10px] uppercase transition-all flex items-center justify-center
-                                                    {{ ($singleAttendances[$w]['status'] ?? 'hadir') === $status 
-                                                        ? ($status === 'hadir' ? 'bg-emerald-500 text-white shadow-md' 
-                                                            : ($status === 'sakit' ? 'bg-blue-500 text-white shadow-md' 
-                                                            : ($status === 'izin' ? 'bg-amber-500 text-white shadow-md' 
-                                                            : 'bg-red-500 text-white shadow-md')))
-                                                        : 'text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-800' }}">
+                                                    class="w-9 h-9 rounded-lg font-black text-xs transition-all flex items-center justify-center {{ $activeClass }}">
                                                     {{ $label }}
                                                 </button>
                                             @endforeach
                                         </div>
                                     </td>
-                                    <td class="py-3">
+                                    <td class="py-3 px-4">
                                         @php
-                                            $isReasonReq = in_array(($singleAttendances[$w]['status'] ?? 'hadir'), ['hadir', 'sakit']);
+                                            $statusVal = $singleAttendances[$w]['status'] ?? 'hadir';
+                                            $showReason = in_array($statusVal, ['sakit', 'izin']);
                                         @endphp
-                                        <input type="text"
-                                            wire:model="singleAttendances.{{ $w }}.reason"
-                                            placeholder="{{ $isReasonReq ? 'Tulis alasan hadir/sakit (Wajib)...' : 'Catatan opsi...' }}"
-                                            class="w-full px-3 py-1.5 bg-gray-55 dark:bg-gray-900 border-none rounded-xl font-semibold text-xs text-gray-800 dark:text-white focus:ring-2 focus:ring-primary-blue {{ $isReasonReq ? 'border border-dashed border-red-300 dark:border-red-900' : '' }}">
+                                        @if($showReason)
+                                            <input type="text"
+                                                wire:model="singleAttendances.{{ $w }}.reason"
+                                                placeholder="Tulis alasan {{ $statusVal }} (Wajib)..."
+                                                class="w-full px-3 py-1.5 bg-gray-50 dark:bg-gray-955 border border-dashed border-red-300 dark:border-red-800/40 rounded-xl font-semibold text-xs text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-red-500/20 transition-all">
+                                        @else
+                                            <span class="text-xs text-gray-400 dark:text-gray-600 italic">Hadir/Alfa tidak perlu alasan</span>
+                                        @endif
                                     </td>
                                 </tr>
                             @endfor
@@ -680,7 +705,7 @@
                     <button type="button" wire:click="$set('showSingleScoringModal', false)" class="px-6 py-3.5 bg-gray-100 dark:bg-gray-700 text-gray-650 dark:text-white rounded-xl font-black text-xs uppercase tracking-wider transition-all">
                         Batal
                     </button>
-                    <button type="submit" class="px-8 py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-black text-xs uppercase tracking-wider transition-all shadow-lg shadow-emerald-500/20">
+                    <button type="submit" class="px-8 py-3.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl font-black text-xs uppercase tracking-wider transition-all shadow-lg shadow-emerald-500/20">
                         Simpan Penilaian
                     </button>
                 </div>

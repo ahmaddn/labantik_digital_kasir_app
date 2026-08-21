@@ -70,6 +70,26 @@ class LabantikCandidates extends Component
         $this->loadScoringData();
     }
 
+    public function checkPermission(): bool
+    {
+        $activeRole = session('active_role_name');
+        if (in_array($activeRole, ['superadmin', 'pengelola_jurusan'])) {
+            return true;
+        }
+
+        if ($activeRole === 'kasir') {
+            $userJurusanId = session('active_jurusan_id') ?? auth()->user()->jurusan_id;
+            if ($userJurusanId) {
+                $jurusan = Jurusan::find($userJurusanId);
+                if ($jurusan && str_contains(strtolower($jurusan->name), 'rpl')) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
     public function updatingSearch(): void
     {
         $this->resetPage();
@@ -106,6 +126,7 @@ class LabantikCandidates extends Component
 
             $this->scores[$candidate->id] = [
                 'score' => $scoreModel ? $scoreModel->score : '',
+                'attitude_score' => $scoreModel ? $scoreModel->attitude_score : '',
                 'notes' => $scoreModel ? $scoreModel->notes : '',
             ];
 
@@ -118,20 +139,24 @@ class LabantikCandidates extends Component
 
     public function saveScoring(): void
     {
-        $activeRole = session('active_role_name');
-        if (!in_array($activeRole, ['superadmin', 'pengelola_jurusan'])) {
-            $this->dispatch('toast', message: 'Hanya superadmin/pengelola yang dapat menginput nilai.');
+        if (!$this->checkPermission()) {
+            $this->dispatch('toast', message: 'Hanya superadmin/pengelola atau kasir jurusan RPL yang dapat menginput nilai.');
             return;
         }
 
         foreach ($this->scores as $candidateId => $scoreData) {
             $scoreVal = $scoreData['score'];
-            $notesVal = $scoreData['notes'];
+            $attitudeVal = $scoreData['attitude_score'] ?? '';
+            $notesVal = $scoreData['notes'] ?? '';
 
-            if ($scoreVal !== '') {
+            if ($scoreVal !== '' || $attitudeVal !== '') {
                 LabantikCandidateScore::updateOrCreate(
                     ['registration_id' => $candidateId, 'week_number' => $this->selectedWeek],
-                    ['score' => intval($scoreVal), 'notes' => $notesVal]
+                    [
+                        'score' => $scoreVal !== '' ? intval($scoreVal) : 0,
+                        'attitude_score' => $attitudeVal !== '' ? intval($attitudeVal) : 0,
+                        'notes' => $notesVal
+                    ]
                 );
             }
 
@@ -139,14 +164,14 @@ class LabantikCandidates extends Component
             $statusVal = $attData['status'];
             $reasonVal = $attData['reason'];
 
-            if (in_array($statusVal, ['hadir', 'sakit']) && empty(trim($reasonVal))) {
-                $this->dispatch('toast', message: 'Alasan hadir/sakit wajib diisi untuk masing-masing peserta.');
+            if (in_array($statusVal, ['sakit', 'izin']) && empty(trim($reasonVal))) {
+                $this->dispatch('toast', message: 'Alasan sakit/izin wajib diisi untuk masing-masing peserta.');
                 return;
             }
 
             LabantikCandidateAttendance::updateOrCreate(
                 ['registration_id' => $candidateId, 'week_number' => $this->selectedWeek],
-                ['status' => $statusVal, 'reason' => $reasonVal]
+                ['status' => $statusVal, 'reason' => $statusVal === 'hadir' || $statusVal === 'alfa' ? null : $reasonVal]
             );
         }
 
@@ -156,8 +181,7 @@ class LabantikCandidates extends Component
 
     public function finishSelection(): void
     {
-        $activeRole = session('active_role_name');
-        if (!in_array($activeRole, ['superadmin', 'pengelola_jurusan'])) {
+        if (!$this->checkPermission()) {
             abort(403, 'Unauthorized.');
         }
 
@@ -182,22 +206,26 @@ class LabantikCandidates extends Component
         $calculated = [];
         foreach ($candidates as $candidate) {
             $totalScore = 0;
+            $totalAttitude = 0;
             $weeks = count($candidate->scores);
             
             if ($weeks > 0) {
                 foreach ($candidate->scores as $s) {
                     $totalScore += $s->score;
+                    $totalAttitude += $s->attitude_score;
                 }
                 $avgScore = $totalScore / $weeks;
+                $avgAttitude = $totalAttitude / $weeks;
             } else {
                 $avgScore = 0;
+                $avgAttitude = 0;
             }
 
-            // Deduct penalty: -5 for alfa, -2 for izin
+            // Deduct penalty: -10 for alfa, -2 for izin
             $alfaCount = $candidate->attendances->where('status', 'alfa')->count();
             $izinCount = $candidate->attendances->where('status', 'izin')->count();
             
-            $finalScore = $avgScore - ($alfaCount * 5) - ($izinCount * 2);
+            $finalScore = $avgScore + $avgAttitude - ($alfaCount * 10) - ($izinCount * 2);
 
             $calculated[] = [
                 'candidate' => $candidate,
@@ -249,59 +277,6 @@ class LabantikCandidates extends Component
         $this->showDetailModal = true;
     }
 
-    public function openCreateModal(): void
-    {
-        $this->reset([
-            'new_full_name', 'new_class_name', 'new_jurusan_id', 
-            'new_phone_number', 'new_parent_phone_number', 
-            'new_address', 'new_reason', 'new_illness_history'
-        ]);
-        $this->showCreateModal = true;
-    }
-
-    public function storeCandidate(): void
-    {
-        $activeRole = session('active_role_name');
-        if (!in_array($activeRole, ['superadmin', 'pengelola_jurusan'])) {
-            abort(403, 'Unauthorized.');
-        }
-
-        $this->validate([
-            'new_full_name' => 'required|string|max:255',
-            'new_class_name' => 'required|string|max:100',
-            'new_jurusan_id' => 'nullable|exists:jurusans,id',
-            'new_phone_number' => 'required|string|max:20',
-            'new_parent_phone_number' => 'required|string|max:20',
-            'new_address' => 'required|string',
-            'new_reason' => 'nullable|string',
-            'new_illness_history' => 'nullable|string|max:255',
-        ], [], [
-            'new_full_name' => 'Nama Lengkap',
-            'new_class_name' => 'Kelas',
-            'new_jurusan_id' => 'Jurusan',
-            'new_phone_number' => 'No HP',
-            'new_parent_phone_number' => 'No HP Orang Tua',
-            'new_address' => 'Alamat',
-        ]);
-
-        LabantikRegistration::create([
-            'jurusan_id' => $this->new_jurusan_id ?: null,
-            'full_name' => $this->new_full_name,
-            'class_name' => $this->new_class_name,
-            'phone_number' => $this->new_phone_number,
-            'parent_phone_number' => $this->new_parent_phone_number,
-            'address' => $this->new_address,
-            'reason' => $this->new_reason,
-            'illness_history' => $this->new_illness_history,
-            'is_joined_group' => false,
-            'is_accepted' => false,
-        ]);
-
-        $this->showCreateModal = false;
-        $this->dispatch('toast', message: 'Calon anggota baru berhasil ditambahkan!');
-        $this->loadScoringData();
-    }
-
     public function openSingleScoringModal(string $candidateId): void
     {
         $this->scoringCandidate = LabantikRegistration::findOrFail($candidateId);
@@ -319,6 +294,7 @@ class LabantikCandidates extends Component
 
             $this->singleScores[$w] = [
                 'score' => $scoreModel ? $scoreModel->score : '',
+                'attitude_score' => $scoreModel ? $scoreModel->attitude_score : '',
                 'notes' => $scoreModel ? $scoreModel->notes : '',
             ];
 
@@ -333,20 +309,24 @@ class LabantikCandidates extends Component
 
     public function saveSingleScoring(): void
     {
-        $activeRole = session('active_role_name');
-        if (!in_array($activeRole, ['superadmin', 'pengelola_jurusan'])) {
-            $this->dispatch('toast', message: 'Hanya superadmin/pengelola yang dapat menginput nilai.');
+        if (!$this->checkPermission()) {
+            $this->dispatch('toast', message: 'Hanya superadmin/pengelola atau kasir jurusan RPL yang dapat menginput nilai.');
             return;
         }
 
         foreach ($this->singleScores as $w => $scoreData) {
             $scoreVal = $scoreData['score'];
-            $notesVal = $scoreData['notes'];
+            $attitudeVal = $scoreData['attitude_score'] ?? '';
+            $notesVal = $scoreData['notes'] ?? '';
 
-            if ($scoreVal !== '') {
+            if ($scoreVal !== '' || $attitudeVal !== '') {
                 LabantikCandidateScore::updateOrCreate(
                     ['registration_id' => $this->scoringCandidate->id, 'week_number' => $w],
-                    ['score' => intval($scoreVal), 'notes' => $notesVal]
+                    [
+                        'score' => $scoreVal !== '' ? intval($scoreVal) : 0,
+                        'attitude_score' => $attitudeVal !== '' ? intval($attitudeVal) : 0,
+                        'notes' => $notesVal
+                    ]
                 );
             } else {
                 LabantikCandidateScore::where('registration_id', $this->scoringCandidate->id)
@@ -358,14 +338,14 @@ class LabantikCandidates extends Component
             $statusVal = $attData['status'];
             $reasonVal = $attData['reason'];
 
-            if (in_array($statusVal, ['hadir', 'sakit']) && empty(trim($reasonVal))) {
-                $this->dispatch('toast', message: "Alasan hadir/sakit pada pekan {$w} wajib diisi.");
+            if (in_array($statusVal, ['sakit', 'izin']) && empty(trim($reasonVal))) {
+                $this->dispatch('toast', message: "Alasan sakit/izin pada pekan {$w} wajib diisi.");
                 return;
             }
 
             LabantikCandidateAttendance::updateOrCreate(
                 ['registration_id' => $this->scoringCandidate->id, 'week_number' => $w],
-                ['status' => $statusVal, 'reason' => $reasonVal]
+                ['status' => $statusVal, 'reason' => $statusVal === 'hadir' || $statusVal === 'alfa' ? null : $reasonVal]
             );
         }
 
@@ -427,8 +407,7 @@ class LabantikCandidates extends Component
 
     public function confirmDelete(string $id): void
     {
-        $activeRole = session('active_role_name');
-        if (!in_array($activeRole, ['superadmin', 'pengelola_jurusan', 'kasir'])) {
+        if (!$this->checkPermission()) {
             abort(403, 'Unauthorized.');
         }
 
@@ -438,8 +417,7 @@ class LabantikCandidates extends Component
 
     public function deleteCandidate(): void
     {
-        $activeRole = session('active_role_name');
-        if (!in_array($activeRole, ['superadmin', 'pengelola_jurusan', 'kasir'])) {
+        if (!$this->checkPermission()) {
             abort(403, 'Unauthorized.');
         }
 
@@ -453,8 +431,7 @@ class LabantikCandidates extends Component
 
     public function toggleJoinedGroup(string $id): void
     {
-        $activeRole = session('active_role_name');
-        if (!in_array($activeRole, ['superadmin', 'pengelola_jurusan', 'kasir'])) {
+        if (!$this->checkPermission()) {
             abort(403, 'Unauthorized.');
         }
 
@@ -467,8 +444,7 @@ class LabantikCandidates extends Component
 
     public function toggleRegistration(): void
     {
-        $activeRole = session('active_role_name');
-        if (!in_array($activeRole, ['superadmin', 'pengelola_jurusan'])) {
+        if (!$this->checkPermission()) {
             abort(403, 'Unauthorized.');
         }
 
@@ -520,11 +496,11 @@ class LabantikCandidates extends Component
             });
         }
         $acceptedCandidates = $acceptedQuery->get()->map(function($c) {
-            // Calculate final average score
             $avg = $c->scores->avg('score') ?: 0;
+            $avgAttitude = $c->scores->avg('attitude_score') ?: 0;
             $alfa = $c->attendances->where('status', 'alfa')->count();
             $izin = $c->attendances->where('status', 'izin')->count();
-            $c->final_score = max(0, $avg - ($alfa * 5) - ($izin * 2));
+            $c->final_score = max(0, $avg + $avgAttitude - ($alfa * 10) - ($izin * 2));
             return $c;
         })->sortByDesc('final_score');
 
@@ -533,7 +509,7 @@ class LabantikCandidates extends Component
             'acceptedCandidates' => $acceptedCandidates,
             'jurusans' => $jurusans,
             'isSuperAdmin' => $activeRole === 'superadmin',
-            'isPengelola' => in_array($activeRole, ['superadmin', 'pengelola_jurusan']),
+            'isPengelola' => $this->checkPermission(),
         ])->layout('layouts.app', ['title' => 'Data Calon Anggota Labantik']);
     }
 }

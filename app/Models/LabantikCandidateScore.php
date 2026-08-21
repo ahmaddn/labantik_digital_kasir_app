@@ -16,6 +16,7 @@ class LabantikCandidateScore extends Model
         'registration_id',
         'week_number',
         'score',
+        'attitude_score',
         'notes',
     ];
 
