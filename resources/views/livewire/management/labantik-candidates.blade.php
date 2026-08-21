@@ -29,9 +29,8 @@
                     Pendaftaran: {{ $isRegistrationOpen ? 'BUKA' : 'TUTUP' }}
                 </button>
 
-                <button onclick="confirm('Apakah Anda yakin ingin menyelesaikan seleksi? Sistem akan menghitung rata-rata nilai, memotong penalti absensi, dan memilih 15 calon terbaik secara otomatis.') || event.stopImmediatePropagation()"
-                    wire:click="finishSelection"
-                    class="inline-flex items-center px-5 py-3.5 bg-gradient-to-r from-yellow-500 to-amber-600 hover:from-yellow-600 hover:to-amber-700 text-white rounded-xl font-black text-sm uppercase italic tracking-wider transition-all duration-300 shadow-xl active:scale-95">
+                <button wire:click="$set('showFinishConfirmModal', true)"
+                    class="inline-flex items-center px-5 py-3.5 bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-black text-sm uppercase italic tracking-wider transition-all duration-300 shadow-xl active:scale-95">
                     Selesai Seleksi
                 </button>
                 <button wire:click="openCreateModal"
@@ -139,13 +138,23 @@
                                 <td class="py-4 text-right pr-4 flex items-center justify-end gap-2">
                                     <button type="button"
                                         wire:click="showDetails('{{ $candidate->id }}')"
-                                        class="px-4 py-2 bg-primary-blue hover:bg-blue-900 text-primary-yellow rounded-lg font-black text-xs uppercase tracking-wider transition-all">
-                                        Detail
+                                        title="Detail Calon"
+                                        class="p-2 bg-primary-blue hover:bg-blue-900 text-primary-yellow rounded-xl transition-all active:scale-95">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.43 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                                     </button>
+                                    @if($isPengelola)
+                                        <button type="button"
+                                            wire:click="openSingleScoringModal('{{ $candidate->id }}')"
+                                            title="Beri Nilai & Absen"
+                                            class="p-2 bg-amber-500 hover:bg-amber-600 text-white rounded-xl transition-all active:scale-95">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+                                        </button>
+                                    @endif
                                     <button type="button"
                                         wire:click="confirmDelete('{{ $candidate->id }}')"
-                                        class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-black text-xs uppercase tracking-wider transition-all">
-                                        Hapus
+                                        title="Hapus"
+                                        class="p-2 bg-red-600 hover:bg-red-700 text-white rounded-xl transition-all active:scale-95">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                                     </button>
                                 </td>
                             </tr>
@@ -169,64 +178,66 @@
     <!-- TAB 2: Input Nilai & Absen -->
     @if ($activeTab === 'scoring' && $isPengelola)
         <div class="bg-white dark:bg-gray-800 rounded-[2.5rem] shadow-2xl border border-gray-100 dark:border-gray-700/50 p-6 md:p-8">
-            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
                 <div class="flex items-center gap-3">
-                    <label class="text-sm font-black text-gray-800 dark:text-white uppercase tracking-wider">Input Penilaian Pekan:</label>
-                    <select wire:model.live="selectedWeek" class="px-4 py-2 bg-gray-55 dark:bg-gray-900 border-none rounded-xl font-bold text-sm text-gray-800 dark:text-white focus:ring-2 focus:ring-primary-blue">
+                    <span class="text-xs font-black text-gray-400 dark:text-gray-300 uppercase tracking-widest">Input Penilaian Pekan:</span>
+                    <select wire:model.live="selectedWeek" class="px-5 py-3 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-750 rounded-2xl font-black text-sm text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-blue transition-all">
                         @for ($w = 1; $w <= 12; $w++)
                             <option value="{{ $w }}">Pekan {{ $w }}</option>
                         @endfor
                     </select>
                 </div>
 
-                <button wire:click="saveScoring" class="px-6 py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-black text-sm uppercase italic tracking-wider transition-all active:scale-95 shadow-lg shadow-emerald-500/20">
-                    Simpan Penilaian Pekan Ini
+                <button wire:click="saveScoring" class="px-6 py-3.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-emerald-500/20 active:scale-95 transition-all">
+                    Simpan Pekan Ini
                 </button>
             </div>
 
-            <div class="overflow-x-auto">
+            <div class="overflow-x-auto rounded-3xl border border-gray-150 dark:border-gray-700/60">
                 <table class="w-full text-left border-collapse min-w-[900px]">
                     <thead>
-                        <tr class="border-b border-gray-100 dark:border-gray-700">
-                            <th class="pb-4 text-xs font-black uppercase tracking-widest text-gray-400 pl-4 w-48">Nama Calon</th>
-                            <th class="pb-4 text-xs font-black uppercase tracking-widest text-gray-400 text-center w-28">Nilai (0-100)</th>
-                            <th class="pb-4 text-xs font-black uppercase tracking-widest text-gray-400 text-center w-64">Kehadiran</th>
-                            <th class="pb-4 text-xs font-black uppercase tracking-widest text-gray-400">Catatan Nilai / Alasan Hadir & Sakit</th>
+                        <tr class="bg-gray-50 dark:bg-gray-900/60 text-gray-400 dark:text-gray-400 border-b border-gray-150 dark:border-gray-700/80">
+                            <th class="py-4 px-6 text-xs font-black uppercase tracking-widest w-48">Nama Calon</th>
+                            <th class="py-4 px-6 text-xs font-black uppercase tracking-widest text-center w-36">Nilai (0-100)</th>
+                            <th class="py-4 px-6 text-xs font-black uppercase tracking-widest text-center w-72">Kehadiran</th>
+                            <th class="py-4 px-6 text-xs font-black uppercase tracking-widest">Catatan Nilai / Alasan</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-gray-50 dark:divide-gray-700/50">
+                    <tbody class="divide-y divide-gray-100 dark:divide-gray-700/50">
                         @foreach($candidates as $candidate)
                             @continue(!$candidate->id)
-                            <tr class="hover:bg-gray-50/50 dark:hover:bg-gray-900/30 transition-colors">
-                                <td class="py-4 pl-4">
-                                    <div class="text-sm font-bold text-gray-900 dark:text-white">{{ $candidate->full_name }}</div>
-                                    <div class="text-[10px] text-gray-400 font-bold uppercase">{{ $candidate->class_name }}</div>
+                            <tr class="hover:bg-gray-50/30 dark:hover:bg-gray-900/20 transition-all">
+                                <td class="py-4 px-6">
+                                    <div class="text-sm font-black text-gray-900 dark:text-white">{{ $candidate->full_name }}</div>
+                                    <div class="text-[10px] text-gray-400 dark:text-gray-550 font-black uppercase tracking-wider mt-0.5">{{ $candidate->class_name }}</div>
                                 </td>
-                                <td class="py-4 text-center">
+                                <td class="py-4 px-6 text-center">
                                     <input type="number" min="0" max="100" 
                                         wire:model="scores.{{ $candidate->id }}.score"
                                         placeholder="-"
-                                        class="w-20 px-3 py-2 text-center bg-gray-55 dark:bg-gray-900 border-none rounded-xl font-black text-sm text-gray-800 dark:text-white focus:ring-2 focus:ring-primary-blue">
+                                        class="w-24 px-4 py-2.5 text-center bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-750 rounded-xl font-black text-sm text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-blue transition-all">
                                 </td>
-                                <td class="py-4 text-center">
-                                    <div class="flex items-center justify-center gap-1.5 bg-gray-55 dark:bg-gray-900 p-1.5 rounded-xl max-w-xs mx-auto">
-                                        @foreach(['hadir' => 'H', 'sakit' => 'S', 'izin' => 'I', 'alfa' => 'A'] as $status => $label)
+                                <td class="py-4 px-6">
+                                    <div class="flex items-center justify-between gap-1 bg-gray-100 dark:bg-gray-900 border border-gray-200 dark:border-gray-750 p-1 rounded-xl max-w-[260px] mx-auto">
+                                        @foreach([
+                                            'hadir' => ['H', 'bg-emerald-500 hover:bg-emerald-600 text-white shadow-md shadow-emerald-500/20', 'Hadir'],
+                                            'sakit' => ['S', 'bg-blue-500 hover:bg-blue-600 text-white shadow-md shadow-blue-500/20', 'Sakit'],
+                                            'izin' => ['I', 'bg-amber-500 hover:bg-amber-600 text-white shadow-md shadow-amber-500/20', 'Izin'],
+                                            'alfa' => ['A', 'bg-red-500 hover:bg-red-600 text-white shadow-md shadow-red-500/20', 'Alfa']
+                                        ] as $status => $meta)
                                             <button type="button" 
                                                 wire:click="$set('attendances.{{ $candidate->id }}.status', '{{ $status }}')"
-                                                class="w-9 h-9 rounded-lg font-black text-xs uppercase transition-all flex items-center justify-center
+                                                class="w-10 h-10 rounded-lg font-black text-xs transition-all flex items-center justify-center
                                                 {{ ($attendances[$candidate->id]['status'] ?? 'hadir') === $status 
-                                                    ? ($status === 'hadir' ? 'bg-emerald-500 text-white shadow-md' 
-                                                        : ($status === 'sakit' ? 'bg-blue-500 text-white shadow-md' 
-                                                        : ($status === 'izin' ? 'bg-amber-500 text-white shadow-md' 
-                                                        : 'bg-red-500 text-white shadow-md')))
-                                                    : 'text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-800' }}"
-                                                title="{{ ucfirst($status) }}">
-                                                {{ $label }}
+                                                    ? $meta[1]
+                                                    : 'text-gray-400 dark:text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-800' }}"
+                                                title="{{ $meta[2] }}">
+                                                {{ $meta[0] }}
                                             </button>
                                         @endforeach
                                     </div>
                                 </td>
-                                <td class="py-4">
+                                <td class="py-4 px-6">
                                     @php
                                         $isReasonRequired = in_array(($attendances[$candidate->id]['status'] ?? 'hadir'), ['hadir', 'sakit']);
                                         $placeholder = $isReasonRequired ? 'Tulis alasan hadir/sakit (Wajib)...' : 'Catatan opsional...';
@@ -234,7 +245,7 @@
                                     <input type="text"
                                         wire:model="attendances.{{ $candidate->id }}.reason"
                                         placeholder="{{ $placeholder }}"
-                                        class="w-full px-4 py-2 bg-gray-55 dark:bg-gray-900 border-none rounded-xl font-semibold text-xs text-gray-800 dark:text-white focus:ring-2 focus:ring-primary-blue {{ $isReasonRequired ? 'border border-dashed border-red-300 dark:border-red-900' : '' }}">
+                                        class="w-full px-4 py-2.5 bg-gray-55 dark:bg-gray-900 border {{ $isReasonRequired ? 'border-dashed border-red-300 dark:border-red-800/40 focus:ring-red-500/20' : 'border-gray-200 dark:border-gray-750 focus:ring-primary-blue/20' }} rounded-xl font-semibold text-xs text-gray-800 dark:text-white focus:outline-none focus:ring-2 transition-all">
                                 </td>
                             </tr>
                         @endforeach
@@ -243,8 +254,8 @@
             </div>
 
             <div class="mt-6 flex justify-end">
-                <button wire:click="saveScoring" class="px-8 py-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-black text-sm uppercase italic tracking-wider transition-all active:scale-95 shadow-lg shadow-emerald-500/20">
-                    Simpan Penilaian Pekan Ini
+                <button wire:click="saveScoring" class="px-8 py-4 bg-emerald-500 hover:bg-emerald-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-emerald-500/20 active:scale-95 transition-all">
+                    Simpan Pekan Ini
                 </button>
             </div>
         </div>
@@ -253,63 +264,73 @@
     <!-- TAB 3: Lolos Seleksi (15 Besar) -->
     @if ($activeTab === 'accepted')
         <div class="bg-white dark:bg-gray-800 rounded-[2.5rem] shadow-2xl border border-gray-100 dark:border-gray-700/50 p-6 md:p-8">
-            <div class="flex items-center gap-3 mb-6">
+            <div class="flex items-center gap-4 mb-8">
                 <span class="p-3 bg-amber-500/10 rounded-2xl flex items-center justify-center text-amber-500 flex-shrink-0">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
                 </span>
                 <div>
-                    <h3 class="text-lg font-black text-gray-900 dark:text-white uppercase italic tracking-tight">15 Calon Terbaik Hasil Seleksi</h3>
+                    <h3 class="text-xl font-black text-gray-900 dark:text-white uppercase italic tracking-tight">Hasil Akhir Seleksi (15 Besar)</h3>
                     <p class="text-xs text-gray-400 font-semibold mt-0.5">Daftar calon anggota dengan ranking nilai akhir terbaik (termasuk potongan nilai ketidakhadiran)</p>
                 </div>
             </div>
 
-            <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse">
+            <div class="overflow-x-auto rounded-3xl border border-gray-150 dark:border-gray-700/60">
+                <table class="w-full text-left border-collapse min-w-[800px]">
                     <thead>
-                        <tr class="border-b border-gray-100 dark:border-gray-700">
-                            <th class="pb-4 text-xs font-black uppercase tracking-widest text-gray-400 pl-4 w-20">Rank</th>
-                            <th class="pb-4 text-xs font-black uppercase tracking-widest text-gray-400">Nama Lengkap</th>
-                            <th class="pb-4 text-xs font-black uppercase tracking-widest text-gray-400">Kelas</th>
-                            <th class="pb-4 text-xs font-black uppercase tracking-widest text-gray-400">Jurusan</th>
-                            <th class="pb-4 text-xs font-black uppercase tracking-widest text-amber-500 text-center w-36">Rata-rata Nilai</th>
-                            <th class="pb-4 text-xs font-black uppercase tracking-widest text-primary-yellow text-center w-36">Skor Akhir</th>
-                            <th class="pb-4 text-xs font-black uppercase tracking-widest text-gray-400 text-right pr-4">Aksi</th>
+                        <tr class="bg-gray-50 dark:bg-gray-900/60 text-gray-400 dark:text-gray-450 border-b border-gray-150 dark:border-gray-700/80">
+                            <th class="py-4 px-6 text-xs font-black uppercase tracking-widest pl-6 w-24 text-center">Rank</th>
+                            <th class="py-4 px-6 text-xs font-black uppercase tracking-widest">Nama Lengkap</th>
+                            <th class="py-4 px-6 text-xs font-black uppercase tracking-widest">Kelas</th>
+                            <th class="py-4 px-6 text-xs font-black uppercase tracking-widest">Jurusan</th>
+                            <th class="py-4 px-6 text-xs font-black uppercase tracking-widest text-center w-36">Rata-rata Nilai</th>
+                            <th class="py-4 px-6 text-xs font-black uppercase tracking-widest text-center w-36">Skor Akhir</th>
+                            <th class="py-4 px-6 text-xs font-black uppercase tracking-widest text-right pr-6 w-24">Aksi</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-gray-50 dark:divide-gray-700/50">
+                    <tbody class="divide-y divide-gray-100 dark:divide-gray-700/50">
                         @forelse($acceptedCandidates as $idx => $ac)
-                            <tr class="hover:bg-gray-50/50 dark:hover:bg-gray-900/30 transition-colors">
-                                <td class="py-4 pl-4 text-sm font-black text-gray-800 dark:text-white">
-                                    #{{ $idx + 1 }}
+                            @php
+                                $rank = $idx + 1;
+                                $rankStyle = 'bg-gray-100 dark:bg-gray-900 text-gray-500';
+                                if ($rank === 1) { $rankStyle = 'bg-yellow-500 text-white shadow-lg shadow-yellow-500/20'; }
+                                elseif ($rank === 2) { $rankStyle = 'bg-slate-300 dark:bg-slate-500 text-gray-800 dark:text-white shadow-lg'; }
+                                elseif ($rank === 3) { $rankStyle = 'bg-amber-600 text-white shadow-lg shadow-amber-600/20'; }
+                            @endphp
+                            <tr class="hover:bg-gray-50/30 dark:hover:bg-gray-900/20 transition-all">
+                                <td class="py-4 px-6 text-center">
+                                    <span class="inline-flex items-center justify-center w-8 h-8 rounded-full font-black text-xs {{ $rankStyle }}">
+                                        {{ $rank }}
+                                    </span>
                                 </td>
-                                <td class="py-4 text-sm font-bold text-gray-900 dark:text-white">
-                                    {{ $ac->full_name }}
+                                <td class="py-4 px-6">
+                                    <div class="text-sm font-black text-gray-900 dark:text-white">{{ $ac->full_name }}</div>
                                 </td>
-                                <td class="py-4 text-sm text-gray-700 dark:text-gray-300 font-bold uppercase">
+                                <td class="py-4 px-6 text-sm text-gray-700 dark:text-gray-300 font-bold uppercase">
                                     {{ $ac->class_name }}
                                 </td>
-                                <td class="py-4 text-sm text-gray-500 dark:text-gray-400 font-bold">
+                                <td class="py-4 px-6 text-sm text-gray-500 dark:text-gray-400 font-bold">
                                     {{ $ac->jurusan ? $ac->jurusan->name : 'Global' }}
                                 </td>
-                                <td class="py-4 text-center text-sm font-bold text-gray-800 dark:text-white">
+                                <td class="py-4 px-6 text-center text-sm font-bold text-gray-850 dark:text-gray-200">
                                     {{ number_format($ac->scores->avg('score') ?: 0, 1) }}
                                 </td>
-                                <td class="py-4 text-center">
-                                    <span class="inline-flex items-center px-3 py-1 bg-yellow-500/10 text-yellow-600 dark:text-primary-yellow rounded-xl text-xs font-black tracking-widest">
+                                <td class="py-4 px-6 text-center">
+                                    <span class="inline-flex items-center px-4 py-1.5 bg-yellow-500/10 text-yellow-600 dark:text-primary-yellow rounded-2xl text-xs font-black tracking-widest border border-yellow-500/20">
                                         {{ number_format($ac->final_score, 1) }}
                                     </span>
                                 </td>
-                                <td class="py-4 text-right pr-4">
+                                <td class="py-4 px-6 text-right pr-6">
                                     <button type="button"
                                         wire:click="showDetails('{{ $ac->id }}')"
-                                        class="px-4 py-2 bg-primary-blue hover:bg-blue-900 text-primary-yellow rounded-lg font-black text-xs uppercase tracking-wider transition-all">
-                                        Detail Seleksi
+                                        title="Detail Seleksi"
+                                        class="p-2.5 bg-primary-blue hover:bg-blue-900 text-primary-yellow rounded-xl transition-all active:scale-95 shadow-md">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.43 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                                     </button>
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="7" class="py-12 text-center text-gray-400 italic font-semibold">
+                                <td colspan="7" class="py-12 text-center text-gray-400 dark:text-gray-500 italic font-bold">
                                     Proses seleksi belum diselesaikan.
                                 </td>
                             </tr>
@@ -552,12 +573,115 @@
                     @error('new_reason') <span class="text-xs text-red-500 font-bold mt-1 ml-1 block">{{ $message }}</span> @enderror
                 </div>
 
-                <div class="flex justify-end gap-3 pt-4 border-t border-gray-100 dark:border-gray-700">
+                <div class="flex justify-end gap-3 pt-4 border-t border-t-gray-100 dark:border-t-gray-700">
                     <button type="button" wire:click="$set('showCreateModal', false)" class="px-6 py-3 bg-gray-100 dark:bg-gray-700 text-gray-650 dark:text-white rounded-xl font-black text-xs uppercase tracking-wider transition-all">
                         Batal
                     </button>
                     <button type="submit" class="px-8 py-3 bg-primary-blue text-primary-yellow rounded-xl shadow-xl font-black text-xs uppercase tracking-wider transition-all">
                         Simpan Calon
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Custom Finish Selection Confirmation Modal -->
+    <div x-data="{ showFinish: @entangle('showFinishConfirmModal') }" x-show="showFinish" class="fixed inset-0 z-50 flex items-center justify-center p-4" x-cloak>
+        <div x-show="showFinish" x-transition.opacity class="fixed inset-0 bg-black/60 backdrop-blur-xs" wire:click="$set('showFinishConfirmModal', false)"></div>
+        <div x-show="showFinish" x-transition.scale class="relative w-full max-w-md bg-white dark:bg-gray-800 rounded-[2.5rem] shadow-2xl p-8 border border-gray-100 dark:border-gray-700 z-10 text-center animate-in zoom-in-95 duration-200">
+            <div class="w-16 h-16 bg-amber-100 dark:bg-amber-950/20 text-amber-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+            </div>
+            <h3 class="text-2xl font-black italic uppercase tracking-tighter text-gray-800 dark:text-white mb-2">
+                Selesaikan Seleksi?
+            </h3>
+            <p class="text-sm font-semibold text-gray-400 leading-relaxed mb-6">
+                Sistem akan menghitung nilai rata-rata tiap peserta, memotong penalti absensi (-5 poin per Alfa, -2 poin per Izin), dan meloloskan 15 calon terbaik secara otomatis. Tindakan ini akan memperbarui status pendaftar.
+            </p>
+            <div class="flex gap-4">
+                <button wire:click="$set('showFinishConfirmModal', false)" class="flex-1 py-4 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-white rounded-2xl font-black text-xs uppercase tracking-widest transition-transform">
+                    Batal
+                </button>
+                <button wire:click="finishSelection" @click="showFinish = false" class="flex-1 py-4 bg-amber-500 hover:bg-amber-600 text-white rounded-2xl font-black italic uppercase text-xs tracking-widest shadow-xl shadow-amber-500/20 transition-all">
+                    Ya, Selesaikan
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Single Candidate Scoring Modal (Weeks 1-12) -->
+    <div x-data="{ showSingleScoring: @entangle('showSingleScoringModal') }" x-show="showSingleScoring" class="fixed inset-0 z-50 flex items-center justify-center p-4" x-cloak>
+        <div x-show="showSingleScoring" x-transition.opacity class="fixed inset-0 bg-black/60 backdrop-blur-xs" wire:click="$set('showSingleScoringModal', false)"></div>
+        <div x-show="showSingleScoring" x-transition.scale class="relative w-full max-w-4xl bg-white dark:bg-gray-800 rounded-[2.5rem] shadow-2xl p-8 border border-gray-100 dark:border-gray-700 z-10 max-h-[85vh] flex flex-col animate-in zoom-in-95 duration-200">
+            <div class="flex justify-between items-center mb-6 flex-shrink-0">
+                <div>
+                    <h2 class="text-xl font-black text-gray-850 dark:text-white uppercase italic tracking-tight">Input Nilai & Absensi Calon</h2>
+                    <p class="text-xs text-gray-400 font-bold uppercase mt-1">Peserta: <span class="text-gray-800 dark:text-white font-black">{{ $scoringCandidate ? $scoringCandidate->full_name : '' }}</span> ({{ $scoringCandidate ? $scoringCandidate->class_name : '' }})</p>
+                </div>
+                <button wire:click="$set('showSingleScoringModal', false)" class="text-gray-400 hover:text-gray-650">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+
+            <form wire:submit.prevent="saveSingleScoring" class="flex-grow overflow-y-auto pr-2 space-y-4 flex flex-col justify-between">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse min-w-[700px]">
+                        <thead>
+                            <tr class="border-b border-gray-100 dark:border-gray-700">
+                                <th class="pb-3 text-xs font-black uppercase text-gray-400 w-24">Pekan</th>
+                                <th class="pb-3 text-xs font-black uppercase text-gray-400 text-center w-28">Nilai (0-100)</th>
+                                <th class="pb-3 text-xs font-black uppercase text-gray-400 text-center w-64">Kehadiran</th>
+                                <th class="pb-3 text-xs font-black uppercase text-gray-400">Catatan / Alasan</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-50 dark:divide-gray-700/50">
+                            @for ($w = 1; $w <= 12; $w++)
+                                <tr>
+                                    <td class="py-3 text-sm font-bold text-gray-800 dark:text-white">Pekan {{ $w }}</td>
+                                    <td class="py-3 text-center">
+                                        <input type="number" min="0" max="100" 
+                                            wire:model="singleScores.{{ $w }}.score"
+                                            placeholder="-"
+                                            class="w-20 px-3 py-1.5 text-center bg-gray-55 dark:bg-gray-900 border-none rounded-xl font-black text-sm text-gray-800 dark:text-white focus:ring-2 focus:ring-primary-blue">
+                                    </td>
+                                    <td class="py-3 text-center">
+                                        <div class="flex items-center justify-center gap-1.5 bg-gray-55 dark:bg-gray-900 p-1 rounded-xl max-w-xs mx-auto">
+                                            @foreach(['hadir' => 'H', 'sakit' => 'S', 'izin' => 'I', 'alfa' => 'A'] as $status => $label)
+                                                <button type="button" 
+                                                    wire:click="$set('singleAttendances.{{ $w }}.status', '{{ $status }}')"
+                                                    class="w-8 h-8 rounded-lg font-black text-[10px] uppercase transition-all flex items-center justify-center
+                                                    {{ ($singleAttendances[$w]['status'] ?? 'hadir') === $status 
+                                                        ? ($status === 'hadir' ? 'bg-emerald-500 text-white shadow-md' 
+                                                            : ($status === 'sakit' ? 'bg-blue-500 text-white shadow-md' 
+                                                            : ($status === 'izin' ? 'bg-amber-500 text-white shadow-md' 
+                                                            : 'bg-red-500 text-white shadow-md')))
+                                                        : 'text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-800' }}">
+                                                    {{ $label }}
+                                                </button>
+                                            @endforeach
+                                        </div>
+                                    </td>
+                                    <td class="py-3">
+                                        @php
+                                            $isReasonReq = in_array(($singleAttendances[$w]['status'] ?? 'hadir'), ['hadir', 'sakit']);
+                                        @endphp
+                                        <input type="text"
+                                            wire:model="singleAttendances.{{ $w }}.reason"
+                                            placeholder="{{ $isReasonReq ? 'Tulis alasan hadir/sakit (Wajib)...' : 'Catatan opsi...' }}"
+                                            class="w-full px-3 py-1.5 bg-gray-55 dark:bg-gray-900 border-none rounded-xl font-semibold text-xs text-gray-800 dark:text-white focus:ring-2 focus:ring-primary-blue {{ $isReasonReq ? 'border border-dashed border-red-300 dark:border-red-900' : '' }}">
+                                    </td>
+                                </tr>
+                            @endfor
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="flex justify-end gap-3 pt-6 border-t border-gray-100 dark:border-gray-700/50 flex-shrink-0">
+                    <button type="button" wire:click="$set('showSingleScoringModal', false)" class="px-6 py-3.5 bg-gray-100 dark:bg-gray-700 text-gray-650 dark:text-white rounded-xl font-black text-xs uppercase tracking-wider transition-all">
+                        Batal
+                    </button>
+                    <button type="submit" class="px-8 py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-black text-xs uppercase tracking-wider transition-all shadow-lg shadow-emerald-500/20">
+                        Simpan Penilaian
                     </button>
                 </div>
             </form>

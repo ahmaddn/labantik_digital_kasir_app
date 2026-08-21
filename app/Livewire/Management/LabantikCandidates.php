@@ -49,6 +49,13 @@ class LabantikCandidates extends Component
     public string $new_reason = '';
     public string $new_illness_history = '';
 
+    // Finish selection & Single scoring properties
+    public bool $showFinishConfirmModal = false;
+    public bool $showSingleScoringModal = false;
+    public ?LabantikRegistration $scoringCandidate = null;
+    public array $singleScores = [];
+    public array $singleAttendances = [];
+
     protected $queryString = [
         'search' => ['except' => ''],
         'selectedJurusanId' => ['except' => ''],
@@ -292,6 +299,78 @@ class LabantikCandidates extends Component
 
         $this->showCreateModal = false;
         $this->dispatch('toast', message: 'Calon anggota baru berhasil ditambahkan!');
+        $this->loadScoringData();
+    }
+
+    public function openSingleScoringModal(string $candidateId): void
+    {
+        $this->scoringCandidate = LabantikRegistration::findOrFail($candidateId);
+        $this->singleScores = [];
+        $this->singleAttendances = [];
+
+        for ($w = 1; $w <= 12; $w++) {
+            $scoreModel = LabantikCandidateScore::where('registration_id', $candidateId)
+                ->where('week_number', $w)
+                ->first();
+            
+            $attendanceModel = LabantikCandidateAttendance::where('registration_id', $candidateId)
+                ->where('week_number', $w)
+                ->first();
+
+            $this->singleScores[$w] = [
+                'score' => $scoreModel ? $scoreModel->score : '',
+                'notes' => $scoreModel ? $scoreModel->notes : '',
+            ];
+
+            $this->singleAttendances[$w] = [
+                'status' => $attendanceModel ? $attendanceModel->status : 'hadir',
+                'reason' => $attendanceModel ? $attendanceModel->reason : '',
+            ];
+        }
+
+        $this->showSingleScoringModal = true;
+    }
+
+    public function saveSingleScoring(): void
+    {
+        $activeRole = session('active_role_name');
+        if (!in_array($activeRole, ['superadmin', 'pengelola_jurusan'])) {
+            $this->dispatch('toast', message: 'Hanya superadmin/pengelola yang dapat menginput nilai.');
+            return;
+        }
+
+        foreach ($this->singleScores as $w => $scoreData) {
+            $scoreVal = $scoreData['score'];
+            $notesVal = $scoreData['notes'];
+
+            if ($scoreVal !== '') {
+                LabantikCandidateScore::updateOrCreate(
+                    ['registration_id' => $this->scoringCandidate->id, 'week_number' => $w],
+                    ['score' => intval($scoreVal), 'notes' => $notesVal]
+                );
+            } else {
+                LabantikCandidateScore::where('registration_id', $this->scoringCandidate->id)
+                    ->where('week_number', $w)
+                    ->delete();
+            }
+
+            $attData = $this->singleAttendances[$w] ?? ['status' => 'hadir', 'reason' => ''];
+            $statusVal = $attData['status'];
+            $reasonVal = $attData['reason'];
+
+            if (in_array($statusVal, ['hadir', 'sakit']) && empty(trim($reasonVal))) {
+                $this->dispatch('toast', message: "Alasan hadir/sakit pada pekan {$w} wajib diisi.");
+                return;
+            }
+
+            LabantikCandidateAttendance::updateOrCreate(
+                ['registration_id' => $this->scoringCandidate->id, 'week_number' => $w],
+                ['status' => $statusVal, 'reason' => $reasonVal]
+            );
+        }
+
+        $this->showSingleScoringModal = false;
+        $this->dispatch('toast', message: 'Penilaian calon anggota berhasil diperbarui!');
         $this->loadScoringData();
     }
 
