@@ -474,6 +474,17 @@
                     </div>
                 </div>
 
+                @if($editingId)
+                <div class="p-6 bg-amber-500/5 dark:bg-amber-500/5 rounded-2xl border border-dashed border-amber-500/30 space-y-3">
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" wire:model="update_history" class="sr-only peer">
+                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-amber-500"></div>
+                        <span class="ml-3 text-[10px] font-black text-amber-600 dark:text-amber-400 uppercase tracking-widest">Perbarui Harga di Riwayat Transaksi</span>
+                    </label>
+                    <p class="text-[9px] font-bold text-gray-400 leading-relaxed uppercase pl-14">Centang ini jika ingin mengubah harga produk ini di seluruh riwayat transaksi sebelumnya agar mengikuti harga baru (misal karena salah input harga).</p>
+                </div>
+                @endif
+
                 <!-- Restock Assistant -->
                 <div class="p-6 bg-blue-500/5 dark:bg-primary-blue/5 rounded-3xl border-2 border-dashed border-primary-blue/30 space-y-4">
                     <h3 class="text-xs font-black uppercase tracking-widest text-primary-blue dark:text-primary-blue-light">Asisten Restock & Modal (Opsional)</h3>

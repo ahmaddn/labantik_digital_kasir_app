@@ -160,9 +160,9 @@
                     @else
                         <a href="{{ route('kasir') }}"
                             class="flex items-center px-6 py-5 text-sm font-black rounded-[2rem] bg-primary-red text-white shadow-2xl shadow-red-500/30 hover:scale-105 active:scale-95 transition-all uppercase italic tracking-wider">
-                            <svg class="w-6 h-6 mr-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
-                                stroke-linecap="round" stroke-linejoin="round">
+                            <svg class="w-6 h-6 mr-4" xmlns="http://www.w3.org/2000/svg" width="24"
+                                height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" />
                                 <path d="M3 6h18" />
                                 <path d="M16 10a4 4 0 0 1-8 0" />
@@ -258,18 +258,6 @@
             @endif
 
             @if (in_array(session('active_role_name'), ['superadmin', 'pengelola_jurusan', 'kasir']))
-                <a href="{{ route('buku-kas') }}"
-                    class="flex items-center px-6 py-4 text-sm font-black rounded-2xl transition-all {{ request()->routeIs('buku-kas') ? 'bg-primary-blue text-white shadow-xl shadow-blue-900/20' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
-                    <svg class="w-5 h-5 mr-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M4 10h12" />
-                        <path d="M4 14h9" />
-                        <path d="M19 6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V8l-2-2Z" />
-                    </svg>
-                    Buku Kas Internal
-                </a>
-
                 <a href="{{ route('daily-recap') }}"
                     class="flex items-center px-6 py-4 text-sm font-black rounded-2xl transition-all {{ request()->routeIs('daily-recap') ? 'bg-primary-blue text-white shadow-xl shadow-blue-900/20' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
                     <svg class="w-5 h-5 mr-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
@@ -328,7 +316,8 @@
                 <div class="h-px bg-gray-100 dark:bg-gray-800 my-8 mx-4"></div>
 
                 <!-- 1. MANAJEMEN INVENTARIS -->
-                <p class="text-[9px] font-black text-gray-400 uppercase tracking-[0.3em] mb-4 ml-5">Manajemen Inventaris</p>
+                <p class="text-[9px] font-black text-gray-400 uppercase tracking-[0.3em] mb-4 ml-5">Manajemen
+                    Inventaris</p>
 
                 <a href="{{ route('products') }}"
                     class="flex items-center px-6 py-4 text-sm font-black rounded-2xl transition-all {{ request()->routeIs('products') ? 'bg-primary-blue text-white shadow-xl shadow-blue-900/20' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
@@ -371,7 +360,8 @@
 
                 <!-- 2. MANAJEMEN OPERASIONAL -->
                 <div class="h-px bg-gray-100 dark:bg-gray-800 my-8 mx-4"></div>
-                <p class="text-[9px] font-black text-gray-400 uppercase tracking-[0.3em] mb-4 ml-5">Manajemen Operasional</p>
+                <p class="text-[9px] font-black text-gray-400 uppercase tracking-[0.3em] mb-4 ml-5">Manajemen
+                    Operasional</p>
 
                 <a href="{{ route('schedules') }}"
                     class="flex items-center px-6 py-4 text-sm font-black rounded-2xl transition-all {{ request()->routeIs('schedules') ? 'bg-primary-blue text-white shadow-xl shadow-blue-900/20' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
@@ -415,7 +405,8 @@
                 <!-- 3. MANAJEMEN SISTEM -->
                 @if (session('active_role_name') === 'superadmin' || session('active_role_name') === 'pengelola_jurusan')
                     <div class="h-px bg-gray-100 dark:bg-gray-800 my-8 mx-4"></div>
-                    <p class="text-[9px] font-black text-gray-400 uppercase tracking-[0.3em] mb-4 ml-5">Manajemen Sistem</p>
+                    <p class="text-[9px] font-black text-gray-400 uppercase tracking-[0.3em] mb-4 ml-5">Manajemen
+                        Sistem</p>
 
                     <a href="{{ route('users') }}"
                         class="flex items-center px-6 py-4 text-sm font-black rounded-2xl transition-all {{ request()->routeIs('users') ? 'bg-primary-blue text-white shadow-xl shadow-blue-900/20' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
@@ -444,9 +435,9 @@
                     @if (session('active_role_name') === 'superadmin')
                         <a href="{{ route('roles') }}"
                             class="flex items-center px-6 py-4 text-sm font-black rounded-2xl transition-all {{ request()->routeIs('roles') ? 'bg-primary-blue text-white shadow-xl shadow-blue-900/20' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
-                            <svg class="w-5 h-5 mr-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-                                stroke-linecap="round" stroke-linejoin="round">
+                            <svg class="w-5 h-5 mr-4" xmlns="http://www.w3.org/2000/svg" width="24"
+                                height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                                 <rect width="18" height="18" x="3" y="3" rx="2" />
                                 <path d="M9 17v-4h6v4M9 7v4h6V7" />
                             </svg>
@@ -529,19 +520,6 @@
                         </svg>
                         Rekap Bulanan
                     </a>
-
-                    <a href="{{ route('yearly-recap') }}"
-                        class="flex items-center px-6 py-4 text-sm font-black rounded-2xl transition-all {{ request()->routeIs('yearly-recap') ? 'bg-primary-blue text-white shadow-xl shadow-blue-900/20' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
-                        <svg class="w-5 h-5 mr-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-                            stroke-linecap="round" stroke-linejoin="round">
-                            <path d="m12 14 4-4" />
-                            <path d="M3.34 19a10 10 0 1 1 17.32 0" />
-                            <path d="m9.05 9 5.64 5.64" />
-                            <circle cx="12" cy="12" r="2" />
-                        </svg>
-                        Rekap Tahunan
-                    </a>
                 @endif
 
                 <a href="{{ route('inventory-report') }}"
@@ -555,19 +533,6 @@
                         <path d="m19 7 3 5-3 5" />
                     </svg>
                     Laporan Stok & Selisih
-                </a>
-
-                <a href="{{ route('supplier-report') }}"
-                    class="flex items-center px-6 py-4 text-sm font-black rounded-2xl transition-all {{ request()->routeIs('supplier-report') ? 'bg-primary-blue text-white shadow-xl shadow-blue-900/20' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
-                    <svg class="w-5 h-5 mr-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-                        <circle cx="9" cy="7" r="4" />
-                        <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
-                        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-                    </svg>
-                    Bagi Hasil Supplier
                 </a>
 
                 @php

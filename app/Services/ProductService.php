@@ -64,12 +64,31 @@ class ProductService
         });
     }
 
-    public function saveProduct(?string $editingId, array $data): Product
+    public function saveProduct(?string $editingId, array $data, bool $updateHistory = false): Product
     {
         if ($editingId) {
             $product = Product::find($editingId);
             if ($product) {
                 $product->update($data);
+
+                if ($updateHistory) {
+                    $newPrice = $data['price'];
+                    $newModal = $data['modal_price'];
+                    $newProfit = $newPrice - $newModal;
+
+                    \Illuminate\Support\Facades\DB::transaction(function () use ($product, $newPrice, $newProfit) {
+                        $transactions = \App\Models\Transaction::where('product_id', $product->id)->get();
+                        foreach ($transactions as $tx) {
+                            $tx->update([
+                                'unit_price' => $newPrice,
+                                'unit_profit' => $newProfit,
+                                'total_price' => $newPrice * $tx->quantity,
+                                'debt_amount' => in_array($tx->status, ['belum_menerima_uang', 'uang_dipinjam']) ? ($newPrice * $tx->quantity) : 0,
+                            ]);
+                        }
+                    });
+                }
+
                 return $product;
             }
         }

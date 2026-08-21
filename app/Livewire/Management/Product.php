@@ -37,6 +37,8 @@ class Product extends Component
 
     public ?string $editingId = null;
 
+    public bool $update_history = false;
+
     // Restock Assistant properties
     public $restockQty = '';
     public $totalModalCost = '';
@@ -269,7 +271,7 @@ class Product extends Component
             'is_active' => (bool) $this->is_active,
         ];
 
-        $product = $service->saveProduct($this->editingId, $data);
+        $product = $service->saveProduct($this->editingId, $data, $this->update_history);
 
         // Save stock if Restock Qty is provided
         if (is_numeric($this->restockQty) && $this->restockQty > 0) {
@@ -280,14 +282,14 @@ class Product extends Component
         $msg = $this->editingId ? 'Produk berhasil diperbarui.' : 'Produk berhasil ditambahkan.';
         $this->dispatch('toast', message: $msg);
 
-        $this->reset(['name', 'label', 'price', 'profit_per_unit', 'modal_price', 'category_id', 'supplier_id', 'is_active', 'editingId', 'jurusan_id', 'restockQty', 'totalModalCost']);
+        $this->reset(['name', 'label', 'price', 'profit_per_unit', 'modal_price', 'category_id', 'supplier_id', 'is_active', 'editingId', 'jurusan_id', 'restockQty', 'totalModalCost', 'update_history']);
         $this->is_active = true;
         $this->showFormModal = false;
     }
 
     public function openCreateModal(): void
     {
-        $this->reset(['name', 'label', 'price', 'profit_per_unit', 'modal_price', 'category_id', 'supplier_id', 'editingId', 'jurusan_id', 'restockQty', 'totalModalCost']);
+        $this->reset(['name', 'label', 'price', 'profit_per_unit', 'modal_price', 'category_id', 'supplier_id', 'editingId', 'jurusan_id', 'restockQty', 'totalModalCost', 'update_history']);
         $this->is_active = true;
         $this->showFormModal = true;
     }
@@ -307,12 +309,13 @@ class Product extends Component
         $this->is_active = (bool) $product->is_active;
         $this->restockQty = '';
         $this->totalModalCost = '';
+        $this->update_history = false;
         $this->showFormModal = true;
     }
 
     public function cancelEdit(): void
     {
-        $this->reset(['name', 'label', 'price', 'profit_per_unit', 'modal_price', 'category_id', 'editingId', 'jurusan_id', 'restockQty', 'totalModalCost']);
+        $this->reset(['name', 'label', 'price', 'profit_per_unit', 'modal_price', 'category_id', 'editingId', 'jurusan_id', 'restockQty', 'totalModalCost', 'update_history']);
         $this->is_active = true;
         $this->showFormModal = false;
     }
