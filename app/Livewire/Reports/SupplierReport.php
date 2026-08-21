@@ -58,31 +58,10 @@ class SupplierReport extends Component
             $totalShopProfit = 0;
 
             foreach ($products as $product) {
-                $firstStock = StockEntry::where('product_id', $product->id)
-                    ->whereBetween('date', [$this->dateFrom, $this->dateTo])
-                    ->where('opening_stock', '>', 0)
-                    ->orderBy('date', 'asc')
-                    ->first() ?? StockEntry::where('product_id', $product->id)
-                    ->whereBetween('date', [$this->dateFrom, $this->dateTo])
-                    ->orderBy('date', 'asc')
-                    ->first();
-
-                $latestStock = StockEntry::where('product_id', $product->id)
-                    ->whereBetween('date', [$this->dateFrom, $this->dateTo])
-                    ->orderBy('date', 'desc')
-                    ->first();
-
-                $openingStock = $firstStock ? $firstStock->opening_stock : 0;
-                $closingStock = $latestStock ? max(0, $latestStock->closing_stock) : 0;
-
-                if ($firstStock || $latestStock) {
-                    $sold = max(0, $openingStock - $closingStock);
-                } else {
-                    $sold = Transaction::forReporting()->where('product_id', $product->id)
-                        ->whereIn('status', ['uang_diterima', 'belum_kembalian'])
-                        ->whereBetween('transacted_at', [$this->dateFrom . ' 00:00:00', $this->dateTo . ' 23:59:59'])
-                        ->sum('quantity');
-                }
+                $sold = Transaction::forReporting()->where('product_id', $product->id)
+                    ->whereIn('status', ['uang_diterima', 'belum_kembalian'])
+                    ->whereBetween('transacted_at', [$this->dateFrom . ' 00:00:00', $this->dateTo . ' 23:59:59'])
+                    ->sum('quantity');
 
                 if ($sold > 0) {
                     $totalQty += $sold;

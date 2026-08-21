@@ -90,13 +90,12 @@ Route::middleware(['auth', 'verified', EnsureRoleSelected::class])->group(functi
                 $openingStock = $firstStock ? $firstStock->opening_stock : 0;
                 $closingStock = $latestStock ? max(0, $latestStock->closing_stock) : 0;
 
-                if ($firstStock || $latestStock) {
-                    $sold = max(0, $openingStock - $closingStock);
-                } else {
-                    $sold = \App\Models\Transaction::where('product_id', $product->id)
-                        ->whereIn('status', ['uang_diterima', 'belum_kembalian'])
-                        ->whereBetween('transacted_at', [$dateFrom . ' 00:00:00', $dateTo . ' 23:59:59'])
-                        ->sum('quantity');
+                $sold = \App\Models\Transaction::where('product_id', $product->id)
+                    ->whereIn('status', ['uang_diterima', 'belum_kembalian'])
+                    ->whereBetween('transacted_at', [$dateFrom . ' 00:00:00', $dateTo . ' 23:59:59'])
+                    ->sum('quantity');
+
+                if (!$firstStock && !$latestStock) {
                     $openingStock = $sold;
                 }
 
