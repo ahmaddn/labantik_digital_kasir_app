@@ -71,6 +71,12 @@ class SupplierReport extends Component
                 }
             }
 
+            $lastSettlement = CashTransaction::forReporting()
+                ->where('reference', 'like', "SETTLE-SUPPLIER-{$supplier->id}-%")
+                ->orderBy('created_at', 'desc')
+                ->first();
+            $lastSettledDate = $lastSettlement ? $lastSettlement->date : null;
+
             return (object) [
                 'supplier_id' => $supplier->id,
                 'supplier_name' => $supplier->name,
@@ -79,6 +85,7 @@ class SupplierReport extends Component
                 'total_supplier_share' => $totalSupplierShare,
                 'total_shop_profit' => $totalShopProfit,
                 'is_settled' => CashTransaction::forReporting()->where('reference', "SETTLE-SUPPLIER-{$supplier->id}-{$this->dateFrom}-{$this->dateTo}")->exists(),
+                'last_settled_date' => $lastSettledDate,
             ];
         })->filter(fn($r) => $r->total_qty > 0 && !$r->is_settled);
 

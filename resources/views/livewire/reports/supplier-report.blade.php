@@ -71,6 +71,11 @@
                     <tr class="hover:bg-gray-50 dark:hover:bg-gray-900/30 transition-colors group">
                         <td class="px-10 py-8">
                             <div class="text-base font-black text-gray-800 dark:text-white uppercase tracking-tight italic">{{ $report->supplier_name }}</div>
+                            @if($report->last_settled_date)
+                                <div class="text-[9px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mt-1">Terakhir Lunas: {{ \Carbon\Carbon::parse($report->last_settled_date)->translatedFormat('d M Y') }}</div>
+                            @else
+                                <div class="text-[9px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mt-1">Belum Pernah Dilunasi</div>
+                            @endif
                         </td>
                         <td class="px-10 py-8 text-center font-black text-gray-600 dark:text-gray-400">
                             {{ number_format($report->total_qty, 0, ',', '.') }}
