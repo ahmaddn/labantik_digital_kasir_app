@@ -369,6 +369,68 @@ class LabantikCandidates extends Component
         $this->loadScoringData();
     }
 
+    public function openCreateModal(): void
+    {
+        if (!$this->checkPermission()) {
+            $this->dispatch('toast', message: 'Hanya superadmin/pengelola yang dapat menambah calon anggota.');
+            return;
+        }
+
+        $this->new_full_name = '';
+        $this->new_class_name = '';
+        $this->new_jurusan_id = '';
+        $this->new_phone_number = '';
+        $this->new_parent_phone_number = '';
+        $this->new_address = '';
+        $this->new_reason = '';
+        $this->new_illness_history = '';
+
+        $this->showCreateModal = true;
+    }
+
+    public function storeCandidate(): void
+    {
+        if (!$this->checkPermission()) {
+            $this->dispatch('toast', message: 'Hanya superadmin/pengelola yang dapat menambah calon anggota.');
+            return;
+        }
+
+        $this->validate([
+            'new_full_name' => 'required|string|max:255',
+            'new_class_name' => 'required|string|max:50',
+            'new_jurusan_id' => 'required|uuid|exists:jurusans,id',
+            'new_phone_number' => 'required|string|max:20',
+            'new_parent_phone_number' => 'required|string|max:20',
+            'new_address' => 'required|string|max:500',
+            'new_reason' => 'nullable|string|max:1000',
+            'new_illness_history' => 'nullable|string|max:500',
+        ], [], [
+            'new_full_name' => 'Nama Lengkap',
+            'new_class_name' => 'Kelas',
+            'new_jurusan_id' => 'Jurusan Tujuan',
+            'new_phone_number' => 'No HP Calon',
+            'new_parent_phone_number' => 'No HP Orang Tua',
+            'new_address' => 'Alamat Rumah',
+        ]);
+
+        LabantikRegistration::create([
+            'full_name' => $this->new_full_name,
+            'jurusan_id' => $this->new_jurusan_id,
+            'class_name' => $this->new_class_name,
+            'phone_number' => $this->new_phone_number,
+            'parent_phone_number' => $this->new_parent_phone_number,
+            'address' => $this->new_address,
+            'reason' => $this->new_reason,
+            'illness_history' => $this->new_illness_history,
+            'is_joined_group' => false,
+            'is_accepted' => false,
+        ]);
+
+        $this->showCreateModal = false;
+        $this->dispatch('toast', message: 'Calon anggota baru berhasil ditambahkan!');
+        $this->loadScoringData();
+    }
+
     public function saveWaLink(): void
     {
         $this->validate([
