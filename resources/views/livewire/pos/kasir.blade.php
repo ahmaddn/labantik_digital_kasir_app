@@ -251,8 +251,10 @@ document.addEventListener('keydown', (e) => {
                                 d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707M16.95 17.95l.707.707M7.05 7.05l.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z" />
                         </svg>
                     </button>
+                    @if (session('active_role_name') !== 'kasir')
                     <a href="{{ route('inventory-report') }}" wire:navigate
                         class="nb-btn py-3 px-4 bg-primary-yellow text-black text-xs shadow-none border-2 hidden md:block">SELISIH</a>
+                    @endif
                     <button wire:click="editOpeningStock"
                         class="nb-btn py-3 px-4 bg-white text-black text-xs shadow-none border-2">STOK</button>
                     <button wire:click="finishSession" {{ $isSessionFinished ? 'disabled' : '' }}
