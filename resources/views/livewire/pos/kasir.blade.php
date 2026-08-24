@@ -1,8 +1,8 @@
-<div wire:poll.5s="checkNewTasks" x-data="{
+<div wire:poll.5s="checkNewTasks" x-init="products = @json($allProductsJson)" x-data="{
     showCart: false,
     search: '',
     selectedCategory: null,
-    products: @json($products),
+    products: @entangle('products'),
     cart: [],
     loading: false,
     modalSearch: '',
@@ -78,6 +78,15 @@
     addToCart(product, force) {
         // Tentukan nilai default force secara aman
         const shouldForce = (force === true);
+        
+        // Debug Logger
+        console.log("addToCart triggered:", {
+            product_name: product.name,
+            available_stock: product.available_stock,
+            modifier_groups: product.modifier_groups,
+            modifierGroups: product.modifierGroups,
+            shouldForce: shouldForce
+        });
 
         // Cek jika produk memiliki modifier / topping dan tidak dipaksa lewati modal
         const modGroups = product.modifier_groups || product.modifierGroups;
@@ -1256,5 +1265,19 @@ document.addEventListener('keydown', (e) => {
             }, 100);
         });
 
+        // Pastikan nested modifier_groups aman dari hydration Livewire dengan menyalin allProductsJson ke Alpine JS data.
+        document.addEventListener('alpine:init', () => {
+            // Kita hubungkan ke siklus Livewire update
+            Livewire.hook('morph.updated', ({ el, component }) => {
+                if (component.name === 'pos.kasir') {
+                    // Update data produk di AlpineJS x-data secara manual dari JSON PHP
+                    const alpineEl = document.querySelector('[x-data]');
+                    if (alpineEl && alpineEl.__x) {
+                        const rawJson = @json($allProductsJson);
+                        alpineEl.__x.$data.products = rawJson;
+                    }
+                }
+            });
+        });
     </script>
 </div>
