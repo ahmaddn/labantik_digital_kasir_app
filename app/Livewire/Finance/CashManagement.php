@@ -706,7 +706,7 @@ class CashManagement extends Component
             ];
         }
 
-        $transactions = (clone $query)
+        $transactions = (clone $activeQuery)
             ->orderBy('date', 'desc')
             ->orderBy('id', 'desc')
             ->paginate(15);
