@@ -2,7 +2,7 @@
     showCart: false,
     search: '',
     selectedCategory: null,
-    products: [],
+    products: @json($allProductsJson),
     cart: [],
     loading: false,
     modalSearch: '',
@@ -1263,33 +1263,6 @@ document.addEventListener('keydown', (e) => {
                 const searchInput = document.querySelector('input[placeholder*="CARI"]');
                 if (searchInput) searchInput.focus();
             }, 100);
-        });
-
-        // Fungsi pembantu untuk memuat produk secara aman dari PHP JSON tanpa merusak attribute x-data
-        function loadAlpineProducts() {
-            try {
-                const alpineEl = document.querySelector('[x-data]');
-                if (alpineEl && alpineEl.__x) {
-                    const rawJson = @json($allProductsJson);
-                    alpineEl.__x.$data.products = rawJson;
-                }
-            } catch (e) {
-                console.error("Gagal menyinkronkan produk:", e);
-            }
-        }
-
-        // Jalankan saat load pertama kali
-        document.addEventListener('DOMContentLoaded', () => {
-            setTimeout(loadAlpineProducts, 100);
-        });
-
-        // Jalankan setiap kali Livewire melakukan morphing/update DOM
-        document.addEventListener('alpine:init', () => {
-            Livewire.hook('morph.updated', ({ el, component }) => {
-                if (component.name === 'pos.kasir') {
-                    loadAlpineProducts();
-                }
-            });
         });
     </script>
 </div>
