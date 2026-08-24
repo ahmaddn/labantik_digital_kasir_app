@@ -445,7 +445,7 @@ class Product extends Component
     public function render()
     {
         $activeJurusanId = session('active_jurusan_id');
-        $query = ProductModel::with(['category', 'supplier', 'jurusan'])
+        $query = ProductModel::with(['category', 'supplier', 'jurusan', 'modifierGroups'])
             ->when($activeJurusanId, function ($q) use ($activeJurusanId) {
                 return $q->where('jurusan_id', $activeJurusanId);
             })

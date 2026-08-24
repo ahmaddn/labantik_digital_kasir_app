@@ -112,7 +112,14 @@
  
                                 <!-- Product Info -->
                                 <div class="col-span-3 px-4 min-w-0">
-                                    <div class="text-base font-black text-gray-800 dark:text-white uppercase tracking-tight italic truncate">{{ $product->name }}</div>
+                                    <div class="flex items-center gap-2">
+                                        <div class="text-base font-black text-gray-800 dark:text-white uppercase tracking-tight italic truncate">{{ $product->name }}</div>
+                                        @if($product->modifierGroups->count() > 0)
+                                            <span class="px-1.5 py-0.5 text-[8px] font-black rounded uppercase tracking-wider bg-amber-500/10 text-amber-600 border border-amber-500/20" title="Memiliki Topping / Opsi Tambahan">
+                                                TOPPING
+                                            </span>
+                                        @endif
+                                    </div>
                                     <div class="flex flex-wrap items-center gap-2 mt-1">
                                         <span class="text-[9px] font-bold text-gray-400 uppercase tracking-widest">ID: #{{ substr($product->id, 0, 8) }}</span>
                                         @if($product->jurusan)
@@ -201,7 +208,14 @@
                                         
                                         <div>
                                             <!-- Product Title -->
-                                            <h3 class="text-base font-black text-gray-800 dark:text-white uppercase tracking-tight italic leading-snug">{{ $product->name }}</h3>
+                                            <div class="flex items-center gap-1.5 flex-wrap">
+                                                <h3 class="text-base font-black text-gray-800 dark:text-white uppercase tracking-tight italic leading-snug">{{ $product->name }}</h3>
+                                                @if($product->modifierGroups->count() > 0)
+                                                    <span class="px-1.5 py-0.5 text-[8px] font-black rounded uppercase tracking-wider bg-amber-500/10 text-amber-600 border border-amber-500/20">
+                                                        TOPPING
+                                                    </span>
+                                                @endif
+                                            </div>
                                             <span class="px-2 py-0.5 bg-blue-50 dark:bg-blue-950/20 text-primary-blue border border-blue-100 dark:border-blue-900/30 rounded text-[8px] font-black uppercase tracking-wider inline-block mt-1">
                                                 {{ $product->category->name }}
                                             </span>
