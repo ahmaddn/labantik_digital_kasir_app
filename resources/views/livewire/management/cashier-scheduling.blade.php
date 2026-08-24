@@ -107,6 +107,53 @@
         </div>
     </div>
 
+    <!-- Tabel Akumulasi Shift Per Kasir -->
+    <div class="p-6 bg-white dark:bg-gray-900 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 shadow-md">
+        <div class="mb-6 border-b border-gray-100 dark:border-gray-800 pb-4">
+            <h2 class="text-xl font-black italic uppercase tracking-tighter text-primary-blue dark:text-primary-yellow">Ringkasan Shift Kasir</h2>
+            <p class="text-gray-400 text-xs font-semibold uppercase tracking-widest mt-1">Akumulasi jumlah tugas jaga kasir periode ini</p>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="border-b border-gray-200 dark:border-gray-800">
+                        <th class="pb-3 text-xs font-black uppercase tracking-widest text-gray-400">Nama Kasir</th>
+                        <th class="pb-3 text-xs font-black uppercase tracking-widest text-gray-400">Email</th>
+                        <th class="pb-3 text-xs font-black uppercase tracking-widest text-gray-400 text-center">Total Tugas Jaga</th>
+                        <th class="pb-3 text-xs font-black uppercase tracking-widest text-gray-400 text-center">Beban Kerja</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100 dark:divide-gray-800/50">
+                    @forelse($cashierStats as $stat)
+                        <tr class="hover:bg-gray-50/50 dark:hover:bg-gray-800/30 transition-colors">
+                            <td class="py-4 text-sm font-bold text-gray-800 dark:text-white">{{ $stat['name'] }}</td>
+                            <td class="py-4 text-xs text-gray-400 font-medium">{{ $stat['email'] }}</td>
+                            <td class="py-4 text-sm font-black text-center text-primary-blue dark:text-primary-yellow italic">
+                                {{ $stat['shifts_count'] }}x Shift
+                            </td>
+                            <td class="py-4">
+                                <div class="flex items-center justify-center gap-2">
+                                    <div class="w-24 bg-gray-200 dark:bg-gray-800 h-2 rounded-full overflow-hidden">
+                                        @php
+                                            $maxShifts = max($cashierStats->pluck('shifts_count')->toArray()) ?: 1;
+                                            $percentage = ($stat['shifts_count'] / $maxShifts) * 100;
+                                        @endphp
+                                        <div class="bg-primary-blue dark:bg-primary-yellow h-full transition-all duration-550" style="width: {{ $percentage }}%"></div>
+                                    </div>
+                                    <span class="text-[9px] font-black text-gray-400">{{ round($percentage) }}%</span>
+                                </div>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="4" class="py-6 text-center text-xs text-gray-400 italic">Tidak ada data kasir murni</td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </div>
+
     <!-- Create Schedule Modal -->
     <div x-data="{ show: @entangle('showCreateModal') }" x-show="show" class="fixed inset-0 z-50 flex items-center justify-center p-4" x-cloak>
         <div x-show="show" x-transition.opacity class="fixed inset-0 bg-black/60 backdrop-blur-xs" wire:click="$set('showCreateModal', false)"></div>

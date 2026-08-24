@@ -389,9 +389,20 @@ class CashierScheduling extends Component
             ->orderBy('date')
             ->get();
 
+        // Hitung total shift per kasir untuk periode aktif ini
+        $cashierStats = $cashiers->map(function($cashier) use ($weekSchedules) {
+            $shiftCount = $weekSchedules->where('user_id', $cashier->id)->count();
+            return [
+                'name' => $cashier->name,
+                'email' => $cashier->email,
+                'shifts_count' => $shiftCount,
+            ];
+        })->sortByDesc('shifts_count');
+
         return view('livewire.management.cashier-scheduling', [
             'cashiers' => $cashiers,
             'weekSchedules' => $weekSchedules,
+            'cashierStats' => $cashierStats,
             'jurusans' => Jurusan::all(),
             'weekRange' => $startOfWeek->translatedFormat('d M Y') . ' - ' . $endOfWeek->translatedFormat('d M Y'),
         ])->layout('layouts.app', ['title' => 'Penjadwalan Kasir']);
