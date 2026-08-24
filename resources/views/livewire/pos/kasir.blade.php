@@ -80,7 +80,8 @@
         const shouldForce = (force === true);
 
         // Cek jika produk memiliki modifier / topping dan tidak dipaksa lewati modal
-        if (!shouldForce && product.modifier_groups && product.modifier_groups.length > 0) {
+        const hasModifiers = product.modifier_groups && Array.isArray(product.modifier_groups) && product.modifier_groups.length > 0;
+        if (!shouldForce && hasModifiers) {
             this.activeModifierProduct = product;
             this.selectedModifiersMap = {};
             // Initialize selections
