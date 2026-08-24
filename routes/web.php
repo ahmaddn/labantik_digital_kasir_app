@@ -41,6 +41,7 @@ Route::middleware(['auth', 'verified', EnsureRoleSelected::class])->group(functi
     Route::get('/products', Product::class)->name('products');
     Route::get('/categories', Category::class)->name('categories');
     Route::get('/suppliers', Supplier::class)->name('suppliers');
+    Route::get('/modifiers', \App\Livewire\Management\ModifierManagement::class)->name('modifiers');
     Route::get('/cashier', Kasir::class)->name('kasir');
 
     // Theme Settings

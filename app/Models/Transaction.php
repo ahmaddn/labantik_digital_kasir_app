@@ -74,4 +74,9 @@ class Transaction extends Model
     {
         return $query->withoutGlobalScope('active');
     }
+
+    public function modifiers(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(Modifier::class, 'transaction_modifiers')->withPivot('price')->withTimestamps();
+    }
 }

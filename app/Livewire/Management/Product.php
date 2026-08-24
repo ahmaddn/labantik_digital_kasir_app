@@ -407,6 +407,41 @@ class Product extends Component
         return $grouped;
     }
 
+    public $selectedModifierGroupId = '';
+    public bool $showBulkModifierModal = false;
+
+    public function applyModifierGroupMassive()
+    {
+        $this->validate([
+            'selectedModifierGroupId' => 'required|exists:modifier_groups,id',
+        ]);
+
+        if (empty($this->selectedProducts)) {
+            $this->dispatch('toast', message: 'Silakan pilih produk terlebih dahulu.', type: 'danger');
+            return;
+        }
+
+        $count = 0;
+        foreach ($this->selectedProducts as $productId => $isSelected) {
+            if ($isSelected) {
+                $product = ProductModel::find($productId);
+                if ($product) {
+                    // Sync without detaching to append, or sync to replace depending on needs.
+                    // SyncWithoutDetaching is better to preserve other groups.
+                    $product->modifierGroups()->syncWithoutDetaching([$this->selectedModifierGroupId]);
+                    $count++;
+                }
+            }
+        }
+
+        $this->selectedProducts = [];
+        $this->selectAll = false;
+        $this->showBulkModifierModal = false;
+        $this->selectedModifierGroupId = '';
+
+        $this->dispatch('toast', message: "Berhasil menerapkan kelompok topping ke {$count} produk.");
+    }
+
     public function render()
     {
         $activeJurusanId = session('active_jurusan_id');
@@ -435,9 +470,14 @@ class Product extends Component
             });
         }
 
+        $modifierGroups = \App\Models\ModifierGroup::when($activeJurusanId, function($q) use ($activeJurusanId) {
+            $q->where('jurusan_id', $activeJurusanId);
+        })->get();
+
         return view('livewire.management.product', [
             'products' => $query->paginate(10),
             'cashGroupedProducts' => $this->activeTab === 'grouping' ? $this->getCashGroupedProducts() : [],
+            'modifierGroupsList' => $modifierGroups,
         ])->layout('layouts.app', ['title' => 'Katalog Produk']);
     }
 }

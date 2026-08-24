@@ -191,7 +191,12 @@ class PosSessionService
         DB::transaction(function () use ($cart, $change, $buyerName, $status, $note, $tDate, $isBackdate, $transactedAt, $activeJurusanId, $userId, $reference) {
             $first = true;
             foreach ($cart as $item) {
-                Transaction::create([
+                // Hitung total harga topping yang dipilih
+                $modifiersPrice = collect($item['selected_modifiers'] ?? [])->sum('price');
+                $finalUnitPrice = $item['price'] + $modifiersPrice;
+                $finalTotalPrice = $finalUnitPrice * $item['quantity'];
+
+                $transaction = Transaction::create([
                     'jurusan_id' => $activeJurusanId,
                     'reference' => $reference,
                     'user_id' => $userId,
@@ -200,14 +205,24 @@ class PosSessionService
                     'transacted_at' => $transactedAt,
                     'buyer_name' => $buyerName ?: null,
                     'quantity' => $item['quantity'],
-                    'unit_price' => $item['price'],
-                    'unit_profit' => $item['profit'],
-                    'total_price' => $item['price'] * $item['quantity'],
-                    'debt_amount' => in_array($status, ['belum_menerima_uang', 'uang_dipinjam']) ? ($item['price'] * $item['quantity']) : 0,
+                    'unit_price' => $finalUnitPrice,
+                    'unit_profit' => $item['profit'], // profit dasar tetap agar modal tidak salah, atau disesuaikan
+                    'total_price' => $finalTotalPrice,
+                    'debt_amount' => in_array($status, ['belum_menerima_uang', 'uang_dipinjam']) ? $finalTotalPrice : 0,
                     'change_due' => ($status === 'belum_kembalian' && $first) ? $change : 0,
                     'status' => $status,
                     'note' => $note ?: ($change > 0 && $first ? 'Kembalian: Rp'.number_format($change, 0, ',', '.') : null),
                 ]);
+
+                // Simpan item topping terpilih ke database pivot
+                if (!empty($item['selected_modifiers'])) {
+                    foreach ($item['selected_modifiers'] as $mod) {
+                        $transaction->modifiers()->attach($mod['id'], [
+                            'price' => $mod['price']
+                        ]);
+                    }
+                }
+
                 $first = false;
 
                 if ($isBackdate) {

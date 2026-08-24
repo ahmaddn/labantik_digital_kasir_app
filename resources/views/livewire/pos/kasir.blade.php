@@ -57,8 +57,15 @@
         });
     },
 
+    showModifierModal: false,
+    activeModifierProduct: null,
+    selectedModifiersMap: {}, // format: { group_id: [modifier_id, ...] }
+
     get total() {
-        return this.cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+        return this.cart.reduce((sum, item) => {
+            const modifiersPrice = (item.selected_modifiers || []).reduce((mSum, m) => mSum + m.price, 0);
+            return sum + ((item.price + modifiersPrice) * item.quantity);
+        }, 0);
     },
 
     get change() {
@@ -68,8 +75,29 @@
         return 0;
     },
 
-    addToCart(product) {
-        const index = this.cart.findIndex(item => item.id === product.id);
+    addToCart(product, force = false) {
+        // Cek jika produk memiliki modifier / topping dan tidak dipaksa lewati modal
+        if (!force && product.modifier_groups && product.modifier_groups.length > 0) {
+            this.activeModifierProduct = product;
+            this.selectedModifiersMap = {};
+            // Initialize selections
+            product.modifier_groups.forEach(g => {
+                this.selectedModifiersMap[g.id] = [];
+            });
+            this.showModifierModal = true;
+            return;
+        }
+
+        // Generate unique key untuk cart item (id_produk + id_topping yang disortir)
+        let selectedMods = [];
+        if (product.selected_modifiers) {
+            selectedMods = product.selected_modifiers;
+        }
+        
+        const modIds = selectedMods.map(m => m.id).sort().join('-');
+        const cartItemId = product.id + (modIds ? '-' + modIds : '');
+
+        const index = this.cart.findIndex(item => item.cartItemId === cartItemId);
         if (index !== -1) {
             if (this.cart[index].quantity < product.available_stock) {
                 this.cart[index].quantity = this.cart[index].quantity + 1;
@@ -80,6 +108,8 @@
             if (product.available_stock > 0) {
                 this.cart = [...this.cart, {
                     ...product,
+                    cartItemId: cartItemId,
+                    selected_modifiers: selectedMods,
                     quantity: 1
                 }];
             } else {
@@ -88,14 +118,64 @@
         }
     },
 
-    removeFromCart(productId) {
-        const index = this.cart.findIndex(item => item.id === productId);
+    confirmModifiers() {
+        if (!this.activeModifierProduct) return;
+
+        // Validasi batasan min/max selection
+        let isValid = true;
+        this.activeModifierProduct.modifier_groups.forEach(g => {
+            const selectedCount = (this.selectedModifiersMap[g.id] || []).length;
+            if (selectedCount < g.min || selectedCount > g.max) {
+                isValid = false;
+                this.stockAlert = { 
+                    title: 'PILIHAN WAJIB', 
+                    message: 'Harap sesuaikan pilihan untuk kelompok ' + g.name + ' (Min: ' + g.min + ', Max: ' + g.max + ')' 
+                };
+            }
+        });
+
+        if (!isValid) return;
+
+        // Kumpulkan semua objek modifier yang dipilih
+        const selectedModsData = [];
+        this.activeModifierProduct.modifier_groups.forEach(g => {
+            const selectedIds = this.selectedModifiersMap[g.id] || [];
+            g.options.forEach(opt => {
+                if (selectedIds.includes(opt.id)) {
+                    selectedModsData.push(opt);
+                }
+            });
+        });
+
+        // Duplikat objek produk dengan topping terlampir
+        const productWithMods = {
+            ...this.activeModifierProduct,
+            selected_modifiers: selectedModsData
+        };
+
+        this.addToCart(productWithMods, true);
+        this.showModifierModal = false;
+        this.activeModifierProduct = null;
+        this.selectedModifiersMap = {};
+    },
+
+    removeFromCart(cartItemId) {
+        const index = this.cart.findIndex(item => item.cartItemId === cartItemId);
         if (index !== -1) {
             if (this.cart[index].quantity > 1) {
                 this.cart[index].quantity--;
             } else {
                 this.cart.splice(index, 1);
             }
+        }
+    },
+
+    // Shortcut untuk menambah item langsung dari cart sidebar
+    addQuantityFromCart(item) {
+        if (item.quantity < item.available_stock) {
+            item.quantity++;
+        } else {
+            this.stockAlert = { title: 'STOK TERBATAS', message: 'Sisa stok tinggal ' + item.available_stock + ' item.' };
         }
     },
 
@@ -455,24 +535,44 @@ document.addEventListener('keydown', (e) => {
 
             <!-- Cart Content -->
             <div x-show="tab === 'cart'" class="flex-1 overflow-y-auto p-5 space-y-3 no-scrollbar">
-                <template x-for="item in cart" :key="item.id">
+                <template x-for="item in cart" :key="item.cartItemId">
                     <div
-                        class="nb-card p-3 flex items-center gap-3 bg-white dark:bg-dark-soft hover:shadow-none transition-shadow border-2">
-                        <div class="w-9 h-9 bg-black text-white flex items-center justify-center font-black text-[10px] italic border-2 border-white"
-                            x-text="item.name.substring(0, 2).toUpperCase()"></div>
-                        <div class="flex-1">
-                            <h4 x-text="item.name"
-                                class="text-[10px] font-black uppercase dark:text-white line-clamp-1"></h4>
-                            <p class="text-[10px] font-black text-primary-red" x-text="formatRupiah(item.price)"></p>
+                        class="nb-card p-3 flex flex-col gap-2 bg-white dark:bg-dark-soft hover:shadow-none transition-shadow border-2">
+                        <div class="flex items-center gap-3">
+                            <div class="w-9 h-9 bg-black text-white flex items-center justify-center font-black text-[10px] italic border-2 border-white"
+                                x-text="item.name.substring(0, 2).toUpperCase()"></div>
+                            <div class="flex-1">
+                                <h4 x-text="item.name"
+                                    class="text-[10px] font-black uppercase dark:text-white line-clamp-1"></h4>
+                                <p class="text-[10px] font-black text-primary-red">
+                                    <span x-text="formatRupiah(item.price + (item.selected_modifiers ? item.selected_modifiers.reduce((sum, m) => sum + m.price, 0) : 0))"></span>
+                                    <template x-if="item.selected_modifiers && item.selected_modifiers.length > 0">
+                                        <span class="text-gray-400 font-bold">
+                                            (Rp<span x-text="formatRupiah(item.price).replace('Rp', '')"></span> + Topping)
+                                        </span>
+                                    </template>
+                                </p>
+                            </div>
+                            <div class="flex items-center border-2 border-black dark:border-white bg-white dark:bg-black">
+                                <button @click="removeFromCart(item.cartItemId)"
+                                    class="px-2 py-0.5 font-black hover:bg-gray-100 dark:hover:bg-gray-800 border-r-2 border-black dark:border-white text-black dark:text-white">-</button>
+                                <span x-text="item.quantity"
+                                    class="px-2 text-[10px] font-black text-black dark:text-white"></span>
+                                <button @click="addQuantityFromCart(item)"
+                                    class="px-2 py-0.5 font-black hover:bg-gray-100 dark:hover:bg-gray-800 border-l-2 border-black dark:border-white text-black dark:text-white">+</button>
+                            </div>
                         </div>
-                        <div class="flex items-center border-2 border-black dark:border-white bg-white dark:bg-black">
-                            <button @click="removeFromCart(item.id)"
-                                class="px-2 py-0.5 font-black hover:bg-gray-100 dark:hover:bg-gray-800 border-r-2 border-black dark:border-white text-black dark:text-white">-</button>
-                            <span x-text="item.quantity"
-                                class="px-2 text-[10px] font-black text-black dark:text-white"></span>
-                            <button @click="addToCart(item)"
-                                class="px-2 py-0.5 font-black hover:bg-gray-100 dark:hover:bg-gray-800 border-l-2 border-black dark:border-white text-black dark:text-white">+</button>
-                        </div>
+
+                        <!-- Rincian Topping Terpilih -->
+                        <template x-if="item.selected_modifiers && item.selected_modifiers.length > 0">
+                            <div class="flex flex-wrap gap-1 pl-12 border-t border-dashed border-gray-100 dark:border-slate-800 pt-2">
+                                <template x-for="mod in item.selected_modifiers" :key="mod.id">
+                                    <span class="px-2 py-0.5 bg-gray-100 dark:bg-slate-850 text-gray-650 dark:text-gray-300 text-[8px] font-black border rounded-lg border-gray-200 dark:border-slate-800 uppercase">
+                                        + <span x-text="mod.name"></span> (+<span x-text="mod.price"></span>)
+                                    </span>
+                                </template>
+                            </div>
+                        </template>
                     </div>
                 </template>
                 <div x-show="cart.length === 0"
@@ -1060,6 +1160,73 @@ document.addEventListener('keydown', (e) => {
 
 
 
+
+    <!-- Modal Pemilihan Topping (Modifier) -->
+    <div x-show="showModifierModal" x-transition:enter="transition ease-out duration-300"
+        x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+        x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100"
+        x-transition:leave-end="opacity-0" class="fixed inset-0 z-[110] flex items-center justify-center p-6 bg-black/60 backdrop-blur-sm" style="display: none;" x-cloak>
+        
+        <div @click.away="showModifierModal = false; activeModifierProduct = null;"
+            x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 scale-95"
+            x-transition:enter-end="opacity-100 scale-100" x-transition:leave="transition ease-in duration-200"
+            x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95"
+            class="nb-card bg-white dark:bg-dark-soft w-full max-w-md p-8 relative border-t-8 border-t-amber-500">
+            
+            <div class="flex justify-between items-start mb-6">
+                <div>
+                    <span class="text-[9px] font-black bg-amber-500 text-white px-3 py-1 uppercase tracking-widest border-2 border-black">OPSI TAMBAHAN</span>
+                    <h2 class="text-xl font-black uppercase italic mt-3 dark:text-white" x-text="activeModifierProduct ? activeModifierProduct.name : ''"></h2>
+                </div>
+                <button @click="showModifierModal = false; activeModifierProduct = null;" class="text-gray-400 hover:text-black dark:hover:text-white text-xl font-black">&times;</button>
+            </div>
+
+            <div class="space-y-6 max-h-[350px] overflow-y-auto pr-1 no-scrollbar text-left">
+                <template x-if="activeModifierProduct">
+                    <template x-for="group in activeModifierProduct.modifier_groups" :key="group.id">
+                        <div class="border-b border-gray-100 dark:border-slate-800 pb-4">
+                            <div class="flex justify-between items-center mb-3">
+                                <span class="text-xs font-black uppercase tracking-wider text-slate-800 dark:text-white" x-text="group.name"></span>
+                                <span class="text-[8px] font-black bg-gray-100 dark:bg-slate-850 px-2 py-0.5 rounded border dark:border-slate-700 dark:text-gray-400">
+                                    PILIH MIN <span x-text="group.min"></span> | MAX <span x-text="group.max"></span>
+                                </span>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-2">
+                                <template x-for="opt in group.options" :key="opt.id">
+                                    <label class="flex items-center gap-2 p-2 border-2 border-black dark:border-slate-700 bg-gray-50 dark:bg-slate-900 rounded-xl cursor-pointer hover:bg-amber-50 dark:hover:bg-slate-800 transition-colors">
+                                        <!-- Checkbox jika max > 1, Radio jika max == 1 -->
+                                        <template x-if="group.max > 1">
+                                            <input type="checkbox" :value="opt.id" x-model="selectedModifiersMap[group.id]"
+                                                class="rounded border-gray-300 text-primary-blue focus:ring-primary-blue dark:bg-slate-800">
+                                        </template>
+                                        <template x-if="group.max === 1">
+                                            <input type="radio" :name="'group-' + group.id" :value="opt.id"
+                                                @change="selectedModifiersMap[group.id] = [opt.id]"
+                                                :checked="(selectedModifiersMap[group.id] || []).includes(opt.id)"
+                                                class="border-gray-300 text-primary-blue focus:ring-primary-blue dark:bg-slate-800">
+                                        </template>
+
+                                        <div class="flex flex-col text-left">
+                                            <span class="text-[10px] font-black uppercase dark:text-white" x-text="opt.name"></span>
+                                            <span class="text-[9px] font-black text-primary-red" x-text="'+Rp' + formatRupiah(opt.price).replace('Rp', '').trim()"></span>
+                                        </div>
+                                    </label>
+                                </template>
+                            </div>
+                        </div>
+                    </template>
+                </template>
+            </div>
+
+            <div class="flex gap-4 mt-8 pt-4 border-t-2 border-dashed border-gray-100 dark:border-slate-800">
+                <button @click="showModifierModal = false; activeModifierProduct = null;"
+                    class="nb-btn flex-1 bg-gray-100 dark:bg-slate-800 dark:text-white text-xs py-3 font-black uppercase tracking-widest shadow-none border-2">BATAL</button>
+                <button @click="confirmModifiers()"
+                    class="nb-btn flex-1 bg-primary-blue text-white text-xs py-3 font-black uppercase tracking-widest">KONFIRMASI</button>
+            </div>
+        </div>
+    </div>
 
     <!-- Mobile Cart FAB Trigger -->
     <button @click="showCart = true" x-show="!showCart"

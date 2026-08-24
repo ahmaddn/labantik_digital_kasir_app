@@ -72,6 +72,7 @@
                         <div class="flex items-center justify-between sm:justify-start bg-primary-blue/5 px-6 py-2.5 rounded-2xl border border-primary-blue/10 animate-fade-in gap-4 w-full sm:w-auto">
                             <span class="text-[10px] font-black text-primary-blue uppercase tracking-widest shrink-0">{{ count($selectedProducts) }} Dipilih</span>
                             <div class="flex gap-2">
+                                <button wire:click="$set('showBulkModifierModal', true)" class="px-3.5 py-2 bg-white dark:bg-gray-900 text-amber-600 rounded-xl text-[9px] font-black uppercase tracking-widest shadow-sm hover:bg-amber-500 hover:text-white transition-all border border-amber-500/20">Terapkan Topping</button>
                                 <button wire:click="bulkToggleStatus" class="px-3.5 py-2 bg-white dark:bg-gray-900 text-primary-blue rounded-xl text-[9px] font-black uppercase tracking-widest shadow-sm hover:bg-primary-blue hover:text-white transition-all border border-primary-blue/20">Ganti Status</button>
                                 <button wire:click="confirmBulkDelete" class="px-3.5 py-2 bg-primary-red text-white rounded-xl text-[9px] font-black uppercase tracking-widest shadow-lg shadow-red-500/20 hover:scale-105 transition-all">Hapus Semua</button>
                             </div>
@@ -599,8 +600,8 @@
             
             <div class="py-6 space-y-4 text-left">
                 <div>
-                    <span class="text-[8px] font-black text-gray-400 uppercase tracking-widest block">Nama Produk</span>
-                    <span class="text-base font-black text-gray-800 dark:text-white uppercase italic tracking-tight" x-text="detailProduct.name"></span>
+                     <span class="text-[8px] font-black text-gray-400 uppercase tracking-widest block">Nama Produk</span>
+                     <span class="text-base font-black text-gray-800 dark:text-white uppercase italic tracking-tight" x-text="detailProduct.name"></span>
                 </div>
                 
                 <div class="grid grid-cols-2 gap-4">
@@ -640,6 +641,37 @@
             <div class="pt-4 border-t border-gray-100 dark:border-gray-700 flex justify-end">
                 <button @click="showProductDetail = false" class="px-6 py-3 bg-gray-100 dark:bg-gray-900 text-gray-500 dark:text-gray-300 text-[10px] font-black uppercase tracking-widest rounded-2xl hover:bg-gray-250 transition-all">Tutup</button>
             </div>
+        </div>
+    </div>
+
+    <!-- Bulk Topping/Modifier Assign Modal -->
+    <div x-data="{ show: @entangle('showBulkModifierModal') }" x-show="show" x-cloak class="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/60 backdrop-blur-sm" style="display: none;" x-transition>
+        <div class="bg-white dark:bg-gray-800 rounded-[3rem] p-10 max-w-md w-full shadow-2xl border border-gray-100 dark:border-gray-700">
+            <div class="flex items-center justify-between pb-4 border-b border-gray-100 dark:border-gray-700">
+                <h3 class="text-xl font-black italic uppercase tracking-tight text-primary-blue dark:text-primary-yellow">Terapkan Topping Massal</h3>
+                <button @click="show = false" class="text-gray-400 hover:text-gray-650 dark:hover:text-white text-2xl font-black">&times;</button>
+            </div>
+            
+            <form wire:submit.prevent="applyModifierGroupMassive" class="py-6 space-y-4 text-left">
+                <p class="text-xs text-gray-400 font-bold uppercase tracking-wider leading-relaxed">
+                    Pilih kelompok topping yang akan diterapkan secara massal ke {{ count($selectedProducts) }} produk yang Anda pilih.
+                </p>
+                <div>
+                    <label class="block text-[8px] font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">Kelompok Topping</label>
+                    <select wire:model="selectedModifierGroupId" class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 border-none rounded-xl text-sm font-semibold dark:text-white">
+                        <option value="">-- Pilih Kelompok Topping --</option>
+                        @foreach($modifierGroupsList as $group)
+                            <option value="{{ $group->id }}">{{ $group->name }}</option>
+                        @endforeach
+                    </select>
+                    @error('selectedModifierGroupId') <span class="text-xs text-red-500 font-bold mt-1 block">{{ $message }}</span> @enderror
+                </div>
+
+                <div class="pt-4 border-t border-gray-100 dark:border-gray-700 flex gap-4">
+                    <button type="button" @click="show = false" class="flex-1 py-3.5 bg-gray-100 dark:bg-gray-900 text-gray-500 dark:text-gray-300 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-gray-250 transition-all">Batal</button>
+                    <button type="submit" class="flex-1 py-3.5 bg-primary-blue text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:scale-105 transition-all shadow-md shadow-blue-900/10">Terapkan</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>

@@ -68,7 +68,7 @@ class PosQueryService
 
     public function getProductsForAlpine(string $today, ?string $activeJurusanId): Collection
     {
-        return Product::with(['category', 'stockEntries' => fn ($q) => $q->where('date', $today)])
+        return Product::with(['category', 'modifierGroups.modifiers', 'stockEntries' => fn ($q) => $q->where('date', $today)])
             ->where('is_active', true)
             ->whereHas('stockEntries', function ($q) use ($today) {
                 $q->where('date', $today)->where('opening_stock', '>', 0);
@@ -85,6 +85,26 @@ class PosQueryService
                     ->sum('quantity');
                 $available_stock = ($entry ? $entry->opening_stock : 0) - $sold;
 
+                // Siapkan data modifier groups & modifiers
+                $modifiersData = [];
+                foreach ($p->modifierGroups as $group) {
+                    $mods = [];
+                    foreach ($group->modifiers as $mod) {
+                        $mods[] = [
+                            'id' => $mod->id,
+                            'name' => $mod->name,
+                            'price' => (int) $mod->price,
+                        ];
+                    }
+                    $modifiersData[] = [
+                        'id' => $group->id,
+                        'name' => $group->name,
+                        'min' => (int) $group->min_selection,
+                        'max' => (int) $group->max_selection,
+                        'options' => $mods,
+                    ];
+                }
+
                 return [
                     'id' => $p->id,
                     'name' => $p->name,
@@ -95,6 +115,7 @@ class PosQueryService
                     'category_name' => $p->category->name ?? 'Uncategorized',
                     'initial' => substr($p->name, 0, 1),
                     'available_stock' => $available_stock,
+                    'modifier_groups' => $modifiersData,
                 ];
             });
     }
