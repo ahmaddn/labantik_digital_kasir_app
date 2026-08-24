@@ -218,13 +218,32 @@ class CashierScheduling extends Component
                     ])
                     ->delete();
 
+                // Ambil total akumulasi tugas jaga global masing-masing kasir
+                $globalSchedulesCount = DB::table('cashier_schedules')
+                    ->where('jurusan_id', $activeJurusanId)
+                    ->whereIn('user_id', $cashierIds)
+                    ->select('user_id', DB::raw('count(*) as total'))
+                    ->groupBy('user_id')
+                    ->pluck('total', 'user_id')
+                    ->toArray();
+
+                // Urutkan kasir berdasarkan jumlah total shift terkecil (global)
+                usort($cashierIds, function($a, $b) use ($globalSchedulesCount) {
+                    $countA = $globalSchedulesCount[$a] ?? 0;
+                    $countB = $globalSchedulesCount[$b] ?? 0;
+                    if ($countA === $countB) {
+                        return rand(-1, 1); // Jika sama, acak agar variatif
+                    }
+                    return $countA <=> $countB; // Urutkan dari terkecil ke terbesar
+                });
+
                 // Balance distribution
                 $n = count($cashierIds);
                 $baseShifts = (int) floor($neededSlots / $n);
                 $extraShiftsCount = $neededSlots % $n;
 
-                shuffle($cashierIds);
-
+                // Pool berisi pembagian shift untuk minggu ini
+                // Urutan kasir di $cashierIds sudah memprioritaskan kasir dengan shift global tersedikit
                 $pool = [];
                 foreach ($cashierIds as $index => $uid) {
                     $targetShifts = $baseShifts + ($index < $extraShiftsCount ? 1 : 0);
