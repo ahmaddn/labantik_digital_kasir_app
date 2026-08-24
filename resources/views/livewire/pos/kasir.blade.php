@@ -17,6 +17,36 @@
     showChangeModal: false,
     lastChangeData: { total: 0, payment: 0, change: 0 },
 
+    sidebarWidth: localStorage.getItem('cashier_sidebar_width') ? parseInt(localStorage.getItem('cashier_sidebar_width')) : 420,
+    isResizing: false,
+
+    startResize(e) {
+        this.isResizing = true;
+        document.body.style.cursor = 'col-resize';
+        document.body.style.userSelect = 'none';
+        
+        const doResize = (event) => {
+            if (!this.isResizing) return;
+            const newWidth = window.innerWidth - event.clientX;
+            // Batasi lebar sidebar minimal 320px dan maksimal 650px
+            if (newWidth >= 320 && newWidth <= 650) {
+                this.sidebarWidth = newWidth;
+                localStorage.setItem('cashier_sidebar_width', newWidth);
+            }
+        };
+        
+        const stopResize = () => {
+            this.isResizing = false;
+            document.body.style.cursor = '';
+            document.body.style.userSelect = '';
+            window.removeEventListener('mousemove', doResize);
+            window.removeEventListener('mouseup', stopResize);
+        };
+        
+        window.addEventListener('mousemove', doResize);
+        window.addEventListener('mouseup', stopResize);
+    },
+
     get filteredProducts() {
         return this.products.filter(p => {
             const matchesSearch = !this.search || p.name.toLowerCase().includes(this.search.toLowerCase());
@@ -353,9 +383,21 @@ document.addEventListener('keydown', (e) => {
         </div>
     </div>
 
+    <!-- Resizer Handle (Only visible on large screens) -->
+    <div 
+        @mousedown="startResize($event)"
+        class="hidden lg:block w-1.5 hover:w-2 bg-slate-200 hover:bg-primary-blue dark:bg-slate-800 dark:hover:bg-primary-blue cursor-col-resize transition-all z-50 h-screen select-none relative"
+        :class="isResizing ? 'bg-primary-blue w-2' : ''"
+        title="Tarik untuk mengubah lebar panel belanja"
+    >
+        <!-- Indicator Center Line -->
+        <div class="absolute inset-y-0 left-1/2 -translate-x-1/2 w-[2px] border-l border-dashed border-gray-400 dark:border-slate-600 opacity-50"></div>
+    </div>
+
     <!-- 2. Right Sidebar (Cart) -->
     <div x-show="window.innerWidth >= 1024 || showCart" x-cloak
-        class="fixed inset-y-0 right-0 w-full md:w-[420px] bg-white dark:bg-slate-900 lg:static lg:flex lg:w-[420px] flex flex-col z-[100] border-l-[var(--nb-border)] border-black dark:border-slate-800">
+        :style="window.innerWidth >= 1024 ? 'width: ' + sidebarWidth + 'px; min-width: ' + sidebarWidth + 'px; max-width: ' + sidebarWidth + 'px;' : ''"
+        class="fixed inset-y-0 right-0 w-full md:w-[420px] bg-white dark:bg-slate-900 lg:static lg:flex flex flex-col z-[100] border-l-[var(--nb-border)] border-black dark:border-slate-800">
 
         <div
             class="p-5 bg-primary-red text-white border-b-[var(--nb-border)] border-black flex justify-between items-center shadow-[inset_0_-4px_0_0_rgba(0,0,0,0.2)]">
