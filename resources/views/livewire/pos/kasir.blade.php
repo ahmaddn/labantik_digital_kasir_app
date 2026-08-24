@@ -29,7 +29,7 @@
         const doResize = (event) => {
             if (!this.isResizing) return;
             const newWidth = window.innerWidth - event.clientX;
-            // Batasi lebar sidebar minimal 280px dan maksimal 80% dari lebar layar
+            /* Batasi lebar sidebar minimal 280px dan maksimal 80% dari lebar layar */
             const maxWidth = Math.floor(window.innerWidth * 0.8);
             if (newWidth >= 280 && newWidth <= maxWidth) {
                 this.sidebarWidth = newWidth;
@@ -59,7 +59,7 @@
 
     showModifierModal: false,
     activeModifierProduct: null,
-    selectedModifiersMap: {}, // format: { group_id: [modifier_id, ...] }
+    selectedModifiersMap: {}, /* format: { group_id: [modifier_id, ...] } */
 
     get total() {
         return this.cart.reduce((sum, item) => {
@@ -76,10 +76,10 @@
     },
 
     addToCart(product, force) {
-        // Tentukan nilai default force secara aman
+        /* Tentukan nilai default force secara aman */
         const shouldForce = (force === true);
         
-        // Debug Logger
+        /* Debug Logger */
         console.log("addToCart triggered:", {
             product_name: product.name,
             available_stock: product.available_stock,
@@ -88,16 +88,16 @@
             shouldForce: shouldForce
         });
 
-        // Cek jika produk memiliki modifier / topping dan tidak dipaksa lewati modal
+        /* Cek jika produk memiliki modifier / topping dan tidak dipaksa lewati modal */
         const modGroups = product.modifier_groups || product.modifierGroups;
         const hasModifiers = modGroups && Array.isArray(modGroups) && modGroups.length > 0;
         if (!shouldForce && hasModifiers) {
             this.activeModifierProduct = product;
-            // Agar template seragam, pastikan properti seragam di activeModifierProduct
+            /* Agar template seragam, pastikan properti seragam di activeModifierProduct */
             this.activeModifierProduct.modifier_groups = modGroups;
             
             this.selectedModifiersMap = {};
-            // Initialize selections
+            /* Initialize selections */
             modGroups.forEach(g => {
                 this.selectedModifiersMap[g.id] = [];
             });
@@ -105,7 +105,7 @@
             return;
         }
 
-        // Generate unique key untuk cart item (id_produk + id_topping yang disortir)
+        /* Generate unique key untuk cart item */
         let selectedMods = [];
         if (product.selected_modifiers) {
             selectedMods = product.selected_modifiers;
@@ -138,7 +138,7 @@
     confirmModifiers() {
         if (!this.activeModifierProduct) return;
 
-        // Validasi batasan min/max selection
+        /* Validasi batasan min/max selection */
         let isValid = true;
         this.activeModifierProduct.modifier_groups.forEach(g => {
             const selectedCount = (this.selectedModifiersMap[g.id] || []).length;
@@ -153,7 +153,7 @@
 
         if (!isValid) return;
 
-        // Kumpulkan semua objek modifier yang dipilih
+        /* Kumpulkan semua objek modifier yang dipilih */
         const selectedModsData = [];
         this.activeModifierProduct.modifier_groups.forEach(g => {
             const selectedIds = this.selectedModifiersMap[g.id] || [];
@@ -164,7 +164,7 @@
             });
         });
 
-        // Duplikat objek produk dengan topping terlampir
+        /* Duplikat objek produk dengan topping terlampir */
         const productWithMods = {
             ...this.activeModifierProduct,
             selected_modifiers: selectedModsData
@@ -187,7 +187,7 @@
         }
     },
 
-    // Shortcut untuk menambah item langsung dari cart sidebar
+    /* Shortcut untuk menambah item langsung dari cart sidebar */
     addQuantityFromCart(item) {
         if (item.quantity < item.available_stock) {
             item.quantity++;
@@ -258,7 +258,7 @@
             this.clearCart();
             this.loading = false;
 
-            // Show Change Due Modal
+            /* Show Change Due Modal */
             this.lastChangeData = { total: totalVal, payment: paymentVal, change: changeVal };
             this.showChangeModal = true;
         }).catch(() => {
@@ -281,13 +281,13 @@ window.addEventListener('resize', () => {
     screenWidth = window.innerWidth;
 });
 
-// Autofocus search on load
+/* Autofocus search on load */
 $nextTick(() => {
     const searchInput = document.getElementById('pos-search-input');
     if (searchInput) searchInput.focus();
 });
 
-// Setup keydown listener for checkout
+/* Setup keydown listener for checkout */
 document.addEventListener('keydown', (e) => {
     if (e.key === 'Enter' && !e.ctrlKey && !e.shiftKey && !e.altKey) {
         const activeElement = document.activeElement;
