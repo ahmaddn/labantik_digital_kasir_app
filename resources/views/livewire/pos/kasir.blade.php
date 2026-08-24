@@ -430,7 +430,7 @@ document.addEventListener('keydown', (e) => {
                 class="grid gap-6"
                 :style="'grid-template-columns: repeat(auto-fill, minmax(220px, 1fr))'">
                 <template x-for="product in filteredProducts" :key="product.id">
-                    <button type="button" @click="addToCart(product)"
+                    <button type="button" @click="addToCart(product, false)"
                         :disabled="{{ $isSessionFinished ? 'true' : 'false' }}"
                         :class="getCategoryBorderColor(product.category_name)"
                         class="nb-card nb-card-hover group p-0 text-left overflow-hidden flex flex-col h-full bg-white dark:bg-slate-900">
