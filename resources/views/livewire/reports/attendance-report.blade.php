@@ -134,13 +134,42 @@
                                 </td>
                                 <td class="py-4">
                                     @php
+                                        $statusText = $att->status;
                                         $color = 'bg-gray-50 text-gray-500';
-                                        if ($att->status === 'present') { $color = 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/30 dark:text-emerald-400'; }
-                                        elseif ($att->status === 'late') { $color = 'bg-rose-50 text-rose-600 dark:bg-rose-955/30 dark:text-rose-450'; }
-                                        elseif ($att->status === 'early_checkout') { $color = 'bg-amber-50 text-amber-600 dark:bg-amber-955/30 dark:text-amber-450'; }
+
+                                        if (str_contains($att->status, '_')) {
+                                            $parts = explode('_', $att->status);
+                                            $in = $parts[0];
+                                            $out = $parts[1];
+
+                                            $inText = $in === 'late' ? 'Terlambat' : 'Tepat Waktu';
+                                            $outText = $out === 'early_checkout' ? 'Pulang Cepat' : ($out === 'overtime' ? 'Lembur' : 'Tepat Waktu');
+                                            $statusText = "In: {$inText} | Out: {$outText}";
+
+                                            if ($in === 'late' && $out === 'early_checkout') {
+                                                $color = 'bg-rose-50 text-rose-600 dark:bg-rose-950/30 dark:text-rose-450';
+                                            } elseif ($in === 'late' || $out === 'early_checkout') {
+                                                $color = 'bg-amber-50 text-amber-600 dark:bg-amber-950/30 dark:text-amber-400';
+                                            } else {
+                                                $color = 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/30 dark:text-emerald-400';
+                                            }
+                                        } else {
+                                            if ($att->status === 'present') { 
+                                                $color = 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/30 dark:text-emerald-400'; 
+                                                $statusText = 'Tepat Waktu';
+                                            }
+                                            elseif ($att->status === 'late') { 
+                                                $color = 'bg-rose-50 text-rose-600 dark:bg-rose-950/30 dark:text-rose-450'; 
+                                                $statusText = 'Terlambat';
+                                            }
+                                            elseif ($att->status === 'early_checkout') { 
+                                                $color = 'bg-amber-50 text-amber-600 dark:bg-amber-950/30 dark:text-amber-450'; 
+                                                $statusText = 'Pulang Cepat';
+                                            }
+                                        }
                                     @endphp
                                     <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider {{ $color }}">
-                                        {{ $att->status === 'present' ? 'Tepat Waktu' : ($att->status === 'late' ? 'Terlambat' : ($att->status === 'early_checkout' ? 'Pulang Cepat' : $att->status)) }}
+                                        {{ $statusText }}
                                     </span>
                                 </td>
                                 <td class="py-4 text-right">

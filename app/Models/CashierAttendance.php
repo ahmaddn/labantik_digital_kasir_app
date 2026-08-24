@@ -23,6 +23,8 @@ class CashierAttendance extends Model
         'edit_count',
         'status',
         'points_at_closing',
+        'clock_in_status',
+        'clock_out_status',
     ];
 
     protected $casts = [

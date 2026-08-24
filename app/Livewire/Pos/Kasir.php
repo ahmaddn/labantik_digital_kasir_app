@@ -122,17 +122,58 @@ class Kasir extends Component
                         ->first();
 
                     $currentTime = now();
-                    // Always record clock_in as present, no late check or late penalty
+                    
+                    // Ambil pengaturan absensi untuk clock in dari database
+                    $jurusan = Jurusan::find($activeJurusanId);
+                    $settings = $jurusan ? ($jurusan->theme_settings ?: []) : [];
+                    $targetClockIn = $settings['clock_in_time'] ?? '07:00';
+                    $penaltyClockIn = (int) ($settings['late_clock_in_penalty'] ?? 0);
+                    
+                    $status = 'present';
+                    $toastMessage = 'Clock in otomatis tercatat. Selamat bertugas!';
+                    
+                    $clockInStatus = 'on_time';
+                    if ($targetClockIn) {
+                        try {
+                            $targetTime = \Carbon\Carbon::createFromFormat('H:i', $targetClockIn);
+                            $targetTime->setDate($currentTime->year, $currentTime->month, $currentTime->day);
+                            
+                            // Jika telat (melebihi batas maksimal absen)
+                            if ($currentTime->gt($targetTime)) {
+                                $status = 'late';
+                                $clockInStatus = 'late';
+                                if ($penaltyClockIn > 0) {
+                                    auth()->user()->decrement('points', $penaltyClockIn);
+                                    if (auth()->user()->points < 0) {
+                                        auth()->user()->update(['points' => 0]);
+                                    }
+                                    $toastMessage = 'Clock in otomatis tercatat. Anda terlambat! Poin berkurang ' . $penaltyClockIn;
+                                } else {
+                                    $toastMessage = 'Clock in otomatis tercatat. Anda terlambat!';
+                                }
+                            } else {
+                                // Jika lebih cepat/tepat waktu, dapet bonus +5 poin
+                                $status = 'present';
+                                $clockInStatus = 'on_time';
+                                auth()->user()->increment('points', 5);
+                                $toastMessage = 'Clock in otomatis tercatat tepat waktu! Bonus +5 poin diberikan.';
+                            }
+                        } catch (\Exception $e) {
+                            // ignore
+                        }
+                    }
+
                     CashierAttendance::create([
                         'cashier_schedule_id' => $schedule ? $schedule->id : null,
                         'user_id' => auth()->id(),
                         'jurusan_id' => $activeJurusanId,
                         'date' => now()->toDateString(),
                         'clock_in' => $currentTime,
-                        'status' => 'present',
+                        'status' => $status,
+                        'clock_in_status' => $clockInStatus,
                     ]);
 
-                    $this->dispatch('toast', message: 'Clock in otomatis tercatat. Selamat bertugas!');
+                    $this->dispatch('toast', message: $toastMessage);
                 }
             }
         }
@@ -418,13 +459,21 @@ class Kasir extends Component
         $penaltyClockOut = (int) ($settings['late_clock_out_penalty'] ?? 0);
 
         $status = 'present';
+        $clockInStatus = $attendance ? $attendance->status : 'present';
+        // Ambil status asli clock in (jika status gabungan, cari part pertamanya)
+        if (str_contains($clockInStatus, '_')) {
+            $parts = explode('_', $clockInStatus);
+            $clockInStatus = $parts[0];
+        }
+        
+        $clockOutStatus = 'overtime';
         if ($targetClockOut) {
             try {
                 $targetTime = \Carbon\Carbon::createFromFormat('H:i', $targetClockOut);
                 $targetTime->setDate($currentTime->year, $currentTime->month, $currentTime->day);
                 if ($currentTime->lt($targetTime)) {
                     $isEarlyClockOut = true;
-                    $status = 'early_checkout';
+                    $clockOutStatus = 'early_checkout';
                     if ($penaltyClockOut > 0) {
                         $deductedClockOut = $penaltyClockOut;
                         auth()->user()->decrement('points', $penaltyClockOut);
@@ -434,7 +483,7 @@ class Kasir extends Component
                     }
                 } else {
                     $isBonusClockOut = true;
-                    $status = 'overtime';
+                    $clockOutStatus = 'overtime';
                     auth()->user()->increment('points', $bonusPoints);
                     auth()->user()->increment('streak', 1);
                 }
@@ -442,6 +491,9 @@ class Kasir extends Component
                 // ignore
             }
         }
+
+        // Gabungkan status clock-in dan clock-out
+        $status = $clockInStatus . '_' . $clockOutStatus;
 
         $closingCash = 1; // Default to 1 to lock the session (actual_cash > 0)
 
@@ -452,6 +504,8 @@ class Kasir extends Component
                 'closing_report' => $report,
                 'status' => $status,
                 'points_at_closing' => (int) (auth()->user()->points + auth()->user()->pending_points),
+                'clock_in_status' => $clockInStatus,
+                'clock_out_status' => $clockOutStatus,
             ]);
         }
 

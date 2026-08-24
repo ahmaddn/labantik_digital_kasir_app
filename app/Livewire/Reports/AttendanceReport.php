@@ -191,7 +191,9 @@ class AttendanceReport extends Component
             ->whereBetween('date', [$this->dateFrom, $this->dateTo])
             ->get()
             ->map(function($att) {
-                $statusText = $att->status === 'present' ? 'Tepat Waktu' : ($att->status === 'late' ? 'Terlambat' : $att->status);
+                $statusText = 'Tepat Waktu';
+                $color = '#10b981'; // Default green for on_time/present
+
                 $timeText = '';
                 if ($att->clock_in) {
                     $timeText .= ' ' . $att->clock_in->format('H:i');
@@ -199,12 +201,37 @@ class AttendanceReport extends Component
                 if ($att->clock_out) {
                     $timeText .= '-' . $att->clock_out->format('H:i');
                 }
-                
-                $color = '#6b7280';
-                if ($att->status === 'present') {
-                    $color = '#10b981';
-                } elseif ($att->status === 'late') {
-                    $color = '#f43f5e';
+
+                if (str_contains($att->status, '_')) {
+                    $parts = explode('_', $att->status);
+                    $in = $parts[0];
+                    $out = $parts[1];
+
+                    $inText = $in === 'late' ? 'Terlambat' : 'Tepat Waktu';
+                    $outText = $out === 'early_checkout' ? 'Pulang Cepat' : ($out === 'overtime' ? 'Lembur' : 'Tepat Waktu');
+                    $statusText = "In: {$inText}, Out: {$outText}";
+
+                    // Color coding
+                    if ($in === 'late' && $out === 'early_checkout') {
+                        $color = '#ef4444'; // Red (double penalty)
+                    } elseif ($in === 'late' || $out === 'early_checkout') {
+                        $color = '#f59e0b'; // Amber (warning)
+                    } else {
+                        $color = '#10b981'; // Green (all good / overtime)
+                    }
+                } else {
+                    if ($att->status === 'present') {
+                        $statusText = 'Tepat Waktu';
+                        $color = '#10b981';
+                    } elseif ($att->status === 'late') {
+                        $statusText = 'Terlambat';
+                        $color = '#f43f5e';
+                    } elseif ($att->status === 'early_checkout') {
+                        $statusText = 'Pulang Cepat';
+                        $color = '#f59e0b';
+                    } else {
+                        $statusText = $att->status;
+                    }
                 }
                 
                 return [
