@@ -80,7 +80,7 @@
         const shouldForce = (force === true);
         
         /* Debug Logger */
-        console.log("addToCart triggered:", {
+        console.log('addToCart triggered:', {
             product_name: product.name,
             available_stock: product.available_stock,
             modifier_groups: product.modifier_groups,
