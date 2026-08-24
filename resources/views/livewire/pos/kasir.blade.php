@@ -342,7 +342,8 @@ document.addEventListener('keydown', (e) => {
             </div>
 
             <div x-show="filteredProducts.length > 0"
-                class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
+                class="grid gap-6"
+                :style="'grid-template-columns: repeat(auto-fill, minmax(220px, 1fr))'">
                 <template x-for="product in filteredProducts" :key="product.id">
                     <button type="button" @click="addToCart(product)"
                         :disabled="{{ $isSessionFinished ? 'true' : 'false' }}"
