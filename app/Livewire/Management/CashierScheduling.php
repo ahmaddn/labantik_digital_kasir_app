@@ -389,10 +389,16 @@ class CashierScheduling extends Component
             ->orderBy('date')
             ->get();
 
-        // Hitung total shift per kasir untuk periode aktif ini
-        $cashierStats = $cashiers->map(function($cashier) use ($weekSchedules) {
-            $shiftCount = $weekSchedules->where('user_id', $cashier->id)->count();
+        // Hitung total shift per kasir untuk seluruh periode (akumulasi global)
+        $allSchedules = CashierSchedule::when($activeJurusanId, function($q) use ($activeJurusanId) {
+                $q->where('jurusan_id', $activeJurusanId);
+            })
+            ->get();
+
+        $cashierStats = $cashiers->map(function($cashier) use ($allSchedules) {
+            $shiftCount = $allSchedules->where('user_id', $cashier->id)->count();
             return [
+                'id' => $cashier->id,
                 'name' => $cashier->name,
                 'email' => $cashier->email,
                 'shifts_count' => $shiftCount,

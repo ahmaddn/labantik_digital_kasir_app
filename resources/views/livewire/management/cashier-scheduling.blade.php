@@ -111,7 +111,7 @@
     <div class="p-6 bg-white dark:bg-gray-900 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 shadow-md">
         <div class="mb-6 border-b border-gray-100 dark:border-gray-800 pb-4">
             <h2 class="text-xl font-black italic uppercase tracking-tighter text-primary-blue dark:text-primary-yellow">Ringkasan Shift Kasir</h2>
-            <p class="text-gray-400 text-xs font-semibold uppercase tracking-widest mt-1">Akumulasi jumlah tugas jaga kasir periode ini</p>
+            <p class="text-gray-400 text-xs font-semibold uppercase tracking-widest mt-1">Akumulasi total tugas jaga kasir (Semua Periode)</p>
         </div>
         <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse">
