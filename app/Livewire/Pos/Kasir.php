@@ -702,6 +702,7 @@ class Kasir extends Component
         $service->autoAssignRoutineTasksForCashier($userId, $activeJurusanId);
 
         $allProducts = $this->getProductsForAlpine($posQueryService);
+        $this->products = $allProducts->toArray();
 
         $isSessionFinished = false;
         if (session('active_role_name') === 'kasir') {
