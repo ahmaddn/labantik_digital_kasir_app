@@ -909,7 +909,7 @@
                     <div class="border-b border-gray-100 dark:border-slate-800 pb-4">
                         <div class="flex justify-between items-center mb-3">
                             <span class="text-xs font-black uppercase tracking-wider text-slate-800 dark:text-white" x-text="group.name"></span>
-                            <span class="text-[8px] font-black bg-gray-100 dark:bg-slate-850 px-2 py-0.5 rounded border dark:border-slate-700 dark:text-gray-400">
+                            <span class="text-[8px] font-black bg-gray-100 dark:bg-slate-800 px-2 py-0.5 rounded border dark:border-slate-700 text-gray-700 dark:text-gray-300">
                                 PILIH MIN <span x-text="group.min"></span> | MAX <span x-text="group.max"></span>
                             </span>
                         </div>
@@ -936,7 +936,7 @@
 
                                     <div class="flex flex-col text-left">
                                         <span class="text-[10px] font-black uppercase dark:text-white" x-text="opt.name"></span>
-                                        <span class="text-[9px] font-black text-primary-red" x-text="'+Rp' + formatRupiah(opt.price).replace('Rp', '').trim()"></span>
+                                        <span class="text-[9px] font-black text-primary-red dark:text-rose-400" x-text="'+Rp' + formatRupiah(opt.price).replace('Rp', '').trim()"></span>
                                     </div>
                                 </label>
                             </template>
@@ -945,11 +945,15 @@
                 </template>
             </div>
 
-            <div class="flex gap-4 mt-8 pt-4 border-t-2 border-dashed border-gray-100 dark:border-slate-800">
+            <div class="flex flex-col gap-2 mt-8 pt-4 border-t-2 border-dashed border-gray-100 dark:border-slate-800">
+                <div class="flex gap-2 w-full">
+                    <button @click="skipModifiers()"
+                        class="nb-btn flex-1 bg-amber-500 text-white text-[10px] py-3 font-black uppercase tracking-widest border-2">TANPA TOPPING</button>
+                    <button @click="confirmModifiers()"
+                        class="nb-btn flex-1 bg-primary-blue text-white text-[10px] py-3 font-black uppercase tracking-widest border-2">KONFIRMASI</button>
+                </div>
                 <button @click="showModifierModal = false; activeModifierProduct = null;"
-                    class="nb-btn flex-1 bg-gray-100 dark:bg-slate-800 dark:text-white text-xs py-3 font-black uppercase tracking-widest shadow-none border-2">BATAL</button>
-                <button @click="confirmModifiers()"
-                    class="nb-btn flex-1 bg-primary-blue text-white text-xs py-3 font-black uppercase tracking-widest">KONFIRMASI</button>
+                    class="nb-btn w-full bg-gray-100 dark:bg-slate-800 dark:text-white text-[10px] py-2 font-black uppercase tracking-widest shadow-none border-2">BATAL</button>
             </div>
         </div>
     </div>
@@ -1145,6 +1149,20 @@
                             this.stockAlert = { title: 'STOK HABIS', message: 'Maaf, stok ' + product.name + ' sudah habis hari ini.' };
                         }
                     }
+                },
+
+                skipModifiers() {
+                    if (!this.activeModifierProduct) return;
+
+                    const productWithoutMods = {
+                        ...this.activeModifierProduct,
+                        selected_modifiers: []
+                    };
+
+                    this.addToCart(productWithoutMods, true);
+                    this.showModifierModal = false;
+                    this.activeModifierProduct = null;
+                    this.selectedModifiersMap = {};
                 },
 
                 confirmModifiers() {
