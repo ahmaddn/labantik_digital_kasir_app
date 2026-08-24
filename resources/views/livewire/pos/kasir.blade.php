@@ -1088,15 +1088,18 @@
                     const modGroups = product.modifier_groups || product.modifierGroups;
                     const hasModifiers = modGroups && Array.isArray(modGroups) && modGroups.length > 0;
                     if (!shouldForce && hasModifiers) {
-                        this.activeModifierProduct = product;
-                        /* Agar template seragam, pastikan properti seragam di activeModifierProduct */
-                        this.activeModifierProduct.modifier_groups = modGroups;
+                        /* Re-assign objek secara utuh agar trigger reaktivitas AlpineJS */
+                        this.activeModifierProduct = {
+                            ...product,
+                            modifier_groups: modGroups
+                        };
                         
-                        this.selectedModifiersMap = {};
+                        const map = {};
                         /* Initialize selections */
                         modGroups.forEach(g => {
-                            this.selectedModifiersMap[g.id] = [];
+                            map[g.id] = [];
                         });
+                        this.selectedModifiersMap = map;
                         this.showModifierModal = true;
                         return;
                     }
