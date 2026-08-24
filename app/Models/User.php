@@ -118,4 +118,12 @@ class User extends Authenticatable
     {
         return $this->hasMany(CashierTaskDefinition::class, 'created_by');
     }
+
+    /**
+     * Relasi untuk kehadiran kasir (CashierAttendance)
+     */
+    public function attendances()
+    {
+        return $this->hasMany(CashierAttendance::class, 'user_id');
+    }
 }
