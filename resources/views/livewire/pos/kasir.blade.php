@@ -438,7 +438,7 @@ document.addEventListener('keydown', (e) => {
                 class="grid gap-6"
                 :style="'grid-template-columns: repeat(auto-fill, minmax(220px, 1fr))'">
                 <template x-for="product in filteredProducts" :key="product.id">
-                    <button type="button" @click="addToCart(product, false)"
+                    <button type="button" @click="addToCart(product)"
                         :disabled="{{ $isSessionFinished ? 'true' : 'false' }}"
                         :class="getCategoryBorderColor(product.category_name)"
                         class="nb-card nb-card-hover group p-0 text-left overflow-hidden flex flex-col h-full bg-white dark:bg-slate-900">
@@ -1169,11 +1169,10 @@ document.addEventListener('keydown', (e) => {
 
 
 
-    <!-- Modal Pemilihan Topping (Modifier) -->
     <div x-show="showModifierModal" x-transition:enter="transition ease-out duration-300"
         x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
         x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100"
-        x-transition:leave-end="opacity-0" class="fixed inset-0 z-[110] flex items-center justify-center p-6 bg-black/60 backdrop-blur-sm" style="display: none;" x-cloak>
+        x-transition:leave-end="opacity-0" class="fixed inset-0 z-[110] flex items-center justify-center p-6 bg-black/60 backdrop-blur-sm" x-cloak>
         
         <div @click.away="showModifierModal = false; activeModifierProduct = null;"
             x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 scale-95"
