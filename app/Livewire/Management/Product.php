@@ -117,9 +117,16 @@ class Product extends Component
     public function updatedSelectAll($value): void
     {
         if ($value) {
-            $this->selectedProducts = ProductModel::when($this->filterCategory, function ($q) {
-                return $q->where('category_id', $this->filterCategory);
+            $activeJurusanId = session('active_jurusan_id');
+            $this->selectedProducts = ProductModel::when($activeJurusanId, function ($q) use ($activeJurusanId) {
+                return $q->where('jurusan_id', $activeJurusanId);
             })
+                ->when(! $activeJurusanId && $this->filterJurusan, function ($q) {
+                    return $q->where('jurusan_id', $this->filterJurusan);
+                })
+                ->when($this->filterCategory, function ($q) {
+                    return $q->where('category_id', $this->filterCategory);
+                })
                 ->when($this->search, function ($q) {
                     return $q->where('name', 'like', '%'.$this->search.'%');
                 })
