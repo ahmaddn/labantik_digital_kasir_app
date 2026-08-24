@@ -674,6 +674,7 @@
                     <label class="block text-[8px] font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">Kelompok Topping</label>
                     <select wire:model="selectedModifierGroupId" class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 border-none rounded-xl text-sm font-semibold dark:text-white">
                         <option value="">-- Pilih Kelompok Topping --</option>
+                        <option value="remove_all" class="text-primary-red font-bold">-- HAPUS SEMUA TOPPING DARI PRODUK --</option>
                         @foreach($modifierGroupsList as $group)
                             <option value="{{ $group->id }}">{{ $group->name }}</option>
                         @endforeach

@@ -419,9 +419,13 @@ class Product extends Component
 
     public function applyModifierGroupMassive()
     {
-        $this->validate([
-            'selectedModifierGroupId' => 'required|exists:modifier_groups,id',
-        ]);
+        $isRemoveMode = ($this->selectedModifierGroupId === 'remove_all');
+
+        if (! $isRemoveMode) {
+            $this->validate([
+                'selectedModifierGroupId' => 'required|exists:modifier_groups,id',
+            ]);
+        }
 
         if (empty($this->selectedProducts)) {
             $this->dispatch('toast', message: 'Silakan pilih produk terlebih dahulu.', type: 'danger');
@@ -433,9 +437,13 @@ class Product extends Component
             if ($productId) {
                 $product = ProductModel::find($productId);
                 if ($product) {
-                    // Sync without detaching to append, or sync to replace depending on needs.
-                    // SyncWithoutDetaching is better to preserve other groups.
-                    $product->modifierGroups()->syncWithoutDetaching([$this->selectedModifierGroupId]);
+                    if ($isRemoveMode) {
+                        $product->modifierGroups()->detach();
+                    } else {
+                        // Sync without detaching to append, or sync to replace depending on needs.
+                        // SyncWithoutDetaching is better to preserve other groups.
+                        $product->modifierGroups()->syncWithoutDetaching([$this->selectedModifierGroupId]);
+                    }
                     $count++;
                 }
             }
@@ -446,7 +454,11 @@ class Product extends Component
         $this->showBulkModifierModal = false;
         $this->selectedModifierGroupId = '';
 
-        $this->dispatch('toast', message: "Berhasil menerapkan kelompok topping ke {$count} produk.");
+        $msg = $isRemoveMode 
+            ? "Berhasil menghapus semua topping dari {$count} produk."
+            : "Berhasil menerapkan kelompok topping ke {$count} produk.";
+
+        $this->dispatch('toast', message: $msg);
     }
 
     public function render()
