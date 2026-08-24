@@ -52,7 +52,7 @@
     get filteredProducts() {
         return this.products.filter(p => {
             const matchesSearch = !this.search || p.name.toLowerCase().includes(this.search.toLowerCase());
-            const matchesCategory = this.selectedCategory === null || String(p.category_id) === String(this.selectedCategory);
+            const matchesCategory = !this.selectedCategory || String(p.category_id) === String(this.selectedCategory);
             return matchesSearch && matchesCategory;
         });
     },
@@ -75,9 +75,12 @@
         return 0;
     },
 
-    addToCart(product, force = false) {
+    addToCart(product, force) {
+        // Tentukan nilai default force secara aman
+        const shouldForce = (force === true);
+
         // Cek jika produk memiliki modifier / topping dan tidak dipaksa lewati modal
-        if (!force && product.modifier_groups && product.modifier_groups.length > 0) {
+        if (!shouldForce && product.modifier_groups && product.modifier_groups.length > 0) {
             this.activeModifierProduct = product;
             this.selectedModifiersMap = {};
             // Initialize selections
