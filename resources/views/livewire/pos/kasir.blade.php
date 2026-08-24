@@ -2,7 +2,7 @@
     showCart: false,
     search: '',
     selectedCategory: null,
-    products: @entangle('products'),
+    products: @json($allProductsJson),
     cart: [],
     loading: false,
     modalSearch: '',
@@ -80,12 +80,16 @@
         const shouldForce = (force === true);
 
         // Cek jika produk memiliki modifier / topping dan tidak dipaksa lewati modal
-        const hasModifiers = product.modifier_groups && Array.isArray(product.modifier_groups) && product.modifier_groups.length > 0;
+        const modGroups = product.modifier_groups || product.modifierGroups;
+        const hasModifiers = modGroups && Array.isArray(modGroups) && modGroups.length > 0;
         if (!shouldForce && hasModifiers) {
             this.activeModifierProduct = product;
+            // Agar template seragam, pastikan properti seragam di activeModifierProduct
+            this.activeModifierProduct.modifier_groups = modGroups;
+            
             this.selectedModifiersMap = {};
             // Initialize selections
-            product.modifier_groups.forEach(g => {
+            modGroups.forEach(g => {
                 this.selectedModifiersMap[g.id] = [];
             });
             this.showModifierModal = true;
