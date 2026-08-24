@@ -28,8 +28,9 @@
         const doResize = (event) => {
             if (!this.isResizing) return;
             const newWidth = window.innerWidth - event.clientX;
-            // Batasi lebar sidebar minimal 320px dan maksimal 650px
-            if (newWidth >= 320 && newWidth <= 650) {
+            // Batasi lebar sidebar minimal 280px dan maksimal 80% dari lebar layar
+            const maxWidth = Math.floor(window.innerWidth * 0.8);
+            if (newWidth >= 280 && newWidth <= maxWidth) {
                 this.sidebarWidth = newWidth;
                 localStorage.setItem('cashier_sidebar_width', newWidth);
             }
