@@ -760,6 +760,7 @@ class Kasir extends Component
         }
 
         return view('livewire.pos.kasir', [
+            'products' => $this->products,
             'allProductsJson' => $allProducts,
             'isSessionFinished' => $isSessionFinished,
             'categories' => $categories,
