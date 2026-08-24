@@ -19,6 +19,7 @@
 
     sidebarWidth: localStorage.getItem('cashier_sidebar_width') ? parseInt(localStorage.getItem('cashier_sidebar_width')) : 420,
     isResizing: false,
+    screenWidth: window.innerWidth,
 
     startResize(e) {
         this.isResizing = true;
@@ -178,6 +179,10 @@
     }
 }" x-init="if (darkMode) document.documentElement.classList.add('dark');
 else document.documentElement.classList.remove('dark');
+
+window.addEventListener('resize', () => {
+    screenWidth = window.innerWidth;
+});
 
 // Autofocus search on load
 $nextTick(() => {
@@ -397,9 +402,9 @@ document.addEventListener('keydown', (e) => {
     </div>
 
     <!-- 2. Right Sidebar (Cart) -->
-    <div x-show="window.innerWidth >= 1024 || showCart" x-cloak
-        :style="window.innerWidth >= 1024 ? 'width: ' + sidebarWidth + 'px; min-width: ' + sidebarWidth + 'px; max-width: ' + sidebarWidth + 'px;' : ''"
-        class="fixed inset-y-0 right-0 w-full md:w-[420px] bg-white dark:bg-slate-900 lg:static lg:flex flex flex-col z-[100] border-l-[var(--nb-border)] border-black dark:border-slate-800">
+    <div x-show="screenWidth >= 1024 || showCart" x-cloak
+        :style="screenWidth >= 1024 ? 'width: ' + sidebarWidth + 'px; min-width: ' + sidebarWidth + 'px; max-width: ' + sidebarWidth + 'px;' : ''"
+        class="fixed inset-y-0 right-0 w-full sm:w-[420px] bg-white dark:bg-slate-900 lg:static lg:flex flex flex-col z-[100] border-l-[var(--nb-border)] border-black dark:border-slate-800">
 
         <div
             class="p-5 bg-primary-red text-white border-b-[var(--nb-border)] border-black flex justify-between items-center shadow-[inset_0_-4px_0_0_rgba(0,0,0,0.2)]">
