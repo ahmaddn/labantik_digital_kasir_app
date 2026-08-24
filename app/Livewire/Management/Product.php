@@ -422,8 +422,8 @@ class Product extends Component
         }
 
         $count = 0;
-        foreach ($this->selectedProducts as $productId => $isSelected) {
-            if ($isSelected) {
+        foreach ($this->selectedProducts as $productId) {
+            if ($productId) {
                 $product = ProductModel::find($productId);
                 if ($product) {
                     // Sync without detaching to append, or sync to replace depending on needs.
