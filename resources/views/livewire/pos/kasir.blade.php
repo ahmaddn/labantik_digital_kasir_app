@@ -1,4 +1,4 @@
-<div wire:poll.5s="checkNewTasks" x-init="products = @json($allProductsJson)" x-data="{
+<div wire:poll.5s="checkNewTasks" x-init='products = @json($allProductsJson)' x-data="{
     showCart: false,
     search: '',
     selectedCategory: null,
