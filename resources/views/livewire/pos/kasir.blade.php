@@ -1,8 +1,8 @@
-<div wire:poll.5s="checkNewTasks" x-init='products = @json($allProductsJson)' x-data="{
+<div wire:poll.5s="checkNewTasks" x-data="{
     showCart: false,
     search: '',
     selectedCategory: null,
-    products: @entangle('products'),
+    products: [],
     cart: [],
     loading: false,
     modalSearch: '',
@@ -1265,17 +1265,29 @@ document.addEventListener('keydown', (e) => {
             }, 100);
         });
 
-        // Pastikan nested modifier_groups aman dari hydration Livewire dengan menyalin allProductsJson ke Alpine JS data.
+        // Fungsi pembantu untuk memuat produk secara aman dari PHP JSON tanpa merusak attribute x-data
+        function loadAlpineProducts() {
+            try {
+                const alpineEl = document.querySelector('[x-data]');
+                if (alpineEl && alpineEl.__x) {
+                    const rawJson = @json($allProductsJson);
+                    alpineEl.__x.$data.products = rawJson;
+                }
+            } catch (e) {
+                console.error("Gagal menyinkronkan produk:", e);
+            }
+        }
+
+        // Jalankan saat load pertama kali
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(loadAlpineProducts, 100);
+        });
+
+        // Jalankan setiap kali Livewire melakukan morphing/update DOM
         document.addEventListener('alpine:init', () => {
-            // Kita hubungkan ke siklus Livewire update
             Livewire.hook('morph.updated', ({ el, component }) => {
                 if (component.name === 'pos.kasir') {
-                    // Update data produk di AlpineJS x-data secara manual dari JSON PHP
-                    const alpineEl = document.querySelector('[x-data]');
-                    if (alpineEl && alpineEl.__x) {
-                        const rawJson = @json($allProductsJson);
-                        alpineEl.__x.$data.products = rawJson;
-                    }
+                    loadAlpineProducts();
                 }
             });
         });
