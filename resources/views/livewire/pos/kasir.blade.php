@@ -264,10 +264,10 @@
                             <div class="flex-1">
                                 <h4 x-text="item.name"
                                     class="text-[10px] font-black uppercase dark:text-white line-clamp-1"></h4>
-                                <p class="text-[10px] font-black text-primary-red">
+                                <p class="text-[10px] font-black text-primary-red dark:text-rose-400">
                                     <span x-text="formatRupiah(item.price + (item.selected_modifiers ? item.selected_modifiers.reduce((sum, m) => sum + m.price, 0) : 0))"></span>
                                     <template x-if="item.selected_modifiers && item.selected_modifiers.length > 0">
-                                        <span class="text-gray-400 font-bold">
+                                        <span class="text-gray-400 dark:text-gray-500 font-bold">
                                             (Rp<span x-text="formatRupiah(item.price).replace('Rp', '')"></span> + Topping)
                                         </span>
                                     </template>
@@ -287,7 +287,7 @@
                         <template x-if="item.selected_modifiers && item.selected_modifiers.length > 0">
                             <div class="flex flex-wrap gap-1 pl-12 border-t border-dashed border-gray-100 dark:border-slate-800 pt-2">
                                 <template x-for="mod in item.selected_modifiers" :key="mod.id">
-                                    <span class="px-2 py-0.5 bg-gray-100 dark:bg-slate-850 text-gray-650 dark:text-gray-300 text-[8px] font-black border rounded-lg border-gray-200 dark:border-slate-800 uppercase">
+                                    <span class="px-2 py-0.5 bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-gray-300 text-[8px] font-black border rounded-lg border-gray-200 dark:border-slate-700 uppercase">
                                         + <span x-text="mod.name"></span> (+<span x-text="mod.price"></span>)
                                     </span>
                                 </template>
@@ -881,10 +881,20 @@
 
 
 
-    <div x-show="showModifierModal" class="fixed inset-0 z-[600] flex items-center justify-center p-6 bg-black/60 backdrop-blur-sm">
-        
-        <div @click.away="showModifierModal = false; activeModifierProduct = null;"
-            class="nb-card bg-white dark:bg-dark-soft w-full max-w-md p-8 relative border-t-8 border-t-amber-500">
+    <div x-show="showModifierModal" x-cloak class="fixed inset-0 z-[600] flex items-center justify-center p-6">
+        <!-- Backdrop -->
+        <div x-show="showModifierModal" x-transition:enter="transition ease-out duration-300"
+            x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+            x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100"
+            x-transition:leave-end="opacity-0" class="absolute inset-0 bg-black/60 backdrop-blur-sm">
+        </div>
+
+        <!-- Modal Box -->
+        <div x-show="showModifierModal" @click.away="showModifierModal = false; activeModifierProduct = null;"
+            x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 scale-95"
+            x-transition:enter-end="opacity-100 scale-100" x-transition:leave="transition ease-in duration-200"
+            x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95"
+            class="nb-card bg-white dark:bg-dark-soft w-full max-w-md p-8 relative z-10 border-t-8 border-t-amber-500">
             
             <div class="flex justify-between items-start mb-6">
                 <div>
