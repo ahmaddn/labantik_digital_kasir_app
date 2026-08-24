@@ -881,15 +881,9 @@
 
 
 
-    <div x-show="showModifierModal" x-transition:enter="transition ease-out duration-300"
-        x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
-        x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100"
-        x-transition:leave-end="opacity-0" class="fixed inset-0 z-[110] flex items-center justify-center p-6 bg-black/60 backdrop-blur-sm" x-cloak>
+    <div x-show="showModifierModal" class="fixed inset-0 z-[600] flex items-center justify-center p-6 bg-black/60 backdrop-blur-sm">
         
         <div @click.away="showModifierModal = false; activeModifierProduct = null;"
-            x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 scale-95"
-            x-transition:enter-end="opacity-100 scale-100" x-transition:leave="transition ease-in duration-200"
-            x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95"
             class="nb-card bg-white dark:bg-dark-soft w-full max-w-md p-8 relative border-t-8 border-t-amber-500">
             
             <div class="flex justify-between items-start mb-6">
@@ -900,41 +894,44 @@
                 <button @click="showModifierModal = false; activeModifierProduct = null;" class="text-gray-400 hover:text-black dark:hover:text-white text-xl font-black">&times;</button>
             </div>
 
-            <div class="space-y-6 max-h-[350px] overflow-y-auto pr-1 no-scrollbar text-left">
-                <template x-if="activeModifierProduct">
-                    <template x-for="group in activeModifierProduct.modifier_groups" :key="group.id">
-                        <div class="border-b border-gray-100 dark:border-slate-800 pb-4">
-                            <div class="flex justify-between items-center mb-3">
-                                <span class="text-xs font-black uppercase tracking-wider text-slate-800 dark:text-white" x-text="group.name"></span>
-                                <span class="text-[8px] font-black bg-gray-100 dark:bg-slate-850 px-2 py-0.5 rounded border dark:border-slate-700 dark:text-gray-400">
-                                    PILIH MIN <span x-text="group.min"></span> | MAX <span x-text="group.max"></span>
-                                </span>
-                            </div>
-
-                            <div class="grid grid-cols-2 gap-2">
-                                <template x-for="opt in group.options" :key="opt.id">
-                                    <label class="flex items-center gap-2 p-2 border-2 border-black dark:border-slate-700 bg-gray-50 dark:bg-slate-900 rounded-xl cursor-pointer hover:bg-amber-50 dark:hover:bg-slate-800 transition-colors">
-                                        <!-- Checkbox jika max > 1, Radio jika max == 1 -->
-                                        <template x-if="group.max > 1">
-                                            <input type="checkbox" :value="opt.id" x-model="selectedModifiersMap[group.id]"
-                                                class="rounded border-gray-300 text-primary-blue focus:ring-primary-blue dark:bg-slate-800">
-                                        </template>
-                                        <template x-if="group.max === 1">
-                                            <input type="radio" :name="'group-' + group.id" :value="opt.id"
-                                                @change="selectedModifiersMap[group.id] = [opt.id]"
-                                                :checked="(selectedModifiersMap[group.id] || []).includes(opt.id)"
-                                                class="border-gray-300 text-primary-blue focus:ring-primary-blue dark:bg-slate-800">
-                                        </template>
-
-                                        <div class="flex flex-col text-left">
-                                            <span class="text-[10px] font-black uppercase dark:text-white" x-text="opt.name"></span>
-                                            <span class="text-[9px] font-black text-primary-red" x-text="'+Rp' + formatRupiah(opt.price).replace('Rp', '').trim()"></span>
-                                        </div>
-                                    </label>
-                                </template>
-                            </div>
+            <div class="space-y-6 max-h-[350px] overflow-y-auto pr-1 no-scrollbar text-left" x-show="activeModifierProduct">
+                <template x-for="group in (activeModifierProduct ? activeModifierProduct.modifier_groups : [])" :key="group.id">
+                    <div class="border-b border-gray-100 dark:border-slate-800 pb-4">
+                        <div class="flex justify-between items-center mb-3">
+                            <span class="text-xs font-black uppercase tracking-wider text-slate-800 dark:text-white" x-text="group.name"></span>
+                            <span class="text-[8px] font-black bg-gray-100 dark:bg-slate-850 px-2 py-0.5 rounded border dark:border-slate-700 dark:text-gray-400">
+                                PILIH MIN <span x-text="group.min"></span> | MAX <span x-text="group.max"></span>
+                            </span>
                         </div>
-                    </template>
+
+                        <div class="grid grid-cols-2 gap-2">
+                            <template x-for="opt in group.options" :key="opt.id">
+                                <label class="flex items-center gap-2 p-2 border-2 border-black dark:border-slate-700 bg-gray-50 dark:bg-slate-900 rounded-xl cursor-pointer hover:bg-amber-50 dark:hover:bg-slate-800 transition-colors">
+                                    <template x-if="group.max > 1">
+                                        <input type="checkbox" :value="opt.id"
+                                            @change="if ($el.checked) {
+                                                if (!selectedModifiersMap[group.id].includes(opt.id)) selectedModifiersMap[group.id].push(opt.id);
+                                            } else {
+                                                selectedModifiersMap[group.id] = selectedModifiersMap[group.id].filter(id => id !== opt.id);
+                                            }"
+                                            :checked="(selectedModifiersMap[group.id] || []).includes(opt.id)"
+                                            class="rounded border-gray-300 text-primary-blue focus:ring-primary-blue dark:bg-slate-800">
+                                    </template>
+                                    <template x-if="group.max === 1">
+                                        <input type="radio" :name="'group-' + group.id" :value="opt.id"
+                                            @change="selectedModifiersMap[group.id] = [opt.id]"
+                                            :checked="(selectedModifiersMap[group.id] || []).includes(opt.id)"
+                                            class="border-gray-300 text-primary-blue focus:ring-primary-blue dark:bg-slate-800">
+                                    </template>
+
+                                    <div class="flex flex-col text-left">
+                                        <span class="text-[10px] font-black uppercase dark:text-white" x-text="opt.name"></span>
+                                        <span class="text-[9px] font-black text-primary-red" x-text="'+Rp' + formatRupiah(opt.price).replace('Rp', '').trim()"></span>
+                                    </div>
+                                </label>
+                            </template>
+                        </div>
+                    </div>
                 </template>
             </div>
 
@@ -1100,7 +1097,13 @@
                             map[g.id] = [];
                         });
                         this.selectedModifiersMap = map;
+                        console.log('Setting showModifierModal to true', {
+                            showModifierModal: this.showModifierModal,
+                            activeProduct: this.activeModifierProduct,
+                            map: this.selectedModifiersMap
+                        });
                         this.showModifierModal = true;
+                        console.log('Current showModifierModal state after set:', this.showModifierModal);
                         return;
                     }
 
