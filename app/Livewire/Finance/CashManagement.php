@@ -712,26 +712,7 @@ class CashManagement extends Component
             }
         }
 
-        // Build Chart.js data
-        $chartData = [
-            'inflowLabels' => [],
-            'inflowValues' => [],
-            'outflowLabels' => [],
-            'outflowValues' => [],
-        ];
-        
-        $categoriesMap = \App\Models\CashCategory::where('jurusan_id', $activeJurusanId)->get()->keyBy('id');
-        foreach ($categorySums as $catId => $sum) {
-            $catName = isset($categoriesMap[$catId]) ? $categoriesMap[$catId]->name : 'Tanpa Kategori';
-            if ($sum->cat_income > 0) {
-                $chartData['inflowLabels'][] = $catName;
-                $chartData['inflowValues'][] = (float)$sum->cat_income;
-            }
-            if ($sum->cat_expense > 0) {
-                $chartData['outflowLabels'][] = $catName;
-                $chartData['outflowValues'][] = (float)$sum->cat_expense;
-            }
-        }
+
 
         $catBagiHasil = \App\Models\CashCategory::where('jurusan_id', $activeJurusanId)->where('name', 'Bagi Hasil Mingguan')->first();
         $bagiHasilTransactions = [];
@@ -821,6 +802,24 @@ class CashManagement extends Component
                 'modal_balance' => $modalBalance,
                 'profit_balance' => $profitBalance,
             ];
+        }
+
+        // Build Chart.js data directly from processed categoryStats to maintain consistency
+        $chartData = [
+            'inflowLabels' => [],
+            'inflowValues' => [],
+            'outflowLabels' => [],
+            'outflowValues' => [],
+        ];
+        foreach ($categoryStats as $stat) {
+            if ($stat['income'] > 0) {
+                $chartData['inflowLabels'][] = $stat['name'];
+                $chartData['inflowValues'][] = (float)$stat['income'];
+            }
+            if ($stat['expense'] > 0) {
+                $chartData['outflowLabels'][] = $stat['name'];
+                $chartData['outflowValues'][] = (float)$stat['expense'];
+            }
         }
 
         $transactions = (clone $activeQuery)
