@@ -269,14 +269,12 @@
                 </span>
             </div>
             <div class="relative flex-1 min-h-[260px] flex items-center justify-center">
-                <template x-if="inflowData.length === 0">
+                <div x-show="inflowData.length === 0" class="absolute inset-0 flex items-center justify-center">
                     <p class="text-xs font-black text-gray-400 uppercase tracking-widest italic text-center">Tidak ada pemasukan pada periode ini</p>
-                </template>
-                <template x-if="inflowData.length > 0">
-                    <div class="w-full max-w-[260px] mx-auto h-[260px]">
-                        <canvas id="inflowChart"></canvas>
-                    </div>
-                </template>
+                </div>
+                <div x-show="inflowData.length > 0" class="w-full max-w-[260px] mx-auto h-[260px]">
+                    <canvas id="inflowChart"></canvas>
+                </div>
             </div>
         </div>
 
@@ -292,14 +290,12 @@
                 </span>
             </div>
             <div class="relative flex-1 min-h-[260px] flex items-center justify-center">
-                <template x-if="outflowData.length === 0">
+                <div x-show="outflowData.length === 0" class="absolute inset-0 flex items-center justify-center">
                     <p class="text-xs font-black text-gray-400 uppercase tracking-widest italic text-center">Tidak ada pengeluaran pada periode ini</p>
-                </template>
-                <template x-if="outflowData.length > 0">
-                    <div class="w-full max-w-[260px] mx-auto h-[260px]">
-                        <canvas id="outflowChart"></canvas>
-                    </div>
-                </template>
+                </div>
+                <div x-show="outflowData.length > 0" class="w-full max-w-[260px] mx-auto h-[260px]">
+                    <canvas id="outflowChart"></canvas>
+                </div>
             </div>
         </div>
     </div>
