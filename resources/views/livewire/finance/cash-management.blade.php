@@ -27,6 +27,68 @@
         </div>
     </div>
 
+    <!-- Filter Panel -->
+    <div class="bg-white dark:bg-gray-800 rounded-[2rem] p-6 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 mb-8 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+        <div class="flex flex-wrap items-center gap-4">
+            <!-- Filter Type Select -->
+            <div class="flex flex-col">
+                <span class="text-[9px] font-black uppercase tracking-widest text-gray-400 mb-1.5 ml-1">Periode Analisis</span>
+                <div class="relative">
+                    <select wire:model.live="filterType" class="pl-4 pr-10 py-3 bg-gray-50 dark:bg-gray-900 border-none rounded-xl font-black text-xs text-gray-800 dark:text-white uppercase tracking-wider focus:ring-4 focus:ring-primary-blue/10 appearance-none min-w-[150px]">
+                        <option value="weekly">Mingguan</option>
+                        <option value="monthly">Bulanan</option>
+                        <option value="cumulative">Kumulatif (Semua)</option>
+                    </select>
+                    <div class="absolute inset-y-0 right-3 flex items-center pointer-events-none">
+                        <svg class="w-3.5 h-3.5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="m19 9-7 7-7-7"/></svg>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Conditional filters based on Filter Type -->
+            @if($filterType !== 'cumulative')
+                <div class="flex flex-col">
+                    <span class="text-[9px] font-black uppercase tracking-widest text-gray-450 dark:text-gray-400 mb-1.5 ml-1">Bulan</span>
+                    <input type="month" wire:model.live="filterMonth" class="px-4 py-3 bg-gray-50 dark:bg-gray-900 border-none rounded-xl font-black text-xs text-gray-800 dark:text-white focus:ring-4 focus:ring-primary-blue/10">
+                </div>
+            @endif
+
+            @if($filterType === 'weekly')
+                <div class="flex flex-col">
+                    <span class="text-[9px] font-black uppercase tracking-widest text-gray-455 dark:text-gray-400 mb-1.5 ml-1">Pilih Minggu</span>
+                    <div class="relative">
+                        <select wire:model.live="filterWeek" class="pl-4 pr-10 py-3 bg-gray-50 dark:bg-gray-900 border-none rounded-xl font-black text-xs text-gray-800 dark:text-white uppercase tracking-wider focus:ring-4 focus:ring-primary-blue/10 appearance-none min-w-[180px]">
+                            <option value="this_week">Minggu Ini (Berjalan)</option>
+                            <option value="last_week">Minggu Lalu</option>
+                            <option value="week_1">Minggu 1 (Tgl 1 - 7)</option>
+                            <option value="week_2">Minggu 2 (Tgl 8 - 14)</option>
+                            <option value="week_3">Minggu 3 (Tgl 15 - 21)</option>
+                            <option value="week_4">Minggu 4 (Tgl 22 - 28)</option>
+                            <option value="week_5">Minggu 5 (Tgl 29+)</option>
+                        </select>
+                        <div class="absolute inset-y-0 right-3 flex items-center pointer-events-none">
+                            <svg class="w-3.5 h-3.5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="m19 9-7 7-7-7"/></svg>
+                        </div>
+                    </div>
+                </div>
+            @endif
+        </div>
+
+        @if($startDate && $endDate)
+            <div class="bg-blue-50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-900/20 rounded-2xl px-5 py-3.5 flex items-center gap-3">
+                <div class="p-2 bg-primary-blue text-white rounded-lg">
+                    <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
+                </div>
+                <div>
+                    <span class="text-[9px] font-black uppercase tracking-widest text-gray-400 block mb-0.5">Rentang Tanggal</span>
+                    <span class="text-xs font-black text-primary-blue dark:text-primary-blue-light uppercase">
+                        {{ \Carbon\Carbon::parse($startDate)->translatedFormat('d F Y') }} - {{ \Carbon\Carbon::parse($endDate)->translatedFormat('d F Y') }}
+                    </span>
+                </div>
+            </div>
+        @endif
+    </div>
+
     <!-- Stats Cards -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-8 mb-12">
         <!-- Total Saldo Kas Card -->
@@ -72,6 +134,173 @@
             </div>
             <h3 class="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 mb-3">Total Pengeluaran</h3>
             <p class="text-2xl xl:text-3xl font-black italic text-primary-red" :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($displayExpense, 0, ',', '.') }}</p>
+        </div>
+    </div>
+
+    <!-- Period Flow Summary Banner (Only if filter is active) -->
+    @if($startDate)
+    <div class="bg-gradient-to-br from-gray-900 via-slate-900 to-gray-950 rounded-[2.5rem] p-8 shadow-xl border border-white/5 text-white mb-8">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-center md:text-left mb-6 pb-6 border-b border-white/10">
+            <div class="flex flex-col justify-center">
+                <span class="text-[9px] font-black uppercase tracking-widest opacity-60 mb-1">Saldo Awal Periode</span>
+                <p class="text-xl font-black italic text-gray-300">Rp{{ number_format($startingBalance, 0, ',', '.') }}</p>
+            </div>
+            <div class="flex flex-col justify-center border-y md:border-y-0 md:border-x border-white/10 px-4 text-center">
+                <span class="text-[9px] font-black uppercase tracking-widest opacity-60 mb-1">Perubahan Arus Kas (Net Flow)</span>
+                @php $netFlow = $displayIncome - $displayExpense; @endphp
+                <p class="text-2xl font-black italic {{ $netFlow >= 0 ? 'text-green-400' : 'text-primary-red' }}">
+                    {{ $netFlow >= 0 ? '+' : '' }}Rp{{ number_format($netFlow, 0, ',', '.') }}
+                </p>
+            </div>
+            <div class="flex flex-col justify-center md:items-end">
+                <span class="text-[9px] font-black uppercase tracking-widest opacity-65 mb-1 text-emerald-450">Saldo Akhir Periode</span>
+                <p class="text-xl font-black italic text-white">Rp{{ number_format($startingBalance + $netFlow, 0, ',', '.') }}</p>
+            </div>
+        </div>
+
+        <!-- Audit Hasil Fisik Status -->
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-4 bg-white/5 rounded-2xl p-4 border border-white/10">
+            <div class="flex items-center gap-3">
+                <div class="p-2 rounded-xl {{ $totalDeficit > 0 ? 'bg-red-500/20 text-red-400' : ($totalSurplus > 0 ? 'bg-amber-500/20 text-amber-400' : 'bg-emerald-500/20 text-emerald-400') }}">
+                    @if($totalDeficit > 0)
+                        <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                    @elseif($totalSurplus > 0)
+                        <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="16"/><line x1="8" x2="16" y1="12" y2="12"/></svg>
+                    @else
+                        <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    @endif
+                </div>
+                <div>
+                    <span class="text-[9px] font-black uppercase tracking-widest opacity-60 block">Hasil Audit Penyesuaian Kas Fisik</span>
+                    <span class="text-xs font-black uppercase tracking-wider">
+                        @if($totalDeficit > 0)
+                            PERINGATAN: MINGGU INI TERDAPAT TEAKOR / SELISIH KURANG (RUGI) FISIK
+                        @elseif($totalSurplus > 0)
+                            INFO: MINGGU INI TERDAPAT SELISIH LEBIH FISIK
+                        @else
+                            SALDO FISIK & SISTEM MINGGU INI SESUAI (AMAN)
+                        @endif
+                    </span>
+                </div>
+            </div>
+            <div class="text-right">
+                @if($totalDeficit > 0)
+                    <span class="text-sm font-black text-red-400 italic">-Rp{{ number_format($totalDeficit, 0, ',', '.') }} (Rugi Selisih)</span>
+                @elseif($totalSurplus > 0)
+                    <span class="text-sm font-black text-amber-400 italic">+Rp{{ number_format($totalSurplus, 0, ',', '.') }} (Lebih)</span>
+                @else
+                    <span class="text-xs font-black text-emerald-450 uppercase">Semua Penyesuaian Klop</span>
+                @endif
+            </div>
+        </div>
+    </div>
+    @endif
+
+    <!-- Visual Cash Flow Charts (Responsive) -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12"
+         x-data="{
+            inflowData: @entangle('chartData.inflowValues'),
+            inflowLabels: @entangle('chartData.inflowLabels'),
+            outflowData: @entangle('chartData.outflowValues'),
+            outflowLabels: @entangle('chartData.outflowLabels'),
+            inflowChart: null,
+            outflowChart: null,
+            initCharts() {
+                this.$nextTick(() => {
+                    const inCanvas = document.getElementById('inflowChart');
+                    if (inCanvas) {
+                        if (this.inflowChart) this.inflowChart.destroy();
+                        this.inflowChart = new Chart(inCanvas, {
+                            type: 'doughnut',
+                            data: {
+                                labels: this.inflowLabels,
+                                datasets: [{
+                                    data: this.inflowData,
+                                    backgroundColor: ['#10b981', '#3b82f6', '#f59e0b', '#8b5cf6', '#ec4899', '#6366f1', '#14b8a6', '#f43f5e'],
+                                    borderWidth: 0
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: {
+                                    legend: { position: 'bottom', labels: { color: '#9ca3af', font: { weight: 'bold', size: 10 } } }
+                                }
+                            }
+                        });
+                    }
+
+                    const outCanvas = document.getElementById('outflowChart');
+                    if (outCanvas) {
+                        if (this.outflowChart) this.outflowChart.destroy();
+                        this.outflowChart = new Chart(outCanvas, {
+                            type: 'doughnut',
+                            data: {
+                                labels: this.outflowLabels,
+                                datasets: [{
+                                    data: this.outflowData,
+                                    backgroundColor: ['#ef4444', '#f97316', '#eab308', '#ec4899', '#a855f7', '#64748b', '#06b6d4', '#d946ef'],
+                                    borderWidth: 0
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: {
+                                    legend: { position: 'bottom', labels: { color: '#9ca3af', font: { weight: 'bold', size: 10 } } }
+                                }
+                            }
+                        });
+                    }
+                });
+            }
+         }"
+         x-init="initCharts(); $watch('inflowData', () => initCharts()); $watch('outflowData', () => initCharts());"
+    >
+        <!-- Inflow Chart Card -->
+        <div class="bg-white dark:bg-gray-800 rounded-[3rem] p-8 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 flex flex-col" wire:ignore>
+            <div class="flex justify-between items-center mb-6">
+                <div>
+                    <h3 class="text-sm font-black uppercase tracking-wider text-gray-800 dark:text-white italic">Sumber Kas Masuk</h3>
+                    <p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Pemasukan Berdasarkan Kategori</p>
+                </div>
+                <span class="px-3 py-1 bg-green-500/10 text-green-500 rounded-full text-[9px] font-black uppercase tracking-widest">
+                    Rp{{ number_format($displayIncome, 0, ',', '.') }}
+                </span>
+            </div>
+            <div class="relative flex-1 min-h-[260px] flex items-center justify-center">
+                <template x-if="inflowData.length === 0">
+                    <p class="text-xs font-black text-gray-400 uppercase tracking-widest italic text-center">Tidak ada pemasukan pada periode ini</p>
+                </template>
+                <template x-if="inflowData.length > 0">
+                    <div class="w-full max-w-[260px] mx-auto h-[260px]">
+                        <canvas id="inflowChart"></canvas>
+                    </div>
+                </template>
+            </div>
+        </div>
+
+        <!-- Outflow Chart Card -->
+        <div class="bg-white dark:bg-gray-800 rounded-[3rem] p-8 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 flex flex-col" wire:ignore>
+            <div class="flex justify-between items-center mb-6">
+                <div>
+                    <h3 class="text-sm font-black uppercase tracking-wider text-gray-800 dark:text-white italic">Tujuan Kas Keluar</h3>
+                    <p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Pengeluaran Berdasarkan Kategori</p>
+                </div>
+                <span class="px-3 py-1 bg-primary-red/10 text-primary-red rounded-full text-[9px] font-black uppercase tracking-widest">
+                    Rp{{ number_format($displayExpense, 0, ',', '.') }}
+                </span>
+            </div>
+            <div class="relative flex-1 min-h-[260px] flex items-center justify-center">
+                <template x-if="outflowData.length === 0">
+                    <p class="text-xs font-black text-gray-400 uppercase tracking-widest italic text-center">Tidak ada pengeluaran pada periode ini</p>
+                </template>
+                <template x-if="outflowData.length > 0">
+                    <div class="w-full max-w-[260px] mx-auto h-[260px]">
+                        <canvas id="outflowChart"></canvas>
+                    </div>
+                </template>
+            </div>
         </div>
     </div>
 

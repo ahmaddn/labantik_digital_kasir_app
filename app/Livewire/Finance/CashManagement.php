@@ -13,6 +13,8 @@ class CashManagement extends Component
 
     // Filters
     public string $filterMonth = '';
+    public string $filterType = 'weekly';
+    public string $filterWeek = 'this_week';
     public string $activeTab = 'cumulative';
 
     // Form inputs
@@ -115,6 +117,16 @@ class CashManagement extends Component
     }
 
     public function updatedFilterMonth()
+    {
+        $this->resetPage();
+    }
+
+    public function updatedFilterType()
+    {
+        $this->resetPage();
+    }
+
+    public function updatedFilterWeek()
     {
         $this->resetPage();
     }
@@ -563,16 +575,16 @@ class CashManagement extends Component
         $jurusan = \App\Models\Jurusan::find($activeJurusanId);
         $isSubUnit = $jurusan && $jurusan->parent_id;
 
-        // Overall cumulative query (all transactions)
-        $cumulativeQuery = CashTransaction::where('jurusan_id', $activeJurusanId);
-
         // Get Keuntungan Jurusan Category ID
         $catKeuntunganJurusan = \App\Models\CashCategory::where('jurusan_id', $activeJurusanId)
             ->where('name', 'Keuntungan Jurusan')
             ->first();
         $keuntunganJurusanId = $catKeuntunganJurusan ? $catKeuntunganJurusan->id : 0;
 
-        // Calculate cumulative balances
+        // Overall cumulative query (all transactions)
+        $cumulativeQuery = CashTransaction::where('jurusan_id', $activeJurusanId);
+
+        // Calculate overall cumulative balances (for context)
         $cumulativeBalances = (clone $cumulativeQuery)
             ->selectRaw("
                 SUM(CASE WHEN cash_type = 'modal' AND type = 'income' THEN amount ELSE 0 END) as modal_income,
@@ -584,8 +596,69 @@ class CashManagement extends Component
         $cumulativeModalBalance = ($cumulativeBalances->modal_income ?? 0) - ($cumulativeBalances->modal_expense ?? 0);
         $cumulativeProfitBalance = ($cumulativeBalances->profit_income ?? 0) - ($cumulativeBalances->profit_expense ?? 0);
 
-        // Fetch cumulative category sums
-        $cumulativeCategorySums = (clone $cumulativeQuery)
+        // Define Start and End Dates based on period filters
+        $startDate = null;
+        $endDate = null;
+
+        if ($this->filterType === 'weekly') {
+            if ($this->filterWeek === 'this_week') {
+                $startDate = now()->startOfWeek(Carbon::MONDAY)->format('Y-m-d');
+                $endDate = now()->endOfWeek(Carbon::SUNDAY)->format('Y-m-d');
+            } elseif ($this->filterWeek === 'last_week') {
+                $startDate = now()->subWeek()->startOfWeek(Carbon::MONDAY)->format('Y-m-d');
+                $endDate = now()->subWeek()->endOfWeek(Carbon::SUNDAY)->format('Y-m-d');
+            } else {
+                $monthDate = Carbon::createFromFormat('Y-m', $this->filterMonth);
+                $weekNumber = (int) str_replace('week_', '', $this->filterWeek);
+                
+                if ($weekNumber === 1) {
+                    $startDate = $monthDate->copy()->startOfMonth()->format('Y-m-d');
+                    $endDate = $monthDate->copy()->startOfMonth()->addDays(6)->format('Y-m-d');
+                } elseif ($weekNumber === 2) {
+                    $startDate = $monthDate->copy()->startOfMonth()->addDays(7)->format('Y-m-d');
+                    $endDate = $monthDate->copy()->startOfMonth()->addDays(13)->format('Y-m-d');
+                } elseif ($weekNumber === 3) {
+                    $startDate = $monthDate->copy()->startOfMonth()->addDays(14)->format('Y-m-d');
+                    $endDate = $monthDate->copy()->startOfMonth()->addDays(20)->format('Y-m-d');
+                } elseif ($weekNumber === 4) {
+                    $startDate = $monthDate->copy()->startOfMonth()->addDays(21)->format('Y-m-d');
+                    $endDate = $monthDate->copy()->startOfMonth()->addDays(27)->format('Y-m-d');
+                } else {
+                    $startDate = $monthDate->copy()->startOfMonth()->addDays(28)->format('Y-m-d');
+                    $endDate = $monthDate->copy()->endOfMonth()->format('Y-m-d');
+                }
+            }
+        } elseif ($this->filterType === 'monthly') {
+            $startDate = Carbon::createFromFormat('Y-m', $this->filterMonth)->startOfMonth()->format('Y-m-d');
+            $endDate = Carbon::createFromFormat('Y-m', $this->filterMonth)->endOfMonth()->format('Y-m-d');
+        }
+
+        // Calculate Starting Balances (Saldo Awal)
+        $startingModal = 0;
+        $startingProfit = 0;
+        $startingBalance = 0;
+
+        if ($startDate) {
+            $startingSums = CashTransaction::where('jurusan_id', $activeJurusanId)
+                ->where('date', '<', $startDate)
+                ->selectRaw("
+                    SUM(CASE WHEN type = 'income' AND cash_type = 'modal' THEN amount ELSE 0 END) - SUM(CASE WHEN type = 'expense' AND cash_type = 'modal' THEN amount ELSE 0 END) as modal_bal,
+                    SUM(CASE WHEN type = 'income' AND cash_type = 'keuntungan' THEN amount ELSE 0 END) - SUM(CASE WHEN type = 'expense' AND cash_type = 'keuntungan' THEN amount ELSE 0 END) as profit_bal
+                ")
+                ->first();
+            $startingModal = (float)($startingSums->modal_bal ?? 0);
+            $startingProfit = (float)($startingSums->profit_bal ?? 0);
+            $startingBalance = $startingModal + $startingProfit;
+        }
+
+        // Set Active Query based on range
+        $activeQuery = CashTransaction::where('jurusan_id', $activeJurusanId);
+        if ($startDate && $endDate) {
+            $activeQuery = $activeQuery->whereBetween('date', [$startDate, $endDate]);
+        }
+
+        // Fetch category sums for active query
+        $categorySums = (clone $activeQuery)
             ->selectRaw("
                 cash_category_id,
                 SUM(CASE WHEN type = 'income' THEN amount ELSE 0 END) as cat_income,
@@ -599,23 +672,66 @@ class CashManagement extends Component
             ->get()
             ->keyBy('cash_category_id');
 
-        // Calculate cumulative income/expense stats
-        $cumulativeStats = (clone $cumulativeQuery)
+        // Fetch stats for active query
+        $periodBalances = (clone $activeQuery)
             ->selectRaw("
-                SUM(CASE WHEN type = 'income' THEN amount ELSE 0 END) as income,
-                SUM(CASE WHEN type = 'expense' THEN amount ELSE 0 END) as expense
+                SUM(CASE WHEN cash_type = 'modal' AND type = 'income' THEN amount ELSE 0 END) as modal_income,
+                SUM(CASE WHEN cash_type = 'modal' AND type = 'expense' THEN amount ELSE 0 END) as modal_expense,
+                SUM(CASE WHEN cash_type = 'keuntungan' AND type = 'income' THEN amount ELSE 0 END) as profit_income,
+                SUM(CASE WHEN cash_type = 'keuntungan' AND type = 'expense' THEN amount ELSE 0 END) as profit_expense
             ")
             ->first();
-        $cumulativeIncome = $cumulativeStats->income ?? 0;
-        $cumulativeExpense = $cumulativeStats->expense ?? 0;
 
-        // Select variables based on active tab
-        $categorySums = $cumulativeCategorySums;
-        $activeQuery = $cumulativeQuery;
-        $currentModalBalance = $cumulativeModalBalance;
-        $currentProfitBalance = $cumulativeProfitBalance;
-        $displayIncome = $cumulativeIncome;
-        $displayExpense = $cumulativeExpense;
+        $periodModalIn = (float)($periodBalances->modal_income ?? 0);
+        $periodModalOut = (float)($periodBalances->modal_expense ?? 0);
+        $periodProfitIn = (float)($periodBalances->profit_income ?? 0);
+        $periodProfitOut = (float)($periodBalances->profit_expense ?? 0);
+
+        $displayIncome = $periodModalIn + $periodProfitIn;
+        $displayExpense = $periodModalOut + $periodProfitOut;
+
+        if ($startDate && $endDate) {
+            $currentModalBalance = $startingModal + ($periodModalIn - $periodModalOut);
+            $currentProfitBalance = $startingProfit + ($periodProfitIn - $periodProfitOut);
+        } else {
+            $currentModalBalance = $cumulativeModalBalance;
+            $currentProfitBalance = $cumulativeProfitBalance;
+        }
+
+        // Calculate Audit Adjustments (deficits/surpluses from physical cash checks)
+        $adjustments = (clone $activeQuery)
+            ->where('description', 'like', 'Penyesuaian Selisih%')
+            ->get();
+        $totalDeficit = 0;
+        $totalSurplus = 0;
+        foreach ($adjustments as $adj) {
+            if ($adj->type === 'expense') {
+                $totalDeficit += $adj->amount;
+            } else {
+                $totalSurplus += $adj->amount;
+            }
+        }
+
+        // Build Chart.js data
+        $chartData = [
+            'inflowLabels' => [],
+            'inflowValues' => [],
+            'outflowLabels' => [],
+            'outflowValues' => [],
+        ];
+        
+        $categoriesMap = \App\Models\CashCategory::where('jurusan_id', $activeJurusanId)->get()->keyBy('id');
+        foreach ($categorySums as $catId => $sum) {
+            $catName = isset($categoriesMap[$catId]) ? $categoriesMap[$catId]->name : 'Tanpa Kategori';
+            if ($sum->cat_income > 0) {
+                $chartData['inflowLabels'][] = $catName;
+                $chartData['inflowValues'][] = (float)$sum->cat_income;
+            }
+            if ($sum->cat_expense > 0) {
+                $chartData['outflowLabels'][] = $catName;
+                $chartData['outflowValues'][] = (float)$sum->cat_expense;
+            }
+        }
 
         $catBagiHasil = \App\Models\CashCategory::where('jurusan_id', $activeJurusanId)->where('name', 'Bagi Hasil Mingguan')->first();
         $bagiHasilTransactions = [];
@@ -634,6 +750,7 @@ class CashManagement extends Component
                 'Bagi Hasil Labantik'
             ])
             ->get();
+
         if (\App\Models\CashCategory::where('jurusan_id', $activeJurusanId)->count() === 0) {
             $defaultCategories = [
                 'Modal Awal',
@@ -658,8 +775,8 @@ class CashManagement extends Component
                 ])
                 ->get();
         }
-        $categoryStats = [];
 
+        $categoryStats = [];
         foreach ($categories as $category) {
             $catSum = (object) ($categorySums->get($category->id) ?? []);
 
@@ -720,6 +837,12 @@ class CashManagement extends Component
             'categories' => $categories,
             'categoryStats' => collect($categoryStats),
             'isSubUnit' => $isSubUnit,
+            'startingBalance' => $startingBalance,
+            'chartData' => $chartData,
+            'startDate' => $startDate,
+            'endDate' => $endDate,
+            'totalDeficit' => $totalDeficit,
+            'totalSurplus' => $totalSurplus,
         ])->layout('layouts.app', ['title' => 'Buku Kas Internal']);
     }
 }
