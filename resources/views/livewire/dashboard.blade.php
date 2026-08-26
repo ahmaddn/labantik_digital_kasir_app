@@ -227,7 +227,7 @@
             <h2 class="text-2xl font-black italic uppercase tracking-tighter text-gray-800 dark:text-white">Statistik
                 Hari Ini</h2>
         </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
             <div
                 class="bg-primary-blue rounded-3xl md:rounded-[3rem] p-5 md:p-10 shadow-2xl shadow-blue-900/30 border border-transparent hover:scale-105 transition-all group overflow-hidden relative">
                 <div
@@ -306,81 +306,6 @@
                         class="text-[9px] font-black uppercase px-2 py-1 rounded-md bg-primary-red/10 text-primary-red">
                         {{ $stats->profit_change >= 0 ? '+' : '' }}{{ number_format($stats->profit_change, 1) }}% vs
                         Kemarin
-                    </span>
-                </div>
-            </div>
-
-            <div
-                class="bg-white dark:bg-gray-800 rounded-3xl md:rounded-[3rem] p-5 md:p-10 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 hover:border-primary-blue transition-all group overflow-hidden relative">
-                <div
-                    class="absolute -right-8 -bottom-8 opacity-5 group-hover:scale-110 transition-transform duration-700">
-                    <svg class="w-48 h-48 text-primary-blue" xmlns="http://www.w3.org/2000/svg" width="24"
-                        height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="8" cy="21" r="1" />
-                        <circle cx="19" cy="21" r="1" />
-                        <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.56-7.43H5.12" />
-                    </svg>
-                </div>
-                <div class="flex items-center justify-between mb-6 md:mb-8">
-                    <div class="p-4 md:p-5 bg-primary-blue/10 rounded-2xl text-primary-blue">
-                        <svg class="w-8 h-8 md:w-10 md:h-10" xmlns="http://www.w3.org/2000/svg" width="24"
-                            height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" />
-                            <path d="M3 6h18" />
-                            <path d="M16 10a4 4 0 0 1-8 0" />
-                        </svg>
-                    </div>
-                    <span
-                        class="text-[10px] font-black uppercase tracking-widest text-primary-blue bg-primary-blue/5 px-4 py-2 rounded-full">Volume</span>
-                </div>
-                <h3 class="text-gray-400 text-[10px] font-black uppercase tracking-widest mb-1">Total Penjualan</h3>
-                <p class="text-2xl md:text-4xl font-black text-gray-800 dark:text-white italic tracking-tighter">
-                    {{ $stats->today_transactions }}</p>
-                <div class="mt-4 flex items-center">
-                    <span class="text-[9px] font-black uppercase px-2 py-1 rounded-md bg-gray-100 text-gray-500">
-                        {{ $stats->transactions_change >= 0 ? '+' : '' }}{{ number_format($stats->transactions_change, 1) }}%
-                        vs Kemarin
-                    </span>
-                </div>
-            </div>
-
-            <div
-                class="bg-white dark:bg-gray-800 rounded-3xl md:rounded-[3rem] p-5 md:p-10 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 hover:border-primary-red transition-all group overflow-hidden relative">
-                <div
-                    class="absolute -right-8 -bottom-8 opacity-5 group-hover:scale-110 transition-transform duration-700">
-                    <svg class="w-48 h-48 text-primary-red" xmlns="http://www.w3.org/2000/svg" width="24"
-                        height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <path
-                            d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
-                        <line x1="12" y1="9" x2="12" y2="13" />
-                        <line x1="12" y1="17" x2="12.01" y2="17" />
-                    </svg>
-                </div>
-                <div class="flex items-center justify-between mb-6 md:mb-8">
-                    <div class="p-4 md:p-5 bg-primary-red/10 rounded-2xl text-primary-red">
-                        <svg class="w-8 h-8 md:w-10 md:h-10" xmlns="http://www.w3.org/2000/svg" width="24"
-                            height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                            <path
-                                d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1" />
-                            <path d="M3 5v14a2 2 0 0 0 2 2h15" />
-                            <path d="M7 11h8" />
-                            <path d="M7 15h8" />
-                        </svg>
-                    </div>
-                    <span
-                        class="text-[10px] font-black uppercase tracking-widest text-primary-red bg-primary-red/5 px-4 py-2 rounded-full">Rata-rata</span>
-                </div>
-                <h3 class="text-gray-400 text-[10px] font-black uppercase tracking-widest mb-1">Tiket Rata-rata</h3>
-                <p class="text-2xl md:text-4xl font-black text-gray-800 dark:text-white italic tracking-tighter"
-                    :class="censorMode ? 'privacy-blur' : ''">
-                    Rp{{ number_format($stats->avg_transaction, 0, ',', '.') }}</p>
-                <div class="mt-4 flex items-center">
-                    <span class="text-[9px] font-black uppercase px-2 py-1 rounded-md bg-gray-100 text-gray-500">
-                        Nilai Per Transaksi
                     </span>
                 </div>
             </div>
@@ -528,37 +453,7 @@
                 </p>
             </div>
 
-            <div
-                class="bg-white dark:bg-gray-800 rounded-3xl md:rounded-[3rem] p-5 md:p-10 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 hover:border-orange-500 transition-all group overflow-hidden relative">
-                <div
-                    class="absolute -right-8 -bottom-8 opacity-5 group-hover:scale-110 transition-transform duration-700">
-                    <svg class="w-48 h-48 text-orange-500" xmlns="http://www.w3.org/2000/svg" width="24"
-                        height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" />
-                        <path d="M3 6h18" />
-                        <path d="M16 10a4 4 0 0 1-8 0" />
-                    </svg>
-                </div>
-                <div class="flex items-center justify-between mb-6 md:mb-8">
-                    <div class="p-4 md:p-5 bg-orange-500/10 rounded-2xl text-orange-500">
-                        <svg class="w-8 h-8 md:w-10 md:h-10" xmlns="http://www.w3.org/2000/svg" width="24"
-                            height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" />
-                            <path d="M3 6h18" />
-                            <path d="M16 10a4 4 0 0 1-8 0" />
-                        </svg>
-                    </div>
-                    <span
-                        class="text-[10px] font-black uppercase tracking-widest text-orange-600 bg-orange-500/5 px-4 py-2 rounded-full">Penjualan</span>
-                </div>
-                <h3 class="text-gray-400 text-[10px] font-black uppercase tracking-widest mb-1">Total Tiket</h3>
-                <p class="text-2xl md:text-4xl font-black text-gray-800 dark:text-white italic tracking-tighter">
-                    {{ $stats->total_all_time_transactions }}</p>
-                <p class="mt-4 text-[9px] font-bold text-gray-400 uppercase tracking-widest">Akumulasi Transaksi Lunas
-                </p>
-            </div>
+
 
             <div
                 class="bg-white dark:bg-gray-800 rounded-3xl md:rounded-[3rem] p-5 md:p-10 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 hover:border-primary-red transition-all group overflow-hidden relative">
@@ -594,39 +489,7 @@
                 <p class="mt-4 text-[9px] font-bold text-gray-400 uppercase tracking-widest">Total Tagihan Piutang</p>
             </div>
 
-            <div
-                class="bg-white dark:bg-gray-800 rounded-3xl md:rounded-[3rem] p-5 md:p-10 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 hover:border-amber-500 transition-all group overflow-hidden relative">
-                <div
-                    class="absolute -right-8 -bottom-8 opacity-5 group-hover:scale-110 transition-transform duration-700">
-                    <svg class="w-48 h-48 text-amber-500" xmlns="http://www.w3.org/2000/svg" width="24"
-                        height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="10" />
-                        <path d="M12 6v6l4 2" />
-                    </svg>
-                </div>
-                <div class="flex items-center justify-between mb-6 md:mb-8">
-                    <div class="p-4 md:p-5 bg-amber-500/10 rounded-2xl text-amber-500">
-                        <svg class="w-8 h-8 md:w-10 md:h-10" xmlns="http://www.w3.org/2000/svg" width="24"
-                            height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                            <path
-                                d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1" />
-                            <path d="M3 5v14a2 2 0 0 0 2 2h15" />
-                            <path d="M7 11h8" />
-                            <path d="M7 15h8" />
-                        </svg>
-                    </div>
-                    <span
-                        class="text-[10px] font-black uppercase tracking-widest text-amber-600 bg-amber-500/5 px-4 py-2 rounded-full">Rata-rata</span>
-                </div>
-                <h3 class="text-gray-400 text-[10px] font-black uppercase tracking-widest mb-1">Tiket Rata-rata</h3>
-                <p class="text-2xl md:text-4xl font-black text-gray-800 dark:text-white italic tracking-tighter"
-                    :class="censorMode ? 'privacy-blur' : ''">
-                    Rp{{ number_format($stats->avg_all_time_ticket, 0, ',', '.') }}</p>
-                <p class="mt-4 text-[9px] font-bold text-gray-400 uppercase tracking-widest">Rata-rata Nilai Transaksi
-                </p>
-            </div>
+
 
             <!-- Total Omzet (Seluruh Waktu) -->
             <div
@@ -845,86 +708,7 @@
         });
     </script>
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-12">
-        <!-- Recent Transactions -->
-        <div
-            class="lg:col-span-2 bg-white dark:bg-gray-800 rounded-3xl md:rounded-[3.5rem] shadow-2xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 overflow-hidden">
-            <div class="p-5 md:p-10 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center">
-                <h2
-                    class="text-xl md:text-2xl font-black italic uppercase tracking-tighter text-gray-800 dark:text-white">
-                    Transaksi Terakhir</h2>
-                <a href="{{ route('transactions') }}"
-                    class="text-[10px] font-black text-primary-blue uppercase tracking-widest hover:underline">Lihat
-                    Semua</a>
-            </div>
-            <div class="overflow-x-auto">
-                <table class="w-full text-left">
-                    <thead class="bg-gray-50 dark:bg-gray-900/50">
-                        <tr>
-                            <th
-                                class="px-4 md:px-10 py-4 md:py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">
-                                Tanggal</th>
-                            <th
-                                class="px-4 md:px-10 py-4 md:py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">
-                                Jam</th>
-                            <th
-                                class="px-4 md:px-10 py-4 md:py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">
-                                Produk</th>
-                            <th
-                                class="px-4 md:px-10 py-4 md:py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">
-                                Total</th>
-                            <th
-                                class="px-4 md:px-10 py-4 md:py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">
-                                Status</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-50 dark:divide-gray-700">
-                        @forelse($recentTransactions as $tx)
-                            <tr class="hover:bg-gray-50 dark:hover:bg-gray-900/30 transition-colors">
-                                <td class="px-4 md:px-10 py-4 md:py-8">
-                                    <div
-                                        class="text-xs font-black text-gray-800 dark:text-white uppercase tracking-tight">
-                                        {{ $tx->transacted_at->format('d/m/Y') }}</div>
-                                </td>
-                                <td class="px-4 md:px-10 py-4 md:py-8 text-xs font-black text-gray-400">
-                                    {{ $tx->transacted_at->format('H:i') }}</td>
-                                <td class="px-4 md:px-10 py-4 md:py-8">
-                                    <div
-                                        class="text-sm md:text-base font-black text-gray-800 dark:text-white uppercase tracking-tight">
-                                        {{ $tx->product->name }}</div>
-                                    <div class="text-[10px] font-bold text-gray-400 italic mt-1">Qty:
-                                        {{ $tx->quantity }}</div>
-                                </td>
-                                <td
-                                    class="px-4 md:px-10 py-4 md:py-8 text-base md:text-lg font-black text-primary-red italic">
-                                    Rp{{ number_format($tx->total_price, 0, ',', '.') }}</td>
-                                <td class="px-4 md:px-10 py-4 md:py-8">
-                                    @php
-                                        $statusClasses = [
-                                            'uang_diterima' => 'bg-green-100 text-green-700',
-                                            'belum_kembalian' => 'bg-primary-blue/10 text-primary-blue',
-                                            'belum_menerima_uang' => 'bg-primary-red/10 text-primary-red',
-                                            'uang_dipinjam' => 'bg-orange-100 text-orange-700',
-                                        ];
-                                    @endphp
-                                    <span
-                                        class="px-3 py-1 text-[8px] md:text-[9px] font-black rounded-full uppercase tracking-widest {{ $statusClasses[$tx->status] ?? 'bg-gray-100 text-gray-700' }}">
-                                        {{ str_replace('_', ' ', $tx->status) }}
-                                    </span>
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="5"
-                                    class="px-4 md:px-10 py-16 md:py-32 text-center text-gray-400 font-bold uppercase text-xs tracking-widest italic opacity-20">
-                                    Belum ada transaksi hari ini</td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
+    <div class="grid grid-cols-1 gap-6 md:gap-12">
         <!-- Top Products -->
         <div
             class="bg-white dark:bg-gray-800 rounded-3xl md:rounded-[3.5rem] shadow-2xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 overflow-hidden">

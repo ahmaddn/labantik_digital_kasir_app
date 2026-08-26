@@ -210,6 +210,7 @@ class Dashboard extends Component
         })
             ->whereBetween('date', [today()->subDays(6)->toDateString(), today()->toDateString()])
             ->where('type', 'expense')
+            ->where('cash_type', 'keuntungan')
             ->selectRaw('date, SUM(amount) as total_amount')
             ->groupBy('date')
             ->pluck('total_amount', 'date')
@@ -228,7 +229,7 @@ class Dashboard extends Component
 
             $weeklyData[] = [
                 'day' => $date->translatedFormat('D'),
-                'revenue' => max(0, $dayTxs->whereIn('status', ['uang_diterima', 'belum_kembalian'])->sum('total_price') - $dayExpenses),
+                'revenue' => (float) $dayTxs->whereIn('status', ['uang_diterima', 'belum_kembalian'])->sum('total_price'),
                 'profit' => max(0, $dayTxs->whereIn('status', ['uang_diterima', 'belum_kembalian'])->sum(fn ($tx) => $tx->unit_profit * $tx->quantity) - $dayExpenses),
             ];
         }
@@ -299,7 +300,7 @@ class Dashboard extends Component
 
             $monthlyData[] = [
                 'month' => $month->translatedFormat('M Y'),
-                'revenue' => max(0, $monthTxs->sum('total_price') - $monthExpenses),
+                'revenue' => (float) $monthTxs->sum('total_price'),
             ];
         }
 
