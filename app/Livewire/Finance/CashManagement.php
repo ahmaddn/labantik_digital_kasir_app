@@ -54,6 +54,7 @@ class CashManagement extends Component
     public bool $showConsolidateModal = false;
     public $consolidateAmount;
     public string $consolidateCashType = 'keuntungan';
+    public array $chartData = [];
 
     public function mount()
     {
@@ -732,6 +733,8 @@ class CashManagement extends Component
                 $chartData['outflowValues'][] = (float)$sum->cat_expense;
             }
         }
+
+        $this->chartData = $chartData;
 
         $catBagiHasil = \App\Models\CashCategory::where('jurusan_id', $activeJurusanId)->where('name', 'Bagi Hasil Mingguan')->first();
         $bagiHasilTransactions = [];
