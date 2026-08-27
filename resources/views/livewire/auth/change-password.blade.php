@@ -3,11 +3,11 @@
     @close-change-password-modal.window="show = false"
     @keydown.window.escape="show = false">
     <div x-show="show" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-950/40 backdrop-blur-sm" x-transition>
-            <div class="w-full max-w-md bg-white dark:bg-gray-800 rounded-[2.5rem] shadow-2xl border border-gray-100 dark:border-gray-700 p-8 space-y-6">
+            <div class="w-full max-w-md bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-100 dark:border-gray-700 p-5 space-y-6">
                 <!-- Header -->
                 <div class="flex items-center justify-between border-b border-gray-50 dark:border-gray-700/50 pb-4">
                     <div>
-                        <h3 class="text-xl font-black italic uppercase tracking-tighter text-primary-blue dark:text-primary-yellow flex items-center gap-2">
+                        <h3 class="text-xl font-bold uppercase tracking-tight text-primary-blue dark:text-primary-yellow flex items-center gap-2">
                             <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m21 2-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0 1.5 1.5M15.5 7.5 14 6m3 3 1.5-1.5M17 9l1.5 1.5"/></svg>
                             Ganti Password
                         </h3>

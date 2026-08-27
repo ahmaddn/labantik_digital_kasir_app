@@ -2,7 +2,7 @@
     <div class="flex flex-col lg:flex-row lg:items-center justify-between mb-10 gap-6">
         <div>
             <h1
-                class="text-4xl font-black italic uppercase tracking-tighter text-primary-blue dark:text-primary-blue-light">
+                class="text-4xl font-bold uppercase tracking-tight text-primary-blue dark:text-primary-blue-light">
                 Riwayat Transaksi</h1>
             <p class="text-gray-400 font-bold text-xs uppercase tracking-[0.2em] italic">Log Aktivitas Penjualan</p>
         </div>
@@ -11,7 +11,7 @@
         <div class="flex flex-col lg:flex-row items-stretch lg:items-center gap-4 w-full lg:w-auto">
             <!-- Search bar -->
             <div
-                class="flex items-center bg-white dark:bg-gray-800 px-6 py-3.5 rounded-2xl shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-805 w-full lg:w-64">
+                class="flex items-center bg-white dark:bg-gray-800 px-4 py-2.5 rounded-2xl shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-805 w-full lg:w-64">
                 <svg class="w-4 h-4 text-gray-400 mr-3 shrink-0" xmlns="http://www.w3.org/2000/svg" width="24"
                     height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                     stroke-linecap="round" stroke-linejoin="round">
@@ -26,7 +26,7 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 xl:flex xl:items-center gap-4 w-full lg:w-auto">
                 <!-- Status Filter -->
                 <div
-                    class="flex items-center bg-white dark:bg-gray-800 px-6 py-3.5 rounded-2xl shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-800 w-full lg:w-auto">
+                    class="flex items-center bg-white dark:bg-gray-800 px-4 py-2.5 rounded-2xl shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-800 w-full lg:w-auto">
                     <svg class="w-4 h-4 text-primary-blue mr-3 shrink-0" xmlns="http://www.w3.org/2000/svg"
                         width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                         stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -46,7 +46,7 @@
                 <!-- Jurusan Filter -->
                 @if (!session('active_jurusan_id'))
                     <div
-                        class="flex items-center bg-white dark:bg-gray-800 px-6 py-3.5 rounded-2xl shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-800 w-full lg:w-auto">
+                        class="flex items-center bg-white dark:bg-gray-800 px-4 py-2.5 rounded-2xl shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-800 w-full lg:w-auto">
                         <svg class="w-4 h-4 text-primary-blue mr-3 shrink-0" xmlns="http://www.w3.org/2000/svg"
                             width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -65,7 +65,7 @@
 
                 <!-- Date Selector -->
                 <div
-                    class="flex items-center bg-white dark:bg-gray-800 px-6 py-3.5 rounded-2xl shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-800 w-full lg:w-auto">
+                    class="flex items-center bg-white dark:bg-gray-800 px-4 py-2.5 rounded-2xl shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-800 w-full lg:w-auto">
                     <svg class="w-4 h-4 text-primary-red mr-3 shrink-0" xmlns="http://www.w3.org/2000/svg"
                         width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                         stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -114,7 +114,7 @@
                     <div class="group transition-all duration-300 {{ $isActive ? 'z-10 relative' : '' }}">
                         <!-- Desktop view -->
                         <div
-                            class="hidden lg:grid grid-cols-[1.5fr_1.5fr_2fr_1fr_1.5fr_1.5fr_130px] items-center p-6 rounded-[2.5rem] border-2 transition-all duration-500 {{ $isActive ? 'bg-white dark:bg-gray-800/50 border-amber-400 shadow-[0_0_25px_rgba(245,158,11,0.4)] ring-4 ring-amber-400/20 scale-[1.01]' : 'bg-white dark:bg-gray-800/50 border-transparent group-hover:border-primary-blue/20' }}">
+                            class="hidden lg:grid grid-cols-[1.5fr_1.5fr_2fr_1fr_1.5fr_1.5fr_130px] items-center p-6 rounded-2xl border-2 transition-all duration-500 {{ $isActive ? 'bg-white dark:bg-gray-800/50 border-amber-400 shadow-[0_0_25px_rgba(245,158,11,0.4)] ring-4 ring-amber-400/20 scale-[1.01]' : 'bg-white dark:bg-gray-800/50 border-transparent group-hover:border-primary-blue/20' }}">
                             <!-- Waktu -->
                             <div class="px-4">
                                 <div class="text-sm font-black text-gray-800 dark:text-white uppercase tracking-tight">
@@ -161,7 +161,7 @@
                                     </div>
                                     <div class="flex flex-col min-w-0">
                                         <span
-                                            class="text-sm font-black italic uppercase tracking-tighter text-gray-700 dark:text-gray-300 truncate">
+                                            class="text-sm font-bold uppercase tracking-tight text-gray-700 dark:text-gray-300 truncate">
                                             {{ $tx->buyer_name ?? 'Guest Customer' }}
                                         </span>
                                         @if ($tx->user)
@@ -369,7 +369,7 @@
                         </svg>
                     </button>
                 </div>
-                <h3 class="text-3xl font-black italic uppercase tracking-tighter mb-1">Edit Transaksi</h3>
+                <h3 class="text-2xl font-bold uppercase tracking-tight mb-1">Edit Transaksi</h3>
                 <p class="text-[10px] font-bold uppercase tracking-[0.3em] opacity-60">Reference:
                     {{ $editingReference }}</p>
             </div>
@@ -514,7 +514,7 @@
                     <line x1="14" x2="14" y1="11" y2="17" />
                 </svg>
             </div>
-            <h3 class="text-2xl font-black italic uppercase tracking-tighter text-gray-800 dark:text-white mb-4">Hapus
+            <h3 class="text-2xl font-bold uppercase tracking-tight text-gray-800 dark:text-white mb-4">Hapus
                 Transaksi?</h3>
             <p class="text-gray-400 font-bold text-xs uppercase tracking-widest mb-10 leading-relaxed">Penghapusan
                 transaksi akan mempengaruhi laporan keuangan. Tindakan ini tidak dapat dibatalkan.</p>
@@ -547,7 +547,7 @@
                         </svg>
                     </button>
                 </div>
-                <h3 class="text-3xl font-black italic uppercase tracking-tighter mb-1">Detail Transaksi</h3>
+                <h3 class="text-2xl font-bold uppercase tracking-tight mb-1">Detail Transaksi</h3>
                 <p class="text-[10px] font-bold uppercase tracking-[0.3em] opacity-60">Reference:
                     {{ $detailReference }}</p>
             </div>

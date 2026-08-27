@@ -1,7 +1,7 @@
 <div class="space-y-8 pt-6">
     <!-- Header -->
     <div>
-        <h1 class="text-3xl font-black italic uppercase tracking-tighter text-primary-blue dark:text-primary-yellow">
+        <h1 class="text-2xl font-bold uppercase tracking-tight text-primary-blue dark:text-primary-yellow">
             Tugas Saya</h1>
         <p class="text-gray-400 text-sm font-semibold uppercase tracking-widest mt-1">Kelola dan laporkan tugas harian
             yang ditugaskan</p>
@@ -10,14 +10,14 @@
     <!-- Tabs -->
     <div class="flex items-center gap-2 border-b border-gray-200 dark:border-gray-700 overflow-x-auto flex-nowrap [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         <button wire:click="$set('activeTab', 'today')"
-            class="px-6 py-3 font-black text-sm uppercase tracking-wider flex items-center gap-2 shrink-0 {{ $activeTab === 'today' ? 'text-primary-blue dark:text-primary-yellow border-b-2 border-primary-blue dark:border-primary-yellow' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300' }}">
+            class="px-4 py-2.5 font-bold text-xs uppercase tracking-wider flex items-center gap-2 shrink-0 {{ $activeTab === 'today' ? 'text-primary-blue dark:text-primary-yellow border-b-2 border-primary-blue dark:border-primary-yellow' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300' }}">
             <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
             </svg>
             <span class="shrink-0">Tugas Hari Ini</span>
         </button>
         <button wire:click="$set('activeTab', 'history')"
-            class="px-6 py-3 font-black text-sm uppercase tracking-wider flex items-center gap-2 shrink-0 {{ $activeTab === 'history' ? 'text-primary-blue dark:text-primary-yellow border-b-2 border-primary-blue dark:border-primary-yellow' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300' }}">
+            class="px-4 py-2.5 font-bold text-xs uppercase tracking-wider flex items-center gap-2 shrink-0 {{ $activeTab === 'history' ? 'text-primary-blue dark:text-primary-yellow border-b-2 border-primary-blue dark:border-primary-yellow' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300' }}">
             <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
             </svg>
@@ -125,7 +125,7 @@
                     </div>
                 </div>
             @empty
-                <div class="bg-white dark:bg-gray-800 rounded-[2rem] shadow-lg p-8 text-center">
+                <div class="bg-white dark:bg-gray-800 rounded-[2rem] shadow-lg p-5 text-center">
                     <div class="text-gray-400 italic font-semibold">
                         Tidak ada tugas untuk hari ini
                     </div>
@@ -181,7 +181,7 @@
                     </div>
                 </div>
             @empty
-                <div class="bg-white dark:bg-gray-800 rounded-[2rem] shadow-lg p-8 text-center">
+                <div class="bg-white dark:bg-gray-800 rounded-[2rem] shadow-lg p-5 text-center">
                     <div class="text-gray-400 italic font-semibold">
                         Tidak ada riwayat tugas
                     </div>
@@ -200,7 +200,7 @@
         <div x-show="show" x-transition.opacity class="fixed inset-0 bg-black/60 backdrop-blur-xs"
             wire:click="$set('showTaskDetailModal', false)"></div>
         <div x-show="show" x-transition.scale
-            class="relative w-full max-w-2xl bg-white dark:bg-gray-800 rounded-[2.5rem] shadow-2xl p-8 border border-gray-100 dark:border-gray-700 z-10 max-h-[90vh] overflow-y-auto">
+            class="relative w-full max-w-2xl bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-5 border border-gray-100 dark:border-gray-700 z-10 max-h-[90vh] overflow-y-auto">
             
             @if($selectedAssignment)
                 @php
@@ -321,7 +321,7 @@
         <div x-show="show" x-transition.opacity class="fixed inset-0 bg-black/60 backdrop-blur-xs"
             wire:click="$set('showSubmissionModal', false)"></div>
         <div x-show="show" x-transition.scale
-            class="relative w-full max-w-2xl bg-white dark:bg-gray-800 rounded-[2.5rem] shadow-2xl p-8 border border-gray-100 dark:border-gray-700 z-10 max-h-[90vh] overflow-y-auto">
+            class="relative w-full max-w-2xl bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-5 border border-gray-100 dark:border-gray-700 z-10 max-h-[90vh] overflow-y-auto">
             
             @if($selectedAssignment)
                 @php

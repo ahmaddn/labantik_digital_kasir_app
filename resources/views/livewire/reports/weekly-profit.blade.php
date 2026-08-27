@@ -2,7 +2,7 @@
     <!-- Header Section -->
     <div class="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-6">
         <div class="w-full lg:w-auto">
-            <h1 class="text-5xl lg:text-6xl font-black italic uppercase tracking-tighter text-primary-blue leading-none">Bagi Hasil</h1>
+            <h1 class="text-5xl lg:text-6xl font-bold uppercase tracking-tight text-primary-blue leading-none">Bagi Hasil</h1>
             <div class="flex flex-wrap sm:flex-nowrap items-center gap-3 mt-6 w-full">
                 <button wire:click="$set('viewMode', 'weekly')"
                     class="flex-1 sm:flex-initial px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all {{ $viewMode === 'weekly' ? 'bg-primary-blue text-white shadow-lg' : 'bg-gray-100 text-gray-400 dark:bg-gray-800' }}">Laporan
@@ -113,7 +113,7 @@
                                     class="px-5 py-2 bg-blue-50 dark:bg-blue-900/20 text-primary-blue rounded-full text-[10px] font-black uppercase tracking-widest">Periode
                                     Terpilih</span>
                                 <h2
-                                    class="text-3xl sm:text-4xl font-black italic uppercase tracking-tighter text-gray-800 dark:text-white mt-4">
+                                    class="text-3xl sm:text-4xl font-bold uppercase tracking-tight text-gray-800 dark:text-white mt-4">
                                     Estimasi Keuntungan</h2>
                                 <p class="text-sm font-bold text-gray-400 mt-2 italic uppercase">
                                     {{ $currentWeek['start']->translatedFormat('d M') }} —
@@ -128,7 +128,7 @@
                             </div>
                         </div>
 
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-8">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
                             <div
                                 class="bg-gray-50 dark:bg-gray-800/50 rounded-[3rem] p-10 border border-gray-100 dark:border-gray-700/50">
                                 <div class="flex items-center gap-4 mb-6">
@@ -178,7 +178,7 @@
                 <div x-data="{ open: false }" class="bg-gray-50 dark:bg-gray-900/50 rounded-[4rem] p-12 border border-gray-100 dark:border-gray-800/50 mb-10 transition-all duration-300">
                     <button @click="open = !open" class="flex justify-between items-center w-full text-left focus:outline-none cursor-pointer">
                         <div>
-                            <h3 class="text-2xl font-black italic uppercase tracking-tighter text-gray-800 dark:text-white">
+                            <h3 class="text-2xl font-bold uppercase tracking-tight text-gray-800 dark:text-white">
                                 Rincian Keuntungan Harian</h3>
                             <p class="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mt-1">Detail keuntungan sistem dan penyesuaian selisih kas per hari</p>
                         </div>
@@ -191,7 +191,7 @@
 
                     <div x-show="open" x-collapse x-cloak class="grid grid-cols-1 gap-6 mt-10">
                         @foreach($currentWeek['dailyBreakdown'] as $day)
-                            <div class="bg-white dark:bg-gray-900 rounded-[2.5rem] p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border border-gray-100 dark:border-gray-800 shadow-sm hover:shadow-xl transition-all">
+                            <div class="bg-white dark:bg-gray-900 rounded-2xl p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border border-gray-100 dark:border-gray-800 shadow-sm hover:shadow-xl transition-all">
                                 <div>
                                     <p class="text-sm font-black text-gray-800 dark:text-white uppercase tracking-tight">
                                         {{ $day['date']->translatedFormat('l, d F Y') }}
@@ -230,7 +230,7 @@
                     <div class="flex justify-between items-center mb-10">
                         <div>
                             <h3
-                                class="text-2xl font-black italic uppercase tracking-tighter text-gray-800 dark:text-white">
+                                class="text-2xl font-bold uppercase tracking-tight text-gray-800 dark:text-white">
                                 Rincian Pembagian Eksternal</h3>
                             <p class="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mt-1">Porsi pembagian bagi hasil mingguan (Najmy 30% & Labantik 30%)</p>
                         </div>
@@ -239,7 +239,7 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         @forelse($currentWeek['adminContributions'] as $contrib)
                             <div
-                                class="bg-white dark:bg-gray-900 rounded-[2.5rem] p-8 flex items-center justify-between border border-gray-100 dark:border-gray-800 shadow-sm hover:shadow-xl transition-all group">
+                                class="bg-white dark:bg-gray-900 rounded-2xl p-5 flex items-center justify-between border border-gray-100 dark:border-gray-800 shadow-sm hover:shadow-xl transition-all group">
                                 <div class="flex items-center gap-5">
                                     <div
                                         class="w-14 h-14 rounded-2xl bg-gray-50 dark:bg-gray-800 flex items-center justify-center text-lg font-black text-primary-blue border border-gray-100 dark:border-gray-700 group-hover:scale-110 transition-transform">
@@ -274,13 +274,13 @@
                 <div
                     class="bg-white dark:bg-gray-900 rounded-[4rem] p-10 shadow-2xl shadow-blue-900/5 border border-gray-50 dark:border-gray-800 h-full">
                     <h3
-                        class="text-2xl font-black italic uppercase tracking-tighter text-gray-800 dark:text-white mb-8">
+                        class="text-2xl font-bold uppercase tracking-tight text-gray-800 dark:text-white mb-8">
                         Riwayat Laporan</h3>
 
                     <div class="space-y-6">
                         @forelse($reports as $report)
                             <div
-                                class="p-8 bg-gray-50 dark:bg-gray-800/50 rounded-[2.5rem] border border-gray-100 dark:border-gray-700/50 hover:border-primary-blue/30 transition-all group relative">
+                                class="p-5 bg-gray-50 dark:bg-gray-800/50 rounded-2xl border border-gray-100 dark:border-gray-700/50 hover:border-primary-blue/30 transition-all group relative">
                                 <button wire:click.stop="confirmDelete('{{ $report->id }}')"
                                     class="absolute top-6 right-6 p-2 text-gray-300 hover:text-primary-red opacity-0 group-hover:opacity-100 transition-all z-30 cursor-pointer pointer-events-auto">
                                     <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" width="24"
@@ -335,7 +335,7 @@
         </div>
     @elseif ($viewMode === 'monthly')
         <!-- Monthly Rekap Mode -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             @forelse($monthlyReports as $mReport)
                 <div
                     class="bg-white dark:bg-gray-900 rounded-[3rem] p-10 border border-gray-100 dark:border-gray-800 shadow-xl shadow-blue-900/5 relative overflow-hidden group">
@@ -343,7 +343,7 @@
                         <div class="flex justify-between items-start mb-10">
                             <div>
                                 <h3
-                                    class="text-2xl font-black italic uppercase tracking-tighter text-gray-800 dark:text-white">
+                                    class="text-2xl font-bold uppercase tracking-tight text-gray-800 dark:text-white">
                                     {{ $mReport->month_name }}</h3>
                                 <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1">
                                     {{ $mReport->weeks_count }} Laporan Mingguan</p>
@@ -421,7 +421,7 @@
                                     class="px-5 py-2 bg-blue-50 dark:bg-blue-900/20 text-primary-blue rounded-full text-[10px] font-black uppercase tracking-widest">Rekap
                                     Tahunan</span>
                                 <h2
-                                    class="text-5xl font-black italic uppercase tracking-tighter text-gray-800 dark:text-white mt-6">
+                                    class="text-5xl font-bold uppercase tracking-tight text-gray-800 dark:text-white mt-6">
                                     Tahun {{ $currentYear }}</h2>
                                 <p class="text-sm font-bold text-gray-400 mt-3 italic uppercase">
                                     {{ $yearlyData->total_months }} Bulan • {{ $yearlyData->total_weeks }} Minggu</p>
@@ -434,7 +434,7 @@
                             </div>
                         </div>
 
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                             <div
                                 class="bg-gray-50 dark:bg-gray-800/50 rounded-[3rem] p-12 border border-gray-100 dark:border-gray-700/50">
                                 <div class="flex items-center gap-4 mb-8">
@@ -481,12 +481,12 @@
                         <!-- Monthly Breakdown -->
                         <div class="mt-16 pt-16 border-t border-gray-100 dark:border-gray-800">
                             <h3
-                                class="text-2xl font-black italic uppercase tracking-tighter text-gray-800 dark:text-white mb-10">
+                                class="text-2xl font-bold uppercase tracking-tight text-gray-800 dark:text-white mb-10">
                                 Rincian Per Bulan</h3>
                             <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
                                 @forelse($allMonthlyData as $mData)
                                     <div
-                                        class="bg-gray-50 dark:bg-gray-800/50 rounded-[2rem] p-8 border border-gray-100 dark:border-gray-700/50 hover:border-primary-blue/30 transition-all">
+                                        class="bg-gray-50 dark:bg-gray-800/50 rounded-[2rem] p-5 border border-gray-100 dark:border-gray-700/50 hover:border-primary-blue/30 transition-all">
                                         <h4
                                             class="text-sm font-black text-gray-800 dark:text-white uppercase tracking-tight mb-6">
                                             {{ $mData->month_name }}</h4>
@@ -537,7 +537,7 @@
         x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-200"
         x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">
         <div @click.away="show = false"
-            class="bg-white dark:bg-gray-900 w-full max-w-sm rounded-[3rem] shadow-2xl flex flex-col p-10 gap-8">
+            class="bg-white dark:bg-gray-900 w-full max-w-sm rounded-[3rem] shadow-2xl flex flex-col p-10 gap-5">
             <div class="text-center">
                 <div
                     class="w-20 h-20 bg-primary-red/10 text-primary-red rounded-[2rem] flex items-center justify-center mx-auto mb-6">
@@ -549,7 +549,7 @@
                         <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
                     </svg>
                 </div>
-                <h3 class="text-2xl font-black italic uppercase tracking-tighter text-gray-800 dark:text-white">Hapus
+                <h3 class="text-2xl font-bold uppercase tracking-tight text-gray-800 dark:text-white">Hapus
                     Laporan?</h3>
                 <p class="text-xs font-bold text-gray-400 mt-4 uppercase tracking-widest leading-loose">Tindakan ini
                     tidak dapat dibatalkan. Laporan bagi hasil akan dihapus permanen.</p>

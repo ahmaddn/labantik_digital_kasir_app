@@ -5,7 +5,7 @@
     <!-- Header -->
     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-            <h1 class="text-3xl font-black italic uppercase tracking-tighter text-primary-blue dark:text-primary-yellow">
+            <h1 class="text-2xl font-bold uppercase tracking-tight text-primary-blue dark:text-primary-yellow">
                 Data Calon Labantik
             </h1>
             <p class="text-gray-400 text-sm font-semibold uppercase tracking-widest mt-1">
@@ -43,7 +43,7 @@
             @endif
 
             <button wire:click="$set('showWaLinkModal', true)"
-                class="inline-flex items-center px-5 py-3.5 bg-primary-blue hover:bg-blue-900 text-primary-yellow rounded-xl font-black text-sm uppercase italic tracking-wider transition-all duration-300 shadow-xl active:scale-95">
+                class="inline-flex items-center px-4 py-2.5 bg-primary-blue hover:bg-blue-900 text-primary-yellow rounded-lg font-bold text-xs uppercase tracking-wide transition-all duration-300 shadow-xl active:scale-95">
                 DAFTAR BADMINTON
             </button>
 
@@ -76,7 +76,7 @@
     <!-- TAB 1: Pendaftar -->
     @if ($activeTab === 'candidates')
         <div
-            class="bg-white dark:bg-gray-800 rounded-[2.5rem] shadow-2xl border border-gray-100 dark:border-gray-700/50 p-6 md:p-8">
+            class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-100 dark:border-gray-700/50 p-6 md:p-5">
             <div class="mb-6 max-w-md w-full">
                 <div class="relative">
                     <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-gray-400">
@@ -203,7 +203,7 @@
     <!-- TAB 2: Input Nilai & Absen -->
     @if ($activeTab === 'scoring' && $isPengelola)
         <div
-            class="bg-white dark:bg-gray-800 rounded-[2.5rem] shadow-2xl border border-gray-100 dark:border-gray-700/50 p-6 md:p-8">
+            class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-100 dark:border-gray-700/50 p-6 md:p-5">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
                 <div class="flex items-center gap-3">
                     <span class="text-xs font-black text-gray-400 dark:text-gray-300 uppercase tracking-widest">Input
@@ -217,7 +217,7 @@
                 </div>
 
                 <button wire:click="saveScoring"
-                    class="px-6 py-3.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-emerald-500/20 active:scale-95 transition-all">
+                    class="px-4 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-emerald-500/20 active:scale-95 transition-all">
                     Simpan Pekan Ini
                 </button>
             </div>
@@ -326,7 +326,7 @@
     <!-- TAB 3: Lolos Seleksi (15 Besar) -->
     @if ($activeTab === 'accepted')
         <div
-            class="bg-white dark:bg-gray-800 rounded-[2.5rem] shadow-2xl border border-gray-100 dark:border-gray-700/50 p-6 md:p-8">
+            class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-100 dark:border-gray-700/50 p-6 md:p-5">
             <div class="flex items-center gap-4 mb-8">
                 <span
                     class="p-3 bg-amber-500/10 rounded-2xl flex items-center justify-center text-amber-500 flex-shrink-0">
@@ -439,7 +439,7 @@
     @if ($showDetailModal && $detailCandidate)
         <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-950/70 backdrop-blur-xs">
             <div
-                class="relative w-full max-w-4xl bg-white dark:bg-gray-800 rounded-[2.5rem] shadow-2xl p-8 border border-gray-100 dark:border-gray-700 z-10 max-h-[90vh] overflow-y-auto">
+                class="relative w-full max-w-4xl bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-5 border border-gray-100 dark:border-gray-700 z-10 max-h-[90vh] overflow-y-auto">
                 <div class="flex justify-between items-center mb-6 border-b border-gray-100 dark:border-gray-700 pb-4">
                     <div>
                         <h2 class="text-2xl font-black text-gray-850 dark:text-white uppercase italic tracking-tight">
@@ -558,10 +558,10 @@
     @if ($showWaLinkModal)
         <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/60 backdrop-blur-sm">
             <div
-                class="bg-white dark:bg-gray-800 w-full max-w-lg rounded-[2.5rem] shadow-2xl p-8 border border-gray-100 dark:border-gray-700 animate-in zoom-in-95 duration-300">
+                class="bg-white dark:bg-gray-800 w-full max-w-lg rounded-2xl shadow-2xl p-5 border border-gray-100 dark:border-gray-700 animate-in zoom-in-95 duration-300">
                 <div class="flex items-center justify-between mb-6">
                     <h3
-                        class="text-2xl font-black italic uppercase tracking-tighter text-gray-800 dark:text-white leading-none">
+                        class="text-2xl font-bold uppercase tracking-tight text-gray-800 dark:text-white leading-none">
                         Link Grup WhatsApp
                     </h3>
                     <button wire:click="$set('showWaLinkModal', false)"
@@ -587,11 +587,11 @@
 
                     <div class="flex justify-end space-x-3 pt-4 border-t border-gray-100 dark:border-gray-700">
                         <button type="button" wire:click="$set('showWaLinkModal', false)"
-                            class="px-6 py-3.5 bg-gray-100 dark:bg-gray-900 text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-2xl font-black italic uppercase text-xs tracking-widest transition-all">
+                            class="px-4 py-2.5 bg-gray-100 dark:bg-gray-900 text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-2xl font-black italic uppercase text-xs tracking-widest transition-all">
                             Batal
                         </button>
                         <button type="submit"
-                            class="px-6 py-3.5 bg-primary-blue text-white rounded-2xl shadow-xl hover:scale-105 active:scale-95 transition-all font-black italic uppercase text-xs tracking-widest">
+                            class="px-4 py-2.5 bg-primary-blue text-white rounded-2xl shadow-xl hover:scale-105 active:scale-95 transition-all font-black italic uppercase text-xs tracking-widest">
                             Simpan Link
                         </button>
                     </div>
@@ -606,7 +606,7 @@
         <div x-show="showDelete" x-transition.opacity class="fixed inset-0 bg-black/60 backdrop-blur-xs"
             wire:click="$set('showDeleteModal', false)"></div>
         <div x-show="showDelete" x-transition.scale
-            class="relative w-full max-w-md bg-white dark:bg-gray-800 rounded-[2.5rem] shadow-2xl p-8 border border-gray-100 dark:border-gray-700 z-10">
+            class="relative w-full max-w-md bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-5 border border-gray-100 dark:border-gray-700 z-10">
             <div class="text-center mb-6">
                 <div
                     class="w-16 h-16 bg-red-50 dark:bg-red-950/30 text-red-600 rounded-3xl flex items-center justify-center mx-auto mb-4">
@@ -641,10 +641,10 @@
         <div x-show="showCreate" x-transition.opacity class="fixed inset-0 bg-black/60 backdrop-blur-xs"
             wire:click="$set('showCreateModal', false)"></div>
         <div x-show="showCreate" x-transition.scale
-            class="relative w-full bg-white dark:bg-gray-800 rounded-[2.5rem] shadow-2xl p-8 border border-gray-100 dark:border-gray-700 z-10 max-h-[90vh] overflow-y-auto"
+            class="relative w-full bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-5 border border-gray-100 dark:border-gray-700 z-10 max-h-[90vh] overflow-y-auto"
             style="max-width: 900px;">
             <div class="flex justify-between items-center mb-6">
-                <h3 class="text-2xl font-black italic uppercase tracking-tighter text-gray-800 dark:text-white">
+                <h3 class="text-2xl font-bold uppercase tracking-tight text-gray-800 dark:text-white">
                     Tambah Calon Anggota
                 </h3>
                 <button wire:click="$set('showCreateModal', false)" class="text-gray-400 hover:text-gray-650">
@@ -772,7 +772,7 @@
         <div x-show="showFinish" x-transition.opacity class="fixed inset-0 bg-black/60 backdrop-blur-xs"
             wire:click="$set('showFinishConfirmModal', false)"></div>
         <div x-show="showFinish" x-transition.scale
-            class="relative w-full max-w-md bg-white dark:bg-gray-800 rounded-[2.5rem] shadow-2xl p-8 border border-gray-100 dark:border-gray-700 z-10 text-center animate-in zoom-in-95 duration-200">
+            class="relative w-full max-w-md bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-5 border border-gray-100 dark:border-gray-700 z-10 text-center animate-in zoom-in-95 duration-200">
             <div
                 class="w-16 h-16 bg-amber-100 dark:bg-amber-950/20 text-amber-500 rounded-full flex items-center justify-center mx-auto mb-4">
                 <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
@@ -780,7 +780,7 @@
                         d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                 </svg>
             </div>
-            <h3 class="text-2xl font-black italic uppercase tracking-tighter text-gray-800 dark:text-white mb-2">
+            <h3 class="text-2xl font-bold uppercase tracking-tight text-gray-800 dark:text-white mb-2">
                 Selesaikan Seleksi?
             </h3>
             <p class="text-sm font-semibold text-gray-400 leading-relaxed mb-6">
@@ -808,7 +808,7 @@
         <div x-show="showSingleScoring" x-transition.opacity class="fixed inset-0 bg-black/60 backdrop-blur-xs"
             wire:click="$set('showSingleScoringModal', false)"></div>
         <div x-show="showSingleScoring" x-transition.scale
-            class="relative w-full max-w-5xl bg-white dark:bg-gray-800 rounded-[2.5rem] shadow-2xl p-8 border border-gray-105 dark:border-gray-700 z-10 max-h-[85vh] flex flex-col animate-in zoom-in-95 duration-200">
+            class="relative w-full max-w-5xl bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-5 border border-gray-105 dark:border-gray-700 z-10 max-h-[85vh] flex flex-col animate-in zoom-in-95 duration-200">
             <div class="flex justify-between items-center mb-6 flex-shrink-0">
                 <div>
                     <h2 class="text-xl font-black text-gray-850 dark:text-white uppercase italic tracking-tight">Input
@@ -917,11 +917,11 @@
                 <div
                     class="flex justify-end gap-3 pt-6 border-t border-gray-100 dark:border-gray-700/50 flex-shrink-0">
                     <button type="button" wire:click="$set('showSingleScoringModal', false)"
-                        class="px-6 py-3.5 bg-gray-100 dark:bg-gray-700 text-gray-650 dark:text-white rounded-xl font-black text-xs uppercase tracking-wider transition-all">
+                        class="px-4 py-2.5 bg-gray-100 dark:bg-gray-700 text-gray-650 dark:text-white rounded-xl font-black text-xs uppercase tracking-wider transition-all">
                         Batal
                     </button>
                     <button type="submit"
-                        class="px-8 py-3.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl font-black text-xs uppercase tracking-wider transition-all shadow-lg shadow-emerald-500/20">
+                        class="px-5 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl font-black text-xs uppercase tracking-wider transition-all shadow-lg shadow-emerald-500/20">
                         Simpan Penilaian
                     </button>
                 </div>

@@ -28,13 +28,13 @@
                     class="w-16 h-16 object-contain drop-shadow-xl saturate-50 brightness-110 shrink-0">
             </div>
             <h1
-                class="text-3xl font-black italic uppercase tracking-tighter text-primary-blue dark:text-primary-yellow">
+                class="text-2xl font-bold uppercase tracking-tight text-primary-blue dark:text-primary-yellow">
                 Superapps TEFA</h1>
             <p class="text-gray-400 font-bold text-xs uppercase tracking-widest mt-1">RPL x Labantik</p>
         </div>
 
         <div
-            class="bg-white dark:bg-gray-800 rounded-[2.5rem] shadow-2xl shadow-blue-900/10 p-10 border border-gray-100 dark:border-gray-700">
+            class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl shadow-blue-900/10 p-10 border border-gray-100 dark:border-gray-700">
             <h2 class="text-2xl font-black text-gray-800 dark:text-white mb-2">Selamat Datang!</h2>
             <p class="text-gray-400 text-sm mb-8 font-medium">Silakan masuk untuk mulai mencatat transaksi.</p>
 

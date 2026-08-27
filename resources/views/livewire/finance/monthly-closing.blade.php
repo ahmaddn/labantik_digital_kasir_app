@@ -1,16 +1,16 @@
 <div class="p-6 max-w-4xl mx-auto">
     <!-- Header -->
     <div class="mb-10 text-center md:text-left">
-        <h1 class="text-4xl font-black italic uppercase tracking-tighter text-primary-blue dark:text-primary-blue-light">
+        <h1 class="text-4xl font-bold uppercase tracking-tight text-primary-blue dark:text-primary-blue-light">
             Tutup Buku Bulanan</h1>
         <p class="text-gray-400 font-bold text-xs uppercase tracking-[0.2em] italic">Kunci & Arsipkan Transaksi Lama
             untuk Menghindari Selisih</p>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
         <!-- Input Form Card -->
         <div
-            class="md:col-span-2 bg-white dark:bg-gray-800 rounded-[3rem] p-8 shadow-2xl border border-gray-150 dark:border-gray-700">
+            class="md:col-span-2 bg-white dark:bg-gray-800 rounded-[3rem] p-5 shadow-2xl border border-gray-150 dark:border-gray-700">
             <div class="space-y-6">
                 <!-- Select Month -->
                 <div>
@@ -99,7 +99,7 @@
 
         <!-- Month Summary Stats Card -->
         <div
-            class="bg-gray-900 text-white rounded-[3rem] p-8 shadow-2xl flex flex-col justify-between relative overflow-hidden border-b-8 border-primary-blue">
+            class="bg-gray-900 text-white rounded-[3rem] p-5 shadow-2xl flex flex-col justify-between relative overflow-hidden border-b-8 border-primary-blue">
             <div>
                 <h3 class="text-[10px] font-black uppercase tracking-[0.2em] text-blue-400 mb-1">RINGKASAN AKHIR</h3>
                 <h2 class="text-lg font-black uppercase italic text-white">
@@ -143,8 +143,8 @@
         x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-200"
         x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">
         <div @click.away="show = false"
-            class="bg-white dark:bg-gray-900 w-full max-w-md rounded-[2.5rem] shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-300">
-            <div class="p-8 text-center">
+            class="bg-white dark:bg-gray-900 w-full max-w-md rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-300">
+            <div class="p-5 text-center">
                 <div
                     class="w-16 h-16 bg-amber-100 dark:bg-amber-900/20 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-6">
                     <svg class="w-8 h-8" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
@@ -153,13 +153,13 @@
                             d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                     </svg>
                 </div>
-                <h3 class="text-2xl font-black italic uppercase tracking-tighter text-gray-800 dark:text-white mb-2">
+                <h3 class="text-2xl font-bold uppercase tracking-tight text-gray-800 dark:text-white mb-2">
                     Batalkan Tutup Buku</h3>
                 <p class="text-sm font-bold text-gray-400">Transaksi bulan
                     {{ \Carbon\Carbon::parse($selectedMonth . '-01')->translatedFormat('F Y') }} akan dibuka kembali
                     dan saldo bawaan di bulan berikutnya dihapus.</p>
             </div>
-            <div class="p-8 bg-gray-50 dark:bg-gray-800/50 flex gap-4">
+            <div class="p-5 bg-gray-50 dark:bg-gray-800/50 flex gap-4">
                 <button @click="show = false"
                     class="flex-1 py-4 bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-2xl font-black text-xs uppercase tracking-widest hover:scale-105 active:scale-95 transition-transform">
                     Batal

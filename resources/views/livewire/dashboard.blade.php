@@ -117,10 +117,10 @@
                                 x-transition:enter="transition ease-out duration-300"
                                 x-transition:enter-start="opacity-0 scale-90"
                                 x-transition:enter-end="opacity-100 scale-100"
-                                class="bg-white dark:bg-gray-900 w-full max-w-md rounded-[2.5rem] shadow-2xl overflow-hidden border border-gray-100 dark:border-gray-800">
+                                class="bg-white dark:bg-gray-900 w-full max-w-md rounded-2xl shadow-2xl overflow-hidden border border-gray-100 dark:border-gray-800">
                                 <!-- Header -->
                                 <div
-                                    class="p-8 bg-gradient-to-br from-red-600 to-red-700 text-white relative overflow-hidden">
+                                    class="p-5 bg-gradient-to-br from-red-600 to-red-700 text-white relative overflow-hidden">
                                     <div
                                         class="absolute -right-10 -bottom-10 w-32 h-32 bg-white/10 rounded-full blur-2xl">
                                     </div>
@@ -145,7 +145,7 @@
                                 </div>
 
                                 <!-- Content -->
-                                <div class="p-8">
+                                <div class="p-5">
                                     <p class="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
                                         Anda yakin ingin mengaktifkan kembali sesi ini? <strong
                                             class="text-primary-red">Data rekap hari ini akan dihapus</strong> dan Anda
@@ -157,12 +157,12 @@
                                 <div
                                     class="p-6 bg-gray-50 dark:bg-gray-800 border-t border-gray-100 dark:border-gray-800 flex flex-col sm:flex-row gap-3 justify-end">
                                     <button type="button" @click="showEmergencyConfirm = false"
-                                        class="px-6 py-3.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 text-xs font-black rounded-2xl hover:bg-gray-50 dark:hover:bg-gray-750 transition-all text-center uppercase tracking-widest">
+                                        class="px-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 text-xs font-black rounded-2xl hover:bg-gray-50 dark:hover:bg-gray-750 transition-all text-center uppercase tracking-widest">
                                         Batal
                                     </button>
                                     <button type="button" wire:click="emergencyReactivateSession"
                                         @click="showEmergencyConfirm = false"
-                                        class="px-8 py-3.5 bg-gradient-to-r from-red-600 to-red-700 text-white text-xs font-black rounded-2xl hover:bg-red-700 shadow-lg shadow-red-600/25 transition-all text-center uppercase tracking-widest">
+                                        class="px-5 py-2.5 bg-gradient-to-r from-red-600 to-red-700 text-white text-xs font-black rounded-2xl hover:bg-red-700 shadow-lg shadow-red-600/25 transition-all text-center uppercase tracking-widest">
                                         Ya, Aktifkan Sesi
                                     </button>
                                 </div>
@@ -229,7 +229,7 @@
         </div>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
             <div
-                class="bg-primary-blue rounded-3xl md:rounded-[3rem] p-5 md:p-10 shadow-2xl shadow-blue-900/30 border border-transparent hover:scale-105 transition-all group overflow-hidden relative">
+                class="bg-primary-blue rounded-2xl p-4 md:p-6 shadow-2xl shadow-blue-900/30 border border-transparent hover:scale-105 transition-all group overflow-hidden relative">
                 <div
                     class="absolute -right-8 -bottom-8 opacity-10 group-hover:scale-110 transition-transform duration-700">
                     <svg class="w-32 h-32 text-white" xmlns="http://www.w3.org/2000/svg" width="24"
@@ -565,7 +565,7 @@
 
     <!-- Chart Section -->
     <div
-        class="bg-white dark:bg-gray-800 rounded-3xl md:rounded-[3.5rem] p-5 md:p-10 mb-8 md:mb-16 shadow-2xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 overflow-hidden">
+        class="bg-white dark:bg-gray-800 rounded-3xl md:rounded-[3.5rem] p-4 md:p-6 mb-8 md:mb-16 shadow-2xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 overflow-hidden">
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 md:mb-10">
             <div>
                 <h2
@@ -712,12 +712,12 @@
         <!-- Top Products -->
         <div
             class="bg-white dark:bg-gray-800 rounded-3xl md:rounded-[3.5rem] shadow-2xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 overflow-hidden">
-            <div class="p-5 md:p-10 border-b border-gray-100 dark:border-gray-700">
+            <div class="p-4 md:p-6 border-b border-gray-100 dark:border-gray-700">
                 <h2
                     class="text-xl md:text-2xl font-bold uppercase tracking-tight text-gray-800 dark:text-white">
                     Produk Terlaris (All-Time)</h2>
             </div>
-            <div class="p-5 md:p-10 space-y-6 md:space-y-10">
+            <div class="p-4 md:p-6 space-y-6 md:space-y-10">
                 @forelse($topProducts as $top)
                     <div class="flex items-center group">
                         <div
@@ -758,14 +758,14 @@
         <!-- Category Revenue Chart -->
         <div
             class="bg-white dark:bg-gray-800 rounded-3xl md:rounded-[3.5rem] shadow-2xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 overflow-hidden flex flex-col">
-            <div class="p-5 md:p-10 border-b border-gray-100 dark:border-gray-700">
+            <div class="p-4 md:p-6 border-b border-gray-100 dark:border-gray-700">
                 <h2
                     class="text-xl md:text-2xl font-bold uppercase tracking-tight text-gray-800 dark:text-white">
                     Revenue by Category</h2>
                 <p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mt-1">Distribusi Omzet Per
                     Kategori</p>
             </div>
-            <div class="p-5 md:p-10 flex-1 flex flex-col justify-center">
+            <div class="p-4 md:p-6 flex-1 flex flex-col justify-center">
                 <div class="relative h-[250px] md:h-[300px]" wire:ignore>
                     <canvas id="categoryChart"></canvas>
                 </div>
@@ -790,14 +790,14 @@
         <!-- Monthly Growth Chart -->
         <div
             class="bg-white dark:bg-gray-800 rounded-3xl md:rounded-[3.5rem] shadow-2xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 overflow-hidden flex flex-col">
-            <div class="p-5 md:p-10 border-b border-gray-100 dark:border-gray-700">
+            <div class="p-4 md:p-6 border-b border-gray-100 dark:border-gray-700">
                 <h2
                     class="text-xl md:text-2xl font-bold uppercase tracking-tight text-gray-800 dark:text-white">
                     Monthly Growth</h2>
                 <p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mt-1">Tren Omzet 6 Bulan
                     Terakhir</p>
             </div>
-            <div class="p-5 md:p-10 flex-1">
+            <div class="p-4 md:p-6 flex-1">
                 <div class="relative h-[280px] md:h-[350px]" wire:ignore>
                     <canvas id="monthlyChart"></canvas>
                 </div>
@@ -1053,10 +1053,10 @@
         style="display: none;">
 
         <div
-            class="bg-white dark:bg-gray-900 w-full max-w-2xl rounded-[2.5rem] shadow-2xl overflow-hidden border border-gray-100 dark:border-gray-800 transition-all max-h-[90vh] flex flex-col">
+            class="bg-white dark:bg-gray-900 w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden border border-gray-100 dark:border-gray-800 transition-all max-h-[90vh] flex flex-col">
             <!-- Modal Header -->
             <div
-                class="p-8 bg-gradient-to-br from-primary-blue to-blue-700 text-white relative overflow-hidden flex-shrink-0">
+                class="p-5 bg-gradient-to-br from-primary-blue to-blue-700 text-white relative overflow-hidden flex-shrink-0">
                 <div class="absolute -right-10 -bottom-10 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
                 <div class="relative z-10 flex items-center gap-4">
                     <div
@@ -1079,7 +1079,7 @@
             </div>
 
             <!-- Modal Content (Scrollable) -->
-            <div class="p-8 space-y-6 overflow-y-auto no-scrollbar flex-1">
+            <div class="p-5 space-y-6 overflow-y-auto no-scrollbar flex-1">
                 <h4 class="text-sm font-black text-gray-900 dark:text-white uppercase tracking-wider">3 Langkah Utama
                     Alur Kerja Kasir:</h4>
 
@@ -1169,11 +1169,11 @@
             <div
                 class="p-6 bg-gray-50 dark:bg-gray-800 border-t border-gray-100 dark:border-gray-800 flex flex-col sm:flex-row gap-3 justify-end flex-shrink-0">
                 <button @click="closeWelcome(false)"
-                    class="px-6 py-3.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 text-xs font-black rounded-2xl hover:bg-gray-50 dark:hover:bg-gray-750 transition-all text-center">
+                    class="px-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 text-xs font-black rounded-2xl hover:bg-gray-50 dark:hover:bg-gray-750 transition-all text-center">
                     Langsung Kerja
                 </button>
                 <button @click="closeWelcome(true)"
-                    class="px-8 py-3.5 bg-gradient-to-r from-primary-blue to-blue-600 text-white text-xs font-black rounded-2xl hover:bg-blue-600 shadow-lg shadow-blue-500/25 transition-all text-center">
+                    class="px-5 py-2.5 bg-gradient-to-r from-primary-blue to-blue-600 text-white text-xs font-black rounded-2xl hover:bg-blue-600 shadow-lg shadow-blue-500/25 transition-all text-center">
                     Pelajari SOP Lengkap
                 </button>
             </div>

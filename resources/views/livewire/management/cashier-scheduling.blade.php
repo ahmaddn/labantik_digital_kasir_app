@@ -2,7 +2,7 @@
     <!-- Header -->
     <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
         <div>
-            <h1 class="text-2xl md:text-3xl font-black italic uppercase tracking-tighter text-primary-blue dark:text-primary-yellow">Penjadwalan Kasir</h1>
+            <h1 class="text-2xl md:text-2xl font-bold uppercase tracking-tight text-primary-blue dark:text-primary-yellow">Penjadwalan Kasir</h1>
             <p class="text-gray-400 text-xs md:text-sm font-semibold uppercase tracking-widest mt-1">Atur jadwal jaga kasir per unit TEFA</p>
         </div>
         <div class="flex flex-wrap items-center gap-3">
@@ -59,10 +59,10 @@
     </div>
 
     <!-- Calendar view / list -->
-    <div id="schedule-capture-area" class="p-6 bg-white dark:bg-gray-900 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 shadow-md">
+    <div id="schedule-capture-area" class="p-6 bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-md">
         <div class="mb-6 flex flex-col md:flex-row md:items-center justify-between border-b border-gray-100 dark:border-gray-800 pb-4">
             <div>
-                <h2 class="text-xl font-black italic uppercase tracking-tighter text-primary-blue dark:text-primary-yellow">JADWAL JAGA KASIR</h2>
+                <h2 class="text-xl font-bold uppercase tracking-tight text-primary-blue dark:text-primary-yellow">JADWAL JAGA KASIR</h2>
                 <p class="text-xs font-bold text-gray-450 dark:text-gray-400 uppercase tracking-widest">Periode: {{ $weekRange }}</p>
             </div>
             <div class="text-[10px] font-black text-primary-red uppercase italic tracking-wider mt-2 md:mt-0">
@@ -108,9 +108,9 @@
     </div>
 
     <!-- Tabel Akumulasi Shift Per Kasir -->
-    <div class="p-6 bg-white dark:bg-gray-900 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 shadow-md">
+    <div class="p-6 bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-md">
         <div class="mb-6 border-b border-gray-100 dark:border-gray-800 pb-4">
-            <h2 class="text-xl font-black italic uppercase tracking-tighter text-primary-blue dark:text-primary-yellow">Ringkasan Shift Kasir</h2>
+            <h2 class="text-xl font-bold uppercase tracking-tight text-primary-blue dark:text-primary-yellow">Ringkasan Shift Kasir</h2>
             <p class="text-gray-400 text-xs font-semibold uppercase tracking-widest mt-1">Akumulasi total tugas jaga kasir (Semua Periode)</p>
         </div>
         <div class="overflow-x-auto">
@@ -157,7 +157,7 @@
     <!-- Create Schedule Modal -->
     <div x-data="{ show: @entangle('showCreateModal') }" x-show="show" class="fixed inset-0 z-50 flex items-center justify-center p-4" x-cloak>
         <div x-show="show" x-transition.opacity class="fixed inset-0 bg-black/60 backdrop-blur-xs" wire:click="$set('showCreateModal', false)"></div>
-        <div x-show="show" x-transition.scale class="relative w-full max-w-md bg-white dark:bg-gray-800 rounded-[2rem] shadow-2xl p-8 border border-gray-100 dark:border-gray-700 z-10">
+        <div x-show="show" x-transition.scale class="relative w-full max-w-md bg-white dark:bg-gray-800 rounded-[2rem] shadow-2xl p-5 border border-gray-100 dark:border-gray-700 z-10">
             <h2 class="text-2xl font-black text-gray-850 dark:text-white uppercase italic tracking-tight mb-6">Tambah Jadwal Kasir</h2>
             
             <form wire:submit.prevent="saveSchedule" class="space-y-5">
@@ -199,7 +199,7 @@
     <!-- Delete Confirmation Modal -->
     <div x-data="{ show: @entangle('showDeleteModal') }" x-show="show" class="fixed inset-0 z-50 flex items-center justify-center p-4" x-cloak>
         <div x-show="show" x-transition.opacity class="fixed inset-0 bg-black/60 backdrop-blur-xs" wire:click="$set('showDeleteModal', false)"></div>
-        <div x-show="show" x-transition.scale class="relative w-full max-w-sm bg-white dark:bg-gray-800 rounded-[2rem] shadow-2xl p-8 border border-gray-100 dark:border-gray-700 z-10 text-center">
+        <div x-show="show" x-transition.scale class="relative w-full max-w-sm bg-white dark:bg-gray-800 rounded-[2rem] shadow-2xl p-5 border border-gray-100 dark:border-gray-700 z-10 text-center">
             <h2 class="text-xl font-black text-gray-850 dark:text-white uppercase italic mb-4">Hapus Jadwal?</h2>
             <p class="text-gray-400 text-sm mb-6">Apakah Anda yakin ingin menghapus jadwal penugasan kasir ini?</p>
             <div class="flex gap-3">
@@ -215,7 +215,7 @@
     <!-- Delete All Confirmation Modal -->
     <div x-data="{ show: @entangle('showDeleteAllModal') }" x-show="show" class="fixed inset-0 z-50 flex items-center justify-center p-4" x-cloak>
         <div x-show="show" x-transition.opacity class="fixed inset-0 bg-black/60 backdrop-blur-xs" wire:click="$set('showDeleteAllModal', false)"></div>
-        <div x-show="show" x-transition.scale class="relative w-full max-w-sm bg-white dark:bg-gray-800 rounded-[2rem] shadow-2xl p-8 border border-gray-100 dark:border-gray-700 z-10 text-center">
+        <div x-show="show" x-transition.scale class="relative w-full max-w-sm bg-white dark:bg-gray-800 rounded-[2rem] shadow-2xl p-5 border border-gray-100 dark:border-gray-700 z-10 text-center">
             <h2 class="text-xl font-black text-gray-850 dark:text-white uppercase italic mb-4">Kosongkan Jadwal?</h2>
             <p class="text-gray-400 text-sm mb-6">Apakah Anda yakin ingin menghapus seluruh jadwal tugas kasir pada minggu ini ({{ $weekRange }})?</p>
             <div class="flex gap-3">
@@ -232,7 +232,7 @@
     <!-- Randomize Config Modal -->
     <div x-data="{ show: @entangle('showRandomModal') }" x-show="show" class="fixed inset-0 z-50 flex items-center justify-center p-4" x-cloak>
         <div x-show="show" x-transition.opacity class="fixed inset-0 bg-black/60 backdrop-blur-xs" wire:click="$set('showRandomModal', false)"></div>
-        <div x-show="show" x-transition.scale class="relative w-full max-w-sm bg-white dark:bg-gray-800 rounded-[2rem] shadow-2xl p-8 border border-gray-100 dark:border-gray-700 z-10">
+        <div x-show="show" x-transition.scale class="relative w-full max-w-sm bg-white dark:bg-gray-800 rounded-[2rem] shadow-2xl p-5 border border-gray-100 dark:border-gray-700 z-10">
             <h2 class="text-2xl font-black text-gray-855 dark:text-white uppercase italic mb-6">Randomize Jadwal</h2>
             
             <form wire:submit.prevent="randomizeSchedules" class="space-y-5">

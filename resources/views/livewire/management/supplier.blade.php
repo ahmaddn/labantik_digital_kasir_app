@@ -1,7 +1,7 @@
 <div class="p-6">
     <div class="flex flex-col md:flex-row md:items-center justify-between mb-10 gap-6">
         <div>
-            <h1 class="text-4xl font-black italic uppercase tracking-tighter text-primary-blue dark:text-primary-blue-light">Manajemen Supplier</h1>
+            <h1 class="text-4xl font-bold uppercase tracking-tight text-primary-blue dark:text-primary-blue-light">Manajemen Supplier</h1>
             <p class="text-gray-400 font-bold text-xs uppercase tracking-[0.2em] italic">Data Penitip Barang & Supplier</p>
         </div>
     </div>
@@ -14,7 +14,7 @@
                     <div class="w-12 h-12 bg-primary-blue rounded-2xl flex items-center justify-center text-white mr-4 shadow-lg shadow-blue-900/20">
                         <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
                     </div>
-                    <h2 class="text-xl font-black italic uppercase tracking-tighter text-gray-800 dark:text-white">
+                    <h2 class="text-xl font-bold uppercase tracking-tight text-gray-800 dark:text-white">
                         {{ $editingId ? 'Edit Supplier' : 'Supplier Baru' }}
                     </h2>
                 </div>
@@ -43,7 +43,7 @@
                     </div>
 
                     <div class="flex items-center gap-4 pt-4">
-                        <button type="submit" class="flex-1 py-5 bg-primary-blue text-white rounded-[2rem] shadow-2xl shadow-blue-900/20 font-black italic uppercase tracking-wider transform hover:-translate-y-1 transition-all">
+                        <button type="submit" class="flex-1 py-5 bg-primary-blue text-white rounded-[2rem] shadow-2xl shadow-blue-900/20 font-bold uppercase tracking-wide text-xs transform hover:-translate-y-1 transition-all">
                             {{ $editingId ? 'Simpan Perubahan' : 'Tambah Supplier' }}
                         </button>
                         @if($editingId)
@@ -59,7 +59,7 @@
         <!-- List Section -->
         <div class="lg:col-span-2">
             <div class="bg-white dark:bg-gray-800 rounded-[3.5rem] shadow-2xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 overflow-hidden">
-                <div class="p-8 border-b border-gray-100 dark:border-gray-700 flex flex-col md:flex-row justify-between items-center gap-4">
+                <div class="p-5 border-b border-gray-100 dark:border-gray-700 flex flex-col md:flex-row justify-between items-center gap-4">
                     <div class="relative group w-full md:w-64">
                         <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                             <svg class="w-3 h-3 text-gray-400" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
@@ -193,7 +193,7 @@
             <div class="w-20 h-20 bg-primary-red/10 text-primary-red rounded-full flex items-center justify-center mx-auto mb-8">
                 <svg class="w-10 h-10" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
             </div>
-            <h3 class="text-2xl font-black italic uppercase tracking-tighter text-gray-800 dark:text-white mb-4">Hapus Supplier?</h3>
+            <h3 class="text-2xl font-bold uppercase tracking-tight text-gray-800 dark:text-white mb-4">Hapus Supplier?</h3>
             <p class="text-gray-400 font-bold text-xs uppercase tracking-widest mb-10 leading-relaxed">Tindakan ini tidak dapat dibatalkan. Seluruh data terkait supplier ini akan dihapus permanen.</p>
             <div class="flex gap-4">
                 <button @click="close()" class="flex-1 py-4 bg-gray-100 dark:bg-gray-900 text-gray-400 rounded-2xl font-black uppercase text-[10px] tracking-widest hover:text-gray-600 transition-all">Batal</button>

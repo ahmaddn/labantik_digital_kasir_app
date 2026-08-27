@@ -2,7 +2,7 @@
     <!-- Header -->
     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-            <h1 class="text-3xl font-black italic uppercase tracking-tighter text-primary-blue dark:text-primary-yellow">Log Audit Keamanan</h1>
+            <h1 class="text-2xl font-bold uppercase tracking-tight text-primary-blue dark:text-primary-yellow">Log Audit Keamanan</h1>
             <p class="text-gray-400 text-sm font-semibold uppercase tracking-widest mt-1">Pelacakan Aktivitas Perekaman Layar, Print, & Screenshot</p>
         </div>
         
@@ -28,9 +28,9 @@
                         x-transition:enter="transition ease-out duration-300"
                         x-transition:enter-start="opacity-0 scale-90"
                         x-transition:enter-end="opacity-100 scale-100"
-                        class="bg-white dark:bg-gray-900 w-full max-w-md rounded-[2.5rem] shadow-2xl overflow-hidden border border-gray-100 dark:border-gray-800">
+                        class="bg-white dark:bg-gray-900 w-full max-w-md rounded-2xl shadow-2xl overflow-hidden border border-gray-100 dark:border-gray-800">
                         <!-- Header -->
-                        <div class="p-8 bg-gradient-to-br from-red-600 to-red-700 text-white relative overflow-hidden">
+                        <div class="p-5 bg-gradient-to-br from-red-600 to-red-700 text-white relative overflow-hidden">
                             <div class="absolute -right-10 -bottom-10 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
                             <div class="relative z-10 flex items-center gap-4">
                                 <div class="w-14 h-14 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/20 flex-shrink-0">
@@ -44,7 +44,7 @@
                         </div>
 
                         <!-- Content -->
-                        <div class="p-8">
+                        <div class="p-5">
                             <p class="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
                                 Apakah Anda yakin ingin menghapus <strong class="text-primary-red">semua log audit keamanan</strong>? Tindakan ini tidak dapat dibatalkan.
                             </p>
@@ -52,10 +52,10 @@
 
                         <!-- Footer -->
                         <div class="p-6 bg-gray-50 dark:bg-gray-800 border-t border-gray-100 dark:border-gray-800 flex flex-col sm:flex-row gap-3 justify-end">
-                            <button type="button" @click="showClearConfirm = false" class="px-6 py-3.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 text-xs font-black rounded-2xl hover:bg-gray-50 dark:hover:bg-gray-750 transition-all text-center uppercase tracking-widest">
+                            <button type="button" @click="showClearConfirm = false" class="px-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 text-xs font-black rounded-2xl hover:bg-gray-50 dark:hover:bg-gray-750 transition-all text-center uppercase tracking-widest">
                                 Batal
                             </button>
-                            <button type="button" wire:click="clearLogs" @click="showClearConfirm = false" class="px-8 py-3.5 bg-gradient-to-r from-red-600 to-red-700 text-white text-xs font-black rounded-2xl hover:bg-red-700 shadow-lg shadow-red-600/25 transition-all text-center uppercase tracking-widest">
+                            <button type="button" wire:click="clearLogs" @click="showClearConfirm = false" class="px-5 py-2.5 bg-gradient-to-r from-red-600 to-red-700 text-white text-xs font-black rounded-2xl hover:bg-red-700 shadow-lg shadow-red-600/25 transition-all text-center uppercase tracking-widest">
                                 Ya, Kosongkan
                             </button>
                         </div>
@@ -81,7 +81,7 @@
     </div>
 
     <!-- Logs List -->
-    <div class="bg-white dark:bg-gray-800 rounded-[2.5rem] shadow-2xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700/50 p-6 md:p-8">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-800 p-4 md:p-6">
         <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse">
                 <thead>

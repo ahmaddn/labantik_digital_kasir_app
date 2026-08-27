@@ -1,7 +1,7 @@
 <div class="p-6">
     <div class="flex flex-col md:flex-row md:items-center justify-between mb-10 gap-6">
         <div>
-            <h1 class="text-4xl font-black italic uppercase tracking-tighter text-primary-blue dark:text-primary-blue-light">Laporan Bagi Hasil Supplier</h1>
+            <h1 class="text-4xl font-bold uppercase tracking-tight text-primary-blue dark:text-primary-blue-light">Laporan Bagi Hasil Supplier</h1>
             <p class="text-gray-400 font-bold text-xs uppercase tracking-[0.2em] italic">Rekap Penjualan Barang Titipan</p>
         </div>
         
@@ -24,7 +24,7 @@
     </div>
 
     <!-- Filters -->
-    <div class="bg-white dark:bg-gray-800 rounded-[2.5rem] p-8 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 mb-10">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl p-5 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 mb-10">
         <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
             <div>
                 <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 ml-2">Dari Tanggal</label>

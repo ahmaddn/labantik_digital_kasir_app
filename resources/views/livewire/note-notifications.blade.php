@@ -67,7 +67,7 @@
                         </div>
                     </a>
                 @empty
-                    <div class="p-8 text-center text-xs font-bold text-gray-450 uppercase tracking-widest italic">
+                    <div class="p-5 text-center text-xs font-bold text-gray-450 uppercase tracking-widest italic">
                         Tidak ada notifikasi aktivitas.
                     </div>
                 @endforelse

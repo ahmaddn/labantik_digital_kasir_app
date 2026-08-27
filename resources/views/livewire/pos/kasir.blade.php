@@ -9,7 +9,7 @@
         wire:target="checkout, saveQuickExpense, saveOpeningStock, saveClosingStockAndNext, submitClosingReport"
         style="display: none;"
         class="fixed inset-0 z-[9999] bg-white/40 dark:bg-black/60 backdrop-blur-md items-center justify-center flex-col gap-6">
-        <div class="nb-card p-12 bg-white dark:bg-dark-soft flex flex-col items-center gap-8 animate-brutal-bounce">
+        <div class="nb-card p-12 bg-white dark:bg-dark-soft flex flex-col items-center gap-5 animate-brutal-bounce">
             <div class="relative w-24 h-24">
                 <div class="absolute inset-0 border-4 border-black dark:border-white opacity-20"></div>
                 <div
@@ -19,7 +19,7 @@
             </div>
             <div class="text-center">
                 <h3
-                    class="text-2xl font-black italic uppercase tracking-tighter text-black dark:text-white leading-none">
+                    class="text-2xl font-bold uppercase tracking-tight text-black dark:text-white leading-none">
                     MEMPROSES...</h3>
                 <p class="text-[9px] font-black text-gray-400 uppercase tracking-[0.6em] mt-3">SEDANG MENCATAT TRANSAKSI
                 </p>
@@ -894,7 +894,7 @@
             x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 scale-95"
             x-transition:enter-end="opacity-100 scale-100" x-transition:leave="transition ease-in duration-200"
             x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95"
-            class="nb-card bg-white dark:bg-dark-soft w-full max-w-md p-8 relative z-10 border-t-8 border-t-amber-500">
+            class="nb-card bg-white dark:bg-dark-soft w-full max-w-md p-5 relative z-10 border-t-8 border-t-amber-500">
             
             <div class="flex justify-between items-start mb-6">
                 <div>

@@ -2,25 +2,25 @@
     <!-- Header -->
     <div class="flex flex-col md:flex-row md:items-center justify-between mb-10 gap-6">
         <div>
-            <h1 class="text-4xl font-black italic uppercase tracking-tighter text-primary-blue dark:text-primary-blue-light">Buku Kas Internal</h1>
+            <h1 class="text-4xl font-bold uppercase tracking-tight text-primary-blue dark:text-primary-blue-light">Buku Kas Internal</h1>
             <p class="text-gray-400 font-bold text-xs uppercase tracking-[0.2em] italic">Pencatatan Uang Riil & Operasional</p>
         </div>
         
         <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
-            <button wire:click="exportExcel" wire:loading.attr="disabled" class="px-5 sm:px-8 py-3.5 sm:py-4 bg-green-500 text-white rounded-2xl shadow-xl shadow-green-500/20 font-black italic uppercase text-xs tracking-widest transform hover:-translate-y-1 transition-all flex items-center justify-center">
+            <button wire:click="exportExcel" wire:loading.attr="disabled" class="px-5 sm:px-5 py-2.5 sm:py-4 bg-green-500 text-white rounded-2xl shadow-xl shadow-green-500/20 font-black italic uppercase text-xs tracking-widest transform hover:-translate-y-1 transition-all flex items-center justify-center">
                 <svg class="w-4 h-4 mr-3" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
                 <span wire:loading.remove wire:target="exportExcel">Export Excel</span>
                 <span wire:loading wire:target="exportExcel">Mengekspor...</span>
             </button>
 
             @if($isSubUnit)
-            <button wire:click="openConsolidateModal" class="px-5 sm:px-8 py-3.5 sm:py-4 bg-amber-500 text-white rounded-2xl shadow-xl shadow-amber-500/20 font-black italic uppercase text-xs tracking-widest transform hover:-translate-y-1 transition-all flex items-center justify-center">
+            <button wire:click="openConsolidateModal" class="px-5 sm:px-5 py-2.5 sm:py-4 bg-amber-500 text-white rounded-2xl shadow-xl shadow-amber-500/20 font-black italic uppercase text-xs tracking-widest transform hover:-translate-y-1 transition-all flex items-center justify-center">
                 <svg class="w-4 h-4 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m16 16 3-8 5-5-5-5-8 3"/><path d="M7 21A14 14 0 0 1 21 7"/></svg>
                 Gabungkan Ke Kas Induk
             </button>
             @endif
 
-            <button wire:click="openModal" class="px-5 sm:px-8 py-3.5 sm:py-4 bg-primary-blue text-white rounded-2xl shadow-xl shadow-blue-500/20 font-black italic uppercase text-xs tracking-widest transform hover:-translate-y-1 transition-all flex items-center justify-center">
+            <button wire:click="openModal" class="px-5 sm:px-5 py-2.5 sm:py-4 bg-primary-blue text-white rounded-2xl shadow-xl shadow-blue-500/20 font-black italic uppercase text-xs tracking-widest transform hover:-translate-y-1 transition-all flex items-center justify-center">
                 <svg class="w-4 h-4 mr-3" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
                 Catat Kas Baru
             </button>
@@ -90,7 +90,7 @@
     </div>
 
     <!-- Stats Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-8 mb-12">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-5 mb-12">
         <!-- Total Saldo Kas Card -->
         <div class="bg-gradient-to-br from-emerald-800 to-teal-950 rounded-[3rem] p-6 md:p-7 text-white shadow-2xl shadow-emerald-950/30 relative overflow-hidden group border-b-8 border-emerald-500">
             <div class="absolute -right-6 -bottom-6 opacity-10 group-hover:scale-110 transition-transform duration-700">
@@ -139,7 +139,7 @@
 
     <!-- Period Flow Summary Banner (Only if filter is active) -->
     @if($startDate)
-    <div class="bg-gradient-to-br from-gray-900 via-slate-900 to-gray-950 rounded-[2.5rem] p-8 shadow-xl border border-white/5 text-white mb-8">
+    <div class="bg-gradient-to-br from-gray-900 via-slate-900 to-gray-950 rounded-2xl p-5 shadow-xl border border-white/5 text-white mb-8">
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-center md:text-left mb-6 pb-6 border-b border-white/10">
             <div class="flex flex-col justify-center">
                 <span class="text-[9px] font-black uppercase tracking-widest opacity-60 mb-1">Saldo Awal Periode</span>
@@ -197,7 +197,7 @@
     @endif
 
     <!-- Visual Cash Flow Charts (Responsive) -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12"
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-12"
          x-data="{
             inflowData: @entangle('chartData.inflowValues'),
             inflowLabels: @entangle('chartData.inflowLabels'),
@@ -258,7 +258,7 @@
          x-init="initCharts(); $watch('inflowData', () => initCharts()); $watch('outflowData', () => initCharts());"
     >
         <!-- Inflow Chart Card -->
-        <div class="bg-white dark:bg-gray-800 rounded-[3rem] p-8 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 flex flex-col" wire:ignore>
+        <div class="bg-white dark:bg-gray-800 rounded-[3rem] p-5 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 flex flex-col" wire:ignore>
             <div class="flex justify-between items-center mb-6">
                 <div>
                     <h3 class="text-sm font-black uppercase tracking-wider text-gray-800 dark:text-white italic">Sumber Kas Masuk</h3>
@@ -279,7 +279,7 @@
         </div>
 
         <!-- Outflow Chart Card -->
-        <div class="bg-white dark:bg-gray-800 rounded-[3rem] p-8 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 flex flex-col" wire:ignore>
+        <div class="bg-white dark:bg-gray-800 rounded-[3rem] p-5 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 flex flex-col" wire:ignore>
             <div class="flex justify-between items-center mb-6">
                 <div>
                     <h3 class="text-sm font-black uppercase tracking-wider text-gray-800 dark:text-white italic">Tujuan Kas Keluar</h3>
@@ -302,7 +302,7 @@
 
     <!-- Category Stats Cards -->
     <div class="mb-12">
-        <h2 class="text-2xl font-black italic uppercase tracking-tighter text-gray-800 dark:text-white mb-6">Ringkasan Per Kategori</h2>
+        <h2 class="text-2xl font-bold uppercase tracking-tight text-gray-800 dark:text-white mb-6">Ringkasan Per Kategori</h2>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             @forelse($categoryStats as $stat)
             <div class="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 relative overflow-hidden group">
@@ -348,7 +348,7 @@
                 </div>
             </div>
             @empty
-            <div class="col-span-full bg-white dark:bg-gray-800 rounded-3xl p-8 text-center border border-gray-100 dark:border-gray-700">
+            <div class="col-span-full bg-white dark:bg-gray-800 rounded-3xl p-5 text-center border border-gray-100 dark:border-gray-700">
                 <p class="text-sm font-black text-gray-400 uppercase tracking-widest italic">Belum ada kategori kas.</p>
             </div>
             @endforelse
@@ -358,7 +358,7 @@
     <!-- Table -->
     <div class="bg-white dark:bg-gray-800 rounded-[3.5rem] shadow-2xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 overflow-hidden mb-12">
         <div class="p-10 border-b border-gray-100 dark:border-gray-700">
-            <h2 class="text-2xl font-black italic uppercase tracking-tighter text-gray-800 dark:text-white">Riwayat Transaksi Kas</h2>
+            <h2 class="text-2xl font-bold uppercase tracking-tight text-gray-800 dark:text-white">Riwayat Transaksi Kas</h2>
         </div>
         
         <div class="overflow-x-auto">
@@ -453,7 +453,7 @@
                         <svg class="w-8 h-8" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
                     </button>
                 </div>
-                <h3 class="text-3xl font-black italic uppercase tracking-tighter mb-1">{{ $editingId ? 'Edit Kas' : 'Catat Kas Baru' }}</h3>
+                <h3 class="text-2xl font-bold uppercase tracking-tight mb-1">{{ $editingId ? 'Edit Kas' : 'Catat Kas Baru' }}</h3>
             </div>
 
             <div class="p-10 space-y-6">
@@ -607,16 +607,16 @@
     >
         <div 
             @click.away="show = false"
-            class="bg-white dark:bg-gray-900 w-full max-w-md rounded-[2.5rem] shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-300"
+            class="bg-white dark:bg-gray-900 w-full max-w-md rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-300"
         >
-            <div class="p-8 text-center">
+            <div class="p-5 text-center">
                 <div class="w-16 h-16 bg-red-100 dark:bg-red-900/20 text-primary-red rounded-full flex items-center justify-center mx-auto mb-6">
                     <svg class="w-8 h-8" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
                 </div>
-                <h3 class="text-2xl font-black italic uppercase tracking-tighter text-gray-800 dark:text-white mb-2">Hapus Catatan Kas</h3>
+                <h3 class="text-2xl font-bold uppercase tracking-tight text-gray-800 dark:text-white mb-2">Hapus Catatan Kas</h3>
                 <p class="text-sm font-bold text-gray-400">Apakah Anda yakin ingin menghapus catatan kas ini? Tindakan ini tidak dapat dibatalkan.</p>
             </div>
-            <div class="p-8 bg-gray-50 dark:bg-gray-800/50 flex gap-4">
+            <div class="p-5 bg-gray-50 dark:bg-gray-800/50 flex gap-4">
                 <button @click="show = false" class="flex-1 py-4 bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-2xl font-black text-xs uppercase tracking-widest hover:scale-105 active:scale-95 transition-transform">
                     Batal
                 </button>
@@ -642,13 +642,13 @@
     >
         <div 
             @click.away="show = false"
-            class="bg-white dark:bg-gray-900 w-full max-w-md rounded-[2.5rem] shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-300"
+            class="bg-white dark:bg-gray-900 w-full max-w-md rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-300"
         >
-            <div class="p-8 text-center">
+            <div class="p-5 text-center">
                 <div class="w-16 h-16 bg-red-100 dark:bg-red-900/20 text-primary-red rounded-full flex items-center justify-center mx-auto mb-6">
                     <svg class="w-8 h-8" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
                 </div>
-                <h3 class="text-2xl font-black italic uppercase tracking-tighter text-gray-800 dark:text-white mb-2">
+                <h3 class="text-2xl font-bold uppercase tracking-tight text-gray-800 dark:text-white mb-2">
                     {{ $confirmingDeleteCategoryTxCount > 0 ? 'Hapus Paksa Kategori' : 'Hapus Kategori Kas' }}
                 </h3>
                 
@@ -667,7 +667,7 @@
                     <p class="text-sm font-bold text-gray-400">Apakah Anda yakin ingin menghapus kategori kas "<span class="font-extrabold text-gray-800 dark:text-white">{{ $confirmingDeleteCategoryName }}</span>"? Tindakan ini tidak dapat dibatalkan.</p>
                 @endif
             </div>
-            <div class="p-8 bg-gray-50 dark:bg-gray-800/50 flex gap-4">
+            <div class="p-5 bg-gray-50 dark:bg-gray-800/50 flex gap-4">
                 <button @click="show = false" class="flex-1 py-4 bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-2xl font-black text-xs uppercase tracking-widest hover:scale-105 active:scale-95 transition-transform">
                     Batal
                 </button>
@@ -693,10 +693,10 @@
     >
         <div 
             @click.away="show = false"
-            class="bg-white dark:bg-gray-900 w-full max-w-lg rounded-[2.5rem] shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-300 border-t-8 border-t-primary-blue"
+            class="bg-white dark:bg-gray-900 w-full max-w-lg rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-300 border-t-8 border-t-primary-blue"
         >
             <div class="p-10 border-b border-gray-100 dark:border-gray-800">
-                <h3 class="text-2xl font-black italic uppercase tracking-tighter text-gray-800 dark:text-white">Sesuaikan Saldo Kas Fisik</h3>
+                <h3 class="text-2xl font-bold uppercase tracking-tight text-gray-800 dark:text-white">Sesuaikan Saldo Kas Fisik</h3>
                 <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mt-1">Kategori: {{ $adjustCategoryName }}</p>
             </div>
             
@@ -753,10 +753,10 @@
     >
         <div 
             @click.away="show = false"
-            class="bg-white dark:bg-gray-900 w-full max-w-lg rounded-[2.5rem] shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-300 border-t-8 border-t-amber-500"
+            class="bg-white dark:bg-gray-900 w-full max-w-lg rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-300 border-t-8 border-t-amber-500"
         >
             <div class="p-10 border-b border-gray-100 dark:border-gray-800">
-                <h3 class="text-2xl font-black italic uppercase tracking-tighter text-gray-800 dark:text-white">Gabungkan Saldo ke Kas Induk</h3>
+                <h3 class="text-2xl font-bold uppercase tracking-tight text-gray-800 dark:text-white">Gabungkan Saldo ke Kas Induk</h3>
                 <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mt-1">Konsolidasi Keuangan Sub-Unit</p>
             </div>
             

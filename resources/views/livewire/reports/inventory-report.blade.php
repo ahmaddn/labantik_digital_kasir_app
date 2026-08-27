@@ -1,9 +1,9 @@
-<div class="p-4 sm:p-8 bg-[#f8fafc] dark:bg-gray-950 min-h-screen font-outfit">
+<div class="p-4 sm:p-5 bg-[#f8fafc] dark:bg-gray-950 min-h-screen font-outfit">
     <div class="max-w-7xl mx-auto">
         <!-- Header Section -->
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
             <div>
-                <h1 class="text-4xl font-black italic uppercase tracking-tighter text-gray-800 dark:text-white">
+                <h1 class="text-4xl font-bold uppercase tracking-tight text-gray-800 dark:text-white">
                     Laporan <span class="text-primary-blue">Selisih Stok</span>
                 </h1>
                 <p class="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] mt-2">Inventory Audit & Discrepancy Analysis</p>
@@ -39,7 +39,7 @@
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
 
             
-            <div class="bg-white dark:bg-gray-900 p-8 rounded-[2.5rem] shadow-xl shadow-blue-900/5 border-t-4 border-primary-blue">
+            <div class="bg-white dark:bg-gray-900 p-5 rounded-2xl shadow-xl shadow-blue-900/5 border-t-4 border-primary-blue">
                 <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-4">Total Unit Terjual</span>
                 <div class="flex items-end gap-3">
                     <span class="text-4xl font-black italic text-gray-800 dark:text-white leading-none">{{ $totalSold }}</span>
@@ -47,7 +47,7 @@
                 </div>
             </div>
 
-            <div class="bg-white dark:bg-gray-900 p-8 rounded-[2.5rem] shadow-xl shadow-blue-900/5 border-t-4 border-primary-red">
+            <div class="bg-white dark:bg-gray-900 p-5 rounded-2xl shadow-xl shadow-blue-900/5 border-t-4 border-primary-red">
                 <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-4">Total Selisih Fisik</span>
                 <div class="flex items-end gap-3">
                     <span class="text-4xl font-black italic {{ $totalDiscrepancy < 0 ? 'text-primary-red' : ($totalDiscrepancy > 0 ? 'text-green-500' : 'text-gray-800 dark:text-white') }} leading-none">
@@ -57,7 +57,7 @@
                 </div>
             </div>
 
-            <div class="bg-white dark:bg-gray-900 p-8 rounded-[2.5rem] shadow-xl shadow-blue-900/5 border-t-4 border-amber-500">
+            <div class="bg-white dark:bg-gray-900 p-5 rounded-2xl shadow-xl shadow-blue-900/5 border-t-4 border-amber-500">
                 <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-4">Produk Bermasalah</span>
                 <div class="flex items-end gap-3">
                     <span class="text-4xl font-black italic text-amber-500 leading-none">{{ $itemsWithIssue }}</span>
@@ -67,7 +67,7 @@
         </div>
 
         <!-- Filters -->
-        <div class="bg-white dark:bg-gray-800 rounded-[3rem] p-8 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 mb-10">
+        <div class="bg-white dark:bg-gray-800 rounded-[3rem] p-5 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 mb-10">
             <div class="flex flex-wrap items-center gap-6">
                 <div class="flex items-center gap-4 bg-gray-50 dark:bg-gray-900 px-6 py-4 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-inner">
                     <svg class="w-4 h-4 text-primary-blue" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
@@ -109,7 +109,7 @@
         <!-- Inventory Table -->
         <div class="bg-white dark:bg-gray-800 rounded-[3.5rem] shadow-2xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 overflow-hidden">
             <div class="p-10 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center">
-                <h2 class="text-2xl font-black italic uppercase tracking-tighter text-gray-800 dark:text-white">Daftar Audit Produk</h2>
+                <h2 class="text-2xl font-bold uppercase tracking-tight text-gray-800 dark:text-white">Daftar Audit Produk</h2>
                 <div class="px-6 py-2 bg-blue-50 dark:bg-blue-900/30 text-primary-blue rounded-full text-[10px] font-black uppercase tracking-widest">
                     Showing {{ count($reportData) }} Items
                 </div>

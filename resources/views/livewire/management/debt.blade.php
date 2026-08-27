@@ -2,7 +2,7 @@
     <!-- Header Section -->
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
         <div>
-            <h2 class="text-3xl font-black italic uppercase tracking-tighter text-primary-blue dark:text-white">
+            <h2 class="text-2xl font-bold uppercase tracking-tight text-primary-blue dark:text-white">
                 Hutang & Kembalian
             </h2>
             <p class="text-gray-400 font-bold uppercase tracking-widest text-[10px] mt-1">
@@ -37,8 +37,8 @@
     <!-- Summary Stats -->
     <div class="mb-10">
         @if($activeTab === 'debt')
-            <div class="bg-white dark:bg-gray-800 rounded-[2.5rem] p-8 border border-gray-100 dark:border-gray-700 shadow-sm relative overflow-hidden group">
-                <div class="absolute top-0 right-0 p-8 opacity-10 group-hover:scale-110 transition-transform duration-500">
+            <div class="bg-white dark:bg-gray-800 rounded-2xl p-5 border border-gray-100 dark:border-gray-700 shadow-sm relative overflow-hidden group">
+                <div class="absolute top-0 right-0 p-5 opacity-10 group-hover:scale-110 transition-transform duration-500">
                     <svg class="w-20 h-20 text-primary-blue" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
                 </div>
                 <p class="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 mb-2">Total Piutang (Hutang Pembeli)</p>
@@ -47,8 +47,8 @@
                 </h3>
             </div>
         @elseif($activeTab === 'change')
-            <div class="bg-white dark:bg-gray-800 rounded-[2.5rem] p-8 border border-gray-100 dark:border-gray-700 shadow-sm relative overflow-hidden group">
-                <div class="absolute top-0 right-0 p-8 opacity-10 group-hover:scale-110 transition-transform duration-500">
+            <div class="bg-white dark:bg-gray-800 rounded-2xl p-5 border border-gray-100 dark:border-gray-700 shadow-sm relative overflow-hidden group">
+                <div class="absolute top-0 right-0 p-5 opacity-10 group-hover:scale-110 transition-transform duration-500">
                     <svg class="w-20 h-20 text-primary-red" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20"/><path d="m17 5-5-3-5 3"/><path d="m17 19-5 3-5-3"/><path d="M2 12h20"/><path d="m5 7-3 5 3 5"/><path d="m19 7 3 5-3 5"/></svg>
                 </div>
                 <p class="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 mb-2">Total Belum Kembalian</p>
@@ -58,8 +58,8 @@
                 <p class="text-[9px] text-gray-400 mt-2 italic font-medium">*Berdasarkan sisa kembalian nota</p>
             </div>
         @elseif($activeTab === 'store_debt')
-            <div class="bg-white dark:bg-gray-800 rounded-[2.5rem] p-8 border border-gray-100 dark:border-gray-700 shadow-sm relative overflow-hidden group">
-                <div class="absolute top-0 right-0 p-8 opacity-10 group-hover:scale-110 transition-transform duration-500">
+            <div class="bg-white dark:bg-gray-800 rounded-2xl p-5 border border-gray-100 dark:border-gray-700 shadow-sm relative overflow-hidden group">
+                <div class="absolute top-0 right-0 p-5 opacity-10 group-hover:scale-110 transition-transform duration-500">
                     <svg class="w-20 h-20 text-amber-500" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="12" x="2" y="6" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/></svg>
                 </div>
                 <p class="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 mb-2">Total Hutang Toko</p>
@@ -71,7 +71,7 @@
     </div>
 
     <!-- Filters Section -->
-    <div class="bg-white dark:bg-gray-900 rounded-[2rem] p-8 border border-gray-100 dark:border-gray-800 shadow-sm mb-8">
+    <div class="bg-white dark:bg-gray-900 rounded-[2rem] p-5 border border-gray-100 dark:border-gray-800 shadow-sm mb-8">
         <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
             <div class="md:col-span-2">
                 <label class="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-3 ml-2">
@@ -141,12 +141,12 @@
                 <!-- SECTION 1: Active Store Debts -->
                 <div class="space-y-4">
                     <div class="flex items-center justify-between">
-                        <h3 class="text-sm font-black italic uppercase tracking-tighter text-amber-500 flex items-center gap-3">
+                        <h3 class="text-sm font-bold uppercase tracking-tight text-amber-500 flex items-center gap-3">
                             <span class="w-1.5 h-4 bg-amber-500 rounded-full"></span>
                             Daftar Hutang Toko Aktif (Belum Lunas)
                         </h3>
                     </div>
-                    <div class="bg-white dark:bg-gray-900 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden">
+                    <div class="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden">
                         <div class="overflow-x-auto">
                             <table class="w-full text-left border-collapse">
                                 <thead>
@@ -178,7 +178,7 @@
                                                     <div class="w-10 h-10 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-amber-500 font-black text-xs mr-4">
                                                         {{ substr($debt->creditor_name ?? 'S', 0, 1) }}
                                                     </div>
-                                                    <span class="text-sm font-black italic uppercase tracking-tighter text-gray-700 dark:text-gray-300">
+                                                    <span class="text-sm font-bold uppercase tracking-tight text-gray-700 dark:text-gray-300">
                                                         {{ $debt->creditor_name }}
                                                     </span>
                                                 </div>
@@ -229,7 +229,7 @@
                                                     <div class="w-16 h-16 bg-gray-50 dark:bg-gray-800 rounded-full flex items-center justify-center text-gray-300 mb-4">
                                                         <svg class="w-8 h-8" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>
                                                     </div>
-                                                    <h4 class="text-sm font-black italic uppercase tracking-tighter text-gray-400">Tidak Ada Hutang Aktif</h4>
+                                                    <h4 class="text-sm font-bold uppercase tracking-tight text-gray-400">Tidak Ada Hutang Aktif</h4>
                                                     <p class="text-[10px] font-bold text-gray-300 uppercase tracking-widest mt-1">Semua hutang toko telah diselesaikan!</p>
                                                 </div>
                                             </td>
@@ -249,12 +249,12 @@
                 <!-- SECTION 2: History (Selesai & Dibatalkan) -->
                 <div class="space-y-4">
                     <div class="flex items-center justify-between">
-                        <h3 class="text-sm font-black italic uppercase tracking-tighter text-emerald-500 flex items-center gap-3">
+                        <h3 class="text-sm font-bold uppercase tracking-tight text-emerald-500 flex items-center gap-3">
                             <span class="w-1.5 h-4 bg-emerald-500 rounded-full"></span>
                             Riwayat Hutang Toko (Lunas &amp; Dihapus)
                         </h3>
                     </div>
-                    <div class="bg-white dark:bg-gray-900 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden">
+                    <div class="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden">
                         <div class="overflow-x-auto">
                             <table class="w-full text-left border-collapse">
                                 <thead>
@@ -280,7 +280,7 @@
                                                     <div class="w-10 h-10 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-400 font-black text-xs mr-4">
                                                         {{ substr($debt->creditor_name ?? 'S', 0, 1) }}
                                                     </div>
-                                                    <span class="text-sm font-black italic uppercase tracking-tighter text-gray-500 dark:text-gray-400">
+                                                    <span class="text-sm font-bold uppercase tracking-tight text-gray-500 dark:text-gray-400">
                                                         {{ $debt->creditor_name }}
                                                     </span>
                                                 </div>
@@ -335,7 +335,7 @@
                                                     <div class="w-16 h-16 bg-gray-50 dark:bg-gray-800 rounded-full flex items-center justify-center text-gray-300 mb-4">
                                                         <svg class="w-8 h-8" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>
                                                     </div>
-                                                    <h4 class="text-sm font-black italic uppercase tracking-tighter text-gray-400">Belum Ada Riwayat</h4>
+                                                    <h4 class="text-sm font-bold uppercase tracking-tight text-gray-400">Belum Ada Riwayat</h4>
                                                     <p class="text-[10px] font-bold text-gray-300 uppercase tracking-widest mt-1">Belum ada transaksi hutang toko yang diselesaikan.</p>
                                                 </div>
                                             </td>
@@ -389,7 +389,7 @@
             @endif
 
             <!-- Table Section -->
-            <div class="bg-white dark:bg-gray-900 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden">
+            <div class="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden">
                 <div class="overflow-x-auto">
                     <table class="w-full text-left border-collapse">
                         <thead>
@@ -419,7 +419,7 @@
                                         <div class="w-10 h-10 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-primary-blue font-black text-xs mr-4">
                                             {{ substr($trx->buyer_name ?? 'A', 0, 1) }}
                                         </div>
-                                        <span class="text-sm font-black italic uppercase tracking-tighter text-gray-700 dark:text-gray-300">
+                                        <span class="text-sm font-bold uppercase tracking-tight text-gray-700 dark:text-gray-300">
                                             {{ $trx->buyer_name ?? 'Anonim' }}
                                         </span>
                                     </div>
@@ -491,7 +491,7 @@
                                         <div class="w-20 h-20 bg-gray-50 dark:bg-gray-800 rounded-full flex items-center justify-center text-gray-300 mb-6">
                                             <svg class="w-10 h-10" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>
                                         </div>
-                                        <h4 class="text-lg font-black italic uppercase tracking-tighter text-gray-400">Tidak Ada Data</h4>
+                                        <h4 class="text-lg font-bold uppercase tracking-tight text-gray-400">Tidak Ada Data</h4>
                                         <p class="text-xs font-bold text-gray-300 uppercase tracking-widest mt-1">Semua transaksi telah diselesaikan!</p>
                                     </div>
                                 </td>
@@ -538,7 +538,7 @@
 
             <div class="p-12 overflow-y-auto custom-scrollbar">
                 <div class="mb-10">
-                    <h3 class="text-3xl font-black italic uppercase tracking-tighter text-gray-800 dark:text-white leading-tight">
+                    <h3 class="text-2xl font-bold uppercase tracking-tight text-gray-800 dark:text-white leading-tight">
                         Pelunasan Nota
                     </h3>
                     <div class="flex items-center gap-2 mt-2">
@@ -547,11 +547,11 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5 items-start">
                     <!-- Left Column: Info & Amount -->
                     <div class="space-y-8">
                         <!-- Summary Info -->
-                        <div class="bg-gray-50 dark:bg-gray-800/50 p-8 rounded-[2.5rem] border border-gray-100 dark:border-gray-700 shadow-sm">
+                        <div class="bg-gray-50 dark:bg-gray-800/50 p-5 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm">
                             <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-2">Total Sisa Tagihan</span>
                             <div class="flex items-baseline gap-2">
                                 <span class="text-xs font-black text-gray-400 italic">Rp</span>
@@ -645,7 +645,7 @@
                                 </button>
 
                                 <!-- Spent Items Selection -->
-                                <div x-show="settleMethod === 'dijajankan'" class="p-8 bg-gray-50 dark:bg-gray-800/50 rounded-[2.5rem] border border-gray-100 dark:border-gray-700 animate-in slide-in-from-top-6 duration-500">
+                                <div x-show="settleMethod === 'dijajankan'" class="p-5 bg-gray-50 dark:bg-gray-800/50 rounded-2xl border border-gray-100 dark:border-gray-700 animate-in slide-in-from-top-6 duration-500">
                                     <div class="space-y-6">
                                         <div class="relative">
                                             <input 
@@ -726,7 +726,7 @@
                 <div class="mt-12 pt-8 border-t border-gray-50 dark:border-gray-800">
                     <button 
                         wire:click="settle"
-                        class="w-full py-6 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-[2.5rem] shadow-2xl font-black italic uppercase tracking-[0.4em] text-sm hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-4 group"
+                        class="w-full py-6 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-2xl shadow-2xl font-black italic uppercase tracking-[0.4em] text-sm hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-4 group"
                     >
                         <span>Proses Pelunasan</span>
                         <svg class="w-5 h-5 group-hover:translate-x-2 transition-transform" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
@@ -756,12 +756,12 @@
             x-transition:enter-start="opacity-0 scale-90 translate-y-10"
             x-transition:enter-end="opacity-100 scale-100 translate-y-0"
         >
-            <button @click="show = false" class="absolute top-8 right-8 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors z-10">
+            <button @click="show = false" class="absolute top-5 right-8 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors z-10">
                 <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
             </button>
 
             <div class="p-10 border-b border-gray-50 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/30">
-                <h3 class="text-2xl font-black italic uppercase tracking-tighter text-gray-800 dark:text-white leading-tight">
+                <h3 class="text-2xl font-bold uppercase tracking-tight text-gray-800 dark:text-white leading-tight">
                     Rincian Transaksi
                 </h3>
                 <p class="text-[10px] font-black text-primary-blue uppercase tracking-widest mt-1">{{ $detailReference }}</p>
@@ -835,7 +835,7 @@
 
             <div class="p-12 overflow-y-auto custom-scrollbar">
                 <div class="mb-8">
-                    <h3 class="text-3xl font-black italic uppercase tracking-tighter text-gray-800 dark:text-white leading-tight">
+                    <h3 class="text-2xl font-bold uppercase tracking-tight text-gray-800 dark:text-white leading-tight">
                         Tambah Hutang Toko
                     </h3>
                     <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">Catat hutang baru kepada supplier atau pihak lain</p>
@@ -962,7 +962,7 @@
 
             <div class="p-12 overflow-y-auto custom-scrollbar">
                 <div class="mb-10">
-                    <h3 class="text-3xl font-black italic uppercase tracking-tighter text-gray-800 dark:text-white leading-tight">
+                    <h3 class="text-2xl font-bold uppercase tracking-tight text-gray-800 dark:text-white leading-tight">
                         Pelunasan Hutang Toko
                     </h3>
                     <div class="flex items-center gap-2 mt-2">
@@ -972,7 +972,7 @@
 
                 <div class="space-y-8">
                     <!-- Total Remaining Info -->
-                    <div class="bg-gray-50 dark:bg-gray-800/50 p-8 rounded-[2.5rem] border border-gray-100 dark:border-gray-700 shadow-sm">
+                    <div class="bg-gray-50 dark:bg-gray-800/50 p-5 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm">
                         <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-2">Sisa Hutang Belum Lunas</span>
                         <div class="flex items-baseline gap-2">
                             <span class="text-xs font-black text-gray-400 italic">Rp</span>
@@ -1041,7 +1041,7 @@
                 <div class="mt-12 pt-8 border-t border-gray-50 dark:border-gray-800">
                     <button 
                         wire:click="settleStoreDebt"
-                        class="w-full py-6 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-[2.5rem] shadow-2xl font-black italic uppercase tracking-[0.4em] text-sm hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-4 group"
+                        class="w-full py-6 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-2xl shadow-2xl font-black italic uppercase tracking-[0.4em] text-sm hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-4 group"
                     >
                         <span>Proses Pelunasan</span>
                         <svg class="w-5 h-5 group-hover:translate-x-2 transition-transform" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
@@ -1079,7 +1079,7 @@
                     <div class="w-16 h-16 bg-red-100 dark:bg-red-900/30 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
                         <svg class="w-8 h-8" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
                     </div>
-                    <h3 class="text-2xl font-black italic uppercase tracking-tighter text-red-600 dark:text-red-500 leading-tight">
+                    <h3 class="text-2xl font-bold uppercase tracking-tight text-red-600 dark:text-red-500 leading-tight">
                         Konfirmasi Penghapusan
                     </h3>
                     <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">Audit Integritas Data Keuangan</p>
@@ -1170,7 +1170,7 @@
             <div class="w-20 h-20 bg-red-100 dark:bg-red-900/30 text-red-500 rounded-full flex items-center justify-center mx-auto mb-8">
                 <svg class="w-10 h-10" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
             </div>
-            <h3 class="text-2xl font-black italic uppercase tracking-tighter text-gray-800 dark:text-white mb-4">Batalkan Pelunasan?</h3>
+            <h3 class="text-2xl font-bold uppercase tracking-tight text-gray-800 dark:text-white mb-4">Batalkan Pelunasan?</h3>
             <p class="text-gray-400 font-bold text-xs uppercase tracking-widest mb-10 leading-relaxed">Status transaksi ini akan dikembalikan menjadi aktif (belum kembalian/belum lunas) dan nominal tagihan akan direstorasi seperti semula.</p>
             <div class="flex gap-4">
                 <button type="button" @click="show = false" class="flex-1 py-4 bg-gray-100 dark:bg-gray-900 text-gray-400 rounded-2xl font-black uppercase text-[10px] tracking-widest hover:text-gray-600 transition-all">Batal</button>

@@ -6,12 +6,12 @@
             <div class="w-px h-8 bg-gray-300 dark:bg-gray-700"></div>
             <img src="{{ asset('labantik.png') }}" alt="Logo Sekolah" class="w-16 h-16 drop-shadow-xl saturate-50 brightness-110">
         </div>
-        <h1 class="text-3xl font-black italic uppercase tracking-tighter text-primary-blue dark:text-primary-yellow">Superapps TEFA</h1>
+        <h1 class="text-2xl font-bold uppercase tracking-tight text-primary-blue dark:text-primary-yellow">Superapps TEFA</h1>
         <p class="text-gray-400 font-bold text-xs uppercase tracking-widest mt-1">RPL x Labantik</p>
     </div>
 
     <!-- Main Container -->
-    <div class="bg-white dark:bg-gray-800 rounded-[2.5rem] shadow-2xl shadow-blue-900/5 p-8 md:p-10 border border-gray-100 dark:border-gray-700">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl shadow-blue-900/5 p-5 md:p-10 border border-gray-100 dark:border-gray-700">
         <div class="text-center mb-10">
             <h2 class="text-2xl font-black text-gray-850 dark:text-white mb-2 uppercase italic tracking-tight">Pilih Hak Akses</h2>
             <p class="text-gray-400 text-sm font-medium">Silakan pilih salah satu hak akses di bawah ini untuk melanjutkan.</p>

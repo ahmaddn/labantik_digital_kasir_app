@@ -56,7 +56,7 @@
             x-transition:leave="transition ease-in duration-400"
             x-transition:leave-start="opacity-100 translate-y-0 scale-100"
             x-transition:leave-end="opacity-0 -translate-y-20 scale-90"
-            class="pointer-events-auto bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl px-6 py-5 sm:px-8 sm:py-6 rounded-[2.5rem] shadow-[0_30px_70px_rgba(0,0,0,0.15)] border-2 flex items-center gap-6 w-full sm:w-auto sm:min-w-[380px] sm:max-w-md relative overflow-hidden group"
+            class="pointer-events-auto bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl px-6 py-5 sm:px-8 sm:py-6 rounded-2xl shadow-[0_30px_70px_rgba(0,0,0,0.15)] border-2 flex items-center gap-6 w-full sm:w-auto sm:min-w-[380px] sm:max-w-md relative overflow-hidden group"
             :class="{
                 'border-emerald-500/20 shadow-emerald-500/10': msg.type === 'success',
                 'border-amber-500/20 shadow-amber-500/10': msg.type === 'warning',

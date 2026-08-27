@@ -171,8 +171,8 @@
         backdrop-filter: blur(24px) saturate(180%) !important;
         -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
         border: 1px solid rgba(255, 255, 255, 0.4) !important;
-        box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.06) !important;
-        border-radius: 1.25rem !important;
+        box-shadow: 0 6px 16px 0 rgba(31, 38, 135, 0.02) !important;
+        border-radius: 0.875rem !important;
     }
     .dark .theme-glassmorphism .bg-white:not(img):not(.theme-no-card),
     .dark .theme-glassmorphism .bg-gray-800:not(.theme-no-card), 
@@ -183,7 +183,7 @@
         -webkit-backdrop-filter: blur(24px) saturate(160%) !important;
         border: 1px solid rgba(255, 255, 255, 0.08) !important;
         box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3) !important;
-        border-radius: 1.25rem !important;
+        border-radius: 0.875rem !important;
     }
 
     /* Classic Premium Theme Style */
@@ -191,9 +191,9 @@
     html:not(.dark) .theme-classic-premium .bg-gray-50:not(.theme-no-card) {
         background-color: #ffffff !important;
         border: 1px solid rgba(0, 0, 0, 0.05) !important;
-        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.03), 0 4px 6px -2px rgba(0, 0, 0, 0.02) !important;
         backdrop-filter: none !important;
-        border-radius: 1.25rem !important;
+        border-radius: 0.875rem !important;
     }
     .dark .theme-classic-premium .bg-white:not(img):not(.theme-no-card),
     .dark .theme-classic-premium .bg-gray-800:not(.theme-no-card),
@@ -203,7 +203,7 @@
         border: 1px solid rgba(255, 255, 255, 0.05) !important;
         box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.35), 0 10px 10px -5px rgba(0, 0, 0, 0.2) !important;
         backdrop-filter: none !important;
-        border-radius: 1.25rem !important;
+        border-radius: 0.875rem !important;
     }
 
     /* Neon Cyberpunk Theme Style */
@@ -229,8 +229,8 @@
     html:not(.dark) .theme-restaurant-aesthetic .bg-gray-50:not(.theme-no-card) {
         background-color: #fffaf0 !important;
         border: 1.5px dashed rgba(249, 115, 22, 0.25) !important;
-        box-shadow: 0 10px 15px -3px rgba(249, 115, 22, 0.05), 0 4px 6px -2px rgba(249, 115, 22, 0.02) !important;
-        border-radius: 1.5rem !important;
+        box-shadow: 0 6px 10px -3px rgba(249, 115, 22, 0.02) !important;
+        border-radius: 1rem !important;
     }
     .dark .theme-restaurant-aesthetic .bg-white:not(img):not(.theme-no-card),
     .dark .theme-restaurant-aesthetic .bg-gray-800:not(.theme-no-card),
@@ -239,7 +239,7 @@
         background-color: #1c1917 !important;
         border: 1.5px dashed rgba(255, 255, 255, 0.08) !important;
         box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.4) !important;
-        border-radius: 1.5rem !important;
+        border-radius: 1rem !important;
     }
 
     /* Retail Minimarket Theme Style (Clean Grid) */
@@ -265,8 +265,8 @@
     html:not(.dark) .theme-bank-aesthetic .bg-gray-50:not(.theme-no-card) {
         background-color: #ffffff !important;
         border: 1px solid rgba(14, 165, 233, 0.18) !important;
-        box-shadow: 0 4px 20px -2px rgba(14, 165, 233, 0.08) !important;
-        border-radius: 1.25rem !important;
+        box-shadow: 0 4px 12px -2px rgba(14, 165, 233, 0.04) !important;
+        border-radius: 0.875rem !important;
     }
     .dark .theme-bank-aesthetic .bg-white:not(img):not(.theme-no-card),
     .dark .theme-bank-aesthetic .bg-gray-800:not(.theme-no-card),
@@ -275,13 +275,13 @@
         background-color: #0b1329 !important;
         border: 1px solid rgba(14, 165, 233, 0.12) !important;
         box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.5) !important;
-        border-radius: 1.25rem !important;
+        border-radius: 0.875rem !important;
     }
 
     /* Generic Card Rounding Overrides for Page Layouts */
     .theme-restaurant-aesthetic [class*="rounded-[3rem]"], .theme-restaurant-aesthetic [class*="rounded-[2.5rem]"],
     .theme-restaurant-aesthetic [class*="rounded-3xl"] {
-        border-radius: 1.5rem !important;
+        border-radius: 1rem !important;
     }
     .theme-retail-aesthetic [class*="rounded-[3rem]"],
     .theme-retail-aesthetic [class*="rounded-3xl"] {
@@ -289,7 +289,7 @@
     }
     .theme-bank-aesthetic [class*="rounded-[3rem]"],
     .theme-bank-aesthetic [class*="rounded-3xl"] {
-        border-radius: 1.25rem !important;
+        border-radius: 0.875rem !important;
     }
     .theme-neon-cyberpunk [class*="rounded-[3rem]"],
     .theme-neon-cyberpunk [class*="rounded-3xl"] {
@@ -297,7 +297,7 @@
     }
     .theme-glassmorphism [class*="rounded-[3rem]"],
     .theme-glassmorphism [class*="rounded-3xl"] {
-        border-radius: 1.25rem !important;
+        border-radius: 0.875rem !important;
     }
 }
 
@@ -346,7 +346,7 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
     background: #ffffff !important;
     border: 1px solid rgba(0, 0, 0, 0.05) !important;
     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.02) !important;
-    border-radius: 1.5rem !important;
+    border-radius: 1rem !important;
     font-family: var(--font-outfit) !important;
     box-sizing: content-box !important;
     padding: 6px !important;
@@ -534,9 +534,9 @@ html:not(.dark) [class*="theme-"] .theme-no-card.bg-gray-50 {
 /* --- 1. Classic Premium --- */
 .theme-classic-premium .nb-card,
 .theme-classic-premium .nb-card-flat {
-    border-radius: 1.25rem !important;
+    border-radius: 0.875rem !important;
     border: 1px solid rgba(0, 0, 0, 0.06) !important;
-    box-shadow: 0 15px 30px -10px rgba(0, 0, 0, 0.05) !important;
+    box-shadow: 0 8px 20px -6px rgba(0, 0, 0, 0.03) !important;
 }
 .theme-classic-premium .nb-btn {
     border-radius: 9999px !important;
@@ -554,7 +554,7 @@ html:not(.dark) [class*="theme-"] .theme-no-card.bg-gray-50 {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
 }
 .theme-classic-premium .nb-input {
-    border-radius: 1.25rem !important;
+    border-radius: 0.875rem !important;
     border: 1px solid rgba(0, 0, 0, 0.1) !important;
     box-shadow: none !important;
 }
@@ -581,21 +581,21 @@ html:not(.dark) [class*="theme-"] .theme-no-card.bg-gray-50 {
 /* --- 2. Glassmorphism --- */
 .theme-glassmorphism .nb-card,
 .theme-glassmorphism .nb-card-flat {
-    border-radius: 1.25rem !important;
+    border-radius: 0.875rem !important;
     background-color: rgba(255, 255, 255, 0.45) !important;
     backdrop-filter: blur(24px) saturate(180%) !important;
     -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
     border: 1px solid rgba(255, 255, 255, 0.4) !important;
-    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.05) !important;
+    box-shadow: 0 6px 16px 0 rgba(31, 38, 135, 0.02) !important;
 }
 .theme-glassmorphism .nb-btn {
-    border-radius: 1.5rem !important;
+    border-radius: 1rem !important;
     backdrop-filter: blur(12px) !important;
     border: 1px solid rgba(255, 255, 255, 0.3) !important;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03) !important;
 }
 .theme-glassmorphism .nb-input {
-    border-radius: 1.5rem !important;
+    border-radius: 1rem !important;
     background-color: rgba(255, 255, 255, 0.3) !important;
     backdrop-filter: blur(12px) !important;
     border: 1px solid rgba(255, 255, 255, 0.25) !important;
@@ -619,10 +619,10 @@ html:not(.dark) [class*="theme-"] .theme-no-card.bg-gray-50 {
 /* --- 3. Restoran & Warung (Warm Culinary) --- */
 .theme-restaurant-aesthetic .nb-card,
 .theme-restaurant-aesthetic .nb-card-flat {
-    border-radius: 1.5rem !important;
+    border-radius: 1rem !important;
     background-color: #fffaf0 !important;
     border: 1.5px dashed rgba(249, 115, 22, 0.25) !important;
-    box-shadow: 0 15px 35px -10px rgba(249, 115, 22, 0.08) !important;
+    box-shadow: 0 8px 20px -8px rgba(249, 115, 22, 0.05) !important;
 }
 .theme-restaurant-aesthetic .nb-btn {
     border-radius: 9999px !important; /* Pill shaped buttons */
@@ -630,7 +630,7 @@ html:not(.dark) [class*="theme-"] .theme-no-card.bg-gray-50 {
     box-shadow: 0 4px 15px -3px rgba(249, 115, 22, 0.1) !important;
 }
 .theme-restaurant-aesthetic .nb-input {
-    border-radius: 1.25rem !important;
+    border-radius: 0.875rem !important;
     border: 1.5px solid rgba(249, 115, 22, 0.2) !important;
     box-shadow: inset 0 2px 4px rgba(249, 115, 22, 0.03) !important;
 }
@@ -683,9 +683,9 @@ html:not(.dark) [class*="theme-"] .theme-no-card.bg-gray-50 {
 /* --- 5. Bank Mini (Corporate FinTech) --- */
 .theme-bank-aesthetic .nb-card,
 .theme-bank-aesthetic .nb-card-flat {
-    border-radius: 1.25rem !important;
+    border-radius: 0.875rem !important;
     border: 1px solid rgba(14, 165, 233, 0.18) !important;
-    box-shadow: 0 10px 25px -5px rgba(14, 165, 233, 0.06) !important;
+    box-shadow: 0 6px 16px -5px rgba(14, 165, 233, 0.03) !important;
 }
 .theme-bank-aesthetic .nb-btn {
     border-radius: 0.75rem !important;

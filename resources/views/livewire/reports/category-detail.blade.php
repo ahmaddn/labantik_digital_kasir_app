@@ -9,7 +9,7 @@
                     </svg>
                 </a>
                 <div>
-                    <h1 class="text-4xl font-black italic uppercase tracking-tighter text-primary-blue dark:text-primary-blue-light">Detail Kategori</h1>
+                    <h1 class="text-4xl font-bold uppercase tracking-tight text-primary-blue dark:text-primary-blue-light">Detail Kategori</h1>
                     <p class="text-gray-400 font-bold text-xs uppercase tracking-[0.2em] italic">Analisis Penjualan Berdasarkan Produk</p>
                 </div>
             </div>
@@ -27,7 +27,7 @@
 
     <!-- Category Performance Summary -->
     <div class="bg-white dark:bg-gray-800 rounded-[3.5rem] p-10 mb-12 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700">
-        <div class="flex flex-col lg:flex-row justify-between lg:items-center gap-8">
+        <div class="flex flex-col lg:flex-row justify-between lg:items-center gap-5">
             <div>
                 <span class="px-4 py-2 bg-primary-blue/10 text-primary-blue dark:text-primary-blue-light text-[10px] font-black uppercase tracking-widest rounded-xl">Kategori Terpilih</span>
                 <h2 class="text-3xl font-black italic uppercase tracking-tight text-gray-800 dark:text-white mt-3">{{ $categoryName }}</h2>
@@ -61,7 +61,7 @@
     <!-- Product Details Table -->
     <div class="bg-white dark:bg-gray-800 rounded-[3.5rem] shadow-2xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 overflow-hidden">
         <div class="p-10 border-b border-gray-100 dark:border-gray-700 flex flex-col md:flex-row justify-between items-center gap-4">
-            <h2 class="text-2xl font-black italic uppercase tracking-tighter text-gray-800 dark:text-white">Daftar Produk Terjual</h2>
+            <h2 class="text-2xl font-bold uppercase tracking-tight text-gray-800 dark:text-white">Daftar Produk Terjual</h2>
             
             <div class="flex flex-wrap items-center gap-4 w-full md:w-auto">
                 <!-- Search -->

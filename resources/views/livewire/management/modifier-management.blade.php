@@ -1,7 +1,7 @@
 <div class="p-6 space-y-8">
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-4">
         <div>
-            <h1 class="text-4xl font-black italic uppercase tracking-tighter text-primary-blue dark:text-primary-blue-light">Topping & Modifikasi Produk</h1>
+            <h1 class="text-4xl font-bold uppercase tracking-tight text-primary-blue dark:text-primary-blue-light">Topping & Modifikasi Produk</h1>
             <p class="text-gray-400 font-bold text-xs uppercase tracking-[0.2em] italic">Atur variasi pilihan tambahan menu di kasir</p>
         </div>
         <div class="flex items-center bg-white dark:bg-gray-800 px-4 py-1.5 rounded-2xl shadow-md border border-gray-100 dark:border-gray-800">
@@ -12,9 +12,9 @@
 
     @if($activeTab === 'modifiers')
         <!-- Tab Daftar Topping -->
-        <div class="bg-white dark:bg-gray-900 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 shadow-md p-8">
+        <div class="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-md p-5">
             <div class="flex justify-between items-center mb-6 border-b border-gray-100 dark:border-gray-850 pb-4">
-                <h3 class="text-xl font-black italic uppercase tracking-tighter text-primary-blue dark:text-primary-yellow">List Item Topping</h3>
+                <h3 class="text-xl font-bold uppercase tracking-tight text-primary-blue dark:text-primary-yellow">List Item Topping</h3>
                 <button wire:click="openModifierModal()" class="px-4 py-2 bg-primary-blue text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:scale-105 transition-all">Tambah Topping</button>
             </div>
             
@@ -57,9 +57,9 @@
         </div>
     @else
         <!-- Tab Kelompok Topping -->
-        <div class="bg-white dark:bg-gray-900 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 shadow-md p-8">
+        <div class="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-md p-5">
             <div class="flex justify-between items-center mb-6 border-b border-gray-100 dark:border-gray-850 pb-4">
-                <h3 class="text-xl font-black italic uppercase tracking-tighter text-primary-blue dark:text-primary-yellow">Daftar Kelompok Topping</h3>
+                <h3 class="text-xl font-bold uppercase tracking-tight text-primary-blue dark:text-primary-yellow">Daftar Kelompok Topping</h3>
                 <button wire:click="openGroupModal()" class="px-4 py-2 bg-primary-blue text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:scale-105 transition-all">Tambah Kelompok</button>
             </div>
             
@@ -114,7 +114,7 @@
 
     <!-- Modal Modifier (Topping) -->
     <div x-data="{ show: @entangle('showModifierModal') }" x-show="show" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" style="display: none;" x-transition>
-        <div class="relative w-full max-w-sm bg-white dark:bg-gray-800 rounded-[2rem] shadow-2xl p-8 border border-gray-100 dark:border-gray-700 z-10 text-left">
+        <div class="relative w-full max-w-sm bg-white dark:bg-gray-800 rounded-[2rem] shadow-2xl p-5 border border-gray-100 dark:border-gray-700 z-10 text-left">
             <h2 class="text-2xl font-black text-gray-850 dark:text-white uppercase italic tracking-tight mb-6">{{ $editingModifierId ? 'Edit Topping' : 'Tambah Topping' }}</h2>
             <form wire:submit.prevent="saveModifier" class="space-y-4">
                 <div>
@@ -137,7 +137,7 @@
 
     <!-- Modal Modifier Group -->
     <div x-data="{ show: @entangle('showGroupModal') }" x-show="show" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" style="display: none;" x-transition>
-        <div class="relative w-full max-w-md bg-white dark:bg-gray-800 rounded-[2rem] shadow-2xl p-8 border border-gray-100 dark:border-gray-700 z-10 text-left">
+        <div class="relative w-full max-w-md bg-white dark:bg-gray-800 rounded-[2rem] shadow-2xl p-5 border border-gray-100 dark:border-gray-700 z-10 text-left">
             <h2 class="text-2xl font-black text-gray-850 dark:text-white uppercase italic tracking-tight mb-6">{{ $editingGroupId ? 'Edit Kelompok Topping' : 'Tambah Kelompok Topping' }}</h2>
             <form wire:submit.prevent="saveGroup" class="space-y-4">
                 <div>

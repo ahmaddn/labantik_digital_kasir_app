@@ -1,7 +1,7 @@
 <div class="p-6">
     <div class="flex flex-col md:flex-row md:items-center justify-between mb-10 gap-6">
         <div>
-            <h1 class="text-4xl font-black italic uppercase tracking-tighter text-primary-blue dark:text-primary-blue-light">Rekap Tahunan</h1>
+            <h1 class="text-4xl font-bold uppercase tracking-tight text-primary-blue dark:text-primary-blue-light">Rekap Tahunan</h1>
             <p class="text-gray-400 font-bold text-xs uppercase tracking-[0.2em] italic">Performansi Keuangan Per Tahun</p>
         </div>
         
@@ -26,7 +26,7 @@
     </div>
 
     @if($recap)
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-12">
         <div class="bg-primary-blue rounded-[3.5rem] p-12 text-white shadow-2xl shadow-blue-900/30 relative overflow-hidden group">
             <div class="absolute -right-10 -bottom-10 opacity-10 group-hover:scale-110 transition-transform duration-700">
                 <svg class="w-64 h-64 text-white" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
@@ -68,7 +68,7 @@
     <div class="bg-white dark:bg-gray-800 rounded-[3.5rem] p-10 mb-12 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 animate-in fade-in slide-in-from-bottom-4 duration-700">
         <div class="flex items-center justify-between mb-10">
             <div>
-                <h2 class="text-2xl font-black italic uppercase tracking-tighter text-gray-800 dark:text-white leading-none">Performa Per Kategori ({{ $selectedYear }})</h2>
+                <h2 class="text-2xl font-bold uppercase tracking-tight text-gray-800 dark:text-white leading-none">Performa Per Kategori ({{ $selectedYear }})</h2>
                 <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-2">Rekap Tahunan Berdasarkan Jenis Produk</p>
             </div>
             <div class="p-4 bg-primary-red/5 rounded-2xl text-primary-red">
@@ -121,7 +121,7 @@
     <!-- Monthly Stats Table -->
     <div class="bg-white dark:bg-gray-800 rounded-[3.5rem] shadow-2xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 overflow-hidden">
         <div class="p-10 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center">
-            <h2 class="text-2xl font-black italic uppercase tracking-tighter text-gray-800 dark:text-white">Trend Bulanan ({{ $selectedYear }})</h2>
+            <h2 class="text-2xl font-bold uppercase tracking-tight text-gray-800 dark:text-white">Trend Bulanan ({{ $selectedYear }})</h2>
         </div>
         <div class="overflow-x-auto">
             <table class="w-full text-left">
@@ -197,10 +197,10 @@
 
     @else
     <div class="bg-white dark:bg-gray-800 rounded-[4rem] p-32 border border-gray-100 dark:border-gray-700 text-center flex flex-col items-center shadow-xl shadow-blue-900/5">
-        <div class="w-32 h-32 bg-gray-50 dark:bg-gray-900 rounded-[2.5rem] flex items-center justify-center mb-10 text-gray-200 dark:text-gray-700 shadow-inner">
+        <div class="w-32 h-32 bg-gray-50 dark:bg-gray-900 rounded-2xl flex items-center justify-center mb-10 text-gray-200 dark:text-gray-700 shadow-inner">
             <svg class="w-16 h-16" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m12 14 4-4"/><path d="M3.34 19a10 10 0 1 1 17.32 0"/><path d="m9.05 9 5.64 5.64"/><circle cx="12" cy="12" r="2"/></svg>
         </div>
-        <h3 class="text-3xl font-black italic uppercase tracking-tighter text-gray-800 dark:text-white">Data Belum Tersedia</h3>
+        <h3 class="text-2xl font-bold uppercase tracking-tight text-gray-800 dark:text-white">Data Belum Tersedia</h3>
         <p class="text-gray-400 font-bold text-sm mt-4 uppercase tracking-[0.3em] italic">Tidak ada rekaman transaksi untuk tahun {{ $selectedYear }}</p>
     </div>
     @endif

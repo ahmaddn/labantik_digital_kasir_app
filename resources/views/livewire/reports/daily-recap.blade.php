@@ -1,7 +1,7 @@
 <div class="p-6">
     <div class="flex flex-col md:flex-row md:items-center justify-between mb-10 gap-6">
         <div>
-            <h1 class="text-4xl font-black italic uppercase tracking-tighter text-primary-blue dark:text-primary-blue-light">Rekap Harian</h1>
+            <h1 class="text-4xl font-bold uppercase tracking-tight text-primary-blue dark:text-primary-blue-light">Rekap Harian</h1>
             <p class="text-gray-400 font-bold text-xs uppercase tracking-[0.2em] italic">Pembukuan Transaksi Digital</p>
         </div>
         
@@ -30,7 +30,7 @@
     </div>
 
     @if($recap)
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-12">
         <!-- Revenue Card -->
         <div class="bg-primary-blue rounded-[3rem] p-10 text-white shadow-2xl shadow-blue-900/30 relative overflow-hidden group">
             <div class="absolute -right-6 -bottom-6 opacity-10 group-hover:scale-110 transition-transform duration-700">
@@ -103,11 +103,11 @@
     </div>
 
     <!-- Cash Reconciliation (Audit Uang Kas) -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
         <div class="lg:col-span-2 bg-white dark:bg-gray-800 rounded-[3rem] p-10 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700">
             <div class="flex items-center justify-between mb-8">
                 <div>
-                    <h2 class="text-2xl font-black italic uppercase tracking-tighter text-gray-800 dark:text-white leading-none">Audit Uang Kas</h2>
+                    <h2 class="text-2xl font-bold uppercase tracking-tight text-gray-800 dark:text-white leading-none">Audit Uang Kas</h2>
                     <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-2">Bandingkan Uang Fisik vs Sistem</p>
                 </div>
                 <div class="p-4 bg-primary-blue/5 rounded-2xl">
@@ -115,7 +115,7 @@
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
                 <div class="space-y-4">
                     <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4">Uang Fisik di Laci (Cash on Hand)</label>
                     <div class="relative group">
@@ -152,7 +152,7 @@
             </div>
 
             <div class="mt-8 pt-8 border-t border-gray-50 dark:border-gray-700 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-                <div class="flex items-center gap-8">
+                <div class="flex items-center gap-5">
                     <div class="flex flex-col">
                         <span class="text-[9px] font-black text-gray-400 uppercase tracking-widest">Status Audit</span>
                         @php
@@ -277,7 +277,7 @@
     <div class="bg-white dark:bg-gray-800 rounded-[3.5rem] p-10 mb-12 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-200">
         <div class="flex items-center justify-between mb-10">
             <div>
-                <h2 class="text-2xl font-black italic uppercase tracking-tighter text-gray-800 dark:text-white leading-none">Performa Per Kategori</h2>
+                <h2 class="text-2xl font-bold uppercase tracking-tight text-gray-800 dark:text-white leading-none">Performa Per Kategori</h2>
                 <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-2">Rekap Modal & Keuntungan Berdasarkan Jenis Produk Hari Ini</p>
             </div>
             <div class="p-4 bg-primary-red/5 rounded-2xl text-primary-red">
@@ -330,7 +330,7 @@
     <!-- Detail Table -->
     <div class="bg-white dark:bg-gray-800 rounded-[3.5rem] shadow-2xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 overflow-hidden">
         <div class="p-10 border-b border-gray-100 dark:border-gray-700 flex flex-col md:flex-row justify-between items-center gap-4">
-            <h2 class="text-2xl font-black italic uppercase tracking-tighter text-gray-800 dark:text-white">Detail Transaksi Harian</h2>
+            <h2 class="text-2xl font-bold uppercase tracking-tight text-gray-800 dark:text-white">Detail Transaksi Harian</h2>
             <div class="flex flex-wrap items-center gap-4 w-full md:w-auto">
                 <!-- Search -->
                 <div class="relative group w-full md:w-64">
@@ -444,7 +444,7 @@
                         <svg class="w-8 h-8" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
                     </button>
                 </div>
-                <h3 class="text-3xl font-black italic uppercase tracking-tighter mb-1">Detail Transaksi</h3>
+                <h3 class="text-2xl font-bold uppercase tracking-tight mb-1">Detail Transaksi</h3>
                 <p class="text-[10px] font-bold uppercase tracking-[0.3em] opacity-60">Reference: {{ $detailReference }}</p>
             </div>
 
@@ -496,10 +496,10 @@
     </div>
     @else
     <div class="bg-white dark:bg-gray-800 rounded-[4rem] p-32 border border-gray-100 dark:border-gray-700 text-center flex flex-col items-center shadow-xl shadow-blue-900/5">
-        <div class="w-32 h-32 bg-gray-50 dark:bg-gray-900 rounded-[2.5rem] flex items-center justify-center mb-10 text-gray-200 dark:text-gray-700 shadow-inner">
+        <div class="w-32 h-32 bg-gray-50 dark:bg-gray-900 rounded-2xl flex items-center justify-center mb-10 text-gray-200 dark:text-gray-700 shadow-inner">
             <svg class="w-16 h-16" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/><path d="m9 16 2 2 4-4"/></svg>
         </div>
-        <h3 class="text-3xl font-black italic uppercase tracking-tighter text-gray-800 dark:text-white">Belum Ada Catatan</h3>
+        <h3 class="text-2xl font-bold uppercase tracking-tight text-gray-800 dark:text-white">Belum Ada Catatan</h3>
         <p class="text-gray-400 font-bold text-sm mt-4 uppercase tracking-[0.3em] italic">Tidak ada aktivitas transaksi pada {{ \Carbon\Carbon::parse($selectedDate)->translatedFormat('d F Y') }}</p>
     </div>
     @endif
@@ -511,7 +511,7 @@
             <span>Import Data</span>
         </button>
         
-        <div x-show="open" @click.away="open = false" x-cloak x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4 scale-95" x-transition:enter-end="opacity-100 translate-y-0 scale-100" class="absolute bottom-full right-0 mb-6 w-80 bg-white dark:bg-gray-900 rounded-[2.5rem] shadow-2xl border border-gray-100 dark:border-gray-800 p-6 flex flex-col gap-4">
+        <div x-show="open" @click.away="open = false" x-cloak x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4 scale-95" x-transition:enter-end="opacity-100 translate-y-0 scale-100" class="absolute bottom-full right-0 mb-6 w-80 bg-white dark:bg-gray-900 rounded-2xl shadow-2xl border border-gray-100 dark:border-gray-800 p-6 flex flex-col gap-4">
             <div class="text-center">
                 <h4 class="text-lg font-black uppercase italic tracking-tight text-gray-800 dark:text-white">Import Excel</h4>
                 <p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mt-1">Upload file dari device lain</p>

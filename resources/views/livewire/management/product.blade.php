@@ -1,7 +1,7 @@
 <div class="p-6" x-data="{ showProductDetail: false, detailProduct: {} }">
     <div class="flex flex-col md:flex-row md:items-center justify-between mb-10 gap-6">
         <div>
-            <h1 class="text-4xl font-black italic uppercase tracking-tighter text-primary-blue dark:text-primary-blue-light">Katalog Produk</h1>
+            <h1 class="text-4xl font-bold uppercase tracking-tight text-primary-blue dark:text-primary-blue-light">Katalog Produk</h1>
             <p class="text-gray-400 font-bold text-xs uppercase tracking-[0.2em] italic">Manajemen Inventaris Digital</p>
         </div>
         
@@ -21,11 +21,11 @@
         @if($activeTab === 'products')
         <!-- List Section -->
         <div class="bg-white dark:bg-gray-800 rounded-[3.5rem] shadow-2xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 overflow-hidden">
-            <div class="p-8 border-b border-gray-100 dark:border-gray-700 flex flex-col lg:flex-row justify-between items-stretch lg:items-center gap-6">
+            <div class="p-5 border-b border-gray-100 dark:border-gray-700 flex flex-col lg:flex-row justify-between items-stretch lg:items-center gap-6">
                 <!-- Left Filters & Add Button -->
                 <div class="flex flex-col lg:flex-row items-stretch lg:items-center gap-4 w-full lg:w-auto">
                     <!-- Tambah Produk Button -->
-                    <button wire:click="openCreateModal" class="px-6 py-3.5 bg-primary-blue text-white rounded-xl text-[10px] font-black uppercase tracking-widest transition-all hover:scale-105 active:scale-95 shadow-md flex items-center justify-center shrink-0 w-full lg:w-auto">
+                    <button wire:click="openCreateModal" class="px-4 py-2.5 bg-primary-blue text-white rounded-xl text-[10px] font-black uppercase tracking-widest transition-all hover:scale-105 active:scale-95 shadow-md flex items-center justify-center shrink-0 w-full lg:w-auto">
                         <svg class="w-4 h-4 mr-2" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                         Tambah Produk
                     </button>
@@ -104,7 +104,7 @@
                         @forelse($products as $product)
                         <div class="group transition-all duration-300">
                             <!-- Desktop view -->
-                            <div class="hidden lg:grid grid-cols-12 items-center p-4 rounded-[2.5rem] border-2 transition-all duration-500 {{ $highlight == $product->id ? 'bg-amber-400/10 border-amber-400 animate-highlight-breath z-10 relative' : 'bg-white dark:bg-gray-800/50 border-transparent group-hover:border-primary-blue/20' }} {{ in_array($product->id, $selectedProducts) ? 'border-primary-blue/30 bg-primary-blue/5' : '' }}">
+                            <div class="hidden lg:grid grid-cols-12 items-center p-4 rounded-2xl border-2 transition-all duration-500 {{ $highlight == $product->id ? 'bg-amber-400/10 border-amber-400 animate-highlight-breath z-10 relative' : 'bg-white dark:bg-gray-800/50 border-transparent group-hover:border-primary-blue/20' }} {{ in_array($product->id, $selectedProducts) ? 'border-primary-blue/30 bg-primary-blue/5' : '' }}">
                                 <!-- Checkbox -->
                                 <div class="col-span-1 flex justify-center">
                                     <input type="checkbox" wire:model.live="selectedProducts" value="{{ $product->id }}" class="w-5 h-5 rounded-lg border-gray-200 text-primary-blue focus:ring-primary-blue dark:bg-gray-900 dark:border-gray-700">
@@ -260,9 +260,9 @@
         </div>
 
         <!-- Grouped Cash Categories Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             @forelse($cashGroupedProducts as $categoryName => $prods)
-                <div class="bg-white dark:bg-gray-800 rounded-[2.5rem] p-8 shadow-2xl border border-gray-150 dark:border-gray-700 relative overflow-hidden group">
+                <div class="bg-white dark:bg-gray-800 rounded-2xl p-5 shadow-2xl border border-gray-150 dark:border-gray-700 relative overflow-hidden group">
                     <div class="absolute -right-4 -bottom-4 opacity-5 group-hover:scale-110 transition-transform duration-500 pointer-events-none">
                         <svg class="w-32 h-32 text-primary-blue" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 00 2 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
                     </div>
@@ -326,13 +326,13 @@
                     <svg class="w-7 h-7" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.27 6.96 8.73 5.04 8.73-5.04"/><path d="M12 22.08V12"/></svg>
                 </div>
                 <div>
-                    <h2 class="text-2xl font-black italic uppercase tracking-tighter text-gray-800 dark:text-white">Input Stok Awal Harian</h2>
+                    <h2 class="text-2xl font-bold uppercase tracking-tight text-gray-800 dark:text-white">Input Stok Awal Harian</h2>
                     <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">Tentukan stok produk saat membuka toko</p>
                 </div>
             </div>
 
             <form wire:submit.prevent="saveStock" class="space-y-8">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div>
                         <label class="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-3 ml-2 italic">Tanggal Stok</label>
                         <input type="date" wire:model="stock_date" class="w-full px-6 py-4 bg-gray-50 dark:bg-gray-900 border-none rounded-2xl focus:ring-4 focus:ring-primary-blue/10 font-black text-sm text-gray-800 dark:text-white">
@@ -356,7 +356,7 @@
                     @error('opening_stock') <span class="text-[10px] font-bold text-primary-red mt-2 ml-2 block uppercase italic">{{ $message }}</span> @enderror
                 </div>
 
-                <button type="submit" class="w-full py-6 bg-primary-blue text-white rounded-[2.5rem] shadow-2xl shadow-blue-900/30 font-black italic uppercase tracking-widest transform hover:-translate-y-1 transition-all text-lg">
+                <button type="submit" class="w-full py-6 bg-primary-blue text-white rounded-2xl shadow-2xl shadow-blue-900/30 font-black italic uppercase tracking-widest transform hover:-translate-y-1 transition-all text-lg">
                     Simpan Stok Awal
                 </button>
             </form>
@@ -380,7 +380,7 @@
         <div 
             x-show="show"
             @click.away="show = false"
-            class="bg-white dark:bg-gray-800 rounded-[2.5rem] sm:rounded-[3rem] sm:p-10 p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto no-scrollbar shadow-2xl border border-gray-100 dark:border-gray-700 relative"
+            class="bg-white dark:bg-gray-800 rounded-2xl sm:rounded-[3rem] sm:p-10 p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto no-scrollbar shadow-2xl border border-gray-100 dark:border-gray-700 relative"
             x-transition:enter="transition cubic-bezier(0.34, 1.56, 0.64, 1) duration-300 transform"
             x-transition:enter-start="opacity-0 scale-75 translate-y-20"
             x-transition:enter-end="opacity-100 scale-100 translate-y-0"
@@ -389,7 +389,7 @@
             x-transition:leave-end="opacity-0 scale-75 translate-y-20"
         >
             <!-- Close Button -->
-            <button type="button" wire:click="cancelEdit" class="absolute top-8 right-8 text-gray-400 hover:text-gray-600 dark:hover:text-white transition-colors">
+            <button type="button" wire:click="cancelEdit" class="absolute top-5 right-8 text-gray-400 hover:text-gray-600 dark:hover:text-white transition-colors">
                 <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
             </button>
 
@@ -398,7 +398,7 @@
                     <svg class="w-7 h-7" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.27 6.96 8.73 5.04 8.73-5.04"/><path d="M12 22.08V12"/></svg>
                 </div>
                 <div>
-                    <h2 class="text-2xl font-black italic uppercase tracking-tighter text-gray-800 dark:text-white">
+                    <h2 class="text-2xl font-bold uppercase tracking-tight text-gray-800 dark:text-white">
                         {{ $editingId ? 'Edit Informasi Produk' : 'Tambah Produk Baru' }}
                     </h2>
                     <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">Lengkapi data katalog produk di bawah ini</p>
@@ -523,7 +523,7 @@
                 </div>
 
                 <div class="flex items-center gap-4 pt-4">
-                    <button type="submit" class="flex-1 py-5 bg-primary-red text-white rounded-[2rem] shadow-2xl shadow-red-500/20 font-black italic uppercase tracking-wider transform hover:-translate-y-1 transition-all">
+                    <button type="submit" class="flex-1 py-5 bg-primary-red text-white rounded-[2rem] shadow-2xl shadow-red-500/20 font-bold uppercase tracking-wide text-xs transform hover:-translate-y-1 transition-all">
                         {{ $editingId ? 'Simpan Perubahan' : 'Tambah Produk' }}
                     </button>
                     <button type="button" wire:click="cancelEdit" class="px-8 py-5 bg-gray-100 dark:bg-gray-900 text-gray-400 rounded-[2rem] font-black uppercase text-[10px] tracking-widest hover:text-gray-600 dark:hover:text-white transition-all">
@@ -560,7 +560,7 @@
             <div class="w-20 h-20 bg-primary-red/10 text-primary-red rounded-full flex items-center justify-center mx-auto mb-8">
                 <svg class="w-10 h-10" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
             </div>
-            <h3 class="text-2xl font-black italic uppercase tracking-tighter text-gray-800 dark:text-white mb-4">Hapus Produk?</h3>
+            <h3 class="text-2xl font-bold uppercase tracking-tight text-gray-800 dark:text-white mb-4">Hapus Produk?</h3>
             <p class="text-gray-400 font-bold text-xs uppercase tracking-widest mb-10 leading-relaxed">Tindakan ini tidak dapat dibatalkan. Seluruh data terkait produk ini akan dihapus permanen.</p>
             <div class="flex gap-4">
                 <button wire:click="cancelDelete" class="flex-1 py-4 bg-gray-100 dark:bg-gray-900 text-gray-400 rounded-2xl font-black uppercase text-[10px] tracking-widest hover:text-gray-600 transition-all">Batal</button>
@@ -595,7 +595,7 @@
             <div class="w-20 h-20 bg-primary-red/10 text-primary-red rounded-full flex items-center justify-center mx-auto mb-8">
                 <svg class="w-10 h-10" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
             </div>
-            <h3 class="text-2xl font-black italic uppercase tracking-tighter text-gray-800 dark:text-white mb-4">Hapus Banyak Produk?</h3>
+            <h3 class="text-2xl font-bold uppercase tracking-tight text-gray-800 dark:text-white mb-4">Hapus Banyak Produk?</h3>
             <p class="text-gray-400 font-bold text-xs uppercase tracking-widest mb-10 leading-relaxed">Tindakan ini tidak dapat dibatalkan. Seluruh produk yang dipilih ({{ count($selectedProducts) }} produk) akan dihapus permanen.</p>
             <div class="flex gap-4">
                 <button wire:click="cancelBulkDelete" class="flex-1 py-4 bg-gray-100 dark:bg-gray-900 text-gray-400 rounded-2xl font-black uppercase text-[10px] tracking-widest hover:text-gray-600 transition-all">Batal</button>

@@ -2,7 +2,7 @@
     <!-- Header -->
     <div class="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-6">
         <div>
-            <h1 class="text-4xl font-black italic uppercase tracking-tighter text-primary-blue dark:text-primary-blue-light">Catatan Kasir & Pengelola</h1>
+            <h1 class="text-4xl font-bold uppercase tracking-tight text-primary-blue dark:text-primary-blue-light">Catatan Kasir & Pengelola</h1>
             <p class="text-gray-400 font-bold text-xs uppercase tracking-[0.2em] italic">Komunikasi Internal & Diskusi Shift Kasir</p>
         </div>
 
@@ -16,7 +16,7 @@
             </div>
 
             <!-- Create Note Button -->
-            <button wire:click="openCreateModal" class="w-full sm:w-auto px-6 py-3.5 bg-primary-blue text-white rounded-2xl shadow-xl shadow-blue-500/20 hover:scale-105 active:scale-95 transition-all font-black italic uppercase text-xs tracking-widest flex items-center justify-center gap-2">
+            <button wire:click="openCreateModal" class="w-full sm:w-auto px-4 py-2.5 bg-primary-blue text-white rounded-2xl shadow-xl shadow-blue-500/20 hover:scale-105 active:scale-95 transition-all font-black italic uppercase text-xs tracking-widest flex items-center justify-center gap-2">
                 <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" /></svg>
                 Catatan Baru
             </button>
@@ -167,9 +167,9 @@
     <!-- Create / Edit Note Modal -->
     @if($showModal)
         <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/60 backdrop-blur-sm animate-in fade-in duration-300">
-            <div class="bg-white dark:bg-gray-800 w-full max-w-lg rounded-[2.5rem] shadow-2xl p-8 border border-gray-100 dark:border-gray-700 animate-in zoom-in-95 duration-300 max-h-[90vh] overflow-y-auto">
+            <div class="bg-white dark:bg-gray-800 w-full max-w-lg rounded-2xl shadow-2xl p-5 border border-gray-100 dark:border-gray-700 animate-in zoom-in-95 duration-300 max-h-[90vh] overflow-y-auto">
                 <div class="flex items-center justify-between mb-6">
-                    <h3 class="text-2xl font-black italic uppercase tracking-tighter text-gray-800 dark:text-white leading-none">
+                    <h3 class="text-2xl font-bold uppercase tracking-tight text-gray-800 dark:text-white leading-none">
                         {{ $noteId ? 'Edit Catatan' : 'Tambah Catatan Baru' }}
                     </h3>
                     <button wire:click="$set('showModal', false)" class="p-2.5 text-gray-400 hover:text-gray-600 dark:hover:text-white rounded-xl hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors">
@@ -334,10 +334,10 @@
 
                     <!-- Buttons -->
                     <div class="flex justify-end space-x-3 pt-4 border-t border-gray-100 dark:border-gray-700">
-                        <button type="button" wire:click="$set('showModal', false)" class="px-6 py-3.5 bg-gray-100 dark:bg-gray-900 text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-2xl font-black italic uppercase text-xs tracking-widest transition-all">
+                        <button type="button" wire:click="$set('showModal', false)" class="px-4 py-2.5 bg-gray-100 dark:bg-gray-900 text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-2xl font-black italic uppercase text-xs tracking-widest transition-all">
                             Batal
                         </button>
-                        <button type="submit" class="px-6 py-3.5 bg-primary-blue text-white rounded-2xl shadow-xl hover:scale-105 active:scale-95 transition-all font-black italic uppercase text-xs tracking-widest">
+                        <button type="submit" class="px-4 py-2.5 bg-primary-blue text-white rounded-2xl shadow-xl hover:scale-105 active:scale-95 transition-all font-black italic uppercase text-xs tracking-widest">
                             Simpan Catatan
                         </button>
                     </div>
@@ -349,7 +349,7 @@
     <!-- Replies Discussion Modal -->
     @if($showReplyModal && $activeNote)
         <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/60 backdrop-blur-sm animate-in fade-in duration-300">
-            <div class="bg-white dark:bg-gray-800 w-full max-w-2xl rounded-[2.5rem] shadow-2xl p-8 border border-gray-100 dark:border-gray-700 flex flex-col max-h-[85vh] animate-in zoom-in-95 duration-300">
+            <div class="bg-white dark:bg-gray-800 w-full max-w-2xl rounded-2xl shadow-2xl p-5 border border-gray-100 dark:border-gray-700 flex flex-col max-h-[85vh] animate-in zoom-in-95 duration-300">
                 <!-- Modal Header -->
                 <div class="flex items-start justify-between pb-4 border-b border-gray-100 dark:border-gray-700">
                     <div>
@@ -403,7 +403,7 @@
                 <!-- Input Reply Form -->
                 <form wire:submit.prevent="addReply" class="pt-4 border-t border-gray-100 dark:border-gray-700 flex items-center gap-3">
                     <input type="text" wire:model="replyContent" placeholder="Tulis balasan atau pesan..." class="flex-1 px-5 py-3.5 bg-gray-50 dark:bg-gray-900 border-none rounded-2xl focus:ring-4 focus:ring-primary-blue/10 font-bold text-sm text-gray-800 dark:text-white">
-                    <button type="submit" class="px-6 py-3.5 bg-primary-blue text-white rounded-2xl shadow-lg font-black italic uppercase text-xs tracking-widest hover:scale-105 active:scale-95 transition-all">
+                    <button type="submit" class="px-4 py-2.5 bg-primary-blue text-white rounded-2xl shadow-lg font-black italic uppercase text-xs tracking-widest hover:scale-105 active:scale-95 transition-all">
                         Kirim
                     </button>
                 </form>
@@ -414,17 +414,17 @@
     <!-- Delete Confirmation Modal -->
     @if($showDeleteModal)
         <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/60 backdrop-blur-sm animate-in fade-in duration-300">
-            <div class="bg-white dark:bg-gray-800 w-full max-w-md rounded-[2.5rem] shadow-2xl p-8 border border-gray-100 dark:border-gray-700 text-center animate-in zoom-in-95 duration-300">
+            <div class="bg-white dark:bg-gray-800 w-full max-w-md rounded-2xl shadow-2xl p-5 border border-gray-100 dark:border-gray-700 text-center animate-in zoom-in-95 duration-300">
                 <div class="w-16 h-16 bg-rose-100 dark:bg-rose-900/30 text-rose-500 rounded-full flex items-center justify-center mx-auto mb-4">
                     <svg class="w-8 h-8" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                 </div>
                 <h3 class="text-xl font-black italic uppercase text-gray-800 dark:text-white mb-2">Hapus Catatan Ini?</h3>
                 <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-6">Tindakan ini akan menghapus catatan dan semua balasan di dalamnya.</p>
                 <div class="flex justify-center space-x-3">
-                    <button wire:click="$set('showDeleteModal', false)" class="px-6 py-3.5 bg-gray-100 dark:bg-gray-900 text-gray-500 rounded-2xl font-black italic uppercase text-xs tracking-widest">
+                    <button wire:click="$set('showDeleteModal', false)" class="px-4 py-2.5 bg-gray-100 dark:bg-gray-900 text-gray-500 rounded-2xl font-black italic uppercase text-xs tracking-widest">
                         Batal
                     </button>
-                    <button wire:click="deleteNote" class="px-6 py-3.5 bg-rose-500 text-white rounded-2xl shadow-xl hover:scale-105 active:scale-95 font-black italic uppercase text-xs tracking-widest">
+                    <button wire:click="deleteNote" class="px-4 py-2.5 bg-rose-500 text-white rounded-2xl shadow-xl hover:scale-105 active:scale-95 font-black italic uppercase text-xs tracking-widest">
                         Ya, Hapus
                     </button>
                 </div>
@@ -434,7 +434,7 @@
 
     <!-- Premium WhatsApp Modal Overlay -->
     <div id="waModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-[9999] hidden items-center justify-center transition-all duration-300">
-        <div class="bg-white dark:bg-gray-900 rounded-[2.5rem] p-8 max-w-sm w-[90%] shadow-[0_30px_70px_rgba(0,0,0,0.25)] border-2 border-emerald-500/20 text-center transform scale-95 transition-all duration-300">
+        <div class="bg-white dark:bg-gray-900 rounded-2xl p-5 max-w-sm w-[90%] shadow-[0_30px_70px_rgba(0,0,0,0.25)] border-2 border-emerald-500/20 text-center transform scale-95 transition-all duration-300">
             <div class="w-16 h-16 bg-emerald-100 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400 rounded-full flex items-center justify-center mx-auto mb-5">
                 <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"></path>
@@ -632,7 +632,7 @@ function shareToWhatsApp(noteId, title, creator, date, content) {
         const iconContainer = modal.querySelector('.rounded-full');
         
         // Reset classes
-        card.className = "bg-white dark:bg-gray-900 rounded-[2.5rem] p-8 max-w-sm w-[90%] shadow-[0_30px_70px_rgba(0,0,0,0.25)] border-2 text-center transform scale-95 transition-all duration-300";
+        card.className = "bg-white dark:bg-gray-900 rounded-2xl p-5 max-w-sm w-[90%] shadow-[0_30px_70px_rgba(0,0,0,0.25)] border-2 text-center transform scale-95 transition-all duration-300";
         btnEl.className = "w-full text-white font-black uppercase text-xs tracking-widest py-4 px-6 rounded-2xl transition-all shadow-lg active:scale-95";
         
         if (state === 'success') {

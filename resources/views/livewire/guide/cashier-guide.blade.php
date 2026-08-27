@@ -2,7 +2,7 @@
     <!-- Header Section -->
     <!-- Header Section -->
     <div
-        class="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-gradient-to-r from-primary-blue to-blue-600 dark:from-gray-900 dark:to-gray-800 p-6 md:p-8 rounded-3xl shadow-xl text-white relative overflow-hidden">
+        class="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-gradient-to-r from-primary-blue to-blue-600 dark:from-gray-900 dark:to-gray-800 p-6 md:p-5 rounded-3xl shadow-xl text-white relative overflow-hidden">
         <div class="absolute -right-10 -bottom-10 w-40 h-40 bg-white/10 rounded-full blur-2xl"></div>
         <div class="absolute right-20 top-2 w-20 h-20 bg-white/5 rounded-full blur-xl"></div>
 
@@ -112,7 +112,7 @@
         @if ($activeTab === 'sop-transaksi')
             <!-- TAB: SOP TRANSAKSI (Wide Grid Layout) -->
             <div
-                class="bg-white dark:bg-gray-900 rounded-3xl md:rounded-[2.5rem] p-5 md:p-8 shadow-sm border border-gray-100 dark:border-gray-855 w-full space-y-8">
+                class="bg-white dark:bg-gray-900 rounded-3xl md:rounded-2xl p-5 md:p-5 shadow-sm border border-gray-100 dark:border-gray-855 w-full space-y-8">
                 <div class="flex items-center gap-4">
                     <div
                         class="w-12 h-12 rounded-2xl bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center text-primary-blue dark:text-blue-400">
@@ -207,7 +207,7 @@
         @elseif($activeTab === 'panduan-menu')
             <!-- TAB: PANDUAN MENU SIDEBAR (Spacious Grid Layout) -->
             <div
-                class="bg-white dark:bg-gray-900 rounded-3xl md:rounded-[2.5rem] p-5 md:p-8 shadow-sm border border-gray-100 dark:border-gray-855 w-full space-y-6">
+                class="bg-white dark:bg-gray-900 rounded-3xl md:rounded-2xl p-5 md:p-5 shadow-sm border border-gray-100 dark:border-gray-855 w-full space-y-6">
                 <div class="flex items-center gap-4">
                     <div
                         class="w-12 h-12 rounded-2xl bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center text-primary-blue dark:text-blue-400">
@@ -408,7 +408,7 @@
         @elseif($activeTab === 'buku-kas')
             <!-- TAB: PENGELOLAAN KAS -->
             <div
-                class="bg-white dark:bg-gray-900 rounded-3xl md:rounded-[2.5rem] p-5 md:p-8 shadow-sm border border-gray-100 dark:border-gray-800 w-full space-y-6">
+                class="bg-white dark:bg-gray-900 rounded-3xl md:rounded-2xl p-5 md:p-5 shadow-sm border border-gray-100 dark:border-gray-800 w-full space-y-6">
                 <div class="flex items-center gap-4">
                     <div
                         class="w-12 h-12 rounded-2xl bg-green-50 dark:bg-green-900/30 flex items-center justify-center text-green-600 dark:text-green-400">
@@ -470,7 +470,7 @@
         @elseif($activeTab === 'tutup-buku')
             <!-- TAB: AUDIT & TUTUP BUKU -->
             <div
-                class="bg-white dark:bg-gray-900 rounded-3xl md:rounded-[2.5rem] p-5 md:p-8 shadow-sm border border-gray-100 dark:border-gray-800 w-full space-y-6">
+                class="bg-white dark:bg-gray-900 rounded-3xl md:rounded-2xl p-5 md:p-5 shadow-sm border border-gray-100 dark:border-gray-800 w-full space-y-6">
                 <div class="flex items-center gap-4">
                     <div
                         class="w-12 h-12 rounded-2xl bg-amber-50 dark:bg-amber-900/30 flex items-center justify-center text-amber-600 dark:text-amber-400">
@@ -511,7 +511,7 @@
         @elseif($activeTab === 'presensi-tugas')
             <!-- TAB: PRESENSI & TUGAS -->
             <div
-                class="bg-white dark:bg-gray-900 rounded-3xl md:rounded-[2.5rem] p-5 md:p-8 shadow-sm border border-gray-100 dark:border-gray-800 w-full space-y-6">
+                class="bg-white dark:bg-gray-900 rounded-3xl md:rounded-2xl p-5 md:p-5 shadow-sm border border-gray-100 dark:border-gray-800 w-full space-y-6">
                 <div class="flex items-center gap-4">
                     <div
                         class="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
@@ -592,7 +592,7 @@
         @elseif($activeTab === 'faq')
             <!-- TAB: FAQ -->
             <div
-                class="bg-white dark:bg-gray-900 rounded-3xl md:rounded-[2.5rem] p-5 md:p-8 shadow-sm border border-gray-100 dark:border-gray-800 w-full space-y-6">
+                class="bg-white dark:bg-gray-900 rounded-3xl md:rounded-2xl p-5 md:p-5 shadow-sm border border-gray-100 dark:border-gray-800 w-full space-y-6">
                 <div class="flex items-center gap-4">
                     <div
                         class="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400">

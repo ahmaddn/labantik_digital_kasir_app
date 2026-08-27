@@ -3,7 +3,7 @@
     <div class="fixed inset-0 bg-gray-950 -z-10"></div>
     <!-- Main Card - Locked to Dark Mode styling -->
     <div
-        class="bg-gray-900 rounded-[2.5rem] sm:rounded-[3.5rem] shadow-2xl border border-gray-800 overflow-hidden p-6 sm:p-10 md:p-14">
+        class="bg-gray-900 rounded-2xl sm:rounded-[3.5rem] shadow-2xl border border-gray-800 overflow-hidden p-6 sm:p-10 md:p-14">
 
         <!-- Header Section -->
         <div class="text-center mb-10">
@@ -16,7 +16,7 @@
             </div>
 
             <div class="space-y-1">
-                <h2 class="text-3xl sm:text-4xl font-black italic uppercase tracking-tighter text-primary-yellow">
+                <h2 class="text-3xl sm:text-4xl font-bold uppercase tracking-tight text-primary-yellow">
                     LABANTIK
                 </h2>
             </div>
@@ -70,7 +70,7 @@
                 @if ($waGroupLink)
                     <!-- WhatsApp Link Box (Dark Mode Only) -->
                     <div
-                        class="p-6 sm:p-8 bg-emerald-950/20 border border-emerald-900 rounded-[2rem] max-w-md mx-auto shadow-md space-y-5">
+                        class="p-6 sm:p-5 bg-emerald-950/20 border border-emerald-900 rounded-[2rem] max-w-md mx-auto shadow-md space-y-5">
                         <p class="text-xs sm:text-sm font-bold text-emerald-300 leading-relaxed">
                             Langkah Selanjutnya: Silakan gabung ke grup WhatsApp koordinasi calon anggota melalui tombol
                             di bawah ini:

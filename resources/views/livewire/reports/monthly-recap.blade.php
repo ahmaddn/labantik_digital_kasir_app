@@ -1,7 +1,7 @@
 <div class="p-6">
     <div class="flex flex-col md:flex-row md:items-center justify-between mb-10 gap-6">
         <div>
-            <h1 class="text-4xl font-black italic uppercase tracking-tighter text-primary-blue dark:text-primary-blue-light">Rekap Bulanan</h1>
+            <h1 class="text-4xl font-bold uppercase tracking-tight text-primary-blue dark:text-primary-blue-light">Rekap Bulanan</h1>
             <p class="text-gray-400 font-bold text-xs uppercase tracking-[0.2em] italic">Analisis Keuangan Per Bulan</p>
         </div>
         
@@ -31,7 +31,7 @@
     </div>
 
     @if($recap)
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-12">
         <div class="bg-primary-blue rounded-[3rem] p-10 text-white shadow-2xl shadow-blue-900/30 relative overflow-hidden group" id="card-revenue">
             <div class="absolute -right-6 -bottom-6 opacity-10 group-hover:scale-110 transition-transform duration-700">
                 <svg class="w-48 h-48 text-white" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
@@ -80,7 +80,7 @@
     <div class="bg-white dark:bg-gray-800 rounded-[3.5rem] p-10 mb-12 shadow-2xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-700">
         <div class="flex justify-between items-center mb-10">
             <div>
-                <h2 class="text-2xl font-black italic uppercase tracking-tighter text-gray-800 dark:text-white leading-none">Tren Profit Bulanan</h2>
+                <h2 class="text-2xl font-bold uppercase tracking-tight text-gray-800 dark:text-white leading-none">Tren Profit Bulanan</h2>
                 <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-2">Visualisasi Keuntungan Harian Selama Sebulan</p>
             </div>
             <div class="flex items-center">
@@ -97,7 +97,7 @@
     <div class="bg-white dark:bg-gray-800 rounded-[3.5rem] p-10 mb-12 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-200">
         <div class="flex items-center justify-between mb-10">
             <div>
-                <h2 class="text-2xl font-black italic uppercase tracking-tighter text-gray-800 dark:text-white leading-none">Performa Per Kategori</h2>
+                <h2 class="text-2xl font-bold uppercase tracking-tight text-gray-800 dark:text-white leading-none">Performa Per Kategori</h2>
                 <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-2">Rekap Modal & Keuntungan Berdasarkan Jenis Produk Bulan Ini</p>
             </div>
             <div class="p-4 bg-primary-red/5 rounded-2xl text-primary-red">
@@ -227,7 +227,7 @@
     <!-- Monthly Breakdown -->
     <div class="bg-white dark:bg-gray-800 rounded-[3.5rem] shadow-2xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 overflow-hidden">
         <div class="p-10 border-b border-gray-100 dark:border-gray-700">
-            <h2 class="text-2xl font-black italic uppercase tracking-tighter text-gray-800 dark:text-white">Breakdown Harian ({{ \Carbon\Carbon::create(null, $selectedMonth)->translatedFormat('F') }})</h2>
+            <h2 class="text-2xl font-bold uppercase tracking-tight text-gray-800 dark:text-white">Breakdown Harian ({{ \Carbon\Carbon::create(null, $selectedMonth)->translatedFormat('F') }})</h2>
         </div>
         <div class="overflow-x-auto">
             <table class="w-full text-left">
@@ -293,10 +293,10 @@
     </div>
     @else
     <div class="bg-white dark:bg-gray-800 rounded-[4rem] p-32 border border-gray-100 dark:border-gray-700 text-center flex flex-col items-center shadow-xl shadow-blue-900/5">
-        <div class="w-32 h-32 bg-gray-50 dark:bg-gray-900 rounded-[2.5rem] flex items-center justify-center mb-10 text-gray-200 dark:text-gray-700 shadow-inner">
+        <div class="w-32 h-32 bg-gray-50 dark:bg-gray-900 rounded-2xl flex items-center justify-center mb-10 text-gray-200 dark:text-gray-700 shadow-inner">
             <svg class="w-16 h-16" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/><path d="m9 16 2 2 4-4"/></svg>
         </div>
-        <h3 class="text-3xl font-black italic uppercase tracking-tighter text-gray-800 dark:text-white">Belum Ada Catatan</h3>
+        <h3 class="text-2xl font-bold uppercase tracking-tight text-gray-800 dark:text-white">Belum Ada Catatan</h3>
         <p class="text-gray-400 font-bold text-sm mt-4 uppercase tracking-[0.3em] italic">Tidak ada aktivitas transaksi pada bulan {{ \Carbon\Carbon::create(null, $selectedMonth)->translatedFormat('F Y') }}</p>
     </div>
     @endif

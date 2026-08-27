@@ -2,9 +2,9 @@
     <!-- Header -->
     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-            <h1 class="text-3xl font-black italic uppercase tracking-tighter text-primary-blue dark:text-primary-yellow">
+            <h1 class="text-xl md:text-2xl font-bold uppercase tracking-tight text-primary-blue dark:text-primary-yellow">
                 Tugas Harian Kasir</h1>
-            <p class="text-gray-400 text-sm font-semibold uppercase tracking-widest mt-1">Kelola tugas operasional untuk
+            <p class="text-gray-400 text-xs font-medium uppercase tracking-wider mt-0.5">Kelola tugas operasional untuk
                 kasir</p>
         </div>
         <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
@@ -21,8 +21,8 @@
             @endif
 
             <button wire:click="openCreateModal"
-                class="inline-flex items-center justify-center px-5 py-3.5 bg-primary-blue hover:bg-blue-900 text-primary-yellow rounded-xl font-black text-sm uppercase italic tracking-wider transition-all duration-300 shadow-xl shadow-blue-900/10 active:scale-95 w-full sm:w-auto">
-                <svg class="w-5 h-5 mr-2 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                class="inline-flex items-center justify-center px-4 py-2.5 bg-primary-blue hover:bg-blue-900 text-primary-yellow rounded-lg font-bold text-xs uppercase tracking-wide transition-all duration-300 shadow-xl shadow-blue-900/10 active:scale-95 w-full sm:w-auto">
+                <svg class="w-4 h-4 mr-2 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path>
                 </svg>
                 Tambah Tugas Baru
@@ -33,14 +33,14 @@
     <!-- Tabs -->
     <div class="flex items-center gap-2 border-b border-gray-200 dark:border-gray-700 overflow-x-auto flex-nowrap [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         <button wire:click="$set('activeTab', 'active')"
-            class="px-6 py-3 font-black text-sm uppercase tracking-wider flex items-center gap-2 shrink-0 {{ $activeTab === 'active' ? 'text-primary-blue dark:text-primary-yellow border-b-2 border-primary-blue dark:border-primary-yellow' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300' }}">
+            class="px-4 py-2.5 font-bold text-xs uppercase tracking-wider flex items-center gap-2 shrink-0 {{ $activeTab === 'active' ? 'text-primary-blue dark:text-primary-yellow border-b-2 border-primary-blue dark:border-primary-yellow' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300' }}">
             <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
             </svg>
             <span class="shrink-0">Daftar Tugas</span>
         </button>
         <button wire:click="$set('activeTab', 'pending_review')"
-            class="px-6 py-3 font-black text-sm uppercase tracking-wider flex items-center gap-2 shrink-0 {{ $activeTab === 'pending_review' ? 'text-primary-blue dark:text-primary-yellow border-b-2 border-primary-blue dark:border-primary-yellow' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300' }}">
+            class="px-4 py-2.5 font-bold text-xs uppercase tracking-wider flex items-center gap-2 shrink-0 {{ $activeTab === 'pending_review' ? 'text-primary-blue dark:text-primary-yellow border-b-2 border-primary-blue dark:border-primary-yellow' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300' }}">
             <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
             </svg>
@@ -50,7 +50,7 @@
             @endif
         </button>
         <button wire:click="$set('activeTab', 'history')"
-            class="px-6 py-3 font-black text-sm uppercase tracking-wider flex items-center gap-2 shrink-0 {{ $activeTab === 'history' ? 'text-primary-blue dark:text-primary-yellow border-b-2 border-primary-blue dark:border-primary-yellow' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300' }}">
+            class="px-4 py-2.5 font-bold text-xs uppercase tracking-wider flex items-center gap-2 shrink-0 {{ $activeTab === 'history' ? 'text-primary-blue dark:text-primary-yellow border-b-2 border-primary-blue dark:border-primary-yellow' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300' }}">
             <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
             </svg>
@@ -60,17 +60,17 @@
 
     <!-- Filters & Table -->
     <div
-        class="bg-white dark:bg-gray-800 rounded-[2.5rem] shadow-2xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700/50 p-6 md:p-8">
+        class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-800 p-4 md:p-6">
         <div class="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div class="relative max-w-md w-full">
                 <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-gray-400">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                     </svg>
                 </span>
                 <input wire:model.live="search" type="text" placeholder="Cari nama tugas..."
-                    class="w-full pl-12 pr-4 py-3.5 bg-gray-50 dark:bg-gray-900 border-none rounded-2xl focus:ring-2 focus:ring-primary-blue dark:text-white transition-all text-sm">
+                    class="w-full pl-12 pr-3 py-2 bg-gray-50 dark:bg-gray-900 border-none rounded-2xl focus:ring-2 focus:ring-primary-blue dark:text-white transition-all text-sm">
             </div>
         </div>
 
@@ -216,7 +216,7 @@
         <div x-show="show" x-transition.opacity class="fixed inset-0 bg-black/60 backdrop-blur-xs"
             wire:click="$set('showCreateModal', false)"></div>
         <div x-show="show" x-transition.scale
-            class="relative w-full max-w-2xl md:max-w-3xl lg:max-w-4xl bg-white dark:bg-gray-800 rounded-[2.5rem] shadow-2xl p-10 border border-gray-100 dark:border-gray-700 z-10 max-h-[90vh] overflow-y-auto">
+            class="relative w-full max-w-2xl md:max-w-3xl lg:max-w-4xl bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-10 border border-gray-100 dark:border-gray-700 z-10 max-h-[90vh] overflow-y-auto">
             <h2 class="text-3xl font-black text-gray-850 dark:text-white uppercase italic tracking-tight mb-6">
                 {{ $isEditMode ? 'Edit Tugas Harian' : 'Tambah Tugas Harian' }}</h2>
     
@@ -449,7 +449,7 @@
         <div x-show="show" x-transition.opacity class="fixed inset-0 bg-black/60 backdrop-blur-xs"
             wire:click="$set('showReviewModal', false)"></div>
         <div x-show="show" x-transition.scale
-            class="relative w-full max-w-4xl bg-white dark:bg-gray-800 rounded-[2.5rem] shadow-2xl p-8 border border-gray-100 dark:border-gray-700 z-10 max-h-[90vh] overflow-y-auto">
+            class="relative w-full max-w-4xl bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-5 border border-gray-100 dark:border-gray-700 z-10 max-h-[90vh] overflow-y-auto">
             
             <div class="mb-6">
                 <h2 class="text-2xl font-black text-gray-850 dark:text-white uppercase italic tracking-tight mb-2">
@@ -677,7 +677,7 @@
         <div x-show="show" x-transition.opacity class="fixed inset-0 bg-black/60 backdrop-blur-xs"
             wire:click="$set('showDeleteModal', false)"></div>
         <div x-show="show" x-transition.scale
-            class="relative w-full max-w-sm bg-white dark:bg-gray-800 rounded-[2rem] shadow-2xl p-8 border border-gray-100 dark:border-gray-700 z-10 text-center">
+            class="relative w-full max-w-sm bg-white dark:bg-gray-800 rounded-[2rem] shadow-2xl p-5 border border-gray-100 dark:border-gray-700 z-10 text-center">
             <h2 class="text-xl font-black text-gray-850 dark:text-white mb-2">Hapus Tugas?</h2>
             <p class="text-sm text-gray-500 mb-6">Tindakan ini tidak bisa dibatalkan. Semua data submission akan ikut terhapus.</p>
             <div class="flex gap-3">

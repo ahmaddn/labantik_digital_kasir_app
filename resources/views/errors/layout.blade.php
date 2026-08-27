@@ -72,7 +72,7 @@
                     <p class="text-[9px] font-black uppercase tracking-[0.3em] text-{{ $brandColor }}">ERROR @yield('code') &bull; System Notification</p>
                 </div>
 
-                <h2 class="text-4xl md:text-5xl font-black italic uppercase tracking-tighter text-gray-900 dark:text-white leading-none mb-6">
+                <h2 class="text-4xl md:text-5xl font-bold uppercase tracking-tight text-gray-900 dark:text-white leading-none mb-6">
                     @yield('title')
                 </h2>
 

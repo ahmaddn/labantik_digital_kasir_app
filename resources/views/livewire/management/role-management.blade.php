@@ -2,7 +2,7 @@
     <!-- Header -->
     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-            <h1 class="text-3xl font-black italic uppercase tracking-tighter text-primary-blue dark:text-primary-yellow">Manajemen Role</h1>
+            <h1 class="text-2xl font-bold uppercase tracking-tight text-primary-blue dark:text-primary-yellow">Manajemen Role</h1>
             <p class="text-gray-400 text-sm font-semibold uppercase tracking-widest mt-1">Kelola Tingkatan Hak Akses Sistem TEFA</p>
         </div>
         <div>
@@ -14,7 +14,7 @@
     </div>
 
     <!-- Table & Filters Container -->
-    <div class="bg-white dark:bg-gray-800 rounded-[2.5rem] shadow-2xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700/50 p-6 md:p-8">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-800 p-4 md:p-6">
         <!-- Search & Filter -->
         <div class="mb-6">
             <div class="relative max-w-md">
@@ -111,7 +111,7 @@
         <div x-show="show" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 bg-black/60 backdrop-blur-xs" wire:click="$set('showModal', false)"></div>
 
         <!-- Content -->
-        <div x-show="show" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95" class="relative w-full max-w-md bg-white dark:bg-gray-800 rounded-[2.5rem] sm:rounded-[3rem] shadow-2xl sm:p-8 p-6 max-h-[90vh] sm:max-h-none overflow-y-auto sm:overflow-visible no-scrollbar border border-gray-100 dark:border-gray-700 z-10">
+        <div x-show="show" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95" class="relative w-full max-w-md bg-white dark:bg-gray-800 rounded-2xl sm:rounded-[3rem] shadow-2xl sm:p-5 p-6 max-h-[90vh] sm:max-h-none overflow-y-auto sm:overflow-visible no-scrollbar border border-gray-100 dark:border-gray-700 z-10">
             <div class="flex justify-between items-center mb-6">
                 <h2 class="text-2xl font-black text-gray-855 dark:text-white uppercase italic tracking-tight">
                     {{ $roleId ? 'Edit Role' : 'Tambah Role Baru' }}
@@ -152,7 +152,7 @@
         <div x-show="showDelete" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 bg-black/60 backdrop-blur-xs" wire:click="$set('showDeleteModal', false)"></div>
 
         <!-- Content -->
-        <div x-show="showDelete" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95" class="relative w-full max-w-md bg-white dark:bg-gray-800 rounded-[2.5rem] sm:rounded-[3rem] shadow-2xl sm:p-8 p-6 max-h-[90vh] sm:max-h-none overflow-y-auto sm:overflow-visible no-scrollbar border border-gray-100 dark:border-gray-700 z-10">
+        <div x-show="showDelete" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95" class="relative w-full max-w-md bg-white dark:bg-gray-800 rounded-2xl sm:rounded-[3rem] shadow-2xl sm:p-5 p-6 max-h-[90vh] sm:max-h-none overflow-y-auto sm:overflow-visible no-scrollbar border border-gray-100 dark:border-gray-700 z-10">
             <div class="text-center mb-6">
                 <div class="w-16 h-16 bg-red-50 dark:bg-red-950/30 text-primary-red rounded-3xl flex items-center justify-center mx-auto mb-4">
                     <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>

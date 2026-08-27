@@ -2,7 +2,7 @@
     <!-- Header -->
     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-            <h1 class="text-3xl font-black italic uppercase tracking-tighter text-primary-blue dark:text-primary-yellow">Laporan Absensi & Shift</h1>
+            <h1 class="text-2xl font-bold uppercase tracking-tight text-primary-blue dark:text-primary-yellow">Laporan Absensi & Shift</h1>
             <p class="text-gray-400 text-sm font-semibold uppercase tracking-widest mt-1">Daftar kehadiran & laporan closing harian kasir</p>
         </div>
         <div class="flex items-center gap-3">
@@ -20,7 +20,7 @@
     </div>
 
     <!-- Filters & Table -->
-    <div class="bg-white dark:bg-gray-800 rounded-[2.5rem] shadow-2xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700/50 p-6 md:p-8">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-800 p-4 md:p-6">
         <div class="mb-6 grid grid-cols-1 md:grid-cols-4 gap-4">
             <div class="relative w-full">
                 <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-gray-400">
@@ -92,7 +92,7 @@
     <!-- Details Attendance Modal -->
     <div x-data="{ show: @entangle('showDetailModal') }" x-show="show" class="fixed inset-0 z-[200] flex items-center justify-center p-4" x-cloak>
         <div x-show="show" x-transition.opacity class="fixed inset-0 bg-black/60 backdrop-blur-xs" wire:click="$set('showDetailModal', false)"></div>
-        <div x-show="show" x-transition.scale class="relative w-full max-w-4xl bg-white dark:bg-gray-800 rounded-[2.5rem] shadow-2xl p-8 border border-gray-100 dark:border-gray-700 z-10 max-h-[85vh] flex flex-col">
+        <div x-show="show" x-transition.scale class="relative w-full max-w-4xl bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-5 border border-gray-100 dark:border-gray-700 z-10 max-h-[85vh] flex flex-col">
             <div class="flex justify-between items-center mb-6 flex-shrink-0">
                 <div>
                     <h2 class="text-xl font-black text-gray-850 dark:text-white uppercase italic tracking-tight">Rincian Absensi Kasir</h2>
@@ -209,7 +209,7 @@
     <!-- Report Modal -->
     <div x-data="{ show: @entangle('showReportModal') }" x-show="show" class="fixed inset-0 z-[300] flex items-center justify-center p-4" x-cloak>
         <div x-show="show" x-transition.opacity class="fixed inset-0 bg-black/60 backdrop-blur-xs" wire:click="$set('showReportModal', false)"></div>
-        <div x-show="show" x-transition.scale class="relative w-full max-w-lg bg-white dark:bg-gray-800 rounded-[2rem] shadow-2xl p-8 border border-gray-100 dark:border-gray-700 z-10">
+        <div x-show="show" x-transition.scale class="relative w-full max-w-lg bg-white dark:bg-gray-800 rounded-[2rem] shadow-2xl p-5 border border-gray-100 dark:border-gray-700 z-10">
             <div class="flex justify-between items-center mb-6">
                 <h2 class="text-xl font-black text-gray-855 dark:text-white uppercase italic tracking-tight">Laporan Closing Shift</h2>
                 <button wire:click="$set('showReportModal', false)" class="text-gray-400 hover:text-white">
@@ -235,7 +235,7 @@
     <!-- Edit Report Modal -->
     <div x-data="{ show: @entangle('editingAttendanceId') }" x-show="show" class="fixed inset-0 z-[300] flex items-center justify-center p-4" x-cloak>
         <div x-show="show" x-transition.opacity class="fixed inset-0 bg-black/60 backdrop-blur-xs" wire:click="$set('editingAttendanceId', null)"></div>
-        <div x-show="show" x-transition.scale class="relative w-full max-w-lg bg-white dark:bg-gray-800 rounded-[2rem] shadow-2xl p-8 border border-gray-100 dark:border-gray-700 z-10">
+        <div x-show="show" x-transition.scale class="relative w-full max-w-lg bg-white dark:bg-gray-800 rounded-[2rem] shadow-2xl p-5 border border-gray-100 dark:border-gray-700 z-10">
             <h2 class="text-xl font-black text-gray-855 dark:text-white uppercase italic mb-6">Edit Laporan Closing Shift</h2>
             
             <form wire:submit.prevent="updateReport" class="space-y-5">
@@ -261,7 +261,7 @@
     </div>
 
     <!-- Calendar Section -->
-    <div class="bg-white dark:bg-gray-800 rounded-[2.5rem] shadow-2xl p-6 md:p-8 border border-gray-100 dark:border-gray-700/50 mt-8">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-6 md:p-5 border border-gray-100 dark:border-gray-700/50 mt-8">
         <h2 class="text-xl font-black text-gray-855 dark:text-white uppercase italic tracking-tight mb-6">Kalender Absensi Kasir</h2>
         
         <!-- FullCalendar Scripts -->
