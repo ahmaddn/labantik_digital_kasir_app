@@ -6,13 +6,13 @@
     class="z-50 flex-col bg-white dark:bg-gray-900 border-r border-gray-100 dark:border-gray-800 transition-all duration-500 ease-in-out shadow-2xl md:shadow-none flex"
     :class="isMobile
         ?
-        'fixed inset-y-0 left-0 w-80 ' + (sidebarOpen ? 'translate-x-0 opacity-100' :
+        'fixed inset-y-0 left-0 w-64 ' + (sidebarOpen ? 'translate-x-0 opacity-100' :
             '-translate-x-full opacity-0 pointer-events-none w-0 overflow-hidden') :
-        'relative ' + (sidebarOpen ? 'translate-x-0 opacity-100 w-80' :
+        'relative ' + (sidebarOpen ? 'translate-x-0 opacity-100 w-64' :
             'w-0 opacity-0 -translate-x-full overflow-hidden')">
     <div class="flex flex-col h-full">
         <!-- Brand -->
-        <div class="p-10 flex items-center justify-between">
+        <div class="p-5 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between">
             <div class="flex items-center overflow-hidden">
                 @php
                     $activeJurusanId = session('active_jurusan_id');
@@ -32,12 +32,12 @@
                             : 'Tefa ' . session('active_jurusan_name', 'RPL'));
                 @endphp
                 <img src="{{ $tefaLogo ? asset('storage/' . $tefaLogo) : asset('favicon.png') }}"
-                    class="w-14 h-14 bg-white rounded-[1.25rem] p-2 flex items-center justify-center shadow-2xl shadow-blue-900/20 border-4 border-white dark:border-gray-800 flex-shrink-0 object-contain">
+                    class="w-10 h-10 bg-white rounded-[1.25rem] p-2 flex items-center justify-center shadow-2xl shadow-blue-900/20 border-4 border-white dark:border-gray-800 flex-shrink-0 object-contain">
                 <div class="ml-4 whitespace-nowrap">
                     <h1
-                        class="text-xl font-black tracking-tight leading-none text-primary-blue dark:text-primary-blue-light uppercase italic">
+                        class="text-md font-bold tracking-tight leading-none text-primary-blue dark:text-primary-blue-light uppercase italic">
                         {{ $tefaName }}</h1>
-                    <span class="text-[9px] font-black text-primary-red tracking-wider uppercase italic">
+                    <span class="text-[8px] font-bold text-primary-red tracking-wider uppercase italic">
                         {{ $roleLabel }}
                     </span>
                 </div>
@@ -53,15 +53,15 @@
         </div>
 
         <!-- Nav -->
-        <nav class="flex-1 px-8 space-y-2 mt-4 overflow-y-auto no-scrollbar pb-10">
-            <div class="px-5 mb-6">
+        <nav class="flex-1 px-4 space-y-1 mt-4 overflow-y-auto no-scrollbar pb-10">
+            <div class="px-3 mb-4">
                 @livewire('layout.tefa-switcher')
             </div>
 
-            <p class="text-[9px] font-black text-primary-blue uppercase tracking-[0.3em] mb-4 ml-5">Beranda & Utama</p>
+            <p class="text-[8px] font-bold text-primary-blue uppercase tracking-[0.3em] mb-4 ml-5">Beranda & Utama</p>
 
             <a href="{{ route('dashboard') }}"
-                class="flex items-center px-6 py-4 text-sm font-black rounded-2xl transition-all {{ request()->routeIs('dashboard') ? 'bg-primary-blue text-white shadow-xl shadow-blue-900/20' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
+                class="flex items-center px-4 py-2.5 text-xs font-semibold rounded-xl transition-all {{ request()->routeIs('dashboard') ? 'bg-primary-blue text-white shadow-xl shadow-blue-900/20' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
                 <svg class="w-5 h-5 mr-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
                     viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
                     stroke-linejoin="round">
@@ -75,7 +75,7 @@
 
             @if (auth()->check() && count(auth()->user()->getAvailableAccesses()) > 1)
                 <a href="{{ route('select-role') }}"
-                    class="flex items-center px-6 py-4 text-sm font-black rounded-2xl text-amber-500 dark:text-amber-400 hover:bg-amber-500/5 transition-all">
+                    class="flex items-center px-4 py-2.5 text-xs font-semibold rounded-xl text-amber-500 dark:text-amber-400 hover:bg-amber-500/5 transition-all">
                     <svg class="w-5 h-5 mr-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
                         viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                         stroke-linecap="round" stroke-linejoin="round">
@@ -205,7 +205,7 @@
 
             <div class="h-px bg-gray-100 dark:bg-gray-800 my-8 mx-4"></div>
 
-            <p class="text-[9px] font-black text-gray-400 uppercase tracking-[0.3em] mb-4 ml-5">Aktivitas Harian</p>
+            <p class="text-[8px] font-bold text-gray-400 uppercase tracking-[0.3em] mb-4 ml-5">Aktivitas Harian</p>
 
             @if (session('active_role_name') === 'kasir')
                 @php
@@ -219,7 +219,7 @@
                         ->count();
                 @endphp
                 <a href="{{ route('my-tasks') }}"
-                    class="flex items-center px-6 py-4 text-sm font-black rounded-2xl transition-all {{ request()->routeIs('my-tasks') ? 'bg-primary-blue text-white shadow-xl shadow-blue-900/20' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
+                    class="flex items-center px-4 py-2.5 text-xs font-semibold rounded-xl transition-all {{ request()->routeIs('my-tasks') ? 'bg-primary-blue text-white shadow-xl shadow-blue-900/20' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
                     <svg class="w-5 h-5 mr-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
                         viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                         stroke-linecap="round" stroke-linejoin="round">
@@ -237,7 +237,7 @@
 
             @if (session('active_role_name') !== 'kasir')
                 <a href="{{ route('buku-kas') }}"
-                    class="flex items-center px-6 py-4 text-sm font-black rounded-2xl transition-all {{ request()->routeIs('buku-kas') ? 'bg-primary-blue text-white shadow-xl shadow-blue-900/20' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
+                    class="flex items-center px-4 py-2.5 text-xs font-semibold rounded-xl transition-all {{ request()->routeIs('buku-kas') ? 'bg-primary-blue text-white shadow-xl shadow-blue-900/20' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
                     <svg class="w-5 h-5 mr-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
                         viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                         stroke-linecap="round" stroke-linejoin="round">
@@ -251,7 +251,7 @@
 
             @if (in_array(session('active_role_name'), ['superadmin', 'pengelola_jurusan', 'kasir']))
                 <a href="{{ route('daily-recap') }}"
-                    class="flex items-center px-6 py-4 text-sm font-black rounded-2xl transition-all {{ request()->routeIs('daily-recap') ? 'bg-primary-blue text-white shadow-xl shadow-blue-900/20' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
+                    class="flex items-center px-4 py-2.5 text-xs font-semibold rounded-xl transition-all {{ request()->routeIs('daily-recap') ? 'bg-primary-blue text-white shadow-xl shadow-blue-900/20' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
                     <svg class="w-5 h-5 mr-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
                         viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                         stroke-linecap="round" stroke-linejoin="round">
@@ -266,7 +266,7 @@
             @endif
 
             <a href="{{ route('transactions') }}"
-                class="flex items-center px-6 py-4 text-sm font-black rounded-2xl transition-all {{ request()->routeIs('transactions') ? 'bg-primary-blue text-white shadow-xl shadow-blue-900/20' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
+                class="flex items-center px-4 py-2.5 text-xs font-semibold rounded-xl transition-all {{ request()->routeIs('transactions') ? 'bg-primary-blue text-white shadow-xl shadow-blue-900/20' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
                 <svg class="w-5 h-5 mr-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
                     viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                     stroke-linecap="round" stroke-linejoin="round">
@@ -282,7 +282,7 @@
 
             @if (in_array(session('active_role_name'), ['superadmin', 'pengelola_jurusan', 'kasir']))
                 <a href="{{ route('debts') }}"
-                    class="flex items-center px-6 py-4 text-sm font-black rounded-2xl transition-all {{ request()->routeIs('debts') ? 'bg-primary-blue text-white shadow-xl shadow-blue-900/20' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
+                    class="flex items-center px-4 py-2.5 text-xs font-semibold rounded-xl transition-all {{ request()->routeIs('debts') ? 'bg-primary-blue text-white shadow-xl shadow-blue-900/20' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
                     <svg class="w-5 h-5 mr-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
                         viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                         stroke-linecap="round" stroke-linejoin="round">
@@ -310,11 +310,11 @@
                     <div class="h-px bg-gray-100 dark:bg-gray-800 my-8 mx-4"></div>
 
                     <!-- 1. MANAJEMEN INVENTARIS -->
-                    <p class="text-[9px] font-black text-gray-400 uppercase tracking-[0.3em] mb-4 ml-5">Manajemen
+                    <p class="text-[8px] font-bold text-gray-400 uppercase tracking-[0.3em] mb-4 ml-5">Manajemen
                         Inventaris</p>
 
                     <a href="{{ route('products') }}"
-                        class="flex items-center px-6 py-4 text-sm font-black rounded-2xl transition-all {{ request()->routeIs('products') ? 'bg-primary-blue text-white shadow-xl shadow-blue-900/20' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
+                        class="flex items-center px-4 py-2.5 text-xs font-semibold rounded-xl transition-all {{ request()->routeIs('products') ? 'bg-primary-blue text-white shadow-xl shadow-blue-900/20' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
                         <svg class="w-5 h-5 mr-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
                             viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                             stroke-linecap="round" stroke-linejoin="round">
@@ -328,7 +328,7 @@
                     </a>
 
                     <a href="{{ route('categories') }}"
-                        class="flex items-center px-6 py-4 text-sm font-black rounded-2xl transition-all {{ request()->routeIs('categories') ? 'bg-primary-blue text-white shadow-xl shadow-blue-900/20' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
+                        class="flex items-center px-4 py-2.5 text-xs font-semibold rounded-xl transition-all {{ request()->routeIs('categories') ? 'bg-primary-blue text-white shadow-xl shadow-blue-900/20' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
                         <svg class="w-5 h-5 mr-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
                             viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                             stroke-linecap="round" stroke-linejoin="round">
@@ -340,7 +340,7 @@
                     </a>
 
                     <a href="{{ route('modifiers') }}"
-                        class="flex items-center px-6 py-4 text-sm font-black rounded-2xl transition-all {{ request()->routeIs('modifiers') ? 'bg-primary-blue text-white shadow-xl shadow-blue-900/20' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
+                        class="flex items-center px-4 py-2.5 text-xs font-semibold rounded-xl transition-all {{ request()->routeIs('modifiers') ? 'bg-primary-blue text-white shadow-xl shadow-blue-900/20' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
                         <svg class="w-5 h-5 mr-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
                             viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                             stroke-linecap="round" stroke-linejoin="round">
@@ -351,7 +351,7 @@
                     </a>
 
                     <a href="{{ route('suppliers') }}"
-                        class="flex items-center px-6 py-4 text-sm font-black rounded-2xl transition-all {{ request()->routeIs('suppliers') ? 'bg-primary-blue text-white shadow-xl shadow-blue-900/20' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
+                        class="flex items-center px-4 py-2.5 text-xs font-semibold rounded-xl transition-all {{ request()->routeIs('suppliers') ? 'bg-primary-blue text-white shadow-xl shadow-blue-900/20' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
                         <svg class="w-5 h-5 mr-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
                             viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                             stroke-linecap="round" stroke-linejoin="round">
@@ -366,11 +366,11 @@
 
                 <!-- 2. MANAJEMEN OPERASIONAL -->
                 <div class="h-px bg-gray-100 dark:bg-gray-800 my-8 mx-4"></div>
-                <p class="text-[9px] font-black text-gray-400 uppercase tracking-[0.3em] mb-4 ml-5">Manajemen
+                <p class="text-[8px] font-bold text-gray-400 uppercase tracking-[0.3em] mb-4 ml-5">Manajemen
                     Operasional</p>
 
                 <a href="{{ route('schedules') }}"
-                    class="flex items-center px-6 py-4 text-sm font-black rounded-2xl transition-all {{ request()->routeIs('schedules') ? 'bg-primary-blue text-white shadow-xl shadow-blue-900/20' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
+                    class="flex items-center px-4 py-2.5 text-xs font-semibold rounded-xl transition-all {{ request()->routeIs('schedules') ? 'bg-primary-blue text-white shadow-xl shadow-blue-900/20' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
                     <svg class="w-5 h-5 mr-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
                         viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                         stroke-linecap="round" stroke-linejoin="round">
@@ -383,7 +383,7 @@
                 </a>
 
                 <a href="{{ route('labantik.candidates') }}"
-                    class="flex items-center px-6 py-4 text-sm font-black rounded-2xl transition-all {{ request()->routeIs('labantik.candidates') ? 'bg-primary-blue text-white shadow-xl shadow-blue-900/20' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
+                    class="flex items-center px-4 py-2.5 text-xs font-semibold rounded-xl transition-all {{ request()->routeIs('labantik.candidates') ? 'bg-primary-blue text-white shadow-xl shadow-blue-900/20' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
                     <svg class="w-5 h-5 mr-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
                         viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                         stroke-linecap="round" stroke-linejoin="round">
@@ -397,7 +397,7 @@
 
                 @if (session('active_role_name') === 'superadmin' || session('active_role_name') === 'pengelola_jurusan')
                     <a href="{{ route('tasks') }}"
-                        class="flex items-center px-6 py-4 text-sm font-black rounded-2xl transition-all {{ request()->routeIs('tasks') ? 'bg-primary-blue text-white shadow-xl shadow-blue-900/20' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
+                        class="flex items-center px-4 py-2.5 text-xs font-semibold rounded-xl transition-all {{ request()->routeIs('tasks') ? 'bg-primary-blue text-white shadow-xl shadow-blue-900/20' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
                         <svg class="w-5 h-5 mr-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
                             viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                             stroke-linecap="round" stroke-linejoin="round">
@@ -411,11 +411,11 @@
                 <!-- 3. MANAJEMEN SISTEM -->
                 @if (session('active_role_name') === 'superadmin' || session('active_role_name') === 'pengelola_jurusan')
                     <div class="h-px bg-gray-100 dark:bg-gray-800 my-8 mx-4"></div>
-                    <p class="text-[9px] font-black text-gray-400 uppercase tracking-[0.3em] mb-4 ml-5">Manajemen
+                    <p class="text-[8px] font-bold text-gray-400 uppercase tracking-[0.3em] mb-4 ml-5">Manajemen
                         Sistem</p>
 
                     <a href="{{ route('users') }}"
-                        class="flex items-center px-6 py-4 text-sm font-black rounded-2xl transition-all {{ request()->routeIs('users') ? 'bg-primary-blue text-white shadow-xl shadow-blue-900/20' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
+                        class="flex items-center px-4 py-2.5 text-xs font-semibold rounded-xl transition-all {{ request()->routeIs('users') ? 'bg-primary-blue text-white shadow-xl shadow-blue-900/20' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
                         <svg class="w-5 h-5 mr-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
                             viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                             stroke-linecap="round" stroke-linejoin="round">
@@ -428,7 +428,7 @@
                     </a>
 
                     <a href="{{ route('jurusans') }}"
-                        class="flex items-center px-6 py-4 text-sm font-black rounded-2xl transition-all {{ request()->routeIs('jurusans') ? 'bg-primary-blue text-white shadow-xl shadow-blue-900/20' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
+                        class="flex items-center px-4 py-2.5 text-xs font-semibold rounded-xl transition-all {{ request()->routeIs('jurusans') ? 'bg-primary-blue text-white shadow-xl shadow-blue-900/20' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
                         <svg class="w-5 h-5 mr-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
                             viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                             stroke-linecap="round" stroke-linejoin="round">
@@ -440,7 +440,7 @@
 
                     @if (session('active_role_name') === 'superadmin')
                         <a href="{{ route('roles') }}"
-                            class="flex items-center px-6 py-4 text-sm font-black rounded-2xl transition-all {{ request()->routeIs('roles') ? 'bg-primary-blue text-white shadow-xl shadow-blue-900/20' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
+                            class="flex items-center px-4 py-2.5 text-xs font-semibold rounded-xl transition-all {{ request()->routeIs('roles') ? 'bg-primary-blue text-white shadow-xl shadow-blue-900/20' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
                             <svg class="w-5 h-5 mr-4" xmlns="http://www.w3.org/2000/svg" width="24"
                                 height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                 stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -452,7 +452,7 @@
                     @endif
 
                     <a href="{{ route('theme-customizer') }}"
-                        class="flex items-center px-6 py-4 text-sm font-black rounded-2xl transition-all {{ request()->routeIs('theme-customizer') ? 'bg-primary-blue text-white shadow-xl shadow-blue-900/20' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
+                        class="flex items-center px-4 py-2.5 text-xs font-semibold rounded-xl transition-all {{ request()->routeIs('theme-customizer') ? 'bg-primary-blue text-white shadow-xl shadow-blue-900/20' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
                         <svg class="w-5 h-5 mr-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
                             viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                             stroke-linecap="round" stroke-linejoin="round">
@@ -467,7 +467,7 @@
                     </a>
 
                     <a href="{{ route('security-logs') }}"
-                        class="flex items-center px-6 py-4 text-sm font-black rounded-2xl transition-all {{ request()->routeIs('security-logs') ? 'bg-primary-blue text-white shadow-xl shadow-blue-900/20' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
+                        class="flex items-center px-4 py-2.5 text-xs font-semibold rounded-xl transition-all {{ request()->routeIs('security-logs') ? 'bg-primary-blue text-white shadow-xl shadow-blue-900/20' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
                         <svg class="w-5 h-5 mr-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
                             viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                             stroke-linecap="round" stroke-linejoin="round">
@@ -481,11 +481,11 @@
             @if (true)
                 <div class="h-px bg-gray-100 dark:bg-gray-800 my-8 mx-4"></div>
 
-                <p class="text-[9px] font-black text-gray-400 uppercase tracking-[0.3em] mb-4 ml-5">Analisis & Laporan
+                <p class="text-[8px] font-bold text-gray-400 uppercase tracking-[0.3em] mb-4 ml-5">Analisis & Laporan
                 </p>
 
                 <a href="{{ route('cashier-notes') }}"
-                    class="flex items-center px-6 py-4 text-sm font-black rounded-2xl transition-all {{ request()->routeIs('cashier-notes') ? 'bg-primary-blue text-white shadow-xl shadow-blue-900/20' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
+                    class="flex items-center px-4 py-2.5 text-xs font-semibold rounded-xl transition-all {{ request()->routeIs('cashier-notes') ? 'bg-primary-blue text-white shadow-xl shadow-blue-900/20' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
                     <svg class="w-5 h-5 mr-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
                         viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                         stroke-linecap="round" stroke-linejoin="round">
@@ -497,7 +497,7 @@
 
                 @if (in_array(session('active_role_name'), ['superadmin', 'pengelola_jurusan', 'kasir']))
                     <a href="{{ route('attendances') }}"
-                        class="flex items-center px-6 py-4 text-sm font-black rounded-2xl transition-all {{ request()->routeIs('attendances') ? 'bg-primary-blue text-white shadow-xl shadow-blue-900/20' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
+                        class="flex items-center px-4 py-2.5 text-xs font-semibold rounded-xl transition-all {{ request()->routeIs('attendances') ? 'bg-primary-blue text-white shadow-xl shadow-blue-900/20' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
                         <svg class="w-5 h-5 mr-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
                             viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                             stroke-linecap="round" stroke-linejoin="round">
@@ -509,7 +509,7 @@
 
                 @if (session('active_role_name') !== 'kasir')
                     <a href="{{ route('monthly-recap') }}"
-                        class="flex items-center px-6 py-4 text-sm font-black rounded-2xl transition-all {{ request()->routeIs('monthly-recap') ? 'bg-primary-blue text-white shadow-xl shadow-blue-900/20' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
+                        class="flex items-center px-4 py-2.5 text-xs font-semibold rounded-xl transition-all {{ request()->routeIs('monthly-recap') ? 'bg-primary-blue text-white shadow-xl shadow-blue-900/20' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
                         <svg class="w-5 h-5 mr-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
                             viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                             stroke-linecap="round" stroke-linejoin="round">
@@ -528,7 +528,7 @@
                     </a>
 
                     <a href="{{ route('yearly-recap') }}"
-                        class="flex items-center px-6 py-4 text-sm font-black rounded-2xl transition-all {{ request()->routeIs('yearly-recap') ? 'bg-primary-blue text-white shadow-xl shadow-blue-900/20' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
+                        class="flex items-center px-4 py-2.5 text-xs font-semibold rounded-xl transition-all {{ request()->routeIs('yearly-recap') ? 'bg-primary-blue text-white shadow-xl shadow-blue-900/20' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
                         <svg class="w-5 h-5 mr-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
                             viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                             stroke-linecap="round" stroke-linejoin="round">
@@ -543,7 +543,7 @@
 
                 @if (session('active_role_name') !== 'kasir')
                     <a href="{{ route('inventory-report') }}"
-                        class="flex items-center px-6 py-4 text-sm font-black rounded-2xl transition-all {{ request()->routeIs('inventory-report') ? 'bg-primary-blue text-white shadow-xl shadow-blue-900/20' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
+                        class="flex items-center px-4 py-2.5 text-xs font-semibold rounded-xl transition-all {{ request()->routeIs('inventory-report') ? 'bg-primary-blue text-white shadow-xl shadow-blue-900/20' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
                         <svg class="w-5 h-5 mr-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
                             viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                             stroke-linecap="round" stroke-linejoin="round">
@@ -556,7 +556,7 @@
                     </a>
 
                     <a href="{{ route('supplier-report') }}"
-                        class="flex items-center px-6 py-4 text-sm font-black rounded-2xl transition-all {{ request()->routeIs('supplier-report') ? 'bg-primary-blue text-white shadow-xl shadow-blue-900/20' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
+                        class="flex items-center px-4 py-2.5 text-xs font-semibold rounded-xl transition-all {{ request()->routeIs('supplier-report') ? 'bg-primary-blue text-white shadow-xl shadow-blue-900/20' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
                         <svg class="w-5 h-5 mr-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
                             viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                             stroke-linecap="round" stroke-linejoin="round">
@@ -592,7 +592,7 @@
                         </div>
                     @else
                         <a href="{{ route('bagi-hasil') }}"
-                            class="flex items-center px-6 py-4 text-sm font-black rounded-2xl transition-all {{ request()->routeIs('bagi-hasil') ? 'bg-primary-blue text-white shadow-xl shadow-blue-900/20' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
+                            class="flex items-center px-4 py-2.5 text-xs font-semibold rounded-xl transition-all {{ request()->routeIs('bagi-hasil') ? 'bg-primary-blue text-white shadow-xl shadow-blue-900/20' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
                             <svg class="w-5 h-5 mr-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
                                 viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                                 stroke-linecap="round" stroke-linejoin="round">

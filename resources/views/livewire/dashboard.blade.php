@@ -2,15 +2,15 @@
     <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-8 md:mb-12">
         <div>
             <h1
-                class="text-3xl md:text-5xl font-black italic uppercase tracking-tighter text-primary-blue dark:text-primary-blue-light">
+                class="text-2xl md:text-4xl font-bold uppercase tracking-tight text-primary-blue dark:text-primary-blue-light">
                 Dashboard Digital</h1>
-            <p class="text-gray-400 font-bold text-xs uppercase tracking-[0.3em] italic">
+            <p class="text-gray-400 font-semibold text-[10px] uppercase tracking-[0.2em]">
                 {{ \Carbon\Carbon::parse($today)->translatedFormat('l, d F Y') }}</p>
         </div>
         <div class="flex flex-wrap items-center gap-3 sm:gap-4 w-full lg:w-auto lg:justify-end">
             @if (!session('active_jurusan_id'))
                 <div
-                    class="flex items-center bg-white dark:bg-gray-800 px-4 md:px-6 py-3 md:py-4 rounded-2xl shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-800">
+                    class="flex items-center bg-white dark:bg-gray-800 px-4 md:px-6 py-2 md:py-2.5 rounded-xl shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-800">
                     <svg class="w-5 h-5 text-primary-blue mr-3" xmlns="http://www.w3.org/2000/svg" width="24"
                         height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                         stroke-linecap="round" stroke-linejoin="round">
@@ -28,7 +28,7 @@
             @endif
 
             <a href="{{ route('guide') }}"
-                class="px-4 py-3 sm:px-6 sm:py-3.5 md:py-5 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 text-gray-800 dark:text-white rounded-2xl md:rounded-[2rem] shadow-xl shadow-blue-900/5 font-black italic uppercase tracking-wider transition transform hover:-translate-y-1 hover:bg-gray-50 dark:hover:bg-gray-700 active:scale-95 flex items-center">
+                class="px-4 py-3 sm:px-5 sm:py-3 md:py-3.5 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 text-gray-800 dark:text-white rounded-xl md:rounded-2xl shadow-xl shadow-blue-900/5 font-bold uppercase tracking-wide text-xs transition transform hover:-translate-y-1 hover:bg-gray-50 dark:hover:bg-gray-700 active:scale-95 flex items-center">
                 <svg class="w-5.5 h-5.5 mr-2.5 text-blue-600 dark:text-blue-400" xmlns="http://www.w3.org/2000/svg"
                     width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                     stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
@@ -40,7 +40,7 @@
             </a>
 
             <a href="{{ route('leaderboard') }}"
-                class="px-4 py-3 sm:px-6 sm:py-3.5 md:py-5 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 text-gray-800 dark:text-white rounded-2xl md:rounded-[2rem] shadow-xl shadow-blue-900/5 font-black italic uppercase tracking-wider transition transform hover:-translate-y-1 hover:bg-gray-50 dark:hover:bg-gray-700 active:scale-95 flex items-center">
+                class="px-4 py-3 sm:px-5 sm:py-3 md:py-3.5 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 text-gray-800 dark:text-white rounded-xl md:rounded-2xl shadow-xl shadow-blue-900/5 font-bold uppercase tracking-wide text-xs transition transform hover:-translate-y-1 hover:bg-gray-50 dark:hover:bg-gray-700 active:scale-95 flex items-center">
                 <svg class="w-5.5 h-5.5 mr-2.5 text-amber-500" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
                     viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
                     stroke-linecap="round" stroke-linejoin="round">
@@ -76,7 +76,7 @@
                 @if ($isSessionFinished)
                     <div class="flex items-center space-x-2" x-data="{ showEmergencyConfirm: false }">
                         <button disabled
-                            class="px-4 py-3 sm:px-6 sm:py-3.5 md:py-5 bg-gray-400 text-white rounded-2xl md:rounded-[2rem] shadow-xl font-black italic uppercase tracking-wider cursor-not-allowed flex flex-col items-center leading-tight">
+                            class="px-4 py-3 sm:px-5 sm:py-3 md:py-3.5 bg-gray-400 text-white rounded-xl md:rounded-2xl shadow-xl font-bold uppercase tracking-wide text-xs cursor-not-allowed flex flex-col items-center leading-tight">
                             <div class="flex items-center">
                                 <svg class="w-6 h-6 mr-3" xmlns="http://www.w3.org/2000/svg" width="24"
                                     height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -90,7 +90,7 @@
                                 telah dikunci</span>
                         </button>
                         <button type="button" @click="showEmergencyConfirm = true" @class([
-                            'px-4 py-3 sm:px-6 sm:py-3.5 md:py-5 bg-red-600 hover:bg-red-700 text-white rounded-2xl md:rounded-[2rem] shadow-xl shadow-red-600/30 font-black italic uppercase tracking-wider flex flex-col items-center leading-tight transition transform hover:-translate-y-1 active:scale-95',
+                            'px-4 py-3 sm:px-5 sm:py-3 md:py-3.5 bg-red-600 hover:bg-red-700 text-white rounded-xl md:rounded-2xl shadow-xl shadow-red-600/30 font-bold uppercase tracking-wide text-xs flex flex-col items-center leading-tight transition transform hover:-translate-y-1 active:scale-95',
                             'hidden' => !$hasHigherRole,
                         ])>
                             <div class="flex items-center">
@@ -171,7 +171,7 @@
                     </div>
                 @elseif(!$isScheduled)
                     <div
-                        class="px-4 py-3 sm:px-6 sm:py-3.5 md:py-5 bg-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-400 rounded-2xl md:rounded-[2rem] shadow-xl opacity-90 cursor-not-allowed flex flex-col items-center justify-center leading-tight text-center">
+                        class="px-4 py-3 sm:px-5 sm:py-3 md:py-3.5 bg-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-400 rounded-xl md:rounded-2xl shadow-xl opacity-90 cursor-not-allowed flex flex-col items-center justify-center leading-tight text-center">
                         <div class="flex items-center text-xs font-black uppercase italic tracking-wider">
                             <svg class="w-5 h-5 mr-2.5 shrink-0" xmlns="http://www.w3.org/2000/svg"
                                 viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
@@ -188,7 +188,7 @@
                     </div>
                 @else
                     <a href="{{ route('kasir') }}"
-                        class="px-4 py-3 sm:px-6 sm:py-3.5 md:py-5 bg-primary-red text-white rounded-2xl md:rounded-[2rem] shadow-2xl shadow-red-500/30 font-black italic uppercase tracking-wider transition transform hover:-translate-y-2 active:scale-95 flex items-center">
+                        class="px-4 py-3 sm:px-5 sm:py-3 md:py-3.5 bg-primary-red text-white rounded-xl md:rounded-2xl shadow-2xl shadow-red-500/30 font-bold uppercase tracking-wide text-xs transition transform hover:-translate-y-2 active:scale-95 flex items-center">
                         <svg class="w-6 h-6 mr-3" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
                             viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
                             stroke-linecap="round" stroke-linejoin="round">
@@ -222,26 +222,26 @@
 
     <!-- Summary Cards (Today vs Yesterday) -->
     <div class="mb-8 md:mb-10">
-        <div class="flex items-center gap-4 mb-6 md:mb-8">
+        <div class="flex items-center gap-4 mb-4 md:mb-5">
             <div class="h-8 w-2 bg-primary-blue rounded-full"></div>
-            <h2 class="text-2xl font-black italic uppercase tracking-tighter text-gray-800 dark:text-white">Statistik
+            <h2 class="text-2xl font-bold uppercase tracking-tight text-gray-800 dark:text-white">Statistik
                 Hari Ini</h2>
         </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
             <div
                 class="bg-primary-blue rounded-3xl md:rounded-[3rem] p-5 md:p-10 shadow-2xl shadow-blue-900/30 border border-transparent hover:scale-105 transition-all group overflow-hidden relative">
                 <div
                     class="absolute -right-8 -bottom-8 opacity-10 group-hover:scale-110 transition-transform duration-700">
-                    <svg class="w-48 h-48 text-white" xmlns="http://www.w3.org/2000/svg" width="24"
+                    <svg class="w-32 h-32 text-white" xmlns="http://www.w3.org/2000/svg" width="24"
                         height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                         stroke-linecap="round" stroke-linejoin="round">
                         <line x1="12" y1="1" x2="12" y2="23" />
                         <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
                     </svg>
                 </div>
-                <div class="flex items-center justify-between mb-6 md:mb-8">
-                    <div class="p-4 md:p-5 bg-white/10 rounded-2xl text-white">
-                        <svg class="w-8 h-8 md:w-10 md:h-10" xmlns="http://www.w3.org/2000/svg" width="24"
+                <div class="flex items-center justify-between mb-4 md:mb-5">
+                    <div class="p-3 bg-white/10 rounded-xl text-white">
+                        <svg class="w-6 h-6 md:w-7 h-7" xmlns="http://www.w3.org/2000/svg" width="24"
                             height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M12 2v20" />
@@ -256,7 +256,7 @@
                         class="text-[10px] font-black uppercase tracking-widest text-white/60 bg-white/5 px-4 py-2 rounded-full">Omzet</span>
                 </div>
                 <h3 class="text-white/60 text-[10px] font-black uppercase tracking-widest mb-1">Total Omzet Tunai</h3>
-                <p class="text-2xl md:text-4xl font-black text-white italic tracking-tighter"
+                <p class="text-xl md:text-2xl font-bold text-white tracking-tight"
                     :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($stats->today_revenue, 0, ',', '.') }}
                 </p>
                 <div class="mt-4 pt-4 border-t border-white/10 flex flex-col gap-2">
@@ -276,19 +276,19 @@
             </div>
 
             <div
-                class="bg-white dark:bg-gray-800 rounded-3xl md:rounded-[3rem] p-5 md:p-10 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 hover:border-primary-red transition-all group overflow-hidden relative">
+                class="bg-white dark:bg-gray-800 rounded-2xl p-4 md:p-6 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 hover:border-primary-red transition-all group overflow-hidden relative">
                 <div
                     class="absolute -right-8 -bottom-8 opacity-5 group-hover:scale-110 transition-transform duration-700">
-                    <svg class="w-48 h-48 text-primary-red" xmlns="http://www.w3.org/2000/svg" width="24"
+                    <svg class="w-32 h-32 text-primary-red" xmlns="http://www.w3.org/2000/svg" width="24"
                         height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                         stroke-linecap="round" stroke-linejoin="round">
                         <path d="m22 7-8.5 8.5-5-5L2 17" />
                         <polyline points="18 7 22 7 22 11" />
                     </svg>
                 </div>
-                <div class="flex items-center justify-between mb-6 md:mb-8">
-                    <div class="p-4 md:p-5 bg-primary-red/10 rounded-2xl text-primary-red">
-                        <svg class="w-8 h-8 md:w-10 md:h-10" xmlns="http://www.w3.org/2000/svg" width="24"
+                <div class="flex items-center justify-between mb-4 md:mb-5">
+                    <div class="p-3 bg-primary-red/10 rounded-xl text-primary-red">
+                        <svg class="w-6 h-6 md:w-7 h-7" xmlns="http://www.w3.org/2000/svg" width="24"
                             height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10" />
@@ -298,7 +298,7 @@
                         class="text-[10px] font-black uppercase tracking-widest text-primary-red bg-primary-red/5 px-4 py-2 rounded-full">Profit</span>
                 </div>
                 <h3 class="text-gray-400 text-[10px] font-black uppercase tracking-widest mb-1">Keuntungan Bersih</h3>
-                <p class="text-2xl md:text-4xl font-black text-primary-red italic tracking-tighter"
+                <p class="text-xl md:text-2xl font-bold text-primary-red tracking-tight"
                     :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($stats->today_profit, 0, ',', '.') }}
                 </p>
                 <div class="mt-4 flex items-center">
@@ -314,27 +314,27 @@
 
     <!-- General Insights (All Time) -->
     <div class="mb-8 md:mb-16">
-        <div class="flex items-center gap-4 mb-6 md:mb-8">
+        <div class="flex items-center gap-4 mb-4 md:mb-5">
             <div class="h-8 w-2 bg-green-500 rounded-full"></div>
-            <h2 class="text-2xl font-black italic uppercase tracking-tighter text-gray-800 dark:text-white">General
+            <h2 class="text-2xl font-bold uppercase tracking-tight text-gray-800 dark:text-white">General
                 Insights</h2>
         </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
             <!-- Pemasukan (Bulan Ini) -->
             <div
-                class="bg-white dark:bg-gray-800 rounded-3xl md:rounded-[3rem] p-5 md:p-10 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 hover:border-green-500 transition-all group overflow-hidden relative">
+                class="bg-white dark:bg-gray-800 rounded-2xl p-4 md:p-6 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 hover:border-green-500 transition-all group overflow-hidden relative">
                 <div
                     class="absolute -right-8 -bottom-8 opacity-5 group-hover:scale-110 transition-transform duration-700">
-                    <svg class="w-48 h-48 text-green-500" xmlns="http://www.w3.org/2000/svg" width="24"
+                    <svg class="w-32 h-32 text-green-500" xmlns="http://www.w3.org/2000/svg" width="24"
                         height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                         stroke-linecap="round" stroke-linejoin="round">
                         <path d="M12 2v20" />
                         <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
                     </svg>
                 </div>
-                <div class="flex items-center justify-between mb-6 md:mb-8">
-                    <div class="p-4 md:p-5 bg-green-500/10 rounded-2xl text-green-500">
-                        <svg class="w-8 h-8 md:w-10 md:h-10" xmlns="http://www.w3.org/2000/svg" width="24"
+                <div class="flex items-center justify-between mb-4 md:mb-5">
+                    <div class="p-3 bg-green-500/10 rounded-xl text-green-500">
+                        <svg class="w-6 h-6 md:w-7 h-7" xmlns="http://www.w3.org/2000/svg" width="24"
                             height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                             <rect width="20" height="12" x="2" y="6" rx="2" />
@@ -346,7 +346,7 @@
                         class="text-[10px] font-black uppercase tracking-widest text-green-600 bg-green-500/5 px-4 py-2 rounded-full">Pemasukan</span>
                 </div>
                 <h3 class="text-gray-400 text-[10px] font-black uppercase tracking-widest mb-1">Bulan Ini</h3>
-                <p class="text-2xl md:text-4xl font-black text-green-600 dark:text-green-400 italic tracking-tighter"
+                <p class="text-xl md:text-2xl font-bold text-green-600 dark:text-green-400 tracking-tight"
                     :class="censorMode ? 'privacy-blur' : ''">
                     Rp{{ number_format($stats->monthly_income, 0, ',', '.') }}</p>
                 <p class="mt-4 text-[9px] font-bold text-gray-400 uppercase tracking-widest">Akumulasi Kas Masuk</p>
@@ -354,19 +354,19 @@
 
             <!-- Pengeluaran (Bulan Ini) -->
             <div
-                class="bg-white dark:bg-gray-800 rounded-3xl md:rounded-[3rem] p-5 md:p-10 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 hover:border-red-500 transition-all group overflow-hidden relative">
+                class="bg-white dark:bg-gray-800 rounded-2xl p-4 md:p-6 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 hover:border-red-500 transition-all group overflow-hidden relative">
                 <div
                     class="absolute -right-8 -bottom-8 opacity-5 group-hover:scale-110 transition-transform duration-700">
-                    <svg class="w-48 h-48 text-red-500" xmlns="http://www.w3.org/2000/svg" width="24"
+                    <svg class="w-32 h-32 text-red-500" xmlns="http://www.w3.org/2000/svg" width="24"
                         height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                         stroke-linecap="round" stroke-linejoin="round">
                         <path d="M12 2v20" />
                         <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
                     </svg>
                 </div>
-                <div class="flex items-center justify-between mb-6 md:mb-8">
+                <div class="flex items-center justify-between mb-4 md:mb-5">
                     <div class="p-4 md:p-5 bg-red-500/10 rounded-2xl text-red-500">
-                        <svg class="w-8 h-8 md:w-10 md:h-10" xmlns="http://www.w3.org/2000/svg" width="24"
+                        <svg class="w-6 h-6 md:w-7 h-7" xmlns="http://www.w3.org/2000/svg" width="24"
                             height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                             <rect width="20" height="12" x="2" y="6" rx="2" />
@@ -385,10 +385,10 @@
             </div>
 
             <div
-                class="bg-white dark:bg-gray-800 rounded-3xl md:rounded-[3rem] p-5 md:p-10 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 hover:border-green-500 transition-all group overflow-hidden relative">
+                class="bg-white dark:bg-gray-800 rounded-2xl p-4 md:p-6 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 hover:border-green-500 transition-all group overflow-hidden relative">
                 <div
                     class="absolute -right-8 -bottom-8 opacity-5 group-hover:scale-110 transition-transform duration-700">
-                    <svg class="w-48 h-48 text-green-500" xmlns="http://www.w3.org/2000/svg" width="24"
+                    <svg class="w-32 h-32 text-green-500" xmlns="http://www.w3.org/2000/svg" width="24"
                         height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                         stroke-linecap="round" stroke-linejoin="round">
                         <path d="M12 2v20" />
@@ -399,9 +399,9 @@
                         <path d="m19 7 3 5-3 5" />
                     </svg>
                 </div>
-                <div class="flex items-center justify-between mb-6 md:mb-8">
-                    <div class="p-4 md:p-5 bg-green-500/10 rounded-2xl text-green-500">
-                        <svg class="w-8 h-8 md:w-10 md:h-10" xmlns="http://www.w3.org/2000/svg" width="24"
+                <div class="flex items-center justify-between mb-4 md:mb-5">
+                    <div class="p-3 bg-green-500/10 rounded-xl text-green-500">
+                        <svg class="w-6 h-6 md:w-7 h-7" xmlns="http://www.w3.org/2000/svg" width="24"
                             height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M11 15h2a2 2 0 1 0 0-4h-2a2 2 0 1 1 0-4h2" />
@@ -421,10 +421,10 @@
             </div>
 
             <div
-                class="bg-white dark:bg-gray-800 rounded-3xl md:rounded-[3rem] p-5 md:p-10 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 hover:border-primary-blue transition-all group overflow-hidden relative">
+                class="bg-white dark:bg-gray-800 rounded-2xl p-4 md:p-6 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 hover:border-primary-blue transition-all group overflow-hidden relative">
                 <div
                     class="absolute -right-8 -bottom-8 opacity-5 group-hover:scale-110 transition-transform duration-700">
-                    <svg class="w-48 h-48 text-primary-blue" xmlns="http://www.w3.org/2000/svg" width="24"
+                    <svg class="w-32 h-32 text-primary-blue" xmlns="http://www.w3.org/2000/svg" width="24"
                         height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                         stroke-linecap="round" stroke-linejoin="round">
                         <rect width="20" height="12" x="2" y="6" rx="2" />
@@ -432,9 +432,9 @@
                         <path d="M6 12h.01M18 12h.01" />
                     </svg>
                 </div>
-                <div class="flex items-center justify-between mb-6 md:mb-8">
+                <div class="flex items-center justify-between mb-4 md:mb-5">
                     <div class="p-4 md:p-5 bg-primary-blue/10 rounded-2xl text-primary-blue">
-                        <svg class="w-8 h-8 md:w-10 md:h-10" xmlns="http://www.w3.org/2000/svg" width="24"
+                        <svg class="w-6 h-6 md:w-7 h-7" xmlns="http://www.w3.org/2000/svg" width="24"
                             height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M21 12V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h7" />
@@ -456,10 +456,10 @@
 
 
             <div
-                class="bg-white dark:bg-gray-800 rounded-3xl md:rounded-[3rem] p-5 md:p-10 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 hover:border-primary-red transition-all group overflow-hidden relative">
+                class="bg-white dark:bg-gray-800 rounded-2xl p-4 md:p-6 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 hover:border-primary-red transition-all group overflow-hidden relative">
                 <div
                     class="absolute -right-8 -bottom-8 opacity-5 group-hover:scale-110 transition-transform duration-700">
-                    <svg class="w-48 h-48 text-primary-red" xmlns="http://www.w3.org/2000/svg" width="24"
+                    <svg class="w-32 h-32 text-primary-red" xmlns="http://www.w3.org/2000/svg" width="24"
                         height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                         stroke-linecap="round" stroke-linejoin="round">
                         <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" />
@@ -467,9 +467,9 @@
                         <path d="M12 17h.01" />
                     </svg>
                 </div>
-                <div class="flex items-center justify-between mb-6 md:mb-8">
-                    <div class="p-4 md:p-5 bg-primary-red/10 rounded-2xl text-primary-red">
-                        <svg class="w-8 h-8 md:w-10 md:h-10" xmlns="http://www.w3.org/2000/svg" width="24"
+                <div class="flex items-center justify-between mb-4 md:mb-5">
+                    <div class="p-3 bg-primary-red/10 rounded-xl text-primary-red">
+                        <svg class="w-6 h-6 md:w-7 h-7" xmlns="http://www.w3.org/2000/svg" width="24"
                             height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
@@ -493,19 +493,19 @@
 
             <!-- Total Omzet (Seluruh Waktu) -->
             <div
-                class="bg-white dark:bg-gray-800 rounded-3xl md:rounded-[3rem] p-5 md:p-10 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 hover:border-indigo-500 transition-all group overflow-hidden relative">
+                class="bg-white dark:bg-gray-800 rounded-2xl p-4 md:p-6 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 hover:border-indigo-500 transition-all group overflow-hidden relative">
                 <div
                     class="absolute -right-8 -bottom-8 opacity-5 group-hover:scale-110 transition-transform duration-700">
-                    <svg class="w-48 h-48 text-indigo-500" xmlns="http://www.w3.org/2000/svg" width="24"
+                    <svg class="w-32 h-32 text-indigo-500" xmlns="http://www.w3.org/2000/svg" width="24"
                         height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                         stroke-linecap="round" stroke-linejoin="round">
                         <path d="M12 2v20" />
                         <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
                     </svg>
                 </div>
-                <div class="flex items-center justify-between mb-6 md:mb-8">
+                <div class="flex items-center justify-between mb-4 md:mb-5">
                     <div class="p-4 md:p-5 bg-indigo-500/10 rounded-2xl text-indigo-500">
-                        <svg class="w-8 h-8 md:w-10 md:h-10" xmlns="http://www.w3.org/2000/svg" width="24"
+                        <svg class="w-6 h-6 md:w-7 h-7" xmlns="http://www.w3.org/2000/svg" width="24"
                             height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                             <rect width="20" height="12" x="2" y="6" rx="2" />
@@ -528,10 +528,10 @@
             <!-- Keuntungan (Bulan Ini) -->
             <!-- Saldo Modal (Seluruh Waktu) -->
             <div
-                class="bg-white dark:bg-gray-800 rounded-3xl md:rounded-[3rem] p-5 md:p-10 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 hover:border-indigo-500 transition-all group overflow-hidden relative">
+                class="bg-white dark:bg-gray-800 rounded-2xl p-4 md:p-6 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 hover:border-indigo-500 transition-all group overflow-hidden relative">
                 <div
                     class="absolute -right-8 -bottom-8 opacity-5 group-hover:scale-110 transition-transform duration-700">
-                    <svg class="w-48 h-48 text-indigo-500" xmlns="http://www.w3.org/2000/svg" width="24"
+                    <svg class="w-32 h-32 text-indigo-500" xmlns="http://www.w3.org/2000/svg" width="24"
                         height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                         stroke-linecap="round" stroke-linejoin="round">
                         <rect width="20" height="12" x="2" y="6" rx="2" />
@@ -539,9 +539,9 @@
                         <path d="M6 12h.01M18 12h.01" />
                     </svg>
                 </div>
-                <div class="flex items-center justify-between mb-6 md:mb-8">
+                <div class="flex items-center justify-between mb-4 md:mb-5">
                     <div class="p-4 md:p-5 bg-indigo-500/10 rounded-2xl text-indigo-500">
-                        <svg class="w-8 h-8 md:w-10 md:h-10" xmlns="http://www.w3.org/2000/svg" width="24"
+                        <svg class="w-6 h-6 md:w-7 h-7" xmlns="http://www.w3.org/2000/svg" width="24"
                             height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                             <rect width="20" height="12" x="2" y="6" rx="2" />
@@ -569,7 +569,7 @@
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 md:mb-10">
             <div>
                 <h2
-                    class="text-xl md:text-2xl font-black italic uppercase tracking-tighter text-gray-800 dark:text-white leading-none">
+                    class="text-xl md:text-2xl font-bold uppercase tracking-tight text-gray-800 dark:text-white leading-none">
                     Grafik Performa Mingguan</h2>
                 <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-2">Analisis Omzet & Profit 7
                     Hari Terakhir</p>
@@ -714,7 +714,7 @@
             class="bg-white dark:bg-gray-800 rounded-3xl md:rounded-[3.5rem] shadow-2xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 overflow-hidden">
             <div class="p-5 md:p-10 border-b border-gray-100 dark:border-gray-700">
                 <h2
-                    class="text-xl md:text-2xl font-black italic uppercase tracking-tighter text-gray-800 dark:text-white">
+                    class="text-xl md:text-2xl font-bold uppercase tracking-tight text-gray-800 dark:text-white">
                     Produk Terlaris (All-Time)</h2>
             </div>
             <div class="p-5 md:p-10 space-y-6 md:space-y-10">
@@ -760,7 +760,7 @@
             class="bg-white dark:bg-gray-800 rounded-3xl md:rounded-[3.5rem] shadow-2xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 overflow-hidden flex flex-col">
             <div class="p-5 md:p-10 border-b border-gray-100 dark:border-gray-700">
                 <h2
-                    class="text-xl md:text-2xl font-black italic uppercase tracking-tighter text-gray-800 dark:text-white">
+                    class="text-xl md:text-2xl font-bold uppercase tracking-tight text-gray-800 dark:text-white">
                     Revenue by Category</h2>
                 <p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mt-1">Distribusi Omzet Per
                     Kategori</p>
@@ -792,7 +792,7 @@
             class="bg-white dark:bg-gray-800 rounded-3xl md:rounded-[3.5rem] shadow-2xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 overflow-hidden flex flex-col">
             <div class="p-5 md:p-10 border-b border-gray-100 dark:border-gray-700">
                 <h2
-                    class="text-xl md:text-2xl font-black italic uppercase tracking-tighter text-gray-800 dark:text-white">
+                    class="text-xl md:text-2xl font-bold uppercase tracking-tight text-gray-800 dark:text-white">
                     Monthly Growth</h2>
                 <p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mt-1">Tren Omzet 6 Bulan
                     Terakhir</p>

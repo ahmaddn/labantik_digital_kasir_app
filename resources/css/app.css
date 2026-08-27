@@ -172,7 +172,7 @@
         -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
         border: 1px solid rgba(255, 255, 255, 0.4) !important;
         box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.06) !important;
-        border-radius: 2rem !important;
+        border-radius: 1.25rem !important;
     }
     .dark .theme-glassmorphism .bg-white:not(img):not(.theme-no-card),
     .dark .theme-glassmorphism .bg-gray-800:not(.theme-no-card), 
@@ -183,7 +183,7 @@
         -webkit-backdrop-filter: blur(24px) saturate(160%) !important;
         border: 1px solid rgba(255, 255, 255, 0.08) !important;
         box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3) !important;
-        border-radius: 2rem !important;
+        border-radius: 1.25rem !important;
     }
 
     /* Classic Premium Theme Style */
@@ -193,7 +193,7 @@
         border: 1px solid rgba(0, 0, 0, 0.05) !important;
         box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
         backdrop-filter: none !important;
-        border-radius: 2rem !important;
+        border-radius: 1.25rem !important;
     }
     .dark .theme-classic-premium .bg-white:not(img):not(.theme-no-card),
     .dark .theme-classic-premium .bg-gray-800:not(.theme-no-card),
@@ -203,7 +203,7 @@
         border: 1px solid rgba(255, 255, 255, 0.05) !important;
         box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.35), 0 10px 10px -5px rgba(0, 0, 0, 0.2) !important;
         backdrop-filter: none !important;
-        border-radius: 2rem !important;
+        border-radius: 1.25rem !important;
     }
 
     /* Neon Cyberpunk Theme Style */
@@ -230,7 +230,7 @@
         background-color: #fffaf0 !important;
         border: 1.5px dashed rgba(249, 115, 22, 0.25) !important;
         box-shadow: 0 10px 15px -3px rgba(249, 115, 22, 0.05), 0 4px 6px -2px rgba(249, 115, 22, 0.02) !important;
-        border-radius: 2.5rem !important;
+        border-radius: 1.5rem !important;
     }
     .dark .theme-restaurant-aesthetic .bg-white:not(img):not(.theme-no-card),
     .dark .theme-restaurant-aesthetic .bg-gray-800:not(.theme-no-card),
@@ -239,7 +239,7 @@
         background-color: #1c1917 !important;
         border: 1.5px dashed rgba(255, 255, 255, 0.08) !important;
         box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.4) !important;
-        border-radius: 2.5rem !important;
+        border-radius: 1.5rem !important;
     }
 
     /* Retail Minimarket Theme Style (Clean Grid) */
@@ -279,9 +279,9 @@
     }
 
     /* Generic Card Rounding Overrides for Page Layouts */
-    .theme-restaurant-aesthetic [class*="rounded-[3rem]"],
+    .theme-restaurant-aesthetic [class*="rounded-[3rem]"], .theme-restaurant-aesthetic [class*="rounded-[2.5rem]"],
     .theme-restaurant-aesthetic [class*="rounded-3xl"] {
-        border-radius: 2.5rem !important;
+        border-radius: 1.5rem !important;
     }
     .theme-retail-aesthetic [class*="rounded-[3rem]"],
     .theme-retail-aesthetic [class*="rounded-3xl"] {
@@ -297,7 +297,7 @@
     }
     .theme-glassmorphism [class*="rounded-[3rem]"],
     .theme-glassmorphism [class*="rounded-3xl"] {
-        border-radius: 2rem !important;
+        border-radius: 1.25rem !important;
     }
 }
 
@@ -534,7 +534,7 @@ html:not(.dark) [class*="theme-"] .theme-no-card.bg-gray-50 {
 /* --- 1. Classic Premium --- */
 .theme-classic-premium .nb-card,
 .theme-classic-premium .nb-card-flat {
-    border-radius: 2rem !important;
+    border-radius: 1.25rem !important;
     border: 1px solid rgba(0, 0, 0, 0.06) !important;
     box-shadow: 0 15px 30px -10px rgba(0, 0, 0, 0.05) !important;
 }
@@ -581,7 +581,7 @@ html:not(.dark) [class*="theme-"] .theme-no-card.bg-gray-50 {
 /* --- 2. Glassmorphism --- */
 .theme-glassmorphism .nb-card,
 .theme-glassmorphism .nb-card-flat {
-    border-radius: 2rem !important;
+    border-radius: 1.25rem !important;
     background-color: rgba(255, 255, 255, 0.45) !important;
     backdrop-filter: blur(24px) saturate(180%) !important;
     -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
@@ -619,7 +619,7 @@ html:not(.dark) [class*="theme-"] .theme-no-card.bg-gray-50 {
 /* --- 3. Restoran & Warung (Warm Culinary) --- */
 .theme-restaurant-aesthetic .nb-card,
 .theme-restaurant-aesthetic .nb-card-flat {
-    border-radius: 2.5rem !important;
+    border-radius: 1.5rem !important;
     background-color: #fffaf0 !important;
     border: 1.5px dashed rgba(249, 115, 22, 0.25) !important;
     box-shadow: 0 15px 35px -10px rgba(249, 115, 22, 0.08) !important;
@@ -630,7 +630,7 @@ html:not(.dark) [class*="theme-"] .theme-no-card.bg-gray-50 {
     box-shadow: 0 4px 15px -3px rgba(249, 115, 22, 0.1) !important;
 }
 .theme-restaurant-aesthetic .nb-input {
-    border-radius: 2rem !important;
+    border-radius: 1.25rem !important;
     border: 1.5px solid rgba(249, 115, 22, 0.2) !important;
     box-shadow: inset 0 2px 4px rgba(249, 115, 22, 0.03) !important;
 }
@@ -880,4 +880,18 @@ textarea {
 .dark select option {
     background-color: #0f172a !important;
     color: #f8fafc !important;
+}
+
+/* Fresh Mobile Additions - Clean typography and spacing */
+@media (max-width: 767px) {
+    h1, h2, h3, h4, h5, h6, .heading-title {
+        font-style: normal !important;
+        letter-spacing: -0.02em !important;
+    }
+}
+
+@media (max-width: 640px) {
+    .nb-card, .nb-card-flat {
+        padding: 1rem !important; /* Balanced mobile card spacing */
+    }
 }
