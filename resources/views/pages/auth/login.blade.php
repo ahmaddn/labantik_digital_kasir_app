@@ -17,7 +17,7 @@
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
 
-<body class="min-h-screen bg-bone-white dark:bg-dark-soft flex flex-col items-center justify-center py-6 px-6 font-sans overflow-y-auto">
+<body class="min-h-screen bg-bone-white dark:bg-dark-soft flex flex-col items-center justify-center py-6 px-6 font-outfit overflow-y-auto">
     <div class="w-full max-w-md">
         <!-- Logo -->
         <div class="text-center mb-10">
