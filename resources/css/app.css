@@ -279,24 +279,29 @@
     }
 
     /* Generic Card Rounding Overrides for Page Layouts */
-    .theme-restaurant-aesthetic [class*="rounded-[3rem]"], .theme-restaurant-aesthetic [class*="rounded-[2.5rem]"],
+    .theme-restaurant-aesthetic [class*="rounded-\[3rem\]"],
+    .theme-restaurant-aesthetic [class*="rounded-\[2\.5rem\]"],
     .theme-restaurant-aesthetic [class*="rounded-3xl"] {
         border-radius: 1rem !important;
     }
-    .theme-retail-aesthetic [class*="rounded-[3rem]"],
+    .theme-retail-aesthetic [class*="rounded-\[3rem\]"],
     .theme-retail-aesthetic [class*="rounded-3xl"] {
         border-radius: 0.5rem !important;
     }
-    .theme-bank-aesthetic [class*="rounded-[3rem]"],
+    .theme-bank-aesthetic [class*="rounded-\[3rem\]"],
     .theme-bank-aesthetic [class*="rounded-3xl"] {
         border-radius: 0.875rem !important;
     }
-    .theme-neon-cyberpunk [class*="rounded-[3rem]"],
+    .theme-neon-cyberpunk [class*="rounded-\[3rem\]"],
     .theme-neon-cyberpunk [class*="rounded-3xl"] {
         border-radius: 0.125rem !important;
     }
-    .theme-glassmorphism [class*="rounded-[3rem]"],
+    .theme-glassmorphism [class*="rounded-\[3rem\]"],
     .theme-glassmorphism [class*="rounded-3xl"] {
+        border-radius: 0.875rem !important;
+    }
+    .theme-classic-premium [class*="rounded-\[3rem\]"],
+    .theme-classic-premium [class*="rounded-3xl"] {
         border-radius: 0.875rem !important;
     }
 }
