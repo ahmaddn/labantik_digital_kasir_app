@@ -9,29 +9,30 @@ use Illuminate\Support\Facades\Route;
 | TEFA API Routes
 |--------------------------------------------------------------------------
 |
-| Endpoint integrasi antara Aplikasi TEFA (Teaching Factory) dan
-| Sistem Dompet Siswa SMKN 1 Talaga.
+| Semua endpoint wajib menyertakan header X-API-Key.
+|
+| Endpoint merchants & products: API Key saja (tidak perlu login).
+| Endpoint auth (me): API Key + Bearer token Sanctum.
 |
 | Prefix  : /api/v1/tefa
-| Auth    : Laravel Sanctum (Bearer token)
 | Format  : JSON (utf-8)
 |
 */
 
-Route::prefix('v1/tefa')->name('tefa.')->group(function () {
+Route::prefix('v1/tefa')->name('tefa.')->middleware('tefa.apikey')->group(function () {
 
     // ── Autentikasi & Manajemen Akun Merchant TEFA ────────────────────────
     Route::prefix('auth')->name('auth.')->group(function () {
 
-        // POST /api/v1/tefa/auth/login
+        // POST /api/v1/tefa/auth/login  — API Key saja
         Route::post('login', [AuthController::class, 'login'])
             ->name('login');
 
-        // POST /api/v1/tefa/auth/register
+        // POST /api/v1/tefa/auth/register  — API Key saja
         Route::post('register', [AuthController::class, 'register'])
             ->name('register');
 
-        // GET /api/v1/tefa/auth/me  — butuh token
+        // GET /api/v1/tefa/auth/me  — API Key + Bearer token
         Route::middleware('auth:sanctum')->group(function () {
             Route::get('me', [AuthController::class, 'me'])
                 ->name('me');
@@ -39,7 +40,8 @@ Route::prefix('v1/tefa')->name('tefa.')->group(function () {
     });
 
     // ── Data Merchant & Produk Kantin TEFA ───────────────────────────────
-    Route::middleware('auth:sanctum')->prefix('merchants')->name('merchants.')->group(function () {
+    // API Key saja — tidak perlu login
+    Route::prefix('merchants')->name('merchants.')->group(function () {
 
         // GET /api/v1/tefa/merchants
         Route::get('/', [MerchantController::class, 'index'])
