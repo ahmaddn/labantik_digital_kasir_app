@@ -159,6 +159,7 @@
         </div>
 
         <!-- Audit Hasil Fisik Status -->
+        @php $auditNet = $totalSurplus - $totalDeficit; @endphp
         <div x-data="{ open: false }"
              class="bg-white/5 rounded-2xl border border-white/10 overflow-hidden">
 
@@ -166,34 +167,43 @@
             <button @click="open = !open"
                     class="w-full flex flex-col sm:flex-row items-center justify-between gap-4 p-4 text-left transition-colors hover:bg-white/5">
                 <div class="flex items-center gap-3">
-                    <div class="p-2 rounded-xl {{ $totalDeficit > 0 ? 'bg-red-500/20 text-red-400' : ($totalSurplus > 0 ? 'bg-amber-500/20 text-amber-400' : 'bg-emerald-500/20 text-emerald-400') }}">
-                        @if($totalDeficit > 0)
+                    <div class="p-2 rounded-xl {{ $auditNet < 0 ? 'bg-red-500/20 text-red-400' : ($auditNet > 0 ? 'bg-amber-500/20 text-amber-400' : 'bg-emerald-500/20 text-emerald-400') }}">
+                        @if($auditNet < 0)
+                            {{-- Rugi: net negatif --}}
                             <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-                        @elseif($totalSurplus > 0)
+                        @elseif($auditNet > 0)
+                            {{-- Lebih: net positif --}}
                             <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="16"/><line x1="8" x2="16" y1="12" y2="12"/></svg>
                         @else
+                            {{-- Klop: net nol --}}
                             <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                         @endif
                     </div>
                     <div>
                         <span class="text-[9px] font-black uppercase tracking-widest opacity-60 block">Hasil Audit Penyesuaian Kas Fisik</span>
                         <span class="text-xs font-black uppercase tracking-wider">
-                            @if($totalDeficit > 0)
-                                PERINGATAN: MINGGU INI TERDAPAT TEAKOR / SELISIH KURANG (RUGI) FISIK
-                            @elseif($totalSurplus > 0)
-                                INFO: MINGGU INI TERDAPAT SELISIH LEBIH FISIK
+                            @if($auditNet < 0)
+                                PERINGATAN: TERDAPAT SELISIH KURANG (RUGI) FISIK BERSIH
+                            @elseif($auditNet > 0)
+                                INFO: TERDAPAT SELISIH LEBIH FISIK BERSIH
                             @else
-                                SALDO FISIK & SISTEM MINGGU INI SESUAI (AMAN)
+                                SALDO FISIK & SISTEM SESUAI (AMAN)
                             @endif
                         </span>
+                        {{-- Penjelasan jika ada campuran --}}
+                        @if($totalDeficit > 0 && $totalSurplus > 0)
+                            <span class="text-[8px] opacity-50 block mt-0.5">
+                                Ada {{ $adjustments->where('type','expense')->count() }} entri rugi & {{ $adjustments->where('type','income')->count() }} entri lebih — dihitung dari net bersih
+                            </span>
+                        @endif
                     </div>
                 </div>
                 <div class="flex items-center gap-3">
                     <div class="text-right">
-                        @if($totalDeficit > 0)
-                            <span class="text-sm font-black text-red-400">-Rp{{ number_format($totalDeficit, 0, ',', '.') }} (Rugi Selisih)</span>
-                        @elseif($totalSurplus > 0)
-                            <span class="text-sm font-black text-amber-400">+Rp{{ number_format($totalSurplus, 0, ',', '.') }} (Lebih)</span>
+                        @if($auditNet < 0)
+                            <span class="text-sm font-black text-red-400">Rp{{ number_format($auditNet, 0, ',', '.') }} (Rugi Bersih)</span>
+                        @elseif($auditNet > 0)
+                            <span class="text-sm font-black text-amber-400">+Rp{{ number_format($auditNet, 0, ',', '.') }} (Lebih Bersih)</span>
                         @else
                             <span class="text-xs font-black text-emerald-400 uppercase">Semua Penyesuaian Klop</span>
                         @endif
@@ -270,11 +280,14 @@
                         <div class="grid grid-cols-12 gap-2 items-center px-2 py-2 mt-1 border-t border-white/10">
                             <div class="col-span-9 text-[9px] font-black uppercase tracking-widest opacity-60">
                                 Total Bersih
+                                <span class="normal-case opacity-70 ml-1">(Lebih - Rugi = Net)</span>
                             </div>
                             <div class="col-span-3 text-right text-sm font-black
-                                {{ $totalDeficit > $totalSurplus ? 'text-red-400' : 'text-amber-400' }}">
-                                @php $net = $totalSurplus - $totalDeficit; @endphp
-                                {{ $net >= 0 ? '+' : '' }}Rp{{ number_format($net, 0, ',', '.') }}
+                                {{ $auditNet < 0 ? 'text-red-400' : ($auditNet > 0 ? 'text-amber-400' : 'text-emerald-400') }}">
+                                {{ $auditNet >= 0 ? '+' : '' }}Rp{{ number_format($auditNet, 0, ',', '.') }}
+                                <span class="text-[8px] block opacity-70">
+                                    {{ $auditNet < 0 ? 'Rugi Bersih' : ($auditNet > 0 ? 'Lebih Bersih' : 'Klop') }}
+                                </span>
                             </div>
                         </div>
                     </div>
