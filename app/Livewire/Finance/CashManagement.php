@@ -846,6 +846,7 @@ class CashManagement extends Component
             'endDate' => $endDate,
             'totalDeficit' => $totalDeficit,
             'totalSurplus' => $totalSurplus,
+            'adjustments' => $adjustments,
         ])->layout('layouts.app', ['title' => 'Buku Kas Internal']);
     }
 }

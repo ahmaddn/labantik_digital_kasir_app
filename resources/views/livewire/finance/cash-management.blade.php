@@ -159,37 +159,125 @@
         </div>
 
         <!-- Audit Hasil Fisik Status -->
-        <div class="flex flex-col sm:flex-row items-center justify-between gap-4 bg-white/5 rounded-2xl p-4 border border-white/10">
-            <div class="flex items-center gap-3">
-                <div class="p-2 rounded-xl {{ $totalDeficit > 0 ? 'bg-red-500/20 text-red-400' : ($totalSurplus > 0 ? 'bg-amber-500/20 text-amber-400' : 'bg-emerald-500/20 text-emerald-400') }}">
-                    @if($totalDeficit > 0)
-                        <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-                    @elseif($totalSurplus > 0)
-                        <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="16"/><line x1="8" x2="16" y1="12" y2="12"/></svg>
-                    @else
-                        <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                    @endif
-                </div>
-                <div>
-                    <span class="text-[9px] font-black uppercase tracking-widest opacity-60 block">Hasil Audit Penyesuaian Kas Fisik</span>
-                    <span class="text-xs font-black uppercase tracking-wider">
+        <div x-data="{ open: false }"
+             class="bg-white/5 rounded-2xl border border-white/10 overflow-hidden">
+
+            {{-- Header / Toggle --}}
+            <button @click="open = !open"
+                    class="w-full flex flex-col sm:flex-row items-center justify-between gap-4 p-4 text-left transition-colors hover:bg-white/5">
+                <div class="flex items-center gap-3">
+                    <div class="p-2 rounded-xl {{ $totalDeficit > 0 ? 'bg-red-500/20 text-red-400' : ($totalSurplus > 0 ? 'bg-amber-500/20 text-amber-400' : 'bg-emerald-500/20 text-emerald-400') }}">
                         @if($totalDeficit > 0)
-                            PERINGATAN: MINGGU INI TERDAPAT TEAKOR / SELISIH KURANG (RUGI) FISIK
+                            <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
                         @elseif($totalSurplus > 0)
-                            INFO: MINGGU INI TERDAPAT SELISIH LEBIH FISIK
+                            <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="16"/><line x1="8" x2="16" y1="12" y2="12"/></svg>
                         @else
-                            SALDO FISIK & SISTEM MINGGU INI SESUAI (AMAN)
+                            <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                         @endif
-                    </span>
+                    </div>
+                    <div>
+                        <span class="text-[9px] font-black uppercase tracking-widest opacity-60 block">Hasil Audit Penyesuaian Kas Fisik</span>
+                        <span class="text-xs font-black uppercase tracking-wider">
+                            @if($totalDeficit > 0)
+                                PERINGATAN: MINGGU INI TERDAPAT TEAKOR / SELISIH KURANG (RUGI) FISIK
+                            @elseif($totalSurplus > 0)
+                                INFO: MINGGU INI TERDAPAT SELISIH LEBIH FISIK
+                            @else
+                                SALDO FISIK & SISTEM MINGGU INI SESUAI (AMAN)
+                            @endif
+                        </span>
+                    </div>
                 </div>
-            </div>
-            <div class="text-right">
-                @if($totalDeficit > 0)
-                    <span class="text-sm font-black text-red-400">-Rp{{ number_format($totalDeficit, 0, ',', '.') }} (Rugi Selisih)</span>
-                @elseif($totalSurplus > 0)
-                    <span class="text-sm font-black text-amber-400">+Rp{{ number_format($totalSurplus, 0, ',', '.') }} (Lebih)</span>
+                <div class="flex items-center gap-3">
+                    <div class="text-right">
+                        @if($totalDeficit > 0)
+                            <span class="text-sm font-black text-red-400">-Rp{{ number_format($totalDeficit, 0, ',', '.') }} (Rugi Selisih)</span>
+                        @elseif($totalSurplus > 0)
+                            <span class="text-sm font-black text-amber-400">+Rp{{ number_format($totalSurplus, 0, ',', '.') }} (Lebih)</span>
+                        @else
+                            <span class="text-xs font-black text-emerald-400 uppercase">Semua Penyesuaian Klop</span>
+                        @endif
+                    </div>
+                    {{-- Chevron --}}
+                    <svg class="w-4 h-4 opacity-50 transition-transform duration-200 shrink-0"
+                         :class="open ? 'rotate-180' : ''"
+                         xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+                    </svg>
+                </div>
+            </button>
+
+            {{-- Accordion Body --}}
+            <div x-show="open"
+                 x-transition:enter="transition ease-out duration-200"
+                 x-transition:enter-start="opacity-0 -translate-y-1"
+                 x-transition:enter-end="opacity-100 translate-y-0"
+                 x-transition:leave="transition ease-in duration-150"
+                 x-transition:leave-start="opacity-100 translate-y-0"
+                 x-transition:leave-end="opacity-0 -translate-y-1"
+                 class="border-t border-white/10 px-4 pb-4 pt-3">
+
+                @if($adjustments->isEmpty())
+                    <p class="text-[10px] font-black uppercase tracking-widest text-center opacity-40 py-3">
+                        Tidak ada data penyesuaian pada periode ini
+                    </p>
                 @else
-                    <span class="text-xs font-black text-emerald-450 uppercase">Semua Penyesuaian Klop</span>
+                    <div class="space-y-2">
+                        {{-- Header kolom --}}
+                        <div class="grid grid-cols-12 gap-2 text-[8px] font-black uppercase tracking-widest opacity-40 px-2 pb-1 border-b border-white/5">
+                            <div class="col-span-2">Tanggal</div>
+                            <div class="col-span-5">Deskripsi</div>
+                            <div class="col-span-2 text-center">Tipe</div>
+                            <div class="col-span-3 text-right">Jumlah</div>
+                        </div>
+
+                        @foreach($adjustments as $adj)
+                            <div class="grid grid-cols-12 gap-2 items-center px-2 py-2 rounded-xl
+                                {{ $adj->type === 'expense' ? 'bg-red-500/10' : 'bg-amber-500/10' }}">
+
+                                {{-- Tanggal --}}
+                                <div class="col-span-2 text-[9px] font-black opacity-60">
+                                    {{ \Carbon\Carbon::parse($adj->date)->format('d/m/Y') }}
+                                </div>
+
+                                {{-- Deskripsi --}}
+                                <div class="col-span-5 text-[9px] font-bold leading-tight">
+                                    {{ $adj->description }}
+                                </div>
+
+                                {{-- Badge tipe --}}
+                                <div class="col-span-2 flex justify-center">
+                                    @if($adj->type === 'expense')
+                                        <span class="text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full bg-red-500/20 text-red-400">
+                                            Rugi Selisih
+                                        </span>
+                                    @else
+                                        <span class="text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-400">
+                                            Lebih
+                                        </span>
+                                    @endif
+                                </div>
+
+                                {{-- Jumlah --}}
+                                <div class="col-span-3 text-right text-sm font-black
+                                    {{ $adj->type === 'expense' ? 'text-red-400' : 'text-amber-400' }}">
+                                    {{ $adj->type === 'expense' ? '-' : '+' }}Rp{{ number_format($adj->amount, 0, ',', '.') }}
+                                </div>
+                            </div>
+                        @endforeach
+
+                        {{-- Total row --}}
+                        <div class="grid grid-cols-12 gap-2 items-center px-2 py-2 mt-1 border-t border-white/10">
+                            <div class="col-span-9 text-[9px] font-black uppercase tracking-widest opacity-60">
+                                Total Bersih
+                            </div>
+                            <div class="col-span-3 text-right text-sm font-black
+                                {{ $totalDeficit > $totalSurplus ? 'text-red-400' : 'text-amber-400' }}">
+                                @php $net = $totalSurplus - $totalDeficit; @endphp
+                                {{ $net >= 0 ? '+' : '' }}Rp{{ number_format($net, 0, ',', '.') }}
+                            </div>
+                        </div>
+                    </div>
                 @endif
             </div>
         </div>
