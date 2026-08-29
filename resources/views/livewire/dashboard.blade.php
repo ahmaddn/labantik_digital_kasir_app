@@ -346,7 +346,7 @@
                         class="text-[10px] font-black uppercase tracking-widest text-green-600 bg-green-500/5 px-4 py-2 rounded-full">Pemasukan</span>
                 </div>
                 <h3 class="text-gray-400 text-[10px] font-black uppercase tracking-widest mb-1">Bulan Ini</h3>
-                <p class="text-xl md:text-2xl font-bold text-green-600 dark:text-green-400 tracking-tight"
+                <p class="text-2xl md:text-4xl font-black text-green-600 dark:text-green-400 tracking-tighter"
                     :class="censorMode ? 'privacy-blur' : ''">
                     Rp{{ number_format($stats->monthly_income, 0, ',', '.') }}</p>
                 <p class="mt-4 text-[9px] font-bold text-gray-400 uppercase tracking-widest">Akumulasi Kas Masuk</p>
