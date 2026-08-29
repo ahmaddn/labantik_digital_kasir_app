@@ -164,7 +164,7 @@
  
                                 <!-- Keuangan -->
                                 <div class="col-span-1 px-2 text-center truncate">
-                                    <div class="text-sm font-black text-primary-red italic truncate">Rp{{ number_format($product->price, 0, ',', '.') }}</div>
+                                    <div class="text-sm font-black text-primary-red truncate">Rp{{ number_format($product->price, 0, ',', '.') }}</div>
                                 </div>
                                 <div class="col-span-1 px-2 text-center truncate">
                                     <div class="text-xs font-black text-gray-500 dark:text-gray-400 truncate">Rp{{ number_format($product->modal_price, 0, ',', '.') }}</div>
@@ -512,7 +512,7 @@
                             @error('restockQty') <span class="text-[9px] font-bold text-primary-red mt-1.5 ml-2 block uppercase italic">{{ $message }}</span> @enderror
                         </div>
                         <div>
-                            <label class="block text-[9px] font-black text-gray-400 uppercase tracking-wider mb-2 ml-2 italic">Total Modal Restock (Rp)</label>
+                            <label class="block text-[9px] font-black text-gray-400 uppercase tracking-wider mb-2 ml-2">Total Modal Restock (Rp)</label>
                             <div class="relative">
                                 <span class="absolute left-5 inset-y-0 flex items-center text-[9px] font-black text-gray-400">Rp</span>
                                 <input type="number" wire:model.live="totalModalCost" placeholder="Contoh: 100000" class="w-full pl-10 pr-5 py-3.5 bg-white dark:bg-gray-900 border-none rounded-xl focus:ring-2 focus:ring-primary-blue/30 font-black text-sm text-gray-800 dark:text-white">

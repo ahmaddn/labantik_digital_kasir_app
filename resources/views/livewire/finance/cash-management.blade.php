@@ -97,7 +97,7 @@
                 <svg class="w-40 h-40 text-white" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="12" x="2" y="6" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/></svg>
             </div>
             <h3 class="text-[10px] font-black uppercase tracking-[0.3em] opacity-80 mb-3 text-emerald-300">Total Saldo Kas</h3>
-            <p class="text-2xl xl:text-3xl font-black italic text-white {{ ($currentModalBalance + $currentProfitBalance) < 0 ? 'text-primary-red' : '' }}" :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($currentModalBalance + $currentProfitBalance, 0, ',', '.') }}</p>
+            <p class="text-2xl xl:text-3xl font-black text-white {{ ($currentModalBalance + $currentProfitBalance) < 0 ? 'text-primary-red' : '' }}" :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($currentModalBalance + $currentProfitBalance, 0, ',', '.') }}</p>
         </div>
 
         <!-- Saldo Modal Card -->
@@ -106,7 +106,7 @@
                 <svg class="w-40 h-40 text-white" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg>
             </div>
             <h3 class="text-[10px] font-black uppercase tracking-[0.3em] opacity-60 mb-3">Saldo Kas Modal</h3>
-            <p class="text-2xl xl:text-3xl font-black italic text-white {{ $currentModalBalance < 0 ? 'text-primary-red' : '' }}" :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($currentModalBalance, 0, ',', '.') }}</p>
+            <p class="text-2xl xl:text-3xl font-black text-white {{ $currentModalBalance < 0 ? 'text-primary-red' : '' }}" :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($currentModalBalance, 0, ',', '.') }}</p>
         </div>
 
         <!-- Saldo Keuntungan Card -->
@@ -115,7 +115,7 @@
                 <svg class="w-40 h-40 text-white" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m16 12-4-4-4 4"/><path d="M12 16V8"/></svg>
             </div>
             <h3 class="text-[10px] font-black uppercase tracking-[0.3em] opacity-80 mb-3">Saldo Kas Keuntungan</h3>
-            <p class="text-2xl xl:text-3xl font-black italic text-white {{ $currentProfitBalance < 0 ? 'text-red-300' : '' }}" :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($currentProfitBalance, 0, ',', '.') }}</p>
+            <p class="text-2xl xl:text-3xl font-black text-white {{ $currentProfitBalance < 0 ? 'text-red-300' : '' }}" :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($currentProfitBalance, 0, ',', '.') }}</p>
         </div>
 
         <!-- Pemasukan Card -->
@@ -124,7 +124,7 @@
                 <svg class="w-40 h-40 text-green-500" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
             </div>
             <h3 class="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 mb-3">Total Pemasukan</h3>
-            <p class="text-2xl xl:text-3xl font-black italic text-green-500" :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($displayIncome, 0, ',', '.') }}</p>
+            <p class="text-2xl xl:text-3xl font-black text-green-500" :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($displayIncome, 0, ',', '.') }}</p>
         </div>
 
         <!-- Pengeluaran Card -->
@@ -133,7 +133,7 @@
                 <svg class="w-40 h-40 text-primary-red" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 17 13.5 8.5 8.5 13.5 2 7"/><polyline points="16 17 22 17 22 11"/></svg>
             </div>
             <h3 class="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 mb-3">Total Pengeluaran</h3>
-            <p class="text-2xl xl:text-3xl font-black italic text-primary-red" :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($displayExpense, 0, ',', '.') }}</p>
+            <p class="text-2xl xl:text-3xl font-black text-primary-red" :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($displayExpense, 0, ',', '.') }}</p>
         </div>
     </div>
 
@@ -143,7 +143,7 @@
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-center md:text-left mb-6 pb-6 border-b border-white/10">
             <div class="flex flex-col justify-center">
                 <span class="text-[9px] font-black uppercase tracking-widest opacity-60 mb-1">Saldo Awal Periode</span>
-                <p class="text-xl font-black italic text-gray-300">Rp{{ number_format($startingBalance, 0, ',', '.') }}</p>
+                <p class="text-xl font-black text-gray-300">Rp{{ number_format($startingBalance, 0, ',', '.') }}</p>
             </div>
             <div class="flex flex-col justify-center border-y md:border-y-0 md:border-x border-white/10 px-4 text-center">
                 <span class="text-[9px] font-black uppercase tracking-widest opacity-60 mb-1">Perubahan Arus Kas (Net Flow)</span>
@@ -154,7 +154,7 @@
             </div>
             <div class="flex flex-col justify-center md:items-end">
                 <span class="text-[9px] font-black uppercase tracking-widest opacity-65 mb-1 text-emerald-450">Saldo Akhir Periode</span>
-                <p class="text-xl font-black italic text-white">Rp{{ number_format($startingBalance + $netFlow, 0, ',', '.') }}</p>
+                <p class="text-xl font-black text-white">Rp{{ number_format($startingBalance + $netFlow, 0, ',', '.') }}</p>
             </div>
         </div>
 
@@ -185,9 +185,9 @@
             </div>
             <div class="text-right">
                 @if($totalDeficit > 0)
-                    <span class="text-sm font-black text-red-400 italic">-Rp{{ number_format($totalDeficit, 0, ',', '.') }} (Rugi Selisih)</span>
+                    <span class="text-sm font-black text-red-400">-Rp{{ number_format($totalDeficit, 0, ',', '.') }} (Rugi Selisih)</span>
                 @elseif($totalSurplus > 0)
-                    <span class="text-sm font-black text-amber-400 italic">+Rp{{ number_format($totalSurplus, 0, ',', '.') }} (Lebih)</span>
+                    <span class="text-sm font-black text-amber-400">+Rp{{ number_format($totalSurplus, 0, ',', '.') }} (Lebih)</span>
                 @else
                     <span class="text-xs font-black text-emerald-450 uppercase">Semua Penyesuaian Klop</span>
                 @endif
@@ -336,7 +336,7 @@
                     </div>
                     <div class="pt-2 mt-2 border-t border-gray-100 dark:border-gray-700 flex justify-between items-center">
                         <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Saldo</span>
-                        <span class="text-lg font-black italic {{ $stat['balance'] >= 0 ? 'text-primary-blue' : 'text-primary-red' }}" :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($stat['balance'], 0, ',', '.') }}</span>
+                        <span class="text-lg font-black {{ $stat['balance'] >= 0 ? 'text-primary-blue' : 'text-primary-red' }}" :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($stat['balance'], 0, ',', '.') }}</span>
                     </div>
                     @if($activeTab === 'cumulative' && $stat['name'] !== 'Bagi Hasil Mingguan')
                         <div class="mt-3 pt-2 border-t border-dashed border-gray-150 dark:border-gray-700">
@@ -704,7 +704,7 @@
                 <!-- System Balance -->
                 <div class="bg-gray-50 dark:bg-gray-800/40 p-5 rounded-2xl border border-gray-100 dark:border-gray-800">
                     <p class="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Saldo Sistem Saat Ini</p>
-                    <p class="text-xl font-black italic text-gray-800 dark:text-white">Rp{{ number_format($adjustSystemBalance, 0, ',', '.') }}</p>
+                    <p class="text-xl font-black text-gray-800 dark:text-white">Rp{{ number_format($adjustSystemBalance, 0, ',', '.') }}</p>
                 </div>
 
                 <!-- Input Physical Cash -->

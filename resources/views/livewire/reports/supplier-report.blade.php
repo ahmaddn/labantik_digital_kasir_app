@@ -46,7 +46,7 @@
             <div class="flex items-end">
                 <div class="w-full p-4 bg-primary-blue/5 rounded-xl border border-primary-blue/10 flex items-center justify-between">
                     <span class="text-[9px] font-black text-primary-blue uppercase tracking-widest">Total Bayar Supplier</span>
-                    <span class="text-lg font-black text-primary-blue italic">Rp{{ number_format($reports->sum('total_supplier_share'), 0, ',', '.') }}</span>
+                    <span class="text-lg font-black text-primary-blue">Rp{{ number_format($reports->sum('total_supplier_share'), 0, ',', '.') }}</span>
                 </div>
             </div>
         </div>
@@ -130,8 +130,8 @@
                         <td class="px-10 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">TOTAL</td>
                         <td class="px-10 py-6 text-center font-black text-gray-800 dark:text-white">{{ number_format($reports->sum('total_qty'), 0, ',', '.') }}</td>
                         <td class="px-10 py-6 font-black text-gray-800 dark:text-white">Rp{{ number_format($reports->sum('total_sales'), 0, ',', '.') }}</td>
-                        <td class="px-10 py-6 font-black text-primary-blue italic text-lg">Rp{{ number_format($reports->sum('total_supplier_share'), 0, ',', '.') }}</td>
-                        <td class="px-10 py-6 text-right font-black text-green-500 italic text-lg">Rp{{ number_format($reports->sum('total_shop_profit'), 0, ',', '.') }}</td>
+                        <td class="px-10 py-6 font-black text-primary-blue text-lg">Rp{{ number_format($reports->sum('total_supplier_share'), 0, ',', '.') }}</td>
+                        <td class="px-10 py-6 text-right font-black text-green-500 text-lg">Rp{{ number_format($reports->sum('total_shop_profit'), 0, ',', '.') }}</td>
                         <td class="px-10 py-6"></td>
                     </tr>
                 </tfoot>

@@ -377,7 +377,7 @@
                                 ITEMS</span>
                             <div class="flex items-center gap-2">
                                 <span
-                                    class="text-xs font-black italic text-primary-red">Rp{{ number_format($history->total_amount, 0, ',', '.') }}</span>
+                                    class="text-xs font-black text-primary-red">Rp{{ number_format($history->total_amount, 0, ',', '.') }}</span>
                                 <button wire:click="viewDetails('{{ $history->reference }}')"
                                     class="nb-btn text-[8px] py-1 px-2 bg-primary-blue text-white shadow-none border-2">DETAIL</button>
                             </div>
@@ -404,7 +404,7 @@
                     <span class="text-[9px] font-black uppercase tracking-[0.3em] mb-1 block dark:text-gray-400">TOTAL
                         BILL</span>
                     <div class="flex items-baseline gap-2">
-                        <span class="text-lg font-black italic dark:text-white">RP</span>
+                        <span class="text-lg font-black dark:text-white">RP</span>
                         <span x-text="formatRupiah(total).replace('Rp', '').trim()"
                             class="text-4xl font-black italic tracking-tighter leading-none dark:text-white"></span>
                     </div>
@@ -899,7 +899,7 @@
             <div class="flex justify-between items-start mb-6">
                 <div>
                     <span class="text-[9px] font-black bg-amber-500 text-white px-3 py-1 uppercase tracking-widest border-2 border-black">OPSI TAMBAHAN</span>
-                    <h2 class="text-xl font-black uppercase italic mt-3 dark:text-white" x-text="activeModifierProduct ? activeModifierProduct.name : ''"></h2>
+                    <h2 class="text-xl font-black uppercase mt-3 dark:text-white" x-text="activeModifierProduct ? activeModifierProduct.name : ''"></h2>
                 </div>
                 <button @click="showModifierModal = false; activeModifierProduct = null;" class="text-gray-400 hover:text-black dark:hover:text-white text-xl font-black">&times;</button>
             </div>

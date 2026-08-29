@@ -369,7 +369,7 @@
                                 <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Total
                                     Keuntungan</span>
                                 <span
-                                    class="text-lg font-black text-gray-800 dark:text-white italic" :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($mReport->total_profit, 0, ',', '.') }}</span>
+                                    class="text-lg font-black text-gray-800 dark:text-white" :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($mReport->total_profit, 0, ',', '.') }}</span>
                             </div>
                             <div class="grid grid-cols-2 gap-4">
                                 <div

@@ -134,17 +134,17 @@
                             <td class="py-6 text-right">
                                 <div class="text-xs">
                                     <p class="text-gray-800 dark:text-white font-bold">Rp{{ number_format($product->unit_price, 0, ',', '.') }}</p>
-                                    <p class="text-[9px] text-gray-400 italic">Margin: Rp{{ number_format($product->unit_profit, 0, ',', '.') }}</p>
+                                    <p class="text-[9px] text-gray-400">Margin: Rp{{ number_format($product->unit_profit, 0, ',', '.') }}</p>
                                 </div>
                             </td>
                             <td class="py-6 text-right">
-                                <span class="text-sm font-bold text-gray-400 italic">Rp{{ number_format($product->total_modal, 0, ',', '.') }}</span>
+                                <span class="text-sm font-bold text-gray-400">Rp{{ number_format($product->total_modal, 0, ',', '.') }}</span>
                             </td>
                             <td class="py-6 text-right">
-                                <span class="text-base font-black text-primary-red italic tracking-tighter">Rp{{ number_format($product->total_profit, 0, ',', '.') }}</span>
+                                <span class="text-base font-black text-primary-red tracking-tighter">Rp{{ number_format($product->total_profit, 0, ',', '.') }}</span>
                             </td>
                             <td class="py-6 px-10 text-right">
-                                <span class="text-base font-black text-primary-blue italic tracking-tighter">Rp{{ number_format($product->total_revenue, 0, ',', '.') }}</span>
+                                <span class="text-base font-black text-primary-blue tracking-tighter">Rp{{ number_format($product->total_revenue, 0, ',', '.') }}</span>
                             </td>
                         </tr>
                     @empty

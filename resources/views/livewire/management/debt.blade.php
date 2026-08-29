@@ -554,7 +554,7 @@
                         <div class="bg-gray-50 dark:bg-gray-800/50 p-5 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm">
                             <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-2">Total Sisa Tagihan</span>
                             <div class="flex items-baseline gap-2">
-                                <span class="text-xs font-black text-gray-400 italic">Rp</span>
+                                <span class="text-xs font-black text-gray-400">Rp</span>
                                 <span class="text-5xl font-black italic text-gray-800 dark:text-white tracking-tighter">
                                     {{ number_format($maxAmount, 0, ',', '.') }}
                                 </span>
@@ -565,7 +565,7 @@
                         <div class="space-y-4">
                             <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4">Nominal Pelunasan</label>
                             <div class="relative group">
-                                <span class="absolute left-8 inset-y-0 flex items-center text-sm font-black text-gray-300 italic group-focus-within:text-primary-blue transition-colors">Rp</span>
+                                <span class="absolute left-8 inset-y-0 flex items-center text-sm font-black text-gray-300 group-focus-within:text-primary-blue transition-colors">Rp</span>
                                 <input 
                                     type="number" 
                                     wire:model.live="settleAmount"
@@ -666,7 +666,7 @@
                                                         >
                                                             <div class="text-left">
                                                                 <p class="text-[11px] font-black uppercase tracking-tight">{{ $res->name }}</p>
-                                                                <p class="text-[10px] font-bold text-primary-red italic mt-1">Rp{{ number_format($res->price, 0, ',', '.') }}</p>
+                                                                <p class="text-[10px] font-bold text-primary-red mt-1">Rp{{ number_format($res->price, 0, ',', '.') }}</p>
                                                             </div>
                                                             <div class="w-8 h-8 rounded-full bg-red-50 text-primary-red flex items-center justify-center">
                                                                 <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
@@ -694,7 +694,7 @@
                                                         </div>
                                                     </div>
                                                     <div class="flex items-center gap-4">
-                                                        <span class="text-[11px] font-black italic text-primary-red">Rp{{ number_format($item['total'], 0, ',', '.') }}</span>
+                                                        <span class="text-[11px] font-black text-primary-red">Rp{{ number_format($item['total'], 0, ',', '.') }}</span>
                                                         <button wire:click="removeSpentItem({{ $index }})" class="w-8 h-8 flex items-center justify-center bg-red-50 text-red-500 rounded-xl hover:bg-red-500 hover:text-white transition-all opacity-0 group-hover:opacity-100 shadow-sm">
                                                             <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
                                                         </button>
@@ -709,7 +709,7 @@
                                         
                                         <div class="flex justify-between items-center pt-6 border-t border-gray-100 dark:border-gray-800">
                                             <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Total Dijajankan</span>
-                                            <span class="text-xl font-black italic text-primary-red tracking-tight">Rp{{ number_format($totalSpent, 0, ',', '.') }}</span>
+                                            <span class="text-xl font-black text-primary-red tracking-tight">Rp{{ number_format($totalSpent, 0, ',', '.') }}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -801,7 +801,7 @@
             <div class="p-10 bg-gray-50 dark:bg-gray-800/30 border-t border-gray-50 dark:border-gray-800 flex justify-between items-center">
                 <div class="flex flex-col">
                     <span class="text-[9px] font-black text-gray-400 uppercase tracking-widest">Total Transaksi</span>
-                    <span class="text-xl font-black italic text-gray-800 dark:text-white">Rp{{ number_format($this->detailItems->sum('total_price'), 0, ',', '.') }}</span>
+                    <span class="text-xl font-black text-gray-800 dark:text-white">Rp{{ number_format($this->detailItems->sum('total_price'), 0, ',', '.') }}</span>
                 </div>
                 <button @click="show = false" class="px-8 py-4 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-2xl font-black uppercase text-[10px] tracking-widest transition-all hover:scale-105 active:scale-95">
                     Tutup
@@ -874,7 +874,7 @@
                     <div>
                         <label class="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-3 ml-2">Nominal Hutang</label>
                         <div class="relative group">
-                            <span class="absolute left-6 inset-y-0 flex items-center text-sm font-black text-gray-300 italic group-focus-within:text-amber-500 transition-colors">Rp</span>
+                            <span class="absolute left-6 inset-y-0 flex items-center text-sm font-black text-gray-300 group-focus-within:text-amber-500 transition-colors">Rp</span>
                             <input 
                                 type="number" 
                                 wire:model.defer="newStoreDebtAmount"
@@ -975,7 +975,7 @@
                     <div class="bg-gray-50 dark:bg-gray-800/50 p-5 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm">
                         <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-2">Sisa Hutang Belum Lunas</span>
                         <div class="flex items-baseline gap-2">
-                            <span class="text-xs font-black text-gray-400 italic">Rp</span>
+                            <span class="text-xs font-black text-gray-400">Rp</span>
                             <span class="text-5xl font-black italic text-gray-800 dark:text-white tracking-tighter">
                                 {{ number_format($maxStoreDebtAmount, 0, ',', '.') }}
                             </span>
@@ -986,7 +986,7 @@
                     <div class="space-y-4">
                         <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4">Nominal Pembayaran</label>
                         <div class="relative group">
-                            <span class="absolute left-8 inset-y-0 flex items-center text-sm font-black text-gray-300 italic group-focus-within:text-amber-500 transition-colors">Rp</span>
+                            <span class="absolute left-8 inset-y-0 flex items-center text-sm font-black text-gray-300 group-focus-within:text-amber-500 transition-colors">Rp</span>
                             <input 
                                 type="number" 
                                 wire:model.live="settleStoreDebtAmount"

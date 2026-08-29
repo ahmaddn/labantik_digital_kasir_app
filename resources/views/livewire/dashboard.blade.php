@@ -378,7 +378,7 @@
                         class="text-[10px] font-black uppercase tracking-widest text-red-600 bg-red-500/5 px-4 py-2 rounded-full">Pengeluaran</span>
                 </div>
                 <h3 class="text-gray-400 text-[10px] font-black uppercase tracking-widest mb-1">Bulan Ini</h3>
-                <p class="text-2xl md:text-4xl font-black text-red-600 dark:text-red-400 italic tracking-tighter"
+                <p class="text-2xl md:text-4xl font-black text-red-600 dark:text-red-400 tracking-tighter"
                     :class="censorMode ? 'privacy-blur' : ''">
                     Rp{{ number_format($stats->monthly_expense, 0, ',', '.') }}</p>
                 <p class="mt-4 text-[9px] font-bold text-gray-400 uppercase tracking-widest">Akumulasi Kas Keluar</p>
@@ -413,7 +413,7 @@
                         Untung</span>
                 </div>
                 <h3 class="text-gray-400 text-[10px] font-black uppercase tracking-widest mb-1">Seluruh Waktu</h3>
-                <p class="text-2xl md:text-4xl font-black text-gray-800 dark:text-white italic tracking-tighter"
+                <p class="text-2xl md:text-4xl font-black text-gray-800 dark:text-white tracking-tighter"
                     :class="censorMode ? 'privacy-blur' : ''">
                     Rp{{ number_format($stats->total_all_time_profit, 0, ',', '.') }}</p>
                 <p class="mt-4 text-[9px] font-bold text-gray-400 uppercase tracking-widest">Akumulasi Profit Bersih
@@ -446,7 +446,7 @@
                         Terverifikasi</span>
                 </div>
                 <h3 class="text-gray-400 text-[10px] font-black uppercase tracking-widest mb-1">Kas Terverifikasi</h3>
-                <p class="text-2xl md:text-4xl font-black text-gray-800 dark:text-white italic tracking-tighter"
+                <p class="text-2xl md:text-4xl font-black text-gray-800 dark:text-white tracking-tighter"
                     :class="censorMode ? 'privacy-blur' : ''">
                     Rp{{ number_format($stats->total_audit_cash, 0, ',', '.') }}</p>
                 <p class="mt-4 text-[9px] font-bold text-gray-400 uppercase tracking-widest">Total Uang Fisik Terkumpul
@@ -483,7 +483,7 @@
                 </div>
                 <h3 class="text-gray-400 text-[10px] font-black uppercase tracking-widest mb-1">Piutang Belum Bayar
                 </h3>
-                <p class="text-2xl md:text-4xl font-black text-gray-800 dark:text-white italic tracking-tighter"
+                <p class="text-2xl md:text-4xl font-black text-gray-800 dark:text-white tracking-tighter"
                     :class="censorMode ? 'privacy-blur' : ''">
                     Rp{{ number_format($stats->total_outstanding_debt, 0, ',', '.') }}</p>
                 <p class="mt-4 text-[9px] font-bold text-gray-400 uppercase tracking-widest">Total Tagihan Piutang</p>
@@ -518,7 +518,7 @@
                         Omzet</span>
                 </div>
                 <h3 class="text-gray-400 text-[10px] font-black uppercase tracking-widest mb-1">Seluruh Waktu</h3>
-                <p class="text-2xl md:text-4xl font-black text-gray-800 dark:text-white italic tracking-tighter"
+                <p class="text-2xl md:text-4xl font-black text-gray-800 dark:text-white tracking-tighter"
                     :class="censorMode ? 'privacy-blur' : ''">
                     Rp{{ number_format($stats->total_all_time_revenue, 0, ',', '.') }}</p>
                 <p class="mt-4 text-[9px] font-bold text-gray-400 uppercase tracking-widest">Akumulasi Pendapatan Kotor
@@ -554,7 +554,7 @@
                         Modal</span>
                 </div>
                 <h3 class="text-gray-400 text-[10px] font-black uppercase tracking-widest mb-1">Seluruh Waktu</h3>
-                <p class="text-2xl md:text-4xl font-black text-indigo-600 dark:text-indigo-400 italic tracking-tighter"
+                <p class="text-2xl md:text-4xl font-black text-indigo-600 dark:text-indigo-400 tracking-tighter"
                     :class="censorMode ? 'privacy-blur' : ''">
                     Rp{{ number_format($stats->total_modal_balance, 0, ',', '.') }}</p>
                 <p class="mt-4 text-[9px] font-bold text-gray-400 uppercase tracking-widest">Akumulasi Kas Modal Aktif

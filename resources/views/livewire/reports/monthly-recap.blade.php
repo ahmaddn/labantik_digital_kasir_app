@@ -37,7 +37,7 @@
                 <svg class="w-48 h-48 text-white" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
             </div>
             <h3 class="text-[10px] font-black uppercase tracking-[0.3em] opacity-60 mb-3">Total Omzet Tunai</h3>
-            <p class="text-5xl font-black italic tracking-tighter" :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($recap->total_revenue_real, 0, ',', '.') }}</p>
+            <p class="text-5xl font-black tracking-tighter" :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($recap->total_revenue_real, 0, ',', '.') }}</p>
             <div class="mt-6 pt-6 border-t border-white/10 space-y-2">
                 <div class="flex justify-between items-center text-[10px] font-bold opacity-70 uppercase tracking-widest">
                     <span>Murni Jurusan:</span>
@@ -55,7 +55,7 @@
                 <svg class="w-48 h-48 text-primary-red" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m22 7-8.5 8.5-5-5L2 17"/><polyline points="18 7 22 7 22 11"/></svg>
             </div>
             <h3 class="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 mb-3">Keuntungan Estimasi</h3>
-            <p class="text-5xl font-black italic tracking-tighter text-primary-red" :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($recap->total_profit, 0, ',', '.') }}</p>
+            <p class="text-5xl font-black tracking-tighter text-primary-red" :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($recap->total_profit, 0, ',', '.') }}</p>
             <p class="mt-4 text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em]">Modal Terputar <span :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($recap->total_modal, 0, ',', '.') }}</span></p>
         </div>
 
@@ -132,13 +132,13 @@
                             <span class="text-sm font-black text-gray-800 dark:text-white">{{ $stats->qty }} <span class="text-[9px] text-gray-400 uppercase ml-1">Unit</span></span>
                         </td>
                         <td class="py-8 text-right">
-                            <span class="text-sm font-bold text-gray-400 italic">Rp{{ number_format($stats->modal, 0, ',', '.') }}</span>
+                            <span class="text-sm font-bold text-gray-400">Rp{{ number_format($stats->modal, 0, ',', '.') }}</span>
                         </td>
                         <td class="py-8 text-right">
-                            <span class="text-lg font-black text-primary-red italic tracking-tighter">Rp{{ number_format($stats->profit, 0, ',', '.') }}</span>
+                            <span class="text-lg font-black text-primary-red tracking-tighter">Rp{{ number_format($stats->profit, 0, ',', '.') }}</span>
                         </td>
                         <td class="py-8 text-right">
-                            <span class="text-lg font-black text-primary-blue italic tracking-tighter">Rp{{ number_format($stats->revenue, 0, ',', '.') }}</span>
+                            <span class="text-lg font-black text-primary-blue tracking-tighter">Rp{{ number_format($stats->revenue, 0, ',', '.') }}</span>
                         </td>
                     </tr>
                     @endforeach
@@ -252,10 +252,10 @@
                         <td class="px-10 py-8">
                             <span class="px-4 py-1 bg-gray-100 dark:bg-gray-900 rounded-full text-xs font-black text-gray-500 uppercase tracking-widest">{{ $day->total_transactions }} Transaksi</span>
                         </td>
-                        <td class="px-10 py-8 text-sm font-black text-primary-blue italic">Rp{{ number_format($day->total_revenue_real, 0, ',', '.') }}</td>
+                        <td class="px-10 py-8 text-sm font-black text-primary-blue">Rp{{ number_format($day->total_revenue_real, 0, ',', '.') }}</td>
                         <td class="px-10 py-8 text-sm font-black text-gray-800 dark:text-white">
                             @if($day->actual_cash !== null)
-                                <div class="italic">Rp{{ number_format((float)$day->actual_cash - (float)$day->starting_change_cash, 0, ',', '.') }}</div>
+                                <div class="">Rp{{ number_format((float)$day->actual_cash - (float)$day->starting_change_cash, 0, ',', '.') }}</div>
                                 @if($day->retained_change_cash > 0)
                                     <div class="text-[9px] font-bold text-primary-blue uppercase tracking-wider mt-1">Kembalian: <span>Rp{{ number_format($day->retained_change_cash, 0, ',', '.') }}</span></div>
                                 @endif
@@ -271,15 +271,15 @@
                                 @if($diff == 0)
                                     <span class="text-green-500 uppercase text-xs font-black">Cocok</span>
                                 @elseif($diff < 0)
-                                    <span class="text-primary-red italic">-Rp{{ number_format(abs($diff), 0, ',', '.') }}</span>
+                                    <span class="text-primary-red">-Rp{{ number_format(abs($diff), 0, ',', '.') }}</span>
                                 @else
-                                    <span class="text-amber-500 italic">+Rp{{ number_format($diff, 0, ',', '.') }}</span>
+                                    <span class="text-amber-500">+Rp{{ number_format($diff, 0, ',', '.') }}</span>
                                 @endif
                             @else
                                 <span class="text-gray-300 dark:text-gray-600">-</span>
                             @endif
                         </td>
-                        <td class="px-10 py-8 text-sm font-black text-primary-red italic">Rp{{ number_format($day->total_profit, 0, ',', '.') }}</td>
+                        <td class="px-10 py-8 text-sm font-black text-primary-red">Rp{{ number_format($day->total_profit, 0, ',', '.') }}</td>
                         <td class="px-10 py-8 text-right">
                             <a href="{{ route('daily-recap', ['date' => $day->date]) }}" class="px-6 py-2.5 bg-gray-100 dark:bg-gray-900 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-primary-blue hover:text-white transition-all opacity-0 group-hover:opacity-100">
                                 Detail

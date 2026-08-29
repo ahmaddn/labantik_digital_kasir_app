@@ -37,7 +37,7 @@
                 <svg class="w-40 h-40 text-white" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
             </div>
             <h3 class="text-[10px] font-black uppercase tracking-[0.3em] opacity-60 mb-3">Total Omzet Tunai</h3>
-            <p class="text-4xl font-black italic text-white" :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($recap->total_revenue_real, 0, ',', '.') }}</p>
+            <p class="text-4xl font-black text-white" :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($recap->total_revenue_real, 0, ',', '.') }}</p>
             <div class="mt-8 pt-8 border-t border-white/10 space-y-2">
                 <div class="flex justify-between items-center">
                     <span class="text-[9px] font-bold opacity-50 uppercase tracking-widest">Murni Jurusan:</span>
@@ -56,7 +56,7 @@
                 <svg class="w-40 h-40 text-primary-red" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 7-8.5 8.5-5-5L2 17"/><polyline points="18 7 22 7 22 11"/></svg>
             </div>
             <h3 class="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 mb-3">Keuntungan Bersih</h3>
-            <p class="text-4xl font-black italic text-primary-red" :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($recap->total_profit, 0, ',', '.') }}</p>
+            <p class="text-4xl font-black text-primary-red" :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($recap->total_profit, 0, ',', '.') }}</p>
             <div class="mt-8 pt-8 border-t border-gray-100 dark:border-gray-700 flex justify-between items-center">
                 <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Modal Pokok:</span>
                 <span class="text-xs font-black text-gray-800 dark:text-white" :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($recap->total_modal, 0, ',', '.') }}</span>
@@ -266,7 +266,7 @@
                     </div>
                     <div>
                         <p class="text-[9px] font-bold uppercase tracking-widest opacity-60">Sistem (Expected)</p>
-                        <p class="text-xs font-black italic" :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($recap->total_revenue_real, 0, ',', '.') }}</p>
+                        <p class="text-xs font-black" :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($recap->total_revenue_real, 0, ',', '.') }}</p>
                     </div>
                 </div>
             </div>
@@ -312,13 +312,13 @@
                             <span class="text-sm font-black text-gray-800 dark:text-white">{{ $stats->qty }} <span class="text-[9px] text-gray-400 uppercase ml-1">Unit</span></span>
                         </td>
                         <td class="py-8 text-right">
-                            <span class="text-sm font-bold text-gray-400 italic">Rp{{ number_format($stats->modal, 0, ',', '.') }}</span>
+                            <span class="text-sm font-bold text-gray-400">Rp{{ number_format($stats->modal, 0, ',', '.') }}</span>
                         </td>
                         <td class="py-8 text-right">
-                            <span class="text-lg font-black text-primary-red italic tracking-tighter">Rp{{ number_format($stats->profit, 0, ',', '.') }}</span>
+                            <span class="text-lg font-black text-primary-red tracking-tighter">Rp{{ number_format($stats->profit, 0, ',', '.') }}</span>
                         </td>
                         <td class="py-8 text-right">
-                            <span class="text-lg font-black text-primary-blue italic tracking-tighter">Rp{{ number_format($stats->revenue, 0, ',', '.') }}</span>
+                            <span class="text-lg font-black text-primary-blue tracking-tighter">Rp{{ number_format($stats->revenue, 0, ',', '.') }}</span>
                         </td>
                     </tr>
                     @endforeach
@@ -393,7 +393,7 @@
                             </span>
                         </td>
                         <td class="px-10 py-8">
-                            <span class="text-lg font-black text-primary-red italic">Rp{{ number_format($tx->total_amount, 0, ',', '.') }}</span>
+                            <span class="text-lg font-black text-primary-red">Rp{{ number_format($tx->total_amount, 0, ',', '.') }}</span>
                         </td>
                         <td class="px-10 py-8 text-right">
                             <span class="text-[9px] font-black uppercase px-4 py-1.5 rounded-full {{ $tx->status === 'uang_diterima' ? 'bg-green-100 text-green-700' : 'bg-primary-red/10 text-primary-red' }}">
@@ -489,7 +489,7 @@
                 </div>
                 <div class="text-right">
                     <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Total Transaksi</p>
-                    <p class="text-4xl font-black text-primary-blue italic tracking-tighter">Rp{{ number_format($this->detailItems->sum('total_price'), 0, ',', '.') }}</p>
+                    <p class="text-4xl font-black text-primary-blue tracking-tighter">Rp{{ number_format($this->detailItems->sum('total_price'), 0, ',', '.') }}</p>
                 </div>
             </div>
         </div>

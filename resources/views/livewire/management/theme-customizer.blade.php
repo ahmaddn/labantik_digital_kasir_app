@@ -236,7 +236,7 @@
                                     <svg class="w-48 h-48 text-gray-800 dark:text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
                                 </div>
                                 <h3 class="text-gray-500 dark:text-white/60 text-[10px] font-black uppercase tracking-widest mb-2">Penjualan Hari Ini</h3>
-                                <p class="text-4xl font-black text-gray-950 dark:text-white italic tracking-tighter mb-4">Rp2.450.000</p>
+                                <p class="text-4xl font-black text-gray-950 dark:text-white tracking-tighter mb-4">Rp2.450.000</p>
                                 <span class="px-2.5 py-1 rounded-md text-[8px] font-black bg-white/20 dark:bg-white/10 text-gray-800 dark:text-white uppercase tracking-widest">
                                     +12.4% vs Kemarin
                                 </span>
@@ -257,7 +257,7 @@
                             <!-- Restoran & Warung Culinary Card -->
                             <div class="bg-[#fffaf0] dark:bg-stone-900 rounded-2xl p-5 border-2 border-dashed border-amber-500/30 dark:border-amber-500/10 shadow-xl relative overflow-hidden text-amber-950 dark:text-amber-100">
                                 <h3 class="text-amber-800/80 dark:text-amber-400/60 text-[10px] font-black uppercase tracking-widest mb-2">Total Penjualan</h3>
-                                <p class="text-4xl font-black text-amber-950 dark:text-white italic tracking-tighter mb-4">Rp1.850.000</p>
+                                <p class="text-4xl font-black text-amber-950 dark:text-white tracking-tighter mb-4">Rp1.850.000</p>
                                 <span class="px-3 py-1 rounded-full text-[8px] font-black bg-amber-500 text-white uppercase tracking-widest">
                                     WARUNG STYLE ACTIVE
                                 </span>
@@ -275,7 +275,7 @@
                             <!-- Bank Mini Fintech Card -->
                             <div class="bg-white dark:bg-slate-950 rounded-2xl p-5 border border-sky-100 dark:border-sky-950/30 shadow-md relative overflow-hidden text-sky-950 dark:text-sky-100">
                                 <h3 class="text-sky-600 dark:text-sky-400 text-[10px] font-black uppercase tracking-widest mb-2">Total Simpanan</h3>
-                                <p class="text-4xl font-black text-sky-950 dark:text-white italic tracking-tighter mb-4">Rp5.450.000</p>
+                                <p class="text-4xl font-black text-sky-950 dark:text-white tracking-tighter mb-4">Rp5.450.000</p>
                                 <span class="px-2.5 py-1 rounded-lg text-[8px] font-black text-white uppercase tracking-widest"
                                     style="background-color: {{ $primaryColor }};">
                                     FINTECH STYLE ACTIVE
@@ -285,7 +285,7 @@
                             <!-- Classic Premium Card -->
                             <div class="bg-white dark:bg-slate-800 rounded-[3rem] p-5 border border-gray-100 dark:border-white/5 shadow-2xl relative overflow-hidden">
                                 <h3 class="text-gray-500 dark:text-white/60 text-[10px] font-black uppercase tracking-widest mb-2">Laba Bersih</h3>
-                                <p class="text-4xl font-black text-gray-950 dark:text-white italic tracking-tighter mb-4">Rp840.500</p>
+                                <p class="text-4xl font-black text-gray-950 dark:text-white tracking-tighter mb-4">Rp840.500</p>
                                 <span class="px-2.5 py-1 rounded-md text-[8px] font-black text-white uppercase tracking-widest"
                                     style="background-color: {{ $primaryColor }};">
                                     Target Tercapai

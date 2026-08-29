@@ -308,7 +308,7 @@
                                         class="block text-[8px] font-black text-gray-400 uppercase tracking-wider">Total
                                         Pembayaran</span>
                                     <span
-                                        class="text-lg font-black text-primary-red italic leading-none">Rp{{ number_format($tx->total_amount, 0, ',', '.') }}</span>
+                                        class="text-lg font-black text-primary-red leading-none">Rp{{ number_format($tx->total_amount, 0, ',', '.') }}</span>
                                     <span class="text-[8px] text-gray-400 block font-bold mt-0.5">{{ $tx->total_qty }}
                                         Item ({{ $tx->unique_items }} Jenis)</span>
                                 </div>
