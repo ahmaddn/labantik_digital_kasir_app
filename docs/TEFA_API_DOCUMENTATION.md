@@ -8,7 +8,7 @@
 | **Versi API** | v1 |
 | **Base URL** | `https://tefa.smkn1talaga.sch.id/api/v1/tefa` |
 | **Format Respons** | JSON (utf-8) |
-| **Autentikasi** | Bearer Token (Laravel Sanctum) |
+| **Autentikasi** | API Key + Bearer Token (untuk /me) |
 | **Tipe ID** | String UUID |
 | **Tanggal Dokumen** | Agustus 2026 |
 
@@ -56,26 +56,40 @@ Dokumen ini merupakan acuan teknis API yang mengatur pertukaran data antara **Ap
 
 ## 2. Autentikasi
 
-API ini menggunakan **Laravel Sanctum** dengan mekanisme Bearer Token.
+API ini menggunakan dua layer keamanan:
 
-### Cara Penggunaan Token
+### 2.1 API Key (Wajib di Semua Endpoint)
 
-1. Dapatkan token melalui endpoint `POST /auth/login`
-2. Sertakan token di header setiap request yang memerlukan autentikasi:
+Setiap request ke API TEFA **wajib** menyertakan header:
+
+```
+X-API-Key: {api_key}
+```
+
+API key digenerate oleh admin sistem dan dishare secara private ke tim TEFA. Tanpa header ini semua endpoint akan mengembalikan `401 Unauthorized`.
+
+> Untuk generate key baru: `php artisan tinker` → `(string) \Illuminate\Support\Str::uuid()`
+
+### 2.2 Bearer Token (Hanya untuk `/auth/me`)
+
+Endpoint `GET /auth/me` memerlukan **dua layer** — API Key + Bearer Token Sanctum:
+
+1. Dapatkan token melalui `POST /auth/login`
+2. Sertakan di header:
 
 ```
 Authorization: Bearer {token}
 ```
 
-### Endpoint yang Memerlukan Token
+### Ringkasan Auth per Endpoint
 
-| Endpoint | Auth Required |
-|---|---|
-| `POST /auth/login` | ❌ Tidak |
-| `POST /auth/register` | ❌ Tidak |
-| `GET /auth/me` | ✅ Ya |
-| `GET /merchants` | ✅ Ya |
-| `GET /merchants/{id}/products` | ✅ Ya |
+| Endpoint | X-API-Key | Bearer Token |
+|---|---|---|
+| `POST /auth/login` | ✅ Wajib | ❌ Tidak perlu |
+| `POST /auth/register` | ✅ Wajib | ❌ Tidak perlu |
+| `GET /auth/me` | ✅ Wajib | ✅ Wajib |
+| `GET /merchants` | ✅ Wajib | ❌ Tidak perlu |
+| `GET /merchants/{id}/products` | ✅ Wajib | ❌ Tidak perlu |
 
 ---
 
@@ -133,6 +147,7 @@ POST /api/v1/tefa/auth/login
 |---|---|
 | `Content-Type` | `application/json` |
 | `Accept` | `application/json` |
+| `X-API-Key` | `{api_key}` |
 
 **Request Body**
 
@@ -174,6 +189,7 @@ POST /api/v1/tefa/auth/login
 
 | HTTP Code | Kondisi |
 |---|---|
+| `401` | API Key tidak valid atau tidak disertakan |
 | `422` | Username atau password salah |
 | `422` | Field wajib tidak diisi |
 
@@ -194,6 +210,7 @@ POST /api/v1/tefa/auth/register
 |---|---|
 | `Content-Type` | `application/json` |
 | `Accept` | `application/json` |
+| `X-API-Key` | `{api_key}` |
 
 **Request Body**
 
@@ -238,6 +255,7 @@ POST /api/v1/tefa/auth/register
 
 | HTTP Code | Kondisi |
 |---|---|
+| `401` | API Key tidak valid atau tidak disertakan |
 | `422` | Email sudah terdaftar |
 | `422` | Field wajib tidak diisi |
 | `422` | Password kurang dari 8 karakter |
@@ -258,6 +276,7 @@ GET /api/v1/tefa/auth/me
 | Header | Value |
 |---|---|
 | `Accept` | `application/json` |
+| `X-API-Key` | `{api_key}` |
 | `Authorization` | `Bearer {token}` |
 
 **Contoh Respons (200 OK)**
@@ -282,7 +301,7 @@ GET /api/v1/tefa/auth/me
 
 | HTTP Code | Kondisi |
 |---|---|
-| `401` | Token tidak valid atau tidak disertakan |
+| `401` | API Key tidak valid, token tidak ada, atau token tidak valid |
 | `404` | Akun tidak memiliki merchant terdaftar |
 
 ---
@@ -291,7 +310,7 @@ GET /api/v1/tefa/auth/me
 
 ### 5.1 GET /merchants
 
-Mengambil daftar seluruh merchant kantin TEFA. Dipanggil oleh Dompet Siswa untuk sinkronisasi data kantin aktif.
+Mengambil daftar seluruh merchant kantin TEFA aktif. Tidak memerlukan login — cukup API Key.
 
 **URL**
 ```
@@ -303,7 +322,7 @@ GET /api/v1/tefa/merchants
 | Header | Value |
 |---|---|
 | `Accept` | `application/json` |
-| `Authorization` | `Bearer {token}` |
+| `X-API-Key` | `{api_key}` |
 
 **Query Parameters**
 
@@ -347,13 +366,13 @@ GET /api/v1/tefa/merchants?status=active
 
 | HTTP Code | Kondisi |
 |---|---|
-| `401` | Token tidak valid atau tidak disertakan |
+| `401` | API Key tidak valid atau tidak disertakan |
 
 ---
 
 ### 5.2 GET /merchants/{tefa_merchant_id}/products
 
-Mengambil daftar produk (menu makanan/minuman) dari kantin TEFA tertentu. Hanya mengembalikan produk dengan status **available** (`is_active = true`).
+Mengambil daftar produk (menu makanan/minuman) dari kantin TEFA tertentu. Tidak memerlukan login — cukup API Key. Hanya mengembalikan produk dengan status **available** (`is_active = true`).
 
 **URL**
 ```
@@ -365,7 +384,7 @@ GET /api/v1/tefa/merchants/{tefa_merchant_id}/products
 | Header | Value |
 |---|---|
 | `Accept` | `application/json` |
-| `Authorization` | `Bearer {token}` |
+| `X-API-Key` | `{api_key}` |
 
 **Path Parameters**
 
@@ -432,7 +451,7 @@ GET /api/v1/tefa/merchants/019fc582-6b7b-72d1-bfbf-7103020eae13/products
 
 | HTTP Code | Kondisi |
 |---|---|
-| `401` | Token tidak valid atau tidak disertakan |
+| `401` | API Key tidak valid atau tidak disertakan |
 | `404` | Merchant dengan ID tersebut tidak ditemukan |
 
 ---
@@ -443,7 +462,7 @@ GET /api/v1/tefa/merchants/019fc582-6b7b-72d1-bfbf-7103020eae13/products
 |---|---|---|
 | `200` | OK | Request berhasil |
 | `201` | Created | Data baru berhasil dibuat |
-| `401` | Unauthenticated | Token tidak ada atau tidak valid |
+| `401` | Unauthorized | API Key tidak ada/salah, atau Bearer Token tidak valid |
 | `404` | Not Found | Data yang dicari tidak ditemukan |
 | `422` | Unprocessable Entity | Validasi input gagal |
 | `500` | Internal Server Error | Terjadi kesalahan di sisi server |
@@ -454,6 +473,12 @@ GET /api/v1/tefa/merchants/019fc582-6b7b-72d1-bfbf-7103020eae13/products
 
 ### Tipe ID
 Seluruh ID (`tefa_merchant_id`, `tefa_product_id`) menggunakan format **UUID v7** (string), contoh: `019fc582-6b7b-72d1-bfbf-7103020eae13`.
+
+### API Key
+- Disimpan di `.env` server sebagai `TEFA_API_KEY`
+- Digenerate via `php artisan tinker` → `(string) \Illuminate\Support\Str::uuid()`
+- Dishare secara private ke tim pengembang Aplikasi TEFA
+- Ganti secara berkala untuk keamanan
 
 ### pic_name
 Field `pic_name` pada data merchant diambil dengan urutan prioritas:
@@ -469,12 +494,12 @@ Semua endpoint menggunakan **eager loading** — tidak ada query N+1. Jumlah que
 | `GET /merchants` | 2 query (merchants + pengelola users) |
 | `GET /merchants/{id}/products` | 3 query (merchant + pengelola + products with category & supplier) |
 
-### Header Wajib untuk Client
-Semua request ke API ini **wajib menyertakan** header:
+### Header Wajib untuk Semua Request
 ```
 Accept: application/json
+X-API-Key: {api_key}
 ```
-Tanpa header ini, respons error akan dikembalikan dalam format HTML bukan JSON.
+Tanpa `Accept: application/json`, respons error akan dikembalikan dalam format HTML bukan JSON.
 
 ---
 
