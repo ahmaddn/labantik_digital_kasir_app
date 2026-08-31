@@ -56,6 +56,11 @@ class CashManagement extends Component
     public string $consolidateCashType = 'keuntungan';
     public array $chartData = [];
 
+    // Category Detail Modal properties
+    public bool $showCategoryDetailModal = false;
+    public string $categoryDetailName = '';
+    public array $categoryDetailTransactions = [];
+
     public function mount()
     {
         $this->filterMonth = now()->format('Y-m');
@@ -568,6 +573,55 @@ class CashManagement extends Component
     {
         $filename = 'Laporan_Buku_Kas_Internal_Kumulatif.xlsx';
         return \Maatwebsite\Excel\Facades\Excel::download(new \App\Exports\CashTransactionsExport(null), $filename);
+    }
+
+    /**
+     * Buka modal detail riwayat transaksi per kategori kas.
+     */
+    public function openCategoryDetail(string $categoryId, string $categoryName): void
+    {
+        $activeJurusanId = session('active_jurusan_id');
+
+        // Tentukan date filter sesuai periode aktif
+        $startDate = null;
+        $endDate = null;
+
+        if ($this->filterType === 'weekly') {
+            if ($this->filterWeek === 'this_week') {
+                $startDate = now()->startOfWeek(\Carbon\Carbon::MONDAY)->format('Y-m-d');
+                $endDate   = now()->endOfWeek(\Carbon\Carbon::SUNDAY)->format('Y-m-d');
+            } elseif ($this->filterWeek === 'last_week') {
+                $startDate = now()->subWeek()->startOfWeek(\Carbon\Carbon::MONDAY)->format('Y-m-d');
+                $endDate   = now()->subWeek()->endOfWeek(\Carbon\Carbon::SUNDAY)->format('Y-m-d');
+            }
+        } elseif ($this->filterType === 'monthly') {
+            $startDate = \Carbon\Carbon::createFromFormat('Y-m', $this->filterMonth)->startOfMonth()->format('Y-m-d');
+            $endDate   = \Carbon\Carbon::createFromFormat('Y-m', $this->filterMonth)->endOfMonth()->format('Y-m-d');
+        }
+
+        $query = CashTransaction::where('jurusan_id', $activeJurusanId)
+            ->where('cash_category_id', $categoryId);
+
+        if ($startDate && $endDate) {
+            $query->whereBetween('date', [$startDate, $endDate]);
+        }
+
+        $this->categoryDetailName         = $categoryName;
+        $this->categoryDetailTransactions = $query
+            ->orderBy('date', 'desc')
+            ->orderBy('id', 'desc')
+            ->get()
+            ->map(fn ($tx) => [
+                'id'          => $tx->id,
+                'date'        => \Carbon\Carbon::parse($tx->date)->translatedFormat('d M Y'),
+                'description' => $tx->description,
+                'type'        => $tx->type,
+                'cash_type'   => $tx->cash_type,
+                'amount'      => $tx->amount,
+            ])
+            ->toArray();
+
+        $this->showCategoryDetailModal = true;
     }
 
     public function render()

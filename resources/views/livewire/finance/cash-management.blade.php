@@ -440,9 +440,21 @@
                         <span class="text-lg font-black {{ $stat['balance'] >= 0 ? 'text-primary-blue' : 'text-primary-red' }}" :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($stat['balance'], 0, ',', '.') }}</span>
                     </div>
                     @if($activeTab === 'cumulative' && $stat['name'] !== 'Bagi Hasil Mingguan')
+                        <div class="mt-3 pt-2 border-t border-dashed border-gray-150 dark:border-gray-700 flex gap-2">
+                            <button wire:click="openCategoryDetail('{{ $stat['id'] }}', '{{ $stat['name'] }}')"
+                                class="flex-1 text-center py-2.5 bg-gray-50 hover:bg-gray-800 hover:text-white dark:bg-gray-700/50 dark:hover:bg-gray-600 dark:text-gray-300 dark:hover:text-white text-[9px] font-black uppercase tracking-wider rounded-xl transition-all shadow-sm">
+                                Lihat Detail
+                            </button>
+                            <button wire:click="openAdjustModal('{{ $stat['id'] }}', '{{ $stat['name'] }}', {{ $stat['balance'] }})"
+                                class="flex-1 text-center py-2.5 bg-gray-50 hover:bg-primary-blue hover:text-white dark:bg-gray-700/50 dark:hover:bg-primary-blue dark:text-gray-300 dark:hover:text-white text-[9px] font-black uppercase tracking-wider rounded-xl transition-all shadow-sm">
+                                Sesuaikan Saldo
+                            </button>
+                        </div>
+                    @else
                         <div class="mt-3 pt-2 border-t border-dashed border-gray-150 dark:border-gray-700">
-                            <button wire:click="openAdjustModal('{{ $stat['id'] }}', '{{ $stat['name'] }}', {{ $stat['balance'] }})" class="w-full text-center py-2.5 bg-gray-50 hover:bg-primary-blue hover:text-white dark:bg-gray-700/50 dark:hover:bg-primary-blue dark:text-gray-300 dark:hover:text-white text-[9px] font-black uppercase tracking-wider rounded-xl transition-all shadow-sm">
-                                Sesuaikan Saldo Fisik
+                            <button wire:click="openCategoryDetail('{{ $stat['id'] }}', '{{ $stat['name'] }}')"
+                                class="w-full text-center py-2.5 bg-gray-50 hover:bg-gray-800 hover:text-white dark:bg-gray-700/50 dark:hover:bg-gray-600 dark:text-gray-300 dark:hover:text-white text-[9px] font-black uppercase tracking-wider rounded-xl transition-all shadow-sm">
+                                Lihat Detail
                             </button>
                         </div>
                     @endif
@@ -834,6 +846,126 @@
                 </button>
                 <button wire:click="submitAdjustment" class="flex-1 py-4 bg-primary-blue text-white rounded-2xl font-black italic uppercase text-xs tracking-widest shadow-xl shadow-blue-500/20 hover:scale-105 active:scale-95 transition-all">
                     Simpan Penyesuaian
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Category Detail Modal -->
+    <div
+        x-data="{ show: @entangle('showCategoryDetailModal') }"
+        x-show="show"
+        x-cloak
+        class="fixed inset-0 z-[300] flex items-end sm:items-center justify-center p-0 sm:p-6 bg-gray-900/60 backdrop-blur-sm"
+        x-transition:enter="transition ease-out duration-300"
+        x-transition:enter-start="opacity-0"
+        x-transition:enter-end="opacity-100"
+        x-transition:leave="transition ease-in duration-200"
+        x-transition:leave-start="opacity-100"
+        x-transition:leave-end="opacity-0"
+    >
+        <div
+            @click.away="show = false"
+            class="bg-white dark:bg-gray-900 w-full sm:max-w-2xl rounded-t-[3rem] sm:rounded-[3rem] shadow-2xl flex flex-col max-h-[90vh] animate-in slide-in-from-bottom-4 sm:zoom-in-95 duration-300"
+        >
+            {{-- Header --}}
+            <div class="flex items-center justify-between p-7 border-b border-gray-100 dark:border-gray-800 shrink-0">
+                <div>
+                    <p class="text-[9px] font-black uppercase tracking-widest text-gray-400 mb-0.5">Riwayat Transaksi Kas</p>
+                    <h3 class="text-xl font-black uppercase tracking-tight text-gray-800 dark:text-white">{{ $categoryDetailName }}</h3>
+                </div>
+                <button @click="show = false" class="text-gray-400 hover:text-gray-700 dark:hover:text-white transition-colors p-2">
+                    <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M18 6 6 18M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+
+            {{-- Body --}}
+            <div class="overflow-y-auto flex-1 p-6">
+                @if(empty($categoryDetailTransactions))
+                    <div class="flex flex-col items-center justify-center py-16 text-center">
+                        <div class="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mb-4">
+                            <svg class="w-8 h-8 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-3-3v6M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        </div>
+                        <p class="text-xs font-black uppercase tracking-widest text-gray-400">Tidak ada transaksi pada periode ini</p>
+                    </div>
+                @else
+                    {{-- Summary row --}}
+                    @php
+                        $detailIncome  = collect($categoryDetailTransactions)->where('type', 'income')->sum('amount');
+                        $detailExpense = collect($categoryDetailTransactions)->where('type', 'expense')->sum('amount');
+                        $detailNet     = $detailIncome - $detailExpense;
+                    @endphp
+                    <div class="grid grid-cols-3 gap-3 mb-5">
+                        <div class="bg-green-500/10 rounded-2xl p-4 text-center">
+                            <p class="text-[8px] font-black uppercase tracking-widest text-green-600 dark:text-green-400 mb-1">Total Masuk</p>
+                            <p class="text-sm font-black text-green-600 dark:text-green-400">+Rp{{ number_format($detailIncome, 0, ',', '.') }}</p>
+                        </div>
+                        <div class="bg-red-500/10 rounded-2xl p-4 text-center">
+                            <p class="text-[8px] font-black uppercase tracking-widest text-red-500 mb-1">Total Keluar</p>
+                            <p class="text-sm font-black text-red-500">-Rp{{ number_format($detailExpense, 0, ',', '.') }}</p>
+                        </div>
+                        <div class="{{ $detailNet >= 0 ? 'bg-primary-blue/10' : 'bg-red-500/10' }} rounded-2xl p-4 text-center">
+                            <p class="text-[8px] font-black uppercase tracking-widest {{ $detailNet >= 0 ? 'text-primary-blue' : 'text-red-500' }} mb-1">Net Saldo</p>
+                            <p class="text-sm font-black {{ $detailNet >= 0 ? 'text-primary-blue' : 'text-red-500' }}">
+                                {{ $detailNet >= 0 ? '+' : '' }}Rp{{ number_format($detailNet, 0, ',', '.') }}
+                            </p>
+                        </div>
+                    </div>
+
+                    {{-- Transaction list --}}
+                    <div class="space-y-2">
+                        @foreach($categoryDetailTransactions as $tx)
+                            <div class="flex items-center gap-3 p-4 rounded-2xl {{ $tx['type'] === 'income' ? 'bg-green-500/5 dark:bg-green-500/10' : 'bg-red-500/5 dark:bg-red-500/10' }}">
+                                {{-- Icon --}}
+                                <div class="shrink-0 w-9 h-9 rounded-xl flex items-center justify-center {{ $tx['type'] === 'income' ? 'bg-green-500/20 text-green-500' : 'bg-red-500/20 text-red-500' }}">
+                                    @if($tx['type'] === 'income')
+                                        <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+                                    @else
+                                        <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M20 12H4"/></svg>
+                                    @endif
+                                </div>
+
+                                {{-- Info --}}
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-sm font-black text-gray-800 dark:text-white truncate leading-tight">
+                                        {{ $tx['description'] ?: '-' }}
+                                    </p>
+                                    <div class="flex items-center gap-2 mt-0.5">
+                                        <span class="text-[9px] font-bold text-gray-400 uppercase tracking-wider">{{ $tx['date'] }}</span>
+                                        <span class="text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded-md {{ $tx['cash_type'] === 'modal' ? 'bg-primary-blue/10 text-primary-blue' : 'bg-emerald-500/10 text-emerald-500' }}">
+                                            {{ $tx['cash_type'] === 'modal' ? 'Modal' : 'Untung' }}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                {{-- Amount --}}
+                                <div class="shrink-0 text-right">
+                                    <span class="text-base font-black {{ $tx['type'] === 'income' ? 'text-green-500' : 'text-red-500' }}">
+                                        {{ $tx['type'] === 'income' ? '+' : '-' }}Rp{{ number_format($tx['amount'], 0, ',', '.') }}
+                                    </span>
+                                    <button
+                                        wire:click="confirmDelete('{{ $tx['id'] }}')"
+                                        @click="show = false"
+                                        class="block mt-1 ml-auto text-red-400 hover:text-red-600 hover:scale-110 transition-all"
+                                        title="Hapus transaksi ini">
+                                        <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                @endif
+            </div>
+
+            {{-- Footer --}}
+            <div class="p-5 border-t border-gray-100 dark:border-gray-800 shrink-0">
+                <button @click="show = false"
+                    class="w-full py-4 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 rounded-2xl font-black text-xs uppercase tracking-widest hover:scale-[1.01] active:scale-95 transition-all">
+                    Tutup
                 </button>
             </div>
         </div>
