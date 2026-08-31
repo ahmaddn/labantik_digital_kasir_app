@@ -123,7 +123,7 @@
                 @endphp
 
                 @if ($hasHigherRole)
-                    @if ($isSessionFinished)
+                    @if ($isSessionFinished || $hasClockedOut)
                         <div
                             class="flex items-center px-6 py-5 text-sm font-black rounded-[2rem] bg-gray-400 dark:bg-gray-800 text-white shadow-xl opacity-80 cursor-not-allowed uppercase italic tracking-wider">
                             <svg class="w-6 h-6 mr-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
