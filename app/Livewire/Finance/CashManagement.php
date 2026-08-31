@@ -577,37 +577,16 @@ class CashManagement extends Component
 
     /**
      * Buka modal detail riwayat transaksi per kategori kas.
+     * Selalu ambil SEMUA transaksi kategori ini (cumulative),
+     * tidak terbatas periode filter — supaya konsisten dengan angka di card.
      */
     public function openCategoryDetail(string $categoryId, string $categoryName): void
     {
         $activeJurusanId = session('active_jurusan_id');
 
-        // Tentukan date filter sesuai periode aktif
-        $startDate = null;
-        $endDate = null;
-
-        if ($this->filterType === 'weekly') {
-            if ($this->filterWeek === 'this_week') {
-                $startDate = now()->startOfWeek(\Carbon\Carbon::MONDAY)->format('Y-m-d');
-                $endDate   = now()->endOfWeek(\Carbon\Carbon::SUNDAY)->format('Y-m-d');
-            } elseif ($this->filterWeek === 'last_week') {
-                $startDate = now()->subWeek()->startOfWeek(\Carbon\Carbon::MONDAY)->format('Y-m-d');
-                $endDate   = now()->subWeek()->endOfWeek(\Carbon\Carbon::SUNDAY)->format('Y-m-d');
-            }
-        } elseif ($this->filterType === 'monthly') {
-            $startDate = \Carbon\Carbon::createFromFormat('Y-m', $this->filterMonth)->startOfMonth()->format('Y-m-d');
-            $endDate   = \Carbon\Carbon::createFromFormat('Y-m', $this->filterMonth)->endOfMonth()->format('Y-m-d');
-        }
-
-        $query = CashTransaction::where('jurusan_id', $activeJurusanId)
-            ->where('cash_category_id', $categoryId);
-
-        if ($startDate && $endDate) {
-            $query->whereBetween('date', [$startDate, $endDate]);
-        }
-
         $this->categoryDetailName         = $categoryName;
-        $this->categoryDetailTransactions = $query
+        $this->categoryDetailTransactions = CashTransaction::where('jurusan_id', $activeJurusanId)
+            ->where('cash_category_id', $categoryId)
             ->orderBy('date', 'desc')
             ->orderBy('id', 'desc')
             ->get()
@@ -844,17 +823,35 @@ class CashManagement extends Component
 
             $prodCatName = str_replace('Penjualan ', '', $category->name);
             $bagiHasilDeduction = 0;
-            if ($category->name !== 'Bagi Hasil Mingguan' && !empty($bagiHasilTransactions)) {
+
+            // Deduction hanya berlaku untuk kategori produk (bukan kategori supplier).
+            // Kategori supplier punya format "Penjualan {NamaSupplier}" dan nama supplier
+            // tidak akan muncul setelah "Kategori:" di deskripsi bagi hasil.
+            // Kategori produk yang valid: Eskrim, Makanan, Minuman, Snack, dll.
+            $isProductCategory = in_array($prodCatName, [
+                'Eskrim', 'Makanan', 'Minuman', 'Snack',
+                'Jurusan Snack & Minuman', 'Toko / POS',
+            ]) || str_starts_with($category->name, 'Penjualan Toko');
+
+            if ($category->name !== 'Bagi Hasil Mingguan' && $isProductCategory && !empty($bagiHasilTransactions)) {
                 foreach ($bagiHasilTransactions as $tx) {
-                    if (str_contains(strtolower($tx['description']), 'kategori:')) {
-                        if ($category->name === 'Jurusan Snack & Minuman') {
-                            if (str_contains(strtolower($tx['description']), 'makanan') || str_contains(strtolower($tx['description']), 'minuman') || str_contains(strtolower($tx['description']), 'snack')) {
-                                $bagiHasilDeduction += $tx['amount'];
-                            }
-                        } else {
-                            if (str_contains(strtolower($tx['description']), strtolower($prodCatName))) {
-                                $bagiHasilDeduction += $tx['amount'];
-                            }
+                    // Hanya proses deskripsi yang punya pola "Kategori: {nama}"
+                    if (!str_contains(strtolower($tx['description']), 'kategori:')) {
+                        continue;
+                    }
+
+                    // Ekstrak nama kategori dari deskripsi: "Kategori: Eskrim"
+                    preg_match('/kategori:\s*([^)]+)/i', $tx['description'], $matches);
+                    $kategoriDiDeskripsi = isset($matches[1]) ? strtolower(trim($matches[1])) : '';
+
+                    if ($category->name === 'Jurusan Snack & Minuman') {
+                        if (in_array($kategoriDiDeskripsi, ['makanan', 'minuman', 'snack'])) {
+                            $bagiHasilDeduction += $tx['amount'];
+                        }
+                    } else {
+                        // Cocokkan nama kategori produk dengan yang ada di deskripsi
+                        if ($kategoriDiDeskripsi === strtolower($prodCatName)) {
+                            $bagiHasilDeduction += $tx['amount'];
                         }
                     }
                 }
