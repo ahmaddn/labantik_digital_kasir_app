@@ -100,10 +100,13 @@ class ProductService
      */
     public function saveStock(string $productId, string $date, int $openingStock): void
     {
+        // Defensive cast — pastikan tidak pernah null/string masuk ke kolom integer
+        $openingStock = max(0, (int) $openingStock);
+
         StockEntry::updateOrCreate(
             [
                 'product_id' => $productId,
-                'date' => $date,
+                'date'       => $date,
             ],
             [
                 'opening_stock' => $openingStock,

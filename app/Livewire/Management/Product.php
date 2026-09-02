@@ -355,17 +355,23 @@ class Product extends Component
 
     public function saveStock(ProductService $service): void
     {
+        // Cast dulu sebelum validate — cegah string kosong lolos ke DB
+        $this->opening_stock = (int) ($this->opening_stock ?? 0);
+
         $this->validate([
             'stock_product_id' => 'required|exists:products,id',
-            'opening_stock' => 'required|integer|min:0',
-            'stock_date' => 'required|date',
+            'opening_stock'    => 'required|integer|min:0',
+            'stock_date'       => 'required|date',
         ]);
 
-        $service->saveStock($this->stock_product_id, $this->stock_date, $this->opening_stock);
-
-        $this->dispatch('toast', message: 'Stok awal berhasil disimpan.');
-        $this->reset(['stock_product_id', 'opening_stock']);
-        $this->stock_date = today()->toDateString();
+        try {
+            $service->saveStock($this->stock_product_id, $this->stock_date, $this->opening_stock);
+            $this->dispatch('toast', message: 'Stok awal berhasil disimpan.', type: 'success');
+            $this->reset(['stock_product_id', 'opening_stock']);
+            $this->stock_date = today()->toDateString();
+        } catch (\Exception $e) {
+            $this->dispatch('toast', message: 'Gagal menyimpan stok. Pastikan nilai stok valid.', type: 'error');
+        }
     }
 
     public function getCashGroupedProducts()
