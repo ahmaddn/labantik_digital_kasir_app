@@ -53,16 +53,27 @@
                         PROSES BAGI HASIL
                     </button>
                 @else
-                    <button disabled
-                        class="px-10 py-5 bg-gray-200 dark:bg-gray-800 text-gray-405 rounded-[2rem] font-black italic uppercase text-xs tracking-widest cursor-not-allowed flex items-center justify-center gap-4 opacity-50 w-full sm:w-auto">
-                        <svg class="w-5 h-5 shrink-0" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
-                            stroke-linecap="round" stroke-linejoin="round">
-                            <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
-                            <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-                        </svg>
-                        JUMAT - MINGGU
-                    </button>
+                    <div class="flex flex-col gap-2 w-full sm:w-auto">
+                        <button disabled
+                            class="px-10 py-5 bg-gray-200 dark:bg-gray-800 text-gray-405 rounded-[2rem] font-black italic uppercase text-xs tracking-widest cursor-not-allowed flex items-center justify-center gap-4 opacity-50 w-full sm:w-auto">
+                            <svg class="w-5 h-5 shrink-0" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
+                                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                            </svg>
+                            JUMAT - MINGGU
+                        </button>
+                        {{-- Toggle pengecualian minggu tidak penuh --}}
+                        <button wire:click="$toggle('overrideCanProcess')"
+                            class="flex items-center justify-center gap-2 px-4 py-2 rounded-2xl text-[9px] font-black uppercase tracking-widest transition-all
+                                {{ $overrideCanProcess ? 'bg-amber-500/20 text-amber-500 border border-amber-500/40' : 'bg-gray-100 dark:bg-gray-800 text-gray-400 border border-gray-200 dark:border-gray-700' }}">
+                            <svg class="w-3.5 h-3.5 shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/>
+                            </svg>
+                            {{ $overrideCanProcess ? 'Mode Pengecualian Aktif' : 'Minggu Tidak Penuh?' }}
+                        </button>
+                    </div>
                 @endif
             @elseif($viewMode === 'monthly')
                 <div
@@ -305,20 +316,66 @@
                                     </div>
                                 </div>
                                 <div class="h-px bg-gray-100 dark:bg-gray-700 mb-6"></div>
-                                <div class="flex justify-between items-center">
+                                <div class="flex justify-between items-center mb-4">
                                     <div class="text-left">
-                                        <p class="text-[8px] font-black text-gray-400 uppercase tracking-widest">Profit
-                                        </p>
-                                        <p class="text-xs font-black text-primary-blue italic">
+                                        <p class="text-[8px] font-black text-gray-400 uppercase tracking-widest">Profit</p>
+                                        <p class="text-xs font-black text-primary-blue">
                                             Rp{{ number_format($report->total_profit, 0, ',', '.') }}</p>
                                     </div>
                                     <div class="text-right">
-                                        <p class="text-[8px] font-black text-gray-400 uppercase tracking-widest">Share
-                                        </p>
-                                        <p class="text-xs font-black text-green-500 italic">
+                                        <p class="text-[8px] font-black text-gray-400 uppercase tracking-widest">Share</p>
+                                        <p class="text-xs font-black text-green-500">
                                             Rp{{ number_format($report->shared_amount, 0, ',', '.') }}</p>
                                     </div>
                                 </div>
+
+                                {{-- Tombol lihat breakdown --}}
+                                <button wire:click="toggleBreakdown('{{ $report->id }}')"
+                                    class="w-full flex items-center justify-between px-4 py-2.5 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all
+                                        {{ $expandedReportId === $report->id ? 'bg-primary-blue/10 text-primary-blue' : 'bg-gray-100 dark:bg-gray-700/50 text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700' }}">
+                                    <span>{{ $expandedReportId === $report->id ? 'Sembunyikan Detail' : 'Lihat Rincian Pembagian' }}</span>
+                                    <svg class="w-3.5 h-3.5 transition-transform {{ $expandedReportId === $report->id ? 'rotate-180' : '' }}"
+                                        xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+                                    </svg>
+                                </button>
+
+                                {{-- Accordion breakdown --}}
+                                @if($expandedReportId === $report->id)
+                                    <div class="mt-3 space-y-3">
+                                        @if(empty($reportBreakdown))
+                                            <p class="text-[9px] font-black uppercase tracking-widest text-center text-gray-400 py-3">
+                                                Tidak ada data rincian
+                                            </p>
+                                        @else
+                                            @foreach($reportBreakdown as $recipient)
+                                                <div class="bg-gray-50 dark:bg-gray-800 rounded-2xl p-3">
+                                                    {{-- Header penerima --}}
+                                                    <div class="flex justify-between items-center mb-2">
+                                                        <div>
+                                                            <p class="text-[9px] font-black uppercase tracking-widest text-gray-800 dark:text-white">
+                                                                {{ $recipient['name'] }}
+                                                            </p>
+                                                            <p class="text-[8px] font-bold text-gray-400">{{ $recipient['percentage'] }}</p>
+                                                        </div>
+                                                        <p class="text-sm font-black text-primary-blue">
+                                                            Rp{{ number_format($recipient['total'], 0, ',', '.') }}
+                                                        </p>
+                                                    </div>
+                                                    {{-- Detail per kategori --}}
+                                                    <div class="space-y-1 border-t border-gray-200 dark:border-gray-700 pt-2">
+                                                        @foreach($recipient['categories'] as $cat)
+                                                            <div class="flex justify-between items-center">
+                                                                <span class="text-[8px] font-bold text-gray-400 uppercase tracking-wider">{{ $cat['name'] }}</span>
+                                                                <span class="text-[9px] font-black text-red-400">-Rp{{ number_format($cat['amount'], 0, ',', '.') }}</span>
+                                                            </div>
+                                                        @endforeach
+                                                    </div>
+                                                </div>
+                                            @endforeach
+                                        @endif
+                                    </div>
+                                @endif
                             </div>
                         @empty
                             <div class="py-32 text-center opacity-20">

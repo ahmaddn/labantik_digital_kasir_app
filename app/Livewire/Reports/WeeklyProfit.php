@@ -29,6 +29,13 @@ class WeeklyProfit extends Component
 
     public $currentYear;
 
+    // Mode pengecualian — aktifkan saat minggu tidak penuh (libur, ujian, dll)
+    public bool $overrideCanProcess = false;
+
+    // Detail breakdown bagi hasil per laporan
+    public ?string $expandedReportId = null;
+    public array $reportBreakdown = [];
+
     public function mount()
     {
         $activeRole = session('active_role_name');
@@ -293,6 +300,73 @@ class WeeklyProfit extends Component
         $this->dispatch('toast', message: 'Laporan bagi hasil berhasil dibuat dan diposting ke Buku Kas!');
     }
 
+    /**
+     * Toggle accordion breakdown per laporan.
+     * Load transaksi bagi hasil dari CashTransaction berdasarkan periode laporan.
+     */
+    public function toggleBreakdown(string $reportId): void
+    {
+        // Kalau sudah terbuka, tutup
+        if ($this->expandedReportId === $reportId) {
+            $this->expandedReportId = null;
+            $this->reportBreakdown  = [];
+            return;
+        }
+
+        $report          = \App\Models\WeeklyProfitShare::find($reportId);
+        $activeJurusanId = session('active_jurusan_id');
+
+        if (! $report) {
+            return;
+        }
+
+        $weekStart = \Carbon\Carbon::parse($report->week_start)->format('d/m/Y');
+        $weekEnd   = \Carbon\Carbon::parse($report->week_end)->format('d/m/Y');
+        $pattern   = '%Periode ' . $weekStart . ' s.d ' . $weekEnd . '%';
+
+        // Ambil semua transaksi bagi hasil periode ini
+        $transactions = CashTransaction::where('jurusan_id', $activeJurusanId)
+            ->where('description', 'like', 'Bagi Hasil Mingguan%')
+            ->where('description', 'like', $pattern)
+            ->where('type', 'expense')
+            ->orderBy('description')
+            ->get(['id', 'description', 'amount', 'cash_category_id']);
+
+        // Kelompokkan per penerima (Najmy, Labantik, Jurusan)
+        $grouped = [];
+        foreach ($transactions as $tx) {
+            // Ekstrak nama penerima dari deskripsi
+            // Format: "Bagi Hasil Mingguan dengan Najmy Admin (30% - Kategori: Eskrim) - Periode..."
+            // Format: "Bagi Hasil Mingguan Labantik (30% - Kategori: Snack) - Periode..."
+            // Format: "Bagi Hasil Mingguan Jurusan (40% - Kategori: ...) - Periode..."
+            preg_match('/^Bagi Hasil Mingguan(?:\s+dengan)?\s+([^(]+)/i', $tx->description, $nameMatch);
+            preg_match('/Kategori:\s*([^)]+)/i', $tx->description, $catMatch);
+            preg_match('/(\d+)%/i', $tx->description, $pctMatch);
+
+            $recipient = isset($nameMatch[1]) ? trim($nameMatch[1]) : 'Lainnya';
+            $category  = isset($catMatch[1])  ? trim($catMatch[1])  : '-';
+            $pct       = isset($pctMatch[1])  ? $pctMatch[1] . '%'  : '-';
+
+            if (! isset($grouped[$recipient])) {
+                $grouped[$recipient] = [
+                    'name'        => $recipient,
+                    'percentage'  => $pct,
+                    'total'       => 0,
+                    'categories'  => [],
+                ];
+            }
+
+            $grouped[$recipient]['total']          += $tx->amount;
+            $grouped[$recipient]['categories'][]    = [
+                'name'   => $category,
+                'amount' => $tx->amount,
+            ];
+        }
+
+        $this->expandedReportId = $reportId;
+        $this->reportBreakdown  = array_values($grouped);
+    }
+
     public function render()
     {
         $activeJurusanId = session('active_jurusan_id');
@@ -488,7 +562,7 @@ class WeeklyProfit extends Component
                 'adminContributions' => $adminContributions,
                 'dailyBreakdown' => $dailyBreakdown,
             ],
-            'canProcess' => in_array(now()->dayOfWeek, [Carbon::FRIDAY, Carbon::SATURDAY, Carbon::SUNDAY]),
+            'canProcess' => $this->overrideCanProcess || in_array(now()->dayOfWeek, [Carbon::FRIDAY, Carbon::SATURDAY, Carbon::SUNDAY]),
         ])->layout('layouts.app', ['title' => 'Bagi Hasil Mingguan']);
     }
 }
