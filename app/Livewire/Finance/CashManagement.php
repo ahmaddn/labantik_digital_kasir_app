@@ -733,8 +733,17 @@ class CashManagement extends Component
         }
 
         // Calculate Audit Adjustments (deficits/surpluses from physical cash checks)
+        // Exclude transaksi dari kategori "Keuntungan Jurusan" — itu bukan selisih kas fisik
+        $keuntunganJurusanCatIds = \App\Models\CashCategory::where('jurusan_id', $activeJurusanId)
+            ->where('name', 'Keuntungan Jurusan')
+            ->pluck('id')
+            ->toArray();
+
         $adjustments = (clone $activeQuery)
             ->where('description', 'like', 'Penyesuaian Selisih%')
+            ->when(!empty($keuntunganJurusanCatIds), fn ($q) =>
+                $q->whereNotIn('cash_category_id', $keuntunganJurusanCatIds)
+            )
             ->get();
         $totalDeficit = 0;
         $totalSurplus = 0;
