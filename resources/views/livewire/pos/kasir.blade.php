@@ -255,8 +255,8 @@
 
             <!-- Content Area Container -->
             <div class="flex-1 flex flex-col min-h-0 overflow-hidden">
-                <!-- Cart Content (40% Height Ratio) -->
-                <div x-show="tab === 'cart'" class="h-[40%] shrink-0 overflow-y-auto p-4 space-y-2.5 no-scrollbar border-b-[var(--nb-border)] border-black dark:border-slate-800">
+                <!-- Cart Content (Dynamic flex-1) -->
+                <div x-show="tab === 'cart'" class="flex-1 min-h-[160px] overflow-y-auto p-4 space-y-2.5 no-scrollbar">
                     <template x-for="item in cart" :key="item.cartItemId">
                         <div
                             class="nb-card p-3 flex flex-col gap-2 bg-white dark:bg-dark-soft hover:shadow-none transition-shadow border-2">
@@ -389,9 +389,9 @@
                     @endforeach
                 </div>
 
-                <!-- Checkout Section (60% Height Ratio) -->
+                <!-- Checkout Section (Fit Content, Border-Top) -->
                 <div x-show="tab === 'cart'"
-                    class="h-[60%] shrink-0 overflow-y-auto p-3.5 sm:p-4 bg-white dark:bg-dark-neutral space-y-2.5 no-scrollbar">
+                    class="shrink-0 p-3.5 sm:p-4 bg-white dark:bg-dark-neutral border-t-[var(--nb-border)] border-black dark:border-slate-800 space-y-2.5 max-h-[60vh] overflow-y-auto no-scrollbar">
                 <div x-show="$wire.transactionDate < '{{ now()->toDateString() }}'" x-cloak
                     class="nb-card p-2 bg-primary-yellow border-2 shadow-none flex items-center justify-center gap-1.5 animate-pulse">
                     <svg class="w-3.5 h-3.5 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
