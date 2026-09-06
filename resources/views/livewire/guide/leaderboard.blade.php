@@ -267,7 +267,7 @@
                         <p class="text-[10px] font-bold text-gray-400 dark:text-gray-400 uppercase tracking-widest mt-0.5">Rincian & Asal Perolehan Poin Kasir</p>
                     </div>
                 </div>
-                <button @click="show = false" class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-white transition-colors rounded-xl bg-gray-100 dark:bg-gray-700/60">
+                <button @click="show = false" type="button" class="p-2 text-gray-400 hover:text-gray-700 dark:text-gray-300 dark:hover:text-white transition-all rounded-xl bg-gray-200/60 hover:bg-gray-200 dark:bg-gray-700/50 dark:hover:bg-gray-700 border border-transparent dark:border-gray-600/50">
                     <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                     </svg>
@@ -431,32 +431,35 @@
                     </button>
 
                     <div x-show="openGroup === 'logs'" x-collapse class="p-4 pt-0 border-t border-gray-100 dark:border-gray-700/60">
-                        <div class="rounded-xl border border-gray-100 dark:border-gray-700/70 overflow-hidden max-h-[250px] overflow-y-auto mt-3">
-                            <table class="w-full text-left border-collapse min-w-[480px]">
+                        <div class="rounded-xl border border-gray-200 dark:border-gray-700/70 overflow-hidden max-h-[260px] overflow-y-auto mt-3 shadow-inner">
+                            <table class="w-full text-left border-collapse">
                                 <thead class="sticky top-0 z-10">
-                                    <tr class="bg-gray-100/90 dark:bg-gray-900 text-[10px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest border-b border-gray-200 dark:border-gray-700/70">
-                                        <th class="py-3 px-4">Aktivitas</th>
-                                        <th class="py-3 px-4 text-center">Kategori</th>
-                                        <th class="py-3 px-4 text-right">Poin</th>
+                                    <tr class="bg-gray-100 dark:bg-gray-900 text-[10px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest border-b border-gray-200 dark:border-gray-700/70">
+                                        <th class="py-3 px-4 w-7/12">Aktivitas</th>
+                                        <th class="py-3 px-4 text-center w-3/12">Kategori</th>
+                                        <th class="py-3 px-4 text-right w-2/12">Poin</th>
                                     </tr>
                                 </thead>
-                                <tbody class="divide-y divide-gray-100 dark:divide-gray-700/60 bg-white dark:bg-gray-900/60">
+                                <tbody class="divide-y divide-gray-100 dark:divide-gray-700/60 bg-white dark:bg-gray-800/80">
                                     @forelse($recentLogs as $log)
-                                        <tr class="hover:bg-gray-50/50 dark:hover:bg-gray-800/40 transition-colors">
+                                        <tr class="hover:bg-gray-50/80 dark:hover:bg-gray-700/50 transition-colors">
                                             <td class="py-3 px-4 align-middle">
-                                                <div class="text-xs font-bold text-gray-800 dark:text-gray-200">
+                                                <div class="text-xs font-bold text-gray-900 dark:text-white leading-snug">
                                                     {{ $log['title'] }}
                                                 </div>
-                                                <div class="text-[9px] font-semibold text-gray-400 dark:text-gray-400 mt-0.5 uppercase tracking-widest">
+                                                <div class="text-[9px] font-semibold text-gray-400 dark:text-gray-400 mt-1 uppercase tracking-widest flex items-center gap-1">
+                                                    <svg class="w-3 h-3 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                    </svg>
                                                     {{ \Carbon\Carbon::parse($log['date'])->format('d M Y - H:i') }}
                                                 </div>
                                             </td>
                                             <td class="py-3 px-4 align-middle text-center">
-                                                <span class="px-2 py-0.5 text-[8px] font-black rounded-lg uppercase tracking-wider border {{ $log['badge_color'] }}">
+                                                <span class="inline-block px-2.5 py-1 text-[9px] font-black rounded-lg uppercase tracking-wider border shadow-xs {{ $log['badge_color'] }}">
                                                     {{ $log['badge'] }}
                                                 </span>
                                             </td>
-                                            <td class="py-3 px-4 align-middle text-right text-xs font-black text-emerald-500 dark:text-emerald-400">
+                                            <td class="py-3 px-4 align-middle text-right text-xs font-black text-emerald-600 dark:text-emerald-400">
                                                 {{ $log['points'] }}
                                             </td>
                                         </tr>

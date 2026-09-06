@@ -160,7 +160,7 @@ class Leaderboard extends Component
                         'date' => $sub->reviewed_at ?? $sub->submitted_at,
                         'points' => '+' . $pts . ' Pts',
                         'badge' => 'Tugas ' . ucfirst($priority),
-                        'badge_color' => 'bg-indigo-50 text-indigo-600 dark:bg-indigo-950/30 dark:text-indigo-400 border-indigo-200 dark:border-indigo-800'
+                        'badge_color' => 'bg-indigo-50 text-indigo-600 border-indigo-200 dark:bg-indigo-500/20 dark:text-indigo-300 dark:border-indigo-500/30'
                     ];
                 });
 
@@ -176,7 +176,7 @@ class Leaderboard extends Component
                         'date' => $att->clock_out ?? $att->clock_in ?? $att->created_at,
                         'points' => '+' . $pts . ' Pts',
                         'badge' => 'Absensi Shift',
-                        'badge_color' => 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/30 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800'
+                        'badge_color' => 'bg-emerald-50 text-emerald-600 border-emerald-200 dark:bg-emerald-500/20 dark:text-emerald-300 dark:border-emerald-500/30'
                     ];
                 });
 
@@ -187,7 +187,7 @@ class Leaderboard extends Component
                         'date' => now(),
                         'points' => '+' . $userStats['pos_points'] . ' Pts',
                         'badge' => 'Transaksi POS',
-                        'badge_color' => 'bg-blue-50 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400 border-blue-200 dark:border-blue-800'
+                        'badge_color' => 'bg-blue-50 text-blue-600 border-blue-200 dark:bg-blue-500/20 dark:text-blue-300 dark:border-blue-500/30'
                     ]
                 ]);
 
