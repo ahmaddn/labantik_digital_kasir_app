@@ -82,16 +82,52 @@
         </div>
     </div>
 
+    <!-- Payment Method Filter Tabs -->
+    <div class="flex flex-wrap items-center gap-3 mb-6">
+        <button wire:click="$set('filterPaymentMethod', '')"
+            class="px-5 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2.5 {{ $filterPaymentMethod === '' ? 'bg-primary-blue text-white shadow-lg shadow-blue-500/20' : 'bg-white dark:bg-gray-800 text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-100 dark:border-gray-800' }}">
+            <span>Semua</span>
+            <span class="px-2 py-0.5 rounded-full text-[9px] font-black {{ $filterPaymentMethod === '' ? 'bg-white/20 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300' }}">
+                {{ $methodStats['all']['count'] }} • Rp{{ number_format($methodStats['all']['total'], 0, ',', '.') }}
+            </span>
+        </button>
+
+        <button wire:click="$set('filterPaymentMethod', 'cash')"
+            class="px-5 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2.5 {{ $filterPaymentMethod === 'cash' ? 'bg-green-600 text-white shadow-lg shadow-green-600/20' : 'bg-white dark:bg-gray-800 text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-100 dark:border-gray-800' }}">
+            <span>Cash</span>
+            <span class="px-2 py-0.5 rounded-full text-[9px] font-black {{ $filterPaymentMethod === 'cash' ? 'bg-white/20 text-white' : 'bg-green-500/10 text-green-600 dark:text-green-400' }}">
+                {{ $methodStats['cash']['count'] }} • Rp{{ number_format($methodStats['cash']['total'], 0, ',', '.') }}
+            </span>
+        </button>
+
+        <button wire:click="$set('filterPaymentMethod', 'transfer')"
+            class="px-5 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2.5 {{ $filterPaymentMethod === 'transfer' ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20' : 'bg-white dark:bg-gray-800 text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-100 dark:border-gray-800' }}">
+            <span>Transfer</span>
+            <span class="px-2 py-0.5 rounded-full text-[9px] font-black {{ $filterPaymentMethod === 'transfer' ? 'bg-white/20 text-white' : 'bg-blue-500/10 text-blue-600 dark:text-blue-400' }}">
+                {{ $methodStats['transfer']['count'] }} • Rp{{ number_format($methodStats['transfer']['total'], 0, ',', '.') }}
+            </span>
+        </button>
+
+        <button wire:click="$set('filterPaymentMethod', 'qris')"
+            class="px-5 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2.5 {{ $filterPaymentMethod === 'qris' ? 'bg-purple-600 text-white shadow-lg shadow-purple-600/20' : 'bg-white dark:bg-gray-800 text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-100 dark:border-gray-800' }}">
+            <span>QRIS</span>
+            <span class="px-2 py-0.5 rounded-full text-[9px] font-black {{ $filterPaymentMethod === 'qris' ? 'bg-white/20 text-white' : 'bg-purple-500/10 text-purple-600 dark:text-purple-400' }}">
+                {{ $methodStats['qris']['count'] }} • Rp{{ number_format($methodStats['qris']['total'], 0, ',', '.') }}
+            </span>
+        </button>
+    </div>
+
     <div
         class="bg-white dark:bg-gray-800 rounded-[3.5rem] shadow-2xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 overflow-hidden">
         <div class="px-10 py-6">
             <!-- Header Grid -->
             <div
-                class="hidden md:grid grid-cols-[1.5fr_1.5fr_2fr_1fr_1.5fr_1.5fr_130px] items-center px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest bg-gray-50 dark:bg-gray-900/50 rounded-2xl mb-6">
+                class="hidden md:grid grid-cols-[1.5fr_1.5fr_2fr_1fr_1fr_1.5fr_1.5fr_130px] items-center px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest bg-gray-50 dark:bg-gray-900/50 rounded-2xl mb-6">
                 <div class="px-4">Waktu</div>
                 <div class="px-4">No. Ref</div>
                 <div class="px-4">Pembeli</div>
                 <div class="px-4 text-center">Items</div>
+                <div class="px-4 text-center">Metode</div>
                 <div class="px-4">Total Bayar</div>
                 <div class="px-4 text-center">Status</div>
                 <div class="px-4 text-right">Aksi</div>
@@ -114,7 +150,7 @@
                     <div class="group transition-all duration-300 {{ $isActive ? 'z-10 relative' : '' }}">
                         <!-- Desktop view -->
                         <div
-                            class="hidden lg:grid grid-cols-[1.5fr_1.5fr_2fr_1fr_1.5fr_1.5fr_130px] items-center p-6 rounded-2xl border-2 transition-all duration-500 {{ $isActive ? 'bg-white dark:bg-gray-800/50 border-amber-400 shadow-[0_0_25px_rgba(245,158,11,0.4)] ring-4 ring-amber-400/20 scale-[1.01]' : 'bg-white dark:bg-gray-800/50 border-transparent group-hover:border-primary-blue/20' }}">
+                            class="hidden lg:grid grid-cols-[1.5fr_1.5fr_2fr_1fr_1fr_1.5fr_1.5fr_130px] items-center p-6 rounded-2xl border-2 transition-all duration-500 {{ $isActive ? 'bg-white dark:bg-gray-800/50 border-amber-400 shadow-[0_0_25px_rgba(245,158,11,0.4)] ring-4 ring-amber-400/20 scale-[1.01]' : 'bg-white dark:bg-gray-800/50 border-transparent group-hover:border-primary-blue/20' }}">
                             <!-- Waktu -->
                             <div class="px-4">
                                 <div class="text-sm font-black text-gray-800 dark:text-white uppercase tracking-tight">
@@ -179,6 +215,25 @@
                                 <span
                                     class="px-3 py-1.5 bg-gray-100 dark:bg-gray-900 rounded-xl text-[10px] font-black text-gray-500 uppercase tracking-widest border border-gray-100 dark:border-gray-800">
                                     {{ $tx->total_qty }} <span class="text-[8px] opacity-50 ml-0.5">U</span>
+                                </span>
+                            </div>
+
+                            <!-- Metode Bayar -->
+                            <div class="px-4 text-center">
+                                @php
+                                    $methodBadge = match ($tx->payment_method ?? 'cash') {
+                                        'transfer' => 'bg-blue-50 text-blue-600 border-blue-100 dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-500/20',
+                                        'qris' => 'bg-purple-50 text-purple-600 border-purple-100 dark:bg-purple-500/10 dark:text-purple-400 dark:border-purple-500/20',
+                                        default => 'bg-green-50 text-green-600 border-green-100 dark:bg-green-500/10 dark:text-green-400 dark:border-green-500/20',
+                                    };
+                                    $methodLabel = match ($tx->payment_method ?? 'cash') {
+                                        'transfer' => 'Transfer',
+                                        'qris' => 'QRIS',
+                                        default => 'Cash',
+                                    };
+                                @endphp
+                                <span class="px-3 py-1.5 {{ $methodBadge }} border rounded-xl text-[9px] font-black uppercase tracking-widest inline-block text-center">
+                                    {{ $methodLabel }}
                                 </span>
                             </div>
 
@@ -377,7 +432,7 @@
             <form wire:submit.prevent="update" class="flex flex-col h-full">
                 <div class="p-10 space-y-8 max-h-[50vh] overflow-y-auto no-scrollbar">
                     <!-- Basic Info -->
-                    <div class="grid grid-cols-2 gap-6">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div class="space-y-2">
                             <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Nama
                                 Pembeli</label>
@@ -393,6 +448,16 @@
                                 <option value="belum_kembalian">Pending</option>
                                 <option value="belum_menerima_uang">Hutang</option>
                                 <option value="uang_dipinjam">Uang Dipinjam</option>
+                            </select>
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Metode
+                                Bayar</label>
+                            <select wire:model="editPaymentMethod"
+                                class="w-full bg-gray-50 dark:bg-gray-800 border-none rounded-2xl px-6 py-4 text-sm font-black text-gray-800 dark:text-white focus:ring-4 focus:ring-amber-500/10 transition-all">
+                                <option value="cash">Cash / Tunai</option>
+                                <option value="transfer">Bank Transfer</option>
+                                <option value="qris">QRIS</option>
                             </select>
                         </div>
                     </div>

@@ -426,26 +426,63 @@
                 </div>
 
                 <div class="space-y-1">
-                    <label class="text-[8px] font-black uppercase tracking-widest ml-1 dark:text-gray-400">CASH
-                        (RP)</label>
+                    <label class="text-[8px] font-black uppercase tracking-widest ml-1 dark:text-gray-400">METODE BAYAR</label>
+                    <div class="flex gap-2">
+                        {{-- CASH --}}
+                        <button @click="payment_method = 'cash'"
+                            :class="payment_method === 'cash' ? 'bg-black text-white dark:bg-white dark:text-black' : 'bg-white dark:bg-dark-soft dark:text-white'"
+                            class="nb-btn flex-1 py-2 text-[9px] shadow-none border-2 font-black flex items-center justify-center gap-1">
+                            <svg class="w-3 h-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><rect width="20" height="14" x="2" y="5" rx="2"/><path d="M2 10h20"/></svg>
+                            CASH
+                        </button>
+                        {{-- TRANSFER --}}
+                        <button @click="payment_method = 'transfer'; status = 'uang_diterima'"
+                            :class="payment_method === 'transfer' ? 'bg-primary-blue text-white' : 'bg-white dark:bg-dark-soft dark:text-white'"
+                            class="nb-btn flex-1 py-2 text-[9px] shadow-none border-2 font-black flex items-center justify-center gap-1">
+                            <svg class="w-3 h-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="m5 12 7-7 7 7"/><path d="M12 19V5"/></svg>
+                            TF
+                        </button>
+                        {{-- QRIS --}}
+                        <button @click="payment_method = 'qris'; status = 'uang_diterima'"
+                            :class="payment_method === 'qris' ? 'bg-purple-600 text-white' : 'bg-white dark:bg-dark-soft dark:text-white'"
+                            class="nb-btn flex-1 py-2 text-[9px] shadow-none border-2 font-black flex items-center justify-center gap-1">
+                            <svg class="w-3 h-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/><path d="M14 14h3v3"/><path d="M17 21v-3"/><path d="M21 14v3h-3"/><path d="M21 21h-3"/></svg>
+                            QRIS
+                        </button>
+                    </div>
+                </div>
+
+                {{-- Input nominal hanya muncul untuk metode CASH --}}
+                <div class="space-y-1" x-show="payment_method === 'cash'">
+                    <label class="text-[8px] font-black uppercase tracking-widest ml-1 dark:text-gray-400">CASH (RP)</label>
                     <input type="number" x-model.number="payment_amount"
                         @keydown.enter="handleCheckoutKeydown($event)"
                         class="nb-input w-full p-2.5 text-xs text-primary-blue italic shadow-none border-2 font-black bg-white dark:bg-black">
                 </div>
 
+                {{-- Info non-tunai --}}
+                <template x-if="payment_method !== 'cash'">
+                    <div class="nb-card p-3 flex items-center gap-3 shadow-none border-2 border-primary-blue bg-primary-blue/5">
+                        <svg class="w-4 h-4 text-primary-blue shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                        <p class="text-[9px] font-black uppercase tracking-widest text-primary-blue">
+                            Masuk <span x-text="payment_method === 'transfer' ? 'KAS VIRTUAL TRANSFER' : 'KAS VIRTUAL QRIS'"></span>
+                        </p>
+                    </div>
+                </template>
+
                 <div class="flex gap-2">
                     <button @click="status = 'uang_diterima'"
-                        :class="status === 'uang_diterima' ? 'bg-green-500 text-white' :
-                            'bg-white dark:bg-dark-soft dark:text-white'"
-                        class="nb-btn flex-1 py-2 text-[9px] shadow-none border-2 font-black">LUNAS</button>
+                        :class="status === 'uang_diterima' ? 'bg-green-500 text-white' : 'bg-white dark:bg-dark-soft dark:text-white'"
+                        :disabled="payment_method !== 'cash'"
+                        class="nb-btn flex-1 py-2 text-[9px] shadow-none border-2 font-black disabled:opacity-40 disabled:cursor-not-allowed">LUNAS</button>
                     <button @click="status = 'belum_kembalian'"
-                        :class="status === 'belum_kembalian' ? 'bg-primary-blue text-white' :
-                            'bg-white dark:bg-dark-soft dark:text-white'"
-                        class="nb-btn flex-1 py-2 text-[9px] shadow-none border-2 font-black">PENDING</button>
+                        :class="status === 'belum_kembalian' ? 'bg-primary-blue text-white' : 'bg-white dark:bg-dark-soft dark:text-white'"
+                        :disabled="payment_method !== 'cash'"
+                        class="nb-btn flex-1 py-2 text-[9px] shadow-none border-2 font-black disabled:opacity-40 disabled:cursor-not-allowed">PENDING</button>
                     <button @click="status = 'belum_menerima_uang'"
-                        :class="status === 'belum_menerima_uang' ? 'bg-primary-red text-white' :
-                            'bg-white dark:bg-dark-soft dark:text-white'"
-                        class="nb-btn flex-1 py-2 text-[9px] shadow-none border-2 font-black">HUTANG</button>
+                        :class="status === 'belum_menerima_uang' ? 'bg-primary-red text-white' : 'bg-white dark:bg-dark-soft dark:text-white'"
+                        :disabled="payment_method !== 'cash'"
+                        class="nb-btn flex-1 py-2 text-[9px] shadow-none border-2 font-black disabled:opacity-40 disabled:cursor-not-allowed">HUTANG</button>
                 </div>
 
                 <template x-if="payment_amount > 0">
@@ -713,6 +750,64 @@
                         ->whereIn('roles.name', ['superadmin', 'pengelola_jurusan'])
                         ->exists();
                 @endphp
+
+                {{-- Audit Non-Cash --}}
+                @if($todayRevenueTransfer > 0 || $todayRevenueQris > 0)
+                <div class="nb-card p-4 border-2 border-primary-blue bg-primary-blue/5 space-y-3">
+                    <p class="text-[9px] font-black uppercase tracking-widest text-primary-blue">Audit Kas Virtual Hari Ini</p>
+                    @if($todayRevenueTransfer > 0)
+                    <div class="space-y-1">
+                        <div class="flex justify-between items-center">
+                            <span class="text-[9px] font-black uppercase tracking-widest text-gray-500 dark:text-gray-400">Transfer Seharusnya</span>
+                            <span class="text-[10px] font-black text-primary-blue">Rp{{ number_format($todayRevenueTransfer, 0, ',', '.') }}</span>
+                        </div>
+                        <div>
+                            <label class="text-[8px] font-black uppercase tracking-widest text-gray-400">Nominal Transfer Masuk Rekening (Rp)</label>
+                            <input type="number" wire:model.live="actualTransfer"
+                                placeholder="{{ $todayRevenueTransfer }}"
+                                class="nb-input w-full p-2 text-xs font-black bg-white dark:bg-black border-2 mt-1">
+                        </div>
+                        @if($actualTransfer > 0)
+                            @php $diffTransfer = $actualTransfer - $todayRevenueTransfer; @endphp
+                            <div class="flex justify-between items-center pt-1">
+                                <span class="text-[8px] font-black uppercase tracking-widest {{ $diffTransfer >= 0 ? 'text-green-500' : 'text-red-500' }}">
+                                    Selisih Transfer
+                                </span>
+                                <span class="text-[10px] font-black {{ $diffTransfer >= 0 ? 'text-green-500' : 'text-red-500' }}">
+                                    {{ $diffTransfer >= 0 ? '+' : '' }}Rp{{ number_format($diffTransfer, 0, ',', '.') }}
+                                </span>
+                            </div>
+                        @endif
+                    </div>
+                    @endif
+                    @if($todayRevenueQris > 0)
+                    <div class="space-y-1 border-t border-primary-blue/20 pt-3">
+                        <div class="flex justify-between items-center">
+                            <span class="text-[9px] font-black uppercase tracking-widest text-gray-500 dark:text-gray-400">QRIS Seharusnya</span>
+                            <span class="text-[10px] font-black text-purple-600">Rp{{ number_format($todayRevenueQris, 0, ',', '.') }}</span>
+                        </div>
+                        <div>
+                            <label class="text-[8px] font-black uppercase tracking-widest text-gray-400">Nominal QRIS Masuk E-Wallet (Rp)</label>
+                            <input type="number" wire:model.live="actualQris"
+                                placeholder="{{ $todayRevenueQris }}"
+                                class="nb-input w-full p-2 text-xs font-black bg-white dark:bg-black border-2 mt-1">
+                        </div>
+                        @if($actualQris > 0)
+                            @php $diffQris = $actualQris - $todayRevenueQris; @endphp
+                            <div class="flex justify-between items-center pt-1">
+                                <span class="text-[8px] font-black uppercase tracking-widest {{ $diffQris >= 0 ? 'text-green-500' : 'text-red-500' }}">
+                                    Selisih QRIS
+                                </span>
+                                <span class="text-[10px] font-black {{ $diffQris >= 0 ? 'text-green-500' : 'text-red-500' }}">
+                                    {{ $diffQris >= 0 ? '+' : '' }}Rp{{ number_format($diffQris, 0, ',', '.') }}
+                                </span>
+                            </div>
+                        @endif
+                    </div>
+                    @endif
+                </div>
+                @endif
+
                 <div>
                     <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">
                         Laporan Aktivitas Selama Shift {!! $hasHigherRole ? '<span class="text-amber-500 font-black">(OPSIONAL)</span>' : '' !!}
@@ -994,6 +1089,7 @@
                 payment_amount: 0,
                 buyer_name: '',
                 status: 'uang_diterima',
+                payment_method: 'cash',
                 note: '',
 
                 showChangeModal: false,
@@ -1231,6 +1327,7 @@
                     this.payment_amount = 0;
                     this.buyer_name = '';
                     this.status = 'uang_diterima';
+                    this.payment_method = 'cash';
                     this.note = '';
                 },
 
@@ -1284,7 +1381,7 @@
                     const paymentVal = this.payment_amount > 0 ? this.payment_amount : this.total;
                     const changeVal = this.change;
 
-                    this.$wire.checkout(this.cart, this.total, this.change, this.buyer_name, this.status, this.note, this.$wire.transactionDate).then(() => {
+                    this.$wire.checkout(this.cart, this.total, this.change, this.buyer_name, this.status, this.note, this.$wire.transactionDate, this.payment_method).then(() => {
                         this.clearCart();
                         this.loading = false;
 

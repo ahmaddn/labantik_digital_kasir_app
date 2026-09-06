@@ -26,6 +26,8 @@ class DailyRecap extends Model
         'count_no_payment',
         'count_borrowed',
         'actual_cash',
+        'actual_transfer',
+        'actual_qris',
         'retained_change_cash',
         'cash_note',
         'posted_by',

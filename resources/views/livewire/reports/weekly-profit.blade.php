@@ -136,13 +136,21 @@
                                     Internal</p>
                                 <p class="text-4xl sm:text-5xl font-black text-primary-blue italic tracking-tighter" :class="censorMode ? 'privacy-blur' : ''">
                                     Rp{{ number_format($currentWeek['profit'], 0, ',', '.') }}</p>
+                                <div class="flex flex-wrap items-center gap-2 mt-2 justify-start sm:justify-end">
+                                    <span class="px-2.5 py-1 bg-green-500/10 text-green-500 rounded-lg text-[9px] font-black uppercase">
+                                        Tunai: Rp{{ number_format($currentWeek['cash_profit'] ?? 0, 0, ',', '.') }}
+                                    </span>
+                                    <span class="px-2.5 py-1 bg-indigo-500/10 text-indigo-500 rounded-lg text-[9px] font-black uppercase">
+                                        Virtual: Rp{{ number_format($currentWeek['non_cash_profit'] ?? 0, 0, ',', '.') }}
+                                    </span>
+                                </div>
                             </div>
                         </div>
 
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
                             <div
                                 class="bg-gray-50 dark:bg-gray-800/50 rounded-[3rem] p-10 border border-gray-100 dark:border-gray-700/50">
-                                <div class="flex items-center gap-4 mb-6">
+                                <div class="flex items-center gap-4 mb-4">
                                     <div
                                         class="w-12 h-12 bg-primary-red/10 rounded-2xl flex items-center justify-center text-primary-red">
                                         <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" width="24"
@@ -160,11 +168,16 @@
                                             Rp{{ number_format($currentWeek['profit'] * 0.4, 0, ',', '.') }}</p>
                                     </div>
                                 </div>
+                                <div class="flex items-center gap-2 pt-3 border-t border-gray-200 dark:border-gray-700 text-[9px] font-bold">
+                                    <span class="text-green-500">Tunai: Rp{{ number_format(($currentWeek['cash_profit'] ?? 0) * 0.4, 0, ',', '.') }}</span>
+                                    <span class="text-gray-300">•</span>
+                                    <span class="text-indigo-400">Virtual: Rp{{ number_format(($currentWeek['non_cash_profit'] ?? 0) * 0.4, 0, ',', '.') }}</span>
+                                </div>
                             </div>
 
                             <div
                                 class="bg-primary-blue rounded-[3rem] p-10 text-white shadow-2xl shadow-blue-500/20 relative overflow-hidden">
-                                <div class="flex items-center gap-4 mb-6 relative z-10">
+                                <div class="flex items-center gap-4 mb-4 relative z-10">
                                     <div class="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center">
                                         <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" width="24"
                                             height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -179,6 +192,11 @@
                                         <p class="text-2xl font-black italic tracking-tighter mt-1" :class="censorMode ? 'privacy-blur' : ''">
                                             Rp{{ number_format($currentWeek['profit'] * 0.6, 0, ',', '.') }}</p>
                                     </div>
+                                </div>
+                                <div class="flex items-center gap-2 pt-3 border-t border-white/10 text-[9px] font-bold text-white/80 relative z-10">
+                                    <span>Tunai: Rp{{ number_format(($currentWeek['cash_profit'] ?? 0) * 0.6, 0, ',', '.') }}</span>
+                                    <span>•</span>
+                                    <span>Virtual: Rp{{ number_format(($currentWeek['non_cash_profit'] ?? 0) * 0.6, 0, ',', '.') }}</span>
                                 </div>
                             </div>
                         </div>
@@ -267,6 +285,11 @@
                                 <div class="text-right">
                                     <p class="text-base font-black text-primary-blue italic">
                                         Rp{{ number_format($contrib->user_profit, 0, ',', '.') }}</p>
+                                    <div class="flex items-center gap-1.5 justify-end text-[8px] font-bold text-gray-400 mt-1">
+                                        <span class="text-green-500">Tunai: Rp{{ number_format($contrib->cash_profit ?? 0, 0, ',', '.') }}</span>
+                                        <span>•</span>
+                                        <span class="text-indigo-400">Virtual: Rp{{ number_format($contrib->non_cash_profit ?? 0, 0, ',', '.') }}</span>
+                                    </div>
                                     <p class="text-[9px] font-bold text-green-500 uppercase tracking-widest mt-1">
                                         Persentase: {{ $contrib->percentage }}</p>
                                 </div>

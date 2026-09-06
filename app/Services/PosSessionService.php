@@ -178,7 +178,8 @@ class PosSessionService
         ?string $transactionDate,
         string $userId,
         ?string $activeJurusanId,
-        string $docPrefix
+        string $docPrefix,
+        string $paymentMethod = 'cash'
     ): string {
         $tDate = $transactionDate ?: now()->toDateString();
         $isBackdate = $tDate < now()->toDateString();
@@ -188,7 +189,7 @@ class PosSessionService
         $initials = strtoupper(substr($cleanName, 0, 2));
         $reference = $docPrefix.'-'.now()->format('Ymd').'-'.$initials.strtoupper(bin2hex(random_bytes(2)));
 
-        DB::transaction(function () use ($cart, $change, $buyerName, $status, $note, $tDate, $isBackdate, $transactedAt, $activeJurusanId, $userId, $reference) {
+        DB::transaction(function () use ($cart, $change, $buyerName, $status, $note, $tDate, $isBackdate, $transactedAt, $activeJurusanId, $userId, $reference, $paymentMethod) {
             $first = true;
             foreach ($cart as $item) {
                 // Hitung total harga topping yang dipilih
@@ -211,6 +212,7 @@ class PosSessionService
                     'debt_amount' => in_array($status, ['belum_menerima_uang', 'uang_dipinjam']) ? $finalTotalPrice : 0,
                     'change_due' => ($status === 'belum_kembalian' && $first) ? $change : 0,
                     'status' => $status,
+                    'payment_method' => $paymentMethod,
                     'note' => $note ?: ($change > 0 && $first ? 'Kembalian: Rp'.number_format($change, 0, ',', '.') : null),
                 ]);
 

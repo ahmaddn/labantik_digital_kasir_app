@@ -29,6 +29,7 @@ class Transaction extends Model
         'debt_amount',
         'change_due',
         'status',
+        'payment_method',
         'note',
     ];
 

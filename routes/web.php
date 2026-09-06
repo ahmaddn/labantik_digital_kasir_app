@@ -4,6 +4,7 @@ use App\Http\Middleware\EnsureRoleSelected;
 use App\Livewire\Auth\SelectRole;
 use App\Livewire\Dashboard;
 use App\Livewire\Finance\CashManagement;
+use App\Livewire\Finance\VirtualCashManagement;
 use App\Livewire\History\Transactions;
 use App\Livewire\Management\Category;
 use App\Livewire\Management\Debt;
@@ -161,6 +162,7 @@ Route::middleware(['auth', 'verified', EnsureRoleSelected::class])->group(functi
 
     // Finance
     Route::get('/cash-management', CashManagement::class)->name('buku-kas');
+    Route::get('/virtual-cash', VirtualCashManagement::class)->name('virtual-cash');
 
     // User Management
     Route::get('/users', UserManagement::class)->name('users');

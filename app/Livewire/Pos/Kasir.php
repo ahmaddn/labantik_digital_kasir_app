@@ -56,6 +56,10 @@ class Kasir extends Component
 
     public string $closingReportText = '';
 
+    // Audit non-cash saat penutupan sesi
+    public float $actualTransfer = 0;
+    public float $actualQris = 0;
+
     public function refreshProducts(): void
     {
         $this->products = $this->getProductsForAlpine(app(PosQueryService::class))->toArray();
@@ -525,7 +529,9 @@ class Kasir extends Component
         }
 
         DailyRecap::upsertForSession($today, $activeJurusanId, [
-            'actual_cash' => $newActualCash,
+            'actual_cash'     => $newActualCash,
+            'actual_transfer' => $this->actualTransfer,
+            'actual_qris'     => $this->actualQris,
         ]);
 
         $this->showClosingStockModal = false;
@@ -542,7 +548,7 @@ class Kasir extends Component
         $this->redirectRoute('dashboard', navigate: true);
     }
 
-    public function checkout(PosSessionService $posSessionService, $cart, $total, $change, $buyer_name, $status, $note, $transactionDate = null): void
+    public function checkout(PosSessionService $posSessionService, $cart, $total, $change, $buyer_name, $status, $note, $transactionDate = null, $payment_method = 'cash'): void
     {
         if (empty($cart)) {
             return;
@@ -579,7 +585,8 @@ class Kasir extends Component
             $transactionDate,
             auth()->id(),
             $activeJurusanId,
-            $prefix
+            $prefix,
+            $payment_method ?? 'cash'
         );
 
         $this->dispatch('transaction-completed', reference: $reference);
@@ -760,11 +767,27 @@ class Kasir extends Component
         }
 
         return view('livewire.pos.kasir', [
-            'products' => $this->products,
-            'allProductsJson' => $allProducts,
+            'products'          => $this->products,
+            'allProductsJson'   => $allProducts,
             'isSessionFinished' => $isSessionFinished,
-            'categories' => $categories,
-            'dailyTasks' => $dailyAssignments,
+            'categories'        => $categories,
+            'dailyTasks'        => $dailyAssignments,
+            // Revenue per metode hari ini — untuk audit di closing modal
+            'todayRevenueCash'     => \App\Models\Transaction::whereDate('transacted_at', $today)
+                ->where('jurusan_id', $activeJurusanId)
+                ->where('payment_method', 'cash')
+                ->whereIn('status', ['uang_diterima', 'belum_kembalian'])
+                ->sum('total_price'),
+            'todayRevenueTransfer' => \App\Models\Transaction::whereDate('transacted_at', $today)
+                ->where('jurusan_id', $activeJurusanId)
+                ->where('payment_method', 'transfer')
+                ->whereIn('status', ['uang_diterima', 'belum_kembalian'])
+                ->sum('total_price'),
+            'todayRevenueQris'     => \App\Models\Transaction::whereDate('transacted_at', $today)
+                ->where('jurusan_id', $activeJurusanId)
+                ->where('payment_method', 'qris')
+                ->whereIn('status', ['uang_diterima', 'belum_kembalian'])
+                ->sum('total_price'),
         ])->layout('layouts.kasir');
     }
 }

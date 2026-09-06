@@ -26,6 +26,8 @@ class Transactions extends Component
 
     public $filterJurusan = '';
 
+    public $filterPaymentMethod = '';
+
     public $successMessage = '';
 
     // Details Modal
@@ -42,9 +44,11 @@ class Transactions extends Component
 
     public $editStatus = '';
 
+    public $editPaymentMethod = 'cash';
+
     public $editItems = []; // Array of transaction items for editing
 
-    protected $queryString = ['search', 'filterStatus', 'filterDate', 'filterMonth', 'filterJurusan'];
+    protected $queryString = ['search', 'filterStatus', 'filterDate', 'filterMonth', 'filterJurusan', 'filterPaymentMethod'];
 
     public function updatedFilterMonth()
     {
@@ -67,6 +71,11 @@ class Transactions extends Component
     }
 
     public function updatedFilterJurusan()
+    {
+        $this->resetPage();
+    }
+
+    public function updatedFilterPaymentMethod()
     {
         $this->resetPage();
     }
@@ -133,6 +142,7 @@ class Transactions extends Component
         $first = $transactions->first();
         $this->editBuyerName = $first->buyer_name;
         $this->editStatus = $first->status;
+        $this->editPaymentMethod = $first->payment_method ?? 'cash';
 
         $this->editItems = [];
         foreach ($transactions as $tx) {
@@ -151,6 +161,7 @@ class Transactions extends Component
     {
         $this->validate([
             'editStatus' => 'required',
+            'editPaymentMethod' => 'required|in:cash,transfer,qris',
             'editItems.*.quantity' => 'required|numeric|min:1',
         ]);
 
@@ -165,6 +176,7 @@ class Transactions extends Component
                 $tx->update([
                     'buyer_name' => $this->editBuyerName,
                     'status' => $this->editStatus,
+                    'payment_method' => $this->editPaymentMethod,
                     'quantity' => $item['quantity'],
                     'total_price' => $tx->unit_price * $item['quantity'],
                 ]);
@@ -212,7 +224,41 @@ class Transactions extends Component
             $query->whereDate('transacted_at', $this->filterDate);
         }
 
-        $transactions = $query->selectRaw('reference, MAX(buyer_name) as buyer_name, MAX(status) as status, MAX(transacted_at) as transacted_at, SUM(total_price) as total_amount, SUM(quantity) as total_qty, COUNT(*) as unique_items, MAX(jurusan_id) as jurusan_id, MAX(user_id) as user_id')
+        // Calculate tab metrics (count & total) prior to payment_method filter
+        $groupedSub = (clone $query)
+            ->selectRaw("reference, MAX(COALESCE(payment_method, 'cash')) as p_method, SUM(total_price) as sum_total")
+            ->groupBy('reference')
+            ->get();
+
+        $methodStats = [
+            'all' => ['count' => $groupedSub->count(), 'total' => $groupedSub->sum('sum_total')],
+            'cash' => [
+                'count' => $groupedSub->whereIn('p_method', ['cash', '', null])->count(),
+                'total' => $groupedSub->whereIn('p_method', ['cash', '', null])->sum('sum_total')
+            ],
+            'transfer' => [
+                'count' => $groupedSub->where('p_method', 'transfer')->count(),
+                'total' => $groupedSub->where('p_method', 'transfer')->sum('sum_total')
+            ],
+            'qris' => [
+                'count' => $groupedSub->where('p_method', 'qris')->count(),
+                'total' => $groupedSub->where('p_method', 'qris')->sum('sum_total')
+            ],
+        ];
+
+        if ($this->filterPaymentMethod) {
+            if ($this->filterPaymentMethod === 'cash') {
+                $query->where(function ($q) {
+                    $q->where('payment_method', 'cash')
+                        ->orWhereNull('payment_method')
+                        ->orWhere('payment_method', '');
+                });
+            } else {
+                $query->where('payment_method', $this->filterPaymentMethod);
+            }
+        }
+
+        $transactions = $query->selectRaw("reference, MAX(buyer_name) as buyer_name, MAX(status) as status, MAX(transacted_at) as transacted_at, MAX(COALESCE(payment_method, 'cash')) as payment_method, SUM(total_price) as total_amount, SUM(quantity) as total_qty, COUNT(*) as unique_items, MAX(jurusan_id) as jurusan_id, MAX(user_id) as user_id")
             ->groupBy('reference')
             ->orderByDesc('transacted_at')
             ->paginate(15);
@@ -220,6 +266,7 @@ class Transactions extends Component
         return view('livewire.history.transactions', [
             'transactions' => $transactions,
             'jurusans' => Jurusan::all(),
+            'methodStats' => $methodStats,
         ])->layout('layouts.app', ['title' => 'Riwayat Transaksi']);
     }
 }

@@ -201,6 +201,17 @@
                     </svg>
                     Buku Kas Internal
                 </a>
+
+                <a href="{{ route('virtual-cash') }}"
+                    class="flex items-center px-4 py-2.5 text-xs font-semibold rounded-xl transition-all {{ request()->routeIs('virtual-cash') ? 'bg-primary-blue text-white shadow-xl shadow-blue-900/20' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
+                    <svg class="w-5 h-5 mr-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <rect width="20" height="14" x="2" y="5" rx="2"/>
+                        <line x1="2" x2="22" y1="10" y2="10"/>
+                    </svg>
+                    Kas Virtual
+                </a>
             @endif
 
             @if (in_array(session('active_role_name'), ['superadmin', 'pengelola_jurusan', 'kasir']))
