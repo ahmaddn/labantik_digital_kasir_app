@@ -391,49 +391,49 @@
 
                 <!-- Checkout Section (Fit Content, Border-Top) -->
                 <div x-show="tab === 'cart'"
-                    class="shrink-0 p-3.5 sm:p-4 bg-white dark:bg-dark-neutral border-t-[var(--nb-border)] border-black dark:border-slate-800 space-y-2.5 max-h-[60vh] overflow-y-auto no-scrollbar">
+                    class="shrink-0 p-4 sm:p-5 bg-white dark:bg-dark-neutral border-t-[var(--nb-border)] border-black dark:border-slate-800 space-y-3.5 max-h-[60vh] overflow-y-auto no-scrollbar">
                 <div x-show="$wire.transactionDate < '{{ now()->toDateString() }}'" x-cloak
-                    class="nb-card p-2 bg-primary-yellow border-2 shadow-none flex items-center justify-center gap-1.5 animate-pulse">
-                    <svg class="w-3.5 h-3.5 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    class="nb-card p-2.5 bg-primary-yellow border-2 shadow-none flex items-center justify-center gap-2 animate-pulse">
+                    <svg class="w-4 h-4 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
                             d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                     </svg>
-                    <span class="text-[9px] font-black uppercase tracking-widest text-black">Mode Susulan Aktif</span>
+                    <span class="text-[10px] font-black uppercase tracking-widest text-black">Mode Susulan Aktif</span>
                 </div>
 
                 <div
-                    class="nb-card-flat bg-gray-50 dark:bg-dark-soft p-2.5 px-3 relative overflow-hidden border-2 flex items-center justify-between shadow-[3px_3px_0_0_rgba(0,0,0,1)] dark:shadow-[3px_3px_0_0_rgba(255,255,255,0.3)]">
-                    <span class="text-[8px] font-black uppercase tracking-[0.2em] dark:text-gray-400">TOTAL BILL</span>
-                    <div class="flex items-baseline gap-1">
-                        <span class="text-xs font-black dark:text-white">RP</span>
+                    class="nb-card-flat bg-gray-50 dark:bg-dark-soft p-3 px-4 relative overflow-hidden border-2 flex items-center justify-between shadow-[4px_4px_0_0_rgba(0,0,0,1)] dark:shadow-[4px_4px_0_0_rgba(255,255,255,0.3)]">
+                    <span class="text-[9px] font-black uppercase tracking-[0.2em] dark:text-gray-400">TOTAL BILL</span>
+                    <div class="flex items-baseline gap-1.5">
+                        <span class="text-sm font-black dark:text-white">RP</span>
                         <span x-text="formatRupiah(total).replace('Rp', '').trim()"
-                            class="text-2xl font-black italic tracking-tighter leading-none dark:text-white"></span>
+                            class="text-3xl font-black italic tracking-tighter leading-none dark:text-white"></span>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-2 gap-2">
-                    <div class="space-y-0.5">
-                        <label class="text-[7px] font-black uppercase tracking-widest ml-1 text-slate-500 dark:text-slate-400">TANGGAL TRANSAKSI</label>
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="space-y-1">
+                        <label class="text-[8px] font-black uppercase tracking-widest ml-1 text-slate-500 dark:text-slate-400">TANGGAL TRANSAKSI</label>
                         <input type="date" wire:model.live="transactionDate" max="{{ now()->toDateString() }}"
-                            class="nb-input w-full p-1.5 px-2 text-[9px] uppercase shadow-none border-2 bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-700 font-bold dark:text-white">
+                            class="nb-input w-full p-2 px-2.5 text-[10px] uppercase shadow-none border-2 bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-700 font-bold dark:text-white">
                     </div>
-                    <div class="space-y-0.5">
-                        <label class="text-[7px] font-black uppercase tracking-widest ml-1 text-slate-500 dark:text-slate-400">BUYER</label>
+                    <div class="space-y-1">
+                        <label class="text-[8px] font-black uppercase tracking-widest ml-1 text-slate-500 dark:text-slate-400">BUYER</label>
                         <input type="text" x-model="buyer_name" placeholder="GUEST"
-                            class="nb-input w-full p-1.5 px-2 text-[9px] uppercase shadow-none border-2 bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-700 font-bold dark:text-white">
+                            class="nb-input w-full p-2 px-2.5 text-[10px] uppercase shadow-none border-2 bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-700 font-bold dark:text-white">
                     </div>
                 </div>
 
-                <div class="space-y-0.5">
-                    <label class="text-[7px] font-black uppercase tracking-widest ml-1 text-slate-500 dark:text-slate-400">METODE BAYAR</label>
-                    <div class="flex gap-1.5">
+                <div class="space-y-1">
+                    <label class="text-[8px] font-black uppercase tracking-widest ml-1 text-slate-500 dark:text-slate-400">METODE BAYAR</label>
+                    <div class="flex gap-2">
                         {{-- CASH --}}
                         <button type="button" @click="payment_method = 'cash'"
                             :class="payment_method === 'cash' 
                                 ? 'bg-black text-white border-black dark:bg-black dark:text-white dark:border-slate-500 shadow-md' 
                                 : 'bg-white text-slate-700 border-slate-300 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 dark:hover:text-white'"
-                            class="nb-btn flex-1 py-1.5 px-2 text-[9px] shadow-none border-2 font-black flex items-center justify-center gap-1 transition-all">
-                            <svg class="w-3 h-3 shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><rect width="20" height="14" x="2" y="5" rx="2"/><path d="M2 10h20"/></svg>
+                            class="nb-btn flex-1 py-2 px-2.5 text-[10px] shadow-none border-2 font-black flex items-center justify-center gap-1.5 transition-all">
+                            <svg class="w-3.5 h-3.5 shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><rect width="20" height="14" x="2" y="5" rx="2"/><path d="M2 10h20"/></svg>
                             CASH
                         </button>
                         {{-- TRANSFER --}}
@@ -441,8 +441,8 @@
                             :class="payment_method === 'transfer' 
                                 ? 'bg-black text-white border-black dark:bg-black dark:text-white dark:border-slate-500 shadow-md' 
                                 : 'bg-white text-slate-700 border-slate-300 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 dark:hover:text-white'"
-                            class="nb-btn flex-1 py-1.5 px-2 text-[9px] shadow-none border-2 font-black flex items-center justify-center gap-1 transition-all">
-                            <svg class="w-3 h-3 shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="m5 12 7-7 7 7"/><path d="M12 19V5"/></svg>
+                            class="nb-btn flex-1 py-2 px-2.5 text-[10px] shadow-none border-2 font-black flex items-center justify-center gap-1.5 transition-all">
+                            <svg class="w-3.5 h-3.5 shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="m5 12 7-7 7 7"/><path d="M12 19V5"/></svg>
                             TF
                         </button>
                         {{-- QRIS --}}
@@ -450,60 +450,60 @@
                             :class="payment_method === 'qris' 
                                 ? 'bg-black text-white border-black dark:bg-black dark:text-white dark:border-slate-500 shadow-md' 
                                 : 'bg-white text-slate-700 border-slate-300 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 dark:hover:text-white'"
-                            class="nb-btn flex-1 py-1.5 px-2 text-[9px] shadow-none border-2 font-black flex items-center justify-center gap-1 transition-all">
-                            <svg class="w-3 h-3 shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/><path d="M14 14h3v3"/><path d="M17 21v-3"/><path d="M21 14v3h-3"/><path d="M21 21h-3"/></svg>
+                            class="nb-btn flex-1 py-2 px-2.5 text-[10px] shadow-none border-2 font-black flex items-center justify-center gap-1.5 transition-all">
+                            <svg class="w-3.5 h-3.5 shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/><path d="M14 14h3v3"/><path d="M17 21v-3"/><path d="M21 14v3h-3"/><path d="M21 21h-3"/></svg>
                             QRIS
                         </button>
                     </div>
                 </div>
 
                 {{-- Input nominal hanya muncul untuk metode CASH --}}
-                <div class="space-y-0.5" x-show="payment_method === 'cash'">
-                    <label class="text-[7px] font-black uppercase tracking-widest ml-1 text-slate-500 dark:text-slate-400">CASH (RP)</label>
+                <div class="space-y-1" x-show="payment_method === 'cash'">
+                    <label class="text-[8px] font-black uppercase tracking-widest ml-1 text-slate-500 dark:text-slate-400">CASH (RP)</label>
                     <input type="number" x-model.number="payment_amount"
                         @keydown.enter="handleCheckoutKeydown($event)"
-                        class="nb-input w-full p-1.5 px-2 text-xs text-primary-blue dark:text-emerald-400 italic shadow-none border-2 font-black bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-700">
+                        class="nb-input w-full p-2 px-3 text-sm text-primary-blue dark:text-emerald-400 italic shadow-none border-2 font-black bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-700">
                 </div>
 
                 {{-- Info non-tunai --}}
                 <template x-if="payment_method !== 'cash'">
-                    <div class="nb-card p-2 flex items-center gap-2 shadow-none border-2 border-primary-blue bg-primary-blue/5 dark:bg-blue-950/40 dark:border-blue-500/50">
-                        <svg class="w-3.5 h-3.5 text-primary-blue dark:text-blue-400 shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
-                        <p class="text-[8px] font-black uppercase tracking-widest text-primary-blue dark:text-blue-300">
+                    <div class="nb-card p-2.5 flex items-center gap-2.5 shadow-none border-2 border-primary-blue bg-primary-blue/5 dark:bg-blue-950/40 dark:border-blue-500/50">
+                        <svg class="w-4 h-4 text-primary-blue dark:text-blue-400 shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                        <p class="text-[9px] font-black uppercase tracking-widest text-primary-blue dark:text-blue-300">
                             Masuk <span x-text="payment_method === 'transfer' ? 'KAS VIRTUAL TRANSFER' : 'KAS VIRTUAL QRIS'"></span>
                         </p>
                     </div>
                 </template>
 
-                <div class="flex gap-1.5">
+                <div class="flex gap-2">
                     <button type="button" @click="status = 'uang_diterima'"
                         :class="status === 'uang_diterima' 
                             ? 'bg-emerald-600 text-white border-emerald-600 dark:bg-emerald-600 dark:text-white dark:border-emerald-500 shadow-md' 
                             : 'bg-white text-slate-700 border-slate-300 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 dark:hover:text-white'"
                         :disabled="payment_method !== 'cash'"
-                        class="nb-btn flex-1 py-1.5 text-[8px] shadow-none border-2 font-black disabled:opacity-30 disabled:cursor-not-allowed transition-all">LUNAS</button>
+                        class="nb-btn flex-1 py-2 text-[9px] shadow-none border-2 font-black disabled:opacity-30 disabled:cursor-not-allowed transition-all">LUNAS</button>
 
                     <button type="button" @click="status = 'belum_kembalian'"
                         :class="status === 'belum_kembalian' 
                             ? 'bg-blue-600 text-white border-blue-600 dark:bg-blue-600 dark:text-white dark:border-blue-500 shadow-md' 
                             : 'bg-white text-slate-700 border-slate-300 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 dark:hover:text-white'"
                         :disabled="payment_method !== 'cash'"
-                        class="nb-btn flex-1 py-1.5 text-[8px] shadow-none border-2 font-black disabled:opacity-30 disabled:cursor-not-allowed transition-all">PENDING</button>
+                        class="nb-btn flex-1 py-2 text-[9px] shadow-none border-2 font-black disabled:opacity-30 disabled:cursor-not-allowed transition-all">PENDING</button>
 
                     <button type="button" @click="status = 'belum_menerima_uang'"
                         :class="status === 'belum_menerima_uang' 
                             ? 'bg-rose-600 text-white border-rose-600 dark:bg-rose-600 dark:text-white dark:border-rose-500 shadow-md' 
                             : 'bg-white text-slate-700 border-slate-300 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 dark:hover:text-white'"
                         :disabled="payment_method !== 'cash'"
-                        class="nb-btn flex-1 py-1.5 text-[8px] shadow-none border-2 font-black disabled:opacity-30 disabled:cursor-not-allowed transition-all">HUTANG</button>
+                        class="nb-btn flex-1 py-2 text-[9px] shadow-none border-2 font-black disabled:opacity-30 disabled:cursor-not-allowed transition-all">HUTANG</button>
                 </div>
 
                 <template x-if="payment_amount > 0">
-                    <div class="nb-card p-2 px-3 flex justify-between items-center shadow-none border-2"
+                    <div class="nb-card p-2.5 px-3.5 flex justify-between items-center shadow-none border-2"
                         :class="change < 0 ? 'bg-primary-red text-white' : 'bg-green-500 text-white'">
                         <span x-text="change < 0 ? 'CURANG' : 'CHANGE'"
-                            class="text-[8px] font-black uppercase tracking-widest"></span>
-                        <span x-text="formatRupiah(Math.abs(change))" class="text-base font-black italic"></span>
+                            class="text-[9px] font-black uppercase tracking-widest"></span>
+                        <span x-text="formatRupiah(Math.abs(change))" class="text-lg font-black italic"></span>
                     </div>
                 </template>
 
@@ -511,7 +511,7 @@
                     :disabled="{{ $isSessionFinished ? 'true' : 'false' }} || cart.length === 0 || (payment_amount < total &&
                         status === 'uang_diterima') || loading"
                     @keydown.enter="handleCheckoutKeydown($event)"
-                    class="nb-btn checkout-trigger w-full py-3 text-sm font-black bg-black text-white hover:bg-primary-blue disabled:bg-gray-400 disabled:opacity-50 group shadow-[3px_3px_0_0_rgba(37,99,235,0.4)] dark:shadow-[3px_3px_0_0_rgba(255,255,255,0.8)]">
+                    class="nb-btn checkout-trigger w-full py-3.5 text-base font-black bg-black text-white hover:bg-primary-blue disabled:bg-gray-400 disabled:opacity-50 group shadow-[4px_4px_0_0_rgba(37,99,235,0.4)] dark:shadow-[4px_4px_0_0_rgba(255,255,255,0.8)]">
                     <span x-show="!loading" class="flex items-center justify-center gap-3">
                         PROCESS NOW
                         <svg class="w-4 h-4 group-hover:translate-x-1.5 transition-transform" fill="none"
