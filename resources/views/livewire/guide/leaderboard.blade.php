@@ -242,11 +242,11 @@
         x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-200"
         x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">
         <div @click.away="show = false"
-            class="bg-white dark:bg-gray-800 w-full max-w-2xl rounded-3xl shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-300 border border-gray-100 dark:border-gray-700">
+            class="bg-white dark:bg-gray-900 w-full max-w-2xl rounded-3xl shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-300 border border-gray-100 dark:border-gray-800 max-h-[90vh]">
             <!-- Modal Header -->
-            <div class="p-6 md:p-8 bg-gray-50 dark:bg-gray-900/80 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
+            <div class="p-6 md:p-8 bg-gray-50 dark:bg-gray-950/90 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between shrink-0">
                 <div class="flex items-center gap-4">
-                    <div class="w-12 h-12 rounded-2xl bg-amber-500/10 text-amber-500 flex items-center justify-center font-black uppercase text-base border border-amber-500/20">
+                    <div class="w-12 h-12 rounded-2xl bg-amber-500/10 text-amber-500 flex items-center justify-center font-black uppercase text-base border border-amber-500/20 shrink-0">
                         {{ substr($detailUser->name ?? 'K', 0, 2) }}
                     </div>
                     <div>
@@ -256,7 +256,7 @@
                                 Detail Poin
                             </span>
                         </div>
-                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-0.5">Rincian & Asal Perolehan Poin Kasir</p>
+                        <p class="text-[10px] font-bold text-gray-400 dark:text-gray-400 uppercase tracking-widest mt-0.5">Rincian & Asal Perolehan Poin Kasir</p>
                     </div>
                 </div>
                 <button @click="show = false" class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-white transition-colors rounded-xl bg-gray-100 dark:bg-gray-800">
@@ -266,83 +266,216 @@
                 </button>
             </div>
 
-            <!-- Modal Content -->
-            <div class="p-6 md:p-8 space-y-6 max-h-[65vh] overflow-y-auto">
-                <!-- Summary Metrics Grid -->
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="p-5 bg-gray-50 dark:bg-gray-900/60 border border-gray-100 dark:border-gray-700/60 rounded-2xl">
-                        <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest block">Total Poin Akumulasi</span>
-                        <div class="text-2xl md:text-3xl font-black text-amber-500 italic mt-1">
-                            {{ ($detailUser->points ?? 0) + ($detailUser->pending_points ?? 0) }} <span class="text-xs not-italic font-bold">Pts</span>
+            <!-- Modal Body (Scrollable Accordions) -->
+            <div class="p-6 md:p-8 space-y-4 overflow-y-auto flex-1 no-scrollbar" x-data="{ openGroup: 'summary' }">
+                <!-- Accordion 1: Ringkasan Sumber Poin -->
+                <div class="rounded-2xl border border-gray-100 dark:border-gray-800 overflow-hidden bg-gray-50/50 dark:bg-gray-950/60">
+                    <button type="button" @click="openGroup = (openGroup === 'summary' ? null : 'summary')"
+                        class="w-full p-4 flex items-center justify-between text-left font-black uppercase tracking-widest text-xs text-gray-800 dark:text-white hover:bg-gray-100/50 dark:hover:bg-gray-800/40 transition-colors">
+                        <div class="flex items-center gap-3">
+                            <div class="p-2 bg-amber-500/10 text-amber-500 rounded-xl">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                </svg>
+                            </div>
+                            <span>Ringkasan & Total Perolehan Poin</span>
                         </div>
-                    </div>
-                    <div class="p-5 bg-gray-50 dark:bg-gray-900/60 border border-gray-100 dark:border-gray-700/60 rounded-2xl">
-                        <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest block">Streak Kehadiran</span>
-                        <div class="text-2xl md:text-3xl font-black text-orange-500 italic mt-1 flex items-center gap-2">
-                            <svg class="w-6 h-6 text-orange-500 inline-block" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                <path fill-rule="evenodd" d="M12.395 2.553a1 1 0 00-1.45-.385c-.345.23-.614.558-.822.94-.209.381-.363.887-.453 1.488-.12.802-.073 1.84.195 2.87l.062.24c.024.1.039.223.05.375a2.037 2.037 0 01-.029.511c-.048.24-.154.48-.32.647a.997.997 0 01-1.08.16c-.461-.247-.744-.623-.926-1.08-.182-.456-.224-.959-.224-1.347V6a1 1 0 00-1-1 3 3 0 00-2 2.22c0 1.258.18 2.5.474 3.738.152.64.4 1.25.753 1.807.353.558.836 1.057 1.443 1.487a8.007 8.007 0 005.19 2.09c.477.027.947-.033 1.4-.18a7.995 7.995 0 003.86-2.482c.187-.228.34-.483.47-.752.43-.892.652-1.928.652-3.141 0-1.622-.515-2.91-1.293-3.812a6.002 6.002 0 00-.825-1.012l-.011-.011-.002-.002a1 1 0 00-1.436.17l-.02.027a4.01 4.01 0 01-.262.33c-.758.874-1.808 1.47-3.2 1.47V2.553z" clip-rule="evenodd" />
+                        <div class="flex items-center gap-2">
+                            <span class="text-amber-500 italic text-sm font-black">{{ ($detailUser->points ?? 0) + ($detailUser->pending_points ?? 0) }} Pts</span>
+                            <svg class="w-4 h-4 transition-transform duration-200" :class="{ 'rotate-180': openGroup === 'summary' }" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
                             </svg>
-                            {{ $detailUser->streak ?? 0 }} <span class="text-xs not-italic font-bold">Hari</span>
+                        </div>
+                    </button>
+
+                    <div x-show="openGroup === 'summary'" x-collapse class="p-4 pt-0 border-t border-gray-100 dark:border-gray-800/60 space-y-3">
+                        <div class="grid grid-cols-2 gap-3 pt-3">
+                            <div class="p-4 bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800">
+                                <span class="text-[9px] font-black text-gray-400 dark:text-gray-400 uppercase tracking-widest block">Total Poin</span>
+                                <div class="text-xl font-black text-amber-500 italic mt-0.5">
+                                    {{ ($detailUser->points ?? 0) + ($detailUser->pending_points ?? 0) }} Pts
+                                </div>
+                            </div>
+                            <div class="p-4 bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800">
+                                <span class="text-[9px] font-black text-gray-400 dark:text-gray-400 uppercase tracking-widest block">Streak Kerja</span>
+                                <div class="text-xl font-black text-orange-500 italic mt-0.5 flex items-center gap-1.5">
+                                    <svg class="w-4 h-4 text-orange-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                        <path fill-rule="evenodd" d="M12.395 2.553a1 1 0 00-1.45-.385c-.345.23-.614.558-.822.94-.209.381-.363.887-.453 1.488-.12.802-.073 1.84.195 2.87l.062.24c.024.1.039.223.05.375a2.037 2.037 0 01-.029.511c-.048.24-.154.48-.32.647a.997.997 0 01-1.08.16c-.461-.247-.744-.623-.926-1.08-.182-.456-.224-.959-.224-1.347V6a1 1 0 00-1-1 3 3 0 00-2 2.22c0 1.258.18 2.5.474 3.738.152.64.4 1.25.753 1.807.353.558.836 1.057 1.443 1.487a8.007 8.007 0 005.19 2.09c.477.027.947-.033 1.4-.18a7.995 7.995 0 003.86-2.482c.187-.228.34-.483.47-.752.43-.892.652-1.928.652-3.141 0-1.622-.515-2.91-1.293-3.812a6.002 6.002 0 00-.825-1.012l-.011-.011-.002-.002a1 1 0 00-1.436.17l-.02.027a4.01 4.01 0 01-.262.33c-.758.874-1.808 1.47-3.2 1.47V2.553z" clip-rule="evenodd" />
+                                    </svg>
+                                    {{ $detailUser->streak ?? 0 }} Hari
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Detail Poin Breakdown List (Tabel / List Rincian) -->
-                <div class="space-y-4">
-                    <div class="flex items-center justify-between">
-                        <h4 class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Riwayat & Sumber Aktivitas Poin:</h4>
-                        <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest">{{ $recentLogs->count() }} Aktivitas</span>
-                    </div>
+                <!-- Accordion 2: Penjualan POS Kasir -->
+                <div class="rounded-2xl border border-gray-100 dark:border-gray-800 overflow-hidden bg-gray-50/50 dark:bg-gray-950/60">
+                    <button type="button" @click="openGroup = (openGroup === 'pos' ? null : 'pos')"
+                        class="w-full p-4 flex items-center justify-between text-left font-black uppercase tracking-widest text-xs text-gray-800 dark:text-white hover:bg-gray-100/50 dark:hover:bg-gray-800/40 transition-colors">
+                        <div class="flex items-center gap-3">
+                            <div class="p-2 bg-blue-500/10 text-blue-500 rounded-xl">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                                </svg>
+                            </div>
+                            <span>Poin Penjualan Kasir (POS)</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-blue-500 font-black text-xs">+{{ $userStats['pos_points'] }} Pts</span>
+                            <svg class="w-4 h-4 transition-transform duration-200" :class="{ 'rotate-180': openGroup === 'pos' }" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </div>
+                    </button>
 
-                    <div class="rounded-2xl border border-gray-100 dark:border-gray-700/60 overflow-hidden">
-                        <table class="w-full text-left border-collapse">
-                            <thead>
-                                <tr class="bg-gray-50 dark:bg-gray-900/60 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 dark:border-gray-700/60">
-                                    <th class="py-3 px-4">Aktivitas</th>
-                                    <th class="py-3 px-4 text-center">Kategori</th>
-                                    <th class="py-3 px-4 text-right">Poin</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-gray-100 dark:divide-gray-700/50">
-                                @forelse($recentLogs as $log)
-                                    <tr class="hover:bg-gray-50/50 dark:hover:bg-gray-700/20 transition-colors">
-                                        <td class="py-3.5 px-4 align-middle">
-                                            <div class="text-xs font-bold text-gray-800 dark:text-gray-200">
-                                                {{ $log['title'] }}
-                                            </div>
-                                            <div class="text-[9px] font-semibold text-gray-400 mt-0.5 uppercase tracking-widest">
-                                                {{ \Carbon\Carbon::parse($log['date'])->format('d M Y - H:i') }}
-                                            </div>
-                                        </td>
-                                        <td class="py-3.5 px-4 align-middle text-center">
-                                            <span class="px-2.5 py-1 text-[9px] font-black rounded-lg uppercase tracking-wider border {{ $log['badge_color'] }}">
-                                                {{ $log['badge'] }}
-                                            </span>
-                                        </td>
-                                        <td class="py-3.5 px-4 align-middle text-right text-xs font-black text-emerald-500">
-                                            {{ $log['points'] }}
-                                        </td>
+                    <div x-show="openGroup === 'pos'" x-collapse class="p-4 pt-0 border-t border-gray-100 dark:border-gray-800/60 space-y-2">
+                        <div class="p-3 bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 flex items-center justify-between mt-3">
+                            <div>
+                                <h5 class="text-xs font-bold text-gray-800 dark:text-gray-200 uppercase">Akumulasi Checkout Sukses</h5>
+                                <p class="text-[9px] font-semibold text-gray-400 mt-0.5">{{ $userStats['total_transactions'] }} Transaksi Ditangani (@ +5 Pts/Transaksi)</p>
+                            </div>
+                            <span class="text-xs font-black text-blue-500">+{{ $userStats['pos_points'] }} Pts</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Accordion 3: Tugas Kasir Selesai -->
+                <div class="rounded-2xl border border-gray-100 dark:border-gray-800 overflow-hidden bg-gray-50/50 dark:bg-gray-950/60">
+                    <button type="button" @click="openGroup = (openGroup === 'tasks' ? null : 'tasks')"
+                        class="w-full p-4 flex items-center justify-between text-left font-black uppercase tracking-widest text-xs text-gray-800 dark:text-white hover:bg-gray-100/50 dark:hover:bg-gray-800/40 transition-colors">
+                        <div class="flex items-center gap-3">
+                            <div class="p-2 bg-indigo-500/10 text-indigo-500 rounded-xl">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2" />
+                                </svg>
+                            </div>
+                            <span>Poin Tugas Kasir</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-indigo-500 font-black text-xs">+{{ $userStats['task_points'] }} Pts</span>
+                            <svg class="w-4 h-4 transition-transform duration-200" :class="{ 'rotate-180': openGroup === 'tasks' }" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </div>
+                    </button>
+
+                    <div x-show="openGroup === 'tasks'" x-collapse class="p-4 pt-0 border-t border-gray-100 dark:border-gray-800/60 space-y-2">
+                        <div class="p-3 bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 flex items-center justify-between mt-3">
+                            <div>
+                                <h5 class="text-xs font-bold text-gray-800 dark:text-gray-200 uppercase">Tugas Kasir Ter-ACC</h5>
+                                <p class="text-[9px] font-semibold text-gray-400 mt-0.5">{{ $userStats['completed_tasks'] }} Laporan Tugas Disetujui Admin</p>
+                            </div>
+                            <span class="text-xs font-black text-indigo-500">+{{ $userStats['task_points'] }} Pts</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Accordion 4: Absensi & Sesi Laci Kasir -->
+                <div class="rounded-2xl border border-gray-100 dark:border-gray-800 overflow-hidden bg-gray-50/50 dark:bg-gray-950/60">
+                    <button type="button" @click="openGroup = (openGroup === 'attendance' ? null : 'attendance')"
+                        class="w-full p-4 flex items-center justify-between text-left font-black uppercase tracking-widest text-xs text-gray-800 dark:text-white hover:bg-gray-100/50 dark:hover:bg-gray-800/40 transition-colors">
+                        <div class="flex items-center gap-3">
+                            <div class="p-2 bg-emerald-500/10 text-emerald-500 rounded-xl">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            </div>
+                            <span>Poin Absensi & Sesi Laci</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-emerald-500 font-black text-xs">+{{ $userStats['attendance_points'] }} Pts</span>
+                            <svg class="w-4 h-4 transition-transform duration-200" :class="{ 'rotate-180': openGroup === 'attendance' }" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </div>
+                    </button>
+
+                    <div x-show="openGroup === 'attendance'" x-collapse class="p-4 pt-0 border-t border-gray-100 dark:border-gray-800/60 space-y-2">
+                        <div class="p-3 bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 flex items-center justify-between mt-3">
+                            <div>
+                                <h5 class="text-xs font-bold text-gray-800 dark:text-gray-200 uppercase">Sesi Shift & Jam Kerja</h5>
+                                <p class="text-[9px] font-semibold text-gray-400 mt-0.5">{{ $userStats['attendance_count'] }} Kali Hadir & Melakukan Closing</p>
+                            </div>
+                            <span class="text-xs font-black text-emerald-500">+{{ $userStats['attendance_points'] }} Pts</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Accordion 5: Tabel Timeline Aktivitas Lengkap -->
+                <div class="rounded-2xl border border-gray-100 dark:border-gray-800 overflow-hidden bg-gray-50/50 dark:bg-gray-950/60">
+                    <button type="button" @click="openGroup = (openGroup === 'logs' ? null : 'logs')"
+                        class="w-full p-4 flex items-center justify-between text-left font-black uppercase tracking-widest text-xs text-gray-800 dark:text-white hover:bg-gray-100/50 dark:hover:bg-gray-800/40 transition-colors">
+                        <div class="flex items-center gap-3">
+                            <div class="p-2 bg-purple-500/10 text-purple-500 rounded-xl">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                                </svg>
+                            </div>
+                            <span>Tabel Riwayat Aktivitas Lengkap</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-gray-400 font-bold text-[10px] uppercase tracking-wider">{{ $recentLogs->count() }} Item</span>
+                            <svg class="w-4 h-4 transition-transform duration-200" :class="{ 'rotate-180': openGroup === 'logs' }" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </div>
+                    </button>
+
+                    <div x-show="openGroup === 'logs'" x-collapse class="p-4 pt-0 border-t border-gray-100 dark:border-gray-800/60">
+                        <div class="rounded-xl border border-gray-100 dark:border-gray-800 overflow-hidden max-h-[250px] overflow-y-auto mt-3">
+                            <table class="w-full text-left border-collapse min-w-[480px]">
+                                <thead class="sticky top-0 z-10">
+                                    <tr class="bg-gray-100 dark:bg-gray-950 text-[10px] font-black text-gray-400 dark:text-gray-400 uppercase tracking-widest border-b border-gray-200 dark:border-gray-800">
+                                        <th class="py-3 px-4">Aktivitas</th>
+                                        <th class="py-3 px-4 text-center">Kategori</th>
+                                        <th class="py-3 px-4 text-right">Poin</th>
                                     </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="3" class="py-8 text-center text-xs text-gray-400 uppercase tracking-widest font-bold">
-                                            Belum ada aktivitas poin tercatat
-                                        </td>
-                                    </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody class="divide-y divide-gray-100 dark:divide-gray-800/80 bg-white dark:bg-gray-900/90">
+                                    @forelse($recentLogs as $log)
+                                        <tr class="hover:bg-gray-50/50 dark:hover:bg-gray-800/40 transition-colors">
+                                            <td class="py-3 px-4 align-middle">
+                                                <div class="text-xs font-bold text-gray-800 dark:text-gray-200">
+                                                    {{ $log['title'] }}
+                                                </div>
+                                                <div class="text-[9px] font-semibold text-gray-400 dark:text-gray-400 mt-0.5 uppercase tracking-widest">
+                                                    {{ \Carbon\Carbon::parse($log['date'])->format('d M Y - H:i') }}
+                                                </div>
+                                            </td>
+                                            <td class="py-3 px-4 align-middle text-center">
+                                                <span class="px-2 py-0.5 text-[8px] font-black rounded-lg uppercase tracking-wider border {{ $log['badge_color'] }}">
+                                                    {{ $log['badge'] }}
+                                                </span>
+                                            </td>
+                                            <td class="py-3 px-4 align-middle text-right text-xs font-black text-emerald-500 dark:text-emerald-400">
+                                                {{ $log['points'] }}
+                                            </td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="3" class="py-8 text-center text-xs text-gray-400 dark:text-gray-400 uppercase tracking-widest font-bold">
+                                                Belum ada aktivitas poin tercatat
+                                            </td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
 
             <!-- Modal Footer -->
-            <div class="p-6 bg-gray-50 dark:bg-gray-900/60 border-t border-gray-100 dark:border-gray-700 flex justify-end">
+            <div class="p-5 md:p-6 bg-gray-50 dark:bg-gray-950/90 border-t border-gray-100 dark:border-gray-800 flex justify-end shrink-0">
                 <button type="button" @click="show = false"
-                    class="px-6 py-3 bg-gray-900 text-white rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-gray-800 transition-all border border-gray-700">
+                    class="px-6 py-3 bg-gray-900 dark:bg-gray-800 text-white rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-gray-800 dark:hover:bg-gray-700 transition-all border border-gray-700">
                     Tutup Modal
                 </button>
             </div>
+        </div>
+    </div>
+</div>
         </div>
     </div>
 </div>
