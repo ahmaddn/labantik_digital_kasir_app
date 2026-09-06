@@ -236,7 +236,7 @@
     </div>
 
     <!-- User Point Breakdown Detail Modal -->
-    <div x-data="{ show: @entangle('showPointDetailModal') }" x-show="show" class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6" x-cloak>
+    <div x-data="{ show: @entangle('showUserDetailModal') }" x-show="show" class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6" x-cloak>
         <!-- Backdrop -->
         <div x-show="show" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
             class="fixed inset-0 bg-black/60 backdrop-blur-xs" @click="show = false"></div>

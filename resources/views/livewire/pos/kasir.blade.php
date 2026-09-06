@@ -1114,7 +1114,7 @@
                 showChangeModal: false,
                 lastChangeData: { total: 0, payment: 0, change: 0 },
 
-                sidebarWidth: localStorage.getItem('cashier_sidebar_width') ? parseInt(localStorage.getItem('cashier_sidebar_width')) : 420,
+                sidebarWidth: Math.max(380, localStorage.getItem('cashier_sidebar_width') ? parseInt(localStorage.getItem('cashier_sidebar_width')) : 420),
                 isResizing: false,
                 screenWidth: window.innerWidth,
 
@@ -1151,9 +1151,9 @@
                     const doResize = (event) => {
                         if (!this.isResizing) return;
                         const newWidth = window.innerWidth - event.clientX;
-                        /* Batasi lebar sidebar minimal 280px dan maksimal hingga sisa panel kiri min 300px */
-                        const maxWidth = Math.max(300, window.innerWidth - 300);
-                        if (newWidth >= 280 && newWidth <= maxWidth) {
+                        /* Batasi lebar sidebar minimal 380px dan maksimal hingga sisa panel kiri min 350px */
+                        const maxWidth = Math.max(380, window.innerWidth - 350);
+                        if (newWidth >= 380 && newWidth <= maxWidth) {
                             this.sidebarWidth = newWidth;
                             localStorage.setItem('cashier_sidebar_width', newWidth);
                         }
