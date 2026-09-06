@@ -150,7 +150,7 @@
                     <div class="group transition-all duration-300 {{ $isActive ? 'z-10 relative' : '' }}">
                         <!-- Desktop view -->
                         <div
-                            class="hidden lg:grid grid-cols-[1.5fr_1.5fr_2fr_1fr_1fr_1.5fr_1.5fr_130px] items-center p-6 rounded-2xl border-2 transition-all duration-500 {{ $isActive ? 'bg-white dark:bg-gray-800/50 border-amber-400 shadow-[0_0_25px_rgba(245,158,11,0.4)] ring-4 ring-amber-400/20 scale-[1.01]' : 'bg-white dark:bg-gray-800/50 border-transparent group-hover:border-primary-blue/20' }}">
+                            class="hidden md:grid grid-cols-[1.5fr_1.5fr_2fr_1fr_1fr_1.5fr_1.5fr_130px] items-center p-6 rounded-2xl border-2 transition-all duration-500 {{ $isActive ? 'bg-white dark:bg-gray-800/50 border-amber-400 shadow-[0_0_25px_rgba(245,158,11,0.4)] ring-4 ring-amber-400/20 scale-[1.01]' : 'bg-white dark:bg-gray-800/50 border-transparent group-hover:border-primary-blue/20' }}">
                             <!-- Waktu -->
                             <div class="px-4">
                                 <div class="text-sm font-black text-gray-800 dark:text-white uppercase tracking-tight">
@@ -305,7 +305,7 @@
 
                         <!-- Mobile Card View -->
                         <div
-                            class="block lg:hidden p-5 rounded-[2rem] border bg-white dark:bg-gray-900/40 transition-all duration-300 {{ $isActive ? 'border-amber-400 bg-amber-400/5 animate-highlight-breath' : 'border-gray-100 dark:border-gray-800' }} mb-4">
+                            class="block md:hidden p-5 rounded-[2rem] border bg-white dark:bg-gray-900/40 transition-all duration-300 {{ $isActive ? 'border-amber-400 bg-amber-400/5 animate-highlight-breath' : 'border-gray-100 dark:border-gray-800' }} mb-4">
                             <div class="flex items-start justify-between gap-3">
                                 <div>
                                     <!-- Ref Code & Jurusan -->
