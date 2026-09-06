@@ -148,9 +148,12 @@
         @apply bg-slate-950 border-slate-700;
     }
     .dark .nb-btn {
-        @apply border-slate-700 shadow-[2px_2px_0px_0px_black] text-slate-300;
+        @apply border-slate-700 shadow-[2px_2px_0px_0px_black];
     }
-    .dark .nb-btn:hover {
+    .dark .nb-btn:not([class*="text-"]) {
+        @apply text-slate-300;
+    }
+    .dark .nb-btn:hover:not([class*="text-"]) {
         @apply border-white shadow-[4px_4px_0px_0px_white] text-white;
     }
     .dark .nb-btn-blue {
