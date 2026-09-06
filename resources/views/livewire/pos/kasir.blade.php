@@ -216,10 +216,10 @@
             </button>
         </div>
 
-        <div x-data="{ tab: 'cart' }" class="flex flex-col h-full overflow-hidden bg-white dark:bg-slate-950">
+        <div x-data="{ tab: 'cart' }" class="flex flex-col h-full min-h-0 overflow-hidden bg-white dark:bg-slate-950">
             <!-- Sidebar Tabs -->
             <div
-                class="p-3 flex gap-3 bg-gray-50 dark:bg-slate-900 border-b-[var(--nb-border)] border-black dark:border-slate-800">
+                class="p-3 flex gap-3 bg-gray-50 dark:bg-slate-900 border-b-[var(--nb-border)] border-black dark:border-slate-800 shrink-0">
                 <button @click="tab = 'cart'"
                     :class="tab === 'cart' ? 'bg-primary-blue text-white border-primary-blue dark:bg-blue-600 dark:text-white dark:border-blue-500 shadow-md' :
                         'bg-white text-slate-700 border-slate-300 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 dark:hover:text-white'"
@@ -253,143 +253,145 @@
                 </button>
             </div>
 
-            <!-- Cart Content -->
-            <div x-show="tab === 'cart'" class="flex-1 overflow-y-auto p-5 space-y-3 no-scrollbar">
-                <template x-for="item in cart" :key="item.cartItemId">
-                    <div
-                        class="nb-card p-3 flex flex-col gap-2 bg-white dark:bg-dark-soft hover:shadow-none transition-shadow border-2">
-                        <div class="flex items-center gap-3">
-                            <div class="w-9 h-9 bg-black text-white flex items-center justify-center font-black text-[10px] italic border-2 border-white"
-                                x-text="item.name.substring(0, 2).toUpperCase()"></div>
-                            <div class="flex-1">
-                                <h4 x-text="item.name"
-                                    class="text-[10px] font-black uppercase dark:text-white line-clamp-1"></h4>
-                                <p class="text-[10px] font-black text-primary-red dark:text-rose-400">
-                                    <span x-text="formatRupiah(item.price + (item.selected_modifiers ? item.selected_modifiers.reduce((sum, m) => sum + m.price, 0) : 0))"></span>
-                                    <template x-if="item.selected_modifiers && item.selected_modifiers.length > 0">
-                                        <span class="text-gray-400 dark:text-gray-500 font-bold">
-                                            (Rp<span x-text="formatRupiah(item.price).replace('Rp', '')"></span> + Topping)
+            <!-- Content Area Container -->
+            <div class="flex-1 flex flex-col min-h-0 overflow-hidden">
+                <!-- Cart Content (40% Height Ratio) -->
+                <div x-show="tab === 'cart'" class="h-[40%] shrink-0 overflow-y-auto p-4 space-y-2.5 no-scrollbar border-b-[var(--nb-border)] border-black dark:border-slate-800">
+                    <template x-for="item in cart" :key="item.cartItemId">
+                        <div
+                            class="nb-card p-3 flex flex-col gap-2 bg-white dark:bg-dark-soft hover:shadow-none transition-shadow border-2">
+                            <div class="flex items-center gap-3">
+                                <div class="w-9 h-9 bg-black text-white flex items-center justify-center font-black text-[10px] italic border-2 border-white"
+                                    x-text="item.name.substring(0, 2).toUpperCase()"></div>
+                                <div class="flex-1">
+                                    <h4 x-text="item.name"
+                                        class="text-[10px] font-black uppercase dark:text-white line-clamp-1"></h4>
+                                    <p class="text-[10px] font-black text-primary-red dark:text-rose-400">
+                                        <span x-text="formatRupiah(item.price + (item.selected_modifiers ? item.selected_modifiers.reduce((sum, m) => sum + m.price, 0) : 0))"></span>
+                                        <template x-if="item.selected_modifiers && item.selected_modifiers.length > 0">
+                                            <span class="text-gray-400 dark:text-gray-500 font-bold">
+                                                (Rp<span x-text="formatRupiah(item.price).replace('Rp', '')"></span> + Topping)
+                                            </span>
+                                        </template>
+                                    </p>
+                                </div>
+                                <div class="flex items-center border-2 border-black dark:border-white bg-white dark:bg-black">
+                                    <button @click="removeFromCart(item.cartItemId)"
+                                        class="px-2 py-0.5 font-black hover:bg-gray-100 dark:hover:bg-gray-800 border-r-2 border-black dark:border-white text-black dark:text-white">-</button>
+                                    <span x-text="item.quantity"
+                                        class="px-2 text-[10px] font-black text-black dark:text-white"></span>
+                                    <button @click="addQuantityFromCart(item)"
+                                        class="px-2 py-0.5 font-black hover:bg-gray-100 dark:hover:bg-gray-800 border-l-2 border-black dark:border-white text-black dark:text-white">+</button>
+                                </div>
+                            </div>
+
+                            <!-- Rincian Topping Terpilih -->
+                            <template x-if="item.selected_modifiers && item.selected_modifiers.length > 0">
+                                <div class="flex flex-wrap gap-1 pl-12 border-t border-dashed border-gray-100 dark:border-slate-800 pt-2">
+                                    <template x-for="mod in item.selected_modifiers" :key="mod.id">
+                                        <span class="px-2 py-0.5 bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-gray-300 text-[8px] font-black border rounded-lg border-gray-200 dark:border-slate-700 uppercase">
+                                            + <span x-text="mod.name"></span> (+<span x-text="mod.price"></span>)
                                         </span>
                                     </template>
-                                </p>
-                            </div>
-                            <div class="flex items-center border-2 border-black dark:border-white bg-white dark:bg-black">
-                                <button @click="removeFromCart(item.cartItemId)"
-                                    class="px-2 py-0.5 font-black hover:bg-gray-100 dark:hover:bg-gray-800 border-r-2 border-black dark:border-white text-black dark:text-white">-</button>
-                                <span x-text="item.quantity"
-                                    class="px-2 text-[10px] font-black text-black dark:text-white"></span>
-                                <button @click="addQuantityFromCart(item)"
-                                    class="px-2 py-0.5 font-black hover:bg-gray-100 dark:hover:bg-gray-800 border-l-2 border-black dark:border-white text-black dark:text-white">+</button>
-                            </div>
+                                </div>
+                            </template>
                         </div>
+                    </template>
+                    <div x-show="cart.length === 0"
+                        class="h-full flex flex-col items-center justify-center opacity-20 italic font-black uppercase tracking-widest text-center text-[10px] py-10">
+                        <p>BELUM ADA PESANAN</p>
+                    </div>
+                </div>
 
-                        <!-- Rincian Topping Terpilih -->
-                        <template x-if="item.selected_modifiers && item.selected_modifiers.length > 0">
-                            <div class="flex flex-wrap gap-1 pl-12 border-t border-dashed border-gray-100 dark:border-slate-800 pt-2">
-                                <template x-for="mod in item.selected_modifiers" :key="mod.id">
-                                    <span class="px-2 py-0.5 bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-gray-300 text-[8px] font-black border rounded-lg border-gray-200 dark:border-slate-700 uppercase">
-                                        + <span x-text="mod.name"></span> (+<span x-text="mod.price"></span>)
+                <!-- Tasks Content -->
+                <div x-show="tab === 'tasks'" class="flex-1 overflow-y-auto p-5 space-y-3 no-scrollbar">
+                    <div class="text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Tugas Harian Anda Hari Ini
+                    </div>
+                    @forelse($dailyTasks as $task)
+                        <a href="{{ route('my-tasks') }}" target="_blank"
+                            class="nb-card p-4 flex flex-col gap-3 bg-white dark:bg-dark-soft border-2 shadow-sm hover:shadow-none transition-shadow cursor-pointer">
+                            <div class="flex justify-between items-start">
+                                <h4
+                                    class="text-xs font-bold uppercase tracking-tight {{ $task->latestSubmission?->approval_status === 'approved' ? 'line-through text-gray-400' : 'text-slate-800 dark:text-white' }}">
+                                    {{ $task->taskDefinition->task_name }}</h4>
+                                @if ($task->latestSubmission?->approval_status === 'approved')
+                                    <span
+                                        class="text-[8px] font-black uppercase bg-green-500 text-white px-2 py-0.5 rounded border border-white">DISETUJUI</span>
+                                @elseif($task->latestSubmission?->approval_status === 'rejected')
+                                    <span
+                                        class="text-[8px] font-black uppercase bg-red-500 text-white px-2 py-0.5 rounded border border-white">DITOLAK
+                                        - REVISI</span>
+                                @elseif($task->latestSubmission?->approval_status === 'pending')
+                                    <span
+                                        class="text-[8px] font-black uppercase bg-primary-blue text-white px-2 py-0.5 rounded border border-white">MENUNGGU
+                                        ACC</span>
+                                @else
+                                    <span
+                                        class="text-[8px] font-black uppercase bg-amber-500 text-white px-2 py-0.5 rounded border border-white">BELUM
+                                        SELESAI</span>
+                                @endif
+                            </div>
+                            @if ($task->taskDefinition->description)
+                                <p class="text-[10px] text-gray-400">{{ $task->taskDefinition->description }}</p>
+                            @endif
+                            <div class="flex flex-wrap gap-1.5 items-center mt-1">
+                                <span class="text-[8px] font-bold text-gray-400 uppercase tracking-widest">{{ $task->taskDefinition->date->translatedFormat('d M Y') }}</span>
+                                @if ($task->taskDefinition->deadline_at)
+                                    <span class="text-[8px] font-black uppercase tracking-widest bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300 px-2 py-0.5 rounded border border-gray-200 dark:border-gray-700">
+                                        Deadline: {{ $task->taskDefinition->deadline_at->translatedFormat('d M H:i') }}
                                     </span>
-                                </template>
+                                @elseif($task->taskDefinition->is_routine && isset($task->taskDefinition->computed_deadline) && $task->taskDefinition->computed_deadline)
+                                    <span class="text-[8px] font-black uppercase tracking-widest bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300 px-2 py-0.5 rounded border border-gray-200 dark:border-gray-700">
+                                        Deadline: {{ \Carbon\Carbon::parse($task->taskDefinition->computed_deadline)->translatedFormat('d M H:i') }}
+                                    </span>
+                                @endif
                             </div>
-                        </template>
-                    </div>
-                </template>
-                <div x-show="cart.length === 0"
-                    class="h-full flex flex-col items-center justify-center opacity-20 italic font-black uppercase tracking-widest text-center text-[10px] py-20">
-                    <p>BELUM ADA PESANAN</p>
+                            <span
+                                class="text-[9px] font-black uppercase tracking-widest text-primary-blue flex items-center gap-1.5 mt-1">
+                                Kerjakan di Halaman Tugas Saya
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                    stroke-width="3">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+                                </svg>
+                            </span>
+                        </a>
+                    @empty
+                        <div class="text-center py-10 text-xs text-gray-400 italic font-semibold">Tidak ada tugas khusus
+                            hari ini</div>
+                    @endforelse
                 </div>
-            </div>
 
-            <!-- Tasks Content -->
-            <div x-show="tab === 'tasks'" class="flex-1 overflow-y-auto p-5 space-y-3 no-scrollbar">
-                <div class="text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Tugas Harian Anda Hari Ini
-                </div>
-                @forelse($dailyTasks as $task)
-                    <a href="{{ route('my-tasks') }}" target="_blank"
-                        class="nb-card p-4 flex flex-col gap-3 bg-white dark:bg-dark-soft border-2 shadow-sm hover:shadow-none transition-shadow cursor-pointer">
-                        <div class="flex justify-between items-start">
-                            <h4
-                                class="text-xs font-bold uppercase tracking-tight {{ $task->latestSubmission?->approval_status === 'approved' ? 'line-through text-gray-400' : 'text-slate-800 dark:text-white' }}">
-                                {{ $task->taskDefinition->task_name }}</h4>
-                            @if ($task->latestSubmission?->approval_status === 'approved')
+                <!-- History Content -->
+                <div x-show="tab === 'history'" class="flex-1 overflow-y-auto p-5 space-y-3 no-scrollbar">
+                    @foreach ($this->recentTransactions as $history)
+                        <div class="nb-card p-3 bg-white dark:bg-dark-soft border-2 hover:shadow-none transition-shadow">
+                            <div class="flex justify-between items-start mb-2">
                                 <span
-                                    class="text-[8px] font-black uppercase bg-green-500 text-white px-2 py-0.5 rounded border border-white">DISETUJUI</span>
-                            @elseif($task->latestSubmission?->approval_status === 'rejected')
+                                    class="text-[8px] font-black bg-black text-white px-2 py-0.5 uppercase tracking-widest border border-white">{{ \Carbon\Carbon::parse($history->transacted_at)->format('H:i') }}</span>
                                 <span
-                                    class="text-[8px] font-black uppercase bg-red-500 text-white px-2 py-0.5 rounded border border-white">DITOLAK
-                                    - REVISI</span>
-                            @elseif($task->latestSubmission?->approval_status === 'pending')
+                                    class="text-[8px] font-black border-2 border-black dark:border-white px-2 py-0.5 uppercase tracking-widest dark:text-white">{{ str_replace('_', ' ', $history->status) }}</span>
+                            </div>
+                            <h4 class="text-[10px] font-black uppercase dark:text-white tracking-tight line-clamp-1">
+                                {{ $history->reference }}</h4>
+                            <div class="flex justify-between items-end mt-3">
                                 <span
-                                    class="text-[8px] font-black uppercase bg-primary-blue text-white px-2 py-0.5 rounded border border-white">MENUNGGU
-                                    ACC</span>
-                            @else
-                                <span
-                                    class="text-[8px] font-black uppercase bg-amber-500 text-white px-2 py-0.5 rounded border border-white">BELUM
-                                    SELESAI</span>
-                            @endif
-                        </div>
-                        @if ($task->taskDefinition->description)
-                            <p class="text-[10px] text-gray-400">{{ $task->taskDefinition->description }}</p>
-                        @endif
-                        <div class="flex flex-wrap gap-1.5 items-center mt-1">
-                            <span class="text-[8px] font-bold text-gray-400 uppercase tracking-widest">{{ $task->taskDefinition->date->translatedFormat('d M Y') }}</span>
-                            @if ($task->taskDefinition->deadline_at)
-                                <span class="text-[8px] font-black uppercase tracking-widest bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300 px-2 py-0.5 rounded border border-gray-200 dark:border-gray-700">
-                                    Deadline: {{ $task->taskDefinition->deadline_at->translatedFormat('d M H:i') }}
-                                </span>
-                            @elseif($task->taskDefinition->is_routine && isset($task->taskDefinition->computed_deadline) && $task->taskDefinition->computed_deadline)
-                                <span class="text-[8px] font-black uppercase tracking-widest bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300 px-2 py-0.5 rounded border border-gray-200 dark:border-gray-700">
-                                    Deadline: {{ \Carbon\Carbon::parse($task->taskDefinition->computed_deadline)->translatedFormat('d M H:i') }}
-                                </span>
-                            @endif
-                        </div>
-                        <span
-                            class="text-[9px] font-black uppercase tracking-widest text-primary-blue flex items-center gap-1.5 mt-1">
-                            Kerjakan di Halaman Tugas Saya
-                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                                stroke-width="3">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
-                            </svg>
-                        </span>
-                    </a>
-                @empty
-                    <div class="text-center py-10 text-xs text-gray-400 italic font-semibold">Tidak ada tugas khusus
-                        hari ini</div>
-                @endforelse
-            </div>
-
-            <div x-show="tab === 'history'" class="flex-1 overflow-y-auto p-5 space-y-3 no-scrollbar">
-                @foreach ($this->recentTransactions as $history)
-                    <div class="nb-card p-3 bg-white dark:bg-dark-soft border-2 hover:shadow-none transition-shadow">
-                        <div class="flex justify-between items-start mb-2">
-                            <span
-                                class="text-[8px] font-black bg-black text-white px-2 py-0.5 uppercase tracking-widest border border-white">{{ \Carbon\Carbon::parse($history->transacted_at)->format('H:i') }}</span>
-                            <span
-                                class="text-[8px] font-black border-2 border-black dark:border-white px-2 py-0.5 uppercase tracking-widest dark:text-white">{{ str_replace('_', ' ', $history->status) }}</span>
-                        </div>
-                        <h4 class="text-[10px] font-black uppercase dark:text-white tracking-tight line-clamp-1">
-                            {{ $history->reference }}</h4>
-                        <div class="flex justify-between items-end mt-3">
-                            <span
-                                class="text-[8px] font-bold text-gray-400 uppercase tracking-widest">{{ $history->total_qty }}
-                                ITEMS</span>
-                            <div class="flex items-center gap-2">
-                                <span
-                                    class="text-xs font-black text-primary-red">Rp{{ number_format($history->total_amount, 0, ',', '.') }}</span>
-                                <button wire:click="viewDetails('{{ $history->reference }}')"
-                                    class="nb-btn text-[8px] py-1 px-2 bg-primary-blue text-white shadow-none border-2">DETAIL</button>
+                                    class="text-[8px] font-bold text-gray-400 uppercase tracking-widest">{{ $history->total_qty }}
+                                    ITEMS</span>
+                                <div class="flex items-center gap-2">
+                                    <span
+                                        class="text-xs font-black text-primary-red">Rp{{ number_format($history->total_amount, 0, ',', '.') }}</span>
+                                    <button wire:click="viewDetails('{{ $history->reference }}')"
+                                        class="nb-btn text-[8px] py-1 px-2 bg-primary-blue text-white shadow-none border-2">DETAIL</button>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                @endforeach
-            </div>
+                    @endforeach
+                </div>
 
-
-            <!-- Checkout Section -->
-            <div
-                class="p-3.5 sm:p-4 bg-white dark:bg-dark-neutral border-t-[var(--nb-border)] border-black dark:border-slate-800 space-y-2.5 max-h-[60vh] overflow-y-auto no-scrollbar">
+                <!-- Checkout Section (60% Height Ratio) -->
+                <div x-show="tab === 'cart'"
+                    class="h-[60%] shrink-0 overflow-y-auto p-3.5 sm:p-4 bg-white dark:bg-dark-neutral space-y-2.5 no-scrollbar">
                 <div x-show="$wire.transactionDate < '{{ now()->toDateString() }}'" x-cloak
                     class="nb-card p-2 bg-primary-yellow border-2 shadow-none flex items-center justify-center gap-1.5 animate-pulse">
                     <svg class="w-3.5 h-3.5 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
