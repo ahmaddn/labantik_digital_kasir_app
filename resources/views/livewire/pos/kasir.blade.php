@@ -428,7 +428,7 @@
                         {{-- CASH --}}
                         <button type="button" @click="payment_method = 'cash'"
                             :class="payment_method === 'cash' 
-                                ? 'bg-slate-900 text-white border-slate-900 dark:bg-emerald-600 dark:text-white dark:border-emerald-500 shadow-md shadow-emerald-950/20' 
+                                ? 'bg-black text-white border-black dark:bg-black dark:text-white dark:border-slate-500 shadow-md' 
                                 : 'bg-white text-slate-700 border-slate-300 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 dark:hover:text-white'"
                             class="nb-btn flex-1 py-1.5 px-2 text-[9px] shadow-none border-2 font-black flex items-center justify-center gap-1 transition-all">
                             <svg class="w-3 h-3 shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><rect width="20" height="14" x="2" y="5" rx="2"/><path d="M2 10h20"/></svg>
@@ -437,7 +437,7 @@
                         {{-- TRANSFER --}}
                         <button type="button" @click="payment_method = 'transfer'; status = 'uang_diterima'"
                             :class="payment_method === 'transfer' 
-                                ? 'bg-blue-600 text-white border-blue-600 dark:bg-blue-600 dark:text-white dark:border-blue-500 shadow-md shadow-blue-950/20' 
+                                ? 'bg-black text-white border-black dark:bg-black dark:text-white dark:border-slate-500 shadow-md' 
                                 : 'bg-white text-slate-700 border-slate-300 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 dark:hover:text-white'"
                             class="nb-btn flex-1 py-1.5 px-2 text-[9px] shadow-none border-2 font-black flex items-center justify-center gap-1 transition-all">
                             <svg class="w-3 h-3 shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="m5 12 7-7 7 7"/><path d="M12 19V5"/></svg>
@@ -446,7 +446,7 @@
                         {{-- QRIS --}}
                         <button type="button" @click="payment_method = 'qris'; status = 'uang_diterima'"
                             :class="payment_method === 'qris' 
-                                ? 'bg-purple-600 text-white border-purple-600 dark:bg-purple-600 dark:text-white dark:border-purple-500 shadow-md shadow-purple-950/20' 
+                                ? 'bg-black text-white border-black dark:bg-black dark:text-white dark:border-slate-500 shadow-md' 
                                 : 'bg-white text-slate-700 border-slate-300 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 dark:hover:text-white'"
                             class="nb-btn flex-1 py-1.5 px-2 text-[9px] shadow-none border-2 font-black flex items-center justify-center gap-1 transition-all">
                             <svg class="w-3 h-3 shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/><path d="M14 14h3v3"/><path d="M17 21v-3"/><path d="M21 14v3h-3"/><path d="M21 21h-3"/></svg>
