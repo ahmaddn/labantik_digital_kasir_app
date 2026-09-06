@@ -126,9 +126,22 @@ class Leaderboard extends Component
                     };
                 });
 
-                // Count attendances
-                $userStats['attendance_count'] = CashierAttendance::where('user_id', $detailUser->id)->count();
-                $userStats['attendance_points'] = CashierAttendance::where('user_id', $detailUser->id)->sum('points_awarded');
+                // Count attendances and calculate attendance & session points
+                $attendances = CashierAttendance::where('user_id', $detailUser->id)->get();
+                $userStats['attendance_count'] = $attendances->count();
+                $userStats['attendance_points'] = $attendances->sum(function ($att) {
+                    $pts = 0;
+                    if ($att->clock_in) {
+                        $pts += 15; // Buka laci & stok awal (+15 Pts)
+                    }
+                    if ($att->clock_out) {
+                        $pts += 15; // Tutup laci & stok akhir (+15 Pts)
+                    }
+                    if ($att->clock_out_status === 'overtime' || $att->clock_out_status === 'on_time') {
+                        $pts += 10; // Bonus tepat waktu / lembur (+10 Pts)
+                    }
+                    return $pts;
+                });
             }
         }
 
