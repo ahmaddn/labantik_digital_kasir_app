@@ -33,10 +33,11 @@
 
         <!-- Header Section -->
         <div
-            class="px-4 lg:px-8 py-4 bg-primary-blue dark:bg-slate-900 border-b-[var(--nb-border)] border-black dark:border-slate-800 shadow-[0_4px_0_0_rgba(0,0,0,1)] dark:shadow-[0_4px_0_0_rgba(0,0,0,0.5)]">
-            <div class="flex flex-col 2xl:flex-row items-stretch 2xl:items-center justify-between gap-3.5">
-                <div class="flex items-center justify-between sm:justify-start gap-4">
-                    <div class="flex items-center gap-3 sm:gap-4">
+            class="px-4 lg:px-8 py-3.5 bg-primary-blue dark:bg-slate-900 border-b-[var(--nb-border)] border-black dark:border-slate-800 shadow-[0_4px_0_0_rgba(0,0,0,1)] dark:shadow-[0_4px_0_0_rgba(0,0,0,0.5)]">
+            <div class="flex flex-col md:flex-row items-center justify-between gap-3">
+                <!-- Branding & Date/Time -->
+                <div class="flex items-center gap-3 shrink-0 w-full md:w-auto justify-between md:justify-start">
+                    <div class="flex items-center gap-3">
                         @php
                             $activeJurusanId = session('active_jurusan_id');
                             $themeSettings = null;
@@ -50,64 +51,67 @@
                             $tefaLogo = $themeSettings['tefa_logo'] ?? '';
                         @endphp
                         <a href="{{ route('dashboard') }}"
-                            class="theme-no-card nb-card-flat p-1.5 w-12 h-12 shrink-0 bg-white flex items-center justify-center hover:scale-105 transition-transform">
+                            class="theme-no-card nb-card-flat p-1 w-10 h-10 shrink-0 bg-white flex items-center justify-center hover:scale-105 transition-transform rounded-xl">
                             <img src="{{ $tefaLogo ? asset('storage/' . $tefaLogo) : asset('favicon.png') }}"
                                 class="w-full h-full object-contain">
                         </a>
                         <div class="min-w-0">
-                            <h1 class="text-lg lg:text-xl font-black uppercase tracking-tighter text-white leading-none truncate">
+                            <h1 class="text-base lg:text-lg font-black uppercase tracking-tighter text-white leading-none truncate max-w-[180px] sm:max-w-[240px]">
                                 {{ $tefaName }}</h1>
                             <div class="flex items-center gap-1.5 mt-1">
                                 <span
-                                    class="text-[8px] font-black bg-black text-white px-1.5 py-0.5 uppercase tracking-widest border border-white">{{ now()->translatedFormat('d F Y') }}</span>
+                                    class="text-[8px] font-black bg-black text-white px-1.5 py-0.5 uppercase tracking-widest border border-white rounded-md">{{ now()->translatedFormat('d F Y') }}</span>
                                 <span x-data="{ time: '' }" x-init="setInterval(() => time = new Date().toLocaleTimeString('id-ID', { hour12: false }), 1000)" x-text="time"
-                                    class="text-[8px] font-black bg-slate-100 dark:bg-black text-black dark:text-white px-1.5 py-0.5 uppercase tracking-widest border border-black dark:border-white"></span>
+                                    class="text-[8px] font-black bg-slate-100 dark:bg-black text-black dark:text-white px-1.5 py-0.5 uppercase tracking-widest border border-black dark:border-white rounded-md"></span>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="flex-1 w-full max-w-xl">
-                    <input type="text" id="pos-search-input" x-ref="searchInput" x-model="search"
-                        placeholder="CARI MENU (INSTAN)..."
-                        class="nb-input w-full p-2.5 text-xs uppercase placeholder:text-gray-400 bg-white dark:bg-slate-800 border-white shadow-none focus:ring-0">
-                </div>
+                <!-- Instant Search Input & Controls Bar -->
+                <div class="flex flex-1 items-center gap-2 w-full md:w-auto justify-end">
+                    <div class="flex-1 max-w-md min-w-[200px]">
+                        <input type="text" id="pos-search-input" x-ref="searchInput" x-model="search"
+                            placeholder="CARI MENU (INSTAN)..."
+                            class="nb-input w-full px-3.5 py-2 text-xs uppercase placeholder:text-gray-400 bg-white dark:bg-slate-800 border-white dark:border-slate-700 shadow-none focus:ring-2 focus:ring-amber-400 rounded-xl">
+                    </div>
 
-                <div class="flex flex-wrap items-center gap-2 shrink-0">
-                    <!-- Global Notifications Bell -->
-                    @livewire('note-notifications')
-                    @livewire('layout.tefa-switcher')
-                    <button @click="toggleTheme()" class="nb-btn p-2 bg-white dark:bg-dark-soft shadow-none border-2">
-                        <svg x-show="!darkMode" class="w-4 h-4 text-black" fill="none" stroke="currentColor"
-                            viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
-                                d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-                        </svg>
-                        <svg x-show="darkMode" x-cloak class="w-4 h-4 text-white" fill="none" stroke="currentColor"
-                            viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
-                                d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707M16.95 17.95l.707.707M7.05 7.05l.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z" />
-                        </svg>
-                    </button>
-                    @if (session('active_role_name') !== 'kasir')
-                    <a href="{{ route('inventory-report') }}" wire:navigate
-                        class="nb-btn py-2 px-3 bg-primary-yellow text-black text-xs shadow-none border-2">SELISIH</a>
-                    @endif
-                    <button wire:click="editOpeningStock"
-                        class="nb-btn py-2 px-3 bg-white text-black text-xs shadow-none border-2">STOK</button>
-                    <button wire:click="finishSession" {{ $isSessionFinished ? 'disabled' : '' }}
-                        class="nb-btn py-2 px-3 {{ $isSessionFinished ? 'bg-gray-400' : 'bg-black text-white' }} text-xs shadow-none border-2">
-                        {{ $isSessionFinished ? 'OFF' : 'SELESAI' }}
-                    </button>
-                    <form method="POST" action="{{ route('logout') }}">
-                        @csrf
-                        <button type="submit" class="nb-btn p-2 bg-primary-red text-white shadow-none border-2" title="Logout">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="flex items-center gap-1.5 shrink-0 overflow-x-auto no-scrollbar py-0.5">
+                        <!-- Global Notifications Bell -->
+                        @livewire('note-notifications')
+                        @livewire('layout.tefa-switcher')
+                        <button @click="toggleTheme()" class="nb-btn p-2 bg-white dark:bg-dark-soft shadow-none border-2 rounded-xl" title="Toggle Mode Dark/Light">
+                            <svg x-show="!darkMode" class="w-4 h-4 text-black" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
-                                    d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                                    d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                            </svg>
+                            <svg x-show="darkMode" x-cloak class="w-4 h-4 text-white" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
+                                    d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707M16.95 17.95l.707.707M7.05 7.05l.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z" />
                             </svg>
                         </button>
-                    </form>
+                        @if (session('active_role_name') !== 'kasir')
+                        <a href="{{ route('inventory-report') }}" wire:navigate
+                            class="nb-btn py-1.5 px-3 bg-primary-yellow text-black text-xs font-black shadow-none border-2 rounded-xl">SELISIH</a>
+                        @endif
+                        <button wire:click="editOpeningStock"
+                            class="nb-btn py-1.5 px-3 bg-white text-black text-xs font-black shadow-none border-2 rounded-xl">STOK</button>
+                        <button wire:click="finishSession" {{ $isSessionFinished ? 'disabled' : '' }}
+                            class="nb-btn py-1.5 px-3 {{ $isSessionFinished ? 'bg-gray-400' : 'bg-black text-white' }} text-xs font-black shadow-none border-2 rounded-xl">
+                            {{ $isSessionFinished ? 'OFF' : 'SELESAI' }}
+                        </button>
+                        <form method="POST" action="{{ route('logout') }}" class="inline-block">
+                            @csrf
+                            <button type="submit" class="nb-btn p-2 bg-primary-red text-white shadow-none border-2 rounded-xl flex items-center justify-center" title="Logout">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
+                                        d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                                </svg>
+                            </button>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
