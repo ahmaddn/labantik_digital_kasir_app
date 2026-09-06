@@ -163,7 +163,7 @@
                             <div class="px-4 min-w-0">
                                 <div class="flex items-center gap-2">
                                     <div
-                                        class="text-sm font-black text-primary-blue uppercase tracking-tight truncate">
+                                        class="text-sm font-black text-primary-blue dark:text-blue-400 uppercase tracking-tight truncate">
                                         {{ $tx->reference }}</div>
                                     @php
                                         $txJurusan = $tx->jurusan_id
@@ -183,7 +183,7 @@
                                     @endif
                                 </div>
                                 <div
-                                    class="text-[9px] font-bold text-gray-400 mt-1 uppercase tracking-widest leading-relaxed">
+                                    class="text-[9px] font-bold text-gray-400 dark:text-gray-400 mt-1 uppercase tracking-widest leading-relaxed truncate">
                                     {{ $productNames }}
                                 </div>
                             </div>
@@ -192,17 +192,17 @@
                             <div class="px-4 min-w-0">
                                 <div class="flex items-center">
                                     <div
-                                        class="w-8 h-8 rounded-lg bg-gray-50 dark:bg-gray-900 flex items-center justify-center text-[10px] font-black text-primary-blue border border-gray-100 dark:border-gray-800 mr-3 shrink-0">
+                                        class="w-8 h-8 rounded-lg bg-gray-50 dark:bg-gray-900 flex items-center justify-center text-[10px] font-black text-primary-blue dark:text-blue-400 border border-gray-100 dark:border-gray-800 mr-3 shrink-0">
                                         {{ substr($tx->buyer_name ?? 'G', 0, 1) }}
                                     </div>
                                     <div class="flex flex-col min-w-0">
                                         <span
-                                            class="text-sm font-bold uppercase tracking-tight text-gray-700 dark:text-gray-300 truncate">
+                                            class="text-sm font-bold uppercase tracking-tight text-gray-700 dark:text-gray-200 truncate">
                                             {{ $tx->buyer_name ?? 'Guest Customer' }}
                                         </span>
                                         @if ($tx->user)
                                             <span
-                                                class="text-[9px] font-black uppercase text-gray-405 dark:text-gray-500 tracking-widest mt-0.5">
+                                                class="text-[9px] font-black uppercase text-gray-400 dark:text-gray-500 tracking-widest mt-0.5 truncate">
                                                 Kasir: {{ $tx->user->name }}
                                             </span>
                                         @endif
@@ -213,7 +213,7 @@
                             <!-- Items Count -->
                             <div class="px-4 text-center">
                                 <span
-                                    class="px-3 py-1.5 bg-gray-100 dark:bg-gray-900 rounded-xl text-[10px] font-black text-gray-500 uppercase tracking-widest border border-gray-100 dark:border-gray-800">
+                                    class="px-3 py-1.5 bg-gray-100 dark:bg-gray-900 rounded-xl text-[10px] font-black text-gray-500 dark:text-gray-300 uppercase tracking-widest border border-gray-100 dark:border-gray-800">
                                     {{ $tx->total_qty }} <span class="text-[8px] opacity-50 ml-0.5">U</span>
                                 </span>
                             </div>
@@ -222,9 +222,9 @@
                             <div class="px-4 text-center">
                                 @php
                                     $methodBadge = match ($tx->payment_method ?? 'cash') {
-                                        'transfer' => 'bg-blue-50 text-blue-600 border-blue-100 dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-500/20',
-                                        'qris' => 'bg-purple-50 text-purple-600 border-purple-100 dark:bg-purple-500/10 dark:text-purple-400 dark:border-purple-500/20',
-                                        default => 'bg-green-50 text-green-600 border-green-100 dark:bg-green-500/10 dark:text-green-400 dark:border-green-500/20',
+                                        'transfer' => 'bg-blue-50 text-blue-600 border-blue-100 dark:bg-blue-500/20 dark:text-blue-300 dark:border-blue-500/30',
+                                        'qris' => 'bg-purple-50 text-purple-600 border-purple-100 dark:bg-purple-500/20 dark:text-purple-300 dark:border-purple-500/30',
+                                        default => 'bg-green-50 text-green-600 border-green-100 dark:bg-green-500/20 dark:text-green-300 dark:border-green-500/30',
                                     };
                                     $methodLabel = match ($tx->payment_method ?? 'cash') {
                                         'transfer' => 'Transfer',
@@ -239,27 +239,32 @@
 
                             <!-- Total Bayar -->
                             <div class="px-4">
-                                <div class="text-lg font-black text-primary-red italic">
+                                <div class="text-lg font-black text-primary-red dark:text-red-400 italic">
                                     Rp{{ number_format($tx->total_amount, 0, ',', '.') }}</div>
-                                <div class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mt-0.5">
+                                <div class="text-[9px] font-bold text-gray-400 dark:text-gray-400 uppercase tracking-widest mt-0.5">
                                     {{ $tx->unique_items }} Jenis Produk</div>
                             </div>
 
                             <!-- Status -->
-                            <div class="px-4 text-center min-w-0">
+                            <div class="px-4 text-center min-w-0 flex justify-center">
                                 @php
                                     $statusColor = match ($tx->status) {
                                         'uang_diterima'
-                                            => 'bg-green-50 text-green-600 border-green-100 dark:bg-green-500/10 dark:text-green-500 dark:border-green-500/20',
+                                            => 'bg-green-50 text-green-600 border-green-100 dark:bg-green-500/20 dark:text-green-300 dark:border-green-500/30',
                                         'belum_kembalian'
-                                            => 'bg-amber-50 text-amber-600 border-amber-100 dark:bg-amber-500/10 dark:text-amber-500 dark:border-amber-500/20',
+                                            => 'bg-amber-50 text-amber-600 border-amber-100 dark:bg-amber-500/20 dark:text-amber-300 dark:border-amber-500/30',
                                         default
-                                            => 'bg-red-50 text-red-600 border-red-100 dark:bg-red-500/10 dark:text-red-500 dark:border-red-500/20',
+                                            => 'bg-red-50 text-red-600 border-red-100 dark:bg-red-500/20 dark:text-red-300 dark:border-red-500/30',
+                                    };
+                                    $statusText = match ($tx->status) {
+                                        'uang_diterima' => 'Lunas',
+                                        'belum_kembalian' => 'Pending',
+                                        default => 'Hutang',
                                     };
                                 @endphp
                                 <span
-                                    class="py-1.5 {{ $statusColor }} border rounded-full text-[8px] font-black uppercase tracking-widest inline-block w-28 text-center truncate">
-                                    {{ str_replace('_', ' ', $tx->status) }}
+                                    class="py-1.5 px-3 {{ $statusColor }} border rounded-full text-[8px] font-black uppercase tracking-widest inline-block w-28 text-center truncate">
+                                    {{ $statusText }}
                                 </span>
                             </div>
 

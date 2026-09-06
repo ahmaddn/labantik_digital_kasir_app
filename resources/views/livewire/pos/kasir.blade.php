@@ -33,55 +33,57 @@
 
         <!-- Header Section -->
         <div
-            class="px-6 lg:px-10 py-5 bg-primary-blue dark:bg-slate-900 border-b-[var(--nb-border)] border-black dark:border-slate-800 shadow-[0_4px_0_0_rgba(0,0,0,1)] dark:shadow-[0_4px_0_0_rgba(0,0,0,0.5)]">
-            <div class="flex flex-col md:flex-row items-center justify-between gap-6">
-                <div class="flex items-center gap-6">
-                    @php
-                        $activeJurusanId = session('active_jurusan_id');
-                        $themeSettings = null;
-                        if ($activeJurusanId) {
-                            $jurusanModel = \App\Models\Jurusan::find($activeJurusanId);
-                            if ($jurusanModel && $jurusanModel->theme_settings) {
-                                $themeSettings = $jurusanModel->theme_settings;
+            class="px-4 lg:px-8 py-4 bg-primary-blue dark:bg-slate-900 border-b-[var(--nb-border)] border-black dark:border-slate-800 shadow-[0_4px_0_0_rgba(0,0,0,1)] dark:shadow-[0_4px_0_0_rgba(0,0,0,0.5)]">
+            <div class="flex flex-col 2xl:flex-row items-stretch 2xl:items-center justify-between gap-3.5">
+                <div class="flex items-center justify-between sm:justify-start gap-4">
+                    <div class="flex items-center gap-3 sm:gap-4">
+                        @php
+                            $activeJurusanId = session('active_jurusan_id');
+                            $themeSettings = null;
+                            if ($activeJurusanId) {
+                                $jurusanModel = \App\Models\Jurusan::find($activeJurusanId);
+                                if ($jurusanModel && $jurusanModel->theme_settings) {
+                                    $themeSettings = $jurusanModel->theme_settings;
+                                }
                             }
-                        }
-                        $tefaName = $themeSettings['tefa_name'] ?? 'LABANTIK POS';
-                        $tefaLogo = $themeSettings['tefa_logo'] ?? '';
-                    @endphp
-                    <a href="{{ route('dashboard') }}"
-                        class="theme-no-card nb-card-flat p-2 w-14 h-14 bg-white flex items-center justify-center hover:scale-110 transition-transform">
-                        <img src="{{ $tefaLogo ? asset('storage/' . $tefaLogo) : asset('favicon.png') }}"
-                            class="w-full h-full object-contain">
-                    </a>
-                    <div>
-                        <h1 class="text-xl lg:text-2xl font-black uppercase tracking-tighter text-white leading-none">
-                            {{ $tefaName }}</h1>
-                        <div class="flex items-center gap-2 mt-1.5">
-                            <span
-                                class="text-[9px] font-black bg-black text-white px-2 py-0.5 uppercase tracking-widest border border-white">{{ now()->translatedFormat('d F Y') }}</span>
-                            <span x-data="{ time: '' }" x-init="setInterval(() => time = new Date().toLocaleTimeString('id-ID', { hour12: false }), 1000)" x-text="time"
-                                class="text-[9px] font-black bg-slate-100 dark:bg-black text-black dark:text-white px-2 py-0.5 uppercase tracking-widest border border-black dark:border-white"></span>
+                            $tefaName = $themeSettings['tefa_name'] ?? 'LABANTIK POS';
+                            $tefaLogo = $themeSettings['tefa_logo'] ?? '';
+                        @endphp
+                        <a href="{{ route('dashboard') }}"
+                            class="theme-no-card nb-card-flat p-1.5 w-12 h-12 shrink-0 bg-white flex items-center justify-center hover:scale-105 transition-transform">
+                            <img src="{{ $tefaLogo ? asset('storage/' . $tefaLogo) : asset('favicon.png') }}"
+                                class="w-full h-full object-contain">
+                        </a>
+                        <div class="min-w-0">
+                            <h1 class="text-lg lg:text-xl font-black uppercase tracking-tighter text-white leading-none truncate">
+                                {{ $tefaName }}</h1>
+                            <div class="flex items-center gap-1.5 mt-1">
+                                <span
+                                    class="text-[8px] font-black bg-black text-white px-1.5 py-0.5 uppercase tracking-widest border border-white">{{ now()->translatedFormat('d F Y') }}</span>
+                                <span x-data="{ time: '' }" x-init="setInterval(() => time = new Date().toLocaleTimeString('id-ID', { hour12: false }), 1000)" x-text="time"
+                                    class="text-[8px] font-black bg-slate-100 dark:bg-black text-black dark:text-white px-1.5 py-0.5 uppercase tracking-widest border border-black dark:border-white"></span>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="flex-1 w-full max-w-lg">
+                <div class="flex-1 w-full max-w-xl">
                     <input type="text" id="pos-search-input" x-ref="searchInput" x-model="search"
                         placeholder="CARI MENU (INSTAN)..."
-                        class="nb-input w-full p-3 text-sm uppercase placeholder:text-gray-400 bg-white dark:bg-slate-800 border-white shadow-none focus:ring-0">
+                        class="nb-input w-full p-2.5 text-xs uppercase placeholder:text-gray-400 bg-white dark:bg-slate-800 border-white shadow-none focus:ring-0">
                 </div>
 
-                <div class="flex flex-wrap items-center gap-3">
+                <div class="flex flex-wrap items-center gap-2 shrink-0">
                     <!-- Global Notifications Bell -->
                     @livewire('note-notifications')
                     @livewire('layout.tefa-switcher')
-                    <button @click="toggleTheme()" class="nb-btn p-3 bg-white dark:bg-dark-soft shadow-none border-2">
-                        <svg x-show="!darkMode" class="w-5 h-5 text-black" fill="none" stroke="currentColor"
+                    <button @click="toggleTheme()" class="nb-btn p-2 bg-white dark:bg-dark-soft shadow-none border-2">
+                        <svg x-show="!darkMode" class="w-4 h-4 text-black" fill="none" stroke="currentColor"
                             viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
                                 d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
                         </svg>
-                        <svg x-show="darkMode" x-cloak class="w-5 h-5 text-white" fill="none" stroke="currentColor"
+                        <svg x-show="darkMode" x-cloak class="w-4 h-4 text-white" fill="none" stroke="currentColor"
                             viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
                                 d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707M16.95 17.95l.707.707M7.05 7.05l.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z" />
@@ -89,18 +91,18 @@
                     </button>
                     @if (session('active_role_name') !== 'kasir')
                     <a href="{{ route('inventory-report') }}" wire:navigate
-                        class="nb-btn py-3 px-4 bg-primary-yellow text-black text-xs shadow-none border-2 hidden md:block">SELISIH</a>
+                        class="nb-btn py-2 px-3 bg-primary-yellow text-black text-xs shadow-none border-2">SELISIH</a>
                     @endif
                     <button wire:click="editOpeningStock"
-                        class="nb-btn py-3 px-4 bg-white text-black text-xs shadow-none border-2">STOK</button>
+                        class="nb-btn py-2 px-3 bg-white text-black text-xs shadow-none border-2">STOK</button>
                     <button wire:click="finishSession" {{ $isSessionFinished ? 'disabled' : '' }}
-                        class="nb-btn py-3 px-4 {{ $isSessionFinished ? 'bg-gray-400' : 'bg-black text-white' }} text-xs shadow-none border-2">
+                        class="nb-btn py-2 px-3 {{ $isSessionFinished ? 'bg-gray-400' : 'bg-black text-white' }} text-xs shadow-none border-2">
                         {{ $isSessionFinished ? 'OFF' : 'SELESAI' }}
                     </button>
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
-                        <button type="submit" class="nb-btn p-3 bg-primary-red text-white shadow-none border-2">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <button type="submit" class="nb-btn p-2 bg-primary-red text-white shadow-none border-2" title="Logout">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
                                     d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                             </svg>
@@ -112,22 +114,22 @@
 
         <!-- Category Navigation -->
         <div
-            class="theme-no-card px-6 lg:px-10 py-4 bg-white dark:bg-slate-950 border-b-[var(--nb-border)] border-black dark:border-slate-800 flex items-center gap-3 overflow-x-auto no-scrollbar">
+            class="theme-no-card px-4 lg:px-8 py-3 bg-white dark:bg-slate-950 border-b-[var(--nb-border)] border-black dark:border-slate-800 flex items-center gap-2 overflow-x-auto no-scrollbar">
             <button @click="selectedCategory = null"
                 :class="selectedCategory === null ? 'bg-primary-blue text-white border-primary-blue dark:bg-blue-600 dark:text-white dark:border-blue-500 shadow-md' :
                     'bg-gray-100 text-slate-700 border-slate-300 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700 dark:hover:text-white'"
-                class="nb-btn text-[10px] py-1.5 px-4 shadow-none border-2 transition-all">SEMUA</button>
+                class="nb-btn text-[10px] py-1.5 px-3.5 shadow-none border-2 transition-all">SEMUA</button>
             @foreach ($this->categories as $cat)
                 <button type="button"
                     @click="selectedCategory = (selectedCategory == '{{ $cat->id }}' ? null : '{{ $cat->id }}')"
                     :class="selectedCategory == '{{ $cat->id }}' ? 'bg-primary-blue text-white border-primary-blue dark:bg-blue-600 dark:text-white dark:border-blue-500 shadow-md' :
                         'bg-gray-100 text-slate-700 border-slate-300 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700 dark:hover:text-white'"
-                    class="nb-btn text-[10px] py-1.5 px-4 whitespace-nowrap shadow-none border-2 transition-all">{{ $cat->name }}</button>
+                    class="nb-btn text-[10px] py-1.5 px-3.5 whitespace-nowrap shadow-none border-2 transition-all">{{ $cat->name }}</button>
             @endforeach
         </div>
 
         <!-- Product Grid -->
-        <div class="flex-1 overflow-y-auto px-6 lg:px-10 py-8 no-scrollbar bg-slate-100 dark:bg-dark-bg"
+        <div class="flex-1 overflow-y-auto px-4 lg:px-8 py-6 no-scrollbar bg-slate-100 dark:bg-dark-bg"
             data-product-grid>
             <div x-show="filteredProducts.length === 0" x-cloak
                 class="h-full flex flex-col items-center justify-center p-6">
@@ -147,8 +149,8 @@
             </div>
 
             <div x-show="filteredProducts.length > 0"
-                class="grid gap-6"
-                :style="'grid-template-columns: repeat(auto-fill, minmax(220px, 1fr))'">
+                class="grid gap-4"
+                :style="'grid-template-columns: repeat(auto-fill, minmax(180px, 1fr))'">
                 <template x-for="product in filteredProducts" :key="product.id">
                     <button type="button" @click="addToCart(product)"
                         :disabled="{{ $isSessionFinished ? 'true' : 'false' }}"
@@ -1145,8 +1147,8 @@
                     const doResize = (event) => {
                         if (!this.isResizing) return;
                         const newWidth = window.innerWidth - event.clientX;
-                        /* Batasi lebar sidebar minimal 280px dan maksimal 80% dari lebar layar */
-                        const maxWidth = Math.floor(window.innerWidth * 0.8);
+                        /* Batasi lebar sidebar minimal 280px dan maksimal hingga sisa panel kiri min 300px */
+                        const maxWidth = Math.max(300, window.innerWidth - 300);
                         if (newWidth >= 280 && newWidth <= maxWidth) {
                             this.sidebarWidth = newWidth;
                             localStorage.setItem('cashier_sidebar_width', newWidth);
