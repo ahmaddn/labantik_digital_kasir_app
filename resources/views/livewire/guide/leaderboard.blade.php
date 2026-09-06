@@ -1,52 +1,33 @@
-<div class="py-6 w-full space-y-8">
-    <!-- Header Section -->
-    <div
-        class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-gradient-to-r from-amber-500 to-yellow-600 dark:from-amber-950 dark:to-yellow-905 p-6 md:p-5 rounded-3xl shadow-xl text-white relative overflow-hidden">
-        <div class="absolute -right-10 -bottom-10 w-40 h-40 bg-white/10 rounded-full blur-2xl"></div>
-        <div class="absolute right-20 top-2 w-20 h-20 bg-white/5 rounded-full blur-xl"></div>
-
-        <div class="relative z-10">
+<div class="py-6 w-full space-y-6">
+    <!-- Active Leaderboard Card -->
+    <div class="bg-white dark:bg-gray-800 rounded-3xl md:rounded-2xl p-6 md:p-8 shadow-2xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 w-full space-y-6">
+        <div>
             <span
-                class="px-3 py-1 bg-white/20 text-xs font-black tracking-widest uppercase rounded-full border border-white/10 flex items-center gap-1.5 w-fit">
-                <svg class="w-3.5 h-3.5 text-yellow-405" fill="currentColor" viewBox="0 0 20 20"
+                class="px-3 py-1 bg-amber-500/10 text-amber-600 dark:text-amber-400 text-[10px] font-black tracking-widest uppercase rounded-full border border-amber-500/20 flex items-center gap-1.5 w-fit">
+                <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"
                     xmlns="http://www.w3.org/2000/svg">
                     <path
                         d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.776 1.848l-3.59 1.54 3.59 1.54a1 1 0 11-.776 1.848l-4-1.714a.999.999 0 01-.356-.257l-2.644-1.133a1 1 0 000-1.84l7-3a1 1 0 00-.788 0l-7-3a1 1 0 000-1.84l7-3z" />
                 </svg>
                 Sistem Peringkat & Gamifikasi
             </span>
-            <h1 class="text-2xl md:text-3xl font-black mt-2 tracking-tight italic uppercase">Papan Skor & Poin Kasir</h1>
-            <p class="text-amber-50 mt-2 text-xs md:text-sm max-w-2xl font-medium">
-                Kumpulkan poin dari melayani transaksi, menyelesaikan tugas rutin, dan menjaga performa absensi Anda untuk menaikkan peringkat!
+            <h1 class="text-2xl md:text-3xl font-black mt-2 tracking-tight italic uppercase text-gray-900 dark:text-white">Papan Skor & Poin Kasir</h1>
+            <p class="text-gray-400 mt-1 text-xs md:text-sm font-semibold">
+                Lakukan performa terbaik untuk memimpin papan skor dan kumpulkan poin!
             </p>
-        </div>
-    </div>
-
-    <!-- Active Leaderboard Card -->
-    <div class="bg-white dark:bg-gray-900 rounded-3xl md:rounded-2xl p-5 md:p-5 shadow-sm border border-gray-100 dark:border-gray-800 w-full space-y-6">
-        <div class="flex items-center gap-4">
-            <div class="w-12 h-12 rounded-2xl bg-amber-50 dark:bg-amber-900/30 flex items-center justify-center text-amber-600 dark:text-amber-400">
-                <svg class="w-6 h-6 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                </svg>
-            </div>
-            <div>
-                <h2 class="text-2xl font-black text-gray-950 dark:text-white uppercase italic tracking-tighter">Papan Peringkat Kasir</h2>
-                <p class="text-sm text-gray-400 mt-1 uppercase tracking-wider font-bold">Lakukan performa terbaik untuk memimpin papan skor!</p>
-            </div>
         </div>
 
         <!-- Dynamic Motivation Banner -->
         @php
-            $bannerBg = match ($motivation['type']) {
-                'gold' => 'from-amber-500/20 to-yellow-500/20 border-amber-500/30 text-amber-600 dark:text-amber-400',
-                'silver' => 'from-gray-400/20 to-slate-400/20 border-gray-400/30 text-gray-700 dark:text-gray-300',
-                'bronze' => 'from-amber-700/20 to-amber-800/20 border-amber-700/30 text-amber-700 dark:text-amber-500',
-                'purple' => 'from-purple-500/20 to-indigo-500/20 border-purple-500/30 text-purple-600 dark:text-purple-400',
-                default => 'from-red-500/20 to-orange-500/20 border-red-500/30 text-red-600 dark:text-red-400',
+            $bannerStyle = match ($motivation['type']) {
+                'gold' => 'bg-amber-500/10 border-amber-500/30 text-amber-600 dark:text-amber-400',
+                'silver' => 'bg-gray-500/10 border-gray-400/30 text-gray-700 dark:text-gray-300',
+                'bronze' => 'bg-amber-700/10 border-amber-700/30 text-amber-700 dark:text-amber-500',
+                'purple' => 'bg-purple-500/10 border-purple-500/30 text-purple-600 dark:text-purple-400',
+                default => 'bg-red-500/10 border-red-500/30 text-red-600 dark:text-red-400',
             };
         @endphp
-        <div class="bg-gradient-to-r {{ $bannerBg }} border p-6 rounded-3xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-sm">
+        <div class="{{ $bannerStyle }} border p-6 rounded-3xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-sm">
             <div class="flex items-center gap-3">
                 <div class="p-3 bg-white/20 dark:bg-gray-800/40 rounded-2xl shrink-0">
                     <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">

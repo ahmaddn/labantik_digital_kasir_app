@@ -111,11 +111,12 @@ class Leaderboard extends Component
 
                 // Count completed tasks
                 $userStats['completed_tasks'] = CashierTaskSubmission::where('submitted_by', $detailUser->id)
-                    ->where('submission_status', 'approved')
+                    ->where('approval_status', 'approved')
                     ->count();
-                $userStats['task_points'] = CashierTaskSubmission::where('submitted_by', $detailUser->id)
-                    ->where('submission_status', 'approved')
-                    ->join('cashier_task_definitions', 'cashier_task_submissions.task_definition_id', '=', 'cashier_task_definitions.id')
+                $userStats['task_points'] = CashierTaskSubmission::where('cashier_task_submissions.submitted_by', $detailUser->id)
+                    ->where('cashier_task_submissions.approval_status', 'approved')
+                    ->join('cashier_task_assignments', 'cashier_task_submissions.task_assignment_id', '=', 'cashier_task_assignments.id')
+                    ->join('cashier_task_definitions', 'cashier_task_assignments.task_definition_id', '=', 'cashier_task_definitions.id')
                     ->sum('cashier_task_definitions.points');
 
                 // Count attendances
