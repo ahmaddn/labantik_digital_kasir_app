@@ -28,10 +28,10 @@
     </div>
 
     <!-- Filter Panel -->
-    <div class="bg-white dark:bg-gray-800 rounded-2xl md:rounded-[2rem] p-5 md:p-6 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 mb-8 flex flex-col xl:flex-row xl:items-center justify-between gap-5">
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 items-end gap-4 w-full xl:w-auto">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl md:rounded-[2rem] p-5 md:p-6 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 mb-8 flex flex-col xl:flex-row xl:items-end justify-between gap-5">
+        <div class="flex flex-wrap items-end gap-4 flex-1">
             <!-- Filter Type Select -->
-            <div class="flex flex-col w-full">
+            <div class="flex flex-col flex-1 min-w-[160px]">
                 <span class="text-[9px] font-black uppercase tracking-widest text-gray-400 mb-1.5 ml-1">Periode Analisis</span>
                 <div class="relative w-full">
                     <select wire:model.live="filterType" class="w-full pl-4 pr-10 py-3 bg-gray-50 dark:bg-gray-900 border-none rounded-xl font-black text-xs text-gray-800 dark:text-white uppercase tracking-wider focus:ring-4 focus:ring-primary-blue/10 appearance-none">
@@ -47,14 +47,14 @@
 
             <!-- Conditional filters based on Filter Type -->
             @if($filterType !== 'cumulative')
-                <div class="flex flex-col w-full">
+                <div class="flex flex-col flex-1 min-w-[150px]">
                     <span class="text-[9px] font-black uppercase tracking-widest text-gray-400 mb-1.5 ml-1">Bulan</span>
                     <input type="month" wire:model.live="filterMonth" class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 border-none rounded-xl font-black text-xs text-gray-800 dark:text-white focus:ring-4 focus:ring-primary-blue/10">
                 </div>
             @endif
 
             @if($filterType === 'weekly')
-                <div class="flex flex-col w-full">
+                <div class="flex flex-col flex-1 min-w-[180px]">
                     <span class="text-[9px] font-black uppercase tracking-widest text-gray-400 mb-1.5 ml-1">Pilih Minggu</span>
                     <div class="relative w-full">
                         <select wire:model.live="filterWeek" class="w-full pl-4 pr-10 py-3 bg-gray-50 dark:bg-gray-900 border-none rounded-xl font-black text-xs text-gray-800 dark:text-white uppercase tracking-wider focus:ring-4 focus:ring-primary-blue/10 appearance-none">
@@ -75,17 +75,15 @@
         </div>
 
         @if($startDate && $endDate)
-            <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800/40 rounded-2xl px-5 py-3.5 flex items-center gap-3 shrink-0 self-stretch xl:self-auto justify-between xl:justify-start">
-                <div class="flex items-center gap-3">
-                    <div class="p-2 bg-primary-blue text-white rounded-xl shrink-0">
-                        <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
-                    </div>
-                    <div>
-                        <span class="text-[9px] font-black uppercase tracking-widest text-gray-400 block mb-0.5">Rentang Tanggal</span>
-                        <span class="text-xs font-black text-primary-blue dark:text-blue-400 uppercase">
-                            {{ \Carbon\Carbon::parse($startDate)->translatedFormat('d F Y') }} - {{ \Carbon\Carbon::parse($endDate)->translatedFormat('d F Y') }}
-                        </span>
-                    </div>
+            <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800/40 rounded-xl px-4 py-2.5 flex items-center gap-3 shrink-0 self-stretch xl:self-auto min-w-[240px]">
+                <div class="p-2 bg-primary-blue text-white rounded-lg shrink-0">
+                    <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
+                </div>
+                <div>
+                    <span class="text-[9px] font-black uppercase tracking-widest text-gray-400 block leading-tight">Rentang Tanggal</span>
+                    <span class="text-xs font-black text-primary-blue dark:text-blue-400 uppercase leading-snug">
+                        {{ \Carbon\Carbon::parse($startDate)->translatedFormat('d M Y') }} - {{ \Carbon\Carbon::parse($endDate)->translatedFormat('d M Y') }}
+                    </span>
                 </div>
             </div>
         @endif
