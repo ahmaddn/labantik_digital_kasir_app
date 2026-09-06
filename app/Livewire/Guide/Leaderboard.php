@@ -98,6 +98,7 @@ class Leaderboard extends Component
             'attendance_count' => 0,
             'attendance_points' => 0,
         ];
+        $recentLogs = collect();
 
         if ($this->selectedUserId) {
             $detailUser = User::find($this->selectedUserId);
@@ -132,16 +133,67 @@ class Leaderboard extends Component
                 $userStats['attendance_points'] = $attendances->sum(function ($att) {
                     $pts = 0;
                     if ($att->clock_in) {
-                        $pts += 15; // Buka laci & stok awal (+15 Pts)
+                        $pts += 15;
                     }
                     if ($att->clock_out) {
-                        $pts += 15; // Tutup laci & stok akhir (+15 Pts)
+                        $pts += 15;
                     }
                     if ($att->clock_out_status === 'overtime' || $att->clock_out_status === 'on_time') {
-                        $pts += 10; // Bonus tepat waktu / lembur (+10 Pts)
+                        $pts += 10;
                     }
                     return $pts;
                 });
+
+                // Build detailed activity log timeline
+                $taskLogs = $approvedSubmissions->map(function ($sub) {
+                    $def = $sub->assignment->taskDefinition ?? null;
+                    $priority = $def->priority ?? 'medium';
+                    $pts = match ($priority) {
+                        'low' => 5,
+                        'high' => 20,
+                        'critical' => 30,
+                        default => 10,
+                    };
+                    return [
+                        'type' => 'Tugas',
+                        'title' => 'Penyelesaian Tugas: ' . ($def->task_name ?? 'Tugas Kasir'),
+                        'date' => $sub->reviewed_at ?? $sub->submitted_at,
+                        'points' => '+' . $pts . ' Pts',
+                        'badge' => 'Tugas ' . ucfirst($priority),
+                        'badge_color' => 'bg-indigo-50 text-indigo-600 dark:bg-indigo-950/30 dark:text-indigo-400 border-indigo-200 dark:border-indigo-800'
+                    ];
+                });
+
+                $attendanceLogs = $attendances->map(function ($att) {
+                    $pts = 0;
+                    if ($att->clock_in) $pts += 15;
+                    if ($att->clock_out) $pts += 15;
+                    if ($att->clock_out_status === 'overtime' || $att->clock_out_status === 'on_time') $pts += 10;
+
+                    return [
+                        'type' => 'Absensi',
+                        'title' => 'Sesi Laci & Absensi Shift (' . \Carbon\Carbon::parse($att->date)->format('d M Y') . ')',
+                        'date' => $att->clock_out ?? $att->clock_in ?? $att->created_at,
+                        'points' => '+' . $pts . ' Pts',
+                        'badge' => 'Absensi Shift',
+                        'badge_color' => 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/30 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800'
+                    ];
+                });
+
+                $posSummaryLog = collect([
+                    [
+                        'type' => 'POS Penjualan',
+                        'title' => 'Akumulasi Penjualan Kasir (' . $userStats['total_transactions'] . ' Transaksi)',
+                        'date' => now(),
+                        'points' => '+' . $userStats['pos_points'] . ' Pts',
+                        'badge' => 'Transaksi POS',
+                        'badge_color' => 'bg-blue-50 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400 border-blue-200 dark:border-blue-800'
+                    ]
+                ]);
+
+                $recentLogs = $taskLogs->concat($attendanceLogs)->concat($posSummaryLog)
+                    ->sortByDesc('date')
+                    ->values();
             }
         }
 
@@ -151,6 +203,7 @@ class Leaderboard extends Component
             'motivation' => $motivation,
             'detailUser' => $detailUser,
             'userStats' => $userStats,
+            'recentLogs' => $recentLogs,
             'isManager' => in_array(session('active_role_name'), ['superadmin', 'pengelola_jurusan'])
         ])->layout('layouts.app', ['title' => 'Sistem Peringkat & Poin']);
     }
