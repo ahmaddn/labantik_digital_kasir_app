@@ -14,6 +14,12 @@ use Livewire\Component;
 class Dashboard extends Component
 {
     public $filterJurusan = '';
+    public $selectedTopCategory = 'all';
+
+    public function setTopCategory($categoryId)
+    {
+        $this->selectedTopCategory = $categoryId;
+    }
 
     public function updatedFilterJurusan()
     {
@@ -243,9 +249,18 @@ class Dashboard extends Component
             ->limit(5)
             ->get();
 
+        $categories = \App\Models\ProductCategory::when($activeJurusanId, function ($q) use ($activeJurusanId) {
+            return $q->where('jurusan_id', $activeJurusanId);
+        })->get();
+
         $topProducts = Transaction::forReporting()->with('product')
             ->when($activeJurusanId, function ($q) use ($activeJurusanId) {
-                return $q->where('jurusan_id', $activeJurusanId);
+                return $q->where('transactions.jurusan_id', $activeJurusanId);
+            })
+            ->when($this->selectedTopCategory !== 'all', function ($q) {
+                return $q->whereHas('product', function ($pq) {
+                    $pq->where('category_id', $this->selectedTopCategory);
+                });
             })
             ->selectRaw('product_id, SUM(quantity) as total_qty, SUM(total_price) as total_revenue')
             ->groupBy('product_id')
@@ -327,6 +342,7 @@ class Dashboard extends Component
             'stats' => $stats,
             'recentTransactions' => $recentTransactions,
             'topProducts' => $topProducts,
+            'categories' => $categories,
             'weeklyData' => $weeklyData,
             'categoryData' => $categoryData,
             'monthlyData' => $monthlyData,

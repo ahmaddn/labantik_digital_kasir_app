@@ -712,10 +712,27 @@
         <!-- Top Products -->
         <div
             class="bg-white dark:bg-gray-800 rounded-3xl md:rounded-[3.5rem] shadow-2xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 overflow-hidden">
-            <div class="p-4 md:p-6 border-b border-gray-100 dark:border-gray-700">
-                <h2
-                    class="text-xl md:text-2xl font-bold uppercase tracking-tight text-gray-800 dark:text-white">
-                    Produk Terlaris (All-Time)</h2>
+            <div class="p-4 md:p-6 border-b border-gray-100 dark:border-gray-700 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <h2
+                        class="text-xl md:text-2xl font-bold uppercase tracking-tight text-gray-800 dark:text-white">
+                        Produk Terlaris</h2>
+                    <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">Peringkat penjualan berdasarkan total unit terjual</p>
+                </div>
+
+                <!-- Category Filter Tabs -->
+                <div class="flex items-center gap-2 overflow-x-auto pb-2 md:pb-0 scrollbar-none">
+                    <button wire:click="setTopCategory('all')"
+                        class="px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wide transition-all duration-200 whitespace-nowrap {{ $selectedTopCategory === 'all' ? 'bg-primary-blue text-white shadow-lg shadow-blue-500/20' : 'bg-gray-100 dark:bg-gray-700/60 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700' }}">
+                        Semua Kategori
+                    </button>
+                    @foreach($categories as $cat)
+                        <button wire:click="setTopCategory({{ $cat->id }})"
+                            class="px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wide transition-all duration-200 whitespace-nowrap {{ $selectedTopCategory == $cat->id ? 'bg-primary-blue text-white shadow-lg shadow-blue-500/20' : 'bg-gray-100 dark:bg-gray-700/60 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700' }}">
+                            {{ $cat->name }}
+                        </button>
+                    @endforeach
+                </div>
             </div>
             <div class="p-4 md:p-6 space-y-6 md:space-y-10">
                 @forelse($topProducts as $top)
