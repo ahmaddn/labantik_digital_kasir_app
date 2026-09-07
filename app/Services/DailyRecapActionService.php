@@ -184,6 +184,49 @@ class DailyRecapActionService
                     ]
                 );
             }
+
+            // Automatic Sync to Kas Virtual for Non-Cash Sales (Transfer & QRIS)
+            $nonCashTransactions = $allTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])
+                ->whereIn('payment_method', ['transfer', 'qris']);
+
+            if ($nonCashTransactions->isNotEmpty()) {
+                // Remove previous automated system postings for virtual cash on this date
+                \App\Models\VirtualCashTransaction::where('date', $date)
+                    ->where('jurusan_id', $activeJurusanId)
+                    ->where('description', 'like', '%(Sistem)%')
+                    ->delete();
+
+                $nonCashGrouped = $nonCashTransactions->groupBy(function ($tx) {
+                    $catId = $tx->product->category_id ?? null;
+                    return $tx->payment_method . '_' . ($catId ?: 'other');
+                });
+
+                foreach ($nonCashGrouped as $groupKey => $txs) {
+                    $firstTx = $txs->first();
+                    $method = $firstTx->payment_method; // 'transfer' or 'qris'
+                    $catName = $firstTx->product->category->name ?? 'Penjualan Umum';
+                    $catNameClean = trim($catName);
+
+                    $catCategory = CashCategory::firstOrCreate(
+                        ['name' => 'Penjualan ' . $catNameClean, 'jurusan_id' => $activeJurusanId]
+                    );
+
+                    $totalNonCashAmount = $txs->sum('total_price');
+
+                    if ($totalNonCashAmount > 0) {
+                        $methodLabel = strtoupper($method);
+                        \App\Models\VirtualCashTransaction::create([
+                            'jurusan_id'       => $activeJurusanId,
+                            'date'             => $date,
+                            'source_method'    => $method,
+                            'type'             => 'income',
+                            'amount'           => $totalNonCashAmount,
+                            'cash_category_id' => $catCategory->id,
+                            'description'      => "Pemasukan Non-Cash {$methodLabel} Penjualan {$catNameClean} (Sistem)",
+                        ]);
+                    }
+                }
+            }
         });
 
         return [true, 'Data kas harian berhasil diposting ke Buku Kas!'];
