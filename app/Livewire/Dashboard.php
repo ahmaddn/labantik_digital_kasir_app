@@ -352,14 +352,20 @@ class Dashboard extends Component
         DailyRecap::withoutGlobalScope('active')
             ->whereDate('date', now())
             ->when($activeJurusanId, function ($q) use ($activeJurusanId) {
-                return $q->where('jurusan_id', $activeJurusanId);
+                return $q->where(function ($query) use ($activeJurusanId) {
+                    $query->where('jurusan_id', $activeJurusanId)
+                        ->orWhereNull('jurusan_id');
+                });
             })
             ->delete();
 
         // 2. Reset clock_out for cashier attendance today so cashiers can re-enter POS mode
         CashierAttendance::whereDate('date', now())
             ->when($activeJurusanId, function ($q) use ($activeJurusanId) {
-                return $q->where('jurusan_id', $activeJurusanId);
+                return $q->where(function ($query) use ($activeJurusanId) {
+                    $query->where('jurusan_id', $activeJurusanId)
+                        ->orWhereNull('jurusan_id');
+                });
             })
             ->update([
                 'clock_out' => null,

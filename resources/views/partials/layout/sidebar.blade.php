@@ -90,15 +90,27 @@
 
             @if (session('active_role_name') !== 'superadmin')
                 @php
+                    $activeJurusanId = session('active_jurusan_id');
+
                     $isSessionFinished = \App\Models\DailyRecap::withoutGlobalScope('active')
                         ->whereDate('date', now())
-                        ->where('jurusan_id', session('active_jurusan_id'))
+                        ->when($activeJurusanId, function ($q) use ($activeJurusanId) {
+                            return $q->where(function ($query) use ($activeJurusanId) {
+                                $query->where('jurusan_id', $activeJurusanId)
+                                    ->orWhereNull('jurusan_id');
+                            });
+                        })
                         ->where('actual_cash', '>', 0)
                         ->exists();
 
                     $hasClockedOut = \App\Models\CashierAttendance::where('user_id', auth()->id())
-                        ->where('jurusan_id', session('active_jurusan_id'))
-                        ->where('date', now()->toDateString())
+                        ->whereDate('date', now()->toDateString())
+                        ->when($activeJurusanId, function ($q) use ($activeJurusanId) {
+                            return $q->where(function ($query) use ($activeJurusanId) {
+                                $query->where('jurusan_id', $activeJurusanId)
+                                    ->orWhereNull('jurusan_id');
+                            });
+                        })
                         ->whereNotNull('clock_out')
                         ->exists();
 
