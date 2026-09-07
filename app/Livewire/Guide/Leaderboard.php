@@ -12,6 +12,14 @@ class Leaderboard extends Component
 {
     public $selectedUserId = null;
     public $showUserDetailModal = false;
+    public $period = 'weekly'; // 'weekly' or 'monthly'
+
+    public function setPeriod($period)
+    {
+        if (in_array($period, ['weekly', 'monthly'])) {
+            $this->period = $period;
+        }
+    }
 
     public function viewUserDetail($userId)
     {
@@ -27,21 +35,82 @@ class Leaderboard extends Component
 
     public function render()
     {
-        $leaderboard = User::select('*')
-            ->selectRaw('(points + pending_points) as total_score')
-            ->orderByDesc('total_score')
-            ->get();
+        // Date range based on selected period
+        $startDate = match ($this->period) {
+            'monthly' => now()->startOfMonth(),
+            default => now()->startOfWeek(),
+        };
+        $endDate = match ($this->period) {
+            'monthly' => now()->endOfMonth(),
+            default => now()->endOfWeek(),
+        };
+
+        // Filter OUT users who have manager/admin roles (hanya kasir murni)
+        $cashierUsers = User::whereDoesntHave('roles', function ($query) {
+            $query->whereIn('roles.name', ['superadmin', 'admin', 'pengelola_jurusan', 'pengelola']);
+        })->get();
+
+        // Calculate dynamic period score for each cashier user
+        $leaderboardCollection = $cashierUsers->map(function ($u) use ($startDate, $endDate) {
+            // 1. Transaction points (+5 per reference)
+            $txCount = Transaction::where('user_id', $u->id)
+                ->whereIn('status', ['uang_diterima', 'belum_kembalian'])
+                ->whereBetween('created_at', [$startDate, $endDate])
+                ->distinct('reference')
+                ->count('reference');
+            $posPts = $txCount * 5;
+
+            // 2. Task points
+            $approvedSubmissions = CashierTaskSubmission::where('submitted_by', $u->id)
+                ->where('approval_status', 'approved')
+                ->whereBetween('created_at', [$startDate, $endDate])
+                ->with('assignment.taskDefinition')
+                ->get();
+            $taskPts = $approvedSubmissions->sum(function ($sub) {
+                $priority = $sub->assignment->taskDefinition->priority ?? 'medium';
+                return match ($priority) {
+                    'low' => 5,
+                    'high' => 20,
+                    'critical' => 30,
+                    default => 10,
+                };
+            });
+
+            // 3. Attendance points
+            $attendances = CashierAttendance::where('user_id', $u->id)
+                ->whereBetween('created_at', [$startDate, $endDate])
+                ->get();
+            $attPts = $attendances->sum(function ($att) {
+                $pts = 0;
+                if ($att->clock_in) $pts += 15;
+                if ($att->clock_out) $pts += 15;
+                if ($att->clock_out_status === 'overtime' || $att->clock_out_status === 'on_time') $pts += 10;
+                return $pts;
+            });
+
+            $totalScore = $posPts + $taskPts + $attPts;
+
+            $u->total_score = $totalScore;
+            $u->period_pos_pts = $posPts;
+            $u->period_task_pts = $taskPts;
+            $u->period_att_pts = $attPts;
+            $u->period_tx_count = $txCount;
+
+            return $u;
+        })->sortByDesc('total_score')->values();
 
         $currentUser = auth()->user();
         $currentUserRank = null;
-        $totalUsers = $leaderboard->count();
+        $totalUsers = $leaderboardCollection->count();
 
-        foreach ($leaderboard as $index => $u) {
+        foreach ($leaderboardCollection as $index => $u) {
             if ($u->id === $currentUser->id) {
                 $currentUserRank = $index + 1;
                 break;
             }
         }
+
+        $periodLabel = $this->period === 'monthly' ? 'Bulan Ini' : 'Minggu Ini';
 
         // Dynamic Motivation Message & Badge based on Rank
         $motivation = [
@@ -54,7 +123,7 @@ class Leaderboard extends Component
         if ($currentUserRank === 1) {
             $motivation = [
                 'title' => 'Luar Biasa, ' . $currentUser->name . '!',
-                'message' => 'Anda memimpin papan skor di Posisi Pertama! Pertahankan tahta juara Anda minggu ini!',
+                'message' => 'Anda memimpin papan skor di Posisi Pertama! Pertahankan tahta juara Anda ' . strtolower($periodLabel) . '!',
                 'badge' => 'Juara 1 Utama',
                 'type' => 'gold'
             ];
@@ -103,16 +172,18 @@ class Leaderboard extends Component
         if ($this->selectedUserId) {
             $detailUser = User::find($this->selectedUserId);
             if ($detailUser) {
-                // Count transactions handled by user
+                // Count transactions handled by user in period
                 $userStats['total_transactions'] = Transaction::where('user_id', $detailUser->id)
                     ->whereIn('status', ['uang_diterima', 'belum_kembalian'])
+                    ->whereBetween('created_at', [$startDate, $endDate])
                     ->distinct('reference')
                     ->count('reference');
                 $userStats['pos_points'] = $userStats['total_transactions'] * 5;
 
-                // Count completed tasks and calculate points based on task priority
+                // Count completed tasks and calculate points based on task priority in period
                 $approvedSubmissions = CashierTaskSubmission::where('submitted_by', $detailUser->id)
                     ->where('approval_status', 'approved')
+                    ->whereBetween('created_at', [$startDate, $endDate])
                     ->with('assignment.taskDefinition')
                     ->get();
 
@@ -127,20 +198,17 @@ class Leaderboard extends Component
                     };
                 });
 
-                // Count attendances and calculate attendance & session points
-                $attendances = CashierAttendance::where('user_id', $detailUser->id)->get();
+                // Count attendances and calculate attendance & session points in period
+                $attendances = CashierAttendance::where('user_id', $detailUser->id)
+                    ->whereBetween('created_at', [$startDate, $endDate])
+                    ->get();
+
                 $userStats['attendance_count'] = $attendances->count();
                 $userStats['attendance_points'] = $attendances->sum(function ($att) {
                     $pts = 0;
-                    if ($att->clock_in) {
-                        $pts += 15;
-                    }
-                    if ($att->clock_out) {
-                        $pts += 15;
-                    }
-                    if ($att->clock_out_status === 'overtime' || $att->clock_out_status === 'on_time') {
-                        $pts += 10;
-                    }
+                    if ($att->clock_in) $pts += 15;
+                    if ($att->clock_out) $pts += 15;
+                    if ($att->clock_out_status === 'overtime' || $att->clock_out_status === 'on_time') $pts += 10;
                     return $pts;
                 });
 
@@ -198,7 +266,7 @@ class Leaderboard extends Component
         }
 
         return view('livewire.guide.leaderboard', [
-            'leaderboard' => $leaderboard,
+            'leaderboard' => $leaderboardCollection,
             'currentUserRank' => $currentUserRank,
             'motivation' => $motivation,
             'detailUser' => $detailUser,
@@ -208,3 +276,4 @@ class Leaderboard extends Component
         ])->layout('layouts.app', ['title' => 'Sistem Peringkat & Poin']);
     }
 }
+

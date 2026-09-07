@@ -1,20 +1,40 @@
 <div class="py-6 w-full space-y-6">
     <!-- Active Leaderboard Card -->
     <div class="bg-white dark:bg-gray-800 rounded-3xl md:rounded-2xl p-6 md:p-8 shadow-2xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 w-full space-y-6">
-        <div>
-            <span
-                class="px-3 py-1 bg-amber-500/10 text-amber-600 dark:text-amber-400 text-[10px] font-black tracking-widest uppercase rounded-full border border-amber-500/20 flex items-center gap-1.5 w-fit">
-                <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"
-                    xmlns="http://www.w3.org/2000/svg">
-                    <path
-                        d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.776 1.848l-3.59 1.54 3.59 1.54a1 1 0 11-.776 1.848l-4-1.714a.999.999 0 01-.356-.257l-2.644-1.133a1 1 0 000-1.84l7-3a1 1 0 00-.788 0l-7-3a1 1 0 000-1.84l7-3z" />
-                </svg>
-                Sistem Peringkat & Gamifikasi
-            </span>
-            <h1 class="text-2xl md:text-3xl font-black mt-2 tracking-tight italic uppercase text-gray-900 dark:text-white">Papan Skor & Poin Kasir</h1>
-            <p class="text-gray-400 mt-1 text-xs md:text-sm font-semibold">
-                Lakukan performa terbaik untuk memimpin papan skor dan kumpulkan poin!
-            </p>
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+                <span
+                    class="px-3 py-1 bg-amber-500/10 text-amber-600 dark:text-amber-400 text-[10px] font-black tracking-widest uppercase rounded-full border border-amber-500/20 flex items-center gap-1.5 w-fit">
+                    <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"
+                        xmlns="http://www.w3.org/2000/svg">
+                        <path
+                            d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.776 1.848l-3.59 1.54 3.59 1.54a1 1 0 11-.776 1.848l-4-1.714a.999.999 0 01-.356-.257l-2.644-1.133a1 1 0 000-1.84l7-3a1 1 0 00-.788 0l-7-3a1 1 0 000-1.84l7-3z" />
+                    </svg>
+                    Sistem Peringkat & Gamifikasi
+                </span>
+                <h1 class="text-2xl md:text-3xl font-black mt-2 tracking-tight italic uppercase text-gray-900 dark:text-white">Papan Skor & Poin Kasir</h1>
+                <p class="text-gray-400 mt-1 text-xs md:text-sm font-semibold">
+                    Lakukan performa terbaik untuk memimpin papan skor dan kumpulkan poin!
+                </p>
+            </div>
+
+            <!-- Period Switcher Tabs -->
+            <div class="flex items-center bg-gray-100 dark:bg-gray-900 p-1.5 rounded-2xl border border-gray-200 dark:border-gray-700/80 w-fit shrink-0">
+                <button wire:click="setPeriod('weekly')"
+                    class="px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center gap-2 {{ $period === 'weekly' ? 'bg-primary-blue text-white shadow-lg shadow-blue-500/20' : 'text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white' }}">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    Minggu Ini
+                </button>
+                <button wire:click="setPeriod('monthly')"
+                    class="px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center gap-2 {{ $period === 'monthly' ? 'bg-primary-blue text-white shadow-lg shadow-blue-500/20' : 'text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white' }}">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                    </svg>
+                    Bulan Ini
+                </button>
+            </div>
         </div>
 
         <!-- Dynamic Motivation Banner -->
