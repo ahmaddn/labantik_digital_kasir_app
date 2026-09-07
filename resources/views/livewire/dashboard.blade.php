@@ -714,9 +714,18 @@
             class="bg-white dark:bg-gray-800 rounded-3xl md:rounded-[3.5rem] shadow-2xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 overflow-hidden">
             <div class="p-4 md:p-6 border-b border-gray-100 dark:border-gray-700 flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h2
-                        class="text-xl md:text-2xl font-bold uppercase tracking-tight text-gray-800 dark:text-white">
-                        Produk Terlaris</h2>
+                    <div class="flex items-center gap-3">
+                        <h2
+                            class="text-xl md:text-2xl font-bold uppercase tracking-tight text-gray-800 dark:text-white">
+                            Produk Terlaris</h2>
+                        <div wire:loading wire:target="setTopCategory" class="flex items-center gap-1.5 px-2.5 py-1 bg-blue-500/10 text-primary-blue rounded-full text-[10px] font-bold uppercase tracking-widest animate-pulse">
+                            <svg class="animate-spin h-3.5 w-3.5 text-primary-blue" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            <span>Memuat...</span>
+                        </div>
+                    </div>
                     <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">Peringkat penjualan berdasarkan total unit terjual</p>
                 </div>
 
@@ -734,18 +743,7 @@
                     @endforeach
                 </div>
             </div>
-            <div class="p-4 md:p-6 space-y-6 md:space-y-10 relative" wire:loading.class="opacity-50 transition-opacity duration-200" wire:target="setTopCategory">
-                <!-- Loading Skeleton / Spinner Overlay -->
-                <div wire:loading wire:target="setTopCategory" class="absolute inset-0 bg-white/40 dark:bg-gray-800/40 backdrop-blur-[1px] z-10 flex items-center justify-center rounded-2xl">
-                    <div class="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-900 rounded-full shadow-lg border border-gray-100 dark:border-gray-700">
-                        <svg class="animate-spin h-4 w-4 text-primary-blue" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                        <span class="text-xs font-bold text-gray-700 dark:text-gray-200">Memuat...</span>
-                    </div>
-                </div>
-
+            <div class="p-4 md:p-6 space-y-6 md:space-y-10 min-h-[360px] transition-opacity duration-150" wire:loading.class="opacity-60" wire:target="setTopCategory">
                 @forelse($topProducts as $top)
                     <div class="flex items-center group transition-all duration-300 transform hover:translate-x-1" wire:key="top-prod-{{ $top->product_id }}">
                         <div
