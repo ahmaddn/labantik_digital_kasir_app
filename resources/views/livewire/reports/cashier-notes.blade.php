@@ -109,20 +109,24 @@
                     </div>
 
                     <!-- Content (Raw HTML output for Rich Text) -->
-                    <div class="prose dark:prose-invert max-w-none text-sm font-medium leading-relaxed opacity-95 mb-6 whitespace-pre-wrap">
-                        {!! $note->content !!}
+                    <div class="max-h-64 overflow-y-auto pr-2 mb-4 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-700">
+                        <div class="prose dark:prose-invert max-w-none text-sm font-medium leading-relaxed opacity-95 whitespace-pre-wrap">
+                            {!! $note->content !!}
+                        </div>
                     </div>
                 </div>
 
                 <div>
                     <!-- Reply Button & Replies Summary -->
                     <div data-html2canvas-ignore class="mb-4">
-                        <button wire:click="openReplyModal({{ $note->id }})" class="w-full py-2.5 px-4 bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 rounded-2xl flex items-center justify-between text-xs font-bold transition-all">
+                        <button wire:click="openReplyModal({{ $note->id }})" class="w-full py-2.5 px-4 bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 rounded-2xl flex items-center justify-between text-xs font-bold transition-all group-hover:border-primary-blue/30 border border-transparent">
                             <span class="flex items-center gap-2">
                                 <svg class="w-4 h-4 text-primary-blue dark:text-blue-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>
                                 {{ $note->replies->count() }} Balasan
                             </span>
-                            <span class="text-[10px] uppercase tracking-wider font-black text-primary-blue dark:text-blue-300">Buka Diskusi &rarr;</span>
+                            <span class="text-[10px] uppercase tracking-wider font-black text-primary-blue dark:text-blue-300 flex items-center gap-1">
+                                Lihat & Diskusi &rarr;
+                            </span>
                         </button>
                     </div>
 
