@@ -734,9 +734,20 @@
                     @endforeach
                 </div>
             </div>
-            <div class="p-4 md:p-6 space-y-6 md:space-y-10">
+            <div class="p-4 md:p-6 space-y-6 md:space-y-10 relative" wire:loading.class="opacity-50 transition-opacity duration-200" wire:target="setTopCategory">
+                <!-- Loading Skeleton / Spinner Overlay -->
+                <div wire:loading wire:target="setTopCategory" class="absolute inset-0 bg-white/40 dark:bg-gray-800/40 backdrop-blur-[1px] z-10 flex items-center justify-center rounded-2xl">
+                    <div class="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-900 rounded-full shadow-lg border border-gray-100 dark:border-gray-700">
+                        <svg class="animate-spin h-4 w-4 text-primary-blue" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <span class="text-xs font-bold text-gray-700 dark:text-gray-200">Memuat...</span>
+                    </div>
+                </div>
+
                 @forelse($topProducts as $top)
-                    <div class="flex items-center group">
+                    <div class="flex items-center group transition-all duration-300 transform hover:translate-x-1" wire:key="top-prod-{{ $top->product_id }}">
                         <div
                             class="flex-shrink-0 w-12 h-12 md:w-16 md:h-16 bg-primary-blue dark:bg-gray-900 text-white rounded-2xl md:rounded-[1.5rem] flex items-center justify-center font-black italic shadow-2xl shadow-blue-900/10 group-hover:scale-110 transition-transform">
                             {{ $loop->iteration }}
@@ -754,16 +765,16 @@
                         </div>
                     </div>
                 @empty
-                    <div class="py-16 md:py-32 text-center opacity-20">
-                        <svg class="w-16 h-16 md:w-24 md:h-24 mx-auto mb-4 md:mb-6" xmlns="http://www.w3.org/2000/svg"
+                    <div class="py-16 md:py-32 text-center opacity-40">
+                        <svg class="w-16 h-16 md:w-24 md:h-24 mx-auto mb-4 md:mb-6 text-gray-400" xmlns="http://www.w3.org/2000/svg"
                             width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+                            stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
                             <polyline points="14 2 14 8 20 8" />
                             <path d="M12 18v-6" />
                             <path d="m9 15 3 3 3-3" />
                         </svg>
-                        <p class="text-xs font-black uppercase tracking-widest italic">Data Kosong</p>
+                        <p class="text-xs font-bold uppercase tracking-widest text-gray-500">Tidak ada produk dalam kategori ini</p>
                     </div>
                 @endforelse
             </div>
