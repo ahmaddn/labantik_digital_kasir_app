@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Models\CashTransaction;
+use App\Models\CashierAttendance;
 use App\Models\DailyRecap;
 use App\Models\Jurusan;
 use App\Models\Transaction;
