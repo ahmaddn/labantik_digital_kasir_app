@@ -67,6 +67,7 @@ class Kasir extends Component
     public function refreshProducts(): void
     {
         $this->products = $this->getProductsForAlpine(app(PosQueryService::class))->toArray();
+        $this->dispatch('products-updated', products: $this->products);
     }
 
     public function updatedTransactionDate(): void
@@ -389,8 +390,8 @@ class Kasir extends Component
 
         $this->showOpeningStockModal = false;
         $this->stockItems = [];
-        session()->flash('toast', 'Stok awal berhasil diperbarui.');
-        $this->redirectRoute('kasir', navigate: true);
+        $this->refreshProducts();
+        $this->dispatch('toast', message: 'Stok awal berhasil diperbarui.', type: 'success');
     }
 
     public function finishSession(): void

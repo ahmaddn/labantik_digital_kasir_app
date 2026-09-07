@@ -1152,6 +1152,22 @@
                     if (this.darkMode) document.documentElement.classList.add('dark');
                     else document.documentElement.classList.remove('dark');
 
+                    /* Real-time product & stock sync with Livewire */
+                    this.$watch('$wire.products', (newProds) => {
+                        if (newProds && Array.isArray(newProds)) {
+                            this.products = JSON.parse(JSON.stringify(newProds));
+                        }
+                    });
+
+                    window.addEventListener('products-updated', (e) => {
+                        if (e.detail) {
+                            const newProds = Array.isArray(e.detail) ? e.detail : (e.detail.products || []);
+                            if (newProds && newProds.length > 0) {
+                                this.products = JSON.parse(JSON.stringify(newProds));
+                            }
+                        }
+                    });
+
                     window.addEventListener('resize', () => {
                         this.screenWidth = window.innerWidth;
                     });
