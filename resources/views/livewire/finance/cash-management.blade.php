@@ -161,7 +161,7 @@
         <!-- Audit Hasil Fisik Status -->
         @php $auditNet = $totalSurplus - $totalDeficit; @endphp
         <div x-data="{ open: false }"
-             class="bg-gray-50 dark:bg-gray-900/60 rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+             class="bg-[#FBF6F6] dark:bg-slate-800/80 rounded-2xl border border-gray-200/80 dark:border-slate-700 overflow-hidden shadow-sm">
 
             {{-- Header / Toggle --}}
             <button @click="open = !open"

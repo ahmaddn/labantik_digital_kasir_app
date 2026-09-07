@@ -170,18 +170,18 @@
     /* Glassmorphism Theme Style */
     html:not(.dark) .theme-glassmorphism .bg-white:not(img):not(.theme-no-card), 
     html:not(.dark) .theme-glassmorphism .bg-gray-50:not(.theme-no-card) {
-        background-color: rgba(255, 255, 255, 0.45) !important;
+        background-color: rgba(251, 246, 246, 0.75) !important;
         backdrop-filter: blur(24px) saturate(180%) !important;
         -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
-        border: 1px solid rgba(255, 255, 255, 0.4) !important;
-        box-shadow: 0 6px 16px 0 rgba(31, 38, 135, 0.02) !important;
+        border: 1px solid rgba(255, 255, 255, 0.6) !important;
+        box-shadow: 0 6px 16px 0 rgba(31, 38, 135, 0.04) !important;
         border-radius: 0.875rem !important;
     }
     .dark .theme-glassmorphism .bg-white:not(img):not(.theme-no-card),
     .dark .theme-glassmorphism .bg-gray-800:not(.theme-no-card), 
     .dark .theme-glassmorphism .bg-gray-850:not(.theme-no-card), 
     .dark .theme-glassmorphism .bg-gray-900:not(.theme-no-card) {
-        background-color: rgba(15, 23, 42, 0.45) !important;
+        background-color: rgba(15, 23, 42, 0.65) !important;
         backdrop-filter: blur(24px) saturate(160%) !important;
         -webkit-backdrop-filter: blur(24px) saturate(160%) !important;
         border: 1px solid rgba(255, 255, 255, 0.08) !important;
@@ -192,7 +192,7 @@
     /* Classic Premium Theme Style */
     html:not(.dark) .theme-classic-premium .bg-white:not(img):not(.theme-no-card),
     html:not(.dark) .theme-classic-premium .bg-gray-50:not(.theme-no-card) {
-        background-color: #ffffff !important;
+        background-color: #FBF6F6 !important;
         border: 1px solid rgba(0, 0, 0, 0.05) !important;
         box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.03), 0 4px 6px -2px rgba(0, 0, 0, 0.02) !important;
         backdrop-filter: none !important;
@@ -230,7 +230,7 @@
     /* Restoran & Warung Theme Style (Warm Culinary) */
     html:not(.dark) .theme-restaurant-aesthetic .bg-white:not(img):not(.theme-no-card),
     html:not(.dark) .theme-restaurant-aesthetic .bg-gray-50:not(.theme-no-card) {
-        background-color: #fffaf0 !important;
+        background-color: #FBF6F6 !important;
         border: 1.5px dashed rgba(249, 115, 22, 0.25) !important;
         box-shadow: 0 6px 10px -3px rgba(249, 115, 22, 0.02) !important;
         border-radius: 1rem !important;
@@ -248,7 +248,7 @@
     /* Retail Minimarket Theme Style (Clean Grid) */
     html:not(.dark) .theme-retail-aesthetic .bg-white:not(img):not(.theme-no-card),
     html:not(.dark) .theme-retail-aesthetic .bg-gray-50:not(.theme-no-card) {
-        background-color: #ffffff !important;
+        background-color: #FBF6F6 !important;
         border: 1px solid #cbd5e1 !important;
         border-radius: 0.5rem !important;
         box-shadow: none !important;
@@ -266,7 +266,7 @@
     /* Bank Mini Theme Style (Corporate FinTech) */
     html:not(.dark) .theme-bank-aesthetic .bg-white:not(img):not(.theme-no-card),
     html:not(.dark) .theme-bank-aesthetic .bg-gray-50:not(.theme-no-card) {
-        background-color: #ffffff !important;
+        background-color: #FBF6F6 !important;
         border: 1px solid rgba(14, 165, 233, 0.18) !important;
         box-shadow: 0 4px 12px -2px rgba(14, 165, 233, 0.04) !important;
         border-radius: 0.875rem !important;
