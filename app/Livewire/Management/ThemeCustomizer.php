@@ -14,10 +14,10 @@ class ThemeCustomizer extends Component
 
     public $selectedJurusanId = '';
 
-    // Theme configurations
-    public $primaryColor = '#2563EB';
+    // Theme configurations (Soft & Pastel defaults)
+    public $primaryColor = '#3B82F6';
 
-    public $secondaryColor = '#EF4444';
+    public $secondaryColor = '#F43F5E';
 
     public $fontFamily = 'Outfit';
 
@@ -43,14 +43,14 @@ class ThemeCustomizer extends Component
 
     public $lateClockOutPenalty = 0;
 
-    // Color presets
+    // Color presets (Soft & Harmonious tones)
     public $colorPresets = [
-        ['name' => 'Royal Blue & Crimson', 'primary' => '#2563EB', 'secondary' => '#EF4444'],
-        ['name' => 'Emerald Forest & Gold', 'primary' => '#10B981', 'secondary' => '#F59E0B'],
-        ['name' => 'Cyber Violet & Pink', 'primary' => '#8B5CF6', 'secondary' => '#EC4899'],
-        ['name' => 'Sunset Orange & Navy', 'primary' => '#F97316', 'secondary' => '#1E3A8A'],
-        ['name' => 'Classic Dark & Silver', 'primary' => '#1E293B', 'secondary' => '#94A3B8'],
-        ['name' => 'Eco Green & Mint', 'primary' => '#059669', 'secondary' => '#34D399'],
+        ['name' => 'Soft Sky Blue & Coral Rose', 'primary' => '#3B82F6', 'secondary' => '#F43F5E'],
+        ['name' => 'Soft Emerald & Honey Amber', 'primary' => '#10B981', 'secondary' => '#F59E0B'],
+        ['name' => 'Soft Violet & Powder Pink', 'primary' => '#8B5CF6', 'secondary' => '#F472B6'],
+        ['name' => 'Soft Sunset & Slate Navy', 'primary' => '#FB923C', 'secondary' => '#334155'],
+        ['name' => 'Soft Sage & Pastel Mint', 'primary' => '#059669', 'secondary' => '#34D399'],
+        ['name' => 'Soft Steel & Warm Slate', 'primary' => '#475569', 'secondary' => '#94A3B8'],
     ];
 
     // Font presets
@@ -114,8 +114,8 @@ class ThemeCustomizer extends Component
         $jurusan = Jurusan::find($this->selectedJurusanId);
         if ($jurusan) {
             $settings = $jurusan->theme_settings ?: [];
-            $this->primaryColor = $settings['primary_color'] ?? '#2563EB';
-            $this->secondaryColor = $settings['secondary_color'] ?? '#EF4444';
+            $this->primaryColor = $settings['primary_color'] ?? '#3B82F6';
+            $this->secondaryColor = $settings['secondary_color'] ?? '#F43F5E';
             $this->fontFamily = $settings['font_family'] ?? 'Outfit';
 
             $isSubUnit = !is_null($jurusan->parent_id);

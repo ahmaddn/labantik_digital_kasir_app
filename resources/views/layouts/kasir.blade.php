@@ -17,8 +17,8 @@
                     $themeSettings = $jurusanModel->theme_settings;
                 }
             }
-            $primaryColor = $themeSettings['primary_color'] ?? '#2563EB'; 
-            $secondaryColor = $themeSettings['secondary_color'] ?? '#EF4444'; 
+            $primaryColor = $themeSettings['primary_color'] ?? '#3B82F6'; 
+            $secondaryColor = $themeSettings['secondary_color'] ?? '#F43F5E'; 
             $fontFamily = $themeSettings['font_family'] ?? 'Outfit'; 
             $themeStyle = $themeSettings['theme_style'] ?? 'classic-premium'; 
         @endphp

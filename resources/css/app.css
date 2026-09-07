@@ -3,11 +3,11 @@
 @variant dark (&:where(.dark, .dark *));
 
 @theme {
-    --color-primary-blue: #2563eb;
-    --color-primary-blue-dark: #1e3a8a;
-    --color-primary-red: #ef4444;
-    --color-primary-red-dark: #991b1b;
-    --color-primary-yellow: #facc15; /* Sparing usage */
+    --color-primary-blue: #3b82f6; /* Soft Royal Blue */
+    --color-primary-blue-dark: #2563eb;
+    --color-primary-red: #f43f5e; /* Soft Rose Red */
+    --color-primary-red-dark: #e11d48;
+    --color-primary-yellow: #fbbf24; /* Soft Amber Yellow */
     --color-accent-yellow: #fde047;
     --color-bone-white: #ffffff;
     --color-dark-bg: #020617; /* Deep Slate Blue */

@@ -774,8 +774,8 @@
                         <div
                             class="flex items-center justify-between text-[10px] font-black uppercase tracking-tight bg-gray-50 dark:bg-gray-900/50 p-3 md:p-4 rounded-2xl">
                             <div class="flex items-center">
-                                <div class="w-2 h-2 rounded-full mr-2"
-                                    style="background-color: {{ ['#3b82f6', '#ef4444', '#f59e0b', '#10b981', '#8b5cf6', '#06b6d4'][$loop->index % 6] }}">
+                                <div class="w-2.5 h-2.5 rounded-full mr-2"
+                                    style="background-color: {{ ['#60a5fa', '#f87171', '#fbbf24', '#34d399', '#a78bfa', '#38bdf8'][$loop->index % 6] }}">
                                 </div>
                                 <span class="text-gray-500 line-clamp-1">{{ $cat->category_name }}</span>
                             </div>
@@ -830,24 +830,24 @@
                     datasets: [{
                             label: 'Omzet',
                             data: weeklyData.map(d => d.revenue),
-                            borderColor: '#3b82f6',
-                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                            borderColor: '#60a5fa',
+                            backgroundColor: 'rgba(96, 165, 250, 0.12)',
                             fill: true,
                             tension: 0.4,
-                            borderWidth: 4,
+                            borderWidth: 3,
                             pointRadius: 4,
-                            pointBackgroundColor: '#3b82f6',
+                            pointBackgroundColor: '#60a5fa',
                         },
                         {
                             label: 'Profit',
                             data: weeklyData.map(d => d.profit),
-                            borderColor: '#ef4444',
-                            backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                            borderColor: '#f87171',
+                            backgroundColor: 'rgba(248, 113, 113, 0.12)',
                             fill: true,
                             tension: 0.4,
-                            borderWidth: 4,
+                            borderWidth: 3,
                             pointRadius: 4,
-                            pointBackgroundColor: '#ef4444',
+                            pointBackgroundColor: '#f87171',
                         }
                     ]
                 },
@@ -920,11 +920,9 @@
                     labels: catData.map(d => d.category_name),
                     datasets: [{
                         data: catData.map(d => d.total_revenue),
-                        backgroundColor: ['#3b82f6', '#ef4444', '#f59e0b', '#10b981', '#8b5cf6',
-                            '#06b6d4'
-                        ],
+                        backgroundColor: ['#60a5fa', '#f87171', '#fbbf24', '#34d399', '#a78bfa', '#38bdf8'],
                         borderWidth: 0,
-                        hoverOffset: 20
+                        hoverOffset: 12
                     }]
                 },
                 options: {
@@ -963,7 +961,7 @@
                     datasets: [{
                         label: 'Omzet',
                         data: monthlyData.map(d => d.revenue),
-                        backgroundColor: '#3b82f6',
+                        backgroundColor: '#60a5fa',
                         borderRadius: 12,
                         barThickness: 30,
                     }]
