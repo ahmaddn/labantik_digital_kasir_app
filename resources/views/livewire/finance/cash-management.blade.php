@@ -92,54 +92,54 @@
     <!-- Stats Cards -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-5 mb-12">
         <!-- Total Saldo Kas Card -->
-        <div class="bg-gradient-to-br from-emerald-600 to-teal-800 dark:from-emerald-900 dark:to-teal-950 rounded-[3rem] p-6 md:p-7 text-white shadow-xl shadow-emerald-500/10 relative overflow-hidden group border-b-8 border-emerald-900 dark:border-emerald-500">
-            <div class="absolute -right-6 -bottom-6 opacity-15 group-hover:scale-110 transition-transform duration-700">
-                <svg class="w-40 h-40 text-white" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="12" x="2" y="6" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/></svg>
+        <div class="theme-no-card bg-emerald-50 dark:bg-slate-900 border-2 border-emerald-500 dark:border-emerald-500 rounded-[2.5rem] p-6 md:p-7 text-gray-900 dark:text-white shadow-lg relative overflow-hidden group">
+            <div class="absolute -right-6 -bottom-6 opacity-10 dark:opacity-20 group-hover:scale-110 transition-transform duration-700">
+                <svg class="w-40 h-40 text-emerald-600 dark:text-emerald-400" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="12" x="2" y="6" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/></svg>
             </div>
-            <h3 class="text-[10px] font-black uppercase tracking-[0.3em] text-emerald-100 dark:text-emerald-300 mb-3">Total Saldo Kas</h3>
-            <p class="text-2xl xl:text-3xl font-black text-white {{ ($currentModalBalance + $currentProfitBalance) < 0 ? 'text-primary-red' : '' }}" :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($currentModalBalance + $currentProfitBalance, 0, ',', '.') }}</p>
+            <h3 class="text-[11px] font-black uppercase tracking-[0.25em] text-emerald-700 dark:text-emerald-400 mb-2">Total Saldo Kas</h3>
+            <p class="text-2xl xl:text-3xl font-black text-emerald-950 dark:text-white leading-tight {{ ($currentModalBalance + $currentProfitBalance) < 0 ? 'text-rose-600 dark:text-primary-red' : '' }}" :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($currentModalBalance + $currentProfitBalance, 0, ',', '.') }}</p>
         </div>
 
         <!-- Saldo Modal Card -->
-        <div class="bg-gradient-to-br from-slate-700 to-slate-900 dark:from-slate-900 dark:to-gray-950 rounded-[3rem] p-6 md:p-7 text-white shadow-xl shadow-slate-900/20 relative overflow-hidden group border-b-8 border-blue-500">
-            <div class="absolute -right-6 -bottom-6 opacity-15 group-hover:scale-110 transition-transform duration-700">
-                <svg class="w-40 h-40 text-white" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg>
+        <div class="theme-no-card bg-slate-100 dark:bg-slate-900 border-2 border-slate-400 dark:border-blue-500 rounded-[2.5rem] p-6 md:p-7 text-slate-900 dark:text-white shadow-lg relative overflow-hidden group">
+            <div class="absolute -right-6 -bottom-6 opacity-10 dark:opacity-20 group-hover:scale-110 transition-transform duration-700">
+                <svg class="w-40 h-40 text-slate-600 dark:text-white" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg>
             </div>
-            <h3 class="text-[10px] font-black uppercase tracking-[0.3em] text-slate-200 dark:text-slate-400 mb-3">Saldo Kas Modal</h3>
-            <p class="text-2xl xl:text-3xl font-black text-white {{ $currentModalBalance < 0 ? 'text-primary-red' : '' }}" :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($currentModalBalance, 0, ',', '.') }}</p>
+            <h3 class="text-[11px] font-black uppercase tracking-[0.25em] text-slate-700 dark:text-slate-400 mb-2">Saldo Kas Modal</h3>
+            <p class="text-2xl xl:text-3xl font-black text-slate-950 dark:text-white leading-tight {{ $currentModalBalance < 0 ? 'text-rose-600 dark:text-primary-red' : '' }}" :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($currentModalBalance, 0, ',', '.') }}</p>
         </div>
 
         <!-- Saldo Keuntungan Card -->
-        <div class="bg-gradient-to-br from-blue-600 to-indigo-800 dark:from-blue-900 dark:to-indigo-950 rounded-[3rem] p-6 md:p-7 text-white shadow-xl shadow-blue-500/10 relative overflow-hidden group border-b-8 border-blue-900 dark:border-white/20">
-            <div class="absolute -right-6 -bottom-6 opacity-15 group-hover:scale-110 transition-transform duration-700">
-                <svg class="w-40 h-40 text-white" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m16 12-4-4-4 4"/><path d="M12 16V8"/></svg>
+        <div class="theme-no-card bg-blue-50 dark:bg-slate-900 border-2 border-blue-500 dark:border-blue-400 rounded-[2.5rem] p-6 md:p-7 text-gray-900 dark:text-white shadow-lg relative overflow-hidden group">
+            <div class="absolute -right-6 -bottom-6 opacity-10 dark:opacity-20 group-hover:scale-110 transition-transform duration-700">
+                <svg class="w-40 h-40 text-blue-600 dark:text-white" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m16 12-4-4-4 4"/><path d="M12 16V8"/></svg>
             </div>
-            <h3 class="text-[10px] font-black uppercase tracking-[0.3em] text-blue-100 dark:text-blue-200 mb-3">Saldo Kas Keuntungan</h3>
-            <p class="text-2xl xl:text-3xl font-black text-white {{ $currentProfitBalance < 0 ? 'text-red-300' : '' }}" :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($currentProfitBalance, 0, ',', '.') }}</p>
+            <h3 class="text-[11px] font-black uppercase tracking-[0.25em] text-blue-700 dark:text-blue-300 mb-2">Saldo Kas Keuntungan</h3>
+            <p class="text-2xl xl:text-3xl font-black text-blue-950 dark:text-white leading-tight {{ $currentProfitBalance < 0 ? 'text-rose-600 dark:text-red-300' : '' }}" :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($currentProfitBalance, 0, ',', '.') }}</p>
         </div>
 
         <!-- Pemasukan Card -->
-        <div class="bg-gradient-to-br from-emerald-600 to-emerald-800 dark:from-gray-900 dark:to-slate-900 rounded-[3rem] p-6 md:p-7 text-white shadow-xl shadow-emerald-500/10 relative overflow-hidden group border-b-8 border-emerald-900 dark:border-green-500">
-            <div class="absolute -right-6 -bottom-6 opacity-15 group-hover:scale-110 transition-transform duration-700">
-                <svg class="w-40 h-40 text-white dark:text-green-500" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+        <div class="theme-no-card bg-emerald-50 dark:bg-slate-900 border-2 border-emerald-400 dark:border-green-500 rounded-[2.5rem] p-6 md:p-7 text-emerald-950 dark:text-white shadow-lg relative overflow-hidden group">
+            <div class="absolute -right-6 -bottom-6 opacity-10 dark:opacity-20 group-hover:scale-110 transition-transform duration-700">
+                <svg class="w-40 h-40 text-emerald-600 dark:text-green-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
             </div>
-            <h3 class="text-[10px] font-black uppercase tracking-[0.3em] text-emerald-100 dark:text-green-400 mb-3">Total Pemasukan</h3>
-            <p class="text-2xl xl:text-3xl font-black text-white dark:text-green-400" :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($displayIncome, 0, ',', '.') }}</p>
+            <h3 class="text-[11px] font-black uppercase tracking-[0.25em] text-emerald-700 dark:text-green-400 mb-2">Total Pemasukan</h3>
+            <p class="text-2xl xl:text-3xl font-black text-emerald-700 dark:text-green-400 leading-tight" :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($displayIncome, 0, ',', '.') }}</p>
         </div>
 
         <!-- Pengeluaran Card -->
-        <div class="bg-gradient-to-br from-rose-600 to-red-800 dark:from-gray-900 dark:to-slate-900 rounded-[3rem] p-6 md:p-7 text-white shadow-xl shadow-rose-500/10 relative overflow-hidden group border-b-8 border-rose-900 dark:border-primary-red">
-            <div class="absolute -right-6 -bottom-6 opacity-15 group-hover:scale-110 transition-transform duration-700">
-                <svg class="w-40 h-40 text-white dark:text-primary-red" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 17 13.5 8.5 8.5 13.5 2 7"/><polyline points="16 17 22 17 22 11"/></svg>
+        <div class="theme-no-card bg-rose-50 dark:bg-slate-900 border-2 border-rose-400 dark:border-primary-red rounded-[2.5rem] p-6 md:p-7 text-rose-950 dark:text-white shadow-lg relative overflow-hidden group">
+            <div class="absolute -right-6 -bottom-6 opacity-10 dark:opacity-20 group-hover:scale-110 transition-transform duration-700">
+                <svg class="w-40 h-40 text-rose-600 dark:text-primary-red" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 17 13.5 8.5 8.5 13.5 2 7"/><polyline points="16 17 22 17 22 11"/></svg>
             </div>
-            <h3 class="text-[10px] font-black uppercase tracking-[0.3em] text-rose-100 dark:text-red-400 mb-3">Total Pengeluaran</h3>
-            <p class="text-2xl xl:text-3xl font-black text-white dark:text-primary-red" :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($displayExpense, 0, ',', '.') }}</p>
+            <h3 class="text-[11px] font-black uppercase tracking-[0.25em] text-rose-700 dark:text-red-400 mb-2">Total Pengeluaran</h3>
+            <p class="text-2xl xl:text-3xl font-black text-rose-700 dark:text-primary-red leading-tight" :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($displayExpense, 0, ',', '.') }}</p>
         </div>
     </div>
 
     <!-- Period Flow Summary Banner (Only if filter is active) -->
     @if($startDate)
-    <div class="bg-gradient-to-br from-gray-900 via-slate-900 to-gray-950 rounded-2xl p-5 shadow-xl border border-white/5 text-white mb-8">
+    <div class="theme-no-card bg-slate-900 text-white rounded-3xl p-6 shadow-xl border border-slate-700 mb-8">
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-center md:text-left mb-6 pb-6 border-b border-white/10">
             <div class="flex flex-col justify-center">
                 <span class="text-[9px] font-black uppercase tracking-widest opacity-60 mb-1">Saldo Awal Periode</span>
