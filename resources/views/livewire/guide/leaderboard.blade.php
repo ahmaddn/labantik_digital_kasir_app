@@ -37,41 +37,43 @@
             </div>
         </div>
 
-        <!-- Dynamic Motivation Banner -->
-        @php
-            $bannerStyle = match ($motivation['type']) {
-                'gold' => 'bg-amber-500/10 border-amber-500/30 text-amber-600 dark:text-amber-400',
-                'silver' => 'bg-gray-500/10 border-gray-400/30 text-gray-700 dark:text-gray-300',
-                'bronze' => 'bg-amber-700/10 border-amber-700/30 text-amber-700 dark:text-amber-500',
-                'purple' => 'bg-purple-500/10 border-purple-500/30 text-purple-600 dark:text-purple-400',
-                default => 'bg-red-500/10 border-red-500/30 text-red-600 dark:text-red-400',
-            };
-        @endphp
-        <div class="{{ $bannerStyle }} border p-6 rounded-3xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-sm">
-            <div class="flex items-center gap-3">
-                <div class="p-3 bg-white/20 dark:bg-gray-800/40 rounded-2xl shrink-0">
-                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
-                    </svg>
-                </div>
-                <div>
-                    <div class="flex items-center gap-2">
-                        <h4 class="font-black uppercase tracking-wider text-sm">{{ $motivation['title'] }}</h4>
-                        <span class="px-2.5 py-0.5 text-[9px] font-black uppercase tracking-widest rounded-full bg-white/30 dark:bg-gray-800/50 border border-current">
-                            {{ $motivation['badge'] }}
-                        </span>
+        <!-- Dynamic Motivation Banner (Only show for active cashier candidates on leaderboard) -->
+        @if($currentUserRank !== null)
+            @php
+                $bannerStyle = match ($motivation['type']) {
+                    'gold' => 'bg-amber-500/10 border-amber-500/30 text-amber-600 dark:text-amber-400',
+                    'silver' => 'bg-gray-500/10 border-gray-400/30 text-gray-700 dark:text-gray-300',
+                    'bronze' => 'bg-amber-700/10 border-amber-700/30 text-amber-700 dark:text-amber-500',
+                    'purple' => 'bg-purple-500/10 border-purple-500/30 text-purple-600 dark:text-purple-400',
+                    default => 'bg-red-500/10 border-red-500/30 text-red-600 dark:text-red-400',
+                };
+            @endphp
+            <div class="{{ $bannerStyle }} border p-6 rounded-3xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-sm">
+                <div class="flex items-center gap-3">
+                    <div class="p-3 bg-white/20 dark:bg-gray-800/40 rounded-2xl shrink-0">
+                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                        </svg>
                     </div>
-                    <p class="text-xs font-semibold mt-1 opacity-90 leading-relaxed">{{ $motivation['message'] }}</p>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <h4 class="font-black uppercase tracking-wider text-sm">{{ $motivation['title'] }}</h4>
+                            <span class="px-2.5 py-0.5 text-[9px] font-black uppercase tracking-widest rounded-full bg-white/30 dark:bg-gray-800/50 border border-current">
+                                {{ $motivation['badge'] }}
+                            </span>
+                        </div>
+                        <p class="text-xs font-semibold mt-1 opacity-90 leading-relaxed">{{ $motivation['message'] }}</p>
+                    </div>
                 </div>
+                <button wire:click="viewUserDetail('{{ auth()->id() }}')"
+                    class="px-5 py-2.5 bg-white dark:bg-gray-800 font-black text-xs uppercase tracking-widest rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 hover:scale-105 active:scale-95 transition-all text-gray-800 dark:text-white shrink-0 flex items-center gap-2">
+                    <svg class="w-4 h-4 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Detail Poin Saya
+                </button>
             </div>
-            <button wire:click="viewUserDetail('{{ auth()->id() }}')"
-                class="px-5 py-2.5 bg-white dark:bg-gray-800 font-black text-xs uppercase tracking-widest rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 hover:scale-105 active:scale-95 transition-all text-gray-800 dark:text-white shrink-0 flex items-center gap-2">
-                <svg class="w-4 h-4 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                Detail Poin Saya
-            </button>
-        </div>
+        @endif
 
         <!-- Podium Layout (Rank 1, 2, 3) -->
         @php
