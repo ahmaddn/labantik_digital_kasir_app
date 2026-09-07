@@ -19,30 +19,30 @@
         <div class="flex flex-wrap items-end gap-4 flex-1">
             <!-- Filter Source Method (Transfer / QRIS) -->
             <div class="flex flex-col flex-1 min-w-[170px]">
-                <span class="text-[9px] font-black uppercase tracking-widest text-gray-400 mb-1.5 ml-1">Metode Non-Cash</span>
+                <span class="text-[9px] font-black uppercase tracking-widest text-gray-600 dark:text-gray-400 mb-1.5 ml-1">Metode Non-Cash</span>
                 <div class="relative w-full">
-                    <select wire:model.live="filterSourceMethod" class="w-full pl-4 pr-10 py-3 bg-gray-50 dark:bg-gray-900 border-none rounded-xl font-black text-xs text-gray-800 dark:text-white uppercase tracking-wider focus:ring-4 focus:ring-primary-blue/10 appearance-none">
+                    <select wire:model.live="filterSourceMethod" class="w-full pl-4 pr-10 py-3 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl font-black text-xs text-gray-800 dark:text-white uppercase tracking-wider focus:ring-4 focus:ring-primary-blue/10 appearance-none">
                         <option value="">Semua (Transfer & QRIS)</option>
                         <option value="transfer">Bank Transfer</option>
                         <option value="qris">QRIS</option>
                     </select>
                     <div class="absolute inset-y-0 right-3 flex items-center pointer-events-none">
-                        <svg class="w-3.5 h-3.5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="m19 9-7 7-7-7"/></svg>
+                        <svg class="w-3.5 h-3.5 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="m19 9-7 7-7-7"/></svg>
                     </div>
                 </div>
             </div>
 
             <!-- Filter Type Select -->
             <div class="flex flex-col flex-1 min-w-[160px]">
-                <span class="text-[9px] font-black uppercase tracking-widest text-gray-400 mb-1.5 ml-1">Periode Analisis</span>
+                <span class="text-[9px] font-black uppercase tracking-widest text-gray-600 dark:text-gray-400 mb-1.5 ml-1">Periode Analisis</span>
                 <div class="relative w-full">
-                    <select wire:model.live="filterType" class="w-full pl-4 pr-10 py-3 bg-gray-50 dark:bg-gray-900 border-none rounded-xl font-black text-xs text-gray-800 dark:text-white uppercase tracking-wider focus:ring-4 focus:ring-primary-blue/10 appearance-none">
+                    <select wire:model.live="filterType" class="w-full pl-4 pr-10 py-3 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl font-black text-xs text-gray-800 dark:text-white uppercase tracking-wider focus:ring-4 focus:ring-primary-blue/10 appearance-none">
                         <option value="weekly">Mingguan</option>
                         <option value="monthly">Bulanan</option>
                         <option value="cumulative">Kumulatif (Semua)</option>
                     </select>
                     <div class="absolute inset-y-0 right-3 flex items-center pointer-events-none">
-                        <svg class="w-3.5 h-3.5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="m19 9-7 7-7-7"/></svg>
+                        <svg class="w-3.5 h-3.5 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="m19 9-7 7-7-7"/></svg>
                     </div>
                 </div>
             </div>
@@ -50,16 +50,16 @@
             <!-- Conditional filters based on Filter Type -->
             @if($filterType !== 'cumulative')
                 <div class="flex flex-col flex-1 min-w-[150px]">
-                    <span class="text-[9px] font-black uppercase tracking-widest text-gray-400 mb-1.5 ml-1">Bulan</span>
-                    <input type="month" wire:model.live="filterMonth" class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 border-none rounded-xl font-black text-xs text-gray-800 dark:text-white focus:ring-4 focus:ring-primary-blue/10">
+                    <span class="text-[9px] font-black uppercase tracking-widest text-gray-600 dark:text-gray-400 mb-1.5 ml-1">Bulan</span>
+                    <input type="month" wire:model.live="filterMonth" class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl font-black text-xs text-gray-800 dark:text-white focus:ring-4 focus:ring-primary-blue/10">
                 </div>
             @endif
 
             @if($filterType === 'weekly')
                 <div class="flex flex-col flex-1 min-w-[180px]">
-                    <span class="text-[9px] font-black uppercase tracking-widest text-gray-400 mb-1.5 ml-1">Pilih Minggu</span>
+                    <span class="text-[9px] font-black uppercase tracking-widest text-gray-600 dark:text-gray-400 mb-1.5 ml-1">Pilih Minggu</span>
                     <div class="relative w-full">
-                        <select wire:model.live="filterWeek" class="w-full pl-4 pr-10 py-3 bg-gray-50 dark:bg-gray-900 border-none rounded-xl font-black text-xs text-gray-800 dark:text-white uppercase tracking-wider focus:ring-4 focus:ring-primary-blue/10 appearance-none">
+                        <select wire:model.live="filterWeek" class="w-full pl-4 pr-10 py-3 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl font-black text-xs text-gray-800 dark:text-white uppercase tracking-wider focus:ring-4 focus:ring-primary-blue/10 appearance-none">
                             <option value="this_week">Minggu Ini (Berjalan)</option>
                             <option value="last_week">Minggu Lalu</option>
                             <option value="week_1">Minggu 1 (Tgl 1 - 7)</option>
@@ -69,7 +69,7 @@
                             <option value="week_5">Minggu 5 (Tgl 29+)</option>
                         </select>
                         <div class="absolute inset-y-0 right-3 flex items-center pointer-events-none">
-                            <svg class="w-3.5 h-3.5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="m19 9-7 7-7-7"/></svg>
+                            <svg class="w-3.5 h-3.5 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="m19 9-7 7-7-7"/></svg>
                         </div>
                     </div>
                 </div>
@@ -94,48 +94,48 @@
     <!-- Stats Cards -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-5 mb-12">
         <!-- Total Saldo Virtual Card -->
-        <div class="bg-gradient-to-br from-indigo-900 to-slate-950 rounded-[3rem] p-6 md:p-7 text-white shadow-2xl shadow-indigo-950/30 relative overflow-hidden group border-b-8 border-indigo-500">
-            <div class="absolute -right-6 -bottom-6 opacity-10 group-hover:scale-110 transition-transform duration-700">
+        <div class="bg-gradient-to-br from-indigo-600 to-indigo-800 dark:from-indigo-950 dark:to-slate-950 rounded-[3rem] p-6 md:p-7 text-white shadow-xl shadow-indigo-500/10 relative overflow-hidden group border-b-8 border-indigo-900 dark:border-indigo-500">
+            <div class="absolute -right-6 -bottom-6 opacity-15 group-hover:scale-110 transition-transform duration-700">
                 <svg class="w-40 h-40 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg>
             </div>
-            <h3 class="text-[10px] font-black uppercase tracking-[0.3em] opacity-80 mb-3 text-indigo-300">Total Saldo Virtual</h3>
+            <h3 class="text-[10px] font-black uppercase tracking-[0.3em] text-indigo-100 dark:text-indigo-300 mb-3">Total Saldo Virtual</h3>
             <p class="text-2xl xl:text-3xl font-black text-white {{ $totalBalance < 0 ? 'text-primary-red' : '' }}" :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($totalBalance, 0, ',', '.') }}</p>
         </div>
 
         <!-- Saldo Transfer Card -->
-        <div class="bg-gradient-to-br from-blue-900 to-slate-900 rounded-[3rem] p-6 md:p-7 text-white shadow-2xl shadow-blue-900/20 relative overflow-hidden group border-b-8 border-blue-500">
-            <div class="absolute -right-6 -bottom-6 opacity-10 group-hover:scale-110 transition-transform duration-700">
+        <div class="bg-gradient-to-br from-blue-600 to-blue-800 dark:from-blue-950 dark:to-slate-900 rounded-[3rem] p-6 md:p-7 text-white shadow-xl shadow-blue-500/10 relative overflow-hidden group border-b-8 border-blue-900 dark:border-blue-500">
+            <div class="absolute -right-6 -bottom-6 opacity-15 group-hover:scale-110 transition-transform duration-700">
                 <svg class="w-40 h-40 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 10h12"/><path d="M4 14h9"/><path d="M19 6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V8l-2-2Z"/></svg>
             </div>
-            <h3 class="text-[10px] font-black uppercase tracking-[0.3em] opacity-80 mb-3 text-blue-300">Saldo Bank Transfer</h3>
+            <h3 class="text-[10px] font-black uppercase tracking-[0.3em] text-blue-100 dark:text-blue-300 mb-3">Saldo Bank Transfer</h3>
             <p class="text-2xl xl:text-3xl font-black text-white {{ $transferBalance < 0 ? 'text-primary-red' : '' }}" :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($transferBalance, 0, ',', '.') }}</p>
         </div>
 
         <!-- Saldo QRIS Card -->
-        <div class="bg-gradient-to-br from-purple-900 to-slate-900 rounded-[3rem] p-6 md:p-7 text-white shadow-2xl shadow-purple-900/20 relative overflow-hidden group border-b-8 border-purple-500">
-            <div class="absolute -right-6 -bottom-6 opacity-10 group-hover:scale-110 transition-transform duration-700">
+        <div class="bg-gradient-to-br from-purple-600 to-purple-800 dark:from-purple-950 dark:to-slate-900 rounded-[3rem] p-6 md:p-7 text-white shadow-xl shadow-purple-500/10 relative overflow-hidden group border-b-8 border-purple-900 dark:border-purple-500">
+            <div class="absolute -right-6 -bottom-6 opacity-15 group-hover:scale-110 transition-transform duration-700">
                 <svg class="w-40 h-40 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><path d="M14 14h3v3h-3z"/><path d="M18 18h3v3h-3z"/></svg>
             </div>
-            <h3 class="text-[10px] font-black uppercase tracking-[0.3em] opacity-80 mb-3 text-purple-300">Saldo QRIS</h3>
+            <h3 class="text-[10px] font-black uppercase tracking-[0.3em] text-purple-100 dark:text-purple-300 mb-3">Saldo QRIS</h3>
             <p class="text-2xl xl:text-3xl font-black text-white {{ $qrisBalance < 0 ? 'text-purple-300' : '' }}" :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($qrisBalance, 0, ',', '.') }}</p>
         </div>
 
         <!-- Pemasukan Card -->
-        <div class="bg-gray-900 rounded-[3rem] p-6 md:p-7 text-white shadow-2xl shadow-gray-900/20 relative overflow-hidden group border-b-8 border-green-500">
-            <div class="absolute -right-6 -bottom-6 opacity-10 group-hover:scale-110 transition-transform duration-700">
-                <svg class="w-40 h-40 text-green-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+        <div class="bg-gradient-to-br from-emerald-600 to-emerald-800 dark:from-gray-900 dark:to-slate-900 rounded-[3rem] p-6 md:p-7 text-white shadow-xl shadow-emerald-500/10 relative overflow-hidden group border-b-8 border-emerald-900 dark:border-green-500">
+            <div class="absolute -right-6 -bottom-6 opacity-15 group-hover:scale-110 transition-transform duration-700">
+                <svg class="w-40 h-40 text-white dark:text-green-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
             </div>
-            <h3 class="text-[10px] font-black uppercase tracking-[0.3em] text-green-400 opacity-80 mb-3">Pemasukan Virtual</h3>
-            <p class="text-2xl xl:text-3xl font-black text-green-400" :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($displayIncome, 0, ',', '.') }}</p>
+            <h3 class="text-[10px] font-black uppercase tracking-[0.3em] text-emerald-100 dark:text-green-400 mb-3">Pemasukan Virtual</h3>
+            <p class="text-2xl xl:text-3xl font-black text-white dark:text-green-400" :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($displayIncome, 0, ',', '.') }}</p>
         </div>
 
         <!-- Pengeluaran Card -->
-        <div class="bg-gray-900 rounded-[3rem] p-6 md:p-7 text-white shadow-2xl shadow-gray-900/20 relative overflow-hidden group border-b-8 border-primary-red">
-            <div class="absolute -right-6 -bottom-6 opacity-10 group-hover:scale-110 transition-transform duration-700">
-                <svg class="w-40 h-40 text-primary-red" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 17 13.5 8.5 8.5 13.5 2 7"/><polyline points="16 17 22 17 22 11"/></svg>
+        <div class="bg-gradient-to-br from-rose-600 to-red-800 dark:from-gray-900 dark:to-slate-900 rounded-[3rem] p-6 md:p-7 text-white shadow-xl shadow-rose-500/10 relative overflow-hidden group border-b-8 border-rose-900 dark:border-primary-red">
+            <div class="absolute -right-6 -bottom-6 opacity-15 group-hover:scale-110 transition-transform duration-700">
+                <svg class="w-40 h-40 text-white dark:text-primary-red" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 17 13.5 8.5 8.5 13.5 2 7"/><polyline points="16 17 22 17 22 11"/></svg>
             </div>
-            <h3 class="text-[10px] font-black uppercase tracking-[0.3em] text-red-400 opacity-80 mb-3">Pengeluaran Virtual</h3>
-            <p class="text-2xl xl:text-3xl font-black text-primary-red" :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($displayExpense, 0, ',', '.') }}</p>
+            <h3 class="text-[10px] font-black uppercase tracking-[0.3em] text-rose-100 dark:text-red-400 mb-3">Pengeluaran Virtual</h3>
+            <p class="text-2xl xl:text-3xl font-black text-white dark:text-primary-red" :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($displayExpense, 0, ',', '.') }}</p>
         </div>
     </div>
 

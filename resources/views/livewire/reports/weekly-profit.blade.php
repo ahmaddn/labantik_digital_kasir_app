@@ -333,9 +333,19 @@
                                         <h4
                                             class="text-sm font-black text-gray-800 dark:text-white uppercase tracking-tight mt-3">
                                             {{ $report->month_name }}</h4>
-                                        <p
-                                            class="text-[8px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mt-2">
-                                            {{ $report->created_at->translatedFormat('d M Y H:i') }}</p>
+                                        <div class="flex flex-wrap items-center gap-2 mt-2">
+                                            <div class="flex items-center gap-1.5 bg-gray-100 dark:bg-gray-700/60 px-2.5 py-1 rounded-full border border-gray-200 dark:border-gray-600/50" title="Pembuat Laporan">
+                                                <svg class="w-3 h-3 text-primary-blue dark:text-primary-blue-light" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+                                                </svg>
+                                                <span class="text-[9px] font-black text-gray-700 dark:text-gray-200 uppercase tracking-wider">
+                                                    {{ $report->creator->name ?? 'Sistem' }}
+                                                </span>
+                                            </div>
+                                            <span class="text-[8px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">
+                                                {{ $report->created_at->translatedFormat('d M Y H:i') }}
+                                            </span>
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="h-px bg-gray-100 dark:bg-gray-700 mb-6"></div>

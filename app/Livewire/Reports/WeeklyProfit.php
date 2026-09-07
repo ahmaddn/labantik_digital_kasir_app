@@ -172,6 +172,7 @@ class WeeklyProfit extends Component
             'total_profit' => $totalProfit,
             'kas_amount' => $totalProfit * 0.40, // 40%
             'shared_amount' => $totalProfit * 0.60, // 60% (Najmy 30% + Labantik 30%)
+            'created_by' => auth()->id(),
         ];
 
         WeeklyProfitShare::updateOrCreate(
@@ -447,7 +448,7 @@ class WeeklyProfit extends Component
     public function render()
     {
         $activeJurusanId = session('active_jurusan_id');
-        $reports = WeeklyProfitShare::where('jurusan_id', $activeJurusanId)->orderByDesc('week_end')->paginate(10);
+        $reports = WeeklyProfitShare::with('creator')->where('jurusan_id', $activeJurusanId)->orderByDesc('week_end')->paginate(10);
 
         $weekStart = Carbon::parse($this->startDate);
         $weekEnd = Carbon::parse($this->endDate);

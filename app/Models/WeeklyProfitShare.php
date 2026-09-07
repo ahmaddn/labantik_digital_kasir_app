@@ -19,11 +19,17 @@ class WeeklyProfitShare extends Model
         'total_profit',
         'kas_amount',
         'shared_amount',
+        'created_by',
     ];
 
     public function jurusan(): BelongsTo
     {
         return $this->belongsTo(Jurusan::class);
+    }
+
+    public function creator(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
     }
 
     protected $casts = [
