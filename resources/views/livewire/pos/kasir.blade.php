@@ -585,6 +585,15 @@
                         barang fisik di toko</p>
                 </div>
                 <div class="flex items-center gap-3 w-full md:w-auto">
+                    <button wire:click="syncOpeningStockWithLast" type="button"
+                        class="nb-btn bg-emerald-500 hover:bg-emerald-600 text-white p-2 text-[10px] font-black uppercase flex items-center gap-1.5 shadow-none border-2"
+                        title="Selaraskan dengan stok terakhir yang tercatat">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
+                                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                        SINKRONKAN STOK
+                    </button>
                     <input type="text" x-model="modalSearch" placeholder="CARI BARANG..."
                         class="nb-input bg-white text-black p-2 text-[10px] flex-1 md:w-48 shadow-none border-2">
                     <button @click="show = false" class="nb-btn bg-white text-black p-2 shadow-none border-2">
@@ -613,13 +622,26 @@
                             class="nb-card p-5 flex items-center justify-between bg-white dark:bg-dark-soft shadow-none border-2">
                             <div class="flex-1">
                                 <h4 class="font-black uppercase text-sm dark:text-white">{{ $p->name }}</h4>
-                                <div class="flex items-center gap-2 mt-2">
+                                <div class="flex flex-wrap items-center gap-1.5 mt-2">
                                     <span
                                         class="text-[9px] font-black bg-black text-white px-2 py-0.5 uppercase tracking-widest border border-white">{{ $p->category->name ?? '' }}</span>
-                                    @if (isset($lastClosingStocks[$p->id]))
+
+                                    <!-- Stok Kemarin (H-1) -->
+                                    <span
+                                        class="text-[9px] font-black border-2 border-amber-500 text-amber-700 dark:text-amber-300 px-2 py-0.5 uppercase tracking-widest bg-amber-50 dark:bg-amber-950/40"
+                                        title="Stok penutupan persis kemarin ({{ \Carbon\Carbon::parse($transactionDate)->subDay()->translatedFormat('d M') }})">
+                                        KEMARIN ({{ \Carbon\Carbon::parse($transactionDate)->subDay()->translatedFormat('d M') }}):
+                                        {{ isset($yesterdayClosingStocks[$p->id]) ? $yesterdayClosingStocks[$p->id] : '-' }}
+                                    </span>
+
+                                    <!-- Stok Terakhir Tercatat -->
+                                    @if (isset($lastClosingDetails[$p->id]))
                                         <span
-                                            class="text-[9px] font-black border-2 border-primary-blue dark:border-primary-blue-light px-2 py-0.5 uppercase tracking-widest text-primary-blue dark:text-primary-blue-light">KEMARIN:
-                                            {{ $lastClosingStocks[$p->id] }}</span>
+                                            class="text-[9px] font-black border-2 border-primary-blue dark:border-primary-blue-light px-2 py-0.5 uppercase tracking-widest text-primary-blue dark:text-primary-blue-light bg-blue-50 dark:bg-blue-950/40"
+                                            title="Stok penutupan sesi terakhir yang tercatat">
+                                            STOK TERAKHIR ({{ $lastClosingDetails[$p->id]['date'] }}):
+                                            {{ $lastClosingDetails[$p->id]['stock'] }}
+                                        </span>
                                     @endif
                                 </div>
                             </div>
@@ -643,9 +665,17 @@
                     </div>
                 </div>
             </div>
-            <div class="p-6 bg-white dark:bg-dark-soft border-t-4 border-black">
+            <div class="p-6 bg-white dark:bg-dark-soft border-t-4 border-black flex flex-col sm:flex-row gap-3">
+                <button wire:click="syncOpeningStockWithLast" type="button"
+                    class="nb-btn bg-emerald-500 hover:bg-emerald-600 text-white text-sm py-4 px-6 flex items-center justify-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
+                            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                    SINKRONKAN STOK TERAKHIR
+                </button>
                 <button wire:click="saveOpeningStock"
-                    class="nb-btn w-full bg-primary-blue text-white text-lg py-5">SIMPAN & MULAI JUALAN</button>
+                    class="nb-btn flex-1 bg-primary-blue text-white text-lg py-4">SIMPAN & MULAI JUALAN</button>
             </div>
         </div>
     </div>

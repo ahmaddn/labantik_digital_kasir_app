@@ -41,7 +41,11 @@ class Kasir extends Component
 
     public $stockItems = []; // Array to hold stock input values [product_id => quantity]
 
-    public $lastClosingStocks = []; // Array to hold yesterday's closing stock [product_id => quantity]
+    public $lastClosingStocks = []; // Array to hold last recorded closing stock [product_id => quantity]
+
+    public $yesterdayClosingStocks = []; // Array to hold strictly yesterday's closing stock [product_id => quantity]
+
+    public $lastClosingDetails = []; // Array to hold details [product_id => ['stock' => int, 'date' => string]]
 
     public $showDetailsModal = false;
 
@@ -314,6 +318,8 @@ class Kasir extends Component
 
         $lastStocks = $posSessionService->getLastSessionStocks($today, $activeJurusanId);
         $this->lastClosingStocks = $lastStocks;
+        $this->yesterdayClosingStocks = $posSessionService->getYesterdayStocks($today, $activeJurusanId);
+        $this->lastClosingDetails = $posSessionService->getLastSessionDetails($today, $activeJurusanId);
 
         $allProducts = $this->getActiveProducts();
 
@@ -345,6 +351,8 @@ class Kasir extends Component
         if (! $exists) {
             $lastStocks = $posSessionService->getLastSessionStocks($today, $activeJurusanId);
             $this->lastClosingStocks = $lastStocks;
+            $this->yesterdayClosingStocks = $posSessionService->getYesterdayStocks($today, $activeJurusanId);
+            $this->lastClosingDetails = $posSessionService->getLastSessionDetails($today, $activeJurusanId);
 
             $allProducts = $this->getActiveProducts();
 
@@ -353,6 +361,25 @@ class Kasir extends Component
             }
             $this->showOpeningStockModal = true;
         }
+    }
+
+    public function syncOpeningStockWithLast(PosSessionService $posSessionService): void
+    {
+        $today = $this->transactionDate ?: now()->toDateString();
+        $activeJurusanId = session('active_jurusan_id');
+
+        $lastStocks = $posSessionService->getLastSessionStocks($today, $activeJurusanId);
+        $this->lastClosingStocks = $lastStocks;
+        $this->yesterdayClosingStocks = $posSessionService->getYesterdayStocks($today, $activeJurusanId);
+        $this->lastClosingDetails = $posSessionService->getLastSessionDetails($today, $activeJurusanId);
+
+        $allProducts = $this->getActiveProducts();
+
+        foreach ($allProducts as $p) {
+            $this->stockItems[$p->id] = $lastStocks[$p->id] ?? 0;
+        }
+
+        $this->dispatch('toast', message: 'Stok awal berhasil diselaraskan dengan stok terakhir seluruh produk.', type: 'success');
     }
 
     public function saveOpeningStock(PosSessionService $posSessionService): void

@@ -73,29 +73,67 @@ class PosSessionService
         });
     }
 
-    public function getLastSessionStocks(string $today, ?string $activeJurusanId): array
+    public function getYesterdayStocks(string $today, ?string $activeJurusanId): array
     {
-        $lastSessionDate = StockEntry::where('date', '<', $today)
+        $yesterday = Carbon::parse($today)->subDay()->toDateString();
+
+        return StockEntry::where('date', $yesterday)
             ->whereHas('product', function ($q) use ($activeJurusanId) {
                 if ($activeJurusanId) {
                     $q->where('jurusan_id', $activeJurusanId);
                 }
             })
-            ->orderBy('date', 'desc')
-            ->value('date');
+            ->pluck('closing_stock', 'product_id')
+            ->toArray();
+    }
 
-        if ($lastSessionDate) {
-            return StockEntry::where('date', $lastSessionDate)
-                ->whereHas('product', function ($q) use ($activeJurusanId) {
-                    if ($activeJurusanId) {
-                        $q->where('jurusan_id', $activeJurusanId);
-                    }
-                })
-                ->pluck('closing_stock', 'product_id')
-                ->toArray();
+    public function getLastSessionDetails(string $today, ?string $activeJurusanId): array
+    {
+        $subQuery = StockEntry::select('product_id', DB::raw('MAX(date) as max_date'))
+            ->where('date', '<', $today)
+            ->whereHas('product', function ($q) use ($activeJurusanId) {
+                if ($activeJurusanId) {
+                    $q->where('jurusan_id', $activeJurusanId);
+                }
+            })
+            ->groupBy('product_id');
+
+        $entries = StockEntry::joinSub($subQuery, 'latest_entries', function ($join) {
+            $join->on('stock_entries.product_id', '=', 'latest_entries.product_id')
+                 ->on('stock_entries.date', '=', 'latest_entries.max_date');
+        })
+        ->select('stock_entries.product_id', 'stock_entries.closing_stock', 'stock_entries.date')
+        ->get();
+
+        $details = [];
+        foreach ($entries as $e) {
+            $details[$e->product_id] = [
+                'stock' => (int) $e->closing_stock,
+                'date'  => $e->date ? Carbon::parse($e->date)->translatedFormat('d M') : '-',
+                'raw_date' => $e->date,
+            ];
         }
 
-        return [];
+        return $details;
+    }
+
+    public function getLastSessionStocks(string $today, ?string $activeJurusanId): array
+    {
+        $subQuery = StockEntry::select('product_id', DB::raw('MAX(date) as max_date'))
+            ->where('date', '<', $today)
+            ->whereHas('product', function ($q) use ($activeJurusanId) {
+                if ($activeJurusanId) {
+                    $q->where('jurusan_id', $activeJurusanId);
+                }
+            })
+            ->groupBy('product_id');
+
+        return StockEntry::joinSub($subQuery, 'latest_entries', function ($join) {
+            $join->on('stock_entries.product_id', '=', 'latest_entries.product_id')
+                 ->on('stock_entries.date', '=', 'latest_entries.max_date');
+        })
+        ->pluck('stock_entries.closing_stock', 'stock_entries.product_id')
+        ->toArray();
     }
 
     public function saveOpeningStock(array $stockItems, string $today): void
