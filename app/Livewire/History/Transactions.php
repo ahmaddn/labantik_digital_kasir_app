@@ -225,24 +225,25 @@ class Transactions extends Component
         }
 
         // Calculate tab metrics (count & total) prior to payment_method filter
+        // Exclude unpaid debt transactions (status === 'belum_menerima_uang') from revenue totals
         $groupedSub = (clone $query)
-            ->selectRaw("reference, MAX(COALESCE(payment_method, 'cash')) as p_method, SUM(total_price) as sum_total")
+            ->selectRaw("reference, MAX(COALESCE(payment_method, 'cash')) as p_method, MAX(status) as ref_status, SUM(total_price) as sum_total, SUM(CASE WHEN status IN ('uang_diterima', 'belum_kembalian') THEN total_price ELSE 0 END) as sum_paid_total")
             ->groupBy('reference')
             ->get();
 
         $methodStats = [
-            'all' => ['count' => $groupedSub->count(), 'total' => $groupedSub->sum('sum_total')],
+            'all' => ['count' => $groupedSub->count(), 'total' => $groupedSub->sum('sum_paid_total')],
             'cash' => [
                 'count' => $groupedSub->whereIn('p_method', ['cash', '', null])->count(),
-                'total' => $groupedSub->whereIn('p_method', ['cash', '', null])->sum('sum_total')
+                'total' => $groupedSub->whereIn('p_method', ['cash', '', null])->sum('sum_paid_total')
             ],
             'transfer' => [
                 'count' => $groupedSub->where('p_method', 'transfer')->count(),
-                'total' => $groupedSub->where('p_method', 'transfer')->sum('sum_total')
+                'total' => $groupedSub->where('p_method', 'transfer')->sum('sum_paid_total')
             ],
             'qris' => [
                 'count' => $groupedSub->where('p_method', 'qris')->count(),
-                'total' => $groupedSub->where('p_method', 'qris')->sum('sum_total')
+                'total' => $groupedSub->where('p_method', 'qris')->sum('sum_paid_total')
             ],
         ];
 
