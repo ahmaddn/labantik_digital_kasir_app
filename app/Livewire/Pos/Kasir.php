@@ -188,7 +188,8 @@ class Kasir extends Component
         }
 
         // Check if session for today is already finished
-        $isTodayFinished = DailyRecap::whereDate('date', now())
+        $isTodayFinished = DailyRecap::withoutGlobalScope('active')
+            ->whereDate('date', now())
             ->where('jurusan_id', $activeJurusanId)
             ->where('actual_cash', '>', 0)
             ->exists();

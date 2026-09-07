@@ -90,7 +90,8 @@
 
             @if (session('active_role_name') !== 'superadmin')
                 @php
-                    $isSessionFinished = \App\Models\DailyRecap::whereDate('date', now())
+                    $isSessionFinished = \App\Models\DailyRecap::withoutGlobalScope('active')
+                        ->whereDate('date', now())
                         ->where('jurusan_id', session('active_jurusan_id'))
                         ->where('actual_cash', '>', 0)
                         ->exists();

@@ -347,18 +347,25 @@ class Dashboard extends Component
         }
 
         $activeJurusanId = session('active_jurusan_id');
-        $recap = DailyRecap::withoutGlobalScope('active')
+        
+        // 1. Reset or delete DailyRecap for today so isSessionFinished returns false
+        DailyRecap::withoutGlobalScope('active')
             ->whereDate('date', now())
             ->when($activeJurusanId, function ($q) use ($activeJurusanId) {
                 return $q->where('jurusan_id', $activeJurusanId);
             })
-            ->first();
+            ->delete();
 
-        if ($recap) {
-            $recap->update([
-                'actual_cash' => -abs($recap->actual_cash ?: 1),
+        // 2. Reset clock_out for cashier attendance today so cashiers can re-enter POS mode
+        CashierAttendance::whereDate('date', now())
+            ->when($activeJurusanId, function ($q) use ($activeJurusanId) {
+                return $q->where('jurusan_id', $activeJurusanId);
+            })
+            ->update([
+                'clock_out' => null,
             ]);
-        }
+
+        session()->flash('success', 'Sesi kasir berhasil diaktifkan kembali. Tombol Buka Kasir kini dapat diakses kembali.');
 
         $this->redirect(route('dashboard'), navigate: true);
     }
