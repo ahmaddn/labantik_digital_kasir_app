@@ -227,8 +227,19 @@ class PosSessionService
         $initials = strtoupper(substr($cleanName, 0, 2));
         $reference = $docPrefix.'-'.now()->format('Ymd').'-'.$initials.strtoupper(bin2hex(random_bytes(2)));
 
-        DB::transaction(function () use ($cart, $change, $buyerName, $status, $note, $tDate, $isBackdate, $transactedAt, $activeJurusanId, $userId, $reference, $paymentMethod) {
+        DB::transaction(function () use ($cart, $change, $buyerName, &$status, $note, $tDate, $isBackdate, $transactedAt, $activeJurusanId, $userId, $reference, $paymentMethod) {
             $first = true;
+            
+            // Prevent Rp 0 transactions from being saved as debt (HUTANG)
+            $calculatedTotal = collect($cart)->sum(function($item) {
+                $modifiersPrice = collect($item['selected_modifiers'] ?? [])->sum('price');
+                return ($item['price'] + $modifiersPrice) * $item['quantity'];
+            });
+
+            if (in_array($status, ['belum_menerima_uang', 'uang_dipinjam']) && $calculatedTotal <= 0) {
+                $status = 'uang_diterima';
+            }
+
             foreach ($cart as $item) {
                 // Hitung total harga topping yang dipilih
                 $modifiersPrice = collect($item['selected_modifiers'] ?? [])->sum('price');

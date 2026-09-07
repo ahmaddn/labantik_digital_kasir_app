@@ -159,60 +159,82 @@ class Leaderboard extends Component
 
         // Details calculation for modal audit
         $detailUser = null;
-        $userStats = [
-            'total_transactions' => 0,
-            'pos_points' => 0,
-            'completed_tasks' => 0,
-            'task_points' => 0,
-            'attendance_count' => 0,
-            'attendance_points' => 0,
+        $userBreakdown = [
+            'weekly' => ['total_transactions' => 0, 'pos_points' => 0, 'completed_tasks' => 0, 'task_points' => 0, 'attendance_count' => 0, 'attendance_points' => 0, 'total' => 0],
+            'monthly' => ['total_transactions' => 0, 'pos_points' => 0, 'completed_tasks' => 0, 'task_points' => 0, 'attendance_count' => 0, 'attendance_points' => 0, 'total' => 0],
+            'lifetime' => ['total_transactions' => 0, 'pos_points' => 0, 'completed_tasks' => 0, 'task_points' => 0, 'attendance_count' => 0, 'attendance_points' => 0, 'total' => 0],
         ];
         $recentLogs = collect();
 
         if ($this->selectedUserId) {
             $detailUser = User::find($this->selectedUserId);
             if ($detailUser) {
-                // Count transactions handled by user in period
-                $userStats['total_transactions'] = Transaction::where('user_id', $detailUser->id)
-                    ->whereIn('status', ['uang_diterima', 'belum_kembalian'])
-                    ->whereBetween('created_at', [$startDate, $endDate])
-                    ->distinct('reference')
-                    ->count('reference');
-                $userStats['pos_points'] = $userStats['total_transactions'] * 5;
+                $periodsConfig = [
+                    'weekly' => [now()->startOfWeek(), now()->endOfWeek()],
+                    'monthly' => [now()->startOfMonth(), now()->endOfMonth()],
+                    'lifetime' => [now()->subYears(10), now()->addYears(10)],
+                ];
 
-                // Count completed tasks and calculate points based on task priority in period
+                foreach ($periodsConfig as $key => [$pStart, $pEnd]) {
+                    // POS transactions
+                    $txCount = Transaction::where('user_id', $detailUser->id)
+                        ->whereIn('status', ['uang_diterima', 'belum_kembalian'])
+                        ->whereBetween('created_at', [$pStart, $pEnd])
+                        ->distinct('reference')
+                        ->count('reference');
+                    $posPts = $txCount * 5;
+
+                    // Tasks
+                    $approvedSubmissions = CashierTaskSubmission::where('submitted_by', $detailUser->id)
+                        ->where('approval_status', 'approved')
+                        ->whereBetween('created_at', [$pStart, $pEnd])
+                        ->with('assignment.taskDefinition')
+                        ->get();
+                    $taskCount = $approvedSubmissions->count();
+                    $taskPts = $approvedSubmissions->sum(function ($sub) {
+                        $priority = $sub->assignment->taskDefinition->priority ?? 'medium';
+                        return match ($priority) {
+                            'low' => 5,
+                            'high' => 20,
+                            'critical' => 30,
+                            default => 10,
+                        };
+                    });
+
+                    // Attendance
+                    $attendances = CashierAttendance::where('user_id', $detailUser->id)
+                        ->whereBetween('created_at', [$pStart, $pEnd])
+                        ->get();
+                    $attCount = $attendances->count();
+                    $attPts = $attendances->sum(function ($att) {
+                        $pts = 0;
+                        if ($att->clock_in) $pts += 15;
+                        if ($att->clock_out) $pts += 15;
+                        if ($att->clock_out_status === 'overtime' || $att->clock_out_status === 'on_time') $pts += 10;
+                        return $pts;
+                    });
+
+                    $userBreakdown[$key] = [
+                        'total_transactions' => $txCount,
+                        'pos_points' => $posPts,
+                        'completed_tasks' => $taskCount,
+                        'task_points' => $taskPts,
+                        'attendance_count' => $attCount,
+                        'attendance_points' => $attPts,
+                        'total' => $posPts + $taskPts + $attPts,
+                    ];
+                }
+
+                // Build detailed activity log timeline for selected active period
+                $pStart = $startDate;
+                $pEnd = $endDate;
+
                 $approvedSubmissions = CashierTaskSubmission::where('submitted_by', $detailUser->id)
                     ->where('approval_status', 'approved')
-                    ->whereBetween('created_at', [$startDate, $endDate])
+                    ->whereBetween('created_at', [$pStart, $pEnd])
                     ->with('assignment.taskDefinition')
                     ->get();
 
-                $userStats['completed_tasks'] = $approvedSubmissions->count();
-                $userStats['task_points'] = $approvedSubmissions->sum(function ($sub) {
-                    $priority = $sub->assignment->taskDefinition->priority ?? 'medium';
-                    return match ($priority) {
-                        'low' => 5,
-                        'high' => 20,
-                        'critical' => 30,
-                        default => 10,
-                    };
-                });
-
-                // Count attendances and calculate attendance & session points in period
-                $attendances = CashierAttendance::where('user_id', $detailUser->id)
-                    ->whereBetween('created_at', [$startDate, $endDate])
-                    ->get();
-
-                $userStats['attendance_count'] = $attendances->count();
-                $userStats['attendance_points'] = $attendances->sum(function ($att) {
-                    $pts = 0;
-                    if ($att->clock_in) $pts += 15;
-                    if ($att->clock_out) $pts += 15;
-                    if ($att->clock_out_status === 'overtime' || $att->clock_out_status === 'on_time') $pts += 10;
-                    return $pts;
-                });
-
-                // Build detailed activity log timeline
                 $taskLogs = $approvedSubmissions->map(function ($sub) {
                     $def = $sub->assignment->taskDefinition ?? null;
                     $priority = $def->priority ?? 'medium';
@@ -231,6 +253,10 @@ class Leaderboard extends Component
                         'badge_color' => 'bg-indigo-50 text-indigo-600 border-indigo-200 dark:bg-indigo-500/20 dark:text-indigo-300 dark:border-indigo-500/30'
                     ];
                 });
+
+                $attendances = CashierAttendance::where('user_id', $detailUser->id)
+                    ->whereBetween('created_at', [$pStart, $pEnd])
+                    ->get();
 
                 $attendanceLogs = $attendances->map(function ($att) {
                     $pts = 0;
@@ -251,9 +277,9 @@ class Leaderboard extends Component
                 $posSummaryLog = collect([
                     [
                         'type' => 'POS Penjualan',
-                        'title' => 'Akumulasi Penjualan Kasir (' . $userStats['total_transactions'] . ' Transaksi)',
+                        'title' => 'Akumulasi Penjualan Kasir (' . $userBreakdown[$this->period]['total_transactions'] . ' Transaksi)',
                         'date' => now(),
-                        'points' => '+' . $userStats['pos_points'] . ' Pts',
+                        'points' => '+' . $userBreakdown[$this->period]['pos_points'] . ' Pts',
                         'badge' => 'Transaksi POS',
                         'badge_color' => 'bg-blue-50 text-blue-600 border-blue-200 dark:bg-blue-500/20 dark:text-blue-300 dark:border-blue-500/30'
                     ]
@@ -270,7 +296,7 @@ class Leaderboard extends Component
             'currentUserRank' => $currentUserRank,
             'motivation' => $motivation,
             'detailUser' => $detailUser,
-            'userStats' => $userStats,
+            'userBreakdown' => $userBreakdown,
             'recentLogs' => $recentLogs,
             'isManager' => in_array(session('active_role_name'), ['superadmin', 'pengelola_jurusan'])
         ])->layout('layouts.app', ['title' => 'Sistem Peringkat & Poin']);

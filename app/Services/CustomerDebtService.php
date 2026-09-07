@@ -22,15 +22,21 @@ class CustomerDebtService
             $remainingToSettle = $settleAmount;
 
             foreach ($transactions as $trx) {
-                if ($remainingToSettle <= 0) {
-                    break;
-                }
-
                 $currentField = $activeTab === 'change' ? 'change_due' : 'debt_amount';
                 $currentAmount = $trx->$currentField;
 
+                // Auto-clear Rp0 debt items directly
                 if ($currentAmount <= 0) {
+                    $trx->update([
+                        'status' => 'uang_diterima',
+                        'debt_amount' => 0,
+                        'transacted_at' => now(),
+                    ]);
                     continue;
+                }
+
+                if ($remainingToSettle <= 0) {
+                    break;
                 }
 
                 $deduct = min($currentAmount, $remainingToSettle);
@@ -44,6 +50,7 @@ class CustomerDebtService
 
                 if ($newAmount <= 0) {
                     $updates['transacted_at'] = now();
+                    $updates['status'] = 'uang_diterima';
                 }
 
                 $trx->update($updates);

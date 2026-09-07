@@ -298,7 +298,7 @@
 
             <!-- Modal Body (Scrollable Accordions) -->
             <div class="p-6 md:p-8 space-y-4 overflow-y-auto flex-1 no-scrollbar bg-white dark:bg-gray-800" x-data="{ openGroup: 'summary' }">
-                <!-- Accordion 1: Ringkasan Sumber Poin -->
+                <!-- Accordion 1: Ringkasan Periode Poin (Minggu Ini, Bulan Ini, Total) -->
                 <div class="rounded-2xl border border-gray-100 dark:border-gray-700/80 overflow-hidden bg-gray-50/50 dark:bg-gray-800/40">
                     <button type="button" @click="openGroup = (openGroup === 'summary' ? null : 'summary')"
                         class="w-full p-4 flex items-center justify-between text-left font-black uppercase tracking-widest text-xs text-gray-800 dark:text-gray-200 hover:bg-gray-100/50 dark:hover:bg-gray-700/40 transition-colors">
@@ -308,10 +308,10 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                                 </svg>
                             </div>
-                            <span>Ringkasan & Total Perolehan Poin</span>
+                            <span>Ringkasan Perolehan Poin Berdasarkan Periode</span>
                         </div>
                         <div class="flex items-center gap-2">
-                            <span class="text-amber-500 dark:text-amber-400 italic text-sm font-black">{{ ($detailUser->points ?? 0) + ($detailUser->pending_points ?? 0) }} Pts</span>
+                            <span class="text-amber-500 dark:text-amber-400 italic text-sm font-black">{{ $userBreakdown['lifetime']['total'] ?? (($detailUser->points ?? 0) + ($detailUser->pending_points ?? 0)) }} Pts (Total)</span>
                             <svg class="w-4 h-4 transition-transform duration-200 text-gray-400" :class="{ 'rotate-180': openGroup === 'summary' }" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
                             </svg>
@@ -319,21 +319,53 @@
                     </button>
 
                     <div x-show="openGroup === 'summary'" x-collapse class="p-4 pt-0 border-t border-gray-100 dark:border-gray-700/60 space-y-3">
-                        <div class="grid grid-cols-2 gap-3 pt-3">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 pt-3">
+                            <!-- Minggu Ini -->
                             <div class="p-4 bg-white dark:bg-gray-900/60 rounded-xl border border-gray-100 dark:border-gray-700/70">
-                                <span class="text-[9px] font-black text-gray-400 dark:text-gray-400 uppercase tracking-widest block">Total Poin</span>
-                                <div class="text-xl font-black text-amber-500 dark:text-amber-400 italic mt-0.5">
-                                    {{ ($detailUser->points ?? 0) + ($detailUser->pending_points ?? 0) }} Pts
-                                </div>
-                            </div>
-                            <div class="p-4 bg-white dark:bg-gray-900/60 rounded-xl border border-gray-100 dark:border-gray-700/70">
-                                <span class="text-[9px] font-black text-gray-400 dark:text-gray-400 uppercase tracking-widest block">Streak Kerja</span>
-                                <div class="text-xl font-black text-orange-500 dark:text-orange-400 italic mt-0.5 flex items-center gap-1.5">
-                                    <svg class="w-4 h-4 text-orange-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                        <path fill-rule="evenodd" d="M12.395 2.553a1 1 0 00-1.45-.385c-.345.23-.614.558-.822.94-.209.381-.363.887-.453 1.488-.12.802-.073 1.84.195 2.87l.062.24c.024.1.039.223.05.375a2.037 2.037 0 01-.029.511c-.048.24-.154.48-.32.647a.997.997 0 01-1.08.16c-.461-.247-.744-.623-.926-1.08-.182-.456-.224-.959-.224-1.347V6a1 1 0 00-1-1 3 3 0 00-2 2.22c0 1.258.18 2.5.474 3.738.152.64.4 1.25.753 1.807.353.558.836 1.057 1.443 1.487a8.007 8.007 0 005.19 2.09c.477.027.947-.033 1.4-.18a7.995 7.995 0 003.86-2.482c.187-.228.34-.483.47-.752.43-.892.652-1.928.652-3.141 0-1.622-.515-2.91-1.293-3.812a6.002 6.002 0 00-.825-1.012l-.011-.011-.002-.002a1 1 0 00-1.436.17l-.02.027a4.01 4.01 0 01-.262.33c-.758.874-1.808 1.47-3.2 1.47V2.553z" clip-rule="evenodd" />
+                                <span class="text-[9px] font-black text-blue-500 dark:text-blue-400 uppercase tracking-widest flex items-center gap-1.5">
+                                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                     </svg>
-                                    {{ $detailUser->streak ?? 0 }} Hari
+                                    Minggu Ini
+                                </span>
+                                <div class="text-xl font-black text-gray-900 dark:text-white italic mt-0.5">
+                                    {{ $userBreakdown['weekly']['total'] ?? 0 }} Pts
                                 </div>
+                                <p class="text-[9px] text-gray-400 font-bold mt-1">
+                                    {{ $userBreakdown['weekly']['total_transactions'] }} TX • {{ $userBreakdown['weekly']['completed_tasks'] }} Tugas
+                                </p>
+                            </div>
+
+                            <!-- Bulan Ini -->
+                            <div class="p-4 bg-white dark:bg-gray-900/60 rounded-xl border border-gray-100 dark:border-gray-700/70">
+                                <span class="text-[9px] font-black text-indigo-500 dark:text-indigo-400 uppercase tracking-widest flex items-center gap-1.5">
+                                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                                    </svg>
+                                    Bulan Ini
+                                </span>
+                                <div class="text-xl font-black text-gray-900 dark:text-white italic mt-0.5">
+                                    {{ $userBreakdown['monthly']['total'] ?? 0 }} Pts
+                                </div>
+                                <p class="text-[9px] text-gray-400 font-bold mt-1">
+                                    {{ $userBreakdown['monthly']['total_transactions'] }} TX • {{ $userBreakdown['monthly']['completed_tasks'] }} Tugas
+                                </p>
+                            </div>
+
+                            <!-- Total Akumulasi Keseluruhan -->
+                            <div class="p-4 bg-white dark:bg-gray-900/60 rounded-xl border border-gray-100 dark:border-gray-700/70">
+                                <span class="text-[9px] font-black text-amber-500 dark:text-amber-400 uppercase tracking-widest flex items-center gap-1.5">
+                                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                                    </svg>
+                                    Total Keseluruhan
+                                </span>
+                                <div class="text-xl font-black text-amber-500 dark:text-amber-400 italic mt-0.5">
+                                    {{ $userBreakdown['lifetime']['total'] ?? (($detailUser->points ?? 0) + ($detailUser->pending_points ?? 0)) }} Pts
+                                </div>
+                                <p class="text-[9px] text-gray-400 font-bold mt-1">
+                                    Streak: {{ $detailUser->streak ?? 0 }} Hari
+                                </p>
                             </div>
                         </div>
                     </div>
@@ -352,7 +384,7 @@
                             <span>Poin Penjualan Kasir (POS)</span>
                         </div>
                         <div class="flex items-center gap-2">
-                            <span class="text-blue-500 dark:text-blue-400 font-black text-xs">+{{ $userStats['pos_points'] }} Pts</span>
+                            <span class="text-blue-500 dark:text-blue-400 font-black text-xs">+{{ $userBreakdown[$period]['pos_points'] ?? 0 }} Pts</span>
                             <svg class="w-4 h-4 transition-transform duration-200 text-gray-400" :class="{ 'rotate-180': openGroup === 'pos' }" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
                             </svg>
@@ -363,9 +395,9 @@
                         <div class="p-3 bg-white dark:bg-gray-900/60 rounded-xl border border-gray-100 dark:border-gray-700/70 flex items-center justify-between mt-3">
                             <div>
                                 <h5 class="text-xs font-bold text-gray-800 dark:text-gray-200 uppercase">Akumulasi Checkout Sukses</h5>
-                                <p class="text-[9px] font-semibold text-gray-400 mt-0.5">{{ $userStats['total_transactions'] }} Transaksi Ditangani (@ +5 Pts/Transaksi)</p>
+                                <p class="text-[9px] font-semibold text-gray-400 mt-0.5">{{ $userBreakdown[$period]['total_transactions'] ?? 0 }} Transaksi Ditangani (@ +5 Pts/Transaksi)</p>
                             </div>
-                            <span class="text-xs font-black text-blue-500 dark:text-blue-400">+{{ $userStats['pos_points'] }} Pts</span>
+                            <span class="text-xs font-black text-blue-500 dark:text-blue-400">+{{ $userBreakdown[$period]['pos_points'] ?? 0 }} Pts</span>
                         </div>
                     </div>
                 </div>
@@ -377,13 +409,13 @@
                         <div class="flex items-center gap-3">
                             <div class="p-2 bg-indigo-500/10 text-indigo-500 rounded-xl">
                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                                 </svg>
                             </div>
                             <span>Poin Tugas Kasir</span>
                         </div>
                         <div class="flex items-center gap-2">
-                            <span class="text-indigo-500 dark:text-indigo-400 font-black text-xs">+{{ $userStats['task_points'] }} Pts</span>
+                            <span class="text-indigo-500 dark:text-indigo-400 font-black text-xs">+{{ $userBreakdown[$period]['task_points'] ?? 0 }} Pts</span>
                             <svg class="w-4 h-4 transition-transform duration-200 text-gray-400" :class="{ 'rotate-180': openGroup === 'tasks' }" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
                             </svg>
@@ -394,9 +426,9 @@
                         <div class="p-3 bg-white dark:bg-gray-900/60 rounded-xl border border-gray-100 dark:border-gray-700/70 flex items-center justify-between mt-3">
                             <div>
                                 <h5 class="text-xs font-bold text-gray-800 dark:text-gray-200 uppercase">Tugas Kasir Ter-ACC</h5>
-                                <p class="text-[9px] font-semibold text-gray-400 mt-0.5">{{ $userStats['completed_tasks'] }} Laporan Tugas Disetujui Admin</p>
+                                <p class="text-[9px] font-semibold text-gray-400 mt-0.5">{{ $userBreakdown[$period]['completed_tasks'] ?? 0 }} Laporan Tugas Disetujui Admin</p>
                             </div>
-                            <span class="text-xs font-black text-indigo-500 dark:text-indigo-400">+{{ $userStats['task_points'] }} Pts</span>
+                            <span class="text-xs font-black text-indigo-500 dark:text-indigo-400">+{{ $userBreakdown[$period]['task_points'] ?? 0 }} Pts</span>
                         </div>
                     </div>
                 </div>
@@ -414,7 +446,7 @@
                             <span>Poin Absensi & Sesi Laci</span>
                         </div>
                         <div class="flex items-center gap-2">
-                            <span class="text-emerald-500 dark:text-emerald-400 font-black text-xs">+{{ $userStats['attendance_points'] }} Pts</span>
+                            <span class="text-emerald-500 dark:text-emerald-400 font-black text-xs">+{{ $userBreakdown[$period]['attendance_points'] ?? 0 }} Pts</span>
                             <svg class="w-4 h-4 transition-transform duration-200 text-gray-400" :class="{ 'rotate-180': openGroup === 'attendance' }" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
                             </svg>
@@ -425,9 +457,9 @@
                         <div class="p-3 bg-white dark:bg-gray-900/60 rounded-xl border border-gray-100 dark:border-gray-700/70 flex items-center justify-between mt-3">
                             <div>
                                 <h5 class="text-xs font-bold text-gray-800 dark:text-gray-200 uppercase">Sesi Shift & Jam Kerja</h5>
-                                <p class="text-[9px] font-semibold text-gray-400 mt-0.5">{{ $userStats['attendance_count'] }} Kali Hadir & Melakukan Closing</p>
+                                <p class="text-[9px] font-semibold text-gray-400 mt-0.5">{{ $userBreakdown[$period]['attendance_count'] ?? 0 }} Kali Hadir & Melakukan Closing</p>
                             </div>
-                            <span class="text-xs font-black text-emerald-500 dark:text-emerald-400">+{{ $userStats['attendance_points'] }} Pts</span>
+                            <span class="text-xs font-black text-emerald-500 dark:text-emerald-400">+{{ $userBreakdown[$period]['attendance_points'] ?? 0 }} Pts</span>
                         </div>
                     </div>
                 </div>

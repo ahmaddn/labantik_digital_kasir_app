@@ -163,7 +163,7 @@ class Debt extends Component
     public function settle(CustomerDebtService $debtService)
     {
         $this->validate([
-            'settleAmount' => 'required|numeric|min:1|max:' . $this->maxAmount,
+            'settleAmount' => 'required|numeric|min:0|max:' . $this->maxAmount,
             'settleMethod' => 'required|in:dibayarkan,dicicil,dijajankan',
         ]);
 

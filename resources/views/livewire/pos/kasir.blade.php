@@ -500,7 +500,7 @@
                         :class="status === 'belum_menerima_uang' 
                             ? 'bg-rose-600 text-white border-rose-600 dark:bg-rose-600 dark:text-white dark:border-rose-500 shadow-md' 
                             : 'bg-white text-slate-700 border-slate-300 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 dark:hover:text-white'"
-                        :disabled="payment_method !== 'cash'"
+                        :disabled="payment_method !== 'cash' || total <= 0"
                         class="nb-btn flex-1 py-2 text-[9px] shadow-none border-2 font-black disabled:opacity-30 disabled:cursor-not-allowed transition-all">HUTANG</button>
                 </div>
 
