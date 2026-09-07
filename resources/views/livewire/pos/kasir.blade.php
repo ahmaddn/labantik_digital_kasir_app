@@ -1417,25 +1417,39 @@
                 },
 
                 getCategoryColor(name) {
+                    if (!name) return 'bg-amber-500 text-white border-amber-600 dark:border-amber-400 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]';
+                    const upper = name.toUpperCase();
+                    if (upper.includes('KERIPIK')) {
+                        return 'bg-amber-500 text-white border-amber-600 dark:border-amber-400 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]';
+                    }
+                    if (upper.includes('KERUPUK')) {
+                        return 'bg-emerald-600 text-white border-emerald-700 dark:border-emerald-500 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]';
+                    }
                     const colors = {
-                        'SNACK': 'bg-primary-yellow text-black border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]',
-                        'MINUMAN': 'bg-primary-blue text-white border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]',
-                        'MAKANAN': 'bg-primary-red text-white border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]',
-                        'ESKRIM': 'bg-purple-500 text-white border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]',
-                        'DEFAULT': 'bg-white text-black border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]'
+                        'SNACK': 'bg-amber-400 text-black border-amber-500 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]',
+                        'MINUMAN': 'bg-primary-blue text-white border-blue-700 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]',
+                        'MAKANAN': 'bg-primary-red text-white border-red-700 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]',
+                        'ESKRIM': 'bg-purple-500 text-white border-purple-700 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]',
                     };
-                    return colors[name.toUpperCase()] || colors['DEFAULT'];
+                    return colors[upper] || 'bg-amber-500 text-white border-amber-600 dark:border-amber-400 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]';
                 },
 
                 getCategoryBorderColor(name) {
+                    if (!name) return 'border-t-4 border-t-amber-500';
+                    const upper = name.toUpperCase();
+                    if (upper.includes('KERIPIK')) {
+                        return 'border-t-4 border-t-amber-500';
+                    }
+                    if (upper.includes('KERUPUK')) {
+                        return 'border-t-4 border-t-emerald-500';
+                    }
                     const borders = {
-                        'SNACK': 'border-t-4 border-t-primary-yellow',
+                        'SNACK': 'border-t-4 border-t-amber-400',
                         'MINUMAN': 'border-t-4 border-t-primary-blue',
                         'MAKANAN': 'border-t-4 border-t-primary-red',
                         'ESKRIM': 'border-t-4 border-t-purple-500',
-                        'DEFAULT': 'border-t-4 border-t-gray-400'
                     };
-                    return borders[name.toUpperCase()] || borders['DEFAULT'];
+                    return borders[upper] || 'border-t-4 border-t-amber-500';
                 },
 
                 checkout() {

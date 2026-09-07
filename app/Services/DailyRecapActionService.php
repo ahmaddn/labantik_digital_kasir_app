@@ -72,7 +72,7 @@ class DailyRecapActionService
         $grouped = $allTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])
             ->groupBy(fn($tx) => ($tx->product->supplier_id ?? $tx->supplier_id) ? 'supplier_' . ($tx->product->supplier_id ?? $tx->supplier_id) : 'category_' . ($tx->product->category_id ?? 'other'));
 
-        DB::transaction(function () use ($grouped, $totalSupplierHak, $diff, $activeJurusanId, $date, $recap, $totalProfit) {
+        DB::transaction(function () use ($grouped, $totalSupplierHak, $diff, $activeJurusanId, $date, $recap, $totalProfit, $allTransactions) {
             CashTransaction::where('date', $date)
                 ->where('jurusan_id', $activeJurusanId)
                 ->where(function ($q) {
