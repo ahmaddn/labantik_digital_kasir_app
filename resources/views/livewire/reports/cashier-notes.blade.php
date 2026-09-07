@@ -48,10 +48,10 @@
                 ][$color] ?? 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200';
             @endphp
 
-            <div id="note-card-{{ $note->id }}" class="rounded-3xl p-6 border-2 shadow-xl shadow-black/5 flex flex-col justify-between transition-all hover:-translate-y-1 relative group {{ $cardStyles }} {{ $note->is_pinned ? 'ring-2 ring-primary-blue dark:ring-blue-400' : '' }}">
-                <div>
+            <div id="note-card-{{ $note->id }}" class="rounded-3xl p-6 border-2 shadow-xl shadow-black/5 flex flex-col justify-between h-[480px] max-h-[480px] overflow-hidden transition-all hover:-translate-y-1 relative group {{ $cardStyles }} {{ $note->is_pinned ? 'ring-2 ring-primary-blue dark:ring-blue-400' : '' }}">
+                <div class="flex-1 flex flex-col min-h-0">
                     <!-- Badges Row: Pin & Target User -->
-                    <div class="flex flex-wrap items-center gap-2 mb-3">
+                    <div class="flex flex-wrap items-center gap-2 mb-3 shrink-0">
                         @if($note->is_pinned)
                             <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-primary-blue/10 dark:bg-blue-400/20 text-primary-blue dark:text-blue-300 text-[10px] font-black uppercase tracking-widest border border-primary-blue/20">
                                 <svg class="w-3 h-3 rotate-45" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24"><path d="M16 12V4h1V2H7v2h1v8l-2 2v2h5.2v6h1.6v-6H18v-2l-2-2z"/></svg>
@@ -76,12 +76,12 @@
                     </div>
 
                     <!-- Header Note: Title & Actions -->
-                    <div class="flex items-start justify-between gap-3 mb-4">
-                        <h3 class="text-lg font-black uppercase tracking-tight leading-snug">
+                    <div class="flex items-start justify-between gap-3 mb-3 shrink-0">
+                        <h3 class="text-lg font-black uppercase tracking-tight leading-snug line-clamp-2">
                             {{ $note->title ?: 'Tanpa Judul' }}
                         </h3>
 
-                        <div data-html2canvas-ignore class="flex items-center gap-1 opacity-80 group-hover:opacity-100 transition-opacity">
+                        <div data-html2canvas-ignore class="flex items-center gap-1 opacity-80 group-hover:opacity-100 transition-opacity shrink-0">
                             <!-- Toggle Pin -->
                             <button wire:click="togglePin({{ $note->id }})" title="{{ $note->is_pinned ? 'Lepas Sematan' : 'Sematkan Catatan' }}" class="p-1.5 hover:bg-black/10 dark:hover:bg-white/10 rounded-xl transition-colors {{ $note->is_pinned ? 'text-primary-blue dark:text-blue-400 font-bold' : 'text-gray-400' }}">
                                 <svg class="w-4 h-4 {{ $note->is_pinned ? 'rotate-45 fill-current' : '' }}" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" /></svg>
@@ -108,8 +108,8 @@
                         </div>
                     </div>
 
-                    <!-- Content (Raw HTML output for Rich Text) -->
-                    <div class="max-h-64 overflow-y-auto pr-2 mb-4 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-700">
+                    <!-- Content (Raw HTML output for Rich Text with internal scroll) -->
+                    <div class="flex-1 overflow-y-auto pr-1.5 mb-3 min-h-0 scrollbar-thin scrollbar-thumb-gray-400/40 dark:scrollbar-thumb-gray-600/60">
                         <div class="prose dark:prose-invert max-w-none text-sm font-medium leading-relaxed opacity-95 whitespace-pre-wrap">
                             {!! $note->content !!}
                         </div>
