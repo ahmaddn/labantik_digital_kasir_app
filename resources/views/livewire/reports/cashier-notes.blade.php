@@ -48,8 +48,8 @@
                 ][$color] ?? 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200';
             @endphp
 
-            <div id="note-card-{{ $note->id }}" class="rounded-3xl p-6 border-2 shadow-xl shadow-black/5 flex flex-col justify-between h-[480px] max-h-[480px] overflow-hidden transition-all hover:-translate-y-1 relative group {{ $cardStyles }} {{ $note->is_pinned ? 'ring-2 ring-primary-blue dark:ring-blue-400' : '' }}">
-                <div class="flex-1 flex flex-col min-h-0">
+            <div id="note-card-{{ $note->id }}" style="height: 380px; max-height: 380px; overflow: hidden;" class="rounded-3xl p-6 border-2 shadow-xl shadow-black/5 flex flex-col justify-between transition-all hover:-translate-y-1 relative group {{ $cardStyles }} {{ $note->is_pinned ? 'ring-2 ring-primary-blue dark:ring-blue-400' : '' }}">
+                <div class="flex-1 flex flex-col min-h-0" style="overflow: hidden;">
                     <!-- Badges Row: Pin & Target User -->
                     <div class="flex flex-wrap items-center gap-2 mb-3 shrink-0">
                         @if($note->is_pinned)
@@ -108,8 +108,8 @@
                         </div>
                     </div>
 
-                    <!-- Content (Raw HTML output for Rich Text with internal scroll) -->
-                    <div class="flex-1 overflow-y-auto pr-1.5 mb-3 min-h-0 scrollbar-thin scrollbar-thumb-gray-400/40 dark:scrollbar-thumb-gray-600/60">
+                    <!-- Content (Raw HTML output for Rich Text with internal scroll enforced by inline CSS) -->
+                    <div style="max-height: 180px; overflow-y: auto;" class="pr-1.5 mb-3 scrollbar-thin scrollbar-thumb-gray-400/40 dark:scrollbar-thumb-gray-600/60">
                         <div class="prose dark:prose-invert max-w-none text-sm font-medium leading-relaxed opacity-95 whitespace-pre-wrap">
                             {!! $note->content !!}
                         </div>
