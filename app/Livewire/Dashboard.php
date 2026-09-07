@@ -343,6 +343,7 @@ class Dashboard extends Component
             'recentTransactions' => $recentTransactions,
             'topProducts' => $topProducts,
             'categories' => $categories,
+            'selectedTopCategory' => $this->selectedTopCategory,
             'weeklyData' => $weeklyData,
             'categoryData' => $categoryData,
             'monthlyData' => $monthlyData,
