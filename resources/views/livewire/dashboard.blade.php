@@ -714,18 +714,9 @@
             class="bg-white dark:bg-gray-800 rounded-3xl md:rounded-[3.5rem] shadow-2xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 overflow-hidden">
             <div class="p-4 md:p-6 border-b border-gray-100 dark:border-gray-700 flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <div class="flex items-center gap-3">
-                        <h2
-                            class="text-xl md:text-2xl font-bold uppercase tracking-tight text-gray-800 dark:text-white">
-                            Produk Terlaris</h2>
-                        <div wire:loading wire:target="setTopCategory" class="flex items-center gap-1.5 px-2.5 py-1 bg-blue-500/10 text-primary-blue rounded-full text-[10px] font-bold uppercase tracking-widest animate-pulse">
-                            <svg class="animate-spin h-3.5 w-3.5 text-primary-blue" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                            </svg>
-                            <span>Memuat...</span>
-                        </div>
-                    </div>
+                    <h2
+                        class="text-xl md:text-2xl font-bold uppercase tracking-tight text-gray-800 dark:text-white">
+                        Produk Terlaris</h2>
                     <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">Peringkat penjualan berdasarkan total unit terjual</p>
                 </div>
 
@@ -743,39 +734,57 @@
                     @endforeach
                 </div>
             </div>
-            <div class="p-4 md:p-6 space-y-6 md:space-y-10 min-h-[360px] transition-opacity duration-150" wire:loading.class="opacity-60" wire:target="setTopCategory">
-                @forelse($topProducts as $top)
-                    <div class="flex items-center group transition-all duration-300 transform hover:translate-x-1" wire:key="top-prod-{{ $top->product_id }}">
-                        <div
-                            class="flex-shrink-0 w-12 h-12 md:w-16 md:h-16 bg-primary-blue dark:bg-gray-900 text-white rounded-2xl md:rounded-[1.5rem] flex items-center justify-center font-black italic shadow-2xl shadow-blue-900/10 group-hover:scale-110 transition-transform">
-                            {{ $loop->iteration }}
+
+            <!-- List Area & Loading Skeleton inside table -->
+            <div class="p-4 md:p-6 space-y-6 md:space-y-10 min-h-[380px] relative">
+                <!-- Skeleton Loader inside list (Shown only when loading setTopCategory) -->
+                <div wire:loading wire:target="setTopCategory" class="space-y-6 md:space-y-10">
+                    @for ($i = 1; $i <= 5; $i++)
+                        <div class="flex items-center animate-pulse">
+                            <div class="flex-shrink-0 w-12 h-12 md:w-16 md:h-16 bg-gray-200 dark:bg-gray-700/80 rounded-2xl md:rounded-[1.5rem]"></div>
+                            <div class="ml-4 md:ml-6 flex-1 space-y-2">
+                                <div class="h-4 bg-gray-200 dark:bg-gray-700/80 rounded w-1/3"></div>
+                                <div class="h-3 bg-gray-200 dark:bg-gray-700/80 rounded w-1/5"></div>
+                            </div>
+                            <div class="w-20 md:w-24 h-5 bg-gray-200 dark:bg-gray-700/80 rounded"></div>
                         </div>
-                        <div class="ml-4 md:ml-6 flex-1">
-                            <h4
-                                class="text-sm md:text-base font-black text-gray-800 dark:text-white uppercase tracking-tight leading-tight">
-                                {{ $top->product->name }}</h4>
-                            <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1">
-                                {{ $top->total_qty }} Unit Terjual</p>
+                    @endfor
+                </div>
+
+                <!-- Actual Product Rows (Hidden while loading setTopCategory) -->
+                <div wire:loading.remove wire:target="setTopCategory" class="space-y-6 md:space-y-10">
+                    @forelse($topProducts as $top)
+                        <div class="flex items-center group transition-all duration-300 transform hover:translate-x-1" wire:key="top-prod-{{ $top->product_id }}">
+                            <div
+                                class="flex-shrink-0 w-12 h-12 md:w-16 md:h-16 bg-primary-blue dark:bg-gray-900 text-white rounded-2xl md:rounded-[1.5rem] flex items-center justify-center font-black italic shadow-2xl shadow-blue-900/10 group-hover:scale-110 transition-transform">
+                                {{ $loop->iteration }}
+                            </div>
+                            <div class="ml-4 md:ml-6 flex-1">
+                                <h4
+                                    class="text-sm md:text-base font-black text-gray-800 dark:text-white uppercase tracking-tight leading-tight">
+                                    {{ $top->product->name }}</h4>
+                                <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1">
+                                    {{ $top->total_qty }} Unit Terjual</p>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-base md:text-lg font-black text-primary-red italic">
+                                    Rp{{ number_format($top->total_revenue, 0, ',', '.') }}</p>
+                            </div>
                         </div>
-                        <div class="text-right">
-                            <p class="text-base md:text-lg font-black text-primary-red italic">
-                                Rp{{ number_format($top->total_revenue, 0, ',', '.') }}</p>
+                    @empty
+                        <div class="py-16 md:py-32 text-center opacity-40">
+                            <svg class="w-16 h-16 md:w-24 md:h-24 mx-auto mb-4 md:mb-6 text-gray-400" xmlns="http://www.w3.org/2000/svg"
+                                width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
+                                <polyline points="14 2 14 8 20 8" />
+                                <path d="M12 18v-6" />
+                                <path d="m9 15 3 3 3-3" />
+                            </svg>
+                            <p class="text-xs font-bold uppercase tracking-widest text-gray-500">Tidak ada produk dalam kategori ini</p>
                         </div>
-                    </div>
-                @empty
-                    <div class="py-16 md:py-32 text-center opacity-40">
-                        <svg class="w-16 h-16 md:w-24 md:h-24 mx-auto mb-4 md:mb-6 text-gray-400" xmlns="http://www.w3.org/2000/svg"
-                            width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
-                            <polyline points="14 2 14 8 20 8" />
-                            <path d="M12 18v-6" />
-                            <path d="m9 15 3 3 3-3" />
-                        </svg>
-                        <p class="text-xs font-bold uppercase tracking-widest text-gray-500">Tidak ada produk dalam kategori ini</p>
-                    </div>
-                @endforelse
-            </div>
+                    @endforelse
+                </div>
         </div>
     </div>
 
