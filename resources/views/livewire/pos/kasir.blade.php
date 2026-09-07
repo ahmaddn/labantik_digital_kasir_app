@@ -443,7 +443,7 @@
                             CASH
                         </button>
                         {{-- TRANSFER --}}
-                        <button type="button" @click="payment_method = 'transfer'; status = 'uang_diterima'"
+                        <button type="button" @click="payment_method = 'transfer'; status = 'uang_diterima'; payment_amount = total"
                             :class="payment_method === 'transfer' 
                                 ? 'bg-black text-white border-black dark:bg-black dark:text-white dark:border-slate-500 shadow-md' 
                                 : 'bg-white text-slate-700 border-slate-300 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 dark:hover:text-white'"
@@ -452,7 +452,7 @@
                             TF
                         </button>
                         {{-- QRIS --}}
-                        <button type="button" @click="payment_method = 'qris'; status = 'uang_diterima'"
+                        <button type="button" @click="payment_method = 'qris'; status = 'uang_diterima'; payment_amount = total"
                             :class="payment_method === 'qris' 
                                 ? 'bg-black text-white border-black dark:bg-black dark:text-white dark:border-slate-500 shadow-md' 
                                 : 'bg-white text-slate-700 border-slate-300 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 dark:hover:text-white'"
@@ -504,7 +504,7 @@
                         class="nb-btn flex-1 py-2 text-[9px] shadow-none border-2 font-black disabled:opacity-30 disabled:cursor-not-allowed transition-all">HUTANG</button>
                 </div>
 
-                <template x-if="payment_amount > 0">
+                <template x-if="payment_method === 'cash' && payment_amount > 0">
                     <div class="nb-card p-2.5 px-3.5 flex justify-between items-center shadow-none border-2"
                         :class="change < 0 ? 'bg-primary-red text-white' : 'bg-green-500 text-white'">
                         <span x-text="change < 0 ? 'CURANG' : 'CHANGE'"
@@ -514,8 +514,7 @@
                 </template>
 
                 <button @click="checkout()"
-                    :disabled="{{ $isSessionFinished ? 'true' : 'false' }} || cart.length === 0 || (payment_amount < total &&
-                        status === 'uang_diterima') || loading"
+                    :disabled="{{ $isSessionFinished ? 'true' : 'false' }} || cart.length === 0 || (payment_method === 'cash' && payment_amount < total && status === 'uang_diterima') || loading"
                     @keydown.enter="handleCheckoutKeydown($event)"
                     class="nb-btn checkout-trigger w-full py-3.5 text-base font-black bg-black text-white hover:bg-primary-blue disabled:bg-gray-400 disabled:opacity-50 group shadow-[4px_4px_0_0_rgba(37,99,235,0.4)] dark:shadow-[4px_4px_0_0_rgba(255,255,255,0.8)]">
                     <span x-show="!loading" class="flex items-center justify-center gap-3">
