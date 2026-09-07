@@ -250,7 +250,10 @@ class Dashboard extends Component
             ->get();
 
         $categories = \App\Models\ProductCategory::when($activeJurusanId, function ($q) use ($activeJurusanId) {
-            return $q->where('jurusan_id', $activeJurusanId);
+            return $q->where(function ($query) use ($activeJurusanId) {
+                $query->where('jurusan_id', $activeJurusanId)
+                    ->orWhereNull('jurusan_id');
+            });
         })->get();
 
         $topProducts = Transaction::forReporting()->with('product')

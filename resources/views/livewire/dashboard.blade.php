@@ -727,7 +727,7 @@
                         Semua Kategori
                     </button>
                     @foreach($categories as $cat)
-                        <button wire:click="setTopCategory({{ $cat->id }})"
+                        <button wire:click="setTopCategory('{{ $cat->id }}')"
                             class="px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wide transition-all duration-200 whitespace-nowrap {{ ($selectedTopCategory ?? $this->selectedTopCategory) == $cat->id ? 'bg-primary-blue text-white shadow-lg shadow-blue-500/20' : 'bg-gray-100 dark:bg-gray-700/60 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700' }}">
                             {{ $cat->name }}
                         </button>
