@@ -161,15 +161,16 @@
                         :class="getCategoryBorderColor(product.category_name)"
                         class="nb-card nb-card-hover group p-0 text-left overflow-hidden flex flex-col h-full bg-white dark:bg-slate-900">
                         <div
-                            class="p-3 bg-gray-50 dark:bg-slate-800 border-b-[var(--nb-border)] border-black dark:border-slate-800 flex items-center justify-between">
+                            class="p-3 bg-gray-50 dark:bg-slate-800/80 border-b-[var(--nb-border)] border-black dark:border-slate-800 flex items-center justify-between gap-2">
                             <span :class="getCategoryColor(product.category_name)"
-                                class="text-[9px] font-black px-2 py-0.5 uppercase tracking-widest border-2"
+                                class="text-[9px] font-black px-2.5 py-1 uppercase tracking-wider border-2 rounded-lg truncate max-w-[100px] inline-block leading-none"
+                                :title="product.category_name"
                                 x-text="product.category_name"></span>
                             <span x-show="product.available_stock > 0"
-                                class="text-[8px] font-black border-2 border-black dark:border-slate-700 px-2 py-0.5 uppercase tracking-widest text-emerald-600 dark:text-emerald-400"
+                                class="text-[9px] font-black border-2 border-black dark:border-slate-700 px-2.5 py-1 uppercase tracking-wider text-emerald-600 dark:text-emerald-400 bg-white dark:bg-slate-900 rounded-lg whitespace-nowrap leading-none"
                                 x-text="'STOK: ' + product.available_stock"></span>
                             <span x-show="product.available_stock <= 0"
-                                class="text-[8px] font-black border-2 border-black dark:border-slate-700 px-2 py-0.5 uppercase tracking-widest text-primary-red dark:text-rose-400">HABIS</span>
+                                class="text-[9px] font-black border-2 border-black dark:border-slate-700 px-2.5 py-1 uppercase tracking-wider text-primary-red dark:text-rose-400 bg-white dark:bg-slate-900 rounded-lg whitespace-nowrap leading-none">HABIS</span>
                         </div>
                         <div class="p-5 flex-1">
                             <h3 x-text="product.name"
