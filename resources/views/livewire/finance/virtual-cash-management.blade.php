@@ -94,48 +94,48 @@
     <!-- Stats Cards -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-5 mb-12">
         <!-- Total Saldo Virtual Card -->
-        <div class="theme-no-card bg-indigo-50 dark:bg-slate-900 border-2 border-indigo-500 dark:border-indigo-500 rounded-[2.5rem] p-6 md:p-7 text-indigo-950 dark:text-white shadow-lg relative overflow-hidden group">
+        <div class="bg-white dark:bg-gray-800 rounded-3xl p-6 md:p-7 text-gray-900 dark:text-white shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 relative overflow-hidden group">
             <div class="absolute -right-6 -bottom-6 opacity-10 dark:opacity-20 group-hover:scale-110 transition-transform duration-700">
-                <svg class="w-40 h-40 text-indigo-600 dark:text-indigo-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg>
+                <svg class="w-40 h-40 text-indigo-500 dark:text-indigo-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg>
             </div>
-            <h3 class="text-[11px] font-black uppercase tracking-[0.25em] text-indigo-700 dark:text-indigo-300 mb-2">Total Saldo Virtual</h3>
-            <p class="text-2xl xl:text-3xl font-black text-indigo-950 dark:text-white leading-tight {{ $totalBalance < 0 ? 'text-rose-600 dark:text-primary-red' : '' }}" :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($totalBalance, 0, ',', '.') }}</p>
+            <h3 class="text-[11px] font-black uppercase tracking-[0.25em] text-gray-500 dark:text-gray-400 mb-2">Total Saldo Virtual</h3>
+            <p class="text-2xl xl:text-3xl font-black text-gray-900 dark:text-white leading-tight {{ $totalBalance < 0 ? 'text-primary-red' : '' }}" :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($totalBalance, 0, ',', '.') }}</p>
         </div>
 
         <!-- Saldo Transfer Card -->
-        <div class="theme-no-card bg-blue-50 dark:bg-slate-900 border-2 border-blue-500 dark:border-blue-500 rounded-[2.5rem] p-6 md:p-7 text-blue-950 dark:text-white shadow-lg relative overflow-hidden group">
+        <div class="bg-white dark:bg-gray-800 rounded-3xl p-6 md:p-7 text-gray-900 dark:text-white shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 relative overflow-hidden group">
             <div class="absolute -right-6 -bottom-6 opacity-10 dark:opacity-20 group-hover:scale-110 transition-transform duration-700">
-                <svg class="w-40 h-40 text-blue-600 dark:text-blue-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 10h12"/><path d="M4 14h9"/><path d="M19 6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V8l-2-2Z"/></svg>
+                <svg class="w-40 h-40 text-blue-500 dark:text-blue-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 10h12"/><path d="M4 14h9"/><path d="M19 6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V8l-2-2Z"/></svg>
             </div>
-            <h3 class="text-[11px] font-black uppercase tracking-[0.25em] text-blue-700 dark:text-blue-300 mb-2">Saldo Bank Transfer</h3>
-            <p class="text-2xl xl:text-3xl font-black text-blue-950 dark:text-white leading-tight {{ $transferBalance < 0 ? 'text-rose-600 dark:text-primary-red' : '' }}" :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($transferBalance, 0, ',', '.') }}</p>
+            <h3 class="text-[11px] font-black uppercase tracking-[0.25em] text-gray-500 dark:text-gray-400 mb-2">Saldo Bank Transfer</h3>
+            <p class="text-2xl xl:text-3xl font-black text-gray-900 dark:text-white leading-tight {{ $transferBalance < 0 ? 'text-primary-red' : '' }}" :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($transferBalance, 0, ',', '.') }}</p>
         </div>
 
         <!-- Saldo QRIS Card -->
-        <div class="theme-no-card bg-purple-50 dark:bg-slate-900 border-2 border-purple-500 dark:border-purple-500 rounded-[2.5rem] p-6 md:p-7 text-purple-950 dark:text-white shadow-lg relative overflow-hidden group">
+        <div class="bg-white dark:bg-gray-800 rounded-3xl p-6 md:p-7 text-gray-900 dark:text-white shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 relative overflow-hidden group">
             <div class="absolute -right-6 -bottom-6 opacity-10 dark:opacity-20 group-hover:scale-110 transition-transform duration-700">
-                <svg class="w-40 h-40 text-purple-600 dark:text-purple-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><path d="M14 14h3v3h-3z"/><path d="M18 18h3v3h-3z"/></svg>
+                <svg class="w-40 h-40 text-purple-500 dark:text-purple-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><path d="M14 14h3v3h-3z"/><path d="M18 18h3v3h-3z"/></svg>
             </div>
-            <h3 class="text-[11px] font-black uppercase tracking-[0.25em] text-purple-700 dark:text-purple-300 mb-2">Saldo QRIS</h3>
-            <p class="text-2xl xl:text-3xl font-black text-purple-950 dark:text-white leading-tight {{ $qrisBalance < 0 ? 'text-rose-600 dark:text-purple-300' : '' }}" :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($qrisBalance, 0, ',', '.') }}</p>
+            <h3 class="text-[11px] font-black uppercase tracking-[0.25em] text-gray-500 dark:text-gray-400 mb-2">Saldo QRIS</h3>
+            <p class="text-2xl xl:text-3xl font-black text-gray-900 dark:text-white leading-tight {{ $qrisBalance < 0 ? 'text-purple-600 dark:text-purple-300' : '' }}" :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($qrisBalance, 0, ',', '.') }}</p>
         </div>
 
         <!-- Pemasukan Card -->
-        <div class="theme-no-card bg-emerald-50 dark:bg-slate-900 border-2 border-emerald-400 dark:border-green-500 rounded-[2.5rem] p-6 md:p-7 text-emerald-950 dark:text-white shadow-lg relative overflow-hidden group">
+        <div class="bg-white dark:bg-gray-800 rounded-3xl p-6 md:p-7 text-gray-900 dark:text-white shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 relative overflow-hidden group">
             <div class="absolute -right-6 -bottom-6 opacity-10 dark:opacity-20 group-hover:scale-110 transition-transform duration-700">
-                <svg class="w-40 h-40 text-emerald-600 dark:text-green-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+                <svg class="w-40 h-40 text-emerald-500 dark:text-green-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
             </div>
-            <h3 class="text-[11px] font-black uppercase tracking-[0.25em] text-emerald-700 dark:text-green-400 mb-2">Pemasukan Virtual</h3>
-            <p class="text-2xl xl:text-3xl font-black text-emerald-700 dark:text-green-400 leading-tight" :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($displayIncome, 0, ',', '.') }}</p>
+            <h3 class="text-[11px] font-black uppercase tracking-[0.25em] text-gray-500 dark:text-gray-400 mb-2">Pemasukan Virtual</h3>
+            <p class="text-2xl xl:text-3xl font-black text-emerald-600 dark:text-green-400 leading-tight" :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($displayIncome, 0, ',', '.') }}</p>
         </div>
 
         <!-- Pengeluaran Card -->
-        <div class="theme-no-card bg-rose-50 dark:bg-slate-900 border-2 border-rose-400 dark:border-primary-red rounded-[2.5rem] p-6 md:p-7 text-rose-950 dark:text-white shadow-lg relative overflow-hidden group">
+        <div class="bg-white dark:bg-gray-800 rounded-3xl p-6 md:p-7 text-gray-900 dark:text-white shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 relative overflow-hidden group">
             <div class="absolute -right-6 -bottom-6 opacity-10 dark:opacity-20 group-hover:scale-110 transition-transform duration-700">
-                <svg class="w-40 h-40 text-rose-600 dark:text-primary-red" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 17 13.5 8.5 8.5 13.5 2 7"/><polyline points="16 17 22 17 22 11"/></svg>
+                <svg class="w-40 h-40 text-rose-500 dark:text-primary-red" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 17 13.5 8.5 8.5 13.5 2 7"/><polyline points="16 17 22 17 22 11"/></svg>
             </div>
-            <h3 class="text-[11px] font-black uppercase tracking-[0.25em] text-rose-700 dark:text-red-400 mb-2">Pengeluaran Virtual</h3>
-            <p class="text-2xl xl:text-3xl font-black text-rose-700 dark:text-primary-red leading-tight" :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($displayExpense, 0, ',', '.') }}</p>
+            <h3 class="text-[11px] font-black uppercase tracking-[0.25em] text-gray-500 dark:text-gray-400 mb-2">Pengeluaran Virtual</h3>
+            <p class="text-2xl xl:text-3xl font-black text-rose-600 dark:text-primary-red leading-tight" :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($displayExpense, 0, ',', '.') }}</p>
         </div>
     </div>
 

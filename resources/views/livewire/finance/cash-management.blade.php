@@ -92,82 +92,82 @@
     <!-- Stats Cards -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-5 mb-12">
         <!-- Total Saldo Kas Card -->
-        <div class="theme-no-card bg-emerald-50 dark:bg-slate-900 border-2 border-emerald-500 dark:border-emerald-500 rounded-[2.5rem] p-6 md:p-7 text-gray-900 dark:text-white shadow-lg relative overflow-hidden group">
+        <div class="bg-white dark:bg-gray-800 rounded-3xl p-6 md:p-7 text-gray-900 dark:text-white shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 relative overflow-hidden group">
             <div class="absolute -right-6 -bottom-6 opacity-10 dark:opacity-20 group-hover:scale-110 transition-transform duration-700">
                 <svg class="w-40 h-40 text-emerald-600 dark:text-emerald-400" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="12" x="2" y="6" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/></svg>
             </div>
-            <h3 class="text-[11px] font-black uppercase tracking-[0.25em] text-emerald-700 dark:text-emerald-400 mb-2">Total Saldo Kas</h3>
-            <p class="text-2xl xl:text-3xl font-black text-emerald-950 dark:text-white leading-tight {{ ($currentModalBalance + $currentProfitBalance) < 0 ? 'text-rose-600 dark:text-primary-red' : '' }}" :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($currentModalBalance + $currentProfitBalance, 0, ',', '.') }}</p>
+            <h3 class="text-[11px] font-black uppercase tracking-[0.25em] text-gray-500 dark:text-gray-400 mb-2">Total Saldo Kas</h3>
+            <p class="text-2xl xl:text-3xl font-black text-gray-900 dark:text-white leading-tight {{ ($currentModalBalance + $currentProfitBalance) < 0 ? 'text-primary-red' : '' }}" :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($currentModalBalance + $currentProfitBalance, 0, ',', '.') }}</p>
         </div>
 
         <!-- Saldo Modal Card -->
-        <div class="theme-no-card bg-slate-100 dark:bg-slate-900 border-2 border-slate-400 dark:border-blue-500 rounded-[2.5rem] p-6 md:p-7 text-slate-900 dark:text-white shadow-lg relative overflow-hidden group">
+        <div class="bg-white dark:bg-gray-800 rounded-3xl p-6 md:p-7 text-gray-900 dark:text-white shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 relative overflow-hidden group">
             <div class="absolute -right-6 -bottom-6 opacity-10 dark:opacity-20 group-hover:scale-110 transition-transform duration-700">
-                <svg class="w-40 h-40 text-slate-600 dark:text-white" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg>
+                <svg class="w-40 h-40 text-slate-400 dark:text-slate-500" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg>
             </div>
-            <h3 class="text-[11px] font-black uppercase tracking-[0.25em] text-slate-700 dark:text-slate-400 mb-2">Saldo Kas Modal</h3>
-            <p class="text-2xl xl:text-3xl font-black text-slate-950 dark:text-white leading-tight {{ $currentModalBalance < 0 ? 'text-rose-600 dark:text-primary-red' : '' }}" :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($currentModalBalance, 0, ',', '.') }}</p>
+            <h3 class="text-[11px] font-black uppercase tracking-[0.25em] text-gray-500 dark:text-gray-400 mb-2">Saldo Kas Modal</h3>
+            <p class="text-2xl xl:text-3xl font-black text-gray-900 dark:text-white leading-tight {{ $currentModalBalance < 0 ? 'text-primary-red' : '' }}" :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($currentModalBalance, 0, ',', '.') }}</p>
         </div>
 
         <!-- Saldo Keuntungan Card -->
-        <div class="theme-no-card bg-blue-50 dark:bg-slate-900 border-2 border-blue-500 dark:border-blue-400 rounded-[2.5rem] p-6 md:p-7 text-gray-900 dark:text-white shadow-lg relative overflow-hidden group">
+        <div class="bg-white dark:bg-gray-800 rounded-3xl p-6 md:p-7 text-gray-900 dark:text-white shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 relative overflow-hidden group">
             <div class="absolute -right-6 -bottom-6 opacity-10 dark:opacity-20 group-hover:scale-110 transition-transform duration-700">
-                <svg class="w-40 h-40 text-blue-600 dark:text-white" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m16 12-4-4-4 4"/><path d="M12 16V8"/></svg>
+                <svg class="w-40 h-40 text-blue-500 dark:text-blue-400" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m16 12-4-4-4 4"/><path d="M12 16V8"/></svg>
             </div>
-            <h3 class="text-[11px] font-black uppercase tracking-[0.25em] text-blue-700 dark:text-blue-300 mb-2">Saldo Kas Keuntungan</h3>
-            <p class="text-2xl xl:text-3xl font-black text-blue-950 dark:text-white leading-tight {{ $currentProfitBalance < 0 ? 'text-rose-600 dark:text-red-300' : '' }}" :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($currentProfitBalance, 0, ',', '.') }}</p>
+            <h3 class="text-[11px] font-black uppercase tracking-[0.25em] text-gray-500 dark:text-gray-400 mb-2">Saldo Kas Keuntungan</h3>
+            <p class="text-2xl xl:text-3xl font-black text-gray-900 dark:text-white leading-tight {{ $currentProfitBalance < 0 ? 'text-primary-red' : '' }}" :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($currentProfitBalance, 0, ',', '.') }}</p>
         </div>
 
         <!-- Pemasukan Card -->
-        <div class="theme-no-card bg-emerald-50 dark:bg-slate-900 border-2 border-emerald-400 dark:border-green-500 rounded-[2.5rem] p-6 md:p-7 text-emerald-950 dark:text-white shadow-lg relative overflow-hidden group">
+        <div class="bg-white dark:bg-gray-800 rounded-3xl p-6 md:p-7 text-gray-900 dark:text-white shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 relative overflow-hidden group">
             <div class="absolute -right-6 -bottom-6 opacity-10 dark:opacity-20 group-hover:scale-110 transition-transform duration-700">
-                <svg class="w-40 h-40 text-emerald-600 dark:text-green-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+                <svg class="w-40 h-40 text-emerald-500 dark:text-green-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
             </div>
-            <h3 class="text-[11px] font-black uppercase tracking-[0.25em] text-emerald-700 dark:text-green-400 mb-2">Total Pemasukan</h3>
-            <p class="text-2xl xl:text-3xl font-black text-emerald-700 dark:text-green-400 leading-tight" :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($displayIncome, 0, ',', '.') }}</p>
+            <h3 class="text-[11px] font-black uppercase tracking-[0.25em] text-gray-500 dark:text-gray-400 mb-2">Total Pemasukan</h3>
+            <p class="text-2xl xl:text-3xl font-black text-emerald-600 dark:text-green-400 leading-tight" :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($displayIncome, 0, ',', '.') }}</p>
         </div>
 
         <!-- Pengeluaran Card -->
-        <div class="theme-no-card bg-rose-50 dark:bg-slate-900 border-2 border-rose-400 dark:border-primary-red rounded-[2.5rem] p-6 md:p-7 text-rose-950 dark:text-white shadow-lg relative overflow-hidden group">
+        <div class="bg-white dark:bg-gray-800 rounded-3xl p-6 md:p-7 text-gray-900 dark:text-white shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 relative overflow-hidden group">
             <div class="absolute -right-6 -bottom-6 opacity-10 dark:opacity-20 group-hover:scale-110 transition-transform duration-700">
-                <svg class="w-40 h-40 text-rose-600 dark:text-primary-red" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 17 13.5 8.5 8.5 13.5 2 7"/><polyline points="16 17 22 17 22 11"/></svg>
+                <svg class="w-40 h-40 text-rose-500 dark:text-primary-red" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 17 13.5 8.5 8.5 13.5 2 7"/><polyline points="16 17 22 17 22 11"/></svg>
             </div>
-            <h3 class="text-[11px] font-black uppercase tracking-[0.25em] text-rose-700 dark:text-red-400 mb-2">Total Pengeluaran</h3>
-            <p class="text-2xl xl:text-3xl font-black text-rose-700 dark:text-primary-red leading-tight" :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($displayExpense, 0, ',', '.') }}</p>
+            <h3 class="text-[11px] font-black uppercase tracking-[0.25em] text-gray-500 dark:text-gray-400 mb-2">Total Pengeluaran</h3>
+            <p class="text-2xl xl:text-3xl font-black text-rose-600 dark:text-primary-red leading-tight" :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($displayExpense, 0, ',', '.') }}</p>
         </div>
     </div>
 
     <!-- Period Flow Summary Banner (Only if filter is active) -->
     @if($startDate)
-    <div class="theme-no-card bg-slate-900 text-white rounded-3xl p-6 shadow-xl border border-slate-700 mb-8">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-center md:text-left mb-6 pb-6 border-b border-white/10">
+    <div class="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 mb-8 text-gray-800 dark:text-white">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-center md:text-left mb-6 pb-6 border-b border-gray-100 dark:border-gray-700">
             <div class="flex flex-col justify-center">
-                <span class="text-[9px] font-black uppercase tracking-widest opacity-60 mb-1">Saldo Awal Periode</span>
-                <p class="text-xl font-black text-gray-300">Rp{{ number_format($startingBalance, 0, ',', '.') }}</p>
+                <span class="text-[9px] font-black uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1">Saldo Awal Periode</span>
+                <p class="text-xl font-black text-gray-900 dark:text-white">Rp{{ number_format($startingBalance, 0, ',', '.') }}</p>
             </div>
-            <div class="flex flex-col justify-center border-y md:border-y-0 md:border-x border-white/10 px-4 text-center">
-                <span class="text-[9px] font-black uppercase tracking-widest opacity-60 mb-1">Perubahan Arus Kas (Net Flow)</span>
+            <div class="flex flex-col justify-center border-y md:border-y-0 md:border-x border-gray-100 dark:border-gray-700 px-4 text-center">
+                <span class="text-[9px] font-black uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1">Perubahan Arus Kas (Net Flow)</span>
                 @php $netFlow = $displayIncome - $displayExpense; @endphp
-                <p class="text-2xl font-black italic {{ $netFlow >= 0 ? 'text-green-400' : 'text-primary-red' }}">
+                <p class="text-2xl font-black italic {{ $netFlow >= 0 ? 'text-emerald-600 dark:text-green-400' : 'text-rose-600 dark:text-primary-red' }}">
                     {{ $netFlow >= 0 ? '+' : '' }}Rp{{ number_format($netFlow, 0, ',', '.') }}
                 </p>
             </div>
             <div class="flex flex-col justify-center md:items-end">
-                <span class="text-[9px] font-black uppercase tracking-widest opacity-65 mb-1 text-emerald-450">Saldo Akhir Periode</span>
-                <p class="text-xl font-black text-white">Rp{{ number_format($startingBalance + $netFlow, 0, ',', '.') }}</p>
+                <span class="text-[9px] font-black uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1">Saldo Akhir Periode</span>
+                <p class="text-xl font-black text-gray-900 dark:text-white">Rp{{ number_format($startingBalance + $netFlow, 0, ',', '.') }}</p>
             </div>
         </div>
 
         <!-- Audit Hasil Fisik Status -->
         @php $auditNet = $totalSurplus - $totalDeficit; @endphp
         <div x-data="{ open: false }"
-             class="bg-white/5 rounded-2xl border border-white/10 overflow-hidden">
+             class="bg-gray-50 dark:bg-gray-900/60 rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden">
 
             {{-- Header / Toggle --}}
             <button @click="open = !open"
-                    class="w-full flex flex-col sm:flex-row items-center justify-between gap-4 p-4 text-left transition-colors hover:bg-white/5">
+                    class="w-full flex flex-col sm:flex-row items-center justify-between gap-4 p-4 text-left transition-colors hover:bg-gray-100 dark:hover:bg-gray-800/80">
                 <div class="flex items-center gap-3">
-                    <div class="p-2 rounded-xl {{ $auditNet < 0 ? 'bg-red-500/20 text-red-400' : ($auditNet > 0 ? 'bg-amber-500/20 text-amber-400' : 'bg-emerald-500/20 text-emerald-400') }}">
+                    <div class="p-2 rounded-xl {{ $auditNet < 0 ? 'bg-red-500/20 text-red-600 dark:text-red-400' : ($auditNet > 0 ? 'bg-amber-500/20 text-amber-600 dark:text-amber-400' : 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-400') }}">
                         @if($auditNet < 0)
                             {{-- Rugi: net negatif --}}
                             <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
@@ -180,8 +180,8 @@
                         @endif
                     </div>
                     <div>
-                        <span class="text-[9px] font-black uppercase tracking-widest opacity-60 block">Hasil Audit Penyesuaian Kas Fisik</span>
-                        <span class="text-xs font-black uppercase tracking-wider">
+                        <span class="text-[9px] font-black uppercase tracking-widest text-gray-500 dark:text-gray-400 block">Hasil Audit Penyesuaian Kas Fisik</span>
+                        <span class="text-xs font-black uppercase tracking-wider text-gray-800 dark:text-gray-200">
                             @if($auditNet < 0)
                                 PERINGATAN: TERDAPAT SELISIH KURANG (RUGI) FISIK BERSIH
                             @elseif($auditNet > 0)
@@ -192,7 +192,7 @@
                         </span>
                         {{-- Penjelasan jika ada campuran --}}
                         @if($totalDeficit > 0 && $totalSurplus > 0)
-                            <span class="text-[8px] opacity-50 block mt-0.5">
+                            <span class="text-[8px] text-gray-500 dark:text-gray-400 block mt-0.5">
                                 Ada {{ $adjustments->where('type','expense')->count() }} entri rugi & {{ $adjustments->where('type','income')->count() }} entri lebih — dihitung dari net bersih
                             </span>
                         @endif
@@ -201,15 +201,15 @@
                 <div class="flex items-center gap-3">
                     <div class="text-right">
                         @if($auditNet < 0)
-                            <span class="text-sm font-black text-red-400">Rp{{ number_format($auditNet, 0, ',', '.') }} (Rugi Bersih)</span>
+                            <span class="text-sm font-black text-rose-600 dark:text-red-400">Rp{{ number_format($auditNet, 0, ',', '.') }} (Rugi Bersih)</span>
                         @elseif($auditNet > 0)
-                            <span class="text-sm font-black text-amber-400">+Rp{{ number_format($auditNet, 0, ',', '.') }} (Lebih Bersih)</span>
+                            <span class="text-sm font-black text-amber-600 dark:text-amber-400">+Rp{{ number_format($auditNet, 0, ',', '.') }} (Lebih Bersih)</span>
                         @else
-                            <span class="text-xs font-black text-emerald-400 uppercase">Semua Penyesuaian Klop</span>
+                            <span class="text-xs font-black text-emerald-600 dark:text-emerald-400 uppercase">Semua Penyesuaian Klop</span>
                         @endif
                     </div>
                     {{-- Chevron --}}
-                    <svg class="w-4 h-4 opacity-50 transition-transform duration-200 shrink-0"
+                    <svg class="w-4 h-4 text-gray-500 dark:text-gray-400 transition-transform duration-200 shrink-0"
                          :class="open ? 'rotate-180' : ''"
                          xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
@@ -225,16 +225,16 @@
                  x-transition:leave="transition ease-in duration-150"
                  x-transition:leave-start="opacity-100 translate-y-0"
                  x-transition:leave-end="opacity-0 -translate-y-1"
-                 class="border-t border-white/10 px-4 pb-4 pt-3">
+                 class="border-t border-gray-200 dark:border-gray-700 px-4 pb-4 pt-3">
 
                 @if($adjustments->isEmpty())
-                    <p class="text-[10px] font-black uppercase tracking-widest text-center opacity-40 py-3">
+                    <p class="text-[10px] font-black uppercase tracking-widest text-center text-gray-400 dark:text-gray-500 py-3">
                         Tidak ada data penyesuaian pada periode ini
                     </p>
                 @else
                     <div class="space-y-2">
                         {{-- Header kolom --}}
-                        <div class="grid grid-cols-12 gap-2 text-[8px] font-black uppercase tracking-widest opacity-40 px-2 pb-1 border-b border-white/5">
+                        <div class="grid grid-cols-12 gap-2 text-[8px] font-black uppercase tracking-widest text-gray-500 dark:text-gray-400 px-2 pb-1 border-b border-gray-200 dark:border-gray-700">
                             <div class="col-span-2">Tanggal</div>
                             <div class="col-span-5">Deskripsi</div>
                             <div class="col-span-2 text-center">Tipe</div>
@@ -243,26 +243,26 @@
 
                         @foreach($adjustments as $adj)
                             <div class="grid grid-cols-12 gap-2 items-center px-2 py-2 rounded-xl
-                                {{ $adj->type === 'expense' ? 'bg-red-500/10' : 'bg-amber-500/10' }}">
+                                {{ $adj->type === 'expense' ? 'bg-rose-50 dark:bg-red-500/10' : 'bg-amber-50 dark:bg-amber-500/10' }}">
 
                                 {{-- Tanggal --}}
-                                <div class="col-span-2 text-[9px] font-black opacity-60">
+                                <div class="col-span-2 text-[9px] font-black text-gray-600 dark:text-gray-400">
                                     {{ \Carbon\Carbon::parse($adj->date)->format('d/m/Y') }}
                                 </div>
 
                                 {{-- Deskripsi --}}
-                                <div class="col-span-5 text-[9px] font-bold leading-tight">
+                                <div class="col-span-5 text-[9px] font-bold text-gray-800 dark:text-gray-200 leading-tight">
                                     {{ $adj->description }}
                                 </div>
 
                                 {{-- Badge tipe --}}
                                 <div class="col-span-2 flex justify-center">
                                     @if($adj->type === 'expense')
-                                        <span class="text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full bg-red-500/20 text-red-400">
+                                        <span class="text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full bg-rose-100 dark:bg-red-500/20 text-rose-700 dark:text-red-400">
                                             Rugi Selisih
                                         </span>
                                     @else
-                                        <span class="text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-400">
+                                        <span class="text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400">
                                             Lebih
                                         </span>
                                     @endif
@@ -270,22 +270,22 @@
 
                                 {{-- Jumlah --}}
                                 <div class="col-span-3 text-right text-sm font-black
-                                    {{ $adj->type === 'expense' ? 'text-red-400' : 'text-amber-400' }}">
+                                    {{ $adj->type === 'expense' ? 'text-rose-600 dark:text-red-400' : 'text-amber-600 dark:text-amber-400' }}">
                                     {{ $adj->type === 'expense' ? '-' : '+' }}Rp{{ number_format($adj->amount, 0, ',', '.') }}
                                 </div>
                             </div>
                         @endforeach
 
                         {{-- Total row --}}
-                        <div class="grid grid-cols-12 gap-2 items-center px-2 py-2 mt-1 border-t border-white/10">
-                            <div class="col-span-9 text-[9px] font-black uppercase tracking-widest opacity-60">
-                                Total Bersih
-                                <span class="normal-case opacity-70 ml-1">(Lebih - Rugi = Net)</span>
+                        <div class="grid grid-cols-12 gap-2 items-center px-2 py-2 mt-1 border-t border-gray-200 dark:border-gray-700">
+                            <div class="col-span-9 text-[9px] font-black uppercase tracking-widest text-gray-500 dark:text-gray-400">
+                                Total Bersih Selisih Kas Fisik
+                                <span class="normal-case text-gray-400 dark:text-gray-500 ml-1">(Lebih - Rugi = Net)</span>
                             </div>
                             <div class="col-span-3 text-right text-sm font-black
-                                {{ $auditNet < 0 ? 'text-red-400' : ($auditNet > 0 ? 'text-amber-400' : 'text-emerald-400') }}">
-                                {{ $auditNet >= 0 ? '+' : '' }}Rp{{ number_format($auditNet, 0, ',', '.') }}
-                                <span class="text-[8px] block opacity-70">
+                                {{ $auditNet < 0 ? 'text-rose-600 dark:text-red-400' : ($auditNet > 0 ? 'text-amber-600 dark:text-amber-400' : 'text-emerald-600 dark:text-emerald-400') }}">
+                                {{ $auditNet > 0 ? '+' : '' }}Rp{{ number_format($auditNet, 0, ',', '.') }}
+                                <span class="text-[8px] block opacity-80">
                                     {{ $auditNet < 0 ? 'Rugi Bersih' : ($auditNet > 0 ? 'Lebih Bersih' : 'Klop') }}
                                 </span>
                             </div>
