@@ -365,43 +365,41 @@ class VirtualCashManagement extends Component
 
         $categoriesMap = CashCategory::where('jurusan_id', $activeJurusanId)->get()->keyBy('id');
         
-        // Build complete categoryStats array
-        $allCategories = CashCategory::where('jurusan_id', $activeJurusanId)->get();
+        // Build categoryStats array directly from VirtualCashTransaction entries
         $categoryStatsMap = [];
 
-        foreach ($allCategories as $cat) {
-            $categoryStatsMap[$cat->id] = [
-                'id' => $cat->id,
-                'name' => $cat->name,
-                'income' => 0,
-                'expense' => 0,
-                'modal' => 0,
-                'profit' => 0,
-                'balance' => 0,
+        foreach ($categorySums as $sum) {
+            $catId = $sum->cash_category_id;
+            $catName = $categoriesMap[$catId]->name ?? 'Tanpa Kategori';
+
+            $salesData = $salesStatsByCatName[$catName] ?? null;
+            $catIncome = (float)$sum->cat_income;
+            $catExpense = (float)$sum->cat_expense;
+            
+            // If product sales HPP/profit exists for this category name, use it; otherwise fallback to HPP calculated from transactions or 0
+            $modal = $salesData ? (float)$salesData['modal'] : 0;
+            $profit = $salesData ? (float)$salesData['profit'] : ($catIncome - $catExpense);
+
+            $categoryStatsMap[$catId ?: 'null'] = [
+                'id' => $catId,
+                'name' => $catName,
+                'income' => $catIncome,
+                'expense' => $catExpense,
+                'modal' => $modal,
+                'profit' => $profit,
+                'balance' => $catIncome - $catExpense,
             ];
         }
 
-        foreach ($categorySums as $sum) {
-            if (isset($categoryStatsMap[$sum->cash_category_id])) {
-                $categoryStatsMap[$sum->cash_category_id]['income'] = (float)$sum->cat_income;
-                $categoryStatsMap[$sum->cash_category_id]['expense'] = (float)$sum->cat_expense;
-            }
-        }
+        // Also check if any product sales categories exist that aren't yet in VirtualCashTransaction but are in salesStats
+        foreach ($salesStatsByCatName as $catName => $salesData) {
+            $matchedCat = $categoriesMap->firstWhere('name', $catName);
+            $catIdKey = $matchedCat ? $matchedCat->id : 'sales_' . md5($catName);
 
-        // Merge product sales HPP (modal) and profit into matching categories
-        foreach ($allCategories as $cat) {
-            $salesData = $salesStatsByCatName[$cat->name] ?? null;
-            if ($salesData) {
-                // If there's direct product sales for this category via non-cash
-                $categoryStatsMap[$cat->id]['income'] += $salesData['sales_income'];
-                $categoryStatsMap[$cat->id]['modal'] += $salesData['modal'];
-                $categoryStatsMap[$cat->id]['profit'] += $salesData['profit'];
-            } else {
-                // For categories without direct HPP from sales, profit is income - expense
-                $categoryStatsMap[$cat->id]['profit'] += ($categoryStatsMap[$cat->id]['income'] - $categoryStatsMap[$cat->id]['expense']);
+            if (!isset($categoryStatsMap[$catIdKey]) && !isset($categoryStatsMap[$matchedCat->id ?? '___'])) {
+                // Only add if not already covered by VirtualCashTransaction
+                // Note: VirtualCashTransaction created during profit sharing or system posting already records these.
             }
-
-            $categoryStatsMap[$cat->id]['balance'] = $categoryStatsMap[$cat->id]['income'] - $categoryStatsMap[$cat->id]['expense'];
         }
 
         // Filter out categories with zero activity
