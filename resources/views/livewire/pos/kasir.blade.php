@@ -37,7 +37,7 @@
             <div class="flex flex-col md:flex-row items-center justify-between gap-3">
                 <!-- Branding & Date/Time -->
                 <div class="flex items-center gap-3 shrink-0 w-full md:w-auto justify-between md:justify-start">
-                    <div class="flex items-center gap-3 min-w-0">
+                    <div class="flex items-center gap-3 shrink-0 min-w-0">
                         @php
                             $activeJurusanId = session('active_jurusan_id');
                             $themeSettings = null;
@@ -55,7 +55,7 @@
                             <img src="{{ $tefaLogo ? asset('storage/' . $tefaLogo) : asset('favicon.png') }}"
                                 class="w-full h-full object-contain">
                         </a>
-                        <div class="min-w-0">
+                        <div class="shrink-0 min-w-0">
                             <h1 class="text-base lg:text-lg font-black uppercase tracking-tighter text-white leading-none truncate max-w-[150px] xs:max-w-[200px] sm:max-w-[240px]">
                                 {{ $tefaName }}</h1>
                             <div class="flex items-center gap-1.5 mt-1">
@@ -79,14 +79,14 @@
                 </div>
 
                 <!-- Instant Search Input & Controls Bar -->
-                <div class="flex flex-col sm:flex-row flex-1 items-stretch sm:items-center gap-2 w-full md:w-auto justify-end min-w-0">
-                    <div class="flex-1 w-full sm:w-auto sm:max-w-md">
+                <div class="flex flex-col sm:flex-row flex-1 items-stretch sm:items-center gap-2 w-full md:w-auto justify-end min-w-0 shrink">
+                    <div class="flex-1 min-w-[120px] sm:max-w-md">
                         <input type="text" id="pos-search-input" x-ref="searchInput" x-model="search"
                             placeholder="CARI MENU (INSTAN)..."
                             class="nb-input w-full px-3.5 py-2 text-xs uppercase placeholder:text-gray-400 bg-white dark:bg-slate-800 border-white dark:border-slate-700 shadow-none focus:ring-2 focus:ring-amber-400 rounded-xl">
                     </div>
 
-                    <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 relative z-30 max-w-full">
+                    <div class="flex items-center gap-1.5 shrink-0 overflow-x-auto no-scrollbar py-0.5 relative z-30 max-w-full">
                         <!-- Global Notifications Bell -->
                         @livewire('note-notifications')
                         @livewire('layout.tefa-switcher')
