@@ -408,7 +408,7 @@ class VirtualCashManagement extends Component
             }
 
             $categoryStatsMap[$catId]['balance'] = $categoryStatsMap[$catId]['income'] - $categoryStatsMap[$catId]['expense'];
-            if (!$salesStatsByCatName[$catName] ?? null) {
+            if (!isset($salesStatsByCatName[$catName])) {
                 $categoryStatsMap[$catId]['profit'] = $categoryStatsMap[$catId]['balance'];
             }
         }
