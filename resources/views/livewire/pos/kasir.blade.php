@@ -37,7 +37,7 @@
             <div class="flex flex-col md:flex-row items-center justify-between gap-3">
                 <!-- Branding & Date/Time -->
                 <div class="flex items-center gap-3 shrink-0 w-full md:w-auto justify-between md:justify-start">
-                    <div class="flex items-center gap-3">
+                    <div class="flex items-center gap-3 min-w-0">
                         @php
                             $activeJurusanId = session('active_jurusan_id');
                             $themeSettings = null;
@@ -56,31 +56,41 @@
                                 class="w-full h-full object-contain">
                         </a>
                         <div class="min-w-0">
-                            <h1 class="text-base lg:text-lg font-black uppercase tracking-tighter text-white leading-none truncate max-w-[180px] sm:max-w-[240px]">
+                            <h1 class="text-base lg:text-lg font-black uppercase tracking-tighter text-white leading-none truncate max-w-[150px] xs:max-w-[200px] sm:max-w-[240px]">
                                 {{ $tefaName }}</h1>
                             <div class="flex items-center gap-1.5 mt-1">
                                 <span
-                                    class="text-[8px] font-black bg-black text-white px-1.5 py-0.5 uppercase tracking-widest border border-white rounded-md">{{ now()->translatedFormat('d F Y') }}</span>
+                                    class="text-[8px] font-black bg-black text-white px-1.5 py-0.5 uppercase tracking-widest border border-white rounded-md whitespace-nowrap">{{ now()->translatedFormat('d F Y') }}</span>
                                 <span x-data="{ time: '' }" x-init="setInterval(() => time = new Date().toLocaleTimeString('id-ID', { hour12: false }), 1000)" x-text="time"
-                                    class="text-[8px] font-black bg-slate-100 dark:bg-black text-black dark:text-white px-1.5 py-0.5 uppercase tracking-widest border border-black dark:border-white rounded-md"></span>
+                                    class="text-[8px] font-black bg-slate-100 dark:bg-black text-black dark:text-white px-1.5 py-0.5 uppercase tracking-widest border border-black dark:border-white rounded-md whitespace-nowrap"></span>
                             </div>
                         </div>
                     </div>
+
+                    <!-- Mobile Cart Trigger Button -->
+                    <button @click="showCart = true" type="button"
+                        class="lg:hidden nb-btn py-1.5 px-3 bg-primary-red text-white text-xs font-black shadow-none border-2 rounded-xl flex items-center gap-1.5 shrink-0">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
+                        </svg>
+                        <span>CART</span>
+                        <span x-show="cart.length > 0" x-text="cart.reduce((sum, i) => sum + i.quantity, 0)" class="px-1.5 py-0.5 text-[9px] bg-white text-black rounded-full font-black leading-none"></span>
+                    </button>
                 </div>
 
                 <!-- Instant Search Input & Controls Bar -->
-                <div class="flex flex-1 items-center gap-2 w-full md:w-auto justify-end">
-                    <div class="flex-1 max-w-md min-w-[200px]">
+                <div class="flex flex-col sm:flex-row flex-1 items-stretch sm:items-center gap-2 w-full md:w-auto justify-end min-w-0">
+                    <div class="flex-1 w-full sm:w-auto sm:max-w-md">
                         <input type="text" id="pos-search-input" x-ref="searchInput" x-model="search"
                             placeholder="CARI MENU (INSTAN)..."
                             class="nb-input w-full px-3.5 py-2 text-xs uppercase placeholder:text-gray-400 bg-white dark:bg-slate-800 border-white dark:border-slate-700 shadow-none focus:ring-2 focus:ring-amber-400 rounded-xl">
                     </div>
 
-                    <div class="flex items-center gap-1.5 shrink-0 py-0.5 relative z-30">
+                    <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 relative z-30 max-w-full">
                         <!-- Global Notifications Bell -->
                         @livewire('note-notifications')
                         @livewire('layout.tefa-switcher')
-                        <button @click="toggleTheme()" class="nb-btn p-2 bg-white dark:bg-dark-soft shadow-none border-2 rounded-xl" title="Toggle Mode Dark/Light">
+                        <button @click="toggleTheme()" class="nb-btn p-2 bg-white dark:bg-dark-soft shadow-none border-2 rounded-xl shrink-0" title="Toggle Mode Dark/Light">
                             <svg x-show="!darkMode" class="w-4 h-4 text-black" fill="none" stroke="currentColor"
                                 viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
@@ -94,15 +104,15 @@
                         </button>
                         @if (session('active_role_name') !== 'kasir')
                         <a href="{{ route('inventory-report') }}" wire:navigate
-                            class="nb-btn py-1.5 px-3 bg-primary-yellow text-black text-xs font-black shadow-none border-2 rounded-xl">SELISIH</a>
+                            class="nb-btn py-1.5 px-3 bg-primary-yellow text-black text-xs font-black shadow-none border-2 rounded-xl whitespace-nowrap shrink-0">SELISIH</a>
                         @endif
                         <button wire:click="editOpeningStock"
-                            class="nb-btn py-1.5 px-3 bg-white text-black text-xs font-black shadow-none border-2 rounded-xl">STOK</button>
+                            class="nb-btn py-1.5 px-3 bg-white text-black text-xs font-black shadow-none border-2 rounded-xl whitespace-nowrap shrink-0">STOK</button>
                         <button wire:click="finishSession" {{ $isSessionFinished ? 'disabled' : '' }}
-                            class="nb-btn py-1.5 px-3 {{ $isSessionFinished ? 'bg-gray-400' : 'bg-black text-white' }} text-xs font-black shadow-none border-2 rounded-xl">
+                            class="nb-btn py-1.5 px-3 {{ $isSessionFinished ? 'bg-gray-400' : 'bg-black text-white' }} text-xs font-black shadow-none border-2 rounded-xl whitespace-nowrap shrink-0">
                             {{ $isSessionFinished ? 'OFF' : 'SELESAI' }}
                         </button>
-                        <form method="POST" action="{{ route('logout') }}" class="inline-block">
+                        <form method="POST" action="{{ route('logout') }}" class="inline-block shrink-0">
                             @csrf
                             <button type="submit" class="nb-btn p-2 bg-primary-red text-white shadow-none border-2 rounded-xl flex items-center justify-center" title="Logout">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -570,33 +580,34 @@
 
     <!-- Opening Stock Modal -->
     <div x-data="{ show: @entangle('showOpeningStockModal'), modalSearch: '' }" x-show="show" x-cloak @keydown.window.escape="show = false"
-        class="fixed inset-0 z-[400] flex items-center justify-center p-6 bg-white/20 dark:bg-black/40 backdrop-blur-md">
+        class="fixed inset-0 z-[400] flex items-center justify-center p-2 sm:p-6 bg-slate-900/80 dark:bg-black/85 backdrop-blur-md">
         <div
-            class="nb-card bg-white dark:bg-dark-soft w-full max-w-5xl max-h-[90vh] flex flex-col overflow-hidden animate-in slide-in-from-bottom-10 duration-500 border-4">
+            class="nb-card bg-white dark:bg-dark-soft w-full max-w-5xl max-h-[92vh] sm:max-h-[90vh] flex flex-col overflow-hidden animate-in slide-in-from-bottom-10 duration-500 border-4">
             <div
-                class="p-6 bg-primary-blue text-white border-b-4 border-black flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                class="p-4 sm:p-6 bg-primary-blue text-white border-b-4 border-black flex flex-col md:flex-row justify-between items-start md:items-center gap-3 sm:gap-4">
                 <div>
-                    <h2 class="text-2xl font-black uppercase italic leading-none flex items-center gap-3">
+                    <h2 class="text-xl sm:text-2xl font-black uppercase italic leading-none flex flex-wrap items-center gap-2 sm:gap-3">
                         STOK AWAL
                         <span
-                            class="text-[10px] bg-white text-primary-blue px-3 py-1 rounded-full not-italic tracking-widest">{{ \Carbon\Carbon::parse($transactionDate)->translatedFormat('d M Y') }}</span>
+                            class="text-[10px] bg-white text-primary-blue px-2.5 py-0.5 rounded-full not-italic tracking-widest">{{ \Carbon\Carbon::parse($transactionDate)->translatedFormat('d M Y') }}</span>
                     </h2>
-                    <p class="text-[10px] font-black uppercase tracking-widest mt-1.5 opacity-80 italic">Verifikasi
+                    <p class="text-[10px] font-black uppercase tracking-widest mt-1 opacity-80 italic">Verifikasi
                         barang fisik di toko</p>
                 </div>
-                <div class="flex items-center gap-3 w-full md:w-auto">
+                <div class="flex items-center gap-2 sm:gap-3 w-full md:w-auto">
                     <button wire:click="syncOpeningStockWithLast" type="button"
-                        class="nb-btn bg-emerald-500 hover:bg-emerald-600 text-white p-2 text-[10px] font-black uppercase flex items-center gap-1.5 shadow-none border-2"
+                        class="nb-btn bg-emerald-500 hover:bg-emerald-600 text-white p-2 text-[10px] font-black uppercase flex items-center gap-1.5 shadow-none border-2 rounded-xl shrink-0"
                         title="Selaraskan dengan stok terakhir yang tercatat">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
                                 d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                         </svg>
-                        SINKRONKAN STOK
+                        <span class="hidden sm:inline">SINKRONKAN STOK</span>
+                        <span class="sm:hidden">SYNC</span>
                     </button>
                     <input type="text" x-model="modalSearch" placeholder="CARI BARANG..."
-                        class="nb-input bg-white text-black p-2 text-[10px] flex-1 md:w-48 shadow-none border-2">
-                    <button @click="show = false" class="nb-btn bg-white text-black p-2 shadow-none border-2">
+                        class="nb-input bg-white text-black p-2 text-xs flex-1 md:w-48 shadow-none border-2 rounded-xl">
+                    <button @click="show = false" class="nb-btn bg-white text-black p-2 shadow-none border-2 rounded-xl shrink-0">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="4"
                                 d="M6 18L18 6M6 6l12 12" />
@@ -604,8 +615,8 @@
                     </button>
                 </div>
             </div>
-            <div class="flex-1 overflow-y-auto p-6 no-scrollbar bg-gray-50 dark:bg-black">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="flex-1 overflow-y-auto p-3 sm:p-6 no-scrollbar bg-gray-50 dark:bg-black">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
                     @php
                         $activeJurusanId = session('active_jurusan_id');
                         $openingProducts = \App\Models\Product::where('is_active', true)
@@ -619,55 +630,55 @@
                     @foreach ($openingProducts as $p)
                         <div x-show="'{{ strtolower($p->name) }}'.includes(modalSearch.toLowerCase())"
                             wire:key="opening-stock-{{ $p->id }}"
-                            class="nb-card p-5 flex items-center justify-between bg-white dark:bg-dark-soft shadow-none border-2">
-                            <div class="flex-1">
-                                <h4 class="font-black uppercase text-sm dark:text-white">{{ $p->name }}</h4>
+                            class="nb-card p-3.5 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white dark:bg-dark-soft shadow-none border-2 rounded-2xl">
+                            <div class="flex-1 min-w-0">
+                                <h4 class="font-black uppercase text-sm dark:text-white leading-tight">{{ $p->name }}</h4>
                                 <div class="flex flex-wrap items-center gap-1.5 mt-2">
                                     <span
-                                        class="text-[9px] font-black bg-black text-white px-2 py-0.5 uppercase tracking-widest border border-white">{{ $p->category->name ?? '' }}</span>
+                                        class="text-[9px] font-black bg-black text-white px-2 py-0.5 uppercase tracking-widest border border-white rounded-md">{{ $p->category->name ?? '' }}</span>
 
                                     <!-- Stok Kemarin (H-1) -->
                                     <span
-                                        class="text-[9px] font-black border-2 border-amber-500 text-amber-700 dark:text-amber-300 px-2 py-0.5 uppercase tracking-widest bg-amber-50 dark:bg-amber-950/40"
+                                        class="text-[9px] font-black border-2 border-amber-500 text-amber-700 dark:text-amber-300 px-2 py-0.5 uppercase tracking-widest bg-amber-50 dark:bg-amber-950/40 rounded-md"
                                         title="Stok penutupan persis kemarin ({{ \Carbon\Carbon::parse($transactionDate)->subDay()->translatedFormat('d M') }})">
-                                        KEMARIN ({{ \Carbon\Carbon::parse($transactionDate)->subDay()->translatedFormat('d M') }}):
-                                        {{ isset($yesterdayClosingStocks[$p->id]) ? $yesterdayClosingStocks[$p->id] : '-' }}
+                                        KEMARIN: {{ isset($yesterdayClosingStocks[$p->id]) ? $yesterdayClosingStocks[$p->id] : '-' }}
                                     </span>
 
                                     <!-- Stok Terakhir Tercatat -->
                                     @if (isset($lastClosingDetails[$p->id]))
                                         <span
-                                            class="text-[9px] font-black border-2 border-primary-blue dark:border-primary-blue-light px-2 py-0.5 uppercase tracking-widest text-primary-blue dark:text-primary-blue-light bg-blue-50 dark:bg-blue-950/40"
+                                            class="text-[9px] font-black border-2 border-primary-blue dark:border-primary-blue-light px-2 py-0.5 uppercase tracking-widest text-primary-blue dark:text-primary-blue-light bg-blue-50 dark:bg-blue-950/40 rounded-md"
                                             title="Stok penutupan sesi terakhir yang tercatat">
-                                            STOK TERAKHIR ({{ $lastClosingDetails[$p->id]['date'] }}):
-                                            {{ $lastClosingDetails[$p->id]['stock'] }}
+                                            TERAKHIR: {{ $lastClosingDetails[$p->id]['stock'] }}
                                         </span>
                                     @endif
                                 </div>
                             </div>
-                            <input type="number" wire:model="stockItems.{{ $p->id }}"
-                                class="nb-input w-24 text-center text-lg p-2 shadow-none border-2 bg-white dark:bg-black">
+                            <div class="flex items-center justify-between sm:justify-end gap-3 pt-2 sm:pt-0 border-t sm:border-t-0 border-gray-100 dark:border-slate-800">
+                                <span class="sm:hidden text-[10px] font-black uppercase text-gray-400">STOK AWAL:</span>
+                                <input type="number" wire:model="stockItems.{{ $p->id }}"
+                                    class="nb-input w-24 sm:w-28 text-center text-lg font-black p-2 shadow-none border-2 bg-white dark:bg-black rounded-xl">
+                            </div>
                         </div>
                     @endforeach
 
                     <div x-show="{{ json_encode($awalNames) }}.filter(name => name.toLowerCase().includes(modalSearch.toLowerCase())).length === 0"
                         x-cloak
-                        class="col-span-full py-16 flex flex-col items-center justify-center bg-gray-50 dark:bg-black/50 border-2 border-dashed border-gray-200 dark:border-gray-800">
-                        <svg class="w-12 h-12 text-gray-300 dark:text-gray-700 mb-4" fill="none"
+                        class="col-span-full py-12 flex flex-col items-center justify-center bg-gray-50 dark:bg-black/50 border-2 border-dashed border-gray-200 dark:border-gray-800 rounded-2xl">
+                        <svg class="w-10 h-10 text-gray-300 dark:text-gray-700 mb-3" fill="none"
                             stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
-                        <div class="text-gray-400 font-bold text-xs uppercase tracking-widest italic mb-1">PRODUK TIDAK
-                            DITEMUKAN</div>
-                        <div class="text-gray-300 dark:text-gray-600 font-black text-2xl uppercase tracking-tighter">
+                        <div class="text-gray-400 font-bold text-xs uppercase tracking-widest italic mb-1">PRODUK TIDAK DITEMUKAN</div>
+                        <div class="text-gray-300 dark:text-gray-600 font-black text-xl uppercase tracking-tighter">
                             "<span x-text="modalSearch"></span>"</div>
                     </div>
                 </div>
             </div>
-            <div class="p-6 bg-white dark:bg-dark-soft border-t-4 border-black flex flex-col sm:flex-row gap-3">
+            <div class="p-4 sm:p-6 bg-white dark:bg-dark-soft border-t-4 border-black flex flex-col sm:flex-row gap-3">
                 <button wire:click="syncOpeningStockWithLast" type="button"
-                    class="nb-btn bg-emerald-500 hover:bg-emerald-600 text-white text-sm py-4 px-6 flex items-center justify-center gap-2">
+                    class="nb-btn bg-emerald-500 hover:bg-emerald-600 text-white text-xs sm:text-sm py-3.5 sm:py-4 px-5 flex items-center justify-center gap-2 rounded-xl">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
                             d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -675,31 +686,31 @@
                     SINKRONKAN STOK TERAKHIR
                 </button>
                 <button wire:click="saveOpeningStock"
-                    class="nb-btn flex-1 bg-primary-blue text-white text-lg py-4">SIMPAN & MULAI JUALAN</button>
+                    class="nb-btn flex-1 bg-primary-blue text-white text-base sm:text-lg py-3.5 sm:py-4 font-black rounded-xl">SIMPAN & MULAI JUALAN</button>
             </div>
         </div>
     </div>
 
     <!-- Closing Stock Modal -->
     <div x-data="{ show: @entangle('showClosingStockModal'), modalSearch: '' }" x-show="show" x-cloak @keydown.window.escape="show = false"
-        class="fixed inset-0 z-[400] flex items-center justify-center p-6 bg-white/20 dark:bg-black/40 backdrop-blur-md">
+        class="fixed inset-0 z-[400] flex items-center justify-center p-2 sm:p-6 bg-slate-900/80 dark:bg-black/85 backdrop-blur-md">
         <div
-            class="nb-card bg-white dark:bg-dark-soft w-full max-w-5xl max-h-[90vh] flex flex-col overflow-hidden border-4">
+            class="nb-card bg-white dark:bg-dark-soft w-full max-w-5xl max-h-[92vh] sm:max-h-[90vh] flex flex-col overflow-hidden border-4">
             <div
-                class="p-6 bg-primary-red text-white border-b-4 border-black flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                class="p-4 sm:p-6 bg-primary-red text-white border-b-4 border-black flex flex-col md:flex-row justify-between items-start md:items-center gap-3 sm:gap-4">
                 <div>
-                    <h2 class="text-2xl font-black uppercase italic leading-none text-white flex items-center gap-3">
+                    <h2 class="text-xl sm:text-2xl font-black uppercase italic leading-none text-white flex flex-wrap items-center gap-2 sm:gap-3">
                         REKAP HARIAN
                         <span
-                            class="text-[10px] bg-white text-primary-red px-3 py-1 rounded-full not-italic tracking-widest">{{ \Carbon\Carbon::parse($transactionDate)->translatedFormat('d M Y') }}</span>
+                            class="text-[10px] bg-white text-primary-red px-2.5 py-0.5 rounded-full not-italic tracking-widest">{{ \Carbon\Carbon::parse($transactionDate)->translatedFormat('d M Y') }}</span>
                     </h2>
-                    <p class="text-[10px] font-black uppercase tracking-widest mt-1.5 opacity-80 italic">Input sisa
+                    <p class="text-[10px] font-black uppercase tracking-widest mt-1 opacity-80 italic">Input sisa
                         barang di toko hari ini</p>
                 </div>
-                <div class="flex items-center gap-3 w-full md:w-auto">
+                <div class="flex items-center gap-2 sm:gap-3 w-full md:w-auto">
                     <input type="text" x-model="modalSearch" placeholder="CARI BARANG..."
-                        class="nb-input bg-white text-black p-2 text-[10px] flex-1 md:w-48 shadow-none border-2">
-                    <button @click="show = false" class="nb-btn bg-white text-black p-2 shadow-none border-2">
+                        class="nb-input bg-white text-black p-2 text-xs flex-1 md:w-48 shadow-none border-2 rounded-xl">
+                    <button @click="show = false" class="nb-btn bg-white text-black p-2 shadow-none border-2 rounded-xl shrink-0">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="4"
                                 d="M6 18L18 6M6 6l12 12" />
@@ -707,7 +718,7 @@
                     </button>
                 </div>
             </div>
-            <div class="flex-1 overflow-y-auto p-6 no-scrollbar bg-gray-50 dark:bg-black">
+            <div class="flex-1 overflow-y-auto p-3 sm:p-6 no-scrollbar bg-gray-50 dark:bg-black">
                 @php
                     $hasHigherRole = auth()
                         ->user()
@@ -716,77 +727,69 @@
                         ->exists();
                 @endphp
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
                     @php
                         $rekapNames = collect($this->stockComparison)->pluck('name')->toArray();
                     @endphp
                     @foreach ($this->stockComparison as $item)
                         <div x-show="'{{ strtolower($item['name']) }}'.includes(modalSearch.toLowerCase())"
                             wire:key="closing-stock-{{ $item['id'] }}"
-                            class="nb-card p-5 flex flex-col bg-white dark:bg-dark-soft shadow-none border-2">
-                            <h4 class="font-black uppercase text-sm dark:text-white mb-4">{{ $item['name'] }}</h4>
-                            <div class="flex flex-wrap items-center gap-3 mb-5">
-                                <div class="flex flex-col">
-                                    <span class="text-[9px] font-black uppercase text-gray-400 mb-1">AWAL</span>
-                                    <span
-                                        class="text-xs font-black border-2 border-black dark:border-white px-3 py-1 uppercase tracking-widest dark:text-white bg-gray-100 dark:bg-slate-800">{{ $item['opening'] }}</span>
+                            class="nb-card p-3.5 sm:p-5 flex flex-col bg-white dark:bg-dark-soft shadow-none border-2 rounded-2xl">
+                            <h4 class="font-black uppercase text-sm dark:text-white mb-3 leading-tight">{{ $item['name'] }}</h4>
+                            <div class="grid grid-cols-3 gap-2 mb-4 text-center">
+                                <div class="flex flex-col bg-gray-100 dark:bg-slate-800 p-1.5 rounded-xl border border-gray-200 dark:border-slate-700">
+                                    <span class="text-[8px] font-black uppercase text-gray-400">AWAL</span>
+                                    <span class="text-xs font-black dark:text-white mt-0.5">{{ $item['opening'] }}</span>
                                 </div>
-                                <div class="flex flex-col">
-                                    <span
-                                        class="text-[9px] font-black uppercase text-primary-blue mb-1">LAKU</span>
-                                    <span
-                                        class="text-xs font-black bg-primary-blue text-white px-3 py-1 uppercase tracking-widest">{{ $item['sold'] }}</span>
+                                <div class="flex flex-col bg-blue-500/10 text-primary-blue dark:text-blue-400 p-1.5 rounded-xl border border-blue-500/30">
+                                    <span class="text-[8px] font-black uppercase">LAKU</span>
+                                    <span class="text-xs font-black mt-0.5">{{ $item['sold'] }}</span>
                                 </div>
-                                <div class="flex flex-col">
-                                    <span class="text-[9px] font-black uppercase text-green-600 mb-1">SISA</span>
-                                    <span
-                                        class="text-xs font-black bg-green-500 text-white px-3 py-1 uppercase tracking-widest">{{ $item['expected'] }}</span>
+                                <div class="flex flex-col bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 p-1.5 rounded-xl border border-emerald-500/30">
+                                    <span class="text-[8px] font-black uppercase">SISA</span>
+                                    <span class="text-xs font-black mt-0.5">{{ $item['expected'] }}</span>
                                 </div>
                             </div>
                             <div class="space-y-1">
                                 <label
-                                    class="text-[10px] font-black uppercase tracking-widest dark:text-gray-400">STOK
-                                    FISIK SEKARANG</label>
+                                    class="text-[10px] font-black uppercase tracking-widest dark:text-gray-400 block">STOK FISIK SEKARANG</label>
                                 <input type="number" wire:model="stockItems.{{ $item['id'] }}"
-                                    class="nb-input w-full text-center text-2xl p-3 shadow-none border-2 bg-white dark:bg-black">
+                                    class="nb-input w-full text-center text-xl sm:text-2xl font-black p-2.5 sm:p-3 shadow-none border-2 bg-white dark:bg-black rounded-xl">
                             </div>
                         </div>
                     @endforeach
 
                     <div x-show="{{ json_encode($rekapNames) }}.filter(name => name.toLowerCase().includes(modalSearch.toLowerCase())).length === 0"
                         x-cloak
-                        class="col-span-full py-16 flex flex-col items-center justify-center bg-gray-50 dark:bg-black/50 border-2 border-dashed border-gray-200 dark:border-gray-800">
-                        <svg class="w-12 h-12 text-gray-300 dark:text-gray-700 mb-4" fill="none"
+                        class="col-span-full py-12 flex flex-col items-center justify-center bg-gray-50 dark:bg-black/50 border-2 border-dashed border-gray-200 dark:border-gray-800 rounded-2xl">
+                        <svg class="w-10 h-10 text-gray-300 dark:text-gray-700 mb-3" fill="none"
                             stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
-                        <div class="text-gray-400 font-bold text-xs uppercase tracking-widest italic mb-1">PRODUK
-                            TIDAK
-                            DITEMUKAN</div>
-                        <div
-                            class="text-gray-300 dark:text-gray-600 font-black text-2xl uppercase tracking-tighter">
+                        <div class="text-gray-400 font-bold text-xs uppercase tracking-widest italic mb-1">PRODUK TIDAK DITEMUKAN</div>
+                        <div class="text-gray-300 dark:text-gray-600 font-black text-xl uppercase tracking-tighter">
                             "<span x-text="modalSearch"></span>"</div>
                     </div>
                 </div>
 
             </div>
-            <div class="p-6 bg-white dark:bg-dark-soft border-t-4 border-black">
+            <div class="p-4 sm:p-6 bg-white dark:bg-dark-soft border-t-4 border-black">
                 <button wire:click="saveClosingStockAndNext"
-                    class="nb-btn w-full bg-primary-blue text-white text-lg py-5">SIMPAN SISA BARANG & LANJUT</button>
+                    class="nb-btn w-full bg-primary-blue text-white text-base sm:text-lg py-4 font-black rounded-xl uppercase tracking-wider">SIMPAN SISA BARANG & LANJUT</button>
             </div>
         </div>
     </div>
 
     <!-- Closing Report Modal -->
     <div x-data="{ show: @entangle('showClosingReportModal') }" x-show="show" x-cloak
-        class="fixed inset-0 z-[500] flex items-center justify-center p-6 bg-white/20 dark:bg-black/40 backdrop-blur-md">
-        <div class="nb-card bg-white dark:bg-dark-soft w-full max-w-md p-10 border-4 border-black text-center">
-            <div class="mb-6">
+        class="fixed inset-0 z-[500] flex items-center justify-center p-3 sm:p-6 bg-slate-900/80 dark:bg-black/85 backdrop-blur-md">
+        <div class="nb-card bg-white dark:bg-dark-soft w-full max-w-md p-5 sm:p-10 border-4 border-black text-center max-h-[92vh] overflow-y-auto rounded-3xl">
+            <div class="mb-4 sm:mb-6">
                 <span
                     class="text-[9px] font-black bg-primary-red text-white px-3 py-1 uppercase tracking-widest border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">LAPORAN
                     AKHIR SHIFT</span>
-                <h2 class="text-2xl font-black uppercase italic mt-4 dark:text-white">CLOSING REPORT</h2>
+                <h2 class="text-xl sm:text-2xl font-black uppercase italic mt-3 sm:mt-4 dark:text-white">CLOSING REPORT</h2>
                 <p class="text-xs text-gray-500 font-semibold mt-1">Tulis laporan aktivitas Anda sebelum menyelesaikan
                     sesi</p>
             </div>
@@ -802,7 +805,7 @@
 
                 {{-- Audit Non-Cash --}}
                 @if($todayRevenueTransfer > 0 || $todayRevenueQris > 0)
-                <div class="nb-card p-4 border-2 border-primary-blue bg-primary-blue/5 space-y-3">
+                <div class="nb-card p-4 border-2 border-primary-blue bg-primary-blue/5 space-y-3 rounded-2xl">
                     <p class="text-[9px] font-black uppercase tracking-widest text-primary-blue">Audit Kas Virtual Hari Ini</p>
                     @if($todayRevenueTransfer > 0)
                     <div class="space-y-1">
@@ -814,7 +817,7 @@
                             <label class="text-[8px] font-black uppercase tracking-widest text-gray-400">Nominal Transfer Masuk Rekening (Rp)</label>
                             <input type="number" wire:model.live="actualTransfer"
                                 placeholder="{{ $todayRevenueTransfer }}"
-                                class="nb-input w-full p-2 text-xs font-black bg-white dark:bg-black border-2 mt-1">
+                                class="nb-input w-full p-2 text-xs font-black bg-white dark:bg-black border-2 mt-1 rounded-xl">
                         </div>
                         @if($actualTransfer > 0)
                             @php $diffTransfer = $actualTransfer - $todayRevenueTransfer; @endphp
@@ -839,7 +842,7 @@
                             <label class="text-[8px] font-black uppercase tracking-widest text-gray-400">Nominal QRIS Masuk E-Wallet (Rp)</label>
                             <input type="number" wire:model.live="actualQris"
                                 placeholder="{{ $todayRevenueQris }}"
-                                class="nb-input w-full p-2 text-xs font-black bg-white dark:bg-black border-2 mt-1">
+                                class="nb-input w-full p-2 text-xs font-black bg-white dark:bg-black border-2 mt-1 rounded-xl">
                         </div>
                         @if($actualQris > 0)
                             @php $diffQris = $actualQris - $todayRevenueQris; @endphp
@@ -862,7 +865,7 @@
                         Laporan Aktivitas Selama Shift {!! $hasHigherRole ? '<span class="text-amber-500 font-black">(OPSIONAL)</span>' : '' !!}
                     </label>
                     <textarea wire:model="closingReportText" placeholder="Jelaskan apa saja yang Anda lakukan selama shift ini..."
-                        rows="4" class="nb-input w-full p-4 text-sm font-bold bg-white dark:bg-slate-800 border-2 border-black"></textarea>
+                        rows="3" class="nb-input w-full p-3 sm:p-4 text-xs sm:text-sm font-bold bg-white dark:bg-slate-800 border-2 border-black rounded-2xl"></textarea>
                     @error('closingReportText')
                         <span class="text-xs text-red-500 font-bold mt-1 block">{{ $message }}</span>
                     @enderror
@@ -870,16 +873,16 @@
             </div>
 
             <button wire:click="submitClosingReport"
-                class="nb-btn w-full bg-primary-red text-white text-base py-4 font-black uppercase tracking-widest">KIRIM
+                class="nb-btn w-full bg-primary-red text-white text-sm sm:text-base py-3.5 sm:py-4 font-black uppercase tracking-widest rounded-xl">KIRIM
                 LAPORAN & CLOCK OUT</button>
         </div>
     </div>
 
     <!-- Transaction Detail Modal -->
     <div x-data="{ show: @entangle('showDetailsModal') }" x-show="show" x-cloak @keydown.window.escape="show = false"
-        class="fixed inset-0 z-[600] flex items-center justify-center p-6 bg-white/20 dark:bg-black/40 backdrop-blur-md">
+        class="fixed inset-0 z-[600] flex items-center justify-center p-3 sm:p-6 bg-slate-900/80 dark:bg-black/85 backdrop-blur-md">
         <div @click.away="show = false"
-            class="nb-card bg-white dark:bg-dark-soft w-full max-w-lg flex flex-col overflow-hidden animate-in zoom-in-95 duration-300 border-4">
+            class="nb-card bg-white dark:bg-dark-soft w-full max-w-lg max-h-[92vh] sm:max-h-[90vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-300 border-4 rounded-3xl">
             <div class="p-6 bg-primary-blue text-white border-b-4 border-black relative">
                 <button @click="show = false"
                     class="absolute right-6 top-6 nb-btn bg-white text-black p-2 shadow-none border-2">
