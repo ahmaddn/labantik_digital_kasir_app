@@ -592,9 +592,9 @@
     <div x-data="{ show: @entangle('showOpeningStockModal'), modalSearch: '' }" x-show="show" x-cloak @keydown.window.escape="show = false"
         class="fixed inset-0 z-[400] flex items-center justify-center p-2 sm:p-6 bg-slate-900/80 dark:bg-black/85 backdrop-blur-md">
         <div
-            class="nb-card bg-white dark:bg-dark-soft w-full max-w-5xl max-h-[92vh] sm:max-h-[90vh] flex flex-col overflow-hidden animate-in slide-in-from-bottom-10 duration-500 border-4">
+            class="nb-card bg-white dark:bg-dark-soft w-full max-w-5xl max-h-[85vh] sm:max-h-[85vh] flex flex-col overflow-hidden animate-in slide-in-from-bottom-10 duration-500 border-4 rounded-3xl">
             <div
-                class="p-4 sm:p-6 bg-primary-blue text-white border-b-4 border-black flex flex-col md:flex-row justify-between items-start md:items-center gap-3 sm:gap-4">
+                class="p-4 sm:p-6 bg-primary-blue text-white border-b-4 border-black flex flex-col md:flex-row justify-between items-start md:items-center gap-3 sm:gap-4 shrink-0">
                 <div>
                     <h2 class="text-xl sm:text-2xl font-black uppercase italic leading-none flex flex-wrap items-center gap-2 sm:gap-3">
                         STOK AWAL
@@ -625,7 +625,7 @@
                     </button>
                 </div>
             </div>
-            <div class="flex-1 overflow-y-auto p-3 sm:p-6 no-scrollbar bg-gray-50 dark:bg-black">
+            <div class="flex-1 overflow-y-auto p-3 sm:p-6 bg-gray-50 dark:bg-black">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
                     @php
                         $activeJurusanId = session('active_jurusan_id');
@@ -686,7 +686,7 @@
                     </div>
                 </div>
             </div>
-            <div class="p-4 sm:p-6 bg-white dark:bg-dark-soft border-t-4 border-black flex flex-col sm:flex-row gap-3">
+            <div class="p-4 sm:p-6 bg-white dark:bg-dark-soft border-t-4 border-black flex flex-col sm:flex-row gap-3 shrink-0">
                 <button wire:click="syncOpeningStockWithLast" type="button"
                     class="nb-btn bg-emerald-500 hover:bg-emerald-600 text-white text-xs sm:text-sm py-3.5 sm:py-4 px-5 flex items-center justify-center gap-2 rounded-xl">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -705,9 +705,9 @@
     <div x-data="{ show: @entangle('showClosingStockModal'), modalSearch: '' }" x-show="show" x-cloak @keydown.window.escape="show = false"
         class="fixed inset-0 z-[400] flex items-center justify-center p-2 sm:p-6 bg-slate-900/80 dark:bg-black/85 backdrop-blur-md">
         <div
-            class="nb-card bg-white dark:bg-dark-soft w-full max-w-5xl max-h-[92vh] sm:max-h-[90vh] flex flex-col overflow-hidden border-4">
+            class="nb-card bg-white dark:bg-dark-soft w-full max-w-5xl max-h-[85vh] sm:max-h-[85vh] flex flex-col overflow-hidden border-4 rounded-3xl">
             <div
-                class="p-4 sm:p-6 bg-primary-red text-white border-b-4 border-black flex flex-col md:flex-row justify-between items-start md:items-center gap-3 sm:gap-4">
+                class="p-4 sm:p-6 bg-primary-red text-white border-b-4 border-black flex flex-col md:flex-row justify-between items-start md:items-center gap-3 sm:gap-4 shrink-0">
                 <div>
                     <h2 class="text-xl sm:text-2xl font-black uppercase italic leading-none text-white flex flex-wrap items-center gap-2 sm:gap-3">
                         REKAP HARIAN
@@ -728,7 +728,7 @@
                     </button>
                 </div>
             </div>
-            <div class="flex-1 overflow-y-auto p-3 sm:p-6 no-scrollbar bg-gray-50 dark:bg-black">
+            <div class="flex-1 overflow-y-auto p-3 sm:p-6 bg-gray-50 dark:bg-black">
                 @php
                     $hasHigherRole = auth()
                         ->user()
@@ -784,7 +784,7 @@
                 </div>
 
             </div>
-            <div class="p-4 sm:p-6 bg-white dark:bg-dark-soft border-t-4 border-black">
+            <div class="p-4 sm:p-6 bg-white dark:bg-dark-soft border-t-4 border-black shrink-0">
                 <button wire:click="saveClosingStockAndNext"
                     class="nb-btn w-full bg-primary-blue text-white text-base sm:text-lg py-4 font-black rounded-xl uppercase tracking-wider">SIMPAN SISA BARANG & LANJUT</button>
             </div>
