@@ -197,18 +197,36 @@ class DailyRecapActionService
                     ->delete();
 
                 $nonCashGrouped = $nonCashTransactions->groupBy(function ($tx) {
+                    $supplierId = $tx->product->supplier_id ?? $tx->supplier_id;
                     $catId = $tx->product->category_id ?? null;
-                    return $tx->payment_method . '_' . ($catId ?: 'other');
+                    return $tx->payment_method . '_' . ($supplierId ? 'supp_' . $supplierId : 'cat_' . ($catId ?: 'other'));
                 });
 
                 foreach ($nonCashGrouped as $groupKey => $txs) {
                     $firstTx = $txs->first();
                     $method = $firstTx->payment_method; // 'transfer' or 'qris'
-                    $catName = $firstTx->product->category->name ?? 'Penjualan Umum';
-                    $catNameClean = trim($catName);
+                    $supplierName = $firstTx->product->supplier->name ?? null;
+
+                    if ($supplierName) {
+                        $catNameClean = trim($supplierName);
+                        $cashCatName = 'Penjualan ' . $catNameClean;
+                    } else {
+                        $categoryName = $firstTx->product->category->name ?? 'Lainnya';
+                        $catNameClean = trim($categoryName);
+                        $categoryNameLower = strtolower($catNameClean);
+                        if (in_array($categoryNameLower, ['makanan', 'minuman', 'makanan & minuman', 'makanan dan minuman', 'snack'])) {
+                            $activeJurusan = \App\Models\Jurusan::find($activeJurusanId);
+                            $activeJurusanNameLower = $activeJurusan ? strtolower($activeJurusan->name) : '';
+                            $cashCatName = str_contains($activeJurusanNameLower, 'doku') ? 'Kas Doku' : 'Jurusan Snack & Minuman';
+                        } elseif (in_array($categoryNameLower, ['umum', 'lainnya', 'lain-lain'])) {
+                            $cashCatName = 'Keuntungan Jurusan';
+                        } else {
+                            $cashCatName = 'Penjualan ' . $catNameClean;
+                        }
+                    }
 
                     $catCategory = CashCategory::firstOrCreate(
-                        ['name' => 'Penjualan ' . $catNameClean, 'jurusan_id' => $activeJurusanId]
+                        ['name' => $cashCatName, 'jurusan_id' => $activeJurusanId]
                     );
 
                     $totalNonCashAmount = $txs->sum('total_price');
@@ -222,7 +240,7 @@ class DailyRecapActionService
                             'type'             => 'income',
                             'amount'           => $totalNonCashAmount,
                             'cash_category_id' => $catCategory->id,
-                            'description'      => "Pemasukan Non-Cash {$methodLabel} Penjualan {$catNameClean} (Sistem)",
+                            'description'      => "Pemasukan Non-Cash {$methodLabel} {$cashCatName} (Sistem)",
                         ]);
                     }
                 }
