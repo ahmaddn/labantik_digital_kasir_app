@@ -131,6 +131,38 @@ class VirtualCashManagement extends Component
         }
     }
 
+    // Delete category confirmation state
+    public bool $showDeleteCategoryConfirmation = false;
+    public $confirmingDeleteCategoryId = null;
+    public string $confirmingDeleteCategoryName = '';
+    public int $confirmingDeleteCategoryTxCount = 0;
+
+    public function confirmDeleteCategory($id, $name)
+    {
+        $this->confirmingDeleteCategoryId = $id;
+        $this->confirmingDeleteCategoryName = $name;
+        $this->confirmingDeleteCategoryTxCount = VirtualCashTransaction::where('cash_category_id', $id)->count();
+        $this->showDeleteCategoryConfirmation = true;
+    }
+
+    public function deleteCategory()
+    {
+        if ($this->confirmingDeleteCategoryId) {
+            // Delete all virtual transactions associated with this category
+            VirtualCashTransaction::where('cash_category_id', $this->confirmingDeleteCategoryId)->delete();
+
+            $category = CashCategory::find($this->confirmingDeleteCategoryId);
+            if ($category) {
+                $category->delete();
+                $this->dispatch('toast', message: 'Kategori dan seluruh transaksi kas virtual di dalamnya berhasil dihapus.');
+            }
+            $this->showDeleteCategoryConfirmation = false;
+            $this->confirmingDeleteCategoryId = null;
+            $this->confirmingDeleteCategoryName = '';
+            $this->confirmingDeleteCategoryTxCount = 0;
+        }
+    }
+
     public function confirmDelete($id)
     {
         $this->confirmingDeleteId = $id;

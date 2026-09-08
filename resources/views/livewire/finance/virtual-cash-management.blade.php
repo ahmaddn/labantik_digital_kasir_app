@@ -147,6 +147,13 @@
             <div class="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 relative overflow-hidden group">
                 <div class="flex justify-between items-start mb-4 gap-2 relative z-10">
                     <h3 class="text-sm font-black uppercase tracking-widest text-gray-800 dark:text-white">{{ $stat['name'] }}</h3>
+                    <button 
+                        wire:click="confirmDeleteCategory('{{ $stat['id'] }}', '{{ addslashes($stat['name']) }}')"
+                        class="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all"
+                        title="Hapus Kategori Kas"
+                    >
+                        <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                    </button>
                 </div>
                 <div class="space-y-2">
                     <div class="flex justify-between items-center text-xs">
@@ -178,6 +185,7 @@
             @endforelse
         </div>
     </div>
+
 
     <!-- Table -->
     <div class="bg-white dark:bg-gray-800 rounded-[3.5rem] shadow-2xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 overflow-hidden mb-12">
@@ -390,6 +398,34 @@
             <div class="flex gap-4">
                 <button wire:click="$set('showDeleteConfirmation', false)" class="flex-1 py-3 bg-gray-100 dark:bg-gray-800 text-gray-400 rounded-xl font-black uppercase text-xs tracking-widest">Batal</button>
                 <button wire:click="deleteTransaction" class="flex-1 py-3 bg-primary-red text-white rounded-xl font-black uppercase text-xs tracking-widest shadow-lg shadow-red-500/30">Hapus</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Category Confirmation Modal -->
+    <div 
+        x-data="{ show: @entangle('showDeleteCategoryConfirmation') }" 
+        x-show="show" 
+        x-cloak
+        class="fixed inset-0 z-[360] flex items-center justify-center p-6 bg-gray-900/60 backdrop-blur-sm"
+    >
+        <div class="bg-white dark:bg-gray-900 w-full max-w-md rounded-[3rem] shadow-2xl p-8 text-center space-y-6">
+            <div class="w-16 h-16 bg-red-500/10 text-primary-red rounded-2xl flex items-center justify-center mx-auto">
+                <svg class="w-8 h-8" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+            </div>
+            <div>
+                <h3 class="text-xl font-bold uppercase text-gray-800 dark:text-white">Hapus Kategori Kas</h3>
+                <p class="text-sm font-black text-red-500 uppercase tracking-wider mt-1">{{ $confirmingDeleteCategoryName }}</p>
+                <p class="text-xs text-gray-400 font-bold mt-3">
+                    Apakah Anda yakin ingin menghapus kategori ini?
+                    @if($confirmingDeleteCategoryTxCount > 0)
+                        <span class="block text-rose-500 font-bold mt-1">Peringatan: Terdapat {{ $confirmingDeleteCategoryTxCount }} transaksi kas virtual dalam kategori ini yang juga akan terhapus.</span>
+                    @endif
+                </p>
+            </div>
+            <div class="flex gap-4">
+                <button wire:click="$set('showDeleteCategoryConfirmation', false)" class="flex-1 py-3 bg-gray-100 dark:bg-gray-800 text-gray-400 rounded-xl font-black uppercase text-xs tracking-widest">Batal</button>
+                <button wire:click="deleteCategory" class="flex-1 py-3 bg-primary-red text-white rounded-xl font-black uppercase text-xs tracking-widest shadow-lg shadow-red-500/30">Hapus Kategori</button>
             </div>
         </div>
     </div>
