@@ -27,10 +27,16 @@ class SupplierReportExport implements FromCollection, WithHeadings, WithMapping,
 
     public function collection()
     {
+        $activeJurusanId = session('active_jurusan_id');
+
         $query = Transaction::join('products', 'transactions.product_id', '=', 'products.id')
             ->whereIn('transactions.status', ['uang_diterima', 'belum_kembalian'])
             ->whereNotNull('products.supplier_id')
             ->whereBetween('transactions.transacted_at', [$this->dateFrom . ' 00:00:00', $this->dateTo . ' 23:59:59']);
+
+        if ($activeJurusanId) {
+            $query->where('transactions.jurusan_id', $activeJurusanId);
+        }
 
         if ($this->supplierId) {
             $query->where('products.supplier_id', $this->supplierId);

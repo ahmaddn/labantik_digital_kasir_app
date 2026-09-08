@@ -48,34 +48,43 @@ class SupplierReport extends Component
         }
 
         $reports = $suppliersQuery->get()->map(function ($supplier) use ($activeJurusanId) {
-            $products = Product::where('supplier_id', $supplier->id)
-                ->where('jurusan_id', $activeJurusanId)
-                ->get();
-
-            $totalQty = 0;
-            $totalSales = 0;
-            $totalSupplierShare = 0;
-            $totalShopProfit = 0;
-
-            foreach ($products as $product) {
-                $sold = Transaction::forReporting()->where('product_id', $product->id)
-                    ->whereIn('status', ['uang_diterima', 'belum_kembalian'])
-                    ->whereBetween('transacted_at', [$this->dateFrom . ' 00:00:00', $this->dateTo . ' 23:59:59'])
-                    ->sum('quantity');
-
-                if ($sold > 0) {
-                    $totalQty += $sold;
-                    $totalSales += $sold * $product->price;
-                    $totalSupplierShare += $sold * $product->modal_price;
-                    $totalShopProfit += $sold * ($product->price - $product->modal_price);
-                }
-            }
-
+            // Cari pelunasan terakhir untuk supplier ini
             $lastSettlement = CashTransaction::forReporting()
                 ->where('reference', 'like', "SETTLE-SUPPLIER-{$supplier->id}-%")
                 ->orderBy('created_at', 'desc')
                 ->first();
+            
             $lastSettledDate = $lastSettlement ? $lastSettlement->date : null;
+            $lastSettledAt = $lastSettlement ? $lastSettlement->created_at : null;
+
+            $trxQuery = Transaction::forReporting()
+                ->join('products', 'transactions.product_id', '=', 'products.id')
+                ->where('products.supplier_id', $supplier->id)
+                ->where('transactions.jurusan_id', $activeJurusanId)
+                ->whereIn('transactions.status', ['uang_diterima', 'belum_kembalian']);
+
+            // Jika pernah ada pelunasan sebelumnya, hanya hitung transaksi SETELAH waktu pelunasan terakhir
+            if ($lastSettledAt) {
+                $trxQuery->where('transactions.transacted_at', '>', $lastSettledAt);
+            } else {
+                $trxQuery->whereBetween('transactions.transacted_at', [$this->dateFrom . ' 00:00:00', $this->dateTo . ' 23:59:59']);
+            }
+
+            // Filter batas akhir sesuai input dateTo
+            $trxQuery->where('transactions.transacted_at', '<=', $this->dateTo . ' 23:59:59');
+
+            $trxSummary = $trxQuery->selectRaw('
+                    SUM(transactions.quantity) as total_qty,
+                    SUM(transactions.total_price) as total_sales,
+                    SUM(transactions.quantity * (transactions.unit_price - transactions.unit_profit)) as total_supplier_share,
+                    SUM(transactions.quantity * transactions.unit_profit) as total_shop_profit
+                ')
+                ->first();
+
+            $totalQty = (int) ($trxSummary->total_qty ?? 0);
+            $totalSales = (float) ($trxSummary->total_sales ?? 0);
+            $totalSupplierShare = (float) ($trxSummary->total_supplier_share ?? 0);
+            $totalShopProfit = (float) ($trxSummary->total_shop_profit ?? 0);
 
             return (object) [
                 'supplier_id' => $supplier->id,
@@ -84,10 +93,10 @@ class SupplierReport extends Component
                 'total_sales' => $totalSales,
                 'total_supplier_share' => $totalSupplierShare,
                 'total_shop_profit' => $totalShopProfit,
-                'is_settled' => CashTransaction::forReporting()->where('reference', "SETTLE-SUPPLIER-{$supplier->id}-{$this->dateFrom}-{$this->dateTo}")->exists(),
+                'is_settled' => false,
                 'last_settled_date' => $lastSettledDate,
             ];
-        })->filter(fn($r) => $r->total_qty > 0 && !$r->is_settled);
+        })->filter(fn($r) => $r->total_qty > 0);
 
         return view('livewire.reports.supplier-report', [
             'reports' => $reports,
