@@ -472,7 +472,7 @@
                         <label
                             class="text-[10px] font-black text-gray-400 uppercase tracking-widest block border-b border-gray-100 dark:border-gray-800 pb-2">Daftar
                             Produk</label>
-                        @foreach ($editItems as $index => $item)
+                        @forelse ($editItems as $index => $item)
                             <div
                                 class="flex items-center justify-between p-6 bg-gray-50 dark:bg-gray-800 rounded-3xl border border-gray-100 dark:border-gray-700/50 group">
                                 <div class="flex-1">
@@ -486,7 +486,7 @@
                                     <div
                                         class="flex items-center bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-700 px-3 py-1 shadow-sm">
                                         <button type="button"
-                                            @click="$wire.set('editItems.{{ $index }}.quantity', Math.max(1, {{ $item['quantity'] }} - 1))"
+                                            wire:click="decrementQuantity({{ $index }})"
                                             class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-amber-500 transition-colors">
                                             <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" width="24"
                                                 height="24" viewBox="0 0 24 24" fill="none"
@@ -498,9 +498,9 @@
                                         <input type="number"
                                             wire:model.live="editItems.{{ $index }}.quantity"
                                             class="w-12 text-center bg-transparent border-none p-0 focus:ring-0 text-sm font-black text-gray-800 dark:text-white"
-                                            min="1">
+                                            min="0">
                                         <button type="button"
-                                            @click="$wire.set('editItems.{{ $index }}.quantity', {{ $item['quantity'] }} + 1)"
+                                            wire:click="incrementQuantity({{ $index }})"
                                             class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-amber-500 transition-colors">
                                             <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" width="24"
                                                 height="24" viewBox="0 0 24 24" fill="none"
@@ -513,12 +513,29 @@
                                     </div>
                                     <div class="w-24 text-right">
                                         <p class="text-sm font-black text-primary-red italic">
-                                            Rp{{ number_format($item['unit_price'] * $item['quantity'], 0, ',', '.') }}
+                                            Rp{{ number_format($item['unit_price'] * max(0, (int)($item['quantity'] ?? 0)), 0, ',', '.') }}
                                         </p>
                                     </div>
+                                    <button type="button"
+                                        wire:click="removeItem({{ $index }})"
+                                        title="Hapus Produk"
+                                        class="w-9 h-9 flex items-center justify-center text-red-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40 rounded-2xl transition-all">
+                                        <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M3 6h18"/>
+                                            <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+                                            <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+                                            <line x1="10" x2="10" y1="11" y2="17"/>
+                                            <line x1="14" x2="14" y1="11" y2="17"/>
+                                        </svg>
+                                    </button>
                                 </div>
                             </div>
-                        @endforeach
+                        @empty
+                            <div class="p-6 text-center bg-gray-50 dark:bg-gray-800/50 rounded-3xl border border-dashed border-gray-200 dark:border-gray-700">
+                                <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Semua produk telah dihapus dari transaksi ini.</p>
+                                <p class="text-[10px] text-red-400 mt-1 font-semibold">Menyimpan perubahan akan menghapus transaksi ini secara penuh.</p>
+                            </div>
+                        @endforelse
                     </div>
                 </div>
 

@@ -157,18 +157,51 @@ class Transactions extends Component
         $this->showEditModal = true;
     }
 
+    public function incrementQuantity($index)
+    {
+        if (isset($this->editItems[$index])) {
+            $this->editItems[$index]['quantity'] = max(0, ((int) ($this->editItems[$index]['quantity'] ?? 0)) + 1);
+        }
+    }
+
+    public function decrementQuantity($index)
+    {
+        if (isset($this->editItems[$index])) {
+            $current = (int) ($this->editItems[$index]['quantity'] ?? 0);
+            $this->editItems[$index]['quantity'] = max(0, $current - 1);
+        }
+    }
+
+    public function removeItem($index)
+    {
+        if (isset($this->editItems[$index])) {
+            unset($this->editItems[$index]);
+            $this->editItems = array_values($this->editItems);
+        }
+    }
+
     public function update()
     {
         $this->validate([
             'editStatus' => 'required',
             'editPaymentMethod' => 'required|in:cash,transfer,qris',
-            'editItems.*.quantity' => 'required|numeric|min:1',
+            'editItems.*.quantity' => 'required|numeric|min:0',
         ]);
 
+        $allExistingTx = Transaction::forReporting()->where('reference', $this->editingReference)->get();
+
+        $keptItems = [];
         foreach ($this->editItems as $item) {
-            $tx = Transaction::forReporting()->find($item['id']);
-            if ($tx) {
-                $qtyDiff = $item['quantity'] - $tx->quantity;
+            $qty = max(0, (int) ($item['quantity'] ?? 0));
+            if ($qty > 0) {
+                $keptItems[$item['id']] = $qty;
+            }
+        }
+
+        foreach ($allExistingTx as $tx) {
+            if (isset($keptItems[$tx->id])) {
+                $newQty = $keptItems[$tx->id];
+                $qtyDiff = $newQty - $tx->quantity;
                 if ($qtyDiff != 0) {
                     $this->cascadeStockUpdate($tx->product_id, $tx->transacted_at, $qtyDiff);
                 }
@@ -177,14 +210,21 @@ class Transactions extends Component
                     'buyer_name' => $this->editBuyerName,
                     'status' => $this->editStatus,
                     'payment_method' => $this->editPaymentMethod,
-                    'quantity' => $item['quantity'],
-                    'total_price' => $tx->unit_price * $item['quantity'],
+                    'quantity' => $newQty,
+                    'total_price' => $tx->unit_price * $newQty,
                 ]);
+            } else {
+                $this->cascadeStockUpdate($tx->product_id, $tx->transacted_at, -$tx->quantity);
+                $tx->delete();
             }
         }
 
         $this->showEditModal = false;
-        $this->dispatch('toast', message: 'Transaksi berhasil diperbarui.');
+        if (empty($keptItems)) {
+            $this->dispatch('toast', message: 'Seluruh produk dihapus, transaksi berhasil dihapus.');
+        } else {
+            $this->dispatch('toast', message: 'Transaksi berhasil diperbarui.');
+        }
     }
 
     public function render()
