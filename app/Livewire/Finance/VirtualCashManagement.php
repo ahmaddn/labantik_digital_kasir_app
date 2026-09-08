@@ -262,7 +262,66 @@ class VirtualCashManagement extends Component
         // Net Virtual Profit = Sales Profit + Other Income (VirtualCashTransaction income) - Virtual Expenses
         $virtualProfit = $salesProfit + $displayIncome - $displayExpense;
 
-        // Fetch category summaries
+        // Fetch non-cash sales grouped by product category / supplier category matching cash categories
+        $categorySalesQuery = \App\Models\Transaction::with(['product.category', 'product.supplier'])
+            ->where('jurusan_id', $activeJurusanId)
+            ->whereIn('status', ['uang_diterima', 'belum_kembalian']);
+
+        if ($startDate && $endDate) {
+            $categorySalesQuery->whereBetween('transacted_at', [
+                Carbon::parse($startDate)->startOfDay()->toDateTimeString(),
+                Carbon::parse($endDate)->endOfDay()->toDateTimeString(),
+            ]);
+        }
+
+        if ($this->filterSourceMethod) {
+            $categorySalesQuery->where('payment_method', $this->filterSourceMethod);
+        } else {
+            $categorySalesQuery->whereIn('payment_method', ['transfer', 'qris']);
+        }
+
+        $categorySales = $categorySalesQuery->get();
+
+        // Calculate sales income, modal, and profit grouped by CashCategory Name
+        $salesStatsByCatName = [];
+        foreach ($categorySales as $tx) {
+            $supplierName = $tx->product->supplier->name ?? null;
+            if ($supplierName) {
+                $catNameClean = trim($supplierName);
+                $cashCatName = 'Penjualan ' . $catNameClean;
+            } else {
+                $categoryName = $tx->product->category->name ?? 'Lainnya';
+                $catNameClean = trim($categoryName);
+                $categoryNameLower = strtolower($catNameClean);
+                if (in_array($categoryNameLower, ['makanan', 'minuman', 'makanan & minuman', 'makanan dan minuman', 'snack'])) {
+                    $activeJurusan = Jurusan::find($activeJurusanId);
+                    $activeJurusanNameLower = $activeJurusan ? strtolower($activeJurusan->name) : '';
+                    $cashCatName = str_contains($activeJurusanNameLower, 'doku') ? 'Kas Doku' : 'Jurusan Snack & Minuman';
+                } elseif (in_array($categoryNameLower, ['umum', 'lainnya', 'lain-lain'])) {
+                    $cashCatName = 'Keuntungan Jurusan';
+                } else {
+                    $cashCatName = 'Penjualan ' . $catNameClean;
+                }
+            }
+
+            if (!isset($salesStatsByCatName[$cashCatName])) {
+                $salesStatsByCatName[$cashCatName] = [
+                    'sales_income' => 0,
+                    'modal' => 0,
+                    'profit' => 0,
+                ];
+            }
+
+            $revenue = (float)$tx->total_price;
+            $modal = ((float)$tx->unit_price - (float)$tx->unit_profit) * (int)$tx->quantity;
+            $profit = (float)$tx->unit_profit * (int)$tx->quantity;
+
+            $salesStatsByCatName[$cashCatName]['sales_income'] += $revenue;
+            $salesStatsByCatName[$cashCatName]['modal'] += $modal;
+            $salesStatsByCatName[$cashCatName]['profit'] += $profit;
+        }
+
+        // Fetch category summaries from VirtualCashTransaction
         $categorySums = (clone $activeQuery)
             ->selectRaw("
                 cash_category_id,
@@ -273,19 +332,50 @@ class VirtualCashManagement extends Component
             ->get();
 
         $categoriesMap = CashCategory::where('jurusan_id', $activeJurusanId)->get()->keyBy('id');
-        $categoryStats = [];
+        
+        // Build complete categoryStats array
+        $allCategories = CashCategory::where('jurusan_id', $activeJurusanId)->get();
+        $categoryStatsMap = [];
+
+        foreach ($allCategories as $cat) {
+            $categoryStatsMap[$cat->id] = [
+                'id' => $cat->id,
+                'name' => $cat->name,
+                'income' => 0,
+                'expense' => 0,
+                'modal' => 0,
+                'profit' => 0,
+                'balance' => 0,
+            ];
+        }
+
         foreach ($categorySums as $sum) {
-            $cat = $categoriesMap[$sum->cash_category_id] ?? null;
-            if ($cat) {
-                $categoryStats[] = [
-                    'id' => $cat->id,
-                    'name' => $cat->name,
-                    'income' => (float)$sum->cat_income,
-                    'expense' => (float)$sum->cat_expense,
-                    'balance' => (float)$sum->cat_income - (float)$sum->cat_expense,
-                ];
+            if (isset($categoryStatsMap[$sum->cash_category_id])) {
+                $categoryStatsMap[$sum->cash_category_id]['income'] = (float)$sum->cat_income;
+                $categoryStatsMap[$sum->cash_category_id]['expense'] = (float)$sum->cat_expense;
             }
         }
+
+        // Merge product sales HPP (modal) and profit into matching categories
+        foreach ($allCategories as $cat) {
+            $salesData = $salesStatsByCatName[$cat->name] ?? null;
+            if ($salesData) {
+                // If there's direct product sales for this category via non-cash
+                $categoryStatsMap[$cat->id]['income'] += $salesData['sales_income'];
+                $categoryStatsMap[$cat->id]['modal'] += $salesData['modal'];
+                $categoryStatsMap[$cat->id]['profit'] += $salesData['profit'];
+            } else {
+                // For categories without direct HPP from sales, profit is income - expense
+                $categoryStatsMap[$cat->id]['profit'] += ($categoryStatsMap[$cat->id]['income'] - $categoryStatsMap[$cat->id]['expense']);
+            }
+
+            $categoryStatsMap[$cat->id]['balance'] = $categoryStatsMap[$cat->id]['income'] - $categoryStatsMap[$cat->id]['expense'];
+        }
+
+        // Filter out categories with zero activity
+        $categoryStats = array_values(array_filter($categoryStatsMap, function ($stat) {
+            return $stat['income'] > 0 || $stat['expense'] > 0 || $stat['modal'] > 0 || $stat['profit'] > 0 || $stat['balance'] != 0;
+        }));
 
         $transactions = (clone $activeQuery)
             ->orderBy('date', 'desc')
