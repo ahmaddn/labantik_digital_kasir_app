@@ -353,52 +353,62 @@ class VirtualCashManagement extends Component
             $salesStatsByCatName[$cashCatName]['profit'] += $profit;
         }
 
-        // Fetch category summaries from VirtualCashTransaction
-        $categorySums = (clone $activeQuery)
-            ->selectRaw("
-                cash_category_id,
-                SUM(CASE WHEN type = 'income' THEN amount ELSE 0 END) as cat_income,
-                SUM(CASE WHEN type = 'expense' THEN amount ELSE 0 END) as cat_expense
-            ")
-            ->groupBy('cash_category_id')
-            ->get();
-
-        $categoriesMap = CashCategory::where('jurusan_id', $activeJurusanId)->get()->keyBy('id');
+        // Fetch VirtualCashTransactions with empty cash_category_id to map them dynamically
+        $rawVirtualTxs = (clone $activeQuery)->get();
         
-        // Build categoryStats array directly from VirtualCashTransaction entries
         $categoryStatsMap = [];
 
-        foreach ($categorySums as $sum) {
-            $catId = $sum->cash_category_id;
-            $catName = $categoriesMap[$catId]->name ?? 'Tanpa Kategori';
+        foreach ($rawVirtualTxs as $tx) {
+            $catId = $tx->cash_category_id;
+            $catName = $categoriesMap[$catId]->name ?? null;
 
-            $salesData = $salesStatsByCatName[$catName] ?? null;
-            $catIncome = (float)$sum->cat_income;
-            $catExpense = (float)$sum->cat_expense;
-            
-            // If product sales HPP/profit exists for this category name, use it; otherwise fallback to HPP calculated from transactions or 0
-            $modal = $salesData ? (float)$salesData['modal'] : 0;
-            $profit = $salesData ? (float)$salesData['profit'] : ($catIncome - $catExpense);
+            if (!$catName) {
+                // Try to infer category name from transaction description
+                if (preg_match('/Penjualan\s+([^(]+)/i', $tx->description, $matches)) {
+                    $extractedName = trim($matches[1]);
+                    $cashCatName = 'Penjualan ' . $extractedName;
+                } else {
+                    $cashCatName = 'Penjualan Umum';
+                }
 
-            $categoryStatsMap[$catId ?: 'null'] = [
-                'id' => $catId,
-                'name' => $catName,
-                'income' => $catIncome,
-                'expense' => $catExpense,
-                'modal' => $modal,
-                'profit' => $profit,
-                'balance' => $catIncome - $catExpense,
-            ];
-        }
+                $matchedCat = $categoriesMap->firstWhere('name', $cashCatName);
+                if (!$matchedCat) {
+                    $matchedCat = CashCategory::firstOrCreate([
+                        'name' => $cashCatName,
+                        'jurusan_id' => $activeJurusanId,
+                    ]);
+                    $categoriesMap->put($matchedCat->id, $matchedCat);
+                }
 
-        // Also check if any product sales categories exist that aren't yet in VirtualCashTransaction but are in salesStats
-        foreach ($salesStatsByCatName as $catName => $salesData) {
-            $matchedCat = $categoriesMap->firstWhere('name', $catName);
-            $catIdKey = $matchedCat ? $matchedCat->id : 'sales_' . md5($catName);
+                $catId = $matchedCat->id;
+                $catName = $matchedCat->name;
 
-            if (!isset($categoryStatsMap[$catIdKey]) && !isset($categoryStatsMap[$matchedCat->id ?? '___'])) {
-                // Only add if not already covered by VirtualCashTransaction
-                // Note: VirtualCashTransaction created during profit sharing or system posting already records these.
+                // Update database record so cash_category_id is persisted and clean in table view
+                $tx->update(['cash_category_id' => $catId]);
+            }
+
+            if (!isset($categoryStatsMap[$catId])) {
+                $salesData = $salesStatsByCatName[$catName] ?? null;
+                $categoryStatsMap[$catId] = [
+                    'id' => $catId,
+                    'name' => $catName,
+                    'income' => 0,
+                    'expense' => 0,
+                    'modal' => $salesData ? (float)$salesData['modal'] : 0,
+                    'profit' => $salesData ? (float)$salesData['profit'] : 0,
+                    'balance' => 0,
+                ];
+            }
+
+            if ($tx->type === 'income') {
+                $categoryStatsMap[$catId]['income'] += (float)$tx->amount;
+            } else {
+                $categoryStatsMap[$catId]['expense'] += (float)$tx->amount;
+            }
+
+            $categoryStatsMap[$catId]['balance'] = $categoryStatsMap[$catId]['income'] - $categoryStatsMap[$catId]['expense'];
+            if (!$salesStatsByCatName[$catName] ?? null) {
+                $categoryStatsMap[$catId]['profit'] = $categoryStatsMap[$catId]['balance'];
             }
         }
 
