@@ -86,7 +86,7 @@
                             class="nb-input w-full px-3.5 py-2 text-xs uppercase placeholder:text-gray-400 bg-white dark:bg-slate-800 border-white dark:border-slate-700 shadow-none focus:ring-2 focus:ring-amber-400 rounded-xl">
                     </div>
 
-                    <div class="flex items-center gap-1.5 shrink-0 overflow-x-auto no-scrollbar py-0.5 relative z-30 max-w-full">
+                    <div class="flex items-center gap-1.5 shrink-0 py-0.5 relative z-30 flex-wrap sm:flex-nowrap">
                         <!-- Global Notifications Bell -->
                         @livewire('note-notifications')
                         @livewire('layout.tefa-switcher')
