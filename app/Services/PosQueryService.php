@@ -58,6 +58,7 @@ class PosQueryService
                     'id' => $p->id,
                     'name' => $p->name,
                     'category' => $p->category->name ?? 'Uncategorized',
+                    'modal_price' => (float) $p->modal_price,
                     'opening' => $entry ? $entry->opening_stock : 0,
                     'sold' => $sold,
                     'expected' => ($entry ? $entry->opening_stock : 0) - $sold,

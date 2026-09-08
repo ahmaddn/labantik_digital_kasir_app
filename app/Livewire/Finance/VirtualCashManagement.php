@@ -280,10 +280,11 @@ class VirtualCashManagement extends Component
         }
 
         $salesStats = (clone $salesQuery)
+            ->leftJoin('products', 'transactions.product_id', '=', 'products.id')
             ->selectRaw("
-                SUM((unit_price - unit_profit) * quantity) as total_modal,
-                SUM(unit_profit * quantity) as total_sales_profit,
-                SUM(total_price) as total_sales_revenue
+                SUM(COALESCE(products.modal_price, transactions.unit_price - transactions.unit_profit) * transactions.quantity) as total_modal,
+                SUM(transactions.unit_profit * transactions.quantity) as total_sales_profit,
+                SUM(transactions.total_price) as total_sales_revenue
             ")
             ->first();
 
@@ -312,7 +313,7 @@ class VirtualCashManagement extends Component
                 suppliers.name as supplier_name,
                 product_categories.name as category_name,
                 SUM(transactions.total_price) as sales_income,
-                SUM((transactions.unit_price - transactions.unit_profit) * transactions.quantity) as modal,
+                SUM(COALESCE(products.modal_price, transactions.unit_price - transactions.unit_profit) * transactions.quantity) as modal,
                 SUM(transactions.unit_profit * transactions.quantity) as profit
             ")
             ->groupBy('suppliers.name', 'product_categories.name')
