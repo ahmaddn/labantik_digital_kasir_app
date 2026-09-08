@@ -17,7 +17,7 @@
                 x-transition:leave="transition ease-in duration-75"
                 x-transition:leave-start="opacity-100 scale-100"
                 x-transition:leave-end="opacity-0 scale-95"
-                class="absolute right-0 mt-2 w-64 bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-2xl z-[400] p-2 space-y-1"
+                class="absolute left-0 mt-2 w-56 sm:w-64 bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-2xl z-[500] p-2 space-y-1"
                 x-cloak
             >
                 <div class="px-3 py-2 text-[10px] font-black uppercase tracking-widest text-gray-400">Pilih Unit TEFA Aktif</div>

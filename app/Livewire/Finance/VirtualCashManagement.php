@@ -230,6 +230,38 @@ class VirtualCashManagement extends Component
         $displayIncome = (float)($periodBalances->total_income ?? 0);
         $displayExpense = (float)($periodBalances->total_expense ?? 0);
 
+        // Calculate non-cash sales modal (HPP) and gross profit from Transaction table
+        $salesQuery = \App\Models\Transaction::where('jurusan_id', $activeJurusanId)
+            ->whereIn('status', ['uang_diterima', 'belum_kembalian']);
+
+        if ($startDate && $endDate) {
+            $salesQuery->whereBetween('transacted_at', [
+                Carbon::parse($startDate)->startOfDay()->toDateTimeString(),
+                Carbon::parse($endDate)->endOfDay()->toDateTimeString(),
+            ]);
+        }
+
+        if ($this->filterSourceMethod) {
+            $salesQuery->where('payment_method', $this->filterSourceMethod);
+        } else {
+            $salesQuery->whereIn('payment_method', ['transfer', 'qris']);
+        }
+
+        $salesStats = (clone $salesQuery)
+            ->selectRaw("
+                SUM((unit_price - unit_profit) * quantity) as total_modal,
+                SUM(unit_profit * quantity) as total_sales_profit,
+                SUM(total_price) as total_sales_revenue
+            ")
+            ->first();
+
+        $virtualModal = (float)($salesStats->total_modal ?? 0);
+        $salesProfit = (float)($salesStats->total_sales_profit ?? 0);
+
+        // Virtual Profit Calculation:
+        // Net Virtual Profit = Sales Profit + Other Income (VirtualCashTransaction income) - Virtual Expenses
+        $virtualProfit = $salesProfit + $displayIncome - $displayExpense;
+
         // Fetch category summaries
         $categorySums = (clone $activeQuery)
             ->selectRaw("
@@ -268,6 +300,8 @@ class VirtualCashManagement extends Component
             'qrisBalance' => $qrisBalance,
             'displayIncome' => $displayIncome,
             'displayExpense' => $displayExpense,
+            'virtualModal' => $virtualModal,
+            'virtualProfit' => $virtualProfit,
             'startDate' => $startDate,
             'endDate' => $endDate,
             'categoryStats' => $categoryStats,

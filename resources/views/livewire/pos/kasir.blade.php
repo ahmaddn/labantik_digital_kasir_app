@@ -224,13 +224,23 @@
         class="fixed inset-y-0 right-0 w-full sm:w-[420px] bg-white dark:bg-slate-900 lg:static lg:flex flex flex-col z-[100] border-l-[var(--nb-border)] border-black dark:border-slate-800">
 
         <div
-            class="p-5 bg-primary-red text-white border-b-[var(--nb-border)] border-black flex justify-between items-center shadow-[inset_0_-4px_0_0_rgba(0,0,0,0.2)]">
-            <h2 class="text-xl font-black uppercase italic tracking-tighter">ORDER CART</h2>
-            <button @click="showCart = false" class="lg:hidden nb-btn bg-white text-black p-2 shadow-none border-2">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-            </button>
+            class="p-4 bg-primary-red text-white border-b-[var(--nb-border)] border-black flex justify-between items-center shadow-[inset_0_-4px_0_0_rgba(0,0,0,0.2)] gap-2">
+            <h2 class="text-lg font-black uppercase italic tracking-tighter">ORDER CART</h2>
+            <div class="flex items-center gap-1.5">
+                <button wire:click="editOpeningStock" type="button"
+                    class="nb-btn py-1 px-2.5 bg-white text-black text-[10px] font-black shadow-none border-2 rounded-lg hover:bg-gray-100 transition-all"
+                    title="Kelola Stok Awal">STOK</button>
+                @if (session('active_role_name') !== 'kasir')
+                <a href="{{ route('inventory-report') }}" wire:navigate
+                    class="nb-btn py-1 px-2.5 bg-primary-yellow text-black text-[10px] font-black shadow-none border-2 rounded-lg hover:bg-amber-400 transition-all"
+                    title="Laporan Selisih Stok">SELISIH</a>
+                @endif
+                <button @click="showCart = false" class="lg:hidden nb-btn bg-white text-black p-1.5 shadow-none border-2 rounded-lg">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
         </div>
 
         <div x-data="{ tab: 'cart' }" class="flex flex-col h-full min-h-0 overflow-hidden bg-white dark:bg-slate-950">
