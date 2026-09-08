@@ -355,6 +355,7 @@ class VirtualCashManagement extends Component
 
         // Fetch VirtualCashTransactions with empty cash_category_id to map them dynamically
         $rawVirtualTxs = (clone $activeQuery)->get();
+        $categoriesMap = CashCategory::where('jurusan_id', $activeJurusanId)->get()->keyBy('id');
         
         $categoryStatsMap = [];
 
