@@ -299,7 +299,7 @@ class VirtualCashManagement extends Component
 
         $rawCategorySales = \App\Models\Transaction::query()
             ->leftJoin('products', 'transactions.product_id', '=', 'products.id')
-            ->leftJoin('categories', 'products.category_id', '=', 'categories.id')
+            ->leftJoin('product_categories', 'products.category_id', '=', 'product_categories.id')
             ->leftJoin('suppliers', 'products.supplier_id', '=', 'suppliers.id')
             ->where('transactions.jurusan_id', $activeJurusanId)
             ->whereIn('transactions.status', ['uang_diterima', 'belum_kembalian'])
@@ -310,12 +310,12 @@ class VirtualCashManagement extends Component
             ->when($this->filterSourceMethod, fn($q) => $q->where('transactions.payment_method', $this->filterSourceMethod), fn($q) => $q->whereIn('transactions.payment_method', ['transfer', 'qris']))
             ->selectRaw("
                 suppliers.name as supplier_name,
-                categories.name as category_name,
+                product_categories.name as category_name,
                 SUM(transactions.total_price) as sales_income,
                 SUM((transactions.unit_price - transactions.unit_profit) * transactions.quantity) as modal,
                 SUM(transactions.unit_profit * transactions.quantity) as profit
             ")
-            ->groupBy('suppliers.name', 'categories.name')
+            ->groupBy('suppliers.name', 'product_categories.name')
             ->get();
 
         $activeJurusan = Jurusan::find($activeJurusanId);
