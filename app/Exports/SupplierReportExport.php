@@ -29,32 +29,58 @@ class SupplierReportExport implements FromCollection, WithHeadings, WithMapping,
     {
         $activeJurusanId = session('active_jurusan_id');
 
-        $query = Transaction::join('products', 'transactions.product_id', '=', 'products.id')
-            ->whereIn('transactions.status', ['uang_diterima', 'belum_kembalian'])
-            ->whereNotNull('products.supplier_id')
-            ->whereBetween('transactions.transacted_at', [$this->dateFrom . ' 00:00:00', $this->dateTo . ' 23:59:59']);
-
-        if ($activeJurusanId) {
-            $query->where('transactions.jurusan_id', $activeJurusanId);
-        }
-
+        $suppliersQuery = \App\Models\Supplier::query();
         if ($this->supplierId) {
-            $query->where('products.supplier_id', $this->supplierId);
+            $suppliersQuery->where('id', $this->supplierId);
         }
 
-        $suppliersList = \App\Models\Supplier::pluck('name', 'id');
+        $reports = $suppliersQuery->get()->map(function ($supplier) use ($activeJurusanId) {
+            $lastSettlement = \App\Models\CashTransaction::forReporting()
+                ->where('reference', 'like', "SETTLE-SUPPLIER-{$supplier->id}-%")
+                ->orderBy('created_at', 'desc')
+                ->first();
 
-        return $query->selectRaw('products.supplier_id as supplier_id, SUM(transactions.quantity) as total_qty, SUM(transactions.total_price) as total_sales, SUM(transactions.quantity * (transactions.unit_price - transactions.unit_profit)) as total_supplier_share, SUM(transactions.quantity * transactions.unit_profit) as total_shop_profit')
-            ->groupBy('products.supplier_id')
-            ->get()
-            ->map(function($report) use ($suppliersList) {
-                if (!$report->supplier_id) {
-                    $report->supplier_name = 'INTERNAL / TOKO';
-                } else {
-                    $report->supplier_name = $suppliersList[$report->supplier_id] ?? 'Unknown';
-                }
-                return $report;
-            });
+            $lastSettledAt = $lastSettlement ? $lastSettlement->created_at : null;
+
+            $trxQuery = Transaction::forReporting()
+                ->join('products', 'transactions.product_id', '=', 'products.id')
+                ->where('products.supplier_id', $supplier->id)
+                ->whereIn('transactions.status', ['uang_diterima', 'belum_kembalian']);
+
+            if ($activeJurusanId) {
+                $trxQuery->where('transactions.jurusan_id', $activeJurusanId);
+            }
+
+            if ($lastSettledAt) {
+                $trxQuery->where('transactions.transacted_at', '>', $lastSettledAt);
+            } else {
+                $trxQuery->whereBetween('transactions.transacted_at', [$this->dateFrom . ' 00:00:00', $this->dateTo . ' 23:59:59']);
+            }
+
+            $trxQuery->where('transactions.transacted_at', '<=', $this->dateTo . ' 23:59:59');
+
+            $trxSummary = $trxQuery->selectRaw('
+                    SUM(transactions.quantity) as total_qty,
+                    SUM(transactions.total_price) as total_sales,
+                    SUM(transactions.quantity * (transactions.unit_price - transactions.unit_profit)) as total_supplier_share,
+                    SUM(transactions.quantity * transactions.unit_profit) as total_shop_profit
+                ')
+                ->first();
+
+            if (!$trxSummary || $trxSummary->total_qty <= 0) {
+                return null;
+            }
+
+            return (object) [
+                'supplier_name' => $supplier->name,
+                'total_qty' => (int) $trxSummary->total_qty,
+                'total_sales' => (float) $trxSummary->total_sales,
+                'total_supplier_share' => (float) $trxSummary->total_supplier_share,
+                'total_shop_profit' => (float) $trxSummary->total_shop_profit,
+            ];
+        })->filter()->values();
+
+        return $reports;
     }
 
     public function map($row): array

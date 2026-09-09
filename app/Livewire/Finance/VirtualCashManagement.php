@@ -263,20 +263,20 @@ class VirtualCashManagement extends Component
         $displayExpense = (float)($periodBalances->total_expense ?? 0);
 
         // Calculate non-cash sales modal (HPP) and gross profit from Transaction table
-        $salesQuery = \App\Models\Transaction::where('jurusan_id', $activeJurusanId)
-            ->whereIn('status', ['uang_diterima', 'belum_kembalian']);
+        $salesQuery = \App\Models\Transaction::where('transactions.jurusan_id', $activeJurusanId)
+            ->whereIn('transactions.status', ['uang_diterima', 'belum_kembalian']);
 
         if ($startDate && $endDate) {
-            $salesQuery->whereBetween('transacted_at', [
+            $salesQuery->whereBetween('transactions.transacted_at', [
                 Carbon::parse($startDate)->startOfDay()->toDateTimeString(),
                 Carbon::parse($endDate)->endOfDay()->toDateTimeString(),
             ]);
         }
 
         if ($this->filterSourceMethod) {
-            $salesQuery->where('payment_method', $this->filterSourceMethod);
+            $salesQuery->where('transactions.payment_method', $this->filterSourceMethod);
         } else {
-            $salesQuery->whereIn('payment_method', ['transfer', 'qris']);
+            $salesQuery->whereIn('transactions.payment_method', ['transfer', 'qris']);
         }
 
         $salesStats = (clone $salesQuery)
