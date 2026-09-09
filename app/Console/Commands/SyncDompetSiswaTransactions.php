@@ -32,6 +32,8 @@ class SyncDompetSiswaTransactions extends Command
 
         $result = $apiService->syncRealtimeTransactions($merchantId);
 
+        \Illuminate\Support\Facades\Log::info('[CRON WORKER] Sync Transaksi Dompet Siswa otomatis dijalankan. Status: ' . $result['status'] . ', Total synced: ' . $result['synced_count']);
+
         $this->info("Sinkronisasi selesai. Total transaksi baru disinkronkan: {$result['synced_count']}");
 
         if (! empty($result['errors'])) {
