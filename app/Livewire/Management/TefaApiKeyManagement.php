@@ -83,10 +83,9 @@ class TefaApiKeyManagement extends Component
         $this->validate();
 
         $rawKey = 'tfk_' . Str::random(56);
-        $activeJurusanId = session('active_jurusan_id');
 
         TefaApiKey::create([
-            'jurusan_id' => $activeJurusanId,
+            'jurusan_id' => null, // Global Key berlaku untuk seluruh merchant/kantin TEFA
             'name'       => $this->name,
             'key'        => $rawKey,
             'is_active'  => true,
