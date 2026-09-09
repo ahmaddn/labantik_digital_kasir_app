@@ -1,341 +1,42 @@
-# Dokumentasi API Integrasi TEFA
-**Sistem Dompet Siswa SMKN 1 Talaga**
+# Dokumentasi API TEFA & Integrasi Dompet Siswa
+
+Dokumentasi ini menjelaskan secara rinci endpoint API TEFA (Teaching Factory) yang digunakan untuk integrasi antara **Aplikasi TEFA Kasir** dan **Aplikasi Dompet Siswa / External Apps**.
 
 ---
 
-| | |
-|---|---|
-| **Versi API** | v1 |
-| **Base URL** | `https://tefa.smkn1talaga.sch.id/api/v1/tefa` |
-| **Format Respons** | JSON (utf-8) |
-| **Autentikasi** | API Key + Bearer Token (untuk /me) |
-| **Tipe ID** | String UUID |
-| **Tanggal Dokumen** | Agustus 2026 |
+## 1. Otentikasi API Key
+
+Semua request HTTP ke API TEFA wajib mencantumkan **API Key** pada Header HTTP:
+
+```http
+X-API-Key: tefa_live_xxxxxxxxxxxxxxxxxxxxxxxx
+```
+
+> **Catatan Pengelola/Superadmin:**
+> API Key dapat digenerate dan dikelola langsung melalui Dashboard Superadmin/Pengelola pada menu **API Key TEFA** (`/settings/api-keys`).
+> Setiap request API akan diverifikasi apakah API Key berstatus aktif (`is_active = true`).
 
 ---
 
-## Daftar Isi
+## 2. Base URL
 
-1. [Pengertian & Tujuan](#1-pengertian--tujuan)
-2. [Autentikasi](#2-autentikasi)
-3. [Format Respons Standar](#3-format-respons-standar)
-4. [Endpoint — Autentikasi](#4-endpoint--autentikasi)
-   - [POST /auth/login](#41-post-authlogin)
-   - [POST /auth/register](#42-post-authregister)
-   - [GET /auth/me](#43-get-authme)
-5. [Endpoint — Merchant & Produk](#5-endpoint--merchant--produk)
-   - [GET /merchants](#51-get-merchants)
-   - [GET /merchants/{id}/products](#52-get-merchantsidproducts)
-6. [Kode Error](#6-kode-error)
-7. [Catatan Teknis](#7-catatan-teknis)
+```
+http://localhost/api/v1/tefa
+```
+
+_(Sesuaikan domain/host dengan server tempat aplikasi dideploy)_
 
 ---
 
-## 1. Pengertian & Tujuan
+## 3. Daftar Endpoint API
 
-Dokumen ini merupakan acuan teknis API yang mengatur pertukaran data antara **Aplikasi TEFA (Teaching Factory)** dan **Sistem Dompet Siswa SMKN 1 Talaga**.
+### A. Dapatkan Semua Merchant (Kantin/Unit usaha TEFA)
 
-**Alur sistem:**
-- Aplikasi TEFA menyediakan data merchant (kantin) dan produk menu
-- Sistem Dompet Siswa mengonsumsi data tersebut dan menerbitkan **Kode QR** (`DS-MCH-XXXXXX`) untuk validasi transaksi pembayaran siswa
+- **URL:** `GET /merchants`
+- **Header:** `X-API-Key: <YOUR_API_KEY>`
+- **Deskripsi:** Mengembalikan daftar merchant/kantin jurusan aktif.
 
-**Pemetaan data:**
-
-| Konsep TEFA | Entitas di Sistem |
-|---|---|
-| Merchant / Kantin | Jurusan (unit multi-tenant) |
-| `tefa_merchant_id` | `jurusans.id` (UUID) |
-| `store_name` | `jurusans.name` |
-| `pic_name` | User berole `pengelola_jurusan` di jurusan tersebut |
-| Produk menu | `products` (scoped per jurusan) |
-| `selling_price` | `products.price` |
-| `estimated_cost_price` | `products.modal_price` |
-| `profit_per_unit` | `products.profit` |
-
----
-
-## 2. Autentikasi
-
-API ini menggunakan dua layer keamanan:
-
-### 2.1 API Key (Wajib di Semua Endpoint)
-
-Setiap request ke API TEFA **wajib** menyertakan header:
-
-```
-X-API-Key: {api_key}
-```
-
-API key digenerate oleh admin sistem dan dishare secara private ke tim TEFA. Tanpa header ini semua endpoint akan mengembalikan `401 Unauthorized`.
-
-> Untuk generate key baru: `php artisan tinker` → `(string) \Illuminate\Support\Str::uuid()`
-
-### 2.2 Bearer Token (Hanya untuk `/auth/me`)
-
-Endpoint `GET /auth/me` memerlukan **dua layer** — API Key + Bearer Token Sanctum:
-
-1. Dapatkan token melalui `POST /auth/login`
-2. Sertakan di header:
-
-```
-Authorization: Bearer {token}
-```
-
-### Ringkasan Auth per Endpoint
-
-| Endpoint | X-API-Key | Bearer Token |
-|---|---|---|
-| `POST /auth/login` | ✅ Wajib | ❌ Tidak perlu |
-| `POST /auth/register` | ✅ Wajib | ❌ Tidak perlu |
-| `GET /auth/me` | ✅ Wajib | ✅ Wajib |
-| `GET /merchants` | ✅ Wajib | ❌ Tidak perlu |
-| `GET /merchants/{id}/products` | ✅ Wajib | ❌ Tidak perlu |
-
----
-
-## 3. Format Respons Standar
-
-Semua respons mengikuti struktur berikut:
-
-### Sukses
-
-```json
-{
-    "status": "success",
-    "message": "Pesan deskriptif",
-    "data": { ... }
-}
-```
-
-### Error
-
-```json
-{
-    "status": "error",
-    "message": "Pesan error",
-    "data": null
-}
-```
-
-### Validasi Gagal (422)
-
-```json
-{
-    "message": "Pesan utama",
-    "errors": {
-        "field": ["Pesan error detail"]
-    }
-}
-```
-
----
-
-## 4. Endpoint — Autentikasi
-
-### 4.1 POST /auth/login
-
-Otentikasi pengelola kantin TEFA. Mengembalikan Bearer Token beserta data merchant pertama yang dimiliki akun tersebut.
-
-**URL**
-```
-POST /api/v1/tefa/auth/login
-```
-
-**Headers**
-
-| Header | Value |
-|---|---|
-| `Content-Type` | `application/json` |
-| `Accept` | `application/json` |
-| `X-API-Key` | `{api_key}` |
-
-**Request Body**
-
-| Parameter | Tipe | Wajib | Keterangan |
-|---|---|---|---|
-| `username` | string | ✅ Ya | Email akun merchant |
-| `password` | string | ✅ Ya | Kata sandi akun |
-
-**Contoh Request**
-
-```json
-{
-    "username": "kantin_tataboga@tefa.sch.id",
-    "password": "PasswordTEFA123!"
-}
-```
-
-**Contoh Respons (200 OK)**
-
-```json
-{
-    "status": "success",
-    "message": "Login berhasil",
-    "data": {
-        "token": "1|3hEFgD56q0IpHLGlKcDrePqs5xZU58sGNgABZ2HW27...",
-        "merchant": {
-            "tefa_merchant_id": "019fc582-6b7b-72d1-bfbf-7103020eae13",
-            "store_name": "Kantin TEFA Tata Boga",
-            "pic_name": "Ibu Siti Nurhaliza",
-            "phone": "085223114455",
-            "stand_location": "Gedung TEFA Blok A",
-            "is_active": true
-        }
-    }
-}
-```
-
-**Respons Error**
-
-| HTTP Code | Kondisi |
-|---|---|
-| `401` | API Key tidak valid atau tidak disertakan |
-| `422` | Username atau password salah |
-| `422` | Field wajib tidak diisi |
-
----
-
-### 4.2 POST /auth/register
-
-Mendaftarkan unit kantin TEFA baru. Proses ini akan membuat akun User baru, Jurusan (merchant) baru, dan assign role `pengelola_jurusan` secara otomatis.
-
-**URL**
-```
-POST /api/v1/tefa/auth/register
-```
-
-**Headers**
-
-| Header | Value |
-|---|---|
-| `Content-Type` | `application/json` |
-| `Accept` | `application/json` |
-| `X-API-Key` | `{api_key}` |
-
-**Request Body**
-
-| Parameter | Tipe | Wajib | Keterangan |
-|---|---|---|---|
-| `store_name` | string | ✅ Ya | Nama stand / kantin TEFA |
-| `pic_name` | string | ✅ Ya | Nama penanggung jawab |
-| `username` | string | ✅ Ya | Email untuk login (harus unik) |
-| `password` | string | ✅ Ya | Kata sandi (minimal 8 karakter) |
-| `stand_location` | string | ❌ Tidak | Lokasi gedung/stand TEFA |
-| `phone` | string | ❌ Tidak | Nomor telepon kantin |
-
-**Contoh Request**
-
-```json
-{
-    "store_name": "Kantin TEFA Barokah",
-    "pic_name": "Bapak Ahmad",
-    "username": "kantin_barokah@tefa.sch.id",
-    "password": "PasswordTEFA123!",
-    "stand_location": "Gedung TEFA Blok C",
-    "phone": "085200001111"
-}
-```
-
-**Contoh Respons (201 Created)**
-
-```json
-{
-    "status": "success",
-    "message": "Pendaftaran kantin TEFA berhasil",
-    "data": {
-        "tefa_merchant_id": "01a04c45-770b-7283-9985-f8dc9795eec6",
-        "store_name": "Kantin TEFA Barokah",
-        "pic_name": "Bapak Ahmad",
-        "stand_location": "Gedung TEFA Blok C"
-    }
-}
-```
-
-**Respons Error**
-
-| HTTP Code | Kondisi |
-|---|---|
-| `401` | API Key tidak valid atau tidak disertakan |
-| `422` | Email sudah terdaftar |
-| `422` | Field wajib tidak diisi |
-| `422` | Password kurang dari 8 karakter |
-
----
-
-### 4.3 GET /auth/me
-
-Mengembalikan profil merchant TEFA yang sedang aktif login berdasarkan token.
-
-**URL**
-```
-GET /api/v1/tefa/auth/me
-```
-
-**Headers**
-
-| Header | Value |
-|---|---|
-| `Accept` | `application/json` |
-| `X-API-Key` | `{api_key}` |
-| `Authorization` | `Bearer {token}` |
-
-**Contoh Respons (200 OK)**
-
-```json
-{
-    "status": "success",
-    "message": "Profil kantin TEFA dimuat",
-    "data": {
-        "tefa_merchant_id": "019fc582-6b7b-72d1-bfbf-7103020eae13",
-        "store_name": "Kantin TEFA Tata Boga",
-        "pic_name": "Ibu Siti Nurhaliza",
-        "phone": "085223114455",
-        "stand_location": "Gedung TEFA Blok A",
-        "is_active": true,
-        "username": "kantin_tataboga@tefa.sch.id"
-    }
-}
-```
-
-**Respons Error**
-
-| HTTP Code | Kondisi |
-|---|---|
-| `401` | API Key tidak valid, token tidak ada, atau token tidak valid |
-| `404` | Akun tidak memiliki merchant terdaftar |
-
----
-
-## 5. Endpoint — Merchant & Produk
-
-### 5.1 GET /merchants
-
-Mengambil daftar seluruh merchant kantin TEFA aktif. Tidak memerlukan login — cukup API Key.
-
-**URL**
-```
-GET /api/v1/tefa/merchants
-```
-
-**Headers**
-
-| Header | Value |
-|---|---|
-| `Accept` | `application/json` |
-| `X-API-Key` | `{api_key}` |
-
-**Query Parameters**
-
-| Parameter | Tipe | Wajib | Default | Keterangan |
-|---|---|---|---|---|
-| `status` | string | ❌ Tidak | `active` | Filter status: `active` atau `inactive` |
-
-**Contoh Request**
-```
-GET /api/v1/tefa/merchants?status=active
-```
-
-**Contoh Respons (200 OK)**
+**Contoh Response `200 OK`:**
 
 ```json
 {
@@ -343,165 +44,410 @@ GET /api/v1/tefa/merchants?status=active
     "message": "Daftar merchant kantin TEFA berhasil dimuat",
     "data": [
         {
-            "tefa_merchant_id": "019fc582-6b7b-72d1-bfbf-7103020eae13",
-            "store_name": "Kantin TEFA Tata Boga",
-            "pic_name": "Ibu Siti Nurhaliza",
-            "phone": "085223114455",
-            "stand_location": "Gedung TEFA Blok A",
-            "is_active": true
-        },
-        {
-            "tefa_merchant_id": "019fc582-6b82-7262-b5aa-82e4a2e9b7ec",
-            "store_name": "Kantin TEFA Barokah",
-            "pic_name": "Bapak Ahmad",
-            "phone": "085200001111",
-            "stand_location": "Gedung TEFA Blok C",
+            "tefa_merchant_id": "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3d0001",
+            "store_name": "RPL",
+            "pic_name": "Pengelola RPL",
+            "phone": "081234567890",
+            "stand_location": "Kantin Utama Stand 01",
             "is_active": true
         }
     ]
 }
 ```
 
-**Respons Error**
-
-| HTTP Code | Kondisi |
-|---|---|
-| `401` | API Key tidak valid atau tidak disertakan |
-
 ---
 
-### 5.2 GET /merchants/{tefa_merchant_id}/products
+### B. Dapatkan Produk Lengkap berdasarkan Merchant ID
 
-Mengambil daftar produk (menu makanan/minuman) dari kantin TEFA tertentu. Tidak memerlukan login — cukup API Key. Hanya mengembalikan produk dengan status **available** (`is_active = true`).
+- **URL:** `GET /merchants/{tefa_merchant_id}/products`
+- **Header:** `X-API-Key: <YOUR_API_KEY>`
+- **Deskripsi:** Mengembalikan daftar produk lengkap pada merchant tertentu, mencakup kategori, supplier, `stock_entries` (stok awal & sisa tutup), dan `modifier_groups` (pilihan topping/level).
 
-**URL**
-```
-GET /api/v1/tefa/merchants/{tefa_merchant_id}/products
-```
-
-**Headers**
-
-| Header | Value |
-|---|---|
-| `Accept` | `application/json` |
-| `X-API-Key` | `{api_key}` |
-
-**Path Parameters**
-
-| Parameter | Tipe | Wajib | Keterangan |
-|---|---|---|---|
-| `tefa_merchant_id` | string (UUID) | ✅ Ya | ID merchant TEFA |
-
-**Contoh Request**
-```
-GET /api/v1/tefa/merchants/019fc582-6b7b-72d1-bfbf-7103020eae13/products
-```
-
-**Contoh Respons (200 OK)**
+**Contoh Response `200 OK`:**
 
 ```json
 {
     "status": "success",
     "message": "Daftar produk menu TEFA berhasil dimuat",
     "data": {
-        "tefa_merchant_id": "019fc582-6b7b-72d1-bfbf-7103020eae13",
-        "store_name": "Kantin TEFA Tata Boga",
-        "pic_name": "Ibu Siti Nurhaliza",
-        "stand_location": "Gedung TEFA Blok A",
+        "tefa_merchant_id": "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3d0001",
+        "store_name": "RPL",
+        "pic_name": "Pengelola RPL",
+        "stand_location": "Kantin Utama Stand 01",
         "products": [
             {
-                "tefa_product_id": "019fc582-6ca6-7295-b2a1-616ba1dfe2ae",
-                "name": "Roti Pastry Cokelat TEFA",
+                "tefa_product_id": "9c123456-ab01-cd02-ef03-123456789001",
+                "name": "Nasi Bakar",
+                "label": "Nasi Bakar - Rp3.500",
                 "category": "Makanan",
+                "category_details": {
+                    "id": "9c123456-cat1-0001",
+                    "name": "Makanan",
+                    "slug": "makanan"
+                },
                 "status": "available",
-                "supplier": "CV Tata Boga Mandiri",
-                "selling_price": 10000,
-                "profit_per_unit": 2500,
-                "estimated_cost_price": 7500
+                "is_active": true,
+                "supplier": "Koperasi Sekolah UP RPL",
+                "supplier_details": {
+                    "id": "9c123456-sup1-0001",
+                    "name": "Koperasi Sekolah UP RPL",
+                    "contact": "081234567890",
+                    "address": "Gedung UP RPL",
+                    "note": "Supplier Resmi Harian"
+                },
+                "selling_price": "3500.00",
+                "profit_per_unit": "200.00",
+                "estimated_cost_price": "3300.00",
+                "stock_entries": [
+                    {
+                        "id": "9c123456-stk1-0001",
+                        "date": "2026-09-09",
+                        "opening_stock": 50,
+                        "closing_stock": 45,
+                        "recorded_by": "Kasir RPL"
+                    }
+                ],
+                "modifier_groups": [
+                    {
+                        "id": "9c123456-modg1-0001",
+                        "name": "Level Pedas",
+                        "min_selection": 0,
+                        "max_selection": 1,
+                        "modifiers": [
+                            {
+                                "id": "9c123456-mod1-0001",
+                                "name": "Pedas Sedang",
+                                "price": 0.0
+                            },
+                            {
+                                "id": "9c123456-mod1-0002",
+                                "name": "Extra Pedas",
+                                "price": 500.0
+                            }
+                        ]
+                    }
+                ],
+                "created_at": "2026-09-09T07:00:00.000000Z",
+                "updated_at": "2026-09-09T07:00:00.000000Z"
             },
             {
-                "tefa_product_id": "019fc582-6d09-71b8-8fdc-04412e74d5a9",
-                "name": "Teh Gelas",
+                "tefa_product_id": "9c123456-ab01-cd02-ef03-123456789002",
+                "name": "Teh Kotak",
+                "label": "Teh Kotak - Rp4.000",
                 "category": "Minuman",
+                "category_details": {
+                    "id": "9c123456-cat1-0002",
+                    "name": "Minuman",
+                    "slug": "minuman"
+                },
                 "status": "available",
-                "supplier": null,
-                "selling_price": 1000,
-                "profit_per_unit": 209,
-                "estimated_cost_price": 791
+                "is_active": true,
+                "supplier": "Koperasi Sekolah UP RPL",
+                "supplier_details": {
+                    "id": "9c123456-sup1-0001",
+                    "name": "Koperasi Sekolah UP RPL",
+                    "contact": "081234567890",
+                    "address": "Gedung UP RPL",
+                    "note": "Supplier Resmi Harian"
+                },
+                "selling_price": "4000.00",
+                "profit_per_unit": "709.00",
+                "estimated_cost_price": "3291.00",
+                "stock_entries": [
+                    {
+                        "id": "9c123456-stk1-0002",
+                        "date": "2026-09-09",
+                        "opening_stock": 30,
+                        "closing_stock": 30,
+                        "recorded_by": "Kasir RPL"
+                    }
+                ],
+                "modifier_groups": [
+                    {
+                        "id": "9c123456-modg1-0002",
+                        "name": "Opsi Suhu / Penyajian",
+                        "min_selection": 0,
+                        "max_selection": 1,
+                        "modifiers": [
+                            {
+                                "id": "9c123456-mod1-0003",
+                                "name": "Dingin / Pakai Es",
+                                "price": 0.0
+                            },
+                            {
+                                "id": "9c123456-mod1-0004",
+                                "name": "Tanpa Es",
+                                "price": 0.0
+                            }
+                        ]
+                    }
+                ],
+                "created_at": "2026-09-09T07:00:00.000000Z",
+                "updated_at": "2026-09-09T07:00:00.000000Z"
             }
         ]
     }
 }
 ```
 
-**Skema Objek Produk**
-
-| Field | Tipe | Keterangan |
-|---|---|---|
-| `tefa_product_id` | string (UUID) | ID unik produk |
-| `name` | string | Nama produk |
-| `category` | string / null | Kategori produk (Makanan, Minuman, Snack, dll.) |
-| `status` | string | `available` atau `unavailable` |
-| `supplier` | string / null | Nama supplier produk |
-| `selling_price` | integer | Harga jual (dalam Rupiah) |
-| `profit_per_unit` | integer | Keuntungan per unit (dalam Rupiah) |
-| `estimated_cost_price` | integer | Estimasi harga modal (dalam Rupiah) |
-
-**Respons Error**
-
-| HTTP Code | Kondisi |
-|---|---|
-| `401` | API Key tidak valid atau tidak disertakan |
-| `404` | Merchant dengan ID tersebut tidak ditemukan |
-
 ---
 
-## 6. Kode Error
+### C. Cek Stok Produk Spesifik
 
-| HTTP Code | Status | Keterangan |
-|---|---|---|
-| `200` | OK | Request berhasil |
-| `201` | Created | Data baru berhasil dibuat |
-| `401` | Unauthorized | API Key tidak ada/salah, atau Bearer Token tidak valid |
-| `404` | Not Found | Data yang dicari tidak ditemukan |
-| `422` | Unprocessable Entity | Validasi input gagal |
-| `500` | Internal Server Error | Terjadi kesalahan di sisi server |
+- **URL:** `GET /products/{product_id}/stock`
+- **Header:** `X-API-Key: <YOUR_API_KEY>`
+- **Deskripsi:** Mengecek jumlah sisa stok real-time untuk 1 produk spesifik berdasarkan Product ID.
 
----
+**Contoh Response `200 OK`:**
 
-## 7. Catatan Teknis
-
-### Tipe ID
-Seluruh ID (`tefa_merchant_id`, `tefa_product_id`) menggunakan format **UUID v7** (string), contoh: `019fc582-6b7b-72d1-bfbf-7103020eae13`.
-
-### API Key
-- Disimpan di `.env` server sebagai `TEFA_API_KEY`
-- Digenerate via `php artisan tinker` → `(string) \Illuminate\Support\Str::uuid()`
-- Dishare secara private ke tim pengembang Aplikasi TEFA
-- Ganti secara berkala untuk keamanan
-
-### pic_name
-Field `pic_name` pada data merchant diambil dengan urutan prioritas:
-1. Kolom `pic_name` di tabel `jurusans` (jika diisi)
-2. Nama user pertama yang memiliki role `pengelola_jurusan` di jurusan tersebut
-3. `null` jika tidak ada pengelola terdaftar
-
-### Performa & Optimasi
-Semua endpoint menggunakan **eager loading** — tidak ada query N+1. Jumlah query per endpoint:
-
-| Endpoint | Jumlah Query |
-|---|---|
-| `GET /merchants` | 2 query (merchants + pengelola users) |
-| `GET /merchants/{id}/products` | 3 query (merchant + pengelola + products with category & supplier) |
-
-### Header Wajib untuk Semua Request
+```json
+{
+    "status": "success",
+    "message": "Stok produk berhasil dimuat",
+    "data": {
+        "tefa_product_id": "9c123456-ab01-cd02-ef03-123456789001",
+        "name": "Nasi Bakar",
+        "label": "Nasi Bakar - Rp3.500",
+        "status": "available",
+        "is_active": true,
+        "date": "2026-09-09",
+        "opening_stock": 50,
+        "sold_quantity": 5,
+        "available_stock": 45
+    }
+}
 ```
-Accept: application/json
-X-API-Key: {api_key}
-```
-Tanpa `Accept: application/json`, respons error akan dikembalikan dalam format HTML bukan JSON.
 
 ---
 
-*Dokumen ini dibuat untuk keperluan integrasi Aplikasi TEFA dengan Sistem Dompet Siswa SMKN 1 Talaga.*
-*© 2026 SMKN 1 Talaga*
+### D. Cek Semua Stok Produk pada Merchant Spesifik
+
+- **URL:** `GET /merchants/{tefa_merchant_id}/stock`
+- **Header:** `X-API-Key: <YOUR_API_KEY>`
+- **Deskripsi:** Mengecek daftar sisa stok seluruh produk menu yang dimiliki oleh merchant tertentu.
+
+**Contoh Response `200 OK`:**
+
+```json
+{
+    "status": "success",
+    "message": "Daftar stok produk merchant berhasil dimuat",
+    "data": {
+        "tefa_merchant_id": "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3d0001",
+        "store_name": "RPL",
+        "stocks": [
+            {
+                "tefa_product_id": "9c123456-ab01-cd02-ef03-123456789001",
+                "name": "Nasi Bakar",
+                "label": "Nasi Bakar - Rp3.500",
+                "status": "available",
+                "is_active": true,
+                "date": "2026-09-09",
+                "opening_stock": 50,
+                "sold_quantity": 5,
+                "available_stock": 45
+            },
+            {
+                "tefa_product_id": "9c123456-ab01-cd02-ef03-123456789002",
+                "name": "Teh Kotak",
+                "label": "Teh Kotak - Rp4.000",
+                "status": "available",
+                "is_active": true,
+                "date": "2026-09-09",
+                "opening_stock": 30,
+                "sold_quantity": 0,
+                "available_stock": 30
+            },
+            {
+                "tefa_product_id": "9c123456-ab01-cd02-ef03-123456789003",
+                "name": "Beng Beng",
+                "label": "Beng Beng - Rp2.500",
+                "status": "out_of_stock",
+                "is_active": true,
+                "date": "2026-09-09",
+                "opening_stock": 20,
+                "sold_quantity": 20,
+                "available_stock": 0
+            }
+        ]
+    }
+}
+```
+
+---
+
+### E. Pengurangan Stok Otomatis (Deduct Stock dari Aplikasi Dompet)
+
+- **URL:** `POST /stock/deduct`
+- **Header:**
+    - `X-API-Key: <YOUR_API_KEY>`
+    - `Content-Type: application/json`
+- **Deskripsi:** Mengurangi sisa stok produk secara atomic (menggunakan DB Transaction & pessimistic locking `lockForUpdate`) ketika terjadi transaksi pembelian dari Aplikasi Dompet Siswa.
+
+**Request Body (`JSON`):**
+
+```json
+{
+    "items": [
+        {
+            "tefa_product_id": "9c123456-ab01-cd02-ef03-123456789001",
+            "quantity": 2
+        },
+        {
+            "tefa_product_id": "9c123456-ab01-cd02-ef03-123456789002",
+            "quantity": 1
+        }
+    ],
+    "reference_id": "TX-DOMPET-20260909-001"
+}
+```
+
+**Contoh Response Berhasil (`200 OK`):**
+
+```json
+{
+    "status": "success",
+    "message": "Pengurangan stok berhasil diproses",
+    "data": {
+        "reference_id": "TX-DOMPET-20260909-001",
+        "deducted_at": "2026-09-09T12:33:00.000000Z",
+        "deducted_items": [
+            {
+                "tefa_product_id": "9c123456-ab01-cd02-ef03-123456789001",
+                "name": "Nasi Bakar",
+                "deducted_quantity": 2,
+                "remaining_stock": 43
+            },
+            {
+                "tefa_product_id": "9c123456-ab01-cd02-ef03-123456789002",
+                "name": "Teh Kotak",
+                "deducted_quantity": 1,
+                "remaining_stock": 29
+            }
+        ]
+    }
+}
+```
+
+**Contoh Response Gagal - Stok Tidak Mencukupi (`400 Bad Request`):**
+
+```json
+{
+    "status": "error",
+    "message": "Stok produk 'Nasi Bakar' tidak mencukupi. Tersisa: 43, diminta: 100.",
+    "data": null
+}
+```
+
+**Contoh Response Gagal - API Key Tidak Valid (`401 Unauthorized`):**
+
+```json
+{
+    "status": "error",
+    "message": "Unauthorized. Invalid or missing TEFA API Key."
+}
+```
+
+---
+
+## 4. Penanganan Error (Status Code)
+
+| Code  | Meaning              | Deskripsi                                                                        |
+| ----- | -------------------- | -------------------------------------------------------------------------------- |
+| `200` | OK                   | Request berhasil diproses.                                                       |
+| `400` | Bad Request          | Parameter request tidak valid atau stok tidak mencukupi saat proses pengurangan. |
+| `401` | Unauthorized         | Header `X-API-Key` kosong, tidak valid, atau telah dinonaktifkan.                |
+| `404` | Not Found            | Merchant atau Produk tidak ditemukan.                                            |
+| `422` | Unprocessable Entity | Validasi format payload JSON request gagal.                                      |
+| `500` | Server Error         | Failover internal server.                                                        |
+
+---
+
+## 5. Histori Transaksi Kantin TEFA (Koneksi Dua Arah & Dompet Digital)
+
+### A. Otentikasi & Konfigurasi API Key
+Seluruh HTTP Request antara Aplikasi TEFA dan Aplikasi Dompet Siswa menggunakan API Key resmi yang disimpan pada file `.env`:
+
+```env
+TEFA_API_KEY=ds_live_R8VgLxdlIfj3iPxnCMs10FeTe8tg2U8Q
+DOMPET_SISWA_API_KEY=ds_live_R8VgLxdlIfj3iPxnCMs10FeTe8tg2U8Q
+```
+
+* **Header Request:** `X-API-Key: ds_live_R8VgLxdlIfj3iPxnCMs10FeTe8tg2U8Q`
+
+---
+
+### B. Otomatisasi Pencatatan Transaksi Dompet Digital saat `deduct`
+Setiap kali Aplikasi Dompet Siswa mengirimkan request pengurangan stok ke `POST /api/v1/tefa/stock/deduct`, Aplikasi Kasir TEFA secara otomatis:
+1. Memotong stok fisik pada `stock_entries` secara atomic (`lockForUpdate`).
+2. Membuat entri baru pada tabel `transactions` di Aplikasi Kasir TEFA dengan field:
+   - `payment_method`: `dompet_digital`
+   - `status`: `lunas`
+   - `buyer_name`: `Siswa (Dompet Digital)`
+   - `reference`: Nomor referensi transaksi dari Dompet Siswa (`reference_id`).
+
+---
+
+### C. Endpoint Histori Transaksi Penjualan Kantin
+
+Aplikasi Dompet Siswa maupun sistem eksternal dapat menarik histori transaksi penjualan kantin TEFA melalui endpoint:
+
+* **URL:** `GET /api/v1/tefa/transactions`
+* **Header:** `X-API-Key: ds_live_R8VgLxdlIfj3iPxnCMs10FeTe8tg2U8Q`
+* **Query Parameters:**
+  - `tefa_merchant_id` (String, Opsional): ID Kantin TEFA / Jurusan.
+  - `start_date` (Date, Opsional): Format `YYYY-MM-DD` (misal `2026-09-01`).
+  - `end_date` (Date, Opsional): Format `YYYY-MM-DD` (misal `2026-09-06`).
+  - `payment_method` (String, Opsional): `dompet_digital` | `cash` | `qris`.
+  - `status` (String, Opsional): `lunas` | `belum_menerima_uang` | `all` (Default: `all`).
+  - `search` (String, Opsional): Pencarian nama pembeli, nama produk, atau nomor referensi (`PAY-XXXX`).
+  - `page` (Integer, Opsional): Halaman data (Default: `1`).
+  - `per_page` (Integer, Opsional): Jumlah baris per halaman (Default: `15`, Max: `100`).
+
+**Contoh Response Sukses (`200 OK`):**
+```json
+{
+  "status": "success",
+  "message": "Histori transaksi kantin TEFA berhasil dimuat.",
+  "meta": {
+    "tefa_merchant_id": "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3d0001",
+    "merchant_name": "RPL",
+    "filters": {
+      "start_date": "2026-09-01",
+      "end_date": "2026-09-06",
+      "payment_method": "dompet_digital",
+      "status": "lunas"
+    },
+    "summary": {
+      "total_transactions": 2,
+      "total_revenue": 35000.00
+    },
+    "pagination": {
+      "current_page": 1,
+      "per_page": 15,
+      "total_items": 2,
+      "total_pages": 1
+    }
+  },
+  "data": [
+    {
+      "transaction_id": "9c123456-tx01-0001",
+      "reference_number": "TX-DOMPET-20260909-001",
+      "merchant_id": "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3d0001",
+      "merchant_name": "RPL",
+      "buyer_name": "Siswa (Dompet Digital)",
+      "product_id": "9c123456-ab01-cd02-ef03-123456789001",
+      "product_name": "Nasi Bakar",
+      "quantity": 2,
+      "unit_price": 3500.00,
+      "total_price": 7000.00,
+      "payment_method": "dompet_digital",
+      "status": "lunas",
+      "transacted_at": "2026-09-09T12:38:00+07:00",
+      "note": "Transaksi via API Dompet Siswa (Saldo Digital)"
+    }
+  ]
+}
+```
+
+

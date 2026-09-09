@@ -35,4 +35,9 @@ return [
         ],
     ],
 
+    'dompet_siswa' => [
+        'base_url' => env('DOMPET_SISWA_BASE_URL', 'https://dompet.smkn1talaga.sch.id'),
+        'api_key'  => env('DOMPET_SISWA_API_KEY', 'ds_live_R8VgLxdlIfj3iPxnCMs10FeTe8tg2U8Q'),
+    ],
+
 ];

@@ -438,10 +438,18 @@
                                 d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" />
                             <circle cx="7.5" cy="10.5" r="1.5" />
                             <circle cx="11.5" cy="7.5" r="1.5" />
-                            <circle cx="16.5" cy="9.5" r="1.5" />
-                            <circle cx="15.5" cy="14.5" r="1.5" />
+                            <circle cx="16.5" cy="10.5" r="1.5" />
+                            <circle cx="15.5" cy="15.5" r="1.5" />
                         </svg>
-                        Kustomisasi Tema
+                        Tampilan Theme
+                    </a>
+
+                    <a href="{{ route('tefa.api-keys') }}"
+                        class="flex items-center px-4 py-2.5 text-xs font-semibold rounded-xl transition-all {{ request()->routeIs('tefa.api-keys') ? 'bg-primary-blue text-white shadow-xl shadow-blue-900/20' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
+                        <svg class="w-5 h-5 mr-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+                        </svg>
+                        API Key TEFA
                     </a>
 
                     <a href="{{ route('security-logs') }}"

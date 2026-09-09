@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\Tefa\AuthController;
 use App\Http\Controllers\Api\Tefa\MerchantController;
+use App\Http\Controllers\Api\Tefa\StockController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -50,5 +51,29 @@ Route::prefix('v1/tefa')->name('tefa.')->middleware('tefa.apikey')->group(functi
         // GET /api/v1/tefa/merchants/{tefa_merchant_id}/products
         Route::get('{tefa_merchant_id}/products', [MerchantController::class, 'products'])
             ->name('products');
+
+        // GET /api/v1/tefa/merchants/{tefa_merchant_id}/stock
+        Route::get('{tefa_merchant_id}/stock', [StockController::class, 'checkMerchantStock'])
+            ->name('stock');
     });
+
+    // ── Manajemen Stok Produk (Integrasi Dompet Siswa) ────────────────────
+    Route::prefix('products')->name('products.')->group(function () {
+
+        // GET /api/v1/tefa/products/{product_id}/stock
+        Route::get('{product_id}/stock', [StockController::class, 'checkProductStock'])
+            ->name('stock');
+    });
+
+    Route::prefix('stock')->name('stock.')->group(function () {
+
+        // POST /api/v1/tefa/stock/deduct
+        Route::post('deduct', [StockController::class, 'deductStock'])
+            ->name('deduct');
+    });
+
+    // ── Histori Transaksi Penjualan Kantin TEFA ───────────────────────────
+    // GET /api/v1/tefa/transactions
+    Route::get('transactions', [\App\Http\Controllers\Api\Tefa\TransactionController::class, 'index'])
+        ->name('transactions.index');
 });

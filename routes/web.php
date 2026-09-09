@@ -45,8 +45,9 @@ Route::middleware(['auth', 'verified', EnsureRoleSelected::class])->group(functi
     Route::get('/modifiers', \App\Livewire\Management\ModifierManagement::class)->name('modifiers');
     Route::get('/cashier', Kasir::class)->name('kasir');
 
-    // Theme Settings
+    // Theme & API Key Settings
     Route::get('/settings/theme', ThemeCustomizer::class)->name('theme-customizer');
+    Route::get('/settings/api-keys', \App\Livewire\Management\TefaApiKeyManagement::class)->name('tefa.api-keys');
 
     // Recaps
     Route::get('/daily-recap/{date?}', DailyRecap::class)->name('daily-recap');
