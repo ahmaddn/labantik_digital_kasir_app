@@ -72,10 +72,10 @@
             </div>
         </div>
 
-        <!-- Kolom KANAN: Form Login (Full Screen di Mobile, Centered Vertikal, No Scroll) -->
-        <div class="relative h-full flex flex-col justify-between items-center p-6 sm:p-10 lg:p-16 bg-slate-50 dark:bg-slate-900 transition-colors duration-300 overflow-hidden">
+        <!-- Kolom KANAN: Form Login (Presisi Ditengah Vertikal & Horizontal) -->
+        <div class="relative h-full flex flex-col items-center justify-center p-6 sm:p-10 lg:p-16 bg-slate-50 dark:bg-slate-900 transition-colors duration-300 overflow-hidden">
             
-            <!-- Dark / Light Mode Toggle Button (Pojok Kanan Atas di Mobile & Desktop) -->
+            <!-- Dark / Light Mode Toggle Button (Pojok Kanan Atas) -->
             <div class="absolute top-4 sm:top-6 right-4 sm:right-6 z-20">
                 <button 
                     @click="toggleTheme()" 
@@ -84,7 +84,7 @@
                     class="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white dark:bg-slate-800 text-slate-700 dark:text-amber-400 border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md hover:scale-105 active:scale-95 transition-all font-bold text-xs cursor-pointer"
                 >
                     <svg x-show="darkMode" x-cloak class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
                     </svg>
                     <svg x-show="!darkMode" class="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
@@ -93,8 +93,8 @@
                 </button>
             </div>
 
-            <!-- Form Wrapper Utama: Ditengah-tengah layar secara Vertikal -->
-            <div class="w-full max-w-sm sm:max-w-md my-auto flex flex-col justify-center py-4">
+            <!-- Form Wrapper Utama: Tepat di titik tengah matematis layar (Vertical & Horizontal Center) -->
+            <div class="w-full max-w-sm sm:max-w-md flex flex-col justify-center">
                 <!-- Heading -->
                 <div class="mb-6 sm:mb-8 text-left">
                     <h2 class="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">Selamat Datang!</h2>
@@ -185,9 +185,9 @@
                 </form>
             </div>
 
-            <!-- Footer -->
-            <footer class="w-full text-center pb-2 shrink-0">
-                <p class="text-[10px] sm:text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
+            <!-- Footer Posisikan Secara Absolut di Bawah Layar -->
+            <footer class="absolute bottom-4 left-0 right-0 text-center pointer-events-none z-10">
+                <p class="text-[10px] sm:text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest pointer-events-auto">
                     Developed for Labantik Jurusan &copy; 2026
                 </p>
             </footer>
