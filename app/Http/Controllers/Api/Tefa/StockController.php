@@ -119,14 +119,23 @@ class StockController extends Controller
                         ->first();
 
                     if (! $stockEntry) {
-                        // Auto-create pencatatan stok hari ini jika belum ada di database
+                        // Cari stok akhir terakhir (misal kemarin atau pencatatan paling akhir)
+                        $lastStockEntry = StockEntry::where('product_id', $productId)
+                            ->where('date', '<', $today)
+                            ->orderBy('date', 'desc')
+                            ->first();
+
+                        // Prioritaskan sisa stok kemarin, jika tidak ada baru pakai master product stock
+                        $initialStock = $lastStockEntry ? $lastStockEntry->closing_stock : ($product->stock ?? 0);
+
+                        // Auto-create pencatatan stok hari ini
                         $stockEntry = StockEntry::create([
                             'jurusan_id'     => $product->jurusan_id,
                             'product_id'     => $product->id,
                             'date'           => $today,
-                            'opening_stock'  => $product->stock ?? 0,
-                            'closing_stock'  => $product->stock ?? 0,
-                            'expected_stock' => $product->stock ?? 0,
+                            'opening_stock'  => $initialStock,
+                            'closing_stock'  => $initialStock,
+                            'expected_stock' => $initialStock,
                         ]);
                     }
 
