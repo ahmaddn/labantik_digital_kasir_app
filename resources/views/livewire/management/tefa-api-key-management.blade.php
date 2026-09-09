@@ -90,11 +90,11 @@
                             </td>
                             <td class="py-4 px-6 text-xs font-semibold">
                                 @if($key->jurusan)
-                                    <span class="inline-flex px-2.5 py-1 bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 rounded-lg font-bold border border-blue-200/50 dark:border-blue-700/50">
+                                    <span class="inline-flex px-3 py-1.5 bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-xl font-extrabold border border-blue-500/20">
                                         {{ $key->jurusan->name }}
                                     </span>
                                 @else
-                                    <span class="inline-flex px-2.5 py-1 bg-purple-100 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 rounded-lg font-bold border border-purple-200/50 dark:border-purple-800/50">
+                                    <span class="inline-flex px-3 py-1.5 bg-slate-100 dark:bg-slate-800/80 text-slate-700 dark:text-slate-200 rounded-xl font-extrabold border border-slate-200 dark:border-slate-700 shadow-xs">
                                         Global (Semua Merchant)
                                     </span>
                                 @endif
