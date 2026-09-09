@@ -100,7 +100,7 @@ class StockController extends Controller
         $items = $request->input('items');
 
         try {
-            $deductedProducts = DB::transaction(function () use ($items, $today) {
+            $deductedProducts = DB::transaction(function () use ($items, $today, $request) {
                 $processed = [];
 
                 foreach ($items as $item) {
