@@ -172,24 +172,29 @@ class InventoryReport extends Component
             ];
         }
 
-        // Global Totals (for all products of the day)
-        $allProducts = Product::where('is_active', true)->get();
-        $totalSoldGlobal = Transaction::whereDate('transacted_at', $this->selectedDate)->sum('quantity');
+        // Global Totals (Filtered by active TEFA / Jurusan)
+        $totalSoldQuery = Transaction::whereDate('transacted_at', $this->selectedDate);
+        if ($activeJurusanId) {
+            $totalSoldQuery->where('jurusan_id', $activeJurusanId);
+        }
+        $totalSoldGlobal = $totalSoldQuery->sum('quantity');
 
         $totalDiscrepancyGlobal = 0;
         $itemsWithIssueGlobal = 0;
 
-        // This might be expensive if many products, but we need it for correct summary.
-        // Optimization: Use a query to join StockEntry and calculate.
-
-        $discrepancies = DB::table('products')
+        $discrepanciesQuery = DB::table('products')
             ->leftJoin('stock_entries', function ($join) {
                 $join->on('products.id', '=', 'stock_entries.product_id')
                     ->where('stock_entries.date', '=', $this->selectedDate);
             })
             ->leftJoin(DB::raw('(SELECT product_id, SUM(quantity) as total_sold FROM transactions WHERE DATE(transacted_at) = "' . $this->selectedDate . '" GROUP BY product_id) as daily_sales'), 'products.id', '=', 'daily_sales.product_id')
-            ->where('products.is_active', true)
-            ->selectRaw('
+            ->where('products.is_active', true);
+
+        if ($activeJurusanId) {
+            $discrepanciesQuery->where('products.jurusan_id', $activeJurusanId);
+        }
+
+        $discrepancies = $discrepanciesQuery->selectRaw('
                 COALESCE(stock_entries.opening_stock, 0) as opening,
                 COALESCE(daily_sales.total_sold, 0) as sold,
                 COALESCE(stock_entries.closing_stock, 0) as closing

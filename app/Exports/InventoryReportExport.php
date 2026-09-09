@@ -29,7 +29,12 @@ class InventoryReportExport implements FromCollection, WithHeadings, WithMapping
 
     public function collection()
     {
+        $activeJurusanId = session('active_jurusan_id');
         $query = Product::with('category')->where('is_active', true);
+
+        if ($activeJurusanId) {
+            $query->where('jurusan_id', $activeJurusanId);
+        }
 
         if ($this->search) {
             $query->where('name', 'like', '%' . $this->search . '%');
