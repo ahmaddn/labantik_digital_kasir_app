@@ -1,12 +1,42 @@
-<div class="w-full max-w-5xl my-8 px-4">
-    <!-- Logos and header -->
-    <div class="text-center mb-10">
-        <div class="flex justify-center items-center gap-4 mb-4">
-            <img src="{{ asset('rpl.png') }}" alt="Logo TEFA" class="w-16 h-16 drop-shadow-xl">
-            <div class="w-px h-8 bg-gray-300 dark:bg-gray-700"></div>
-            <img src="{{ asset('labantik.png') }}" alt="Logo Sekolah" class="w-16 h-16 drop-shadow-xl saturate-50 brightness-110">
-        </div>
-        <h1 class="text-2xl font-bold uppercase tracking-tight text-primary-blue dark:text-primary-yellow">Superapps TEFA</h1>
+<div 
+    x-data="{
+        darkMode: localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches),
+        toggleTheme() {
+            this.darkMode = !this.darkMode;
+            if (this.darkMode) {
+                document.documentElement.classList.add('dark');
+                localStorage.setItem('color-theme', 'dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+                localStorage.setItem('color-theme', 'light');
+            }
+        }
+    }"
+    class="w-full max-w-5xl my-8 px-4 relative"
+>
+    <!-- Dark / Light Mode Toggle Button -->
+    <div class="absolute top-0 right-4 z-20">
+        <button 
+            @click="toggleTheme()" 
+            type="button"
+            title="Beralih Mode Gelap/Terang"
+            class="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white dark:bg-slate-800 text-slate-600 dark:text-amber-400 border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md hover:scale-105 active:scale-95 transition-all font-semibold text-xs cursor-pointer"
+        >
+            <!-- Sun Icon (Show in dark mode) -->
+            <svg x-show="darkMode" x-cloak class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+            </svg>
+            <!-- Moon Icon (Show in light mode) -->
+            <svg x-show="!darkMode" class="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+            </svg>
+            <span x-text="darkMode ? 'Mode Terang' : 'Mode Gelap'"></span>
+        </button>
+    </div>
+
+    <!-- Header -->
+    <div class="text-center mb-10 pt-4">
+        <h1 class="text-3xl font-black uppercase tracking-tight text-primary-blue dark:text-primary-yellow">Superapps TEFA</h1>
         <p class="text-gray-400 font-bold text-xs uppercase tracking-widest mt-1">RPL x Labantik</p>
     </div>
 
@@ -40,7 +70,7 @@
                 @endphp
 
                 <button type="button" wire:click="selectAccess('{{ $access->access_id }}')" 
-                    class="flex flex-col p-6 bg-white dark:bg-gray-900/30 rounded-2xl border border-gray-200/80 dark:border-gray-700/60 {{ $hoverBorder }} transition-all duration-300 text-left group hover:-translate-y-1 shadow-xs justify-between min-h-[160px]">
+                    class="flex flex-col p-6 bg-white dark:bg-gray-900/30 rounded-2xl border border-gray-200/80 dark:border-gray-700/60 {{ $hoverBorder }} transition-all duration-300 text-left group hover:-translate-y-1 shadow-xs justify-between min-h-[160px] cursor-pointer">
                     
                     <div class="flex items-start gap-4 w-full">
                         <!-- Icon -->
@@ -89,7 +119,7 @@
             </span>
             <form method="POST" action="{{ route('logout') }}">
                 @csrf
-                <button type="submit" class="font-black text-primary-red hover:text-primary-red-dark hover:underline uppercase tracking-wider">
+                <button type="submit" class="font-black text-primary-red hover:text-primary-red-dark hover:underline uppercase tracking-wider cursor-pointer">
                     Keluar / Ganti Akun
                 </button>
             </form>
