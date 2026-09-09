@@ -47,20 +47,20 @@ class MerchantController extends Controller
      * Daftar produk (menu) kantin TEFA berdasarkan merchant ID.
      * tefa_merchant_id mendukung UUID string sesuai spec.
      *
-     * Eager load 'pengelolaUsers', 'products.category', 'products.supplier'
-     * semuanya dalam 3 query flat — nol N+1.
+     * Eager load relasi lengkap: category, supplier, stockEntries, modifierGroups.modifiers
      */
     public function products(string $tefa_merchant_id): JsonResponse
     {
-        // Eager load semua relasi yang dibutuhkan sekaligus:
-        //   1 query → jurusan
-        //   1 query → pengelolaUsers (via role_user + whereHas roles)
-        //   1 query → products (filter is_active) + category + supplier
         $merchant = Jurusan::with([
             'pengelolaUsers',
             'products' => function ($q) {
                 $q->where('is_active', true)
-                    ->with(['category', 'supplier']);
+                    ->with([
+                        'category',
+                        'supplier',
+                        'stockEntries' => fn ($stockQuery) => $stockQuery->orderBy('date', 'desc')->with('user'),
+                        'modifierGroups.modifiers',
+                    ]);
             },
         ])->find($tefa_merchant_id);
 
