@@ -16,16 +16,10 @@ class Dashboard extends Component
     public $filterJurusan = '';
     public $selectedTopCategory = 'all';
 
-    public function mount(\App\Services\DompetSiswaApiService $apiService)
+    public function mount()
     {
-        // Realtime automatic sync dari Server Dompet Siswa setiap kali Halaman Dashboard dibuka/dimuat
-        try {
-            $activeJurusanId = session('active_jurusan_id');
-            $apiService->syncRealtimeTransactions($activeJurusanId);
-        } catch (\Throwable $e) {
-            // Silently log jika server dompet siswa offline agar dashboard tetap tampil cepat
-            \Illuminate\Support\Facades\Log::warning('Auto-sync Dompet Siswa skipped: ' . $e->getMessage());
-        }
+        // Dashboard dimuat secara instan dan wus-wus. 
+        // Auto-sync berjalan otomatis via background cron (every minute) atau di API deduct secara real-time.
     }
 
     public function setTopCategory($categoryId)

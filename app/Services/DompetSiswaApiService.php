@@ -38,7 +38,7 @@ class DompetSiswaApiService
             $response = Http::withHeaders([
                 'X-API-KEY' => $this->apiKey,
                 'Accept'    => 'application/json',
-            ])->timeout(15)->get("{$this->baseUrl}/api/v1/external/tefa/transactions", $queryParams);
+            ])->timeout(3)->get("{$this->baseUrl}/api/v1/external/tefa/transactions", $queryParams);
 
             if ($response->successful()) {
                 return $response->json();
