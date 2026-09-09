@@ -13,12 +13,7 @@
         </div>
     </div>
 
-    <!-- Toast Notification -->
-    @if (session()->has('toast'))
-        <div class="p-4 bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 rounded-2xl font-bold text-sm">
-            {{ session('toast') }}
-        </div>
-    @endif
+    <!-- Header -->
 
     <!-- Config Dompet Siswa API Key Card -->
     <div class="bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent border border-amber-500/20 rounded-3xl p-6 shadow-xl">

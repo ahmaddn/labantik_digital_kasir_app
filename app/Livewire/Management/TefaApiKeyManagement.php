@@ -53,6 +53,7 @@ class TefaApiKeyManagement extends Component
         }
 
         session()->flash('toast', 'API Key Dompet Siswa (Outbound) berhasil diperbarui!');
+        $this->dispatch('toast', message: 'API Key Dompet Siswa (Outbound) berhasil diperbarui!');
     }
 
     protected $rules = [
@@ -92,7 +93,7 @@ class TefaApiKeyManagement extends Component
         ]);
 
         $this->newlyGeneratedKey = $rawKey;
-        session()->flash('toast', "API Key '{$this->name}' berhasil dibuat!");
+        $this->dispatch('toast', message: "API Key '{$this->name}' berhasil dibuat!");
     }
 
     public function toggleActive($id)
@@ -102,7 +103,7 @@ class TefaApiKeyManagement extends Component
         $key->update(['is_active' => ! $key->is_active]);
 
         $status = $key->is_active ? 'diaktifkan' : 'dinonaktifkan';
-        session()->flash('toast', "API Key '{$key->name}' berhasil {$status}.");
+        $this->dispatch('toast', message: "API Key '{$key->name}' berhasil {$status}.");
     }
 
     public function deleteKey($id)
@@ -111,7 +112,7 @@ class TefaApiKeyManagement extends Component
         $key = TefaApiKey::findOrFail($id);
         $key->delete();
 
-        session()->flash('toast', "API Key '{$key->name}' telah dihapus.");
+        $this->dispatch('toast', message: "API Key '{$key->name}' telah dihapus.");
     }
 
     public function render()
