@@ -30,6 +30,17 @@ class Transactions extends Component
 
     public $successMessage = '';
 
+    public function mount(\App\Services\DompetSiswaApiService $apiService)
+    {
+        // Realtime automatic sync dari Server Dompet Siswa setiap kali Halaman Riwayat Transaksi dibuka
+        try {
+            $activeJurusanId = session('active_jurusan_id') ?: ($this->filterJurusan ?: null);
+            $apiService->syncRealtimeTransactions($activeJurusanId);
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning('Auto-sync Dompet Siswa pada Riwayat Transaksi skipped: ' . $e->getMessage());
+        }
+    }
+
     // Details Modal
     public $showDetailsModal = false;
 
@@ -284,6 +295,10 @@ class Transactions extends Component
             'qris' => [
                 'count' => $groupedSub->where('p_method', 'qris')->count(),
                 'total' => $groupedSub->where('p_method', 'qris')->sum('sum_paid_total')
+            ],
+            'dompet_digital' => [
+                'count' => $groupedSub->where('p_method', 'dompet_digital')->count(),
+                'total' => $groupedSub->where('p_method', 'dompet_digital')->sum('sum_paid_total')
             ],
         ];
 

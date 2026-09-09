@@ -115,6 +115,14 @@
                 {{ $methodStats['qris']['count'] }} • Rp{{ number_format($methodStats['qris']['total'], 0, ',', '.') }}
             </span>
         </button>
+
+        <button wire:click="$set('filterPaymentMethod', 'dompet_digital')"
+            class="px-5 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2.5 {{ $filterPaymentMethod === 'dompet_digital' ? 'bg-amber-500 text-white shadow-lg shadow-amber-500/20' : 'bg-white dark:bg-gray-800 text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-100 dark:border-gray-800' }}">
+            <span>Dompet Digital</span>
+            <span class="px-2 py-0.5 rounded-full text-[9px] font-black {{ $filterPaymentMethod === 'dompet_digital' ? 'bg-white/20 text-white' : 'bg-amber-500/10 text-amber-600 dark:text-amber-400' }}">
+                {{ $methodStats['dompet_digital']['count'] }} • Rp{{ number_format($methodStats['dompet_digital']['total'], 0, ',', '.') }}
+            </span>
+        </button>
     </div>
 
     <div
@@ -224,11 +232,13 @@
                                     $methodBadge = match ($tx->payment_method ?? 'cash') {
                                         'transfer' => 'bg-blue-100 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400 border-blue-200/50 dark:border-blue-500/20',
                                         'qris' => 'bg-purple-100 text-purple-600 dark:bg-purple-500/10 dark:text-purple-400 border-purple-200/50 dark:border-purple-500/20',
+                                        'dompet_digital' => 'bg-amber-100 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400 border-amber-200/50 dark:border-amber-500/20',
                                         default => 'bg-emerald-100 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400 border-emerald-200/50 dark:border-emerald-500/20',
                                     };
                                     $methodLabel = match ($tx->payment_method ?? 'cash') {
                                         'transfer' => 'Transfer',
                                         'qris' => 'QRIS',
+                                        'dompet_digital' => 'Dompet Digital',
                                         default => 'Cash',
                                     };
                                 @endphp
