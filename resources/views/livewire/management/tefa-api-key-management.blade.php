@@ -20,6 +20,31 @@
         </div>
     @endif
 
+    <!-- Config Dompet Siswa API Key Card -->
+    <div class="bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent border border-amber-500/20 rounded-3xl p-6 shadow-xl">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+            <div class="flex items-start gap-4">
+                <div class="w-12 h-12 rounded-2xl bg-amber-500 text-white flex items-center justify-center shrink-0 font-black shadow-lg shadow-amber-500/30">
+                    DS
+                </div>
+                <div>
+                    <h3 class="text-base font-extrabold text-gray-900 dark:text-white uppercase tracking-tight">API Key Dompet Siswa (Koneksi Outbound)</h3>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 leading-relaxed">
+                        API Key resmi dari server Dompet Siswa SMKN 1 Talaga (<code class="font-mono bg-amber-100 dark:bg-gray-800 text-amber-700 dark:text-amber-300 px-1.5 py-0.5 rounded">ds_live_...</code>) untuk menarik transaksi real-time secara otomatis.
+                    </p>
+                </div>
+            </div>
+            <form wire:submit.prevent="saveDompetSiswaApiKey" class="flex items-center gap-3 w-full lg:w-auto">
+                <div class="relative flex-1 lg:w-80">
+                    <input wire:model="dompetSiswaApiKey" type="text" placeholder="ds_live_..." class="w-full px-4 py-3 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl font-mono text-xs text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500">
+                </div>
+                <button type="submit" class="px-5 py-3 bg-amber-500 hover:bg-amber-600 text-white rounded-2xl font-black text-xs uppercase tracking-wider transition-all cursor-pointer shadow-md shrink-0">
+                    Simpan Key
+                </button>
+            </form>
+        </div>
+    </div>
+
     <!-- Controls Card -->
     <div class="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-2xl shadow-blue-950/5 border border-gray-100 dark:border-gray-700">
         <div class="flex flex-col md:flex-row items-center justify-between gap-4">

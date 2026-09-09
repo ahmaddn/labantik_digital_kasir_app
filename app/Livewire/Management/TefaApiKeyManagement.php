@@ -15,6 +15,32 @@ class TefaApiKeyManagement extends Component
     public $name = '';
     public $isModalOpen = false;
     public $newlyGeneratedKey = null;
+    public $dompetSiswaApiKey = '';
+
+    public function mount()
+    {
+        $this->dompetSiswaApiKey = env('DOMPET_SISWA_API_KEY', 'ds_live_R8VgLxdlIfj3iPxnCMs10FeTe8tg2U8Q');
+    }
+
+    public function saveDompetSiswaApiKey()
+    {
+        $this->validate([
+            'dompetSiswaApiKey' => 'required|string|min:10',
+        ]);
+
+        $envPath = base_path('.env');
+        if (file_exists($envPath)) {
+            $envContent = file_get_contents($envPath);
+            if (str_contains($envContent, 'DOMPET_SISWA_API_KEY=')) {
+                $envContent = preg_replace('/DOMPET_SISWA_API_KEY=.*/', 'DOMPET_SISWA_API_KEY=' . $this->dompetSiswaApiKey, $envContent);
+            } else {
+                $envContent .= "\nDOMPET_SISWA_API_KEY=" . $this->dompetSiswaApiKey;
+            }
+            file_put_contents($envPath, $envContent);
+        }
+
+        session()->flash('toast', 'API Key Dompet Siswa (Outbound) berhasil diperbarui!');
+    }
 
     protected $rules = [
         'name' => 'required|string|max:100',
