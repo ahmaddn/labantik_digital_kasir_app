@@ -45,7 +45,7 @@
 >
     <div class="h-full min-h-full grid grid-cols-1 lg:grid-cols-2 overflow-hidden">
         
-        <!-- Kolom KIRI: Branding Panel TEFA (DISEMBUNYIKAN DI MOBILE: hidden lg:flex) -->
+        <!-- Kolom KIRI: Branding Panel TEFA (Hanya Tampil di Desktop lg:) -->
         <div 
             class="hidden lg:flex relative flex-col items-center justify-center p-12 lg:p-16 text-center text-white overflow-hidden z-10"
             style="background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 50%, #1d4ed8 100%);"
@@ -72,11 +72,11 @@
             </div>
         </div>
 
-        <!-- Kolom KANAN: Form Login (Presisi Ditengah Vertikal & Horizontal) -->
-        <div class="relative h-full flex flex-col items-center justify-center p-6 sm:p-10 lg:p-16 bg-slate-50 dark:bg-slate-900 transition-colors duration-300 overflow-hidden">
+        <!-- Kolom KANAN: Form Login (3-Row Layout: Header, Centered Form, Footer) -->
+        <div class="relative h-full flex flex-col justify-between items-center p-6 sm:p-10 lg:p-16 bg-slate-50 dark:bg-slate-900 transition-colors duration-300 overflow-hidden">
             
-            <!-- Dark / Light Mode Toggle Button (Pojok Kanan Atas) -->
-            <div class="absolute top-4 sm:top-6 right-4 sm:right-6 z-20">
+            <!-- Row 1: Top Bar / Dark Mode Toggle -->
+            <div class="w-full flex justify-end items-center z-20 shrink-0">
                 <button 
                     @click="toggleTheme()" 
                     type="button"
@@ -93,8 +93,8 @@
                 </button>
             </div>
 
-            <!-- Form Wrapper Utama: Tepat di titik tengah matematis layar (Vertical & Horizontal Center) -->
-            <div class="w-full max-w-sm sm:max-w-md flex flex-col justify-center">
+            <!-- Row 2: Form Wrapper Utama (Tepat Ditengah) -->
+            <div class="w-full max-w-sm sm:max-w-md my-auto flex flex-col justify-center py-4">
                 <!-- Heading -->
                 <div class="mb-6 sm:mb-8 text-left">
                     <h2 class="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">Selamat Datang!</h2>
@@ -185,9 +185,9 @@
                 </form>
             </div>
 
-            <!-- Footer Posisikan Secara Absolut di Bawah Layar -->
-            <footer class="absolute bottom-4 left-0 right-0 text-center pointer-events-none z-10">
-                <p class="text-[10px] sm:text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest pointer-events-auto">
+            <!-- Row 3: Footer (Fixed di paling bawah layout, tidak menimpa elemen lain) -->
+            <footer class="w-full text-center pb-2 pt-2 shrink-0 z-20">
+                <p class="text-[10px] sm:text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
                     Developed for Labantik Jurusan &copy; 2026
                 </p>
             </footer>
