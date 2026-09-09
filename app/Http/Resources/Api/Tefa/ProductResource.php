@@ -9,6 +9,16 @@ class ProductResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
+        $today = now()->toDateString();
+        $stockEntry = $this->whenLoaded('stockEntries', fn () => 
+            $this->stockEntries->firstWhere('date', $today) ?? $this->stockEntries->first()
+        );
+
+        $openingStock = (int) ($stockEntry?->opening_stock ?? 0);
+        $closingStock = (int) max(0, $stockEntry?->closing_stock ?? 0);
+        $soldQuantity = (int) max(0, $openingStock - $closingStock);
+        $isAvailable = $this->is_active && $closingStock > 0;
+
         return [
             'tefa_product_id'      => $this->id,
             'name'                 => $this->name,
@@ -19,8 +29,12 @@ class ProductResource extends JsonResource
                 'name' => $this->category?->name,
                 'slug' => $this->category?->slug,
             ]),
-            'status'               => $this->is_active ? 'available' : 'unavailable',
+            'status'               => $isAvailable ? 'available' : 'out_of_stock',
             'is_active'            => (bool) $this->is_active,
+            'opening_stock'        => $openingStock,
+            'sold_quantity'        => $soldQuantity,
+            'remaining_stock'      => $closingStock,
+            'available_stock'      => $closingStock,
             'supplier'             => $this->whenLoaded('supplier', fn () => $this->supplier?->name),
             'supplier_details'     => $this->whenLoaded('supplier', fn () => [
                 'id'      => $this->supplier?->id,

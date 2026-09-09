@@ -142,6 +142,10 @@ _(Sesuaikan domain/host dengan server tempat aplikasi dideploy)_
                 },
                 "status": "available",
                 "is_active": true,
+                "opening_stock": 30,
+                "sold_quantity": 0,
+                "remaining_stock": 30,
+                "available_stock": 30,
                 "supplier": "Koperasi Sekolah UP RPL",
                 "supplier_details": {
                     "id": "9c123456-sup1-0001",
