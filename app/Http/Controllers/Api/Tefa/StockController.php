@@ -162,7 +162,7 @@ class StockController extends Controller
                         'total_price'    => $product->price * $qtyToDeduct,
                         'debt_amount'    => 0,
                         'change_due'     => 0,
-                        'status'         => 'lunas',
+                        'status'         => 'uang_diterima',
                         'payment_method' => 'dompet_digital',
                         'note'           => 'Transaksi via API Dompet Siswa (Saldo Digital)',
                     ]);
