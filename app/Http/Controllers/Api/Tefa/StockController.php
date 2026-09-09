@@ -119,7 +119,15 @@ class StockController extends Controller
                         ->first();
 
                     if (! $stockEntry) {
-                        throw new \Exception("Pencatatan stok hari ini belum tersedia untuk produk '{$product->name}'.");
+                        // Auto-create pencatatan stok hari ini jika belum ada di database
+                        $stockEntry = StockEntry::create([
+                            'jurusan_id'     => $product->jurusan_id,
+                            'product_id'     => $product->id,
+                            'date'           => $today,
+                            'opening_stock'  => $product->stock ?? 0,
+                            'closing_stock'  => $product->stock ?? 0,
+                            'expected_stock' => $product->stock ?? 0,
+                        ]);
                     }
 
                     if ($stockEntry->closing_stock < $qtyToDeduct) {
