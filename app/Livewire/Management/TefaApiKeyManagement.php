@@ -19,11 +19,24 @@ class TefaApiKeyManagement extends Component
 
     public function mount()
     {
+        $this->authorizeAccess();
         $this->dompetSiswaApiKey = env('DOMPET_SISWA_API_KEY', 'ds_live_R8VgLxdlIfj3iPxnCMs10FeTe8tg2U8Q');
+    }
+
+    private function authorizeAccess(): void
+    {
+        $hasRole = auth()->user()?->roles()
+            ->whereIn('roles.name', ['superadmin', 'pengelola_jurusan'])
+            ->exists();
+
+        if (! $hasRole) {
+            abort(403, 'Akses Ditolak. Halaman manajemen API Key hanya untuk Superadmin dan Pengelola.');
+        }
     }
 
     public function saveDompetSiswaApiKey()
     {
+        $this->authorizeAccess();
         $this->validate([
             'dompetSiswaApiKey' => 'required|string|min:10',
         ]);
@@ -65,6 +78,7 @@ class TefaApiKeyManagement extends Component
 
     public function generateKey()
     {
+        $this->authorizeAccess();
         $this->validate();
 
         $rawKey = 'tfk_' . Str::random(56);
@@ -83,6 +97,7 @@ class TefaApiKeyManagement extends Component
 
     public function toggleActive($id)
     {
+        $this->authorizeAccess();
         $key = TefaApiKey::findOrFail($id);
         $key->update(['is_active' => ! $key->is_active]);
 
@@ -92,6 +107,7 @@ class TefaApiKeyManagement extends Component
 
     public function deleteKey($id)
     {
+        $this->authorizeAccess();
         $key = TefaApiKey::findOrFail($id);
         $key->delete();
 
