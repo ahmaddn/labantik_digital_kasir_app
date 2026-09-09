@@ -14,6 +14,7 @@
         }
         input:focus {
             outline: none !important;
+            box-shadow: none !important;
         }
     </style>
     <script>
@@ -71,7 +72,7 @@
         </div>
 
         <!-- Kolom KANAN: Form Login -->
-        <div class="relative flex flex-col justify-between p-6 sm:p-12 lg:p-16 min-h-screen bg-white dark:bg-slate-900 transition-colors duration-300">
+        <div class="relative flex flex-col justify-between items-center p-6 sm:p-12 lg:p-16 min-h-screen bg-white dark:bg-slate-900 transition-colors duration-300 w-full">
             
             <!-- Dark / Light Mode Toggle Button (Pojok Kanan Atas) -->
             <div class="absolute top-6 right-6 z-20">
@@ -79,7 +80,7 @@
                     @click="toggleTheme()" 
                     type="button"
                     title="Beralih Mode Gelap/Terang"
-                    class="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-amber-400 border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md hover:scale-105 active:scale-95 transition-all font-bold text-xs cursor-pointer"
+                    class="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-amber-400 border-none shadow-sm hover:shadow-md hover:scale-105 active:scale-95 transition-all font-bold text-xs cursor-pointer"
                 >
                     <!-- Sun Icon (Show in dark mode) -->
                     <svg x-show="darkMode" x-cloak class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -93,13 +94,13 @@
                 </button>
             </div>
 
-            <!-- Form Container (Vertically Centered) -->
-            <div class="w-full max-w-md mx-auto my-auto py-8">
+            <!-- Form Container (Perfectly Centered Vertically & Horizontally) -->
+            <div class="w-full max-w-md my-auto py-8 flex flex-col justify-center">
                 
                 <!-- Heading -->
                 <div class="mb-8">
                     <div class="flex items-center gap-3 mb-2">
-                        <div class="w-10 h-10 rounded-xl bg-blue-50 dark:bg-slate-800 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0 border border-blue-100 dark:border-slate-700 shadow-sm">
+                        <div class="w-10 h-10 rounded-xl bg-blue-50 dark:bg-slate-800 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0 border-none shadow-xs">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
                             </svg>
@@ -135,8 +136,8 @@
                                 required 
                                 autofocus 
                                 placeholder="admin@gmail.com" 
-                                class="w-full pl-12 pr-4 py-3.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 dark:focus:ring-blue-900/40 transition-all font-medium text-sm outline-none"
-                                style="outline: none;"
+                                class="w-full pl-12 pr-4 py-4 bg-slate-100 dark:bg-slate-800 border-none rounded-2xl text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 transition-all font-medium text-sm"
+                                style="border: none; outline: none;"
                             >
                         </div>
                         @error('email')
@@ -160,8 +161,8 @@
                                 name="password" 
                                 required 
                                 placeholder="••••••••" 
-                                class="w-full pl-12 pr-12 py-3.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 dark:focus:ring-blue-900/40 transition-all font-medium text-sm outline-none"
-                                style="outline: none;"
+                                class="w-full pl-12 pr-12 py-4 bg-slate-100 dark:bg-slate-800 border-none rounded-2xl text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 transition-all font-medium text-sm"
+                                style="border: none; outline: none;"
                             >
                             <button 
                                 type="button" 
@@ -189,7 +190,7 @@
                             <input 
                                 type="checkbox" 
                                 name="remember" 
-                                class="w-4 h-4 rounded text-blue-600 focus:ring-blue-500 border-slate-300 dark:border-slate-700 dark:bg-slate-800 transition"
+                                class="w-4 h-4 rounded text-blue-600 focus:ring-blue-500 border-none bg-slate-100 dark:bg-slate-800 transition"
                             >
                             <span class="ml-2.5 text-xs font-bold text-slate-600 dark:text-slate-400 group-hover:text-slate-900 dark:group-hover:text-slate-200 transition-colors">
                                 Ingat Saya
@@ -216,7 +217,7 @@
             </div>
 
             <!-- Footer -->
-            <footer class="mt-8 text-center">
+            <footer class="w-full text-center pb-2">
                 <p class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
                     Developed for Labantik Jurusan &copy; 2026
                 </p>
