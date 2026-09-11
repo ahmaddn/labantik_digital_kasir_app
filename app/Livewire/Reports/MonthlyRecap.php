@@ -51,7 +51,7 @@ class MonthlyRecap extends Component
             })
             ->selectRaw("
                 SUM(total_price) as total_revenue_all,
-                SUM(CASE WHEN status IN ('uang_diterima', 'belum_kembalian') THEN total_price ELSE 0 END) as total_revenue_real,
+                SUM(CASE WHEN status IN ('uang_diterima', 'belum_kembalian') AND (payment_method IS NULL OR payment_method = '' OR payment_method = 'cash') THEN total_price ELSE 0 END) as total_revenue_real,
                 SUM(CASE WHEN status IN ('uang_diterima', 'belum_kembalian') AND supplier_id IS NOT NULL THEN (unit_price - unit_profit) * quantity ELSE 0 END) as total_supplier_hak,
                 SUM(CASE WHEN status IN ('uang_diterima', 'belum_kembalian') THEN unit_profit * quantity ELSE 0 END) as total_profit,
                 SUM(CASE WHEN status IN ('uang_diterima', 'belum_kembalian') THEN (unit_price - unit_profit) * quantity ELSE 0 END) as total_modal,
@@ -87,7 +87,7 @@ class MonthlyRecap extends Component
                 DATE(transacted_at) as date,
                 COUNT(*) as total_transactions,
                 SUM(total_price) as total_revenue_all,
-                SUM(CASE WHEN status IN ("uang_diterima", "belum_kembalian") THEN total_price ELSE 0 END) as total_revenue_real,
+                SUM(CASE WHEN status IN ("uang_diterima", "belum_kembalian") AND (payment_method IS NULL OR payment_method = "" OR payment_method = "cash") THEN total_price ELSE 0 END) as total_revenue_real,
                 SUM(CASE WHEN status IN ("uang_diterima", "belum_kembalian") THEN unit_profit * quantity ELSE 0 END) as total_profit
             ')
             ->whereMonth('transacted_at', $this->selectedMonth)

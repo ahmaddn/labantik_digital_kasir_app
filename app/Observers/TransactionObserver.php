@@ -28,7 +28,7 @@ class TransactionObserver
         $stats = Transaction::whereDate('transacted_at', $date)
             ->where('jurusan_id', $jurusanId)
             ->selectRaw("
-                SUM(CASE WHEN status IN ('uang_diterima', 'belum_kembalian') THEN total_price ELSE 0 END) as revenue_real,
+                SUM(CASE WHEN status IN ('uang_diterima', 'belum_kembalian') AND (payment_method IS NULL OR payment_method = '' OR payment_method = 'cash') THEN total_price ELSE 0 END) as revenue_real,
                 SUM(total_price) as revenue_all,
                 SUM(unit_profit * quantity) as profit,
                 SUM((unit_price - unit_profit) * quantity) as modal,

@@ -24,7 +24,9 @@ class DailyRecapQueryService
         }
 
         $totalRevenueAll = $allTransactions->sum('total_price');
-        $totalRevenueReal = $allTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->sum('total_price');
+        $totalRevenueReal = $allTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])
+            ->filter(fn ($tx) => in_array($tx->payment_method ?? 'cash', ['cash', '', null]))
+            ->sum('total_price');
 
         $totalSupplierHak = $allTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])
             ->whereNotNull('supplier_id')
