@@ -146,6 +146,11 @@ class WeeklyProfit extends Component
             $totalRevenueReal = Transaction::whereDate('transacted_at', $recap->date->toDateString())
                 ->where('jurusan_id', $activeJurusanId)
                 ->whereIn('status', ['uang_diterima', 'belum_kembalian'])
+                ->where(function ($q) {
+                    $q->whereNull('payment_method')
+                        ->orWhere('payment_method', '')
+                        ->orWhere('payment_method', 'cash');
+                })
                 ->sum('total_price');
             $diff = ((float) $recap->actual_cash - (float) $startingChangeCash) - $totalRevenueReal;
             if ($diff < 0) {
