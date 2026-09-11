@@ -741,6 +741,7 @@ class CashManagement extends Component
 
         $adjustments = (clone $activeQuery)
             ->where('description', 'like', 'Penyesuaian Selisih%')
+            ->where('description', 'not like', '%(Manual)%')
             ->when(!empty($keuntunganJurusanCatIds), fn ($q) =>
                 $q->whereNotIn('cash_category_id', $keuntunganJurusanCatIds)
             )

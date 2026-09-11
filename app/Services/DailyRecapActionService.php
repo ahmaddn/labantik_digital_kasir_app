@@ -167,7 +167,7 @@ class DailyRecapActionService
                     ['name' => 'Jurusan Snack & Minuman', 'jurusan_id' => $activeJurusanId]
                 );
 
-                $baseDescription = 'Penyesuaian Selisih Lebih Uang Kas';
+                $baseDescription = 'Penyesuaian Selisih Lebih Uang Kas (Sistem)';
                 $description = (! empty($recap->cash_note)) ? $baseDescription.' ('.$recap->cash_note.')' : $baseDescription;
 
                 CashTransaction::updateOrCreate(
