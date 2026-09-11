@@ -289,8 +289,35 @@ class WeeklyProfit extends Component
             $nonCashGroupTxs = $txs->filter(fn($tx) => in_array($tx->payment_method, ['transfer', 'qris']));
 
             // --- 1) Post Cash Profit Share to CashTransaction ---
-            $cashGroupProfit = $cashGroupTxs->sum(fn($tx) => $tx->unit_profit * $tx->quantity);
-            $adjustedCashGroupProfit = $cashGroupProfit * $scaleFactor;
+            $catPostedIncome = CashTransaction::where('jurusan_id', $activeJurusanId)
+                ->where('cash_category_id', $catPenjualan->id)
+                ->whereBetween('date', [$weekStart->toDateString(), $weekEnd->toDateString()])
+                ->where('cash_type', 'keuntungan')
+                ->where('type', 'income')
+                ->where(function ($q) {
+                    $q->where('description', 'like', '%(Sistem)%')
+                        ->orWhere('description', 'like', 'Keuntungan Penjualan%');
+                })
+                ->sum('amount');
+
+            $catPostedExpense = CashTransaction::where('jurusan_id', $activeJurusanId)
+                ->where('cash_category_id', $catPenjualan->id)
+                ->whereBetween('date', [$weekStart->toDateString(), $weekEnd->toDateString()])
+                ->where('cash_type', 'keuntungan')
+                ->where('type', 'expense')
+                ->where(function ($q) {
+                    $q->where('description', 'like', '%Penyesuaian Selisih Kurang%');
+                })
+                ->sum('amount');
+
+            $catNetPostedProfit = $catPostedIncome - $catPostedExpense;
+
+            if ($catPostedIncome > 0) {
+                $adjustedCashGroupProfit = max(0, $catNetPostedProfit);
+            } else {
+                $cashGroupProfit = $cashGroupTxs->sum(fn($tx) => $tx->unit_profit * $tx->quantity);
+                $adjustedCashGroupProfit = $cashGroupProfit * $scaleFactor;
+            }
 
             if ($adjustedCashGroupProfit > 0) {
                 $najmyShare = $adjustedCashGroupProfit * 0.30;
