@@ -175,8 +175,9 @@ class WeeklyProfit extends Component
             }
         }
 
-        $cashProfit = max(0, $cashSystemProfit - $totalShortage + $totalSurplus);
-        $totalProfit = $cashProfit + $nonCashSystemProfit;
+        $cashProfit = $cashSystemProfit;
+        $nonCashProfit = $nonCashSystemProfit;
+        $totalProfit = $cashProfit + $nonCashProfit;
 
         if ($totalProfit <= 0) {
             $this->dispatch('toast', message: 'Tidak ada keuntungan pada periode ini.', type: 'error');
@@ -229,7 +230,7 @@ class WeeklyProfit extends Component
         $najmyUser = \App\Models\User::where('name', 'like', '%Najmy%')->first();
         $najmyName = $najmyUser ? $najmyUser->name : 'Najmy';
 
-        $scaleFactor = ($systemProfit > 0) ? ($totalProfit / $systemProfit) : 1;
+        $scaleFactor = 1;
 
         foreach ($grouped as $key => $txs) {
             $firstTx = $txs->first();
@@ -262,35 +263,7 @@ class WeeklyProfit extends Component
             $nonCashGroupTxs = $txs->filter(fn($tx) => in_array($tx->payment_method, ['transfer', 'qris']));
 
             // --- 1) Post Cash Profit Share to CashTransaction ---
-            $catPostedIncome = CashTransaction::where('jurusan_id', $activeJurusanId)
-                ->where('cash_category_id', $catPenjualan->id)
-                ->whereBetween('date', [$weekStart->toDateString(), $weekEnd->toDateString()])
-                ->where('cash_type', 'keuntungan')
-                ->where('type', 'income')
-                ->where(function ($q) {
-                    $q->where('description', 'like', '%(Sistem)%')
-                        ->orWhere('description', 'like', 'Keuntungan Penjualan%');
-                })
-                ->sum('amount');
-
-            $catPostedExpense = CashTransaction::where('jurusan_id', $activeJurusanId)
-                ->where('cash_category_id', $catPenjualan->id)
-                ->whereBetween('date', [$weekStart->toDateString(), $weekEnd->toDateString()])
-                ->where('cash_type', 'keuntungan')
-                ->where('type', 'expense')
-                ->where(function ($q) {
-                    $q->where('description', 'like', '%Penyesuaian Selisih Kurang%');
-                })
-                ->sum('amount');
-
-            $catNetPostedProfit = $catPostedIncome - $catPostedExpense;
-
-            if ($catPostedIncome > 0) {
-                $adjustedCashGroupProfit = max(0, $catNetPostedProfit);
-            } else {
-                $cashGroupProfit = $cashGroupTxs->sum(fn($tx) => $tx->unit_profit * $tx->quantity);
-                $adjustedCashGroupProfit = $cashGroupProfit * $scaleFactor;
-            }
+            $adjustedCashGroupProfit = $cashGroupTxs->sum(fn($tx) => $tx->unit_profit * $tx->quantity);
 
             if ($adjustedCashGroupProfit > 0) {
                 $najmyShare = $adjustedCashGroupProfit * 0.30;
@@ -356,7 +329,7 @@ class WeeklyProfit extends Component
             foreach ($byMethod as $method => $methodTxs) {
                 $sourceMethod = in_array($method, ['transfer', 'qris']) ? $method : 'transfer';
                 $methodGroupProfit = $methodTxs->sum(fn($tx) => $tx->unit_profit * $tx->quantity);
-                $adjustedMethodGroupProfit = $methodGroupProfit * $scaleFactor;
+                $adjustedMethodGroupProfit = $methodGroupProfit;
 
                 if ($adjustedMethodGroupProfit > 0) {
                     $najmyShare = $adjustedMethodGroupProfit * 0.30;
@@ -539,44 +512,7 @@ class WeeklyProfit extends Component
             ->whereIn('payment_method', ['transfer', 'qris'])
             ->sum(DB::raw('unit_profit * quantity'));
 
-        // Calculate total shortage & surplus from daily recaps for the current week
-        $dailyRecaps = \App\Models\DailyRecap::whereBetween('date', [$weekStart->toDateString(), $weekEnd->toDateString()])
-            ->where('jurusan_id', $activeJurusanId)
-            ->get();
-
-        $totalShortage = 0;
-        $totalSurplus = 0;
-        foreach ($dailyRecaps as $recap) {
-            if ((float) $recap->actual_cash <= 1) {
-                continue;
-            }
-
-            $previousRecap = \App\Models\DailyRecap::forReporting()
-                ->where('jurusan_id', $activeJurusanId)
-                ->where('date', '<', $recap->date)
-                ->orderBy('date', 'desc')
-                ->first();
-            $startingChangeCash = $previousRecap ? ($previousRecap->retained_change_cash ?? 0) : 0;
-
-            $dayCashRevenue = Transaction::whereDate('transacted_at', $recap->date->toDateString())
-                ->where('jurusan_id', $activeJurusanId)
-                ->whereIn('status', ['uang_diterima', 'belum_kembalian'])
-                ->where(function ($q) {
-                    $q->whereNull('payment_method')
-                        ->orWhere('payment_method', '')
-                        ->orWhere('payment_method', 'cash');
-                })
-                ->sum('total_price');
-
-            $diff = ((float) $recap->actual_cash - (float) $startingChangeCash) - $dayCashRevenue;
-            if ($diff < 0) {
-                $totalShortage += abs($diff);
-            } else {
-                $totalSurplus += $diff;
-            }
-        }
-
-        $cashProfit = max(0, $cashSystemProfit - $totalShortage + $totalSurplus);
+        $cashProfit = $cashSystemProfit;
         $nonCashProfit = $nonCashSystemProfit;
         $currentProfit = $cashProfit + $nonCashProfit;
 
