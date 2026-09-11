@@ -115,52 +115,95 @@ class WeeklyProfit extends Component
         $weekNumber = $weekEnd->weekOfMonth;
         $monthName = $weekEnd->translatedFormat('F Y');
 
-        // Calculate total profit (Including shop's share from supplier products)
-        $systemProfit = Transaction::whereBetween('transacted_at', [
+        // Calculate Cash System Profit vs Non-Cash System Profit
+        $cashSystemProfit = Transaction::whereBetween('transacted_at', [
             $weekStart->startOfDay()->toDateTimeString(),
             $weekEnd->endOfDay()->toDateTimeString(),
         ])
             ->where('jurusan_id', $activeJurusanId)
             ->whereIn('status', ['uang_diterima', 'belum_kembalian'])
+            ->where(function ($q) {
+                $q->where('payment_method', 'cash')
+                    ->orWhereNull('payment_method')
+                    ->orWhere('payment_method', '');
+            })
             ->sum(DB::raw('unit_profit * quantity'));
 
-        // Calculate total shortage from daily recaps
-        $dailyRecaps = \App\Models\DailyRecap::whereBetween('date', [$weekStart->toDateString(), $weekEnd->toDateString()])
+        $nonCashSystemProfit = Transaction::whereBetween('transacted_at', [
+            $weekStart->startOfDay()->toDateTimeString(),
+            $weekEnd->endOfDay()->toDateTimeString(),
+        ])
             ->where('jurusan_id', $activeJurusanId)
-            ->get();
+            ->whereIn('status', ['uang_diterima', 'belum_kembalian'])
+            ->whereIn('payment_method', ['transfer', 'qris'])
+            ->sum(DB::raw('unit_profit * quantity'));
 
-        $totalShortage = 0;
-        $totalSurplus = 0;
-        foreach ($dailyRecaps as $recap) {
-            if ((float) $recap->actual_cash <= 1) {
-                continue;
+        // Query CashTransaction posted profit for that weekly period
+        $postedCashIncome = CashTransaction::where('jurusan_id', $activeJurusanId)
+            ->whereBetween('date', [$weekStart->toDateString(), $weekEnd->toDateString()])
+            ->where('cash_type', 'keuntungan')
+            ->where('type', 'income')
+            ->where(function ($q) {
+                $q->where('description', 'like', '%(Sistem)%')
+                    ->orWhere('description', 'like', 'Keuntungan Penjualan%')
+                    ->orWhere('description', 'like', 'Penyesuaian Selisih%');
+            })
+            ->sum('amount');
+
+        $postedCashExpense = CashTransaction::where('jurusan_id', $activeJurusanId)
+            ->whereBetween('date', [$weekStart->toDateString(), $weekEnd->toDateString()])
+            ->where('cash_type', 'keuntungan')
+            ->where('type', 'expense')
+            ->where(function ($q) {
+                $q->where('description', 'like', '%Penyesuaian Selisih Kurang%');
+            })
+            ->sum('amount');
+
+        $netPostedCashProfit = $postedCashIncome - $postedCashExpense;
+
+        if ($postedCashIncome > 0) {
+            $cashProfit = max(0, $netPostedCashProfit);
+        } else {
+            // Calculate total shortage from daily recaps
+            $dailyRecaps = \App\Models\DailyRecap::whereBetween('date', [$weekStart->toDateString(), $weekEnd->toDateString()])
+                ->where('jurusan_id', $activeJurusanId)
+                ->get();
+
+            $totalShortage = 0;
+            $totalSurplus = 0;
+            foreach ($dailyRecaps as $recap) {
+                if ((float) $recap->actual_cash <= 1) {
+                    continue;
+                }
+
+                $previousRecap = \App\Models\DailyRecap::forReporting()
+                    ->where('jurusan_id', $activeJurusanId)
+                    ->where('date', '<', $recap->date)
+                    ->orderBy('date', 'desc')
+                    ->first();
+                $startingChangeCash = $previousRecap ? ($previousRecap->retained_change_cash ?? 0) : 0;
+
+                $totalRevenueReal = Transaction::whereDate('transacted_at', $recap->date->toDateString())
+                    ->where('jurusan_id', $activeJurusanId)
+                    ->whereIn('status', ['uang_diterima', 'belum_kembalian'])
+                    ->where(function ($q) {
+                        $q->whereNull('payment_method')
+                            ->orWhere('payment_method', '')
+                            ->orWhere('payment_method', 'cash');
+                    })
+                    ->sum('total_price');
+                $diff = ((float) $recap->actual_cash - (float) $startingChangeCash) - $totalRevenueReal;
+                if ($diff < 0) {
+                    $totalShortage += abs($diff);
+                } else {
+                    $totalSurplus += $diff;
+                }
             }
 
-            $previousRecap = \App\Models\DailyRecap::forReporting()
-                ->where('jurusan_id', $activeJurusanId)
-                ->where('date', '<', $recap->date)
-                ->orderBy('date', 'desc')
-                ->first();
-            $startingChangeCash = $previousRecap ? ($previousRecap->retained_change_cash ?? 0) : 0;
-
-            $totalRevenueReal = Transaction::whereDate('transacted_at', $recap->date->toDateString())
-                ->where('jurusan_id', $activeJurusanId)
-                ->whereIn('status', ['uang_diterima', 'belum_kembalian'])
-                ->where(function ($q) {
-                    $q->whereNull('payment_method')
-                        ->orWhere('payment_method', '')
-                        ->orWhere('payment_method', 'cash');
-                })
-                ->sum('total_price');
-            $diff = ((float) $recap->actual_cash - (float) $startingChangeCash) - $totalRevenueReal;
-            if ($diff < 0) {
-                $totalShortage += abs($diff);
-            } else {
-                $totalSurplus += $diff;
-            }
+            $cashProfit = max(0, $cashSystemProfit - $totalShortage + $totalSurplus);
         }
 
-        $totalProfit = $systemProfit - $totalShortage;
+        $totalProfit = $cashProfit + $nonCashSystemProfit;
 
         if ($totalProfit <= 0) {
             $this->dispatch('toast', message: 'Tidak ada keuntungan pada periode ini.', type: 'error');
@@ -496,45 +539,73 @@ class WeeklyProfit extends Component
             ->whereIn('payment_method', ['transfer', 'qris'])
             ->sum(DB::raw('unit_profit * quantity'));
 
-        // Calculate total shortage from daily recaps for the current week
-        $dailyRecaps = \App\Models\DailyRecap::whereBetween('date', [$weekStart->toDateString(), $weekEnd->toDateString()])
-            ->where('jurusan_id', $activeJurusanId)
-            ->get();
+        // Query CashTransaction posted profit for that weekly period
+        $postedCashIncome = CashTransaction::where('jurusan_id', $activeJurusanId)
+            ->whereBetween('date', [$weekStart->toDateString(), $weekEnd->toDateString()])
+            ->where('cash_type', 'keuntungan')
+            ->where('type', 'income')
+            ->where(function ($q) {
+                $q->where('description', 'like', '%(Sistem)%')
+                    ->orWhere('description', 'like', 'Keuntungan Penjualan%')
+                    ->orWhere('description', 'like', 'Penyesuaian Selisih%');
+            })
+            ->sum('amount');
 
-        $totalShortage = 0;
-        $totalSurplus = 0;
-        foreach ($dailyRecaps as $recap) {
-            if ((float) $recap->actual_cash <= 1) {
-                continue;
+        $postedCashExpense = CashTransaction::where('jurusan_id', $activeJurusanId)
+            ->whereBetween('date', [$weekStart->toDateString(), $weekEnd->toDateString()])
+            ->where('cash_type', 'keuntungan')
+            ->where('type', 'expense')
+            ->where(function ($q) {
+                $q->where('description', 'like', '%Penyesuaian Selisih Kurang%');
+            })
+            ->sum('amount');
+
+        $netPostedCashProfit = $postedCashIncome - $postedCashExpense;
+
+        if ($postedCashIncome > 0) {
+            $cashProfit = max(0, $netPostedCashProfit);
+        } else {
+            // Calculate total shortage from daily recaps for the current week
+            $dailyRecaps = \App\Models\DailyRecap::whereBetween('date', [$weekStart->toDateString(), $weekEnd->toDateString()])
+                ->where('jurusan_id', $activeJurusanId)
+                ->get();
+
+            $totalShortage = 0;
+            $totalSurplus = 0;
+            foreach ($dailyRecaps as $recap) {
+                if ((float) $recap->actual_cash <= 1) {
+                    continue;
+                }
+
+                $previousRecap = \App\Models\DailyRecap::forReporting()
+                    ->where('jurusan_id', $activeJurusanId)
+                    ->where('date', '<', $recap->date)
+                    ->orderBy('date', 'desc')
+                    ->first();
+                $startingChangeCash = $previousRecap ? ($previousRecap->retained_change_cash ?? 0) : 0;
+
+                $totalRevenueReal = Transaction::whereDate('transacted_at', $recap->date->toDateString())
+                    ->where('jurusan_id', $activeJurusanId)
+                    ->whereIn('status', ['uang_diterima', 'belum_kembalian'])
+                    ->where(function ($q) {
+                        $q->whereNull('payment_method')
+                            ->orWhere('payment_method', '')
+                            ->orWhere('payment_method', 'cash');
+                    })
+                    ->sum('total_price');
+                $diff = ((float) $recap->actual_cash - (float) $startingChangeCash) - $totalRevenueReal;
+                if ($diff < 0) {
+                    $totalShortage += abs($diff);
+                } else {
+                    $totalSurplus += $diff;
+                }
             }
 
-            $previousRecap = \App\Models\DailyRecap::forReporting()
-                ->where('jurusan_id', $activeJurusanId)
-                ->where('date', '<', $recap->date)
-                ->orderBy('date', 'desc')
-                ->first();
-            $startingChangeCash = $previousRecap ? ($previousRecap->retained_change_cash ?? 0) : 0;
-
-            $totalRevenueReal = Transaction::whereDate('transacted_at', $recap->date->toDateString())
-                ->where('jurusan_id', $activeJurusanId)
-                ->whereIn('status', ['uang_diterima', 'belum_kembalian'])
-                ->where(function ($q) {
-                    $q->whereNull('payment_method')
-                        ->orWhere('payment_method', '')
-                        ->orWhere('payment_method', 'cash');
-                })
-                ->sum('total_price');
-            $diff = ((float) $recap->actual_cash - (float) $startingChangeCash) - $totalRevenueReal;
-            if ($diff < 0) {
-                $totalShortage += abs($diff);
-            } else {
-                $totalSurplus += $diff;
-            }
+            $cashProfit = max(0, $cashSystemProfit - $totalShortage + $totalSurplus);
         }
 
-        $currentProfit = $systemProfit - $totalShortage;
-        $cashProfit = max(0, $cashSystemProfit - $totalShortage);
         $nonCashProfit = $nonCashSystemProfit;
+        $currentProfit = $cashProfit + $nonCashProfit;
 
         $totalRevenue = $weeklyData->total_revenue ?? 0;
         $supplierHak = $weeklyData->supplier_hak ?? 0;

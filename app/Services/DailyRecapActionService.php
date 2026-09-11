@@ -52,13 +52,17 @@ class DailyRecapActionService
             return [false, 'Tidak ada transaksi pada tanggal ini.'];
         }
 
-        $totalRevenueReal = $allTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->sum('total_price');
+        $totalRevenueReal = $allTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])
+            ->filter(fn ($tx) => in_array($tx->payment_method ?? 'cash', ['cash', '', null]))
+            ->sum('total_price');
 
         $totalSupplierHak = $allTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])
             ->filter(fn ($tx) => ($tx->product->supplier_id ?? $tx->supplier_id) !== null)
             ->sum(fn ($tx) => ($tx->unit_price - $tx->unit_profit) * $tx->quantity);
 
-        $totalProfit = $allTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->sum(fn ($tx) => $tx->unit_profit * $tx->quantity);
+        $totalProfit = $allTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])
+            ->filter(fn ($tx) => in_array($tx->payment_method ?? 'cash', ['cash', '', null]))
+            ->sum(fn ($tx) => $tx->unit_profit * $tx->quantity);
 
         $previousRecap = DailyRecapModel::forReporting()
             ->where('jurusan_id', $activeJurusanId)
@@ -107,8 +111,9 @@ class DailyRecapActionService
                     ['name' => $cashCategoryName, 'jurusan_id' => $activeJurusanId]
                 );
 
-                $catModalTotal = $txs->sum(fn ($tx) => ($tx->unit_price - $tx->unit_profit) * $tx->quantity);
-                $catProfit = $txs->sum(fn ($tx) => $tx->unit_profit * $tx->quantity);
+                $cashTxs = $txs->filter(fn ($tx) => in_array($tx->payment_method ?? 'cash', ['cash', '', null]));
+                $catModalTotal = $cashTxs->sum(fn ($tx) => ($tx->unit_price - $tx->unit_profit) * $tx->quantity);
+                $catProfit = $cashTxs->sum(fn ($tx) => $tx->unit_profit * $tx->quantity);
 
                 if ($catModalTotal > 0) {
                     CashTransaction::updateOrCreate(
