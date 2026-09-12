@@ -109,7 +109,7 @@
                     </thead>
                     <tbody class="divide-y divide-gray-50 dark:divide-gray-700/50">
                         @forelse($candidates as $index => $candidate)
-                            <tr class="group hover:bg-gray-50/50 dark:hover:bg-gray-900/30 transition-colors">
+                            <tr wire:key="candidate-row-{{ $candidate->id }}" class="group hover:bg-gray-50/50 dark:hover:bg-gray-900/30 transition-colors">
                                 <td class="py-4 pl-4 text-sm font-bold text-gray-800 dark:text-white">
                                     {{ $candidates->firstItem() + $index }}
                                 </td>
@@ -226,10 +226,16 @@
                     </select>
                 </div>
 
-                <button wire:click="saveScoring"
-                    class="px-4 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-emerald-500/20 active:scale-95 transition-all">
-                    Simpan Pekan Ini
-                </button>
+                <div class="flex items-center gap-3">
+                    <button wire:click="$set('showResetWeekConfirmModal', true)"
+                        class="px-4 py-2.5 bg-rose-600 hover:bg-rose-700 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl active:scale-95 transition-all">
+                        Reset Nilai Pekan Ini
+                    </button>
+                    <button wire:click="saveScoring"
+                        class="px-4 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-emerald-500/20 active:scale-95 transition-all">
+                        Simpan Pekan Ini
+                    </button>
+                </div>
             </div>
 
             <div class="overflow-x-auto rounded-3xl border border-gray-150 dark:border-gray-700/60">
@@ -250,7 +256,7 @@
                     <tbody class="divide-y divide-gray-100 dark:divide-gray-700/50">
                         @foreach ($scoringCandidates as $candidate)
                             @continue(!$candidate->id)
-                            <tr class="hover:bg-gray-50/30 dark:hover:bg-gray-900/20 transition-all">
+                            <tr wire:key="scoring-row-{{ $candidate->id }}-{{ $selectedWeek }}" class="hover:bg-gray-50/30 dark:hover:bg-gray-900/20 transition-all">
                                 <td class="py-4 px-6">
                                     <div class="text-sm font-black text-gray-900 dark:text-white">
                                         {{ $candidate->full_name }}</div>
@@ -264,12 +270,14 @@
                                         $isNotHadir = $statusVal !== 'hadir';
                                     @endphp
                                     <input type="number" min="0" max="100"
+                                        wire:key="score-input-{{ $candidate->id }}-{{ $selectedWeek }}"
                                         wire:model="scores.{{ $candidate->id }}.score" placeholder="-"
                                         {{ $isNotHadir ? 'disabled' : '' }}
                                         class="w-20 px-3 py-2 text-center bg-gray-55 dark:bg-gray-955 border border-gray-250 dark:border-gray-700 rounded-xl font-black text-sm text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-blue disabled:opacity-30 disabled:cursor-not-allowed transition-all">
                                 </td>
                                 <td class="py-4 px-6 text-center">
                                     <input type="number" min="0" max="100"
+                                        wire:key="attitude-input-{{ $candidate->id }}-{{ $selectedWeek }}"
                                         wire:model="scores.{{ $candidate->id }}.attitude_score" placeholder="-"
                                         {{ $isNotHadir ? 'disabled' : '' }}
                                         class="w-20 px-3 py-2 text-center bg-gray-55 dark:bg-gray-955 border border-gray-250 dark:border-gray-700 rounded-xl font-black text-sm text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-blue disabled:opacity-30 disabled:cursor-not-allowed transition-all">
@@ -284,6 +292,7 @@
         'alfa' => ['A', 'bg-red-500 hover:bg-red-650 text-white shadow-md shadow-red-500/20', 'Alfa'],
     ] as $status => $meta)
                                             <button type="button"
+                                                wire:key="attendance-btn-{{ $candidate->id }}-{{ $selectedWeek }}-{{ $status }}"
                                                 wire:click="$set('attendances.{{ $candidate->id }}.status', '{{ $status }}')"
                                                 class="w-9 h-9 rounded-lg font-black text-xs transition-all flex items-center justify-center
                                                 {{ ($attendances[$candidate->id]['status'] ?? 'hadir') === $status
@@ -301,7 +310,9 @@
                                         $showReason = in_array($statusVal, ['sakit', 'izin']);
                                     @endphp
                                     @if ($showReason)
-                                        <input type="text" wire:model="attendances.{{ $candidate->id }}.reason"
+                                        <input type="text" 
+                                            wire:key="reason-input-{{ $candidate->id }}-{{ $selectedWeek }}"
+                                            wire:model="attendances.{{ $candidate->id }}.reason"
                                             placeholder="Tulis alasan {{ $statusVal }} (Wajib)..."
                                             class="w-full px-4 py-2 bg-gray-55 dark:bg-gray-955 border border-dashed border-red-300 dark:border-red-800/40 rounded-xl font-semibold text-xs text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-red-500/20 transition-all">
                                     @else
@@ -383,7 +394,7 @@
                                     $rankStyle = 'bg-amber-600 text-white shadow-lg shadow-amber-600/20';
                                 }
                             @endphp
-                            <tr class="hover:bg-gray-50/30 dark:hover:bg-gray-900/20 transition-all">
+                            <tr wire:key="accepted-row-{{ $ac->id }}" class="hover:bg-gray-50/30 dark:hover:bg-gray-900/20 transition-all">
                                 <td class="py-4 px-6 text-center">
                                     <span
                                         class="inline-flex items-center justify-center w-8 h-8 rounded-full font-black text-xs {{ $rankStyle }}">
@@ -963,6 +974,39 @@
                 <button wire:click="finishSelection" @click="showFinish = false"
                     class="flex-1 py-4 bg-amber-500 hover:bg-amber-600 text-white rounded-2xl font-black italic uppercase text-xs tracking-widest shadow-xl shadow-amber-500/20 transition-all">
                     Ya, Selesaikan
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reset Week Confirmation Modal -->
+    <div x-data="{ showResetWeek: @entangle('showResetWeekConfirmModal') }" x-show="showResetWeek" class="fixed inset-0 z-50 flex items-center justify-center p-4"
+        x-cloak>
+        <div x-show="showResetWeek" x-transition.opacity class="fixed inset-0 bg-black/60 backdrop-blur-xs"
+            wire:click="$set('showResetWeekConfirmModal', false)"></div>
+        <div x-show="showResetWeek" x-transition.scale
+            class="relative w-full max-w-md bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-5 border border-gray-100 dark:border-gray-700 z-10 text-center animate-in zoom-in-95 duration-200">
+            <div
+                class="w-16 h-16 bg-red-100 dark:bg-red-950/20 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+            </div>
+            <h3 class="text-2xl font-bold uppercase tracking-tight text-gray-800 dark:text-white mb-2">
+                Reset Nilai Pekan {{ $selectedWeek }}?
+            </h3>
+            <p class="text-sm font-semibold text-gray-400 leading-relaxed mb-6">
+                Tindakan ini akan mengosongkan/menghapus seluruh input Nilai Akademik dan Attitude pada <strong>Pekan {{ $selectedWeek }}</strong> yang terlanjur tersimpan. Anda dapat menginput ulang nilainya secara bersih.
+            </p>
+            <div class="flex gap-4">
+                <button wire:click="$set('showResetWeekConfirmModal', false)"
+                    class="flex-1 py-4 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-white rounded-2xl font-black text-xs uppercase tracking-widest transition-transform">
+                    Batal
+                </button>
+                <button wire:click="resetWeekScoring" @click="showResetWeek = false"
+                    class="flex-1 py-4 bg-red-600 hover:bg-red-700 text-white rounded-2xl font-black italic uppercase text-xs tracking-widest shadow-xl shadow-red-500/20 transition-all">
+                    Ya, Reset Nilai
                 </button>
             </div>
         </div>

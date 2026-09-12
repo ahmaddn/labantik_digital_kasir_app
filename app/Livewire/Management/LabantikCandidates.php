@@ -63,6 +63,7 @@ class LabantikCandidates extends Component
 
     // Finish selection & Single scoring properties
     public bool $showFinishConfirmModal = false;
+    public bool $showResetWeekConfirmModal = false;
     public bool $showSingleScoringModal = false;
     public ?LabantikRegistration $scoringCandidate = null;
     public array $singleScores = [];
@@ -203,6 +204,30 @@ class LabantikCandidates extends Component
         }
 
         $this->dispatch('toast', message: 'Nilai dan absensi pekan ini berhasil disimpan!');
+        $this->loadScoringData();
+    }
+
+    public function resetWeekScoring(): void
+    {
+        if (!$this->checkPermission()) {
+            $this->dispatch('toast', message: 'Hanya superadmin/pengelola yang dapat mereset nilai.');
+            return;
+        }
+
+        $activeJurusanId = session('active_jurusan_id') ?: $this->selectedJurusanId;
+        $candidateIds = LabantikRegistration::when($activeJurusanId, function($q) use ($activeJurusanId) {
+            $q->where('jurusan_id', $activeJurusanId)->orWhereNull('jurusan_id');
+        })->pluck('id');
+
+        LabantikCandidateScore::whereIn('registration_id', $candidateIds)
+            ->where('week_number', $this->selectedWeek)
+            ->where(function($q) {
+                $q->where('user_id', auth()->id())->orWhereNull('user_id');
+            })
+            ->delete();
+
+        $this->showResetWeekConfirmModal = false;
+        $this->dispatch('toast', message: "Nilai masukan pada Pekan {$this->selectedWeek} berhasil direset!");
         $this->loadScoringData();
     }
 
