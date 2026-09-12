@@ -89,23 +89,30 @@ $$\text{Skor Akhir} = \overline{\text{Nilai Akademik}} + \overline{\text{Nilai A
 
 ---
 
-## 6. Alur Tampilan Saat Calon Membereskan Login
+## 6. Alur Tampilan Saat Calon Melakukan Login
 
-Ketika calon anggota melakukan login ke portal `/labantik/login`:
+Ketika calon anggota melakukan login ke portal `/labantik/login`, alur tampilan layar dibagi menjadi 3 kondisi status pengumuman:
 
-1. **Modal Peringatan Volume (Pop-up)**:
-   - Sebelum hasil dapat dilihat, layar menampilkan modal peringatan: *"Silakan nyalakan dan besarkan volume perangkat Anda sebelum melanjutkan!"*.
-   - Modal akan hilang begitu tombol *"Saya Sudah Nyalakan Volume"* diklik.
+1. **Modal Peringatan Volume Perangkat (Pop-up)**:
+   - Sebelum halaman hasil terbuka, layar menampilkan modal peringatan: *"Silakan nyalakan dan besarkan volume perangkat Anda sebelum melanjutkan!"*.
+   - Modal akan menutup begitu tombol *"Saya Sudah Nyalakan Volume"* diklik oleh calon.
 
-2. **Jika Calon Lolos Seleksi Akhir (`passed`)**:
+2. **Tampilan 1: Status Masih Dalam Proses Seleksi / Penetapan (`pending`)**:
+   - Layar menampilkan **Animasi Loading/Spinning** bernuansa emas/amber.
+   - **Kondisi A (Sebelum Selesai Seleksi / Belum Terbit Hasil)**: Pesan pengumuman: *"SELEKSI SEDANG DALAM PROSES. Rekapitulasi nilai calon anggota Labantik sedang berlangsung... Harap cek halaman ini secara berkala!"*.
+   - **Kondisi B (Sudah Masuk 15 Besar, tapi Pengelola Belum Set Lolos/Gagal)**: Pesan pengumuman: *"SELEKSI SEDANG DALAM PROSES. Selamat! Anda telah masuk dalam 15 Besar Calon Anggota Labantik. Status akhir kelulusan Anda saat ini sedang dalam tahap verifikasi & penetapan oleh pengelola. Harap cek kembali secara berkala!"*.
+
+3. **Tampilan 2: Status Lolos Seleksi Akhir (`passed`)**:
+   - Terjadi jika pengelola telah mengeklik tombol **`Lolos`** pada peserta 15 Besar tersebut.
    - Tampilan selebrasi mewah bernuansa hijau/emas.
-   - Efek hujan **Canvas Confetti** otomatis menyala di layar.
+   - Efek hujan **Canvas Confetti** otomatis menyala dan menghiasi seluruh layar.
    - Lagu selebrasi *"Terimakasih Sudah Bertahan - Ghea Indrawari"* terputar secara otomatis.
    - Tersedia tombol hijau mencolok untuk **Gabung Grup WhatsApp Resmi Labantik**.
 
-3. **Jika Calon Tidak Lolos (`rejected`)**:
-   - Tampilan pesanan apresiasi & semangat yang ramah dan bermartabat.
-   - Tanpa pemutaran musik/lagu.
+4. **Tampilan 3: Status Tidak Lolos (`rejected`)**:
+   - Terjadi jika peserta berada di luar 15 Besar ATAU pengelola mengeklik tombol **`Gagal`**.
+   - Tampilan pesan apresiasi, terima kasih, dan kalimat motivasi yang ramah dan bermartabat.
+   - Tanpa pemutaran musik/lagu maupun efek confetti.
 
 ---
 

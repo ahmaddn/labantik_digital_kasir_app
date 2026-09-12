@@ -119,20 +119,29 @@
             </div>
 
         @elseif ($candidate->final_status === 'pending')
-            <!-- STATUS: PENDING / PROCESS -->
+            <!-- STATUS: PENDING / PROSES SELEKSI -->
             <div class="text-center space-y-6">
                 <div class="inline-flex items-center justify-center w-24 h-24 bg-amber-500/10 text-amber-500 rounded-full border-2 border-amber-500/30 shadow-2xl">
                     <svg class="w-12 h-12 animate-spin" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>
                 </div>
-                <div class="space-y-2">
-                    <h2 class="text-2xl font-black text-amber-500 uppercase tracking-tight italic">
-                        SELEKSI SEDANG PROSES
+                <div class="space-y-3">
+                    <span class="px-4 py-1.5 bg-amber-500/10 text-amber-600 dark:text-amber-400 font-black rounded-full text-xs uppercase tracking-widest border border-amber-500/20 italic">
+                        Status Seleksi
+                    </span>
+                    <h2 class="text-2xl md:text-3xl font-black text-amber-500 uppercase tracking-tight italic">
+                        SELEKSI SEDANG DALAM PROSES
                     </h2>
-                    <p class="text-sm font-semibold text-gray-500 dark:text-gray-400 max-w-md mx-auto">
-                        Anda masuk dalam 15 Besar calon anggota Labantik. Status akhir kelulusan sedang dalam tahap penetapan oleh pengelola. Harap cek kembali secara berkala!
-                    </p>
+                    @if ($candidate->is_accepted)
+                        <p class="text-sm font-semibold text-gray-600 dark:text-gray-300 max-w-md mx-auto leading-relaxed">
+                            Selamat! Anda telah masuk dalam <strong>15 Besar Calon Anggota Labantik</strong>. Status akhir kelulusan Anda saat ini sedang dalam tahap verifikasi & penetapan oleh pengelola. Harap cek kembali secara berkala!
+                        </p>
+                    @else
+                        <p class="text-sm font-semibold text-gray-600 dark:text-gray-300 max-w-md mx-auto leading-relaxed">
+                            Proses penyeleksian & rekapitulasi nilai calon anggota Labantik sedang berlangsung. Pengumuman resmi hasil seleksi belum diterbitkan oleh pengelola. Silakan cek halaman ini secara berkala!
+                        </p>
+                    @endif
                 </div>
             </div>
 
