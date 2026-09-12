@@ -162,9 +162,19 @@
                                     </button>
                                     @if ($isPengelola)
                                         <button type="button"
+                                            wire:click="openEditModal('{{ $candidate->id }}')"
+                                            title="Edit Data Calon"
+                                            class="p-2 bg-amber-500 hover:bg-amber-600 text-white rounded-xl transition-all active:scale-95">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5"
+                                                viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                    d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+                                            </svg>
+                                        </button>
+                                        <button type="button"
                                             wire:click="openSingleScoringModal('{{ $candidate->id }}')"
                                             title="Beri Nilai & Absen"
-                                            class="p-2 bg-amber-500 hover:bg-amber-600 text-white rounded-xl transition-all active:scale-95">
+                                            class="p-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl transition-all active:scale-95">
                                             <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5"
                                                 viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round"
@@ -787,6 +797,135 @@
                     <button type="submit"
                         class="px-8 py-3 bg-primary-blue text-primary-yellow rounded-xl shadow-xl font-black text-xs uppercase tracking-wider transition-all">
                         Simpan Calon
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Candidate Modal -->
+    <div x-data="{ showEdit: @entangle('showEditModal') }" x-show="showEdit" class="fixed inset-0 z-50 flex items-center justify-center p-4"
+        x-cloak>
+        <div x-show="showEdit" x-transition.opacity class="fixed inset-0 bg-black/60 backdrop-blur-xs"
+            wire:click="$set('showEditModal', false)"></div>
+        <div x-show="showEdit" x-transition.scale
+            class="relative w-full bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-5 border border-gray-100 dark:border-gray-700 z-10 max-h-[90vh] overflow-y-auto"
+            style="max-width: 900px;">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold uppercase tracking-tight text-gray-800 dark:text-white">
+                    Edit Data Calon Anggota
+                </h3>
+                <button wire:click="$set('showEditModal', false)" class="text-gray-400 hover:text-gray-650">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <form wire:submit.prevent="updateCandidate" class="space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label
+                            class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1 ml-1">Nama
+                            Lengkap</label>
+                        <input type="text" wire:model="edit_full_name" required
+                            class="w-full px-4 py-3.5 bg-gray-55 dark:bg-gray-900 border-none rounded-xl font-bold text-sm text-gray-800 dark:text-white">
+                        @error('edit_full_name')
+                            <span class="text-xs text-red-500 font-bold mt-1 ml-1 block">{{ $message }}</span>
+                        @enderror
+                    </div>
+                    <div>
+                        <label
+                            class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1 ml-1">Kelas</label>
+                        <input type="text" wire:model="edit_class_name" required placeholder="Contoh: X RPL 1"
+                            class="w-full px-4 py-3.5 bg-gray-55 dark:bg-gray-900 border-none rounded-xl font-bold text-sm text-gray-800 dark:text-white">
+                        @error('edit_class_name')
+                            <span class="text-xs text-red-500 font-bold mt-1 ml-1 block">{{ $message }}</span>
+                        @enderror
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label
+                            class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1 ml-1">Jurusan Tujuan</label>
+                        <select wire:model="edit_jurusan_id"
+                            class="w-full px-4 py-3.5 bg-gray-55 dark:bg-gray-900 border-none rounded-xl font-bold text-sm text-gray-800 dark:text-white">
+                            <option value="">Global / Semua Jurusan</option>
+                            @foreach ($jurusans as $j)
+                                <option value="{{ $j->id }}">{{ $j->name }}</option>
+                            @endforeach
+                        </select>
+                        @error('edit_jurusan_id')
+                            <span class="text-xs text-red-500 font-bold mt-1 ml-1 block">{{ $message }}</span>
+                        @enderror
+                    </div>
+                    <div>
+                        <label
+                            class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1 ml-1">Riwayat
+                            Penyakit Bawaan</label>
+                        <input type="text" wire:model="edit_illness_history" placeholder="Isi jika ada, atau kosongkan"
+                            class="w-full px-4 py-3.5 bg-gray-55 dark:bg-gray-900 border-none rounded-xl font-bold text-sm text-gray-800 dark:text-white">
+                        @error('edit_illness_history')
+                            <span class="text-xs text-red-500 font-bold mt-1 ml-1 block">{{ $message }}</span>
+                        @enderror
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label
+                            class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1 ml-1">No
+                            HP Calon</label>
+                        <input type="text" wire:model="edit_phone_number" required
+                            class="w-full px-4 py-3.5 bg-gray-55 dark:bg-gray-900 border-none rounded-xl font-bold text-sm text-gray-800 dark:text-white">
+                        @error('edit_phone_number')
+                            <span class="text-xs text-red-500 font-bold mt-1 ml-1 block">{{ $message }}</span>
+                        @enderror
+                    </div>
+                    <div>
+                        <label
+                            class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1 ml-1">No
+                            HP Orang Tua</label>
+                        <input type="text" wire:model="edit_parent_phone_number" required
+                            class="w-full px-4 py-3.5 bg-gray-55 dark:bg-gray-900 border-none rounded-xl font-bold text-sm text-gray-800 dark:text-white">
+                        @error('edit_parent_phone_number')
+                            <span class="text-xs text-red-500 font-bold mt-1 ml-1 block">{{ $message }}</span>
+                        @enderror
+                    </div>
+                </div>
+
+                <div>
+                    <label
+                        class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1 ml-1">Alamat
+                        Rumah</label>
+                    <textarea wire:model="edit_address" required rows="3"
+                        class="w-full px-4 py-3 bg-gray-55 dark:bg-gray-900 border-none rounded-xl font-bold text-sm text-gray-800 dark:text-white"></textarea>
+                    @error('edit_address')
+                        <span class="text-xs text-red-500 font-bold mt-1 ml-1 block">{{ $message }}</span>
+                    @enderror
+                </div>
+
+                <div>
+                    <label
+                        class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1 ml-1">Alasan
+                        Masuk Labantik</label>
+                    <textarea wire:model="edit_reason" rows="3"
+                        class="w-full px-4 py-3 bg-gray-55 dark:bg-gray-900 border-none rounded-xl font-bold text-sm text-gray-800 dark:text-white"></textarea>
+                    @error('edit_reason')
+                        <span class="text-xs text-red-500 font-bold mt-1 ml-1 block">{{ $message }}</span>
+                    @enderror
+                </div>
+
+                <div class="flex justify-end gap-3 pt-4 border-t border-t-gray-100 dark:border-t-gray-700">
+                    <button type="button" wire:click="$set('showEditModal', false)"
+                        class="px-6 py-3 bg-gray-100 dark:bg-gray-700 text-gray-650 dark:text-white rounded-xl font-black text-xs uppercase tracking-wider transition-all">
+                        Batal
+                    </button>
+                    <button type="submit"
+                        class="px-8 py-3 bg-amber-500 hover:bg-amber-600 text-white rounded-xl shadow-xl font-black text-xs uppercase tracking-wider transition-all">
+                        Simpan Perubahan
                     </button>
                 </div>
             </form>

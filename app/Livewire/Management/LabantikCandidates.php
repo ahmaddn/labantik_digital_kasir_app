@@ -49,6 +49,18 @@ class LabantikCandidates extends Component
     public string $new_reason = '';
     public string $new_illness_history = '';
 
+    // Edit candidate properties
+    public bool $showEditModal = false;
+    public string $editId = '';
+    public string $edit_full_name = '';
+    public string $edit_class_name = '';
+    public string $edit_jurusan_id = '';
+    public string $edit_phone_number = '';
+    public string $edit_parent_phone_number = '';
+    public string $edit_address = '';
+    public string $edit_reason = '';
+    public string $edit_illness_history = '';
+
     // Finish selection & Single scoring properties
     public bool $showFinishConfirmModal = false;
     public bool $showSingleScoringModal = false;
@@ -449,6 +461,69 @@ class LabantikCandidates extends Component
 
         $this->showCreateModal = false;
         $this->dispatch('toast', message: 'Calon anggota baru berhasil ditambahkan!');
+        $this->loadScoringData();
+    }
+
+    public function openEditModal(string $id): void
+    {
+        if (!$this->checkPermission()) {
+            $this->dispatch('toast', message: 'Hanya superadmin/pengelola yang dapat mengubah data calon anggota.');
+            return;
+        }
+
+        $candidate = LabantikRegistration::findOrFail($id);
+        $this->editId = $candidate->id;
+        $this->edit_full_name = $candidate->full_name ?? '';
+        $this->edit_class_name = $candidate->class_name ?? '';
+        $this->edit_jurusan_id = $candidate->jurusan_id ?? '';
+        $this->edit_phone_number = $candidate->phone_number ?? '';
+        $this->edit_parent_phone_number = $candidate->parent_phone_number ?? '';
+        $this->edit_address = $candidate->address ?? '';
+        $this->edit_reason = $candidate->reason ?? '';
+        $this->edit_illness_history = $candidate->illness_history ?? '';
+
+        $this->showEditModal = true;
+    }
+
+    public function updateCandidate(): void
+    {
+        if (!$this->checkPermission()) {
+            $this->dispatch('toast', message: 'Hanya superadmin/pengelola yang dapat mengubah data calon anggota.');
+            return;
+        }
+
+        $this->validate([
+            'edit_full_name' => 'required|string|max:255',
+            'edit_class_name' => 'required|string|max:50',
+            'edit_jurusan_id' => 'nullable|uuid|exists:jurusans,id',
+            'edit_phone_number' => 'required|string|max:20',
+            'edit_parent_phone_number' => 'required|string|max:20',
+            'edit_address' => 'required|string|max:500',
+            'edit_reason' => 'nullable|string|max:1000',
+            'edit_illness_history' => 'nullable|string|max:500',
+        ], [], [
+            'edit_full_name' => 'Nama Lengkap',
+            'edit_class_name' => 'Kelas',
+            'edit_jurusan_id' => 'Jurusan',
+            'edit_phone_number' => 'No HP Calon',
+            'edit_parent_phone_number' => 'No HP Orang Tua',
+            'edit_address' => 'Alamat Rumah',
+        ]);
+
+        $candidate = LabantikRegistration::findOrFail($this->editId);
+        $candidate->update([
+            'full_name' => $this->edit_full_name,
+            'class_name' => $this->edit_class_name,
+            'jurusan_id' => $this->edit_jurusan_id ?: null,
+            'phone_number' => $this->edit_phone_number,
+            'parent_phone_number' => $this->edit_parent_phone_number,
+            'address' => $this->edit_address,
+            'reason' => $this->edit_reason,
+            'illness_history' => $this->edit_illness_history ?: null,
+        ]);
+
+        $this->showEditModal = false;
+        $this->dispatch('toast', message: 'Data calon anggota berhasil diperbarui!');
         $this->loadScoringData();
     }
 
