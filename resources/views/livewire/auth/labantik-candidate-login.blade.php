@@ -31,10 +31,10 @@
         <form wire:submit.prevent="loginCandidate" class="space-y-4">
             <div>
                 <label class="block text-xs font-bold text-gray-300 uppercase tracking-wider mb-1.5">
-                    Nama Depan
+                    Nama Depan <span class="text-primary-yellow text-[10px] lowercase">(huruf kapital)</span>
                 </label>
-                <input wire:model="firstName" type="text" required placeholder="Contoh: Ahmad"
-                    class="w-full px-3.5 sm:px-4 py-3 bg-gray-800 border border-gray-700 rounded-xl font-bold text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary-blue transition-all">
+                <input wire:model="firstName" type="text" required placeholder="Contoh: AHMAD"
+                    class="w-full px-3.5 sm:px-4 py-3 bg-gray-800 border border-gray-700 rounded-xl font-bold text-sm text-white uppercase focus:outline-none focus:ring-2 focus:ring-primary-blue transition-all">
             </div>
 
             <div>
