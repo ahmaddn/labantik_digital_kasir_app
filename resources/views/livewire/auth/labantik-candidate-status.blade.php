@@ -66,7 +66,7 @@
             </div>
 
             <button @click="confirmVolume()"
-                class="w-full py-3.5 bg-primary-blue hover:bg-blue-900 text-primary-yellow font-black text-xs uppercase tracking-widest rounded-xl shadow-lg transition-all active:scale-95">
+                class="w-full py-4 bg-amber-500 hover:bg-amber-600 text-gray-950 font-black text-xs sm:text-sm uppercase tracking-wider rounded-xl shadow-xl transition-all active:scale-95 border border-amber-400">
                 Saya Sudah Nyalakan Volume
             </button>
         </div>

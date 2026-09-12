@@ -46,7 +46,7 @@
             </div>
 
             <button type="submit"
-                class="w-full py-3.5 bg-primary-blue hover:bg-blue-900 text-primary-yellow font-black text-xs uppercase tracking-widest rounded-xl shadow-lg transition-all active:scale-95 mt-2">
+                class="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs sm:text-sm uppercase tracking-wider rounded-xl shadow-lg transition-all active:scale-95 mt-2">
                 Masuk & Cek Hasil
             </button>
         </form>
