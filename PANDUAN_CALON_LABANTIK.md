@@ -8,7 +8,7 @@ Petunjuk resmi bagi calon anggota untuk melakukan login dan memeriksa hasil peng
 
 1. **Akses Portal Login**:
    Buka peramban (browser) di HP atau Komputer Anda, lalu kunjungi URL berikut:
-   $$\text{http://domain-aplikasi/labantik/login}$$
+   http://tefa.smkn1talaga.sch.id/labantik/login
 
 2. **Masukkan Data Login**:
    * **Field Nama Depan**: Masukkan kata pertama dari nama lengkap pendaftaran Anda menggunakan **HURUF KAPITAL SEMUA**.
@@ -51,4 +51,4 @@ Petunjuk resmi bagi calon anggota untuk melakukan login dan memeriksa hasil peng
   - Berarti Anda masuk dalam kualifikasi 15 Besar / rekapitulasi nilai sedang berlangsung. Harap periksa halaman secara berkala.
 
 * **Jika Status TIDAK LOLOS**:
-  - Layar menampilkan pesan ucapan terima kasih & apresiasi motivasi dari panitia seleksi.
+  - Layar menampilkan pesan apresiasi & kata-kata motivasi penyemangat: *"Terima kasih banyak telah berjuang dan melangkah sejauh ini. Satu kesempatan yang belum berhasil bukanlah akhir dari perjalananmu, melainkan langkah awal menuju pintu sukses yang jauh lebih besar. Tetaplah belajar, bersinar, dan tunjukkan potensi terbaikmu! ✨💪"*.

@@ -111,7 +111,7 @@ Ketika calon anggota melakukan login ke portal `/labantik/login`, alur tampilan 
 
 4. **Tampilan 3: Status Tidak Lolos (`rejected`)**:
    - Terjadi jika peserta berada di luar 15 Besar ATAU pengelola mengeklik tombol **`Gagal`**.
-   - Tampilan pesan apresiasi, terima kasih, dan kalimat motivasi yang ramah dan bermartabat.
+   - Layar menampilkan pesan apresiasi & kalimat motivasi penyemangat: *"Ingatlah bahwa satu kesempatan yang belum berhasil bukanlah akhir dari perjalananmu, melainkan langkah menuju pintu sukses yang jauh lebih besar. Tetaplah belajar, bersinar, dan tunjukkan potensi terbaikmu! ✨💪"*.
    - Tanpa pemutaran musik/lagu maupun efek confetti.
 
 ---

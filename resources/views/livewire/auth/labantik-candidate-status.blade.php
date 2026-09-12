@@ -162,10 +162,10 @@
                         Pengumuman Seleksi
                     </span>
                     <h1 class="text-xl sm:text-3xl font-black text-white uppercase italic tracking-tight leading-tight">
-                        TETAP SEMANGAT & TERIMA KASIH!
+                        TETAP SEMANGAT & TERIMA KASIH ATAS PERJUANGANMU!
                     </h1>
-                    <p class="text-xs sm:text-sm font-semibold text-gray-400 max-w-md mx-auto leading-relaxed">
-                        Terima kasih banyak telah mendaftar dan mengikuti seluruh tahapan seleksi calon anggota Labantik. Walau kesempatan kali ini belum berpihak, perjuangan dan usaha Anda sangat luar biasa. Jangan pernah patah semangat!
+                    <p class="text-xs sm:text-sm font-semibold text-gray-400 max-w-lg mx-auto leading-relaxed">
+                        Terima kasih banyak telah berjuang dan melangkah sejauh ini dalam seluruh rangkaian seleksi calon anggota Labantik. Ingatlah bahwa satu kesempatan yang belum berhasil bukanlah akhir dari perjalananmu, melainkan langkah menuju pintu sukses yang jauh lebih besar. Tetaplah belajar, bersinar, dan tunjukkan potensi terbaikmu! ✨💪
                     </p>
                 </div>
             </div>
