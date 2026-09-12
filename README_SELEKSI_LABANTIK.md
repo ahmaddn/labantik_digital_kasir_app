@@ -28,8 +28,18 @@ Penilaian dan pengelolaan seleksi calon anggota Labantik dapat dilakukan oleh pe
 
 * **Pendaftaran**: Calon anggota mendaftar melalui form publik di `/labantik/form-registration`.
 * **Login Cek Hasil**: Calon anggota dapat memeriksa hasil seleksi secara mandiri di portal `/labantik/login` menggunakan:
-  1. **Nama Depan** (Sesuai nama pendaftaran)
-  2. **4 Digit Terakhir Nomor HP** (Sesuai nomor WhatsApp terdaftar)
+  1. **Nama Depan** (Kata pertama dari nama pendaftaran)
+  2. **4 Digit Terakhir Nomor HP** (4 angka terakhir dari nomor HP terdaftar)
+
+### Contoh Input Login Kandidat:
+
+| Data Pendaftaran Peserta | Input Field Nama Depan | Input Field 4 Digit No HP | Status Login |
+| :--- | :--- | :--- | :--- |
+| Nama: **Ahmad Najmy Al-Farisi**<br>No HP: `081234567890` | `Ahmad` | `7890` | **Berhasil Login** |
+| Nama: **Budi Santoso**<br>No HP: `085711223344` | `Budi` | `3344` | **Berhasil Login** |
+| Nama: **Siti Nurhaliza**<br>No HP: `089699887766` | `Siti` | `7766` | **Berhasil Login** |
+
+> *Catatan*: Huruf besar/kecil (case-insensitive) tidak berpengaruh saat mengetik nama depan. Sistem akan mencocokkan kata pertama dari nama lengkap peserta secara otomatis.
 
 ---
 
