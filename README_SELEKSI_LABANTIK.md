@@ -1,0 +1,102 @@
+# Panduan Lengkap & Mekanisme Penilaian Seleksi Calon Anggota Labantik
+
+Dokumen ini memuat panduan lengkap mengenai alur pendaftaran, mekanisme penilaian mingguan, rumus perhitungan skor akhir, hingga alur kelulusan 15 Besar untuk calon anggota Labantik. Dokumen ini dirancang rapi dan siap dikonversi ke format PDF.
+
+---
+
+## 1. Hak Akses & Ketentuan Penguji
+
+Penilaian dan pengelolaan seleksi calon anggota Labantik dapat dilakukan oleh pengguna dengan hak akses berikut:
+* **Super Admin**
+* **Pengelola Jurusan**
+* **Kasir Jurusan RPL** (Kasir dari jurusan yang terdaftar sebagai RPL)
+
+> **Catatan Pengisian Absensi & Nilai**:
+> 1. **Absensi (Hadir/Sakit/Izin/Alfa)**: Bersifat global per peserta per pekan dan **cukup diisi oleh 1 user saja**. Semua user yang memiliki akses bebas mengklik tombol absensi dan menginput alasan. Data absensi yang diisi akan langsung berlaku untuk peserta tersebut.
+> 2. **Nilai Akademik & Attitude**: Bebas diisi oleh masing-masing penguji/penilai. Jika terdapat lebih dari satu penguji yang memasukkan nilai untuk peserta yang sama di pekan tersebut, sistem akan secara otomatis menghitung **rata-rata dari seluruh penguji**.
+> 3. **Perubahan Data**: Nilai maupun absensi dapat ditinjau dan **diperbarui (di-edit) berkali-kali** selama masa seleksi berlangsung.
+
+---
+
+## 2. Alur Pendaftaran & Portal Login Calon
+
+```
+[ Form Pendaftaran Online ] ──► [ Database Calon Labantik ] ──► [ Penilaian Mingguan (Pekan 1-12) ]
+                                                                             │
+[ Tampilan Pengumuman Calon ] ◄── [ Seleksi Akhir 15 Besar ] ◄── [ Tombol Selesai Seleksi ]
+```
+
+* **Pendaftaran**: Calon anggota mendaftar melalui form publik di `/labantik/form-registration`.
+* **Login Cek Hasil**: Calon anggota dapat memeriksa hasil seleksi secara mandiri di portal `/labantik/login` menggunakan:
+  1. **Nama Depan** (Sesuai nama pendaftaran)
+  2. **4 Digit Terakhir Nomor HP** (Sesuai nomor WhatsApp terdaftar)
+
+---
+
+## 3. Komponen Penilaian Pekanan (Pekan 1 - 12)
+
+Pada setiap pekan kegiatan (Pekan 1 hingga 12), user menginput data berikut:
+
+| Komponen | Skala / Opsi | Pengisian | Keterangan & Ketentuan |
+| :--- | :--- | :--- | :--- |
+| **Kehadiran (Absensi)** | `H`, `S`, `I`, `A` | **Cukup 1 User** | **H (Hadir)**, **S (Sakit)**, **I (Izin)**, **A (Alfa)**. Alasan wajib diisi jika Sakit atau Izin. Berlaku untuk seluruh sistem. |
+| **Nilai Akademik** | `0 - 100` | **Multi-Penilai (Rata-rata)** | Nilai evaluasi tugas, materi, atau pemahaman teknis. Hanya aktif jika status kehadiran = **Hadir (H)**. |
+| **Nilai Attitude** | `0 - 100` | **Multi-Penilai (Rata-rata)** | Nilai kedisiplinan, etika, dan keaktifan. Hanya aktif jika status kehadiran = **Hadir (H)**. |
+
+---
+
+## 4. Rumus Perhitungan Skor Akhir Seleksi
+
+Saat proses penilaian selesai, pengelola mengeklik tombol **"Selesai Seleksi"**. Sistem akan mengalkulasi total skor seluruh pekan menggunakan rumus matematika sebagai berikut:
+
+$$\text{Skor Akhir} = \overline{\text{Nilai Akademik}} + \overline{\text{Nilai Attitude}} + (\text{Jumlah Hadir} \times 5) - (\text{Jumlah Alfa} \times 10) - (\text{Jumlah Izin} \times 2)$$
+
+### Bobot & Akumulasi Kehadiran:
+* **Hadir (H)**: Bonus $+5$ poin per pekan.
+* **Alfa (A)**: Penalti $-10$ poin per ketidakhadiran tanpa alasan.
+* **Izin (I)**: Penalti $-2$ poin per izin.
+* **Sakit (S)**: $0$ poin (tidak mengurangi maupun menambah skor).
+
+---
+
+## 5. Alur Pemeringkatan & Seleksi 15 Besar
+
+```
+                      ┌──► Rank 1 s.d 15  ──► Masuk 15 Besar ──► Pengelola Set Status: [Lolos] / [Gagal]
+[ Kalkulasi Skor ] ──┤
+                      └──► Rank 16+       ──► Otomatis Tidak Lolos
+```
+
+1. **Pemeringkatan Otomatis**:
+   Sistem mengurutkan seluruh peserta dari Skor Akhir tertinggi hingga terendah.
+2. **Kualifikasi 15 Besar**:
+   - **Peringkat 1 hingga 15**: Dimasukkan ke dalam tab **"Lolos Seleksi (15 Besar)"** dengan status awal `BELUM DITENTUKAN` (`pending`).
+   - **Peringkat 16 ke bawah**: Otomatis berstatus `TIDAK LOLOS` (`rejected`).
+3. **Seleksi Tingkat 2 (Pengelola)**:
+   Di tab 15 Besar, pengelola memiliki kewenangan penuh untuk menetapkan keputusan akhir:
+   - **Tombol `Lolos`**: Menetapkan peserta **Lolos Seleksi Akhir** (`passed`).
+   - **Tombol `Gagal`**: Menetapkan peserta **Tidak Lolos** (`rejected`).
+
+---
+
+## 6. Alur Tampilan Saat Calon Membereskan Login
+
+Ketika calon anggota melakukan login ke portal `/labantik/login`:
+
+1. **Modal Peringatan Volume (Pop-up)**:
+   - Sebelum hasil dapat dilihat, layar menampilkan modal peringatan: *"Silakan nyalakan dan besarkan volume perangkat Anda sebelum melanjutkan!"*.
+   - Modal akan hilang begitu tombol *"Saya Sudah Nyalakan Volume"* diklik.
+
+2. **Jika Calon Lolos Seleksi Akhir (`passed`)**:
+   - Tampilan selebrasi mewah bernuansa hijau/emas.
+   - Efek hujan **Canvas Confetti** otomatis menyala di layar.
+   - Lagu selebrasi *"Terimakasih Sudah Bertahan - Ghea Indrawari"* terputar secara otomatis.
+   - Tersedia tombol hijau mencolok untuk **Gabung Grup WhatsApp Resmi Labantik**.
+
+3. **Jika Calon Tidak Lolos (`rejected`)**:
+   - Tampilan pesanan apresiasi & semangat yang ramah dan bermartabat.
+   - Tanpa pemutaran musik/lagu.
+
+---
+
+*Dokumen ini dapat langsung dicetak atau di-export ke format PDF melalui browser (Ctrl + P -> Save as PDF).*

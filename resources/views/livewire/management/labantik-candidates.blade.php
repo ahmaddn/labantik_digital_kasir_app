@@ -274,16 +274,11 @@
         'alfa' => ['A', 'bg-red-500 hover:bg-red-650 text-white shadow-md shadow-red-500/20', 'Alfa'],
     ] as $status => $meta)
                                             <button type="button"
-                                                @if($isNajmy)
-                                                    wire:click="$set('attendances.{{ $candidate->id }}.status', '{{ $status }}')"
-                                                @else
-                                                    disabled
-                                                @endif
+                                                wire:click="$set('attendances.{{ $candidate->id }}.status', '{{ $status }}')"
                                                 class="w-9 h-9 rounded-lg font-black text-xs transition-all flex items-center justify-center
                                                 {{ ($attendances[$candidate->id]['status'] ?? 'hadir') === $status
                                                     ? $meta[1]
-                                                    : 'text-gray-400 dark:text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-900' }}
-                                                disabled:opacity-50 disabled:cursor-not-allowed"
+                                                    : 'text-gray-400 dark:text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-900' }}"
                                                 title="{{ $meta[2] }}">
                                                 {{ $meta[0] }}
                                             </button>
@@ -298,8 +293,7 @@
                                     @if ($showReason)
                                         <input type="text" wire:model="attendances.{{ $candidate->id }}.reason"
                                             placeholder="Tulis alasan {{ $statusVal }} (Wajib)..."
-                                            {{ !$isNajmy ? 'disabled' : '' }}
-                                            class="w-full px-4 py-2 bg-gray-55 dark:bg-gray-955 border border-dashed border-red-300 dark:border-red-800/40 rounded-xl font-semibold text-xs text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-red-500/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+                                            class="w-full px-4 py-2 bg-gray-55 dark:bg-gray-955 border border-dashed border-red-300 dark:border-red-800/40 rounded-xl font-semibold text-xs text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-red-500/20 transition-all">
                                     @else
                                         <span class="text-xs text-gray-400 dark:text-gray-600 italic">Hadir/Alfa tidak
                                             perlu alasan</span>
