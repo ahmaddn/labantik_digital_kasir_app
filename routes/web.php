@@ -30,6 +30,8 @@ Route::get('/', function () {
 })->name('home');
 
 Route::get('/labantik/form-registration', \App\Livewire\Auth\FormRegistration::class)->name('labantik.form-registration');
+Route::get('/labantik/login', \App\Livewire\Auth\LabantikCandidateLogin::class)->name('labantik.login');
+Route::get('/labantik/status', \App\Livewire\Auth\LabantikCandidateStatus::class)->name('labantik.status');
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/select-role', SelectRole::class)->name('select-role');

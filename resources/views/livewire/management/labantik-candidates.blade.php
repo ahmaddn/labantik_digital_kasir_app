@@ -359,7 +359,9 @@
                                 Rata-rata Nilai</th>
                             <th class="py-4 px-6 text-xs font-black uppercase tracking-widest text-center w-36">Skor
                                 Akhir</th>
-                            <th class="py-4 px-6 text-xs font-black uppercase tracking-widest text-right pr-6 w-24">
+                            <th class="py-4 px-6 text-xs font-black uppercase tracking-widest text-center w-40">
+                                Status Seleksi</th>
+                            <th class="py-4 px-6 text-xs font-black uppercase tracking-widest text-right pr-6 w-48">
                                 Aksi</th>
                         </tr>
                     </thead>
@@ -403,18 +405,49 @@
                                         {{ number_format($ac->final_score, 1) }}
                                     </span>
                                 </td>
+                                <td class="py-4 px-6 text-center">
+                                    @if ($ac->final_status === 'passed')
+                                        <span class="px-3 py-1.5 bg-emerald-100 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-400 font-black rounded-xl text-xs tracking-wider inline-flex items-center gap-1 border border-emerald-300 dark:border-emerald-800">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                                            LOLOS
+                                        </span>
+                                    @elseif ($ac->final_status === 'rejected')
+                                        <span class="px-3 py-1.5 bg-rose-100 text-rose-700 dark:bg-rose-950/50 dark:text-rose-400 font-black rounded-xl text-xs tracking-wider inline-flex items-center gap-1 border border-rose-300 dark:border-rose-800">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                                            TIDAK LOLOS
+                                        </span>
+                                    @else
+                                        <span class="px-3 py-1.5 bg-amber-100 text-amber-700 dark:bg-amber-950/50 dark:text-amber-400 font-black rounded-xl text-xs tracking-wider border border-amber-300 dark:border-amber-800">
+                                            BELUM DITENTUKAN
+                                        </span>
+                                    @endif
+                                </td>
                                 <td class="py-4 px-6 text-right pr-6">
-                                    <button type="button" wire:click="showDetails('{{ $ac->id }}')"
-                                        title="Detail Seleksi"
-                                        class="p-2.5 bg-primary-blue hover:bg-blue-900 text-primary-yellow rounded-xl transition-all active:scale-95 shadow-md">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5"
-                                            viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.43 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
-                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                        </svg>
-                                    </button>
+                                    <div class="flex items-center justify-end gap-2">
+                                        @if ($isPengelola)
+                                            <button type="button" wire:click="updateFinalStatus('{{ $ac->id }}', 'passed')"
+                                                title="Set Lolos Seleksi"
+                                                class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-black uppercase tracking-wider transition-all active:scale-95 shadow">
+                                                Lolos
+                                            </button>
+                                            <button type="button" wire:click="updateFinalStatus('{{ $ac->id }}', 'rejected')"
+                                                title="Set Tidak Lolos"
+                                                class="px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-black uppercase tracking-wider transition-all active:scale-95 shadow">
+                                                Gagal
+                                            </button>
+                                        @endif
+                                        <button type="button" wire:click="showDetails('{{ $ac->id }}')"
+                                            title="Detail Seleksi"
+                                            class="p-2 bg-primary-blue hover:bg-blue-900 text-primary-yellow rounded-xl transition-all active:scale-95 shadow-md">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5"
+                                                viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                    d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.43 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                            </svg>
+                                        </button>
+                                    </div>
                                 </td>
                             </tr>
                         @empty

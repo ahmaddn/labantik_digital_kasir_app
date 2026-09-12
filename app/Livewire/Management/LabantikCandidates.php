@@ -215,6 +215,7 @@ class LabantikCandidates extends Component
         // Reset accepted status first
         foreach ($candidates as $c) {
             $c->is_accepted = false;
+            $c->final_status = 'rejected';
             $c->save();
         }
 
@@ -246,11 +247,31 @@ class LabantikCandidates extends Component
         $top15 = array_slice($calculated, 0, 15);
         foreach ($top15 as $item) {
             $item['candidate']->is_accepted = true;
+            $item['candidate']->final_status = 'pending';
             $item['candidate']->save();
         }
 
         $this->activeTab = 'accepted';
         $this->dispatch('toast', message: 'Proses seleksi selesai! 15 calon terbaik telah terpilih.');
+    }
+
+    public function updateFinalStatus(string $candidateId, string $status): void
+    {
+        if (!$this->checkPermission()) {
+            $this->dispatch('toast', message: 'Hanya pengelola / superadmin yang dapat merubah status seleksi.');
+            return;
+        }
+
+        if (!in_array($status, ['passed', 'rejected', 'pending'])) {
+            return;
+        }
+
+        $candidate = LabantikRegistration::findOrFail($candidateId);
+        $candidate->final_status = $status;
+        $candidate->save();
+
+        $statusText = $status === 'passed' ? 'LOLOS SELEKSI' : ($status === 'rejected' ? 'TIDAK LOLOS' : 'PENDING');
+        $this->dispatch('toast', message: "Status seleksi {$candidate->full_name} berhasil diubah menjadi {$statusText}.");
     }
 
     public function showDetails(string $id): void

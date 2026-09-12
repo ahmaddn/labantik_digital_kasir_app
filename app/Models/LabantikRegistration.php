@@ -23,12 +23,23 @@ class LabantikRegistration extends Model
         'illness_history',
         'is_joined_group',
         'is_accepted',
+        'final_status',
     ];
 
     protected $casts = [
         'is_joined_group' => 'boolean',
         'is_accepted' => 'boolean',
     ];
+
+    public function isFinalPassed(): bool
+    {
+        return $this->is_accepted && $this->final_status === 'passed';
+    }
+
+    public function isFinalRejected(): bool
+    {
+        return !$this->is_accepted || $this->final_status === 'rejected';
+    }
 
     public function jurusan(): BelongsTo
     {
