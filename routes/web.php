@@ -175,6 +175,7 @@ Route::middleware(['auth', 'verified', EnsureRoleSelected::class])->group(functi
 
     // Cashier Scheduling & Tasks & Attendance Reports
     Route::get('/management/schedules', \App\Livewire\Management\CashierScheduling::class)->name('schedules');
+    Route::get('/management/documentation-schedules', \App\Livewire\Management\DocumentationScheduling::class)->name('documentation-schedules');
     Route::get('/management/tasks', \App\Livewire\Management\CashierTasks::class)->name('tasks');
     Route::get('/my-tasks', \App\Livewire\Reports\MyTasks::class)->name('my-tasks');
     Route::get('/reports/attendances', \App\Livewire\Reports\AttendanceReport::class)->name('attendances');

@@ -127,4 +127,12 @@ class User extends Authenticatable
     {
         return $this->hasMany(CashierAttendance::class, 'user_id');
     }
+
+    /**
+     * Relasi untuk penugasan dokumentasi (DocumentationSchedule)
+     */
+    public function documentationSchedules()
+    {
+        return $this->hasMany(DocumentationSchedule::class, 'user_id');
+    }
 }
