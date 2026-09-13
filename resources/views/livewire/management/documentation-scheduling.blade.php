@@ -346,8 +346,9 @@
                 </div>
 
                 <div class="bg-blue-50 dark:bg-blue-950/30 rounded-2xl p-4 border border-blue-100 dark:border-blue-900/50 text-xs text-blue-700 dark:text-blue-300 space-y-1">
-                    <p class="font-bold uppercase tracking-wider">Algoritma Pemerataan Shift Dokumentasi:</p>
-                    <p>Sistem akan memprioritaskan kasir yang memiliki <strong>riwayat akumulasi penugasan paling sedikit</strong> agar distribusi tugas dokumentasi berjalan adil.</p>
+                    <p class="font-bold uppercase tracking-wider">Algoritma Anti-Bentrok & Pemerataan Shift:</p>
+                    <p>1. Memprioritaskan kasir dengan <strong>riwayat penugasan paling sedikit</strong>.</p>
+                    <p>2. Otomatis <strong>menghindari kasir yang sedang piket kasir</strong> pada tanggal tersebut agar tidak bentrok.</p>
                 </div>
 
                 <form wire:submit.prevent="randomizeSchedules" class="space-y-4">

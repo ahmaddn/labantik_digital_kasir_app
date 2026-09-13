@@ -193,7 +193,17 @@ class DocumentationScheduling extends Component
             ->exists();
 
         if ($alreadyScheduled) {
-            $this->dispatch('toast', message: 'Kasir sudah ditugaskan pada tanggal tersebut.', type: 'danger');
+            $this->dispatch('toast', message: 'Kasir sudah ditugaskan dokumentasi pada tanggal tersebut.', type: 'danger');
+            return;
+        }
+
+        $hasCashierShift = DB::table('cashier_schedules')
+            ->where('user_id', $this->selectedUserId)
+            ->where('date', $this->date)
+            ->exists();
+
+        if ($hasCashierShift) {
+            $this->dispatch('toast', message: 'Kasir ini sudah memiliki jadwal piket kasir pada tanggal tersebut. Pilihlah kasir/tanggal lain agar tidak bentrok.', type: 'danger');
             return;
         }
 
@@ -356,6 +366,15 @@ class DocumentationScheduling extends Component
                     ->whereBetween('date', [$startDate->toDateString(), $endDate->toDateString()])
                     ->delete();
 
+                // Map existing cashier shifts (cashier_schedules) to prevent clashes
+                $cashierShiftMap = DB::table('cashier_schedules')
+                    ->whereIn('user_id', $cashierUsers->pluck('id'))
+                    ->whereBetween('date', [$startDate->toDateString(), $endDate->toDateString()])
+                    ->get()
+                    ->groupBy(function ($item) {
+                        return $item->user_id . '_' . $item->date;
+                    });
+
                 // Ambil total akumulasi riwayat penugasan dokumentasi global masing-masing kasir
                 $globalSchedulesCount = DB::table('documentation_schedules')
                     ->where('jurusan_id', $activeJurusanId)
@@ -411,7 +430,8 @@ class DocumentationScheduling extends Component
                                 for ($slot = 0; $slot < $quota; $slot++) {
                                     $candIdx = null;
                                     foreach ($tempGradePools[$g] as $idx => $uid) {
-                                        if (!in_array($uid, $dayAssigned)) {
+                                        $hasCashierShift = isset($cashierShiftMap[$uid . '_' . $day]);
+                                        if (!in_array($uid, $dayAssigned) && !$hasCashierShift) {
                                             $candIdx = $idx;
                                             break;
                                         }
@@ -473,7 +493,8 @@ class DocumentationScheduling extends Component
                             for ($slot = 0; $slot < $this->maxCashiersPerDay; $slot++) {
                                 $candidateIndex = null;
                                 foreach ($tempPool as $idx => $uid) {
-                                    if (!in_array($uid, $dayAssigned)) {
+                                    $hasCashierShift = isset($cashierShiftMap[$uid . '_' . $day]);
+                                    if (!in_array($uid, $dayAssigned) && !$hasCashierShift) {
                                         $candidateIndex = $idx;
                                         break;
                                     }
@@ -504,7 +525,7 @@ class DocumentationScheduling extends Component
                 }
 
                 if (!$success) {
-                    throw new \Exception('Gagal mendistribusikan penugasan dokumentasi secara merata. Silakan coba lagi.');
+                    throw new \Exception('Gagal mendistribusikan penugasan dokumentasi tanpa bentrok dengan jadwal piket kasir. Pastikan jumlah anggota kasir mencukupi.');
                 }
 
                 foreach ($assignedSchedules as $sched) {
@@ -525,7 +546,7 @@ class DocumentationScheduling extends Component
         }
 
         $this->showRandomModal = false;
-        $this->dispatch('toast', message: 'Penugasan dokumentasi berhasil dirandomize secara adil!');
+        $this->dispatch('toast', message: 'Penugasan dokumentasi berhasil dirandomize tanpa bentrok dengan piket kasir!');
     }
 
     public function confirmDeleteSchedule($id)
