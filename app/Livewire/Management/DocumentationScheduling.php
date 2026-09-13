@@ -544,6 +544,60 @@ class DocumentationScheduling extends Component
         }
     }
 
+    public function exportExcel()
+    {
+        if (!$this->selectedActivityId) {
+            $this->dispatch('toast', message: 'Pilih kegiatan dokumentasi terlebih dahulu.', type: 'danger');
+            return;
+        }
+
+        $activity = DocumentationActivity::find($this->selectedActivityId);
+        if (!$activity) return;
+
+        $schedules = DocumentationSchedule::with('user')
+            ->where('activity_id', $activity->id)
+            ->orderBy('date')
+            ->get();
+
+        $slugTitle = \Illuminate\Support\Str::slug($activity->title);
+        $fileName = 'Jadwal_Dokumentasi_' . $slugTitle . '.csv';
+
+        $headers = [
+            "Content-type" => "text/csv; charset=UTF-8",
+            "Content-Disposition" => "attachment; filename=$fileName",
+            "Pragma" => "no-cache",
+            "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
+            "Expires" => "0"
+        ];
+
+        $callback = function () use ($activity, $schedules) {
+            $file = fopen('php://output', 'w');
+            fputs($file, "\xEF\xBB\xBF");
+
+            fputcsv($file, ['KEGIATAN DOKUMENTASI:', $activity->title]);
+            fputcsv($file, ['PERIODE:', $activity->start_date->format('d/m/Y') . ' s/d ' . $activity->end_date->format('d/m/Y')]);
+            fputcsv($file, ['DESKRIPSI:', $activity->description]);
+            fputcsv($file, []);
+            fputcsv($file, ['NO', 'TANGGAL', 'HARI', 'NAMA KASIR', 'TINGKATAN', 'CATATAN TUGAS']);
+
+            $no = 1;
+            foreach ($schedules as $sched) {
+                fputcsv($file, [
+                    $no++,
+                    $sched->date->format('d/m/Y'),
+                    $sched->date->translatedFormat('l'),
+                    $sched->user ? $sched->user->name : '-',
+                    $sched->user && $sched->user->grade_level ? 'Tingkat ' . $sched->user->grade_level : '-',
+                    $sched->notes,
+                ]);
+            }
+
+            fclose($file);
+        };
+
+        return response()->streamDownload($callback, $fileName, $headers);
+    }
+
     public function render()
     {
         $activeRole = session('active_role_name') ?? (auth()->user()?->roles->first()?->name ?? 'kasir');

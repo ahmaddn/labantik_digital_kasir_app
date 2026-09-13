@@ -43,6 +43,16 @@
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path></svg>
                         Tambah Penugasan
                     </button>
+
+                    <button wire:click="exportExcel" class="flex-1 sm:flex-initial inline-flex items-center justify-center px-4 py-3 bg-green-600 hover:bg-green-700 text-white rounded-xl font-black text-xs uppercase italic tracking-wider transition-all duration-300 shadow-xl shadow-green-900/10 active:scale-95">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                        Excel
+                    </button>
+
+                    <button type="button" onclick="exportDocScheduleToImage()" class="flex-1 sm:flex-initial inline-flex items-center justify-center px-4 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-black text-xs uppercase italic tracking-wider transition-all duration-300 shadow-xl shadow-indigo-900/10 active:scale-95">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                        Gambar
+                    </button>
                 @endif
             @endif
         </div>
@@ -105,7 +115,7 @@
 
     <!-- Schedules Grid View -->
     @if($activeActivity)
-        <div class="p-6 bg-white dark:bg-gray-900 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-md space-y-6">
+        <div id="doc-schedule-capture-area" class="p-6 bg-white dark:bg-gray-900 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-md space-y-6">
             <div class="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 pb-4">
                 <div>
                     <h2 class="text-xl font-bold uppercase tracking-tight text-primary-blue dark:text-primary-yellow">Jadwal Tugas Dokumentasi</h2>
@@ -421,3 +431,34 @@
         </div>
     @endif
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/dist/html-to-image.min.js"></script>
+<script>
+    function exportDocScheduleToImage() {
+        const element = document.getElementById('doc-schedule-capture-area');
+        if (!element) return;
+
+        htmlToImage.toPng(element, {
+            quality: 0.95,
+            pixelRatio: 2,
+            backgroundColor: document.documentElement.classList.contains('dark') ? '#111827' : '#ffffff',
+            skipFonts: true,
+            filter: (node) => {
+                if (node.tagName === 'BUTTON' || (node.classList && node.classList.contains('capture-exclude'))) {
+                    return false;
+                }
+                return true;
+            }
+        })
+        .then(function (dataUrl) {
+            const link = document.createElement('a');
+            let titleStr = '{{ $activeActivity ? \Illuminate\Support\Str::slug($activeActivity->title) : "Dokumentasi" }}';
+            link.download = 'Jadwal_Dokumentasi_' + titleStr + '.png';
+            link.href = dataUrl;
+            link.click();
+        })
+        .catch(function (error) {
+            console.error('Oops, export image error:', error);
+        });
+    }
+</script>
