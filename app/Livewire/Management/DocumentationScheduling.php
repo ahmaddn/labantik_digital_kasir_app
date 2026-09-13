@@ -14,6 +14,7 @@ class DocumentationScheduling extends Component
 {
     // Activity State
     public $selectedActivityId = '';
+    public $selectedJurusanId = '';
     public $activityTitle = '';
     public $activityStartDate = '';
     public $activityEndDate = '';
@@ -49,8 +50,9 @@ class DocumentationScheduling extends Component
         $this->activityStartDate = now()->toDateString();
         $this->activityEndDate = now()->addDays(6)->toDateString();
         $this->date = now()->toDateString();
+        $this->selectedJurusanId = session('active_jurusan_id') ?? '';
 
-        $activeJurusanId = session('active_jurusan_id');
+        $activeJurusanId = session('active_jurusan_id') ?: ($this->selectedJurusanId ?: null);
         $latestActivity = DocumentationActivity::when($activeJurusanId, function ($q) use ($activeJurusanId) {
             $q->where('jurusan_id', $activeJurusanId);
         })->latest('created_at')->first();
@@ -90,35 +92,40 @@ class DocumentationScheduling extends Component
             'activityDescription' => 'nullable|string|max:1000',
         ]);
 
-        $activeJurusanId = session('active_jurusan_id');
+        $activeJurusanId = session('active_jurusan_id') ?: ($this->selectedJurusanId ?: null);
+
         if (!$activeJurusanId && session('active_role_name') !== 'superadmin') {
             $this->dispatch('toast', message: 'Silakan pilih jurusan terlebih dahulu.', type: 'danger');
             return;
         }
 
-        if ($this->editingActivityId) {
-            $activity = DocumentationActivity::findOrFail($this->editingActivityId);
-            $activity->update([
-                'title' => $this->activityTitle,
-                'start_date' => $this->activityStartDate,
-                'end_date' => $this->activityEndDate,
-                'description' => $this->activityDescription,
-            ]);
-            $this->dispatch('toast', message: 'Kegiatan dokumentasi berhasil diperbarui.');
-        } else {
-            $activity = DocumentationActivity::create([
-                'jurusan_id' => $activeJurusanId,
-                'title' => $this->activityTitle,
-                'start_date' => $this->activityStartDate,
-                'end_date' => $this->activityEndDate,
-                'description' => $this->activityDescription,
-                'created_by' => auth()->id(),
-            ]);
-            $this->selectedActivityId = $activity->id;
-            $this->dispatch('toast', message: 'Kegiatan dokumentasi berhasil dibuat.');
-        }
+        try {
+            if ($this->editingActivityId) {
+                $activity = DocumentationActivity::findOrFail($this->editingActivityId);
+                $activity->update([
+                    'title' => $this->activityTitle,
+                    'start_date' => $this->activityStartDate,
+                    'end_date' => $this->activityEndDate,
+                    'description' => $this->activityDescription,
+                ]);
+                $this->dispatch('toast', message: 'Kegiatan dokumentasi berhasil diperbarui.');
+            } else {
+                $activity = DocumentationActivity::create([
+                    'jurusan_id' => $activeJurusanId ?: null,
+                    'title' => $this->activityTitle,
+                    'start_date' => $this->activityStartDate,
+                    'end_date' => $this->activityEndDate,
+                    'description' => $this->activityDescription,
+                    'created_by' => auth()->id(),
+                ]);
+                $this->selectedActivityId = $activity->id;
+                $this->dispatch('toast', message: 'Kegiatan dokumentasi berhasil dibuat.');
+            }
 
-        $this->showActivityModal = false;
+            $this->showActivityModal = false;
+        } catch (\Exception $e) {
+            $this->dispatch('toast', message: 'Gagal menyimpan kegiatan: ' . $e->getMessage(), type: 'danger');
+        }
     }
 
     public function confirmDeleteActivity($id)
@@ -190,25 +197,29 @@ class DocumentationScheduling extends Component
             return;
         }
 
-        $schedule = DocumentationSchedule::create([
-            'activity_id' => $activity->id,
-            'jurusan_id' => $activity->jurusan_id,
-            'user_id' => $this->selectedUserId,
-            'date' => $this->date,
-            'notes' => $this->notes ?: 'Tugas Dokumentasi',
-            'created_by' => auth()->id(),
-        ]);
+        try {
+            $schedule = DocumentationSchedule::create([
+                'activity_id' => $activity->id,
+                'jurusan_id' => $activity->jurusan_id,
+                'user_id' => $this->selectedUserId,
+                'date' => $this->date,
+                'notes' => $this->notes ?: 'Tugas Dokumentasi',
+                'created_by' => auth()->id(),
+            ]);
 
-        \App\Models\Notification::create([
-            'user_id' => $this->selectedUserId,
-            'title' => 'Tugas Dokumentasi Baru',
-            'body' => 'Anda ditugaskan dokumentasi ' . $activity->title . ' pada ' . Carbon::parse($this->date)->translatedFormat('d M Y'),
-            'type' => 'system',
-            'action_url' => '/management/documentation-schedules'
-        ]);
+            \App\Models\Notification::create([
+                'user_id' => $this->selectedUserId,
+                'title' => 'Tugas Dokumentasi Baru',
+                'body' => 'Anda ditugaskan dokumentasi ' . $activity->title . ' pada ' . Carbon::parse($this->date)->translatedFormat('d M Y'),
+                'type' => 'system',
+                'action_url' => '/management/documentation-schedules'
+            ]);
 
-        $this->showScheduleModal = false;
-        $this->dispatch('toast', message: 'Penugasan dokumentasi berhasil ditambahkan!');
+            $this->showScheduleModal = false;
+            $this->dispatch('toast', message: 'Penugasan dokumentasi berhasil ditambahkan!');
+        } catch (\Exception $e) {
+            $this->dispatch('toast', message: 'Gagal menambah penugasan: ' . $e->getMessage(), type: 'danger');
+        }
     }
 
     public function openRandomModal()
@@ -536,7 +547,8 @@ class DocumentationScheduling extends Component
             abort(403, 'Unauthorized.');
         }
 
-        $activeJurusanId = session('active_jurusan_id');
+        $activeJurusanId = session('active_jurusan_id') ?: ($this->selectedJurusanId ?: null);
+        $jurusans = Jurusan::all();
 
         // Fetch Activities
         $activities = DocumentationActivity::when($activeJurusanId, function ($q) use ($activeJurusanId) {
@@ -598,6 +610,7 @@ class DocumentationScheduling extends Component
             'daysList' => $daysList,
             'cashiers' => $cashiers,
             'cashierStats' => $cashierStats,
+            'jurusans' => $jurusans,
         ])->layout('layouts.app', ['title' => 'Jadwal Dokumentasi Labantik']);
     }
 }

@@ -6,6 +6,17 @@
             <p class="text-gray-400 text-xs md:text-sm font-semibold uppercase tracking-widest mt-1">Kelola penugasan dokumentasi kegiatan khusus anggota kasir</p>
         </div>
         <div class="flex flex-wrap items-center gap-3">
+            @if(session('active_role_name') === 'superadmin')
+                <div class="w-full sm:w-64">
+                    <select wire:model.live="selectedJurusanId" class="w-full px-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-semibold text-gray-700 dark:text-gray-200">
+                        <option value="">-- Pilih Jurusan --</option>
+                        @foreach($jurusans as $j)
+                            <option value="{{ $j->id }}">{{ $j->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+            @endif
+
             @if(in_array(session('active_role_name'), ['superadmin', 'pengelola_jurusan']))
                 <button wire:click="openCreateActivityModal" class="flex-1 sm:flex-initial inline-flex items-center justify-center px-4 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-black text-xs uppercase italic tracking-wider transition-all duration-300 shadow-xl shadow-emerald-900/10 active:scale-95">
                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
