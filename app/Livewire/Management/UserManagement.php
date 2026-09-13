@@ -67,7 +67,7 @@ class UserManagement extends Component
             });
         })
         ->latest()
-        ->paginate(10);
+        ->paginate(10, ['*'], 'page', $this->getPage());
 
         $currentPageIds = $currentPageUsers->pluck('id')->map(fn($id) => (string) $id)->toArray();
 

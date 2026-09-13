@@ -88,9 +88,9 @@
                 </thead>
                 <tbody class="divide-y divide-gray-50 dark:divide-gray-700/50">
                     @forelse($users as $user)
-                        <tr class="group hover:bg-gray-50/50 dark:hover:bg-gray-900/30 transition-colors">
+                        <tr wire:key="user-row-{{ $user->id }}" class="group hover:bg-gray-50/50 dark:hover:bg-gray-900/30 transition-colors">
                             <td class="py-5 pl-4">
-                                <input type="checkbox" wire:model.live="selectedUsers" value="{{ $user->id }}" class="w-4 h-4 rounded border-gray-300 text-primary-blue focus:ring-primary-blue cursor-pointer">
+                                <input type="checkbox" wire:key="chk-desktop-{{ $user->id }}" wire:model.live="selectedUsers" value="{{ $user->id }}" class="w-4 h-4 rounded border-gray-300 text-primary-blue focus:ring-primary-blue cursor-pointer">
                             </td>
                             <td class="py-5">
                                 <div class="flex items-center">
@@ -166,9 +166,9 @@
         <!-- Mobile View (Cards) -->
         <div class="block md:hidden space-y-4">
             @forelse($users as $user)
-                <div class="p-6 bg-gray-50 dark:bg-gray-900 rounded-3xl border border-gray-100 dark:border-gray-800 space-y-4">
+                <div wire:key="user-card-{{ $user->id }}" class="p-6 bg-gray-50 dark:bg-gray-900 rounded-3xl border border-gray-100 dark:border-gray-800 space-y-4">
                     <div class="flex items-center gap-3">
-                        <input type="checkbox" wire:model.live="selectedUsers" value="{{ $user->id }}" class="w-4 h-4 rounded border-gray-300 text-primary-blue focus:ring-primary-blue cursor-pointer">
+                        <input type="checkbox" wire:key="chk-mobile-{{ $user->id }}" wire:model.live="selectedUsers" value="{{ $user->id }}" class="w-4 h-4 rounded border-gray-300 text-primary-blue focus:ring-primary-blue cursor-pointer">
                         <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-black text-sm shadow-md">
                             {{ $user->initials() }}
                         </div>
