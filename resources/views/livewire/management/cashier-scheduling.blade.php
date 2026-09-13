@@ -87,7 +87,7 @@
                     <div class="flex-1 space-y-3">
                         @forelse($daySchedules as $sched)
                             <div class="bg-white dark:bg-gray-900 rounded-2xl p-4 border border-gray-150 dark:border-gray-800 relative group shadow-sm">
-                                <div class="flex items-start justify-between gap-1">
+                                <div class="flex items-start justify-between gap-1 pr-7">
                                     <h4 class="font-bold text-gray-800 dark:text-white text-sm">{{ $sched->user->name }}</h4>
                                     @if($sched->user->grade_level)
                                         @php
@@ -109,8 +109,8 @@
                                 @endif
                                 
                                 @if(in_array(session('active_role_name'), ['superadmin', 'pengelola_jurusan']))
-                                    <button wire:click="confirmDelete('{{ $sched->id }}')" class="absolute top-2 right-2 p-1 text-gray-400 hover:text-red-500 rounded-lg bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 opacity-0 group-hover:opacity-100 transition-opacity">
-                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                    <button wire:click="confirmDelete('{{ $sched->id }}')" title="Hapus Jadwal" class="absolute top-2.5 right-2.5 p-1.5 text-gray-400 hover:text-red-500 dark:text-gray-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 rounded-xl transition-all">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                                     </button>
                                 @endif
                             </div>
