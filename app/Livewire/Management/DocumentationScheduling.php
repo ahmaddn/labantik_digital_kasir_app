@@ -545,59 +545,67 @@ class DocumentationScheduling extends Component
         $activeRole = session('active_role_name') ?? (auth()->user()?->roles->first()?->name ?? 'kasir');
         $activeJurusanId = session('active_jurusan_id') ?: ($this->selectedJurusanId ?: null);
         $jurusans = Jurusan::all();
+        $dbError = null;
 
-        // Fetch Activities
-        $activities = DocumentationActivity::when($activeJurusanId, function ($q) use ($activeJurusanId) {
-            $q->where('jurusan_id', $activeJurusanId);
-        })
-        ->latest('start_date')
-        ->get();
-
-        // Selected Activity Details & Schedules
+        $activities = collect();
         $activeActivity = null;
         $activitySchedules = collect();
         $daysList = [];
+        $cashiers = collect();
+        $cashierStats = collect();
 
-        if ($this->selectedActivityId) {
-            $activeActivity = $activities->firstWhere('id', $this->selectedActivityId);
-            if ($activeActivity) {
-                $activitySchedules = DocumentationSchedule::with('user')
-                    ->where('activity_id', $activeActivity->id)
-                    ->orderBy('date')
-                    ->get();
+        try {
+            // Fetch Activities
+            $activities = DocumentationActivity::when($activeJurusanId, function ($q) use ($activeJurusanId) {
+                $q->where('jurusan_id', $activeJurusanId);
+            })
+            ->latest('start_date')
+            ->get();
 
-                // Days list between start and end date
-                $tempDate = $activeActivity->start_date->copy();
-                while ($tempDate->lte($activeActivity->end_date)) {
-                    $daysList[] = $tempDate->copy();
-                    $tempDate->addDay();
+            // Selected Activity Details & Schedules
+            if ($this->selectedActivityId) {
+                $activeActivity = $activities->firstWhere('id', $this->selectedActivityId);
+                if ($activeActivity) {
+                    $activitySchedules = DocumentationSchedule::with('user')
+                        ->where('activity_id', $activeActivity->id)
+                        ->orderBy('date')
+                        ->get();
+
+                    // Days list between start and end date
+                    $tempDate = $activeActivity->start_date->copy();
+                    while ($tempDate->lte($activeActivity->end_date)) {
+                        $daysList[] = $tempDate->copy();
+                        $tempDate->addDay();
+                    }
                 }
             }
+
+            // Fetch Cashiers
+            $cashiers = User::whereHas('roles', function ($q) use ($activeJurusanId) {
+                $q->where('roles.name', 'kasir')
+                    ->when($activeJurusanId, function ($sq) use ($activeJurusanId) {
+                        $sq->where('role_user.jurusan_id', $activeJurusanId);
+                    });
+            })->get();
+
+            // Akumulasi riwayat tugas dokumentasi global per kasir
+            $allDocSchedules = DocumentationSchedule::when($activeJurusanId, function ($q) use ($activeJurusanId) {
+                $q->where('jurusan_id', $activeJurusanId);
+            })->get();
+
+            $cashierStats = $cashiers->map(function ($cashier) use ($allDocSchedules) {
+                $count = $allDocSchedules->where('user_id', $cashier->id)->count();
+                return [
+                    'id' => $cashier->id,
+                    'name' => $cashier->name,
+                    'email' => $cashier->email,
+                    'grade_level' => $cashier->grade_level,
+                    'doc_count' => $count,
+                ];
+            })->sortByDesc('doc_count');
+        } catch (\Exception $e) {
+            $dbError = 'Database Error / Tabel belum dimigrasi di server production: ' . $e->getMessage();
         }
-
-        // Fetch Cashiers
-        $cashiers = User::whereHas('roles', function ($q) use ($activeJurusanId) {
-            $q->where('roles.name', 'kasir')
-                ->when($activeJurusanId, function ($sq) use ($activeJurusanId) {
-                    $sq->where('role_user.jurusan_id', $activeJurusanId);
-                });
-        })->get();
-
-        // Akumulasi riwayat tugas dokumentasi global per kasir
-        $allDocSchedules = DocumentationSchedule::when($activeJurusanId, function ($q) use ($activeJurusanId) {
-            $q->where('jurusan_id', $activeJurusanId);
-        })->get();
-
-        $cashierStats = $cashiers->map(function ($cashier) use ($allDocSchedules) {
-            $count = $allDocSchedules->where('user_id', $cashier->id)->count();
-            return [
-                'id' => $cashier->id,
-                'name' => $cashier->name,
-                'email' => $cashier->email,
-                'grade_level' => $cashier->grade_level,
-                'doc_count' => $count,
-            ];
-        })->sortByDesc('doc_count');
 
         return view('livewire.management.documentation-scheduling', [
             'activities' => $activities,
@@ -607,6 +615,7 @@ class DocumentationScheduling extends Component
             'cashiers' => $cashiers,
             'cashierStats' => $cashierStats,
             'jurusans' => $jurusans,
+            'dbError' => $dbError,
         ])->layout('layouts.app', ['title' => 'Jadwal Dokumentasi Labantik']);
     }
 }

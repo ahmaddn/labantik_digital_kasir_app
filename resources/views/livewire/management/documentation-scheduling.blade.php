@@ -1,4 +1,14 @@
 <div class="space-y-8 pt-6">
+    @if(isset($dbError) && $dbError)
+        <div class="p-4 bg-rose-500/10 border border-rose-500/30 text-rose-600 dark:text-rose-400 rounded-2xl flex items-center gap-3 text-xs font-bold">
+            <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+            <div>
+                <p class="uppercase font-black tracking-wider">Perhatian: Terjadi Kesalahan Database Server</p>
+                <p class="font-normal mt-0.5">{{ $dbError }}</p>
+            </div>
+        </div>
+    @endif
+
     <!-- Header -->
     <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
         <div>
