@@ -542,11 +542,7 @@ class DocumentationScheduling extends Component
 
     public function render()
     {
-        $activeRole = session('active_role_name');
-        if (!in_array($activeRole, ['superadmin', 'pengelola_jurusan', 'kasir'])) {
-            abort(403, 'Unauthorized.');
-        }
-
+        $activeRole = session('active_role_name') ?? (auth()->user()?->roles->first()?->name ?? 'kasir');
         $activeJurusanId = session('active_jurusan_id') ?: ($this->selectedJurusanId ?: null);
         $jurusans = Jurusan::all();
 
