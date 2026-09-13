@@ -87,7 +87,14 @@
                     <div class="flex-1 space-y-3">
                         @forelse($daySchedules as $sched)
                             <div class="bg-white dark:bg-gray-900 rounded-2xl p-4 border border-gray-150 dark:border-gray-800 relative group shadow-sm">
-                                <h4 class="font-bold text-gray-800 dark:text-white text-sm">{{ $sched->user->name }}</h4>
+                                <div class="flex items-start justify-between gap-1">
+                                    <h4 class="font-bold text-gray-800 dark:text-white text-sm">{{ $sched->user->name }}</h4>
+                                    @if($sched->user->grade_level)
+                                        <span class="text-[9px] font-black px-1.5 py-0.5 bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300 rounded uppercase shrink-0">
+                                            Tingkat {{ $sched->user->grade_level }}
+                                        </span>
+                                    @endif
+                                </div>
                                 @if($sched->notes)
                                     <p class="text-[10px] text-gray-400 font-medium mt-1">{{ $sched->notes }}</p>
                                 @endif
@@ -126,7 +133,16 @@
                 <tbody class="divide-y divide-gray-100 dark:divide-gray-800/50">
                     @forelse($cashierStats as $stat)
                         <tr class="hover:bg-gray-50/50 dark:hover:bg-gray-800/30 transition-colors">
-                            <td class="py-4 text-sm font-bold text-gray-800 dark:text-white">{{ $stat['name'] }}</td>
+                            <td class="py-4 text-sm font-bold text-gray-800 dark:text-white">
+                                <div class="flex items-center gap-2">
+                                    <span>{{ $stat['name'] }}</span>
+                                    @if(!empty($stat['grade_level']))
+                                        <span class="text-[10px] font-black px-2 py-0.5 bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300 rounded uppercase">
+                                            Tingkat {{ $stat['grade_level'] }}
+                                        </span>
+                                    @endif
+                                </div>
+                            </td>
                             <td class="py-4 text-xs text-gray-400 font-medium">{{ $stat['email'] }}</td>
                             <td class="py-4 text-sm font-black text-center text-primary-blue dark:text-primary-yellow italic">
                                 {{ $stat['shifts_count'] }}x Shift
@@ -166,7 +182,7 @@
                     <select wire:model="selectedUserId" class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 border-none rounded-xl focus:ring-2 focus:ring-primary-blue dark:text-white text-sm">
                         <option value="">-- Pilih Kasir --</option>
                         @foreach($cashiers as $c)
-                            <option value="{{ $c->id }}">{{ $c->name }}</option>
+                            <option value="{{ $c->id }}">{{ $c->name }} {{ $c->grade_level ? '(Tingkat ' . $c->grade_level . ')' : '' }}</option>
                         @endforeach
                     </select>
                     @error('selectedUserId') <span class="text-xs text-red-500 font-bold mt-1 block">{{ $message }}</span> @enderror
@@ -249,10 +265,35 @@
                     </div>
                 </div>
 
-                <div>
-                    <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">Kasir per Hari</label>
-                    <input type="number" wire:model="maxCashiersPerDay" min="1" max="10" class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 border-none rounded-xl focus:ring-2 focus:ring-primary-blue dark:text-white text-sm font-semibold">
-                    @error('maxCashiersPerDay') <span class="text-xs text-red-500 font-bold mt-1 block">{{ $message }}</span> @enderror
+                <div class="p-4 bg-gray-50 dark:bg-gray-900/50 rounded-2xl border border-gray-100 dark:border-gray-800 space-y-3">
+                    <div class="flex items-center justify-between">
+                        <label class="text-xs font-black uppercase tracking-wider text-gray-700 dark:text-gray-200">
+                            Kuota Per Tingkatan
+                        </label>
+                        <input type="checkbox" wire:model.live="useGradeQuotas" class="w-4 h-4 rounded border-gray-300 text-primary-blue focus:ring-primary-blue">
+                    </div>
+
+                    @if($useGradeQuotas)
+                        <div class="space-y-2.5 pt-2 border-t border-gray-200 dark:border-gray-800">
+                            <p class="text-[10px] text-gray-400 font-semibold leading-tight">
+                                Tentukan jumlah kasir bertugas per hari untuk tiap tingkat:
+                            </p>
+                            <div class="grid grid-cols-3 gap-2">
+                                @foreach($availableGrades as $g)
+                                    <div>
+                                        <label class="block text-[10px] font-black uppercase text-gray-500 mb-1">Tingkat {{ $g }}</label>
+                                        <input type="number" wire:model="gradeQuotas.{{ $g }}" min="0" max="10" class="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-xs font-bold text-center">
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    @else
+                        <div>
+                            <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">Kasir per Hari</label>
+                            <input type="number" wire:model="maxCashiersPerDay" min="1" max="10" class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 border-none rounded-xl focus:ring-2 focus:ring-primary-blue dark:text-white text-sm font-semibold">
+                            @error('maxCashiersPerDay') <span class="text-xs text-red-500 font-bold mt-1 block">{{ $message }}</span> @enderror
+                        </div>
+                    @endif
                 </div>
 
                 <div>

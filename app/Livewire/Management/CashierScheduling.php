@@ -25,6 +25,11 @@ class CashierScheduling extends Component
     public $randomizeStartDate = '';
     public $randomizeEndDate = '';
 
+    // Grade quotas state for randomizer
+    public $useGradeQuotas = true;
+    public $gradeQuotas = ['12' => 1, '11' => 1, '10' => 0];
+    public $availableGrades = ['12', '11', '10'];
+
     // Modal UI states
     public $showCreateModal = false;
     public $showDeleteModal = false;
@@ -52,6 +57,37 @@ class CashierScheduling extends Component
         $start = Carbon::parse($this->currentWeekStart);
         $this->randomizeStartDate = $start->toDateString();
         $this->randomizeEndDate = $start->copy()->addDays(5)->toDateString();
+
+        $activeJurusanId = session('active_jurusan_id') ?: $this->selectedJurusanId;
+
+        $dbGrades = User::whereHas('roles', function($q) use ($activeJurusanId) {
+            $q->where('roles.name', 'kasir')
+              ->when($activeJurusanId, function($sq) use ($activeJurusanId) {
+                  $sq->where('role_user.jurusan_id', $activeJurusanId);
+              });
+        })
+        ->whereNotNull('grade_level')
+        ->where('grade_level', '!=', '')
+        ->pluck('grade_level')
+        ->unique()
+        ->values()
+        ->toArray();
+
+        $mergedGrades = array_unique(array_merge(['12', '11', '10'], $dbGrades));
+        rsort($mergedGrades);
+        $this->availableGrades = array_values($mergedGrades);
+
+        foreach ($this->availableGrades as $g) {
+            if (!isset($this->gradeQuotas[(string)$g])) {
+                $this->gradeQuotas[(string)$g] = 0;
+            }
+        }
+
+        if (array_sum($this->gradeQuotas) === 0) {
+            if (in_array('12', $this->availableGrades)) $this->gradeQuotas['12'] = 1;
+            if (in_array('11', $this->availableGrades)) $this->gradeQuotas['11'] = 1;
+        }
+
         $this->showRandomModal = true;
     }
 
@@ -172,18 +208,11 @@ class CashierScheduling extends Component
             ->toArray();
 
         // Filter out users who have more than 1 role (e.g. kasir + admin)
-        $cashierIds = [];
-        foreach ($allJurusanCashierIds as $uid) {
-            $rolesCount = DB::table('role_user')
-                ->where('user_id', $uid)
-                ->count();
-            
-            if ($rolesCount === 1) {
-                $cashierIds[] = $uid;
-            }
-        }
+        $cashierUsers = User::whereIn('id', $allJurusanCashierIds)->get()->filter(function($u) {
+            return DB::table('role_user')->where('user_id', $u->id)->count() === 1;
+        });
 
-        if (empty($cashierIds)) {
+        if ($cashierUsers->isEmpty()) {
             $this->dispatch('toast', message: 'Tidak ada kasir murni (tanpa role lain) yang terdaftar di jurusan ini.', type: 'danger');
             return;
         }
@@ -200,16 +229,44 @@ class CashierScheduling extends Component
         }
 
         $totalDays = count($days);
-        $neededSlots = $totalDays * $this->maxCashiersPerDay;
-        $maxCapacity = count($cashierIds) * $this->maxShiftsPerWeek;
 
-        if ($neededSlots > $maxCapacity) {
-            $this->dispatch('toast', message: 'Jumlah kasir tidak cukup untuk slot harian dengan batas maksimal shift mingguan saat ini.', type: 'danger');
-            return;
+        // Process grade quotas if enabled
+        $activeGradeQuotas = [];
+        if ($this->useGradeQuotas) {
+            foreach ($this->gradeQuotas as $g => $q) {
+                $qInt = (int)$q;
+                if ($qInt > 0) {
+                    $activeGradeQuotas[(string)$g] = $qInt;
+                }
+            }
+        }
+
+        if (!empty($activeGradeQuotas)) {
+            $this->maxCashiersPerDay = array_sum($activeGradeQuotas);
+
+            // Validate capacity per grade
+            foreach ($activeGradeQuotas as $g => $quota) {
+                $gradeCashierCount = $cashierUsers->where('grade_level', (string)$g)->count();
+                $neededGradeSlots = $totalDays * $quota;
+                $maxGradeCapacity = $gradeCashierCount * $this->maxShiftsPerWeek;
+
+                if ($neededGradeSlots > $maxGradeCapacity) {
+                    $this->dispatch('toast', message: "Jumlah kasir tingkat {$g} tidak cukup ({$gradeCashierCount} orang) untuk memenuhi kuota {$quota} orang/hari selama {$totalDays} hari (kapasitas max: {$maxGradeCapacity} shift, dibutuhkan: {$neededGradeSlots} shift).", type: 'danger');
+                    return;
+                }
+            }
+        } else {
+            $neededSlots = $totalDays * $this->maxCashiersPerDay;
+            $maxCapacity = $cashierUsers->count() * $this->maxShiftsPerWeek;
+
+            if ($neededSlots > $maxCapacity) {
+                $this->dispatch('toast', message: 'Jumlah kasir tidak cukup untuk slot harian dengan batas maksimal shift mingguan saat ini.', type: 'danger');
+                return;
+            }
         }
 
         try {
-            DB::transaction(function () use ($cashierIds, $startDate, $endDate, $days, $activeJurusanId, $neededSlots) {
+            DB::transaction(function () use ($cashierUsers, $startDate, $endDate, $days, $activeJurusanId, $activeGradeQuotas, $totalDays) {
                 // Delete existing schedules for this week and jurusan to prevent clashes
                 CashierSchedule::where('jurusan_id', $activeJurusanId)
                     ->whereBetween('date', [
@@ -221,78 +278,151 @@ class CashierScheduling extends Component
                 // Ambil total akumulasi tugas jaga global masing-masing kasir
                 $globalSchedulesCount = DB::table('cashier_schedules')
                     ->where('jurusan_id', $activeJurusanId)
-                    ->whereIn('user_id', $cashierIds)
+                    ->whereIn('user_id', $cashierUsers->pluck('id'))
                     ->select('user_id', DB::raw('count(*) as total'))
                     ->groupBy('user_id')
                     ->pluck('total', 'user_id')
                     ->toArray();
 
-                // Urutkan kasir berdasarkan jumlah total shift terkecil (global)
-                usort($cashierIds, function($a, $b) use ($globalSchedulesCount) {
-                    $countA = $globalSchedulesCount[$a] ?? 0;
-                    $countB = $globalSchedulesCount[$b] ?? 0;
-                    if ($countA === $countB) {
-                        return rand(-1, 1); // Jika sama, acak agar variatif
-                    }
-                    return $countA <=> $countB; // Urutkan dari terkecil ke terbesar
-                });
-
-                // Balance distribution
-                $n = count($cashierIds);
-                $baseShifts = (int) floor($neededSlots / $n);
-                $extraShiftsCount = $neededSlots % $n;
-
-                // Pool berisi pembagian shift untuk minggu ini
-                // Urutan kasir di $cashierIds sudah memprioritaskan kasir dengan shift global tersedikit
-                $pool = [];
-                foreach ($cashierIds as $index => $uid) {
-                    $targetShifts = $baseShifts + ($index < $extraShiftsCount ? 1 : 0);
-                    for ($j = 0; $j < $targetShifts; $j++) {
-                        $pool[] = $uid;
-                    }
-                }
-
                 $assignedSchedules = [];
                 $success = false;
 
-                for ($attempt = 0; $attempt < 150; $attempt++) {
-                    $success = true;
-                    $assignedSchedules = [];
-                    $tempPool = $pool;
-                    shuffle($tempPool);
+                if (!empty($activeGradeQuotas)) {
+                    // Build pool per grade
+                    $gradePools = [];
+                    foreach ($activeGradeQuotas as $g => $quota) {
+                        $cInGrade = $cashierUsers->where('grade_level', (string)$g)->pluck('id')->toArray();
+                        
+                        usort($cInGrade, function($a, $b) use ($globalSchedulesCount) {
+                            $cA = $globalSchedulesCount[$a] ?? 0;
+                            $cB = $globalSchedulesCount[$b] ?? 0;
+                            if ($cA === $cB) return rand(-1, 1);
+                            return $cA <=> $cB;
+                        });
 
-                    foreach ($days as $day) {
-                        $dayAssigned = [];
-                        for ($slot = 0; $slot < $this->maxCashiersPerDay; $slot++) {
-                            $candidateIndex = null;
-                            foreach ($tempPool as $idx => $uid) {
-                                if (!in_array($uid, $dayAssigned)) {
-                                    $candidateIndex = $idx;
-                                    break;
+                        $n = count($cInGrade);
+                        $totalSlotsForGrade = $totalDays * $quota;
+                        $baseShifts = (int) floor($totalSlotsForGrade / $n);
+                        $extraShifts = $totalSlotsForGrade % $n;
+
+                        $pool = [];
+                        foreach ($cInGrade as $idx => $uid) {
+                            $target = $baseShifts + ($idx < $extraShifts ? 1 : 0);
+                            for ($j = 0; $j < $target; $j++) {
+                                $pool[] = $uid;
+                            }
+                        }
+                        $gradePools[(string)$g] = $pool;
+                    }
+
+                    for ($attempt = 0; $attempt < 150; $attempt++) {
+                        $success = true;
+                        $assignedSchedules = [];
+                        $tempGradePools = [];
+                        foreach ($gradePools as $g => $p) {
+                            $temp = $p;
+                            shuffle($temp);
+                            $tempGradePools[$g] = $temp;
+                        }
+
+                        foreach ($days as $day) {
+                            $dayAssigned = [];
+                            foreach ($activeGradeQuotas as $g => $quota) {
+                                for ($slot = 0; $slot < $quota; $slot++) {
+                                    $candIdx = null;
+                                    foreach ($tempGradePools[$g] as $idx => $uid) {
+                                        if (!in_array($uid, $dayAssigned)) {
+                                            $candIdx = $idx;
+                                            break;
+                                        }
+                                    }
+
+                                    if ($candIdx === null) {
+                                        $success = false;
+                                        break 3;
+                                    }
+
+                                    $selectedUser = $tempGradePools[$g][$candIdx];
+                                    $dayAssigned[] = $selectedUser;
+                                    array_splice($tempGradePools[$g], $candIdx, 1);
+
+                                    $assignedSchedules[] = [
+                                        'jurusan_id' => $activeJurusanId,
+                                        'user_id' => $selectedUser,
+                                        'date' => $day,
+                                        'notes' => 'Acak Otomatis (Tingkat ' . $g . ')',
+                                        'created_by' => auth()->id(),
+                                    ];
                                 }
                             }
+                        }
 
-                            if ($candidateIndex === null) {
-                                $success = false;
-                                break 2;
-                            }
+                        if ($success) break;
+                    }
+                } else {
+                    // Standard randomization pool
+                    $cashierIds = $cashierUsers->pluck('id')->toArray();
+                    usort($cashierIds, function($a, $b) use ($globalSchedulesCount) {
+                        $countA = $globalSchedulesCount[$a] ?? 0;
+                        $countB = $globalSchedulesCount[$b] ?? 0;
+                        if ($countA === $countB) {
+                            return rand(-1, 1);
+                        }
+                        return $countA <=> $countB;
+                    });
 
-                            $selectedUser = $tempPool[$candidateIndex];
-                            $dayAssigned[] = $selectedUser;
-                            array_splice($tempPool, $candidateIndex, 1);
+                    $neededSlots = $totalDays * $this->maxCashiersPerDay;
+                    $n = count($cashierIds);
+                    $baseShifts = (int) floor($neededSlots / $n);
+                    $extraShiftsCount = $neededSlots % $n;
 
-                            $assignedSchedules[] = [
-                                'jurusan_id' => $activeJurusanId,
-                                'user_id' => $selectedUser,
-                                'date' => $day,
-                                'notes' => 'Acak Otomatis',
-                                'created_by' => auth()->id(),
-                            ];
+                    $pool = [];
+                    foreach ($cashierIds as $index => $uid) {
+                        $targetShifts = $baseShifts + ($index < $extraShiftsCount ? 1 : 0);
+                        for ($j = 0; $j < $targetShifts; $j++) {
+                            $pool[] = $uid;
                         }
                     }
 
-                    if ($success) {
-                        break;
+                    for ($attempt = 0; $attempt < 150; $attempt++) {
+                        $success = true;
+                        $assignedSchedules = [];
+                        $tempPool = $pool;
+                        shuffle($tempPool);
+
+                        foreach ($days as $day) {
+                            $dayAssigned = [];
+                            for ($slot = 0; $slot < $this->maxCashiersPerDay; $slot++) {
+                                $candidateIndex = null;
+                                foreach ($tempPool as $idx => $uid) {
+                                    if (!in_array($uid, $dayAssigned)) {
+                                        $candidateIndex = $idx;
+                                        break;
+                                    }
+                                }
+
+                                if ($candidateIndex === null) {
+                                    $success = false;
+                                    break 2;
+                                }
+
+                                $selectedUser = $tempPool[$candidateIndex];
+                                $dayAssigned[] = $selectedUser;
+                                array_splice($tempPool, $candidateIndex, 1);
+
+                                $assignedSchedules[] = [
+                                    'jurusan_id' => $activeJurusanId,
+                                    'user_id' => $selectedUser,
+                                    'date' => $day,
+                                    'notes' => 'Acak Otomatis',
+                                    'created_by' => auth()->id(),
+                                ];
+                            }
+                        }
+
+                        if ($success) {
+                            break;
+                        }
                     }
                 }
 
@@ -420,6 +550,7 @@ class CashierScheduling extends Component
                 'id' => $cashier->id,
                 'name' => $cashier->name,
                 'email' => $cashier->email,
+                'grade_level' => $cashier->grade_level,
                 'shifts_count' => $shiftCount,
             ];
         })->sortByDesc('shifts_count');

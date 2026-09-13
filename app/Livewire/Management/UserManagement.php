@@ -23,6 +23,7 @@ class UserManagement extends Component
     public $name = '';
     public $email = '';
     public $password = '';
+    public $grade_level = '';
     public $assignedAccesses = []; // Array of ['role_id' => ..., 'role_label' => ..., 'jurusan_id' => ..., 'jurusan_name' => ...]
 
     // Temp inputs for adding access
@@ -38,10 +39,68 @@ class UserManagement extends Component
     public $excelFile;
     public $showImportModal = false;
 
+    // Bulk selection & update state
+    public $selectedUsers = [];
+    public $selectAll = false;
+    public $bulkGradeLevel = '';
+    public $showBulkGradeModal = false;
+
     protected $rules = [
         'name' => 'required|string|max:255',
         'email' => 'required|email|max:255',
+        'grade_level' => 'nullable|string|max:50',
     ];
+
+    public function updatedSelectAll($value)
+    {
+        if ($value) {
+            $activeRole = session('active_role_name');
+            $activeJurusanId = session('active_jurusan_id');
+
+            $query = User::where(function ($q) {
+                $q->where('name', 'like', '%'.$this->search.'%')
+                    ->orWhere('email', 'like', '%'.$this->search.'%');
+            })
+            ->when($activeRole === 'pengelola_jurusan', function ($q) use ($activeJurusanId) {
+                return $q->whereHas('roles', function($sq) use ($activeJurusanId) {
+                    $sq->where('roles.name', 'kasir')
+                      ->where('role_user.jurusan_id', $activeJurusanId);
+                });
+            });
+
+            $this->selectedUsers = $query->pluck('id')->map(fn($id) => (string) $id)->toArray();
+        } else {
+            $this->selectedUsers = [];
+        }
+    }
+
+    public function openBulkGradeModal()
+    {
+        if (empty($this->selectedUsers)) {
+            $this->dispatch('toast', message: 'Pilih minimal satu user terlebih dahulu.', type: 'danger');
+            return;
+        }
+        $this->bulkGradeLevel = '';
+        $this->showBulkGradeModal = true;
+    }
+
+    public function applyBulkGradeLevel()
+    {
+        if (empty($this->selectedUsers)) {
+            $this->dispatch('toast', message: 'Tidak ada user yang dipilih.', type: 'danger');
+            return;
+        }
+
+        $count = User::whereIn('id', $this->selectedUsers)
+            ->update(['grade_level' => $this->bulkGradeLevel ?: null]);
+
+        $this->showBulkGradeModal = false;
+        $this->selectedUsers = [];
+        $this->selectAll = false;
+        $this->bulkGradeLevel = '';
+
+        $this->dispatch('toast', message: "Berhasil meng-update tingkatan untuk {$count} user.");
+    }
 
     public function updatedSearch()
     {
@@ -61,6 +120,7 @@ class UserManagement extends Component
         $this->userId = $user->id;
         $this->name = $user->name;
         $this->email = $user->email;
+        $this->grade_level = $user->grade_level ?? '';
 
         // Load accesses
         $accesses = $user->getAvailableAccesses();
@@ -82,6 +142,7 @@ class UserManagement extends Component
         $this->name = '';
         $this->email = '';
         $this->password = '';
+        $this->grade_level = '';
         $this->assignedAccesses = [];
         $this->selectedRoleId = '';
         $this->selectedJurusanId = '';
@@ -148,6 +209,7 @@ class UserManagement extends Component
                 $user = User::findOrFail($this->userId);
                 $user->name = $this->name;
                 $user->email = $this->email;
+                $user->grade_level = $this->grade_level ?: null;
                 if ($this->password) {
                     $user->password = Hash::make($this->password);
                 }
@@ -156,6 +218,7 @@ class UserManagement extends Component
                 $user = User::create([
                     'name' => $this->name,
                     'email' => $this->email,
+                    'grade_level' => $this->grade_level ?: null,
                     'password' => Hash::make($this->password),
                 ]);
             }
@@ -204,11 +267,12 @@ class UserManagement extends Component
         $sheet->setCellValue('A1', 'No');
         $sheet->setCellValue('B1', 'Nama Lengkap');
         $sheet->setCellValue('C1', 'Email');
-        $sheet->setCellValue('D1', 'Akses Role / Unit TEFA');
+        $sheet->setCellValue('D1', 'Tingkatan');
+        $sheet->setCellValue('E1', 'Akses Role / Unit TEFA');
 
         // Style header
-        $sheet->getStyle('A1:D1')->getFont()->setBold(true);
-        foreach (range('A', 'D') as $col) {
+        $sheet->getStyle('A1:E1')->getFont()->setBold(true);
+        foreach (range('A', 'E') as $col) {
             $sheet->getColumnDimension($col)->setAutoSize(true);
         }
 
@@ -229,7 +293,8 @@ class UserManagement extends Component
             $sheet->setCellValue('A' . $row, $no++);
             $sheet->setCellValue('B' . $row, $user->name);
             $sheet->setCellValue('C' . $row, $user->email);
-            $sheet->setCellValue('D' . $row, $accessText);
+            $sheet->setCellValue('D' . $row, $user->grade_level ? 'Tingkat ' . $user->grade_level : '-');
+            $sheet->setCellValue('E' . $row, $accessText);
             $row++;
         }
 
@@ -275,10 +340,11 @@ class UserManagement extends Component
         $sheet->setCellValue('B1', 'Email');
         $sheet->setCellValue('C1', 'Role');
         $sheet->setCellValue('D1', 'Jurusan');
+        $sheet->setCellValue('E1', 'Tingkatan');
 
         // Style header
-        $sheet->getStyle('A1:D1')->getFont()->setBold(true);
-        foreach(range('A','D') as $col) {
+        $sheet->getStyle('A1:E1')->getFont()->setBold(true);
+        foreach(range('A','E') as $col) {
             $sheet->getColumnDimension($col)->setAutoSize(true);
         }
 
@@ -291,11 +357,13 @@ class UserManagement extends Component
             $sheet->setCellValue('B2', 'kasir1@mail.com');
             $sheet->setCellValue('C2', 'kasir');
             $sheet->setCellValue('D2', $activeJurusan->name);
+            $sheet->setCellValue('E2', '12');
         } else {
             $sheet->setCellValue('A2', 'Ahmad Dani');
             $sheet->setCellValue('B2', 'ahmad@mail.com');
             $sheet->setCellValue('C2', 'kasir');
             $sheet->setCellValue('D2', 'RPL');
+            $sheet->setCellValue('E2', '11');
         }
 
         $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
@@ -339,6 +407,7 @@ class UserManagement extends Component
                 $email = trim($row[1]);
                 $roleName = strtolower(trim($row[2] ?? 'kasir'));
                 $jurusanName = trim($row[3] ?? '');
+                $gradeLevel = trim($row[4] ?? '');
 
                 // Validation: Check duplicate email
                 if (User::where('email', $email)->exists()) {
@@ -374,6 +443,7 @@ class UserManagement extends Component
                 $user = User::create([
                     'name' => $name,
                     'email' => $email,
+                    'grade_level' => !empty($gradeLevel) ? $gradeLevel : null,
                     'password' => Hash::make('00000000'),
                 ]);
 

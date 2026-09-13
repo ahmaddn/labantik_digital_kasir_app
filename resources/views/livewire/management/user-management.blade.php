@@ -52,12 +52,35 @@
             </div>
         </div>
 
+        @if(count($selectedUsers) > 0)
+            <div class="mb-6 p-4 bg-purple-50 dark:bg-purple-950/30 border border-purple-200 dark:border-purple-800 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 animate-fade-in-up">
+                <div class="flex items-center gap-2">
+                    <span class="w-2.5 h-2.5 rounded-full bg-purple-500 animate-pulse"></span>
+                    <span class="text-xs font-black text-purple-700 dark:text-purple-300 uppercase tracking-wider">
+                        {{ count($selectedUsers) }} Pengguna Terpilih
+                    </span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button wire:click="openBulkGradeModal" class="inline-flex items-center px-4 py-2.5 bg-purple-600 hover:bg-purple-700 text-white font-black text-xs uppercase tracking-wider italic rounded-xl transition-all shadow-md active:scale-95">
+                        <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                        Edit Tingkatan Serentak
+                    </button>
+                    <button wire:click="$set('selectedUsers', []); $set('selectAll', false);" class="px-3 py-2.5 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-xs font-bold rounded-xl hover:bg-gray-300 transition-all">
+                        Batal
+                    </button>
+                </div>
+            </div>
+        @endif
+
         <!-- Desktop Table -->
         <div class="hidden md:block overflow-x-auto">
             <table class="w-full text-left border-collapse">
                 <thead>
                     <tr class="border-b border-gray-100 dark:border-gray-700">
-                        <th class="pb-4 text-xs font-black uppercase tracking-widest text-gray-400 pl-4">Pengguna</th>
+                        <th class="pb-4 pl-4 w-10">
+                            <input type="checkbox" wire:model.live="selectAll" class="w-4 h-4 rounded border-gray-300 text-primary-blue focus:ring-primary-blue cursor-pointer">
+                        </th>
+                        <th class="pb-4 text-xs font-black uppercase tracking-widest text-gray-400">Pengguna</th>
                         <th class="pb-4 text-xs font-black uppercase tracking-widest text-gray-400">Email</th>
                         <th class="pb-4 text-xs font-black uppercase tracking-widest text-gray-400">Akses Unit TEFA / Role</th>
                         <th class="pb-4 text-xs font-black uppercase tracking-widest text-gray-400 text-right pr-4 w-32">Aksi</th>
@@ -67,12 +90,22 @@
                     @forelse($users as $user)
                         <tr class="group hover:bg-gray-50/50 dark:hover:bg-gray-900/30 transition-colors">
                             <td class="py-5 pl-4">
+                                <input type="checkbox" wire:model.live="selectedUsers" value="{{ $user->id }}" class="w-4 h-4 rounded border-gray-300 text-primary-blue focus:ring-primary-blue cursor-pointer">
+                            </td>
+                            <td class="py-5">
                                 <div class="flex items-center">
                                     <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-black text-sm shadow-md">
                                         {{ $user->initials() }}
                                     </div>
                                     <div class="ml-4">
-                                        <h3 class="font-bold text-gray-800 dark:text-white group-hover:text-primary-blue dark:group-hover:text-primary-yellow transition-colors">{{ $user->name }}</h3>
+                                        <div class="flex items-center gap-2">
+                                            <h3 class="font-bold text-gray-800 dark:text-white group-hover:text-primary-blue dark:group-hover:text-primary-yellow transition-colors">{{ $user->name }}</h3>
+                                            @if($user->grade_level)
+                                                <span class="px-2 py-0.5 text-[10px] font-black bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300 rounded uppercase tracking-wider">
+                                                    Tingkat {{ $user->grade_level }}
+                                                </span>
+                                            @endif
+                                        </div>
                                         <span class="text-[10px] text-gray-400 font-semibold uppercase tracking-wider">ID: {{ substr($user->id, 0, 8) }}...</span>
                                     </div>
                                 </div>
@@ -121,7 +154,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="4" class="py-10 text-center text-gray-400 font-semibold italic">
+                            <td colspan="5" class="py-10 text-center text-gray-400 font-semibold italic">
                                 Tidak ada data pengguna yang ditemukan.
                             </td>
                         </tr>
@@ -135,11 +168,19 @@
             @forelse($users as $user)
                 <div class="p-6 bg-gray-50 dark:bg-gray-900 rounded-3xl border border-gray-100 dark:border-gray-800 space-y-4">
                     <div class="flex items-center gap-3">
+                        <input type="checkbox" wire:model.live="selectedUsers" value="{{ $user->id }}" class="w-4 h-4 rounded border-gray-300 text-primary-blue focus:ring-primary-blue cursor-pointer">
                         <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-black text-sm shadow-md">
                             {{ $user->initials() }}
                         </div>
                         <div>
-                            <h3 class="font-bold text-gray-800 dark:text-white">{{ $user->name }}</h3>
+                            <div class="flex items-center gap-2">
+                                <h3 class="font-bold text-gray-800 dark:text-white">{{ $user->name }}</h3>
+                                @if($user->grade_level)
+                                    <span class="px-2 py-0.5 text-[10px] font-black bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300 rounded uppercase tracking-wider">
+                                        Tingkat {{ $user->grade_level }}
+                                    </span>
+                                @endif
+                            </div>
                             <p class="text-xs text-gray-500 dark:text-gray-400">{{ $user->email }}</p>
                         </div>
                     </div>
@@ -231,12 +272,26 @@
                     </div>
                 </div>
 
-                <div>
-                    <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">
-                        Password {{ $userId ? '(Kosongkan jika tidak ingin diubah)' : '' }}
-                    </label>
-                    <input wire:model="password" type="password" placeholder="••••••••" class="w-full px-4 py-4 bg-gray-50 dark:bg-gray-900 border-none rounded-2xl focus:ring-2 focus:ring-primary-blue dark:text-white transition-all text-sm">
-                    @error('password') <span class="text-xs text-primary-red font-bold mt-1 block">{{ $message }}</span> @enderror
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">
+                            Password {{ $userId ? '(Kosongkan jika tidak ubah)' : '' }}
+                        </label>
+                        <input wire:model="password" type="password" placeholder="••••••••" class="w-full px-4 py-4 bg-gray-50 dark:bg-gray-900 border-none rounded-2xl focus:ring-2 focus:ring-primary-blue dark:text-white transition-all text-sm">
+                        @error('password') <span class="text-xs text-primary-red font-bold mt-1 block">{{ $message }}</span> @enderror
+                    </div>
+                    <div>
+                        <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">
+                            Tingkatan (Khusus Role Kasir)
+                        </label>
+                        <select wire:model="grade_level" class="w-full px-4 py-4 bg-gray-50 dark:bg-gray-900 border-none rounded-2xl focus:ring-2 focus:ring-primary-blue dark:text-white transition-all text-sm">
+                            <option value="">-- Tanpa Tingkatan --</option>
+                            <option value="10">Tingkat 10</option>
+                            <option value="11">Tingkat 11</option>
+                            <option value="12">Tingkat 12</option>
+                        </select>
+                        @error('grade_level') <span class="text-xs text-primary-red font-bold mt-1 block">{{ $message }}</span> @enderror
+                    </div>
                 </div>
 
                 <!-- Access Settings Section -->
@@ -406,7 +461,8 @@
                     <strong>A: Nama Lengkap</strong>, 
                     <strong>B: Email</strong>, 
                     <strong>C: Role (kasir)</strong>, 
-                    <strong>D: Jurusan (contoh: RPL)</strong>.<br>
+                    <strong>D: Jurusan (contoh: RPL)</strong>,
+                    <strong>E: Tingkatan (Opsional, contoh: 10/11/12)</strong>.<br>
                     <span class="text-amber-500 font-bold">* Password secara otomatis diset default menjadi '00000000' (nol 8 kali) untuk semua user yang diimport.</span>
                 </div>
 
@@ -416,6 +472,36 @@
                     </button>
                     <button type="submit" class="flex-1 py-3 bg-primary-blue hover:bg-blue-900 text-primary-yellow rounded-xl font-black text-xs uppercase tracking-wider transition-all shadow-md">
                         Mulai Import
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Bulk Grade Modal -->
+    <div x-data="{ showBulk: @entangle('showBulkGradeModal') }" x-show="showBulk" class="fixed inset-0 z-50 flex items-center justify-center p-4" x-cloak>
+        <div x-show="showBulk" x-transition.opacity class="fixed inset-0 bg-black/60 backdrop-blur-xs" wire:click="$set('showBulkGradeModal', false)"></div>
+        <div x-show="showBulk" x-transition.scale class="relative w-full max-w-md bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-5 border border-gray-100 dark:border-gray-700 z-10">
+            <h2 class="text-2xl font-black text-gray-855 dark:text-white uppercase italic mb-2">Edit Tingkatan Massal</h2>
+            <p class="text-xs text-gray-400 font-semibold mb-6">Ubah tingkatan secara serentak untuk {{ count($selectedUsers) }} user terpilih.</p>
+            
+            <form wire:submit.prevent="applyBulkGradeLevel" class="space-y-5">
+                <div>
+                    <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">Pilih Tingkatan Baru</label>
+                    <select wire:model="bulkGradeLevel" class="w-full px-4 py-4 bg-gray-50 dark:bg-gray-900 border-none rounded-2xl focus:ring-2 focus:ring-primary-blue dark:text-white text-sm font-semibold">
+                        <option value="">-- Tanpa Tingkatan (Kosongkan) --</option>
+                        <option value="10">Tingkat 10</option>
+                        <option value="11">Tingkat 11</option>
+                        <option value="12">Tingkat 12</option>
+                    </select>
+                </div>
+
+                <div class="flex gap-3 pt-4">
+                    <button type="button" wire:click="$set('showBulkGradeModal', false)" class="flex-1 py-3 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:text-white rounded-xl font-black text-xs uppercase tracking-wider transition-all">
+                        Batal
+                    </button>
+                    <button type="submit" class="flex-1 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-xl font-black text-xs uppercase tracking-wider transition-all shadow-md">
+                        Terapkan Ke {{ count($selectedUsers) }} User
                     </button>
                 </div>
             </form>
