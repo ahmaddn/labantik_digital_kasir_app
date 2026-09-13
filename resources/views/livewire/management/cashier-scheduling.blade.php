@@ -86,32 +86,35 @@
                     
                     <div class="flex-1 space-y-3">
                         @forelse($daySchedules as $sched)
-                            <div class="bg-white dark:bg-gray-900 rounded-2xl p-4 border border-gray-150 dark:border-gray-800 relative group shadow-sm">
-                                <div class="flex items-start justify-between gap-1 pr-7">
-                                    <h4 class="font-bold text-gray-800 dark:text-white text-sm">{{ $sched->user->name }}</h4>
-                                    @if($sched->user->grade_level)
-                                        @php
-                                            $gLevel = (string) $sched->user->grade_level;
-                                            $gColor = match($gLevel) {
-                                                '12' => 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20',
-                                                '11' => 'bg-sky-500/10 text-sky-600 dark:text-sky-400 border-sky-500/20',
-                                                '10' => 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20',
-                                                default => 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-500/20',
-                                            };
-                                        @endphp
-                                        <span class="inline-flex items-center text-[9px] font-black px-2 py-0.5 rounded-full border {{ $gColor }} uppercase shrink-0 tracking-wider">
-                                            Tingkat {{ $gLevel }}
-                                        </span>
-                                    @endif
+                            <div class="bg-white dark:bg-gray-900 rounded-2xl p-4 border border-gray-150 dark:border-gray-800 shadow-sm space-y-1.5">
+                                <div class="flex items-center justify-between gap-2">
+                                    <h4 class="font-bold text-gray-800 dark:text-white text-sm truncate leading-tight">{{ $sched->user->name }}</h4>
+                                    
+                                    <div class="flex items-center gap-1.5 shrink-0">
+                                        @if($sched->user->grade_level)
+                                            @php
+                                                $gLevel = (string) $sched->user->grade_level;
+                                                $gColor = match($gLevel) {
+                                                    '12' => 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20',
+                                                    '11' => 'bg-sky-500/10 text-sky-600 dark:text-sky-400 border-sky-500/20',
+                                                    '10' => 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20',
+                                                    default => 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-500/20',
+                                                };
+                                            @endphp
+                                            <span class="inline-flex items-center text-[9px] font-black px-2 py-0.5 rounded-full border {{ $gColor }} uppercase tracking-wider">
+                                                Tingkat {{ $gLevel }}
+                                            </span>
+                                        @endif
+
+                                        @if(in_array(session('active_role_name'), ['superadmin', 'pengelola_jurusan']))
+                                            <button wire:click="confirmDelete('{{ $sched->id }}')" title="Hapus Jadwal" class="p-1 text-gray-400 hover:text-red-500 dark:text-gray-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 rounded-lg transition-all">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                            </button>
+                                        @endif
+                                    </div>
                                 </div>
                                 @if($sched->notes)
-                                    <p class="text-[10px] text-gray-400 font-medium mt-1">{{ $sched->notes }}</p>
-                                @endif
-                                
-                                @if(in_array(session('active_role_name'), ['superadmin', 'pengelola_jurusan']))
-                                    <button wire:click="confirmDelete('{{ $sched->id }}')" title="Hapus Jadwal" class="absolute top-2.5 right-2.5 p-1.5 text-gray-400 hover:text-red-500 dark:text-gray-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 rounded-xl transition-all">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                                    </button>
+                                    <p class="text-[10px] text-gray-400 font-medium leading-none">{{ $sched->notes }}</p>
                                 @endif
                             </div>
                         @empty
