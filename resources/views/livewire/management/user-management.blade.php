@@ -101,8 +101,17 @@
                                         <div class="flex items-center gap-2">
                                             <h3 class="font-bold text-gray-800 dark:text-white group-hover:text-primary-blue dark:group-hover:text-primary-yellow transition-colors">{{ $user->name }}</h3>
                                             @if($user->grade_level)
-                                                <span class="px-2 py-0.5 text-[10px] font-black bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300 rounded uppercase tracking-wider">
-                                                    Tingkat {{ $user->grade_level }}
+                                                @php
+                                                    $gLevel = (string) $user->grade_level;
+                                                    $gColor = match($gLevel) {
+                                                        '12' => 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20',
+                                                        '11' => 'bg-sky-500/10 text-sky-600 dark:text-sky-400 border-sky-500/20',
+                                                        '10' => 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20',
+                                                        default => 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-500/20',
+                                                    };
+                                                @endphp
+                                                <span class="inline-flex items-center text-[10px] font-black px-2 py-0.5 rounded-full border {{ $gColor }} uppercase tracking-wider">
+                                                    Tingkat {{ $gLevel }}
                                                 </span>
                                             @endif
                                         </div>
@@ -176,8 +185,17 @@
                             <div class="flex items-center gap-2">
                                 <h3 class="font-bold text-gray-800 dark:text-white">{{ $user->name }}</h3>
                                 @if($user->grade_level)
-                                    <span class="px-2 py-0.5 text-[10px] font-black bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300 rounded uppercase tracking-wider">
-                                        Tingkat {{ $user->grade_level }}
+                                    @php
+                                        $gLevel = (string) $user->grade_level;
+                                        $gColor = match($gLevel) {
+                                            '12' => 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20',
+                                            '11' => 'bg-sky-500/10 text-sky-600 dark:text-sky-400 border-sky-500/20',
+                                            '10' => 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20',
+                                            default => 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-500/20',
+                                        };
+                                    @endphp
+                                    <span class="inline-flex items-center text-[10px] font-black px-2 py-0.5 rounded-full border {{ $gColor }} uppercase tracking-wider">
+                                        Tingkat {{ $gLevel }}
                                     </span>
                                 @endif
                             </div>
