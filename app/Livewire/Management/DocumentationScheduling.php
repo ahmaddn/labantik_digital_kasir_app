@@ -300,14 +300,18 @@ class DocumentationScheduling extends Component
             return;
         }
 
-        $startDate = Carbon::parse($this->randomizeStartDate);
-        $endDate = Carbon::parse($this->randomizeEndDate);
+        $startDate = Carbon::parse($this->randomizeStartDate)->startOfDay();
+        $endDate = Carbon::parse($this->randomizeEndDate)->startOfDay();
 
         $days = [];
-        $tempDate = $startDate->copy();
-        while ($tempDate->lte($endDate)) {
-            $days[] = $tempDate->toDateString();
-            $tempDate->addDay();
+        if ($startDate->lte($endDate)) {
+            $tempDate = $startDate->copy();
+            $limit = 0;
+            while ($tempDate->lte($endDate) && $limit < 90) {
+                $days[] = $tempDate->toDateString();
+                $tempDate->addDay();
+                $limit++;
+            }
         }
 
         $totalDays = count($days);
@@ -571,11 +575,20 @@ class DocumentationScheduling extends Component
                         ->orderBy('date')
                         ->get();
 
-                    // Days list between start and end date
-                    $tempDate = $activeActivity->start_date->copy();
-                    while ($tempDate->lte($activeActivity->end_date)) {
-                        $daysList[] = $tempDate->copy();
-                        $tempDate->addDay();
+                    // Days list between start and end date safely
+                    if ($activeActivity->start_date && $activeActivity->end_date) {
+                        $startDate = Carbon::parse($activeActivity->start_date)->startOfDay();
+                        $endDate = Carbon::parse($activeActivity->end_date)->startOfDay();
+
+                        if ($startDate->lte($endDate)) {
+                            $curr = $startDate->copy();
+                            $limit = 0;
+                            while ($curr->lte($endDate) && $limit < 90) {
+                                $daysList[] = $curr->copy();
+                                $curr->addDay();
+                                $limit++;
+                            }
+                        }
                     }
                 }
             }
