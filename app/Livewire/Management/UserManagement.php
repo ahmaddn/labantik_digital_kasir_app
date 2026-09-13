@@ -53,24 +53,28 @@ class UserManagement extends Component
 
     public function updatedSelectAll($value)
     {
-        if ($value) {
-            $activeRole = session('active_role_name');
-            $activeJurusanId = session('active_jurusan_id');
+        $activeRole = session('active_role_name');
+        $activeJurusanId = session('active_jurusan_id');
 
-            $query = User::where(function ($q) {
-                $q->where('name', 'like', '%'.$this->search.'%')
-                    ->orWhere('email', 'like', '%'.$this->search.'%');
-            })
-            ->when($activeRole === 'pengelola_jurusan', function ($q) use ($activeJurusanId) {
-                return $q->whereHas('roles', function($sq) use ($activeJurusanId) {
-                    $sq->where('roles.name', 'kasir')
-                      ->where('role_user.jurusan_id', $activeJurusanId);
-                });
+        $currentPageUsers = User::where(function ($q) {
+            $q->where('name', 'like', '%'.$this->search.'%')
+                ->orWhere('email', 'like', '%'.$this->search.'%');
+        })
+        ->when($activeRole === 'pengelola_jurusan', function ($q) use ($activeJurusanId) {
+            return $q->whereHas('roles', function($sq) use ($activeJurusanId) {
+                $sq->where('roles.name', 'kasir')
+                  ->where('role_user.jurusan_id', $activeJurusanId);
             });
+        })
+        ->latest()
+        ->paginate(10);
 
-            $this->selectedUsers = $query->pluck('id')->map(fn($id) => (string) $id)->toArray();
+        $currentPageIds = $currentPageUsers->pluck('id')->map(fn($id) => (string) $id)->toArray();
+
+        if ($value) {
+            $this->selectedUsers = array_values(array_unique(array_merge($this->selectedUsers, $currentPageIds)));
         } else {
-            $this->selectedUsers = [];
+            $this->selectedUsers = array_values(array_diff($this->selectedUsers, $currentPageIds));
         }
     }
 
@@ -514,6 +518,10 @@ class UserManagement extends Component
             )
             ->get()
             ->groupBy('user_id');
+
+        // Sync selectAll status for current page items
+        $currentPageIds = $users->pluck('id')->map(fn($id) => (string) $id)->toArray();
+        $this->selectAll = count($currentPageIds) > 0 && count(array_diff($currentPageIds, $this->selectedUsers)) === 0;
 
         foreach ($users as $user) {
             $user->setRelation('available_accesses', $allAccesses->get($user->id, collect()));
