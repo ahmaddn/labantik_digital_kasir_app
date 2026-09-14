@@ -73,11 +73,11 @@
 
             @if($activeActivity && in_array(session('active_role_name'), ['superadmin', 'pengelola_jurusan']))
                 <div class="flex items-center gap-2 self-end md:self-center">
-                    <button wire:click="openEditActivityModal({{ $activeActivity->id }})" class="p-2.5 bg-amber-500/10 text-amber-600 dark:text-amber-400 hover:bg-amber-500/20 rounded-xl font-bold text-xs transition-all flex items-center gap-1.5">
+                    <button wire:click="openEditActivityModal('{{ $activeActivity->id }}')" class="p-2.5 bg-amber-500/10 text-amber-600 dark:text-amber-400 hover:bg-amber-500/20 rounded-xl font-bold text-xs transition-all flex items-center gap-1.5">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                         Edit Event
                     </button>
-                    <button wire:click="confirmDeleteActivity({{ $activeActivity->id }})" class="p-2.5 bg-rose-500/10 text-rose-600 dark:text-rose-400 hover:bg-rose-500/20 rounded-xl font-bold text-xs transition-all flex items-center gap-1.5">
+                    <button wire:click="confirmDeleteActivity('{{ $activeActivity->id }}')" class="p-2.5 bg-rose-500/10 text-rose-600 dark:text-rose-400 hover:bg-rose-500/20 rounded-xl font-bold text-xs transition-all flex items-center gap-1.5">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                         Hapus Event
                     </button>
@@ -167,7 +167,7 @@
                                         <span class="text-[10px] font-medium truncate max-w-[140px]" title="{{ $sched->notes }}">{{ $sched->notes }}</span>
 
                                         @if(in_array(session('active_role_name'), ['superadmin', 'pengelola_jurusan']))
-                                            <button wire:click="confirmDeleteSchedule({{ $sched->id }})" class="p-1 hover:bg-rose-50 dark:hover:bg-rose-950/40 text-gray-400 hover:text-rose-500 rounded-lg transition-all" title="Hapus Tugas">
+                                            <button wire:click="confirmDeleteSchedule('{{ $sched->id }}')" class="p-1 hover:bg-rose-50 dark:hover:bg-rose-950/40 text-gray-400 hover:text-rose-500 rounded-lg transition-all" title="Hapus Tugas">
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                                             </button>
                                         @endif
