@@ -6,6 +6,7 @@ use App\Models\CashierAttendance;
 use App\Models\CashierTaskDefinition;
 use App\Models\CashierTaskAssignment;
 use App\Models\CashierTaskSubmission;
+use App\Models\DocumentationSchedule;
 use App\Models\Notification;
 use App\Services\CashierTaskService;
 use Carbon\Carbon;
@@ -242,9 +243,17 @@ class MyTasks extends Component
             }
         }
 
+        // Fetch documentation schedules for this user
+        $myDocSchedules = DocumentationSchedule::with('activity')
+            ->where('user_id', $userId)
+            ->whereDate('date', '>=', now()->subDays(30)->toDateString())
+            ->orderBy('date', 'desc')
+            ->get();
+
         return view('livewire.reports.my-tasks', [
             'todayAssignments' => $todayAssignments,
             'historyAssignments' => $historyAssignments,
+            'myDocSchedules' => $myDocSchedules,
         ])->layout('layouts.app', ['title' => 'Tugas Saya']);
     }
 }

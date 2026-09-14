@@ -142,6 +142,29 @@
             @endforeach
         </div>
 
+        <!-- Today's Documentation Schedule Alert Banner -->
+        @if(isset($todayDocSchedule) && $todayDocSchedule)
+            <div class="mx-4 lg:mx-8 mt-4 p-3.5 bg-gradient-to-r from-indigo-900 via-blue-900 to-indigo-950 text-white rounded-2xl border-2 border-indigo-500/30 shadow-md flex items-center justify-between gap-3">
+                <div class="flex items-center gap-3">
+                    <div class="p-2 bg-indigo-500/20 rounded-xl text-indigo-300 shrink-0">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <span class="text-[9px] font-black uppercase bg-amber-400 text-amber-950 px-2 py-0.5 rounded-full">Tugas Dokumentasi Hari Ini</span>
+                            <span class="text-xs font-black uppercase text-indigo-200">{{ $todayDocSchedule->activity->title ?? 'Dokumentasi' }}</span>
+                        </div>
+                        @if($todayDocSchedule->notes)
+                            <p class="text-xs text-indigo-200/90 font-medium mt-0.5">Catatan: {{ $todayDocSchedule->notes }}</p>
+                        @endif
+                    </div>
+                </div>
+                <a href="{{ route('documentation-schedules') }}" class="px-3 py-1.5 bg-white/10 hover:bg-white/20 text-white rounded-xl text-xs font-bold transition-all shrink-0">
+                    Detail &rarr;
+                </a>
+            </div>
+        @endif
+
         <!-- Product Grid -->
         <div class="flex-1 overflow-y-auto px-4 lg:px-8 py-6 no-scrollbar bg-slate-100 dark:bg-dark-bg"
             data-product-grid>

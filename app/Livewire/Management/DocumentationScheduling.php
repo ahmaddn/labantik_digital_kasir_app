@@ -656,6 +656,11 @@ class DocumentationScheduling extends Component
                     'doc_count' => $count,
                 ];
             })->sortByDesc('doc_count');
+            // Fetch logged-in user's documentation schedules
+            $mySchedules = DocumentationSchedule::with('activity')
+                ->where('user_id', auth()->id())
+                ->orderBy('date', 'desc')
+                ->get();
         } catch (\Exception $e) {
             $dbError = 'Database Error / Tabel belum dimigrasi di server production: ' . $e->getMessage();
         }
@@ -667,6 +672,7 @@ class DocumentationScheduling extends Component
             'daysList' => $daysList,
             'cashiers' => $cashiers,
             'cashierStats' => $cashierStats,
+            'mySchedules' => $mySchedules ?? collect(),
             'jurusans' => $jurusans,
             'dbError' => $dbError,
         ])->layout('layouts.app', ['title' => 'Jadwal Dokumentasi Labantik']);

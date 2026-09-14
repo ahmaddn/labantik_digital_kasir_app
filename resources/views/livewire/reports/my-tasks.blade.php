@@ -28,6 +28,51 @@
     <!-- Today's Tasks -->
     @if ($activeTab === 'today')
         <div class="space-y-4">
+            @if(isset($myDocSchedules) && $myDocSchedules->count() > 0)
+                <div class="bg-gradient-to-br from-indigo-900 to-blue-900 text-white rounded-[2rem] p-6 shadow-xl space-y-4 border border-indigo-700/50">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <span class="p-2 bg-white/10 rounded-xl">
+                                <svg class="w-5 h-5 text-indigo-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                            </span>
+                            <div>
+                                <h3 class="text-base font-black uppercase tracking-tight">Jadwal Penugasan Dokumentasi Saya</h3>
+                                <p class="text-xs text-indigo-200 font-semibold">Tugas dokumentasi acara/kegiatan yang ditugaskan kepada Anda</p>
+                            </div>
+                        </div>
+                        <a href="{{ route('documentation-schedules') }}" class="px-3 py-1.5 bg-white/10 hover:bg-white/20 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shrink-0">
+                            Lihat Semua &rarr;
+                        </a>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        @foreach($myDocSchedules->take(4) as $docSched)
+                            @php
+                                $isToday = \Carbon\Carbon::parse($docSched->date)->isToday();
+                                $isPast = \Carbon\Carbon::parse($docSched->date)->isPast() && !$isToday;
+                            @endphp
+                            <div class="p-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/10 space-y-1">
+                                <div class="flex items-center justify-between text-xs">
+                                    <span class="font-black tracking-wider uppercase text-indigo-200">
+                                        {{ \Carbon\Carbon::parse($docSched->date)->translatedFormat('l, d M Y') }}
+                                    </span>
+                                    @if($isToday)
+                                        <span class="px-2 py-0.5 rounded-full text-[9px] font-black uppercase bg-amber-400 text-amber-950 animate-pulse">Hari Ini</span>
+                                    @elseif($isPast)
+                                        <span class="px-2 py-0.5 rounded-full text-[9px] font-black uppercase bg-white/20 text-gray-300">Lewat</span>
+                                    @else
+                                        <span class="px-2 py-0.5 rounded-full text-[9px] font-black uppercase bg-emerald-400 text-emerald-950">Mendatang</span>
+                                    @endif
+                                </div>
+                                <h4 class="text-sm font-bold text-white line-clamp-1">{{ $docSched->activity->title ?? 'Kegiatan Dokumentasi' }}</h4>
+                                @if($docSched->notes)
+                                    <p class="text-xs text-indigo-200 line-clamp-1 italic">Catatan: {{ $docSched->notes }}</p>
+                                @endif
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+            @endif
             @forelse($todayAssignments as $assignment)
                 <div
                     class="bg-white dark:bg-gray-800 rounded-[2rem] shadow-lg shadow-blue-900/5 border border-gray-100 dark:border-gray-700/50 p-6 hover:shadow-xl transition-all">

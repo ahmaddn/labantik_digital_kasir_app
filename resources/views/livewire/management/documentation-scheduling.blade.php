@@ -58,6 +58,53 @@
         </div>
     </div>
 
+    <!-- Personal Documentation Schedules Banner -->
+    @if(isset($mySchedules) && $mySchedules->count() > 0)
+        <div class="bg-gradient-to-r from-indigo-900 via-blue-900 to-indigo-950 text-white rounded-3xl p-6 shadow-xl border border-indigo-700/50 space-y-4">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div class="flex items-center gap-3">
+                    <span class="p-2.5 bg-white/10 rounded-2xl shrink-0">
+                        <svg class="w-6 h-6 text-indigo-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                    </span>
+                    <div>
+                        <h2 class="text-lg font-black uppercase tracking-tight">Jadwal Tugas Dokumentasi Saya</h2>
+                        <p class="text-xs text-indigo-200 font-semibold">Berikut adalah daftar tanggal & kegiatan dokumentasi yang ditugaskan kepada Anda ({{ auth()->user()->name }})</p>
+                    </div>
+                </div>
+                <span class="self-start sm:self-center px-3 py-1 bg-white/10 text-indigo-200 text-xs font-bold rounded-full border border-white/10 shrink-0">
+                    Total: {{ $mySchedules->count() }} Tugas
+                </span>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                @foreach($mySchedules as $mySched)
+                    @php
+                        $isToday = \Carbon\Carbon::parse($mySched->date)->isToday();
+                        $isPast = \Carbon\Carbon::parse($mySched->date)->isPast() && !$isToday;
+                    @endphp
+                    <div class="p-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/15 space-y-1.5 hover:bg-white/15 transition-all">
+                        <div class="flex items-center justify-between text-xs">
+                            <span class="font-black uppercase tracking-wider text-indigo-200">
+                                {{ \Carbon\Carbon::parse($mySched->date)->translatedFormat('d M Y') }}
+                            </span>
+                            @if($isToday)
+                                <span class="px-2 py-0.5 rounded-full text-[9px] font-black uppercase bg-amber-400 text-amber-950 animate-pulse">Hari Ini</span>
+                            @elseif($isPast)
+                                <span class="px-2 py-0.5 rounded-full text-[9px] font-black uppercase bg-white/20 text-gray-300">Selesai</span>
+                            @else
+                                <span class="px-2 py-0.5 rounded-full text-[9px] font-black uppercase bg-emerald-400 text-emerald-950">Mendatang</span>
+                            @endif
+                        </div>
+                        <h3 class="text-sm font-bold text-white line-clamp-1">{{ $mySched->activity->title ?? 'Kegiatan' }}</h3>
+                        @if($mySched->notes)
+                            <p class="text-xs text-indigo-200/90 line-clamp-1 italic">Catatan: {{ $mySched->notes }}</p>
+                        @endif
+                    </div>
+                @endforeach
+            </div>
+        </div>
+    @endif
+
     <!-- Activity Selector Card -->
     <div class="bg-white dark:bg-gray-900 rounded-3xl p-6 border border-gray-100 dark:border-gray-800 shadow-sm space-y-4">
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-gray-100 dark:border-gray-800 pb-4">
@@ -143,9 +190,14 @@
 
                         <div class="flex-1 space-y-3">
                             @forelse($dayScheds as $sched)
-                                <div class="bg-white dark:bg-gray-900 rounded-2xl p-4 border border-gray-150 dark:border-gray-800 shadow-sm space-y-2">
+                                <div class="bg-white dark:bg-gray-900 rounded-2xl p-4 border {{ $sched->user_id === auth()->id() ? 'border-indigo-500 ring-2 ring-indigo-500/20 bg-indigo-50/50 dark:bg-indigo-950/20' : 'border-gray-150 dark:border-gray-800' }} shadow-sm space-y-2">
                                     <div class="flex items-center justify-between gap-2">
-                                        <h4 class="font-bold text-gray-800 dark:text-white text-sm truncate leading-tight">{{ $sched->user->name }}</h4>
+                                        <div class="flex items-center gap-1.5 min-w-0">
+                                            <h4 class="font-bold text-gray-800 dark:text-white text-sm truncate leading-tight">{{ $sched->user->name }}</h4>
+                                            @if($sched->user_id === auth()->id())
+                                                <span class="px-1.5 py-0.5 text-[8px] font-black rounded uppercase bg-indigo-600 text-white shrink-0">Anda</span>
+                                            @endif
+                                        </div>
 
                                         @if($sched->user->grade_level)
                                             @php

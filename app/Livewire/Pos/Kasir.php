@@ -9,6 +9,7 @@ use App\Models\CashierTaskDefinition;
 use App\Models\CashierTaskAssignment;
 use App\Models\CashTransaction;
 use App\Models\DailyRecap;
+use App\Models\DocumentationSchedule;
 use App\Models\Jurusan;
 use App\Models\Product;
 use App\Models\StockEntry;
@@ -795,12 +796,19 @@ class Kasir extends Component
             }
         }
 
+        // Fetch today's documentation schedule for logged-in user if any
+        $todayDocSchedule = DocumentationSchedule::with('activity')
+            ->where('user_id', auth()->id())
+            ->where('date', $today)
+            ->first();
+
         return view('livewire.pos.kasir', [
             'products'          => $this->products,
             'allProductsJson'   => $allProducts,
             'isSessionFinished' => $isSessionFinished,
             'categories'        => $categories,
             'dailyTasks'        => $dailyAssignments,
+            'todayDocSchedule'  => $todayDocSchedule,
             // Revenue per metode hari ini — untuk audit di closing modal
             'todayRevenueCash'     => \App\Models\Transaction::whereDate('transacted_at', $today)
                 ->where('jurusan_id', $activeJurusanId)
