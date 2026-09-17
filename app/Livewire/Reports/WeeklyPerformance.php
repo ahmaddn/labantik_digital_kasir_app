@@ -18,8 +18,7 @@ class WeeklyPerformance extends Component
 {
     public $startDate;
     public $endDate;
-    public $activeSlide = 1;
-    public $isPresentationMode = false;
+    public $currentStep = 1; // 1: Ringkasan & Tren, 2: Kinerja Kasir & Disiplin, 3: Analisis Produk & Stok, 4: Audit Harian & Catatan
 
     // Modal state for viewing detailed cashier audit
     public $selectedCashierId = null;
@@ -45,30 +44,24 @@ class WeeklyPerformance extends Component
         }
     }
 
-    public function togglePresentationMode()
+    public function setStep($step)
     {
-        $this->isPresentationMode = !$this->isPresentationMode;
-        $this->activeSlide = 1;
-    }
-
-    public function setSlide($slide)
-    {
-        if ($slide >= 1 && $slide <= 4) {
-            $this->activeSlide = $slide;
+        if ($step >= 1 && $step <= 4) {
+            $this->currentStep = $step;
         }
     }
 
-    public function nextSlide()
+    public function nextStep()
     {
-        if ($this->activeSlide < 4) {
-            $this->activeSlide++;
+        if ($this->currentStep < 4) {
+            $this->currentStep++;
         }
     }
 
-    public function prevSlide()
+    public function prevStep()
     {
-        if ($this->activeSlide > 1) {
-            $this->activeSlide--;
+        if ($this->currentStep > 1) {
+            $this->currentStep--;
         }
     }
 
