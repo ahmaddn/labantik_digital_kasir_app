@@ -54,6 +54,7 @@ Route::middleware(['auth', 'verified', EnsureRoleSelected::class])->group(functi
 
     // Recaps
     Route::get('/weekly-performance', WeeklyPerformance::class)->name('weekly-performance');
+    Route::get('/weekly-performance/presentation', \App\Livewire\Reports\WeeklyPerformancePresentation::class)->name('weekly-performance.presentation');
     Route::get('/daily-recap/{date?}', DailyRecap::class)->name('daily-recap');
     Route::get('/monthly-recap', MonthlyRecap::class)->name('monthly-recap');
     Route::get('/yearly-recap', YearlyRecap::class)->name('yearly-recap');
