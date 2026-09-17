@@ -279,7 +279,9 @@ class WeeklyPerformance extends Component
             $query->whereIn('roles.name', ['superadmin', 'admin', 'pengelola_jurusan', 'pengelola']);
         })
         ->when($activeJurusanId, function ($q) use ($activeJurusanId) {
-            return $q->where('jurusan_id', $activeJurusanId);
+            return $q->whereHas('roles', function ($sq) use ($activeJurusanId) {
+                $sq->where('role_user.jurusan_id', $activeJurusanId);
+            });
         })
         ->get();
 
