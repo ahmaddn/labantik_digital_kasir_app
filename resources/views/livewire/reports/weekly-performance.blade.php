@@ -312,8 +312,11 @@
                 </div>
             </div>
             <h3 class="text-2xl font-black text-gray-900 dark:text-white">{{ number_format($totalTransactions) }} <span class="text-xs font-bold text-gray-500 dark:text-gray-400">Struk</span></h3>
-            <div class="mt-2 text-xs text-gray-500 dark:text-gray-400 font-medium">
-                Rata: <strong class="text-gray-900 dark:text-gray-200">Rp {{ number_format($avgBasketSize) }}</strong> / belanja
+            <div class="mt-2 text-xs font-semibold flex items-center justify-between gap-1">
+                <span class="{{ $txGrowth >= 0 ? 'text-purple-600 dark:text-purple-400' : 'text-rose-600 dark:text-rose-400' }}">
+                    {{ $txGrowth >= 0 ? '+'.$txGrowth.'%' : $txGrowth.'%' }}
+                </span>
+                <span class="text-gray-500 dark:text-gray-400 font-normal">vs Periode Lalu ({{ number_format($prevTxCount) }} Tx)</span>
             </div>
         </div>
 

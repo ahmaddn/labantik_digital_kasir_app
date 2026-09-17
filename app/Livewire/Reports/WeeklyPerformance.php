@@ -102,29 +102,31 @@ class WeeklyPerformance extends Component
         $prevWeekStart = (clone $weekStart)->subDays($diffDays);
         $prevWeekEnd = (clone $weekStart)->subSecond();
 
-        // --- 1. OVERALL PERIOD SALES & REVENUE AGGREGATE ---
-        $currentSalesQuery = Transaction::forReporting()
+        // --- 1. OVERALL PERIOD SALES & REVENUE AGGREGATE (OPTIMIZED SINGLE QUERY) ---
+        $currentAgg = Transaction::forReporting()
+            ->selectRaw('COALESCE(SUM(total_price), 0) as total_rev, COALESCE(SUM(unit_profit * quantity), 0) as total_profit, COUNT(DISTINCT reference) as total_tx, COALESCE(SUM(quantity), 0) as total_items')
             ->whereBetween('transacted_at', [$weekStart->format('Y-m-d 00:00:00'), $weekEnd->format('Y-m-d 23:59:59')])
-            ->when($activeJurusanId, fn($q) => $q->where('jurusan_id', $activeJurusanId));
+            ->when($activeJurusanId, fn($q) => $q->where('jurusan_id', $activeJurusanId))
+            ->whereIn('status', ['uang_diterima', 'belum_kembalian'])
+            ->first();
 
-        $currentValidSales = (clone $currentSalesQuery)
-            ->whereIn('status', ['uang_diterima', 'belum_kembalian']);
-
-        $totalRevenue = $currentValidSales->sum('total_price');
-        $totalProfit = $currentValidSales->sum(DB::raw('unit_profit * quantity'));
-        $totalTransactions = $currentValidSales->count('reference');
-        $totalItemsSold = $currentValidSales->sum('quantity');
+        $totalRevenue = (float) ($currentAgg->total_rev ?? 0);
+        $totalProfit = (float) ($currentAgg->total_profit ?? 0);
+        $totalTransactions = (int) ($currentAgg->total_tx ?? 0);
+        $totalItemsSold = (int) ($currentAgg->total_items ?? 0);
         $avgBasketSize = $totalTransactions > 0 ? round($totalRevenue / $totalTransactions) : 0;
 
-        // Previous Period Metrics for Comparison
-        $prevValidSales = Transaction::forReporting()
+        // Previous Period Metrics for Comparison (OPTIMIZED SINGLE QUERY)
+        $prevAgg = Transaction::forReporting()
+            ->selectRaw('COALESCE(SUM(total_price), 0) as total_rev, COALESCE(SUM(unit_profit * quantity), 0) as total_profit, COUNT(DISTINCT reference) as total_tx')
             ->whereBetween('transacted_at', [$prevWeekStart->format('Y-m-d 00:00:00'), $prevWeekEnd->format('Y-m-d 23:59:59')])
             ->when($activeJurusanId, fn($q) => $q->where('jurusan_id', $activeJurusanId))
-            ->whereIn('status', ['uang_diterima', 'belum_kembalian']);
+            ->whereIn('status', ['uang_diterima', 'belum_kembalian'])
+            ->first();
 
-        $prevRevenue = $prevValidSales->sum('total_price');
-        $prevProfit = $prevValidSales->sum(DB::raw('unit_profit * quantity'));
-        $prevTxCount = $prevValidSales->count('reference');
+        $prevRevenue = (float) ($prevAgg->total_rev ?? 0);
+        $prevProfit = (float) ($prevAgg->total_profit ?? 0);
+        $prevTxCount = (int) ($prevAgg->total_tx ?? 0);
 
         $revenueGrowth = $prevRevenue > 0 ? round((($totalRevenue - $prevRevenue) / $prevRevenue) * 100, 1) : ($totalRevenue > 0 ? 100 : 0);
         $profitGrowth = $prevProfit > 0 ? round((($totalProfit - $prevProfit) / $prevProfit) * 100, 1) : ($totalProfit > 0 ? 100 : 0);
