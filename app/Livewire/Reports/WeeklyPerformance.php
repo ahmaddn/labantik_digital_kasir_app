@@ -433,8 +433,8 @@ class WeeklyPerformance extends Component
             ->count();
         $taskApprovedRate = $totalWeeklyTasksAssigned > 0 ? round(($totalWeeklyTasksApproved / $totalWeeklyTasksAssigned) * 100) : 100;
 
-        // --- 4. TOP SELLING VS LEAST SELLING PRODUCTS ---
-        $productSales = Transaction::forReporting()
+        // --- 4. TOP SELLING VS LEAST SELLING PRODUCTS (TEFA & REGULAR STOCK FILTERED) ---
+        $productSalesCurrent = Transaction::forReporting()
             ->select('product_id', DB::raw('SUM(quantity) as total_qty'), DB::raw('SUM(total_price) as total_omset'), DB::raw('SUM(unit_profit * quantity) as total_profit'))
             ->whereBetween('transacted_at', [$weekStart->format('Y-m-d 00:00:00'), $weekEnd->format('Y-m-d 23:59:59')])
             ->when($activeJurusanId, fn($q) => $q->where('jurusan_id', $activeJurusanId))
@@ -443,24 +443,56 @@ class WeeklyPerformance extends Component
             ->get()
             ->keyBy('product_id');
 
+        $productSalesPrev = Transaction::forReporting()
+            ->select('product_id', DB::raw('SUM(quantity) as total_qty'), DB::raw('SUM(total_price) as total_omset'))
+            ->whereBetween('transacted_at', [$prevWeekStart->format('Y-m-d 00:00:00'), $prevWeekEnd->format('Y-m-d 23:59:59')])
+            ->when($activeJurusanId, fn($q) => $q->where('jurusan_id', $activeJurusanId))
+            ->whereIn('status', ['uang_diterima', 'belum_kembalian'])
+            ->groupBy('product_id')
+            ->get()
+            ->keyBy('product_id');
+
         $allProducts = Product::when($activeJurusanId, fn($q) => $q->where('jurusan_id', $activeJurusanId))
+            ->where('is_active', true)
+            ->where(function($q) {
+                // Internal TEFA products (no supplier) OR supplier products with persistent stock (>0)
+                $q->whereNull('supplier_id')
+                  ->orWhere(function($sq) {
+                      $sq->whereNotNull('supplier_id')
+                        ->where('stock', '>', 0);
+                  });
+            })
             ->with(['category', 'supplier'])
             ->get();
 
-        $productPerformanceCollection = $allProducts->map(function ($product) use ($productSales, $totalRevenue) {
-            $sales = $productSales->get($product->id);
-            $qtySold = $sales ? (int)$sales->total_qty : 0;
-            $omset = $sales ? (float)$sales->total_omset : 0;
-            $profit = $sales ? (float)$sales->total_profit : 0;
+        $productPerformanceCollection = $allProducts->map(function ($product) use ($productSalesCurrent, $productSalesPrev, $totalRevenue) {
+            $curr = $productSalesCurrent->get($product->id);
+            $prev = $productSalesPrev->get($product->id);
+
+            $qtySold = $curr ? (int)$curr->total_qty : 0;
+            $omset = $curr ? (float)$curr->total_omset : 0;
+            $profit = $curr ? (float)$curr->total_profit : 0;
             $contrib = $totalRevenue > 0 ? round(($omset / $totalRevenue) * 100, 1) : 0;
+
+            $prevQty = $prev ? (int)$prev->total_qty : 0;
+            $prevOmset = $prev ? (float)$prev->total_omset : 0;
+            $qtyDiff = $qtySold - $prevQty;
+            $qtyGrowth = $prevQty > 0 ? round((($qtySold - $prevQty) / $prevQty) * 100, 1) : ($qtySold > 0 ? 100 : 0);
+
+            $isTefaInternal = is_null($product->supplier_id);
 
             return (object) [
                 'product' => $product,
+                'is_tefa_internal' => $isTefaInternal,
                 'qty_sold' => $qtySold,
                 'omset' => $omset,
                 'profit' => $profit,
                 'contribution_pct' => $contrib,
                 'stock' => $product->stock,
+                'prev_qty' => $prevQty,
+                'prev_omset' => $prevOmset,
+                'qty_diff' => $qtyDiff,
+                'qty_growth' => $qtyGrowth,
             ];
         });
 
@@ -471,11 +503,11 @@ class WeeklyPerformance extends Component
             ->values()
             ->take(5);
 
-        // Top 5 Least Sold / Stagnant Products
+        // Top 10 Least Sold / Stagnant Products (Slow-moving)
         $leastSellingProducts = $productPerformanceCollection
             ->sortBy(fn($p) => $p->qty_sold * 10000000 + $p->omset)
             ->values()
-            ->take(5);
+            ->take(10);
 
         // --- 5. CASHIER DETAIL MODAL DATA ---
         $modalCashierData = null;

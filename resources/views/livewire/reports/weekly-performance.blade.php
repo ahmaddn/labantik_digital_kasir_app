@@ -194,40 +194,100 @@
                     </div>
 
                 @elseif($activeSlide === 3)
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-6">
+                        {{-- Product Comparison Chart (Periode Ini vs Periode Lalu) --}}
                         <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl space-y-4">
-                            <h3 class="text-sm font-black text-emerald-400 uppercase tracking-wider">5 Produk Paling Laku (Top Selling)</h3>
-                            <div class="space-y-3">
+                            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                                <h3 class="text-sm font-black text-emerald-400 uppercase tracking-wider">Grafik Perbandingan Penjualan Produk Terlaris (Periode Ini vs Periode Lalu)</h3>
+                                <span class="text-xs text-slate-400 font-medium">TEFA & Supplier Reguler</span>
+                            </div>
+                            <div class="space-y-4 pt-2">
                                 @foreach($topSellingProducts as $p)
-                                    <div class="flex items-center justify-between p-3.5 bg-slate-800/80 rounded-xl border border-slate-700/60">
-                                        <div>
-                                            <h4 class="font-bold text-white text-sm">{{ $p->product->name }}</h4>
-                                            <p class="text-xs text-slate-400">Kategori: {{ $p->product->category->name ?? '-' }}</p>
+                                    @php 
+                                        $maxQty = max(1, max($p->qty_sold, $p->prev_qty));
+                                        $currWidth = round(($p->qty_sold / $maxQty) * 100);
+                                        $prevWidth = round(($p->prev_qty / $maxQty) * 100);
+                                    @endphp
+                                    <div class="space-y-1.5">
+                                        <div class="flex items-center justify-between text-xs">
+                                            <div class="flex items-center gap-2">
+                                                <span class="font-bold text-white">{{ $p->product->name }}</span>
+                                                <span class="px-2 py-0.5 {{ $p->is_tefa_internal ? 'bg-blue-950 text-blue-300 border-blue-800' : 'bg-purple-950 text-purple-300 border-purple-800' }} border rounded text-[10px] font-bold">
+                                                    {{ $p->is_tefa_internal ? 'TEFA Internal' : 'Supplier Reguler' }}
+                                                </span>
+                                            </div>
+                                            <span class="font-bold {{ $p->qty_growth >= 0 ? 'text-emerald-400' : 'text-rose-400' }}">
+                                                {{ $p->qty_sold }} pcs ({{ $p->qty_growth >= 0 ? '+'.$p->qty_growth.'%' : $p->qty_growth.'%' }} vs {{ $p->prev_qty }} pcs)
+                                            </span>
                                         </div>
-                                        <div class="text-right">
-                                            <span class="text-emerald-400 font-black text-sm block">{{ $p->qty_sold }} Terjual</span>
-                                            <span class="text-xs text-slate-400">Omset: Rp {{ number_format($p->omset) }}</span>
+                                        <div class="space-y-1">
+                                            {{-- Current Period Bar --}}
+                                            <div class="flex items-center gap-2 text-[10px]">
+                                                <span class="w-16 text-slate-400 font-semibold shrink-0">Ini: {{ $p->qty_sold }} pcs</span>
+                                                <div class="w-full bg-slate-800 rounded-full h-3 overflow-hidden p-0.5 border border-slate-700">
+                                                    <div class="bg-blue-500 h-full rounded-full transition-all" style="width: {{ max(6, $currWidth) }}%"></div>
+                                                </div>
+                                            </div>
+                                            {{-- Prev Period Bar --}}
+                                            <div class="flex items-center gap-2 text-[10px]">
+                                                <span class="w-16 text-slate-400 shrink-0">Lalu: {{ $p->prev_qty }} pcs</span>
+                                                <div class="w-full bg-slate-800 rounded-full h-2.5 overflow-hidden p-0.5">
+                                                    <div class="bg-slate-600 h-full rounded-full transition-all" style="width: {{ max(4, $prevWidth) }}%"></div>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 @endforeach
                             </div>
                         </div>
 
-                        <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl space-y-4">
-                            <h3 class="text-sm font-black text-amber-400 uppercase tracking-wider">5 Produk Kurang Laku / Stagnan</h3>
-                            <div class="space-y-3">
-                                @foreach($leastSellingProducts as $p)
-                                    <div class="flex items-center justify-between p-3.5 bg-slate-800/80 rounded-xl border border-slate-700/60">
-                                        <div>
-                                            <h4 class="font-bold text-white text-sm">{{ $p->product->name }}</h4>
-                                            <p class="text-xs text-amber-400 font-medium">Stok Tersisa: {{ $p->stock }} {{ $p->product->unit ?? 'pcs' }}</p>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            {{-- Top Selling Products --}}
+                            <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl space-y-4">
+                                <h3 class="text-sm font-black text-emerald-400 uppercase tracking-wider">Top 5 Produk Terlaris</h3>
+                                <div class="space-y-3">
+                                    @foreach($topSellingProducts as $p)
+                                        <div class="flex items-center justify-between p-3.5 bg-slate-800/80 rounded-xl border border-slate-700/60">
+                                            <div>
+                                                <div class="flex items-center gap-2">
+                                                    <h4 class="font-bold text-white text-sm">{{ $p->product->name }}</h4>
+                                                    <span class="px-1.5 py-0.5 {{ $p->is_tefa_internal ? 'bg-blue-950 text-blue-300' : 'bg-purple-950 text-purple-300' }} rounded text-[10px] font-bold">
+                                                        {{ $p->is_tefa_internal ? 'TEFA' : 'Supplier' }}
+                                                    </span>
+                                                </div>
+                                                <p class="text-xs text-slate-400 mt-0.5">Kat: {{ $p->product->category->name ?? '-' }} | Kontribusi: {{ $p->contribution_pct }}%</p>
+                                            </div>
+                                            <div class="text-right shrink-0">
+                                                <span class="text-emerald-400 font-black text-sm block">{{ $p->qty_sold }} Terjual</span>
+                                                <span class="text-xs text-slate-400 block">Rp {{ number_format($p->omset) }}</span>
+                                            </div>
                                         </div>
-                                        <div class="text-right">
-                                            <span class="text-rose-400 font-black text-sm block">{{ $p->qty_sold }} Terjual</span>
-                                            <span class="text-xs text-slate-400">Perlu Penanganan Stok</span>
+                                    @endforeach
+                                </div>
+                            </div>
+
+                            {{-- 10 Least Selling Products --}}
+                            <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl space-y-4">
+                                <h3 class="text-sm font-black text-amber-400 uppercase tracking-wider">10 Produk Stagnan / Slow-Moving</h3>
+                                <div class="space-y-2.5 max-h-[380px] overflow-y-auto pr-1">
+                                    @foreach($leastSellingProducts as $p)
+                                        <div class="flex items-center justify-between p-3 bg-slate-800/80 rounded-xl border border-slate-700/60">
+                                            <div>
+                                                <div class="flex items-center gap-2">
+                                                    <h4 class="font-bold text-white text-xs">{{ $p->product->name }}</h4>
+                                                    <span class="px-1.5 py-0.5 {{ $p->is_tefa_internal ? 'bg-blue-950 text-blue-300' : 'bg-purple-950 text-purple-300' }} rounded text-[9px] font-bold">
+                                                        {{ $p->is_tefa_internal ? 'TEFA' : 'Supplier' }}
+                                                    </span>
+                                                </div>
+                                                <p class="text-[11px] text-amber-400 font-medium">Stok Tersisa: {{ $p->stock }} {{ $p->product->unit ?? 'pcs' }}</p>
+                                            </div>
+                                            <div class="text-right shrink-0">
+                                                <span class="text-rose-400 font-black text-xs block">{{ $p->qty_sold }} Terjual</span>
+                                                <span class="text-[10px] text-slate-400">Slow Moving</span>
+                                            </div>
                                         </div>
-                                    </div>
-                                @endforeach
+                                    @endforeach
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -578,7 +638,7 @@
         </div>
     </div>
 
-    {{-- SECTION 5: BARANG TERLARIS VS STAGNAN --}}
+    {{-- SECTION 5: BARANG TERLARIS VS STAGNAN (TEFA & SUPPLIER REGULER) --}}
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
         {{-- Top Selling --}}
         <div class="bg-white dark:bg-gray-800 p-5 sm:p-6 rounded-2xl border border-gray-100 dark:border-gray-700/60 shadow-sm space-y-4">
@@ -596,8 +656,15 @@
                 @forelse($topSellingProducts as $item)
                     <div class="p-4 bg-gray-50/80 dark:bg-gray-700/40 rounded-xl flex items-center justify-between border border-gray-100 dark:border-gray-700/60">
                         <div>
-                            <h4 class="font-extrabold text-gray-900 dark:text-white text-xs sm:text-sm">{{ $item->product->name }}</h4>
-                            <p class="text-xs text-gray-500 dark:text-gray-400 font-medium">Kat: {{ $item->product->category->name ?? '-' }}</p>
+                            <div class="flex items-center gap-2">
+                                <h4 class="font-extrabold text-gray-900 dark:text-white text-xs sm:text-sm">{{ $item->product->name }}</h4>
+                                <span class="px-1.5 py-0.5 {{ $item->is_tefa_internal ? 'bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300' : 'bg-purple-100 text-purple-800 dark:bg-purple-950 dark:text-purple-300' }} rounded text-[10px] font-bold">
+                                    {{ $item->is_tefa_internal ? 'TEFA' : 'Supplier' }}
+                                </span>
+                            </div>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 font-medium mt-0.5">
+                                Kat: {{ $item->product->category->name ?? '-' }} | <span class="{{ $item->qty_growth >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400' }} font-bold">{{ $item->qty_growth >= 0 ? '+'.$item->qty_growth.'%' : $item->qty_growth.'%' }} vs lalu ({{ $item->prev_qty }} pcs)</span>
+                            </p>
                         </div>
                         <div class="text-right shrink-0">
                             <span class="text-emerald-600 dark:text-emerald-400 font-black text-sm block">{{ $item->qty_sold }} Terjual</span>
@@ -610,28 +677,33 @@
             </div>
         </div>
 
-        {{-- Least Selling --}}
+        {{-- Least Selling (10 Stagnant items) --}}
         <div class="bg-white dark:bg-gray-800 p-5 sm:p-6 rounded-2xl border border-gray-100 dark:border-gray-700/60 shadow-sm space-y-4">
             <div class="flex items-center justify-between pb-3 border-b border-gray-100 dark:border-gray-700/60">
                 <div class="flex items-center gap-2">
                     <div class="p-2 bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 rounded-lg shrink-0 border border-amber-200 dark:border-amber-900/50">
                         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"/></svg>
                     </div>
-                    <h3 class="font-black text-gray-900 dark:text-white text-base">5 Barang Kurang Laku / Stagnan</h3>
+                    <h3 class="font-black text-gray-900 dark:text-white text-base">10 Barang Stagnan / Slow-Moving</h3>
                 </div>
                 <span class="text-xs font-bold text-amber-600 dark:text-amber-400">Evaluasi Stok</span>
             </div>
 
-            <div class="space-y-3">
+            <div class="space-y-2.5 max-h-[420px] overflow-y-auto pr-1">
                 @forelse($leastSellingProducts as $item)
-                    <div class="p-4 bg-gray-50/80 dark:bg-gray-700/40 rounded-xl flex items-center justify-between border border-gray-100 dark:border-gray-700/60">
+                    <div class="p-3 bg-gray-50/80 dark:bg-gray-700/40 rounded-xl flex items-center justify-between border border-gray-100 dark:border-gray-700/60">
                         <div>
-                            <h4 class="font-extrabold text-gray-900 dark:text-white text-xs sm:text-sm">{{ $item->product->name }}</h4>
-                            <p class="text-xs text-gray-500 dark:text-gray-400 font-medium">Stok Tersedia: <strong class="text-amber-600 dark:text-amber-400">{{ $item->stock }} {{ $item->product->unit ?? 'pcs' }}</strong></p>
+                            <div class="flex items-center gap-2">
+                                <h4 class="font-extrabold text-gray-900 dark:text-white text-xs">{{ $item->product->name }}</h4>
+                                <span class="px-1.5 py-0.5 {{ $item->is_tefa_internal ? 'bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300' : 'bg-purple-100 text-purple-800 dark:bg-purple-950 dark:text-purple-300' }} rounded text-[9px] font-bold">
+                                    {{ $item->is_tefa_internal ? 'TEFA' : 'Supplier' }}
+                                </span>
+                            </div>
+                            <p class="text-xs text-amber-600 dark:text-amber-400 font-medium mt-0.5">Stok Tersedia: <strong>{{ $item->stock }} {{ $item->product->unit ?? 'pcs' }}</strong></p>
                         </div>
                         <div class="text-right shrink-0">
-                            <span class="text-rose-600 dark:text-rose-400 font-black text-sm block">{{ $item->qty_sold }} Terjual</span>
-                            <span class="text-xs text-gray-500 dark:text-gray-400">Slow Moving</span>
+                            <span class="text-rose-600 dark:text-rose-400 font-black text-xs block">{{ $item->qty_sold }} Terjual</span>
+                            <span class="text-[10px] text-gray-500 dark:text-gray-400">Slow Moving</span>
                         </div>
                     </div>
                 @empty
