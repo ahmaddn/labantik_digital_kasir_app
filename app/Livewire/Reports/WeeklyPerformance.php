@@ -1,0 +1,536 @@
+<?php
+
+namespace App\Livewire\Reports;
+
+use App\Models\CashierAttendance;
+use App\Models\CashierNote;
+use App\Models\CashierSchedule;
+use App\Models\CashierTaskAssignment;
+use App\Models\CashierTaskSubmission;
+use App\Models\Product;
+use App\Models\Transaction;
+use App\Models\User;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
+use Livewire\Component;
+
+class WeeklyPerformance extends Component
+{
+    public $selectedWeekDate; // Any Y-m-d within the chosen week
+    public $availableWeeks = [];
+    public $activeSlide = 1;
+    public $isPresentationMode = false;
+
+    // Modal state for viewing detailed cashier audit
+    public $selectedCashierId = null;
+    public $showCashierDetailModal = false;
+
+    public function mount($date = null)
+    {
+        $this->selectedWeekDate = $date ?? now()->toDateString();
+        $this->generateAvailableWeeks();
+    }
+
+    public function setWeekDate($date)
+    {
+        $this->selectedWeekDate = $date;
+    }
+
+    public function togglePresentationMode()
+    {
+        $this->isPresentationMode = !$this->isPresentationMode;
+        $this->activeSlide = 1;
+    }
+
+    public function setSlide($slide)
+    {
+        if ($slide >= 1 && $slide <= 4) {
+            $this->activeSlide = $slide;
+        }
+    }
+
+    public function nextSlide()
+    {
+        if ($this->activeSlide < 4) {
+            $this->activeSlide++;
+        }
+    }
+
+    public function prevSlide()
+    {
+        if ($this->activeSlide > 1) {
+            $this->activeSlide--;
+        }
+    }
+
+    public function viewCashierDetail($userId)
+    {
+        $this->selectedCashierId = $userId;
+        $this->showCashierDetailModal = true;
+    }
+
+    public function closeCashierDetailModal()
+    {
+        $this->showCashierDetailModal = false;
+        $this->selectedCashierId = null;
+    }
+
+    private function generateAvailableWeeks()
+    {
+        $weeks = [];
+        $current = now()->startOfWeek();
+
+        for ($i = 0; $i < 12; $i++) {
+            $start = (clone $current)->subWeeks($i);
+            $end = (clone $start)->endOfWeek();
+
+            $weeks[] = [
+                'date' => $start->toDateString(),
+                'label' => $start->format('d M') . ' - ' . $end->format('d M Y') . ($i === 0 ? ' (Minggu Ini)' : ''),
+            ];
+        }
+
+        $this->availableWeeks = $weeks;
+    }
+
+    public function render()
+    {
+        $activeJurusanId = session('active_jurusan_id');
+
+        $weekStart = Carbon::parse($this->selectedWeekDate)->startOfWeek();
+        $weekEnd = Carbon::parse($this->selectedWeekDate)->endOfWeek();
+
+        // Previous week for comparison
+        $prevWeekStart = (clone $weekStart)->subWeek();
+        $prevWeekEnd = (clone $weekEnd)->subWeek();
+
+        // --- 1. OVERALL WEEKLY SALES & REVENUE AGGREGATE ---
+        $currentSalesQuery = Transaction::forReporting()
+            ->whereBetween('transacted_at', [$weekStart->format('Y-m-d 00:00:00'), $weekEnd->format('Y-m-d 23:59:59')])
+            ->when($activeJurusanId, fn($q) => $q->where('jurusan_id', $activeJurusanId));
+
+        $currentValidSales = (clone $currentSalesQuery)
+            ->whereIn('status', ['uang_diterima', 'belum_kembalian']);
+
+        $totalRevenue = $currentValidSales->sum('total_price');
+        $totalProfit = $currentValidSales->sum(DB::raw('unit_profit * quantity'));
+        $totalTransactions = $currentValidSales->count('reference');
+        $totalItemsSold = $currentValidSales->sum('quantity');
+        $avgBasketSize = $totalTransactions > 0 ? round($totalRevenue / $totalTransactions) : 0;
+
+        // Previous Week Metrics for Comparison
+        $prevValidSales = Transaction::forReporting()
+            ->whereBetween('transacted_at', [$prevWeekStart->format('Y-m-d 00:00:00'), $prevWeekEnd->format('Y-m-d 23:59:59')])
+            ->when($activeJurusanId, fn($q) => $q->where('jurusan_id', $activeJurusanId))
+            ->whereIn('status', ['uang_diterima', 'belum_kembalian']);
+
+        $prevRevenue = $prevValidSales->sum('total_price');
+        $prevProfit = $prevValidSales->sum(DB::raw('unit_profit * quantity'));
+        $prevTxCount = $prevValidSales->count('reference');
+
+        $revenueGrowth = $prevRevenue > 0 ? round((($totalRevenue - $prevRevenue) / $prevRevenue) * 100, 1) : ($totalRevenue > 0 ? 100 : 0);
+        $profitGrowth = $prevProfit > 0 ? round((($totalProfit - $prevProfit) / $prevProfit) * 100, 1) : ($totalProfit > 0 ? 100 : 0);
+        $txGrowth = $prevTxCount > 0 ? round((($totalTransactions - $prevTxCount) / $prevTxCount) * 100, 1) : ($totalTransactions > 0 ? 100 : 0);
+
+        // --- 2. DAILY BREAKDOWN & DAILY SHIFT AUDIT (SENIN - MINGGU) ---
+        $dailySales = [];
+        $dailyShiftAudits = [];
+        $maxDailyRevenue = 1;
+        $peakDay = ['day' => '-', 'revenue' => 0, 'transactions' => 0, 'date' => '-'];
+
+        $daysMap = [
+            1 => 'Senin',
+            2 => 'Selasa',
+            3 => 'Rabu',
+            4 => 'Kamis',
+            5 => 'Jumat',
+            6 => 'Sabtu',
+            7 => 'Minggu'
+        ];
+
+        for ($d = 1; $d <= 7; $d++) {
+            $dayDate = (clone $weekStart)->addDays($d - 1);
+            $dayStr = $dayDate->toDateString();
+
+            // Sales on this day
+            $daySalesQuery = Transaction::forReporting()
+                ->whereDate('transacted_at', $dayStr)
+                ->when($activeJurusanId, fn($q) => $q->where('jurusan_id', $activeJurusanId))
+                ->whereIn('status', ['uang_diterima', 'belum_kembalian']);
+
+            $rev = $daySalesQuery->sum('total_price');
+            $txCount = $daySalesQuery->count('reference');
+            $profit = $daySalesQuery->sum(DB::raw('unit_profit * quantity'));
+
+            if ($rev > $maxDailyRevenue) {
+                $maxDailyRevenue = $rev;
+            }
+
+            if ($rev > $peakDay['revenue']) {
+                $peakDay = [
+                    'day' => $daysMap[$d],
+                    'date' => $dayDate->format('d M'),
+                    'revenue' => $rev,
+                    'transactions' => $txCount
+                ];
+            }
+
+            $dailySales[] = [
+                'day_num' => $d,
+                'day_name' => $daysMap[$d],
+                'date' => $dayDate->format('d M Y'),
+                'revenue' => $rev,
+                'profit' => $profit,
+                'transactions' => $txCount,
+            ];
+
+            // Factual Shift & Task Audit on this specific day
+            $schedulesOnDay = CashierSchedule::where('date', $dayStr)
+                ->when($activeJurusanId, fn($q) => $q->where('jurusan_id', $activeJurusanId))
+                ->with('user')
+                ->get();
+
+            $cashierAuditsForDay = [];
+            foreach ($schedulesOnDay as $sched) {
+                $cUser = $sched->user;
+                if (!$cUser) continue;
+
+                // Attendance on this day
+                $att = CashierAttendance::where('user_id', $cUser->id)
+                    ->where('date', $dayStr)
+                    ->when($activeJurusanId, fn($q) => $q->where('jurusan_id', $activeJurusanId))
+                    ->first();
+
+                // Tasks assigned on this day or assigned tasks for this cashier on this date
+                $assignmentsOnDay = CashierTaskAssignment::where('assigned_to', $cUser->id)
+                    ->whereHas('taskDefinition', function($q) use ($dayStr) {
+                        $q->where('date', $dayStr);
+                    })
+                    ->when($activeJurusanId, fn($q) => $q->where('jurusan_id', $activeJurusanId))
+                    ->with(['taskDefinition', 'latestSubmission'])
+                    ->get();
+
+                // Cashier sales on this day
+                $cSalesOnDay = Transaction::forReporting()
+                    ->where('user_id', $cUser->id)
+                    ->whereDate('transacted_at', $dayStr)
+                    ->when($activeJurusanId, fn($q) => $q->where('jurusan_id', $activeJurusanId))
+                    ->whereIn('status', ['uang_diterima', 'belum_kembalian']);
+
+                $cRev = $cSalesOnDay->sum('total_price');
+                $cTx = $cSalesOnDay->count('reference');
+
+                $taskDetails = $assignmentsOnDay->map(function($asg) {
+                    $def = $asg->taskDefinition;
+                    $sub = $asg->latestSubmission;
+                    $status = 'Belum Dikerjakan';
+                    $badgeClass = 'bg-rose-50 text-rose-600 dark:bg-rose-950/40 dark:text-rose-400';
+
+                    if ($sub) {
+                        if ($sub->approval_status === 'approved') {
+                            $status = 'Disetujui';
+                            $badgeClass = 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400';
+                        } elseif ($sub->approval_status === 'rejected') {
+                            $status = 'Ditolak: ' . ($sub->rejection_note ?? 'Perlu perbaikan');
+                            $badgeClass = 'bg-rose-50 text-rose-600 dark:bg-rose-950/40 dark:text-rose-400';
+                        } else {
+                            $status = 'Menunggu Review';
+                            $badgeClass = 'bg-blue-50 text-blue-600 dark:bg-blue-950/40 dark:text-blue-400';
+                        }
+                    }
+
+                    return [
+                        'task_name' => $def->task_name ?? 'Tugas Piket',
+                        'priority' => $def->priority ?? 'medium',
+                        'status' => $status,
+                        'badge_class' => $badgeClass,
+                        'rejection_note' => $sub->rejection_note ?? null,
+                    ];
+                });
+
+                $uncompletedTaskCount = $assignmentsOnDay->filter(function($asg) {
+                    return !$asg->latestSubmission || $asg->latestSubmission->approval_status === 'rejected';
+                })->count();
+
+                $cashierAuditsForDay[] = [
+                    'user' => $cUser,
+                    'attended' => $att ? true : false,
+                    'clock_in' => $att && $att->clock_in ? Carbon::parse($att->clock_in)->format('H:i') : null,
+                    'clock_in_status' => $att->clock_in_status ?? 'absen_kosong',
+                    'sales_omset' => $cRev,
+                    'sales_tx' => $cTx,
+                    'assigned_task_count' => $assignmentsOnDay->count(),
+                    'uncompleted_task_count' => $uncompletedTaskCount,
+                    'task_details' => $taskDetails,
+                ];
+            }
+
+            if (!empty($cashierAuditsForDay)) {
+                $dailyShiftAudits[] = [
+                    'day_name' => $daysMap[$d],
+                    'date' => $dayDate->format('d M Y'),
+                    'cashiers' => $cashierAuditsForDay,
+                ];
+            }
+        }
+
+        // --- 3. CASHIER SHIFT & PERFORMANCE AUDIT (SELEURUH MINGGU) ---
+        $cashierUsers = User::whereDoesntHave('roles', function ($query) {
+            $query->whereIn('roles.name', ['superadmin', 'admin', 'pengelola_jurusan', 'pengelola']);
+        })
+        ->when($activeJurusanId, function ($q) use ($activeJurusanId) {
+            return $q->where('jurusan_id', $activeJurusanId);
+        })
+        ->get();
+
+        $cashierPerformanceList = $cashierUsers->map(function ($user) use ($weekStart, $weekEnd, $activeJurusanId) {
+            // POS Sales
+            $userSales = Transaction::forReporting()
+                ->where('user_id', $user->id)
+                ->whereBetween('transacted_at', [$weekStart->format('Y-m-d 00:00:00'), $weekEnd->format('Y-m-d 23:59:59')])
+                ->when($activeJurusanId, fn($q) => $q->where('jurusan_id', $activeJurusanId))
+                ->whereIn('status', ['uang_diterima', 'belum_kembalian']);
+
+            $totalSales = $userSales->sum('total_price');
+            $totalTx = $userSales->count('reference');
+            $totalProfitGen = $userSales->sum(DB::raw('unit_profit * quantity'));
+
+            // Schedules & Attendance
+            $schedules = CashierSchedule::where('user_id', $user->id)
+                ->whereBetween('date', [$weekStart->toDateString(), $weekEnd->toDateString()])
+                ->when($activeJurusanId, fn($q) => $q->where('jurusan_id', $activeJurusanId))
+                ->get();
+
+            $scheduledCount = $schedules->count();
+
+            $attendances = CashierAttendance::where('user_id', $user->id)
+                ->whereBetween('date', [$weekStart->toDateString(), $weekEnd->toDateString()])
+                ->when($activeJurusanId, fn($q) => $q->where('jurusan_id', $activeJurusanId))
+                ->get();
+
+            $attendedCount = $attendances->count();
+            $onTimeCount = $attendances->whereIn('clock_in_status', ['on_time', 'early'])->count();
+            $lateCount = $attendances->where('clock_in_status', 'late')->count();
+
+            // Task Assignments & Submissions
+            $assignments = CashierTaskAssignment::where('assigned_to', $user->id)
+                ->whereBetween('created_at', [$weekStart->format('Y-m-d 00:00:00'), $weekEnd->format('Y-m-d 23:59:59')])
+                ->when($activeJurusanId, fn($q) => $q->where('jurusan_id', $activeJurusanId))
+                ->get();
+
+            $totalAssignedTasks = $assignments->count();
+
+            $submissions = CashierTaskSubmission::where('submitted_by', $user->id)
+                ->whereBetween('created_at', [$weekStart->format('Y-m-d 00:00:00'), $weekEnd->format('Y-m-d 23:59:59')])
+                ->get();
+
+            $approvedTasksCount = $submissions->where('approval_status', 'approved')->count();
+            $rejectedTasksCount = $submissions->where('approval_status', 'rejected')->count();
+            $pendingTasksCount = $submissions->where('approval_status', 'pending')->count();
+            $unsubmittedTasksCount = max(0, $totalAssignedTasks - $submissions->count());
+
+            // Comprehensive Score Index Calculation
+            $posScore = ($totalTx * 5) + (int) floor($totalSales / 10000);
+            $attendanceScore = ($onTimeCount * 25) + ($lateCount * 10);
+            $taskScore = ($approvedTasksCount * 30) - ($rejectedTasksCount * 10) - ($unsubmittedTasksCount * 15);
+
+            $overallScore = max(0, $posScore + $attendanceScore + $taskScore);
+
+            // Determine status label & theme badge
+            $statusBadge = 'Perlu Evaluasi';
+            $badgeColor = 'danger'; // danger, warning, success, gold
+            $evaluationNotes = [];
+
+            if ($unsubmittedTasksCount > 0) {
+                $evaluationNotes[] = "$unsubmittedTasksCount tugas belum dilaporkan";
+            }
+            if ($rejectedTasksCount > 0) {
+                $evaluationNotes[] = "$rejectedTasksCount tugas ditolak";
+            }
+            if ($lateCount > 0) {
+                $evaluationNotes[] = "$lateCount kali terlambat piket";
+            }
+            if ($scheduledCount > $attendedCount) {
+                $missed = $scheduledCount - $attendedCount;
+                $evaluationNotes[] = "$missed piket tidak hadir";
+            }
+            if ($totalTx === 0 && $scheduledCount > 0) {
+                $evaluationNotes[] = "0 transaksi saat piket";
+            }
+
+            if (empty($evaluationNotes)) {
+                $evaluationNotes[] = "Kinerja & kepatuhan sempurna";
+            }
+
+            if ($overallScore >= 150 || ($totalTx >= 15 && $approvedTasksCount >= 2 && empty($evaluationNotes[0] ?? ''))) {
+                $statusBadge = 'Sangat Baik / Bintang';
+                $badgeColor = 'gold';
+            } elseif ($overallScore >= 80 || $totalTx >= 8) {
+                $statusBadge = 'Baik & Produktif';
+                $badgeColor = 'success';
+            } elseif ($overallScore >= 40 || $attendedCount > 0) {
+                $statusBadge = 'Cukup / Standar';
+                $badgeColor = 'warning';
+            }
+
+            return (object) [
+                'user' => $user,
+                'total_sales' => $totalSales,
+                'total_tx' => $totalTx,
+                'total_profit' => $totalProfitGen,
+                'scheduled_count' => $scheduledCount,
+                'attended_count' => $attendedCount,
+                'on_time_count' => $onTimeCount,
+                'late_count' => $lateCount,
+                'assigned_tasks' => $totalAssignedTasks,
+                'approved_tasks' => $approvedTasksCount,
+                'pending_tasks' => $pendingTasksCount,
+                'rejected_tasks' => $rejectedTasksCount,
+                'unsubmitted_tasks' => $unsubmittedTasksCount,
+                'overall_score' => $overallScore,
+                'status_badge' => $statusBadge,
+                'badge_color' => $badgeColor,
+                'evaluation_notes' => implode(', ', $evaluationNotes),
+            ];
+        })->sortByDesc('overall_score')->values();
+
+        // Top & Bottom performers
+        $topPerformers = $cashierPerformanceList->take(3);
+        $bottomPerformers = $cashierPerformanceList->filter(fn($c) => $c->overall_score < 60 || $c->rejected_tasks > 0 || $c->unsubmitted_tasks > 0 || $c->total_tx === 0)->sortBy('overall_score')->values()->take(3);
+
+        // Task & Attendance Totals for Summary Card
+        $totalScheduledShifts = CashierSchedule::whereBetween('date', [$weekStart->toDateString(), $weekEnd->toDateString()])
+            ->when($activeJurusanId, fn($q) => $q->where('jurusan_id', $activeJurusanId))
+            ->count();
+        $totalAttendedShifts = CashierAttendance::whereBetween('date', [$weekStart->toDateString(), $weekEnd->toDateString()])
+            ->when($activeJurusanId, fn($q) => $q->where('jurusan_id', $activeJurusanId))
+            ->count();
+        $shiftFulfillmentRate = $totalScheduledShifts > 0 ? round(($totalAttendedShifts / $totalScheduledShifts) * 100) : 100;
+
+        $totalWeeklyTasksAssigned = CashierTaskAssignment::whereBetween('created_at', [$weekStart->format('Y-m-d 00:00:00'), $weekEnd->format('Y-m-d 23:59:59')])
+            ->when($activeJurusanId, fn($q) => $q->where('jurusan_id', $activeJurusanId))
+            ->count();
+
+        $totalWeeklyTasksApproved = CashierTaskSubmission::whereBetween('created_at', [$weekStart->format('Y-m-d 00:00:00'), $weekEnd->format('Y-m-d 23:59:59')])
+            ->where('approval_status', 'approved')
+            ->count();
+        $taskApprovedRate = $totalWeeklyTasksAssigned > 0 ? round(($totalWeeklyTasksApproved / $totalWeeklyTasksAssigned) * 100) : 100;
+
+        // --- 4. TOP SELLING VS LEAST SELLING PRODUCTS ---
+        $productSales = Transaction::forReporting()
+            ->select('product_id', DB::raw('SUM(quantity) as total_qty'), DB::raw('SUM(total_price) as total_omset'), DB::raw('SUM(unit_profit * quantity) as total_profit'))
+            ->whereBetween('transacted_at', [$weekStart->format('Y-m-d 00:00:00'), $weekEnd->format('Y-m-d 23:59:59')])
+            ->when($activeJurusanId, fn($q) => $q->where('jurusan_id', $activeJurusanId))
+            ->whereIn('status', ['uang_diterima', 'belum_kembalian'])
+            ->groupBy('product_id')
+            ->get()
+            ->keyBy('product_id');
+
+        $allProducts = Product::when($activeJurusanId, fn($q) => $q->where('jurusan_id', $activeJurusanId))
+            ->with(['category', 'supplier'])
+            ->get();
+
+        $productPerformanceCollection = $allProducts->map(function ($product) use ($productSales, $totalRevenue) {
+            $sales = $productSales->get($product->id);
+            $qtySold = $sales ? (int)$sales->total_qty : 0;
+            $omset = $sales ? (float)$sales->total_omset : 0;
+            $profit = $sales ? (float)$sales->total_profit : 0;
+            $contrib = $totalRevenue > 0 ? round(($omset / $totalRevenue) * 100, 1) : 0;
+
+            return (object) [
+                'product' => $product,
+                'qty_sold' => $qtySold,
+                'omset' => $omset,
+                'profit' => $profit,
+                'contribution_pct' => $contrib,
+                'stock' => $product->stock,
+            ];
+        });
+
+        // Top 5 Most Sold Products
+        $topSellingProducts = $productPerformanceCollection
+            ->filter(fn($p) => $p->qty_sold > 0)
+            ->sortByDesc(fn($p) => $p->qty_sold * 10000000 + $p->omset)
+            ->values()
+            ->take(5);
+
+        // Top 5 Least Sold / Stagnant Products
+        $leastSellingProducts = $productPerformanceCollection
+            ->sortBy(fn($p) => $p->qty_sold * 10000000 + $p->omset)
+            ->values()
+            ->take(5);
+
+        // --- 5. CASHIER DETAIL MODAL DATA ---
+        $modalCashierData = null;
+        if ($this->selectedCashierId) {
+            $cUser = User::find($this->selectedCashierId);
+            if ($cUser) {
+                // Fetch shift audit per day for this user
+                $cashierDailyBreakdown = [];
+                for ($d = 1; $d <= 7; $d++) {
+                    $dDate = (clone $weekStart)->addDays($d - 1);
+                    $dStr = $dDate->toDateString();
+
+                    $sched = CashierSchedule::where('user_id', $cUser->id)->where('date', $dStr)->first();
+                    $att = CashierAttendance::where('user_id', $cUser->id)->where('date', $dStr)->first();
+                    $asgs = CashierTaskAssignment::where('assigned_to', $cUser->id)
+                        ->whereHas('taskDefinition', fn($q) => $q->where('date', $dStr))
+                        ->with(['taskDefinition', 'latestSubmission'])
+                        ->get();
+
+                    $txs = Transaction::forReporting()
+                        ->where('user_id', $cUser->id)
+                        ->whereDate('transacted_at', $dStr)
+                        ->whereIn('status', ['uang_diterima', 'belum_kembalian']);
+
+                    $cNotes = CashierNote::where('user_id', $cUser->id)
+                        ->whereDate('date', $dStr)
+                        ->get();
+
+                    $cashierDailyBreakdown[] = [
+                        'day_name' => $daysMap[$d],
+                        'date' => $dDate->format('d M Y'),
+                        'is_scheduled' => $sched ? true : false,
+                        'attendance' => $att,
+                        'tasks' => $asgs,
+                        'sales_omset' => $txs->sum('total_price'),
+                        'sales_count' => $txs->count('reference'),
+                        'notes' => $cNotes,
+                    ];
+                }
+
+                $modalCashierData = [
+                    'user' => $cUser,
+                    'daily_breakdown' => $cashierDailyBreakdown,
+                ];
+            }
+        }
+
+        return view('livewire.reports.weekly-performance', [
+            'weekStart' => $weekStart,
+            'weekEnd' => $weekEnd,
+            'totalRevenue' => $totalRevenue,
+            'totalProfit' => $totalProfit,
+            'totalTransactions' => $totalTransactions,
+            'totalItemsSold' => $totalItemsSold,
+            'avgBasketSize' => $avgBasketSize,
+            'revenueGrowth' => $revenueGrowth,
+            'profitGrowth' => $profitGrowth,
+            'txGrowth' => $txGrowth,
+            'dailySales' => $dailySales,
+            'dailyShiftAudits' => $dailyShiftAudits,
+            'maxDailyRevenue' => $maxDailyRevenue,
+            'peakDay' => $peakDay,
+            'cashierPerformanceList' => $cashierPerformanceList,
+            'topPerformers' => $topPerformers,
+            'bottomPerformers' => $bottomPerformers,
+            'shiftFulfillmentRate' => $shiftFulfillmentRate,
+            'taskApprovedRate' => $taskApprovedRate,
+            'totalScheduledShifts' => $totalScheduledShifts,
+            'totalAttendedShifts' => $totalAttendedShifts,
+            'topSellingProducts' => $topSellingProducts,
+            'leastSellingProducts' => $leastSellingProducts,
+            'modalCashierData' => $modalCashierData,
+        ])->layout('layouts.app', ['title' => 'Performa Penjualan & Kasir Mingguan']);
+    }
+}

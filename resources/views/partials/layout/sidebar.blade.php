@@ -228,6 +228,17 @@
             @endif
 
             @if (in_array(session('active_role_name'), ['superadmin', 'pengelola_jurusan', 'kasir']))
+                <a href="{{ route('weekly-performance') }}"
+                    class="flex items-center px-4 py-2.5 text-xs font-semibold rounded-xl transition-all {{ request()->routeIs('weekly-performance') ? 'bg-primary-blue text-white shadow-xl shadow-blue-900/20' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
+                    <svg class="w-5 h-5 mr-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 3v18h18" />
+                        <path d="m19 9-5 5-4-4-3 3" />
+                    </svg>
+                    Performa Penjualan Mingguan
+                </a>
+
                 <a href="{{ route('daily-recap') }}"
                     class="flex items-center px-4 py-2.5 text-xs font-semibold rounded-xl transition-all {{ request()->routeIs('daily-recap') ? 'bg-primary-blue text-white shadow-xl shadow-blue-900/20' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
                     <svg class="w-5 h-5 mr-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24"

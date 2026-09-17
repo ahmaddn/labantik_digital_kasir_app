@@ -21,6 +21,7 @@ use App\Livewire\Reports\DailyRecap;
 use App\Livewire\Reports\InventoryReport;
 use App\Livewire\Reports\MonthlyRecap;
 use App\Livewire\Reports\SupplierReport;
+use App\Livewire\Reports\WeeklyPerformance;
 use App\Livewire\Reports\WeeklyProfit;
 use App\Livewire\Reports\YearlyRecap;
 use Illuminate\Support\Facades\Route;
@@ -52,6 +53,7 @@ Route::middleware(['auth', 'verified', EnsureRoleSelected::class])->group(functi
     Route::get('/settings/api-keys', \App\Livewire\Management\TefaApiKeyManagement::class)->name('tefa.api-keys');
 
     // Recaps
+    Route::get('/weekly-performance', WeeklyPerformance::class)->name('weekly-performance');
     Route::get('/daily-recap/{date?}', DailyRecap::class)->name('daily-recap');
     Route::get('/monthly-recap', MonthlyRecap::class)->name('monthly-recap');
     Route::get('/yearly-recap', YearlyRecap::class)->name('yearly-recap');
