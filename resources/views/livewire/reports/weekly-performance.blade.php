@@ -143,13 +143,13 @@
                 </div>
 
                 {{-- Chart Columns --}}
-                <div class="relative z-10 w-full flex items-end justify-around pl-14 pr-4 h-full pb-12">
+                <div class="relative z-10 w-full flex items-end justify-around pl-14 pr-4 h-full pb-10">
                     @foreach($dailySales as $day)
                         @php 
-                            $barPct = ($maxDailyRevenue > 0 && $day['revenue'] > 0) ? max(4, round(($day['revenue'] / $maxDailyRevenue) * 100)) : 0;
-                            $isPeak = ($day['day_name'] === $peakDay['day'] && $day['revenue'] > 0);
+                            $barPct = ($maxDailyRevenue > 0 && $day['revenue'] > 0) ? max(6, min(100, round(($day['revenue'] / $maxDailyRevenue) * 100))) : 0;
+                            $isPeak = ($day['day_name'] === $peakDay['day'] && $day['revenue'] > 0 && $day['revenue'] == $peakDay['revenue']);
                         @endphp
-                        <div class="flex-1 flex flex-col items-center justify-end h-full group max-w-[70px]">
+                        <div class="flex-1 flex flex-col items-center justify-end group max-w-[75px] relative">
                             {{-- Value Label Above Column --}}
                             <div class="mb-1 text-center transition-transform group-hover:-translate-y-1">
                                 <span class="text-[11px] font-black block whitespace-nowrap {{ $isPeak ? 'text-blue-600 dark:text-blue-400' : ($day['revenue'] > 0 ? 'text-gray-700 dark:text-gray-300' : 'text-gray-400 dark:text-gray-600') }}">
@@ -157,20 +157,20 @@
                                 </span>
                             </div>
 
-                            {{-- The Actual Vertical Bar Column --}}
-                            <div class="w-8 sm:w-11 flex items-end justify-center h-full">
+                            {{-- The Actual Vertical Bar Column Track (Fixed explicit height h-44 for reliable CSS percentage computation) --}}
+                            <div class="w-8 sm:w-11 h-44 flex items-end justify-center">
                                 @if($barPct > 0)
-                                    <div class="w-full rounded-t-md transition-all duration-500 {{ $isPeak ? 'bg-blue-600 dark:bg-blue-500 shadow-lg shadow-blue-500/50 ring-2 ring-blue-400' : 'bg-blue-400/80 dark:bg-blue-600/80 hover:bg-blue-500 hover:dark:bg-blue-400 shadow-sm' }}" 
-                                         style="height: {{ $barPct }}%;"
-                                         title="{{ $day['day_name'] }}: Rp {{ number_format($day['revenue']) }} ({{ $day['transactions'] }} Tx)">
+                                    <div class="w-full rounded-t-md transition-all duration-500 {{ $isPeak ? 'bg-blue-600 dark:bg-blue-500 shadow-lg shadow-blue-500/50 ring-2 ring-blue-400' : 'bg-blue-500 dark:bg-blue-600 hover:bg-blue-600 hover:dark:bg-blue-500 shadow-sm' }}" 
+                                         style="height: {{ $barPct }}%; min-height: 8px;"
+                                         title="{{ $day['day_name'] }} ({{ $day['date'] }}): Rp {{ number_format($day['revenue']) }} ({{ $day['transactions'] }} Tx)">
                                     </div>
                                 @else
-                                    <div class="w-full h-1 bg-gray-300 dark:bg-gray-700 rounded-t-sm" title="Tidak ada penjualan"></div>
+                                    <div class="w-full h-1.5 bg-gray-200 dark:bg-gray-700 rounded-t-sm" title="Tidak ada penjualan"></div>
                                 @endif
                             </div>
 
                             {{-- X-Axis Day & Transaction --}}
-                            <div class="absolute -bottom-11 text-center">
+                            <div class="mt-2 text-center">
                                 <span class="text-xs font-black block {{ $isPeak ? 'text-blue-600 dark:text-blue-400' : 'text-gray-800 dark:text-gray-200' }}">
                                     {{ $day['day_name'] }}
                                 </span>
@@ -182,7 +182,7 @@
                     @endforeach
                 </div>
             </div>
-            <div class="h-4"></div>
+            <div class="h-2"></div>
         </div>
     </div>
 </div>

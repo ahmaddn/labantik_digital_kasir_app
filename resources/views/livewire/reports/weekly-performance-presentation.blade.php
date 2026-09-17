@@ -99,27 +99,30 @@
                         </div>
 
                         {{-- Bar Columns --}}
-                        <div class="relative z-10 w-full flex items-end justify-around pl-16 pr-4 h-full pb-12">
+                        <div class="relative z-10 w-full flex items-end justify-around pl-16 pr-4 h-full pb-10">
                             @foreach($dailySales as $day)
                                 @php 
-                                    $barPct = ($maxDailyRevenue > 0 && $day['revenue'] > 0) ? max(6, round(($day['revenue'] / $maxDailyRevenue) * 100)) : 0;
-                                    $isPeak = ($day['day_name'] === $peakDay['day'] && $day['revenue'] > 0);
+                                    $barPct = ($maxDailyRevenue > 0 && $day['revenue'] > 0) ? max(6, min(100, round(($day['revenue'] / $maxDailyRevenue) * 100))) : 0;
+                                    $isPeak = ($day['day_name'] === $peakDay['day'] && $day['revenue'] > 0 && $day['revenue'] == $peakDay['revenue']);
                                 @endphp
-                                <div class="flex-1 flex flex-col items-center justify-end h-full group max-w-[85px]">
+                                <div class="flex-1 flex flex-col items-center justify-end group max-w-[85px] relative">
                                     <span class="text-xs font-black {{ $isPeak ? 'text-blue-400' : ($day['revenue'] > 0 ? 'text-slate-200' : 'text-slate-600') }} mb-1.5 whitespace-nowrap">
                                         {{ $day['revenue'] > 0 ? 'Rp ' . number_format($day['revenue'] / 1000, 0) . 'k' : 'Rp 0' }}
                                     </span>
                                     
-                                    {{-- Real Vivid Bars (Blue-500 Solid for all days with revenue, Highlight Glow for Peak) --}}
-                                    <div class="w-10 sm:w-14 flex items-end justify-center h-full">
+                                    {{-- Real Vivid Bars (Explicit h-48 track for 100% dependable vertical height rendering) --}}
+                                    <div class="w-10 sm:w-14 h-48 flex items-end justify-center">
                                         @if($barPct > 0)
-                                            <div class="w-full rounded-t-lg transition-all duration-500 {{ $isPeak ? 'bg-blue-500 shadow-xl shadow-blue-500/50 ring-2 ring-blue-300' : 'bg-blue-600/80 hover:bg-blue-500 shadow-md' }}" style="height: {{ $barPct }}%;"></div>
+                                            <div class="w-full rounded-t-lg transition-all duration-500 {{ $isPeak ? 'bg-blue-500 shadow-xl shadow-blue-500/60 ring-2 ring-blue-300' : 'bg-blue-600 hover:bg-blue-500 shadow-md' }}" 
+                                                 style="height: {{ $barPct }}%; min-height: 8px;"
+                                                 title="{{ $day['day_name'] }} ({{ $day['date'] }}): Rp {{ number_format($day['revenue']) }} ({{ $day['transactions'] }} Tx)">
+                                            </div>
                                         @else
-                                            <div class="w-full h-1 bg-slate-800 rounded-t-sm"></div>
+                                            <div class="w-full h-1.5 bg-slate-800 rounded-t-sm" title="Tidak ada penjualan"></div>
                                         @endif
                                     </div>
                                     
-                                    <div class="absolute -bottom-11 text-center">
+                                    <div class="mt-2 text-center">
                                         <span class="text-xs font-black block {{ $isPeak ? 'text-blue-400' : 'text-slate-200' }}">{{ $day['day_name'] }}</span>
                                         <span class="text-[10px] font-semibold text-slate-400 block">{{ $day['transactions'] }} Tx</span>
                                     </div>
@@ -127,7 +130,7 @@
                             @endforeach
                         </div>
                     </div>
-                    <div class="h-3"></div>
+                    <div class="h-2"></div>
                 </div>
             </div>
 
