@@ -322,15 +322,15 @@
                                             <span class="text-base font-black text-gray-800 dark:text-white uppercase tracking-tight">{{ $c->user->name }}</span>
                                         </td>
                                         <td class="px-6 py-8 text-center text-sm font-bold text-gray-500 dark:text-gray-300">
-                                            {{ $c->scheduled_shifts }} Shift
+                                            {{ $c->scheduled_count }} Shift
                                         </td>
                                         <td class="px-6 py-8 text-center">
-                                            <span class="px-3 py-1 rounded-xl text-xs font-black {{ $c->attendance_rate >= 80 ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300' : 'bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300' }}">
-                                                {{ $c->attended_shifts }} ({{ $c->attendance_rate }}%)
+                                            <span class="px-3 py-1 rounded-xl text-xs font-black {{ $c->attended_count > 0 ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300' : 'bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300' }}">
+                                                {{ $c->attended_count }} Shift ({{ $c->on_time_rate }}% Tepat Waktu)
                                             </span>
                                         </td>
                                         <td class="px-6 py-8 text-center text-xs font-bold text-gray-600 dark:text-gray-300">
-                                            {{ $c->approved_tasks }} / {{ $c->total_assigned_tasks }}
+                                            {{ $c->approved_tasks }} / {{ $c->assigned_tasks }} Selesai
                                         </td>
                                         <td class="px-6 py-8 text-right">
                                             <span class="text-base font-black text-primary-blue tracking-tight">Rp{{ number_format($c->total_sales, 0, ',', '.') }}</span>
