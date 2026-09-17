@@ -455,14 +455,19 @@ class WeeklyPerformance extends Component
         $allProducts = Product::when($activeJurusanId, fn($q) => $q->where('jurusan_id', $activeJurusanId))
             ->where('is_active', true)
             ->where(function($q) {
-                // Internal TEFA products (no supplier) OR supplier products with persistent stock (>0)
+                // Internal TEFA products (no supplier) OR supplier products that have recorded stock entries (>0)
                 $q->whereNull('supplier_id')
                   ->orWhere(function($sq) {
                       $sq->whereNotNull('supplier_id')
-                        ->where('stock', '>', 0);
+                        ->whereHas('stockEntries', function($stq) {
+                            $stq->where('opening_stock', '>', 0)
+                               ->orWhere('closing_stock', '>', 0);
+                        });
                   });
             })
-            ->with(['category', 'supplier'])
+            ->with(['category', 'supplier', 'stockEntries' => function($sq) {
+                $sq->orderBy('date', 'desc')->limit(1);
+            }])
             ->get();
 
         $productPerformanceCollection = $allProducts->map(function ($product) use ($productSalesCurrent, $productSalesPrev, $totalRevenue) {
@@ -481,6 +486,9 @@ class WeeklyPerformance extends Component
 
             $isTefaInternal = is_null($product->supplier_id);
 
+            $latestEntry = $product->stockEntries->first();
+            $latestStock = $latestEntry ? ($latestEntry->closing_stock ?? $latestEntry->opening_stock ?? 0) : 0;
+
             return (object) [
                 'product' => $product,
                 'is_tefa_internal' => $isTefaInternal,
@@ -488,7 +496,7 @@ class WeeklyPerformance extends Component
                 'omset' => $omset,
                 'profit' => $profit,
                 'contribution_pct' => $contrib,
-                'stock' => $product->stock,
+                'stock' => $latestStock,
                 'prev_qty' => $prevQty,
                 'prev_omset' => $prevOmset,
                 'qty_diff' => $qtyDiff,
