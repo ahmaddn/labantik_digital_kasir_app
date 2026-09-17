@@ -44,110 +44,136 @@
         </div>
     </div>
 
-    {{-- PRESENTATION MODE SLIDE DECK --}}
+    {{-- PRESENTATION MODE SLIDE DECK (TRUE FULLSCREEN EXECUTABLE DECK) --}}
     @if($isPresentationMode)
-        <div class="fixed inset-0 z-50 bg-gray-950/95 backdrop-blur-xl flex flex-col p-4 sm:p-8 text-white animate-fadeIn overflow-hidden">
+        <div class="fixed inset-0 z-[9999] bg-slate-950 text-white w-screen h-screen flex flex-col p-6 sm:p-10 overflow-hidden">
             {{-- Slide Header --}}
-            <div class="flex items-center justify-between border-b border-gray-800 pb-4 mb-6 shrink-0">
-                <div class="flex items-center gap-3">
-                    <span class="px-3 py-1 bg-primary-blue/20 border border-primary-blue/40 text-primary-blue text-xs font-extrabold uppercase rounded-lg tracking-wider">Slide {{ $activeSlide }} dari 4</span>
-                    <h2 class="text-base sm:text-xl font-black text-white">
-                        @if($activeSlide === 1) Slide 1: Ringkasan Omset & Profit Mingguan
+            <div class="flex items-center justify-between border-b border-slate-800 pb-5 mb-6 shrink-0 max-w-7xl mx-auto w-full">
+                <div class="flex items-center gap-4">
+                    <span class="px-3.5 py-1.5 bg-blue-600/20 border border-blue-500/40 text-blue-400 text-xs font-black uppercase rounded-xl tracking-wider">
+                        Slide {{ $activeSlide }} / 4
+                    </span>
+                    <h2 class="text-lg sm:text-2xl font-black text-white tracking-tight">
+                        @if($activeSlide === 1) Slide 1: Ringkasan Omset & Tren Penjualan Mingguan
                         @elseif($activeSlide === 2) Slide 2: Evaluasi Kasir & Kepatuhan Tugas Piket
-                        @elseif($activeSlide === 3) Slide 3: Analisis Produk Terlaris vs Stagnan
-                        @elseif($activeSlide === 4) Slide 4: Kesimpulan & Rekomendasi Rapat Evaluasi
+                        @elseif($activeSlide === 3) Slide 3: Analisis Pergerakan Produk (Top vs Stagnan)
+                        @elseif($activeSlide === 4) Slide 4: Kesimpulan & Rekomendasi Evaluasi Rapat
                         @endif
                     </h2>
                 </div>
 
-                <div class="flex items-center gap-2">
-                    <button wire:click="prevSlide" @disabled($activeSlide <= 1) class="px-4 py-2 bg-gray-800 hover:bg-gray-700 disabled:opacity-30 text-white rounded-lg text-xs font-bold">← Sebelum</button>
-                    <button wire:click="nextSlide" @disabled($activeSlide >= 4) class="px-4 py-2 bg-primary-blue hover:bg-blue-600 disabled:opacity-30 text-white rounded-lg text-xs font-bold">Berikut →</button>
-                    <button wire:click="togglePresentationMode" class="ml-3 p-2 bg-rose-950 text-rose-300 border border-rose-800 hover:bg-rose-900 rounded-lg">
-                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                <div class="flex items-center gap-3">
+                    <button wire:click="prevSlide" @disabled($activeSlide <= 1) class="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 disabled:opacity-30 text-white rounded-xl text-xs font-extrabold transition-all border border-slate-700">
+                        ← Sebelumnya
+                    </button>
+                    <button wire:click="nextSlide" @disabled($activeSlide >= 4) class="px-5 py-2.5 bg-blue-600 hover:bg-blue-500 disabled:opacity-30 text-white rounded-xl text-xs font-extrabold transition-all shadow-md shadow-blue-500/20">
+                        Berikutnya →
+                    </button>
+                    <button wire:click="togglePresentationMode" title="Tutup Presentasi" class="ml-2 px-4 py-2.5 bg-rose-950/80 hover:bg-rose-900 text-rose-300 border border-rose-800/80 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                        <span>Tutup Deck</span>
                     </button>
                 </div>
             </div>
 
-            {{-- Slide Content --}}
-            <div class="flex-1 overflow-y-auto space-y-6 pr-2">
+            {{-- Slide Content Canvas --}}
+            <div class="flex-1 overflow-y-auto max-w-7xl mx-auto w-full flex flex-col justify-center py-2 pr-2">
                 @if($activeSlide === 1)
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        <div class="bg-gray-900 border border-gray-800 p-5 rounded-xl">
-                            <span class="text-xs uppercase tracking-wider text-gray-400 font-bold block mb-1">Total Omset Mingguan</span>
-                            <h3 class="text-2xl sm:text-3xl font-black text-white">Rp {{ number_format($totalRevenue, 0, ',', '.') }}</h3>
-                            <span class="text-xs font-semibold {{ $revenueGrowth >= 0 ? 'text-emerald-400' : 'text-rose-400' }} block mt-2">
-                                {{ $revenueGrowth >= 0 ? '+'.$revenueGrowth.'%' : $revenueGrowth.'%' }} vs minggu lalu
-                            </span>
-                        </div>
-                        <div class="bg-gray-900 border border-gray-800 p-5 rounded-xl">
-                            <span class="text-xs uppercase tracking-wider text-gray-400 font-bold block mb-1">Estimasi Net Profit</span>
-                            <h3 class="text-2xl sm:text-3xl font-black text-emerald-400">Rp {{ number_format($totalProfit, 0, ',', '.') }}</h3>
-                            <span class="text-xs text-gray-400 block mt-2">Margin Keuntungan Toko</span>
-                        </div>
-                        <div class="bg-gray-900 border border-gray-800 p-5 rounded-xl">
-                            <span class="text-xs uppercase tracking-wider text-gray-400 font-bold block mb-1">Total Transaksi</span>
-                            <h3 class="text-2xl sm:text-3xl font-black text-purple-400">{{ number_format($totalTransactions) }} <span class="text-sm font-semibold text-gray-400">Struk</span></h3>
-                            <span class="text-xs text-gray-400 block mt-2">Rata: Rp {{ number_format($avgBasketSize) }}/struk</span>
-                        </div>
-                        <div class="bg-gray-900 border border-gray-800 p-5 rounded-xl">
-                            <span class="text-xs uppercase tracking-wider text-gray-400 font-bold block mb-1">Hari Puncak Omset</span>
-                            <h3 class="text-2xl sm:text-3xl font-black text-amber-400">{{ $peakDay['day'] }}</h3>
-                            <span class="text-xs text-gray-400 block mt-2">Rp {{ number_format($peakDay['revenue']) }} ({{ $peakDay['transactions'] }} Tx)</span>
-                        </div>
-                    </div>
+                    <div class="space-y-6">
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl">
+                                <span class="text-xs uppercase tracking-wider text-slate-400 font-bold block mb-1">Total Omset Mingguan</span>
+                                <h3 class="text-3xl font-black text-white">Rp {{ number_format($totalRevenue, 0, ',', '.') }}</h3>
+                                <span class="text-xs font-bold {{ $revenueGrowth >= 0 ? 'text-emerald-400' : 'text-rose-400' }} block mt-2">
+                                    {{ $revenueGrowth >= 0 ? '+'.$revenueGrowth.'%' : $revenueGrowth.'%' }} dibanding minggu lalu
+                                </span>
+                            </div>
 
-                    {{-- Presentation Chart --}}
-                    <div class="bg-gray-900 border border-gray-800 p-6 rounded-xl">
-                        <h4 class="text-sm font-bold text-gray-300 uppercase tracking-wider mb-4">Grafik Penjualan Harian</h4>
-                        <div class="h-64 grid grid-cols-7 gap-3 items-end pt-6 pb-4 border-b border-gray-800">
-                            @foreach($dailySales as $day)
-                                @php $barPct = $maxDailyRevenue > 0 ? max(12, round(($day['revenue'] / $maxDailyRevenue) * 100)) : 12; @endphp
-                                <div class="flex flex-col items-center justify-end h-full">
-                                    <span class="text-xs font-black text-blue-400 mb-1.5">Rp {{ number_format($day['revenue'] / 1000, 0) }}k</span>
-                                    <div class="w-full bg-gray-800/80 rounded-t-lg flex items-end h-36 p-1 border border-gray-700">
-                                        <div class="w-full bg-blue-500 rounded-t-md transition-all shadow-md shadow-blue-500/20" style="height: {{ $barPct }}%"></div>
+                            <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl">
+                                <span class="text-xs uppercase tracking-wider text-slate-400 font-bold block mb-1">Net Profit Toko</span>
+                                <h3 class="text-3xl font-black text-emerald-400">Rp {{ number_format($totalProfit, 0, ',', '.') }}</h3>
+                                <span class="text-xs font-bold {{ $profitGrowth >= 0 ? 'text-emerald-400' : 'text-rose-400' }} block mt-2">
+                                    {{ $profitGrowth >= 0 ? '+'.$profitGrowth.'%' : $profitGrowth.'%' }} dibanding minggu lalu
+                                </span>
+                            </div>
+
+                            <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl">
+                                <span class="text-xs uppercase tracking-wider text-slate-400 font-bold block mb-1">Total Transaksi</span>
+                                <h3 class="text-3xl font-black text-blue-400">{{ number_format($totalTransactions) }} Tx</h3>
+                                <span class="text-xs font-bold text-slate-400 block mt-2">Rata-rata {{ number_format($avgBasketSize) }} / transaksi</span>
+                            </div>
+
+                            <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl">
+                                <span class="text-xs uppercase tracking-wider text-slate-400 font-bold block mb-1">Hari Puncak Omset</span>
+                                <h3 class="text-3xl font-black text-amber-400">{{ $peakDay['day'] }}</h3>
+                                <span class="text-xs font-bold text-slate-400 block mt-2">Rp {{ number_format($peakDay['revenue']) }} ({{ $peakDay['transactions'] }} Tx)</span>
+                            </div>
+                        </div>
+
+                        {{-- Presentation Chart --}}
+                        <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl space-y-4">
+                            <h4 class="text-xs font-black text-slate-400 uppercase tracking-widest">Grafik Penjualan Harian</h4>
+                            <div class="h-60 flex items-end justify-between gap-3 pt-4 pb-2 border-b border-slate-800">
+                                @foreach($dailySales as $day)
+                                    @php $barPct = $maxDailyRevenue > 0 ? max(12, round(($day['revenue'] / $maxDailyRevenue) * 100)) : 12; @endphp
+                                    <div class="flex-1 flex flex-col items-center justify-end h-full">
+                                        <span class="text-xs font-black text-blue-400 mb-2">Rp {{ number_format($day['revenue'] / 1000, 0) }}k</span>
+                                        <div class="w-full max-w-[42px] bg-slate-800 rounded-t-xl flex items-end h-36 p-1 border border-slate-700">
+                                            <div class="w-full bg-blue-500 rounded-t-lg transition-all shadow-lg shadow-blue-500/20" style="height: {{ $barPct }}%"></div>
+                                        </div>
+                                        <span class="text-xs font-black text-slate-200 pt-2.5">{{ substr($day['day_name'], 0, 3) }}</span>
+                                        <span class="text-[10px] text-slate-400 font-medium">{{ $day['transactions'] }} Tx</span>
                                     </div>
-                                    <span class="text-xs font-bold text-gray-300 pt-2">{{ substr($day['day_name'], 0, 3) }}</span>
-                                    <span class="text-[10px] text-gray-400">{{ $day['transactions'] }} Tx</span>
-                                </div>
-                            @endforeach
+                                @endforeach
+                            </div>
                         </div>
                     </div>
 
                 @elseif($activeSlide === 2)
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="bg-gray-900 border border-emerald-900/50 p-6 rounded-xl space-y-4">
-                            <h3 class="text-base font-black text-emerald-400 uppercase tracking-wider">Top 3 Kasir Terbaik (Bintang Piket)</h3>
+                        <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl space-y-4">
+                            <h3 class="text-sm font-black text-emerald-400 uppercase tracking-wider flex items-center justify-between">
+                                <span>Top 3 Kasir Terbaik (Bintang Piket)</span>
+                                <span class="text-xs text-slate-400 font-normal">Disiplin & Penjualan</span>
+                            </h3>
                             <div class="space-y-3">
                                 @forelse($topPerformers as $idx => $item)
-                                    <div class="flex items-center justify-between p-4 bg-gray-800 rounded-lg border border-gray-700">
-                                        <div>
-                                            <h4 class="font-bold text-white text-sm">#{{ $idx + 1 }} {{ $item->user->name }}</h4>
-                                            <p class="text-xs text-gray-400 mt-0.5">{{ $item->total_tx }} Transaksi | Omset Rp {{ number_format($item->total_sales) }}</p>
+                                    <div class="flex items-center justify-between p-4 bg-slate-800/80 rounded-xl border border-slate-700">
+                                        <div class="flex items-center gap-3">
+                                            <span class="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 font-black text-sm flex items-center justify-center border border-emerald-500/30">#{{ $idx + 1 }}</span>
+                                            <div>
+                                                <h4 class="font-bold text-white text-sm">{{ $item->user->name }}</h4>
+                                                <p class="text-xs text-slate-400 mt-0.5">{{ $item->total_tx }} Transaksi | Omset Rp {{ number_format($item->total_sales) }}</p>
+                                            </div>
                                         </div>
                                         <span class="px-3 py-1 bg-emerald-950 text-emerald-300 border border-emerald-800 text-xs font-black rounded-lg">{{ $item->overall_score }} Pts</span>
                                     </div>
                                 @empty
-                                    <p class="text-xs text-gray-400">Belum ada data kasir.</p>
+                                    <p class="text-xs text-slate-400 py-4 text-center">Belum ada data kinerja kasir.</p>
                                 @endforelse
                             </div>
                         </div>
 
-                        <div class="bg-gray-900 border border-rose-900/50 p-6 rounded-xl space-y-4">
-                            <h3 class="text-base font-black text-rose-400 uppercase tracking-wider">Kasir Perlu Evaluasi & Catatan Tugas</h3>
+                        <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl space-y-4">
+                            <h3 class="text-sm font-black text-rose-400 uppercase tracking-wider flex items-center justify-between">
+                                <span>Kasir Perlu Evaluasi & Catatan Tugas</span>
+                                <span class="text-xs text-slate-400 font-normal">Tugas Belum Selesai</span>
+                            </h3>
                             <div class="space-y-3">
                                 @forelse($bottomPerformers as $item)
-                                    <div class="p-4 bg-gray-800 rounded-lg border border-gray-700 space-y-1">
+                                    <div class="p-4 bg-slate-800/80 rounded-xl border border-slate-700 space-y-1.5">
                                         <div class="flex items-center justify-between">
                                             <h4 class="font-bold text-white text-sm">{{ $item->user->name }}</h4>
                                             <span class="px-2.5 py-0.5 bg-rose-950 text-rose-300 border border-rose-800 text-xs font-bold rounded-lg">Skor: {{ $item->overall_score }}</span>
                                         </div>
-                                        <p class="text-xs text-rose-300 font-semibold">{{ $item->evaluation_notes }}</p>
-                                        <p class="text-[11px] text-gray-400">Omset: Rp {{ number_format($item->total_sales) }} ({{ $item->total_tx }} Tx)</p>
+                                        <p class="text-xs text-rose-300 font-medium leading-relaxed">{{ $item->evaluation_notes }}</p>
+                                        <div class="text-[11px] text-slate-400 pt-1 flex justify-between border-t border-slate-700/60">
+                                            <span>Omset POS: Rp {{ number_format($item->total_sales) }}</span>
+                                            <span>{{ $item->total_tx }} Transaksi</span>
+                                        </div>
                                     </div>
                                 @empty
-                                    <p class="text-xs text-emerald-400">Semua kasir memiliki kinerja baik!</p>
+                                    <p class="text-xs text-emerald-400 py-4 text-center">Semua kasir memiliki kinerja baik & disiplin!</p>
                                 @endforelse
                             </div>
                         </div>
@@ -155,36 +181,36 @@
 
                 @elseif($activeSlide === 3)
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="bg-gray-900 border border-gray-800 p-6 rounded-xl space-y-4">
-                            <h3 class="text-base font-black text-emerald-400 uppercase tracking-wider">5 Produk Paling Laku (Top Selling)</h3>
+                        <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl space-y-4">
+                            <h3 class="text-sm font-black text-emerald-400 uppercase tracking-wider">5 Produk Paling Laku (Top Selling)</h3>
                             <div class="space-y-3">
                                 @foreach($topSellingProducts as $p)
-                                    <div class="flex items-center justify-between p-3.5 bg-gray-800 rounded-lg">
+                                    <div class="flex items-center justify-between p-3.5 bg-slate-800/80 rounded-xl border border-slate-700/60">
                                         <div>
                                             <h4 class="font-bold text-white text-sm">{{ $p->product->name }}</h4>
-                                            <p class="text-xs text-gray-400">Kategori: {{ $p->product->category->name ?? '-' }}</p>
+                                            <p class="text-xs text-slate-400">Kategori: {{ $p->product->category->name ?? '-' }}</p>
                                         </div>
                                         <div class="text-right">
                                             <span class="text-emerald-400 font-black text-sm block">{{ $p->qty_sold }} Terjual</span>
-                                            <span class="text-xs text-gray-400">Rp {{ number_format($p->omset) }}</span>
+                                            <span class="text-xs text-slate-400">Omset: Rp {{ number_format($p->omset) }}</span>
                                         </div>
                                     </div>
                                 @endforeach
                             </div>
                         </div>
 
-                        <div class="bg-gray-900 border border-gray-800 p-6 rounded-xl space-y-4">
-                            <h3 class="text-base font-black text-amber-400 uppercase tracking-wider">5 Produk Kurang Laku / Stagnan</h3>
+                        <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl space-y-4">
+                            <h3 class="text-sm font-black text-amber-400 uppercase tracking-wider">5 Produk Kurang Laku / Stagnan</h3>
                             <div class="space-y-3">
                                 @foreach($leastSellingProducts as $p)
-                                    <div class="flex items-center justify-between p-3.5 bg-gray-800 rounded-lg">
+                                    <div class="flex items-center justify-between p-3.5 bg-slate-800/80 rounded-xl border border-slate-700/60">
                                         <div>
                                             <h4 class="font-bold text-white text-sm">{{ $p->product->name }}</h4>
                                             <p class="text-xs text-amber-400 font-medium">Stok Tersisa: {{ $p->stock }} {{ $p->product->unit ?? 'pcs' }}</p>
                                         </div>
                                         <div class="text-right">
                                             <span class="text-rose-400 font-black text-sm block">{{ $p->qty_sold }} Terjual</span>
-                                            <span class="text-xs text-gray-400">Slow Moving</span>
+                                            <span class="text-xs text-slate-400">Perlu Penanganan Stok</span>
                                         </div>
                                     </div>
                                 @endforeach
@@ -193,20 +219,23 @@
                     </div>
 
                 @elseif($activeSlide === 4)
-                    <div class="bg-gray-900 border border-gray-800 p-6 rounded-xl space-y-6">
-                        <h3 class="text-xl font-black text-white border-b border-gray-800 pb-3">Kesimpulan & Catatan Evaluasi Rapat Mingguan</h3>
+                    <div class="bg-slate-900 border border-slate-800 p-8 rounded-3xl space-y-6">
+                        <h3 class="text-xl font-black text-white border-b border-slate-800 pb-4 flex items-center justify-between">
+                            <span>Kesimpulan & Catatan Evaluasi Rapat Mingguan</span>
+                            <span class="text-xs font-bold text-blue-400 uppercase tracking-wider">Pengelolaan Kasir & Toko</span>
+                        </h3>
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <div class="p-5 bg-gray-800 rounded-lg border border-gray-700">
-                                <h4 class="font-bold text-blue-400 text-sm mb-2">1. Evaluasi Penjualan</h4>
-                                <p class="text-xs text-gray-300 leading-relaxed">Puncak omset terjadi pada hari <strong class="text-white">{{ $peakDay['day'] }}</strong> sebesar Rp {{ number_format($peakDay['revenue']) }}. Tingkatkan promosi pada hari sepi.</p>
+                            <div class="p-6 bg-slate-800/80 rounded-2xl border border-slate-700 space-y-2">
+                                <h4 class="font-black text-blue-400 text-sm uppercase tracking-wider">1. Evaluasi Penjualan</h4>
+                                <p class="text-xs text-slate-300 leading-relaxed">Puncak omset terjadi pada hari <strong class="text-white font-bold">{{ $peakDay['day'] }}</strong> sebesar Rp {{ number_format($peakDay['revenue']) }}. Disarankan untuk meningkatkan promosi dan variasi produk pada hari-hari sepi.</p>
                             </div>
-                            <div class="p-5 bg-gray-800 rounded-lg border border-gray-700">
-                                <h4 class="font-bold text-emerald-400 text-sm mb-2">2. Kepatuhan Kasir</h4>
-                                <p class="text-xs text-gray-300 leading-relaxed">Kehadiran kasir piket di angka <strong class="text-white">{{ $shiftFulfillmentRate }}%</strong> dan persentase kelengkapan tugas disetujui sebesar <strong class="text-white">{{ $taskApprovedRate }}%</strong>.</p>
+                            <div class="p-6 bg-slate-800/80 rounded-2xl border border-slate-700 space-y-2">
+                                <h4 class="font-black text-emerald-400 text-sm uppercase tracking-wider">2. Kepatuhan Kasir & Piket</h4>
+                                <p class="text-xs text-slate-300 leading-relaxed">Kehadiran kasir piket berada di angka <strong class="text-white font-bold">{{ $shiftFulfillmentRate }}%</strong> dan tingkat penyelesaian tugas piket yang disetujui sebesar <strong class="text-white font-bold">{{ $taskApprovedRate }}%</strong>.</p>
                             </div>
-                            <div class="p-5 bg-gray-800 rounded-lg border border-gray-700">
-                                <h4 class="font-bold text-amber-400 text-sm mb-2">3. Manajemen Persediaan</h4>
-                                <p class="text-xs text-gray-300 leading-relaxed">Lakukan evaluasi stok barang slow-moving untuk mencegah penumpukan modal dan resiko barang rusak.</p>
+                            <div class="p-6 bg-slate-800/80 rounded-2xl border border-slate-700 space-y-2">
+                                <h4 class="font-black text-amber-400 text-sm uppercase tracking-wider">3. Manajemen Persediaan</h4>
+                                <p class="text-xs text-slate-300 leading-relaxed">Segera lakukan rotasi atau promosi bundling untuk produk-produk slow-moving untuk mencegah risiko kadaluarsa dan penumpukan stok.</p>
                             </div>
                         </div>
                     </div>
@@ -214,9 +243,9 @@
             </div>
 
             {{-- Footer Indicators --}}
-            <div class="flex items-center justify-center gap-2 pt-4 border-t border-gray-800 shrink-0">
+            <div class="flex items-center justify-center gap-3 pt-4 border-t border-slate-800 shrink-0 max-w-7xl mx-auto w-full">
                 @for($s = 1; $s <= 4; $s++)
-                    <button wire:click="setSlide({{ $s }})" class="w-3 h-3 rounded-full transition-all {{ $activeSlide === $s ? 'bg-primary-blue w-8' : 'bg-gray-700 hover:bg-gray-600' }}"></button>
+                    <button wire:click="setSlide({{ $s }})" class="h-3 rounded-full transition-all {{ $activeSlide === $s ? 'bg-blue-500 w-10' : 'bg-slate-700 hover:bg-slate-600 w-3' }}"></button>
                 @endfor
             </div>
         </div>
@@ -302,22 +331,22 @@
         </div>
 
         {{-- VISIBLE BAR CHART --}}
-        <div class="pt-4 pb-2 border-b border-gray-100 dark:border-gray-700/60">
-            <div class="grid grid-cols-7 gap-2 sm:gap-4 items-end h-48">
+        <div class="pt-4 pb-2 border-b border-gray-100 dark:border-gray-700/60 overflow-x-auto">
+            <div class="flex items-end justify-between gap-3 min-w-[600px] h-56 pt-2">
                 @foreach($dailySales as $day)
                     @php 
-                        $barPct = $maxDailyRevenue > 0 ? max(12, round(($day['revenue'] / $maxDailyRevenue) * 100)) : 12;
+                        $barPct = $maxDailyRevenue > 0 ? max(10, round(($day['revenue'] / $maxDailyRevenue) * 100)) : 10;
                         $isPeak = ($day['day_name'] === $peakDay['day'] && $day['revenue'] > 0);
                     @endphp
-                    <div class="flex flex-col items-center justify-end h-full group">
+                    <div class="flex-1 flex flex-col items-center justify-end h-full min-w-[55px] group">
                         {{-- Omset Rp Label above bar --}}
                         <span class="text-[11px] font-black mb-1.5 whitespace-nowrap {{ $isPeak ? 'text-blue-600 dark:text-blue-400' : 'text-gray-700 dark:text-gray-300' }}">
                             Rp {{ number_format($day['revenue'] / 1000, 0) }}k
                         </span>
 
                         {{-- Bar Track & Inner Bar --}}
-                        <div class="w-full max-w-[42px] bg-gray-100 dark:bg-gray-700/60 rounded-t-xl flex items-end h-32 p-1 border border-gray-200/50 dark:border-gray-600/40">
-                            <div class="w-full rounded-t-lg transition-all duration-500 {{ $isPeak ? 'bg-blue-600 dark:bg-blue-500 shadow-lg shadow-blue-500/30' : 'bg-blue-500/80 dark:bg-blue-400/80 group-hover:bg-blue-600' }}" style="height: {{ $barPct }}%;"></div>
+                        <div class="w-full max-w-[44px] bg-gray-100 dark:bg-gray-700/60 rounded-t-xl flex items-end h-36 p-1 border border-gray-200/50 dark:border-gray-600/40 shrink-0">
+                            <div class="w-full rounded-t-lg transition-all duration-500 {{ $isPeak ? 'bg-blue-600 dark:bg-blue-500 shadow-md shadow-blue-500/30' : 'bg-blue-500/80 dark:bg-blue-400/80 group-hover:bg-blue-600' }}" style="height: {{ $barPct }}%;"></div>
                         </div>
 
                         {{-- Day Name & Tx Count below bar --}}
