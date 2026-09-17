@@ -437,110 +437,11 @@
         </div>
     </div>
 
-    {{-- SECTION 3: AUDIT PIKET & TUGAS KASIR HARIAN --}}
-    <div class="bg-white dark:bg-gray-800 p-5 sm:p-6 rounded-2xl border border-gray-100 dark:border-gray-700/60 shadow-sm space-y-5">
+    {{-- SECTION 4: PAPAN EVALUASI KASIR MINGGUAN (RINGKAS & INFORMATIF) --}}
+    <div class="space-y-4">
         <div>
-            <h3 class="text-lg font-black text-gray-900 dark:text-white flex items-center gap-2">
-                <svg class="w-5 h-5 text-primary-blue dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                Audit Piket & Tugas Kasir Harian
-            </h3>
-            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Rincian faktual kasir yang piket di tiap hari, status kehadiran, omset, & kelengkapan tugasnya</p>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            @forelse($dailyShiftAudits as $audit)
-                <div class="bg-gray-50/80 dark:bg-gray-700/40 p-4 rounded-xl border border-gray-200/80 dark:border-gray-600/60 space-y-3">
-                    <div class="flex items-center justify-between pb-2 border-b border-gray-200 dark:border-gray-600">
-                        <span class="font-extrabold text-sm text-gray-900 dark:text-white">{{ $audit['day_name'] }}</span>
-                        <span class="text-xs text-gray-500 dark:text-gray-400 font-semibold">{{ $audit['date'] }}</span>
-                    </div>
-
-                    <div class="space-y-3">
-                        @foreach($audit['cashiers'] as $c)
-                            <div class="p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-100 dark:border-gray-700 space-y-2">
-                                <div class="flex items-center justify-between">
-                                    <span class="font-extrabold text-xs text-gray-900 dark:text-white">{{ $c['user']->name }}</span>
-                                    @if($c['attended'])
-                                        <span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 border border-emerald-200 dark:bg-emerald-950 dark:text-emerald-400 dark:border-emerald-800 text-[10px] font-bold rounded">Hadir {{ $c['clock_in'] ?? '' }}</span>
-                                    @else
-                                        <span class="px-2 py-0.5 bg-rose-100 text-rose-800 border border-rose-200 dark:bg-rose-950 dark:text-rose-400 dark:border-rose-800 text-[10px] font-bold rounded">Tidak Absen</span>
-                                    @endif
-                                </div>
-
-                                <div class="flex items-center justify-between text-xs text-gray-600 dark:text-gray-300">
-                                    <span>Omset POS: <strong class="text-gray-900 dark:text-white">Rp {{ number_format($c['sales_omset']) }}</strong></span>
-                                    <span>{{ $c['sales_tx'] }} Tx</span>
-                                </div>
-
-                                {{-- Task Status List --}}
-                                @if(!empty($c['task_details']) && count($c['task_details']) > 0)
-                                    <div class="pt-2 border-t border-gray-100 dark:border-gray-700 space-y-1">
-                                        <span class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Tugas Piket:</span>
-                                        @foreach($c['task_details'] as $t)
-                                            <div class="flex items-center justify-between text-xs">
-                                                <span class="text-gray-700 dark:text-gray-300 truncate max-w-[140px]">• {{ $t['task_name'] }}</span>
-                                                <span class="px-1.5 py-0.5 rounded text-[10px] font-bold {{ $t['badge_class'] }}">
-                                                    {{ $t['status'] }}
-                                                </span>
-                                            </div>
-                                        @endforeach
-                                    </div>
-                                @else
-                                    <div class="pt-1 text-[11px] text-gray-500 dark:text-gray-400 italic">Tidak ada penugasan khusus.</div>
-                                @endif
-                            </div>
-                        @endforeach
-                    </div>
-                </div>
-            @empty
-                <div class="col-span-full text-center py-6 text-xs text-gray-400">Belum ada data jadwal piket kasir pada minggu ini.</div>
-            @endforelse
-        </div>
-    </div>
-
-    {{-- SECTION 4: PAPAN EVALUASI KASIR MINGGUAN --}}
-    <div class="space-y-5">
-        <div>
-            <h3 class="text-lg font-black text-gray-900 dark:text-white">Papan Evaluasi Kasir Piket</h3>
-            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Analisis akumulasi kinerja individu kasir meliputi omset penjualan, kedisiplinan piket, & kelengkapan tugas</p>
-        </div>
-
-        {{-- Top 3 Highlight Cards --}}
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            @foreach($topPerformers as $index => $cashier)
-                <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-100 dark:border-gray-700/60 shadow-sm relative">
-                    <div class="flex items-center justify-between mb-3">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 bg-amber-500 text-gray-950 font-black text-sm rounded-xl flex items-center justify-center shrink-0">
-                                #{{ $index + 1 }}
-                            </div>
-                            <div class="truncate">
-                                <h4 class="font-extrabold text-gray-900 dark:text-white text-sm truncate">{{ $cashier->user->name }}</h4>
-                                <span class="text-xs text-amber-600 dark:text-amber-400 font-bold">Top Kasir #{{ $index + 1 }}</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-2 pt-3 border-t border-gray-100 dark:border-gray-700/60 text-xs">
-                        <div>
-                            <span class="text-gray-500 dark:text-gray-400 block font-medium">Omset POS</span>
-                            <strong class="text-gray-900 dark:text-white font-black">Rp {{ number_format($cashier->total_sales) }}</strong>
-                        </div>
-                        <div>
-                            <span class="text-gray-500 dark:text-gray-400 block font-medium">Transaksi</span>
-                            <strong class="text-gray-900 dark:text-white font-black">{{ $cashier->total_tx }} Tx</strong>
-                        </div>
-                        <div>
-                            <span class="text-gray-500 dark:text-gray-400 block font-medium">Absensi</span>
-                            <strong class="text-emerald-600 dark:text-emerald-400 font-bold">{{ $cashier->attended_count }} Shift</strong>
-                        </div>
-                        <div>
-                            <span class="text-gray-500 dark:text-gray-400 block font-medium">Tugas</span>
-                            <strong class="text-primary-blue dark:text-blue-400 font-bold">{{ $cashier->approved_tasks }} Disetujui</strong>
-                        </div>
-                    </div>
-                </div>
-            @endforeach
+            <h3 class="text-lg font-black text-gray-900 dark:text-white">Papan Kinerja Kasir Piket Mingguan</h3>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Analisis omset penjualan, kedisiplinan piket, & kelengkapan tugas seluruh kasir piket</p>
         </div>
 
         {{-- Full Table --}}
@@ -581,7 +482,6 @@
                                 <td class="px-5 py-4">
                                     <span class="font-black text-gray-900 dark:text-white block">Rp {{ number_format($item->total_sales, 0, ',', '.') }}</span>
                                     <span class="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold block">Profit: Rp {{ number_format($item->total_profit, 0, ',', '.') }}</span>
-                                    <span class="text-[10px] text-gray-500 dark:text-gray-400 block">Rata Keranjang: Rp {{ number_format($item->avg_basket, 0, ',', '.') }}</span>
                                 </td>
                                 <td class="px-5 py-4 font-semibold text-gray-700 dark:text-gray-300">
                                     <span class="font-bold text-gray-900 dark:text-white block text-sm">{{ number_format($item->total_tx) }} Transaksi</span>
