@@ -16,8 +16,8 @@ use Livewire\Component;
 
 class WeeklyPerformance extends Component
 {
-    public $selectedWeekDate; // Any Y-m-d within the chosen week
-    public $availableWeeks = [];
+    public $startDate;
+    public $endDate;
     public $activeSlide = 1;
     public $isPresentationMode = false;
 
@@ -25,15 +25,24 @@ class WeeklyPerformance extends Component
     public $selectedCashierId = null;
     public $showCashierDetailModal = false;
 
-    public function mount($date = null)
+    public function mount($startDate = null, $endDate = null)
     {
-        $this->selectedWeekDate = $date ?? now()->toDateString();
-        $this->generateAvailableWeeks();
+        $this->startDate = $startDate ?? now()->startOfWeek()->toDateString();
+        $this->endDate = $endDate ?? now()->endOfWeek()->toDateString();
     }
 
-    public function setWeekDate($date)
+    public function setPresetRange($preset)
     {
-        $this->selectedWeekDate = $date;
+        if ($preset === 'this_week') {
+            $this->startDate = now()->startOfWeek()->toDateString();
+            $this->endDate = now()->endOfWeek()->toDateString();
+        } elseif ($preset === 'last_week') {
+            $this->startDate = now()->subWeek()->startOfWeek()->toDateString();
+            $this->endDate = now()->subWeek()->endOfWeek()->toDateString();
+        } elseif ($preset === 'this_month') {
+            $this->startDate = now()->startOfMonth()->toDateString();
+            $this->endDate = now()->endOfMonth()->toDateString();
+        }
     }
 
     public function togglePresentationMode()
@@ -75,36 +84,25 @@ class WeeklyPerformance extends Component
         $this->selectedCashierId = null;
     }
 
-    private function generateAvailableWeeks()
-    {
-        $weeks = [];
-        $current = now()->startOfWeek();
-
-        for ($i = 0; $i < 12; $i++) {
-            $start = (clone $current)->subWeeks($i);
-            $end = (clone $start)->endOfWeek();
-
-            $weeks[] = [
-                'date' => $start->toDateString(),
-                'label' => $start->format('d M') . ' - ' . $end->format('d M Y') . ($i === 0 ? ' (Minggu Ini)' : ''),
-            ];
-        }
-
-        $this->availableWeeks = $weeks;
-    }
-
     public function render()
     {
         $activeJurusanId = session('active_jurusan_id');
 
-        $weekStart = Carbon::parse($this->selectedWeekDate)->startOfWeek();
-        $weekEnd = Carbon::parse($this->selectedWeekDate)->endOfWeek();
+        $weekStart = Carbon::parse($this->startDate)->startOfDay();
+        $weekEnd = Carbon::parse($this->endDate)->endOfDay();
 
-        // Previous week for comparison
-        $prevWeekStart = (clone $weekStart)->subWeek();
-        $prevWeekEnd = (clone $weekEnd)->subWeek();
+        // Fallback if start is after end
+        if ($weekStart->gt($weekEnd)) {
+            $temp = clone $weekStart;
+            $weekStart = clone $weekEnd;
+            $weekEnd = $temp;
+        }
 
-        // --- 1. OVERALL WEEKLY SALES & REVENUE AGGREGATE ---
+        $diffDays = max(1, $weekStart->diffInDays($weekEnd) + 1);
+        $prevWeekStart = (clone $weekStart)->subDays($diffDays);
+        $prevWeekEnd = (clone $weekStart)->subSecond();
+
+        // --- 1. OVERALL PERIOD SALES & REVENUE AGGREGATE ---
         $currentSalesQuery = Transaction::forReporting()
             ->whereBetween('transacted_at', [$weekStart->format('Y-m-d 00:00:00'), $weekEnd->format('Y-m-d 23:59:59')])
             ->when($activeJurusanId, fn($q) => $q->where('jurusan_id', $activeJurusanId));
@@ -118,7 +116,7 @@ class WeeklyPerformance extends Component
         $totalItemsSold = $currentValidSales->sum('quantity');
         $avgBasketSize = $totalTransactions > 0 ? round($totalRevenue / $totalTransactions) : 0;
 
-        // Previous Week Metrics for Comparison
+        // Previous Period Metrics for Comparison
         $prevValidSales = Transaction::forReporting()
             ->whereBetween('transacted_at', [$prevWeekStart->format('Y-m-d 00:00:00'), $prevWeekEnd->format('Y-m-d 23:59:59')])
             ->when($activeJurusanId, fn($q) => $q->where('jurusan_id', $activeJurusanId))
@@ -132,25 +130,27 @@ class WeeklyPerformance extends Component
         $profitGrowth = $prevProfit > 0 ? round((($totalProfit - $prevProfit) / $prevProfit) * 100, 1) : ($totalProfit > 0 ? 100 : 0);
         $txGrowth = $prevTxCount > 0 ? round((($totalTransactions - $prevTxCount) / $prevTxCount) * 100, 1) : ($totalTransactions > 0 ? 100 : 0);
 
-        // --- 2. DAILY BREAKDOWN & DAILY SHIFT AUDIT (SENIN - MINGGU) ---
+        // --- 2. DAILY BREAKDOWN & DAILY SHIFT AUDIT ---
         $dailySales = [];
         $dailyShiftAudits = [];
         $maxDailyRevenue = 1;
         $peakDay = ['day' => '-', 'revenue' => 0, 'transactions' => 0, 'date' => '-'];
 
-        $daysMap = [
+        $indonesianDays = [
+            0 => 'Minggu',
             1 => 'Senin',
             2 => 'Selasa',
             3 => 'Rabu',
             4 => 'Kamis',
             5 => 'Jumat',
             6 => 'Sabtu',
-            7 => 'Minggu'
         ];
 
-        for ($d = 1; $d <= 7; $d++) {
-            $dayDate = (clone $weekStart)->addDays($d - 1);
+        $currDate = clone $weekStart;
+        while ($currDate->lte($weekEnd)) {
+            $dayDate = clone $currDate;
             $dayStr = $dayDate->toDateString();
+            $dayName = $indonesianDays[$dayDate->dayOfWeek];
 
             // Sales on this day
             $daySalesQuery = Transaction::forReporting()
@@ -168,7 +168,7 @@ class WeeklyPerformance extends Component
 
             if ($rev > $peakDay['revenue']) {
                 $peakDay = [
-                    'day' => $daysMap[$d],
+                    'day' => $dayName,
                     'date' => $dayDate->format('d M'),
                     'revenue' => $rev,
                     'transactions' => $txCount
@@ -176,8 +176,8 @@ class WeeklyPerformance extends Component
             }
 
             $dailySales[] = [
-                'day_num' => $d,
-                'day_name' => $daysMap[$d],
+                'day_num' => $dayDate->dayOfWeek,
+                'day_name' => $dayName,
                 'date' => $dayDate->format('d M Y'),
                 'revenue' => $rev,
                 'profit' => $profit,
@@ -201,10 +201,11 @@ class WeeklyPerformance extends Component
                     ->when($activeJurusanId, fn($q) => $q->where('jurusan_id', $activeJurusanId))
                     ->first();
 
-                // Tasks assigned on this day or assigned tasks for this cashier on this date
+                // Tasks assigned on this day (both routine and custom tasks created on/for this date)
                 $assignmentsOnDay = CashierTaskAssignment::where('assigned_to', $cUser->id)
-                    ->whereHas('taskDefinition', function($q) use ($dayStr) {
-                        $q->where('date', $dayStr);
+                    ->where(function($q) use ($dayStr) {
+                        $q->whereDate('created_at', $dayStr)
+                          ->orWhereHas('taskDefinition', fn($sq) => $sq->whereDate('date', $dayStr));
                     })
                     ->when($activeJurusanId, fn($q) => $q->where('jurusan_id', $activeJurusanId))
                     ->with(['taskDefinition', 'latestSubmission'])
@@ -239,8 +240,11 @@ class WeeklyPerformance extends Component
                         }
                     }
 
+                    $prefix = ($def && $def->is_routine) ? '[Rutin] ' : '';
+
                     return [
-                        'task_name' => $def->task_name ?? 'Tugas Piket',
+                        'task_name' => $prefix . ($def->task_name ?? 'Tugas Piket'),
+                        'is_routine' => $def->is_routine ?? false,
                         'priority' => $def->priority ?? 'medium',
                         'status' => $status,
                         'badge_class' => $badgeClass,
@@ -267,11 +271,13 @@ class WeeklyPerformance extends Component
 
             if (!empty($cashierAuditsForDay)) {
                 $dailyShiftAudits[] = [
-                    'day_name' => $daysMap[$d],
+                    'day_name' => $dayName,
                     'date' => $dayDate->format('d M Y'),
                     'cashiers' => $cashierAuditsForDay,
                 ];
             }
+
+            $currDate->addDay();
         }
 
         // --- 3. CASHIER SHIFT & PERFORMANCE AUDIT ---
@@ -375,20 +381,27 @@ class WeeklyPerformance extends Component
                 $badgeColor = 'warning';
             }
 
+            $avgBasket = $totalTx > 0 ? round($totalSales / $totalTx) : 0;
+            $taskCompletionRate = $totalAssignedTasks > 0 ? round(($approvedTasksCount / $totalAssignedTasks) * 100) : 100;
+            $onTimeRate = $attendedCount > 0 ? round(($onTimeCount / $attendedCount) * 100) : 100;
+
             return (object) [
                 'user' => $user,
                 'total_sales' => $totalSales,
                 'total_tx' => $totalTx,
                 'total_profit' => $totalProfitGen,
+                'avg_basket' => $avgBasket,
                 'scheduled_count' => $scheduledCount,
                 'attended_count' => $attendedCount,
                 'on_time_count' => $onTimeCount,
                 'late_count' => $lateCount,
+                'on_time_rate' => $onTimeRate,
                 'assigned_tasks' => $totalAssignedTasks,
                 'approved_tasks' => $approvedTasksCount,
                 'pending_tasks' => $pendingTasksCount,
                 'rejected_tasks' => $rejectedTasksCount,
                 'unsubmitted_tasks' => $unsubmittedTasksCount,
+                'task_completion_rate' => $taskCompletionRate,
                 'overall_score' => $overallScore,
                 'status_badge' => $statusBadge,
                 'badge_color' => $badgeColor,
@@ -467,16 +480,20 @@ class WeeklyPerformance extends Component
         if ($this->selectedCashierId) {
             $cUser = User::find($this->selectedCashierId);
             if ($cUser) {
-                // Fetch shift audit per day for this user
                 $cashierDailyBreakdown = [];
-                for ($d = 1; $d <= 7; $d++) {
-                    $dDate = (clone $weekStart)->addDays($d - 1);
+                $mCurrDate = clone $weekStart;
+                while ($mCurrDate->lte($weekEnd)) {
+                    $dDate = clone $mCurrDate;
                     $dStr = $dDate->toDateString();
+                    $dDayName = $indonesianDays[$dDate->dayOfWeek];
 
                     $sched = CashierSchedule::where('user_id', $cUser->id)->where('date', $dStr)->first();
                     $att = CashierAttendance::where('user_id', $cUser->id)->where('date', $dStr)->first();
                     $asgs = CashierTaskAssignment::where('assigned_to', $cUser->id)
-                        ->whereHas('taskDefinition', fn($q) => $q->where('date', $dStr))
+                        ->where(function($q) use ($dStr) {
+                            $q->whereDate('created_at', $dStr)
+                              ->orWhereHas('taskDefinition', fn($sq) => $sq->whereDate('date', $dStr));
+                        })
                         ->with(['taskDefinition', 'latestSubmission'])
                         ->get();
 
@@ -490,7 +507,7 @@ class WeeklyPerformance extends Component
                         ->get();
 
                     $cashierDailyBreakdown[] = [
-                        'day_name' => $daysMap[$d],
+                        'day_name' => $dDayName,
                         'date' => $dDate->format('d M Y'),
                         'is_scheduled' => $sched ? true : false,
                         'attendance' => $att,
@@ -499,6 +516,8 @@ class WeeklyPerformance extends Component
                         'sales_count' => $txs->count('reference'),
                         'notes' => $cNotes,
                     ];
+
+                    $mCurrDate->addDay();
                 }
 
                 $modalCashierData = [

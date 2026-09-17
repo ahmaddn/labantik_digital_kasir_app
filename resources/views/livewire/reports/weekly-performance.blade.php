@@ -13,27 +13,33 @@
             </div>
         </div>
 
-        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-            {{-- Week Select Dropdown --}}
-            <div class="relative w-full sm:w-auto">
-                <select wire:model.live="selectedWeekDate" class="w-full sm:w-auto appearance-none bg-gray-50 dark:bg-gray-700/60 border border-gray-200 dark:border-gray-600 text-gray-900 dark:text-white text-xs font-bold rounded-xl sm:rounded-2xl px-4 py-3 pr-10 focus:ring-2 focus:ring-primary-blue focus:outline-none cursor-pointer shadow-xs">
-                    @foreach($availableWeeks as $w)
-                        <option value="{{ $w['date'] }}">{{ $w['label'] }}</option>
-                    @endforeach
-                </select>
-                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500 dark:text-gray-400">
-                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
-                    </svg>
-                </div>
+        <div class="flex flex-col xl:flex-row items-stretch xl:items-center gap-3">
+            {{-- Quick Presets --}}
+            <div class="flex items-center gap-1 bg-gray-100 dark:bg-gray-700/60 p-1 rounded-xl border border-gray-200 dark:border-gray-600 shrink-0">
+                <button wire:click="setPresetRange('this_week')" class="px-3 py-1.5 text-xs font-bold rounded-lg transition-all text-gray-700 dark:text-gray-200 hover:bg-white dark:hover:bg-gray-600 shadow-xs">
+                    Minggu Ini
+                </button>
+                <button wire:click="setPresetRange('last_week')" class="px-3 py-1.5 text-xs font-bold rounded-lg transition-all text-gray-700 dark:text-gray-200 hover:bg-white dark:hover:bg-gray-600 shadow-xs">
+                    Minggu Lalu
+                </button>
+                <button wire:click="setPresetRange('this_month')" class="px-3 py-1.5 text-xs font-bold rounded-lg transition-all text-gray-700 dark:text-gray-200 hover:bg-white dark:hover:bg-gray-600 shadow-xs">
+                    Bulan Ini
+                </button>
+            </div>
+
+            {{-- Date Range Picker Inputs --}}
+            <div class="flex items-center gap-2 bg-gray-50 dark:bg-gray-700/60 border border-gray-200 dark:border-gray-600 rounded-xl px-3 py-1.5 shadow-xs">
+                <input type="date" wire:model.live="startDate" class="bg-transparent text-xs font-bold text-gray-900 dark:text-white focus:outline-none cursor-pointer">
+                <span class="text-xs font-semibold text-gray-400">s/d</span>
+                <input type="date" wire:model.live="endDate" class="bg-transparent text-xs font-bold text-gray-900 dark:text-white focus:outline-none cursor-pointer">
             </div>
 
             {{-- Toggle Presentation Mode Button --}}
-            <button wire:click="togglePresentationMode" class="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-3 bg-primary-blue hover:bg-blue-600 text-white text-xs font-bold rounded-xl sm:rounded-2xl shadow-md shadow-blue-500/15 transition-all">
+            <button wire:click="togglePresentationMode" class="flex items-center justify-center gap-2 px-4 py-2.5 bg-primary-blue hover:bg-blue-600 text-white text-xs font-bold rounded-xl shadow-md shadow-blue-500/15 transition-all">
                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12H4z" />
                 </svg>
-                <span>Mode Presentasi (Deck)</span>
+                <span class="whitespace-nowrap">Mode Presentasi (Deck)</span>
             </button>
         </div>
     </div>
@@ -94,14 +100,16 @@
                     {{-- Presentation Chart --}}
                     <div class="bg-gray-900 border border-gray-800 p-6 rounded-xl">
                         <h4 class="text-sm font-bold text-gray-300 uppercase tracking-wider mb-4">Grafik Penjualan Harian</h4>
-                        <div class="h-64 flex items-end justify-between gap-3 pt-8 pb-4 border-b border-gray-800">
+                        <div class="h-64 grid grid-cols-7 gap-3 items-end pt-6 pb-4 border-b border-gray-800">
                             @foreach($dailySales as $day)
                                 @php $barPct = $maxDailyRevenue > 0 ? max(12, round(($day['revenue'] / $maxDailyRevenue) * 100)) : 12; @endphp
-                                <div class="flex-1 flex flex-col items-center gap-2">
-                                    <span class="text-xs font-bold text-blue-400">Rp {{ number_format($day['revenue'] / 1000, 0) }}k</span>
-                                    <div class="w-full bg-blue-600 rounded-t-lg transition-all" style="height: {{ $barPct }}%"></div>
-                                    <span class="text-xs font-bold text-gray-300">{{ substr($day['day_name'], 0, 3) }}</span>
-                                    <span class="text-[11px] text-gray-400">{{ $day['transactions'] }} Tx</span>
+                                <div class="flex flex-col items-center justify-end h-full">
+                                    <span class="text-xs font-black text-blue-400 mb-1.5">Rp {{ number_format($day['revenue'] / 1000, 0) }}k</span>
+                                    <div class="w-full bg-gray-800/80 rounded-t-lg flex items-end h-36 p-1 border border-gray-700">
+                                        <div class="w-full bg-blue-500 rounded-t-md transition-all shadow-md shadow-blue-500/20" style="height: {{ $barPct }}%"></div>
+                                    </div>
+                                    <span class="text-xs font-bold text-gray-300 pt-2">{{ substr($day['day_name'], 0, 3) }}</span>
+                                    <span class="text-[10px] text-gray-400">{{ $day['transactions'] }} Tx</span>
                                 </div>
                             @endforeach
                         </div>
@@ -294,27 +302,28 @@
         </div>
 
         {{-- VISIBLE BAR CHART --}}
-        <div class="pt-6 pb-2 border-b border-gray-100 dark:border-gray-700/60">
-            <div class="h-56 flex items-end justify-between gap-2 sm:gap-4 px-2">
+        <div class="pt-4 pb-2 border-b border-gray-100 dark:border-gray-700/60">
+            <div class="grid grid-cols-7 gap-2 sm:gap-4 items-end h-48">
                 @foreach($dailySales as $day)
                     @php 
-                        $barPct = $maxDailyRevenue > 0 ? max(15, round(($day['revenue'] / $maxDailyRevenue) * 100)) : 15;
+                        $barPct = $maxDailyRevenue > 0 ? max(12, round(($day['revenue'] / $maxDailyRevenue) * 100)) : 12;
                         $isPeak = ($day['day_name'] === $peakDay['day'] && $day['revenue'] > 0);
                     @endphp
-                    <div class="flex-1 flex flex-col items-center gap-2 group h-full justify-end">
+                    <div class="flex flex-col items-center justify-end h-full group">
                         {{-- Omset Rp Label above bar --}}
-                        <span class="text-[11px] font-extrabold {{ $isPeak ? 'text-primary-blue dark:text-blue-400' : 'text-gray-700 dark:text-gray-300' }}">
+                        <span class="text-[11px] font-black mb-1.5 whitespace-nowrap {{ $isPeak ? 'text-blue-600 dark:text-blue-400' : 'text-gray-700 dark:text-gray-300' }}">
                             Rp {{ number_format($day['revenue'] / 1000, 0) }}k
                         </span>
 
-                        {{-- Bar container --}}
-                        <div class="w-full max-w-[48px] rounded-t-lg transition-all duration-300 {{ $isPeak ? 'bg-primary-blue dark:bg-blue-500' : 'bg-gray-300 dark:bg-gray-700 group-hover:bg-primary-blue' }}" style="height: {{ $barPct }}%">
+                        {{-- Bar Track & Inner Bar --}}
+                        <div class="w-full max-w-[42px] bg-gray-100 dark:bg-gray-700/60 rounded-t-xl flex items-end h-32 p-1 border border-gray-200/50 dark:border-gray-600/40">
+                            <div class="w-full rounded-t-lg transition-all duration-500 {{ $isPeak ? 'bg-blue-600 dark:bg-blue-500 shadow-lg shadow-blue-500/30' : 'bg-blue-500/80 dark:bg-blue-400/80 group-hover:bg-blue-600' }}" style="height: {{ $barPct }}%;"></div>
                         </div>
 
                         {{-- Day Name & Tx Count below bar --}}
-                        <div class="text-center pt-1">
-                            <span class="text-xs font-bold block text-gray-900 dark:text-white">{{ $day['day_name'] }}</span>
-                            <span class="text-[10px] font-semibold text-gray-500 dark:text-gray-400">{{ $day['transactions'] }} Tx</span>
+                        <div class="text-center pt-2">
+                            <span class="text-xs font-black block text-gray-900 dark:text-white">{{ $day['day_name'] }}</span>
+                            <span class="text-[10px] font-semibold text-gray-500 dark:text-gray-400 block">{{ $day['transactions'] }} Tx</span>
                         </div>
                     </div>
                 @endforeach
@@ -463,29 +472,37 @@
                                         </div>
                                     </div>
                                 </td>
-                                <td class="px-5 py-4 font-black text-gray-900 dark:text-white">
-                                    Rp {{ number_format($item->total_sales, 0, ',', '.') }}
+                                <td class="px-5 py-4">
+                                    <span class="font-black text-gray-900 dark:text-white block">Rp {{ number_format($item->total_sales, 0, ',', '.') }}</span>
+                                    <span class="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold block">Profit: Rp {{ number_format($item->total_profit, 0, ',', '.') }}</span>
+                                    <span class="text-[10px] text-gray-500 dark:text-gray-400 block">Rata Keranjang: Rp {{ number_format($item->avg_basket, 0, ',', '.') }}</span>
                                 </td>
                                 <td class="px-5 py-4 font-semibold text-gray-700 dark:text-gray-300">
-                                    {{ $item->total_tx }} Struk
+                                    <span class="font-bold text-gray-900 dark:text-white block text-sm">{{ number_format($item->total_tx) }} Transaksi</span>
                                 </td>
                                 <td class="px-5 py-4">
-                                    <div class="flex flex-wrap items-center gap-1">
-                                        <span class="px-2 py-0.5 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 rounded font-bold text-[11px]">{{ $item->on_time_count }} Tepat Waktu</span>
-                                        @if($item->late_count > 0)
-                                            <span class="px-2 py-0.5 bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-300 border border-rose-200 dark:border-rose-800 rounded font-bold text-[11px]">{{ $item->late_count }} Terlambat</span>
-                                        @endif
+                                    <div class="space-y-1">
+                                        <span class="text-xs font-extrabold text-gray-900 dark:text-white block">{{ $item->attended_count }}/{{ $item->scheduled_count }} Shift ({{ $item->on_time_rate }}% Tepat Waktu)</span>
+                                        <div class="flex flex-wrap items-center gap-1">
+                                            <span class="px-2 py-0.5 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 rounded font-bold text-[10px]">{{ $item->on_time_count }} On-Time</span>
+                                            @if($item->late_count > 0)
+                                                <span class="px-2 py-0.5 bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-300 border border-rose-200 dark:border-rose-800 rounded font-bold text-[10px]">{{ $item->late_count }} Terlambat</span>
+                                            @endif
+                                        </div>
                                     </div>
                                 </td>
                                 <td class="px-5 py-4">
-                                    <div class="space-y-0.5">
-                                        <span class="text-emerald-600 dark:text-emerald-400 font-bold block">{{ $item->approved_tasks }} Disetujui</span>
-                                        @if($item->unsubmitted_tasks > 0)
-                                            <span class="text-rose-600 dark:text-rose-400 font-bold text-[11px] block">{{ $item->unsubmitted_tasks }} Belum Dilaporkan</span>
-                                        @endif
-                                        @if($item->rejected_tasks > 0)
-                                            <span class="text-rose-600 dark:text-rose-400 font-bold text-[11px] block">{{ $item->rejected_tasks }} Ditolak</span>
-                                        @endif
+                                    <div class="space-y-1">
+                                        <span class="text-xs font-black text-primary-blue dark:text-blue-400 block">{{ $item->task_completion_rate }}% Selesai</span>
+                                        <div class="text-[11px] font-semibold space-y-0.5">
+                                            <span class="text-emerald-600 dark:text-emerald-400 block">• {{ $item->approved_tasks }} Disetujui</span>
+                                            @if($item->unsubmitted_tasks > 0)
+                                                <span class="text-rose-600 dark:text-rose-400 block">• {{ $item->unsubmitted_tasks }} Belum Dilaporkan</span>
+                                            @endif
+                                            @if($item->rejected_tasks > 0)
+                                                <span class="text-rose-600 dark:text-rose-400 block">• {{ $item->rejected_tasks }} Ditolak</span>
+                                            @endif
+                                        </div>
                                     </div>
                                 </td>
                                 <td class="px-5 py-4">
