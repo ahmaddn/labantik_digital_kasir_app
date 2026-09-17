@@ -387,9 +387,9 @@
                                 <div class="flex items-center justify-between">
                                     <span class="font-extrabold text-xs text-gray-900 dark:text-white">{{ $c['user']->name }}</span>
                                     @if($c['attended'])
-                                        <span class="px-2 py-0.5 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 text-[10px] font-bold rounded">Hadir {{ $c['clock_in'] ?? '' }}</span>
+                                        <span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 border border-emerald-200 dark:bg-emerald-950 dark:text-emerald-400 dark:border-emerald-800 text-[10px] font-bold rounded">Hadir {{ $c['clock_in'] ?? '' }}</span>
                                     @else
-                                        <span class="px-2 py-0.5 bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-300 border border-rose-200 dark:border-rose-800 text-[10px] font-bold rounded">Tidak Absen</span>
+                                        <span class="px-2 py-0.5 bg-rose-100 text-rose-800 border border-rose-200 dark:bg-rose-950 dark:text-rose-400 dark:border-rose-800 text-[10px] font-bold rounded">Tidak Absen</span>
                                     @endif
                                 </div>
 
@@ -516,9 +516,9 @@
                                     <div class="space-y-1">
                                         <span class="text-xs font-extrabold text-gray-900 dark:text-white block">{{ $item->attended_count }}/{{ $item->scheduled_count }} Shift ({{ $item->on_time_rate }}% Tepat Waktu)</span>
                                         <div class="flex flex-wrap items-center gap-1">
-                                            <span class="px-2 py-0.5 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 rounded font-bold text-[10px]">{{ $item->on_time_count }} On-Time</span>
+                                            <span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 border border-emerald-200 dark:bg-emerald-950 dark:text-emerald-400 dark:border-emerald-800 rounded font-bold text-[10px]">{{ $item->on_time_count }} On-Time</span>
                                             @if($item->late_count > 0)
-                                                <span class="px-2 py-0.5 bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-300 border border-rose-200 dark:border-rose-800 rounded font-bold text-[10px]">{{ $item->late_count }} Terlambat</span>
+                                                <span class="px-2 py-0.5 bg-rose-100 text-rose-800 border border-rose-200 dark:bg-rose-950 dark:text-rose-400 dark:border-rose-800 rounded font-bold text-[10px]">{{ $item->late_count }} Terlambat</span>
                                             @endif
                                         </div>
                                     </div>

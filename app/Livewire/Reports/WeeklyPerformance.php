@@ -225,18 +225,18 @@ class WeeklyPerformance extends Component
                     $def = $asg->taskDefinition;
                     $sub = $asg->latestSubmission;
                     $status = 'Belum Dikerjakan';
-                    $badgeClass = 'bg-rose-50 text-rose-700 border border-rose-200 dark:bg-rose-950/70 dark:text-rose-300 dark:border-rose-800/80';
+                    $badgeClass = 'bg-rose-100 text-rose-800 border border-rose-200 dark:bg-rose-950 dark:text-rose-300 dark:border-rose-800';
 
                     if ($sub) {
                         if ($sub->approval_status === 'approved') {
                             $status = 'Disetujui';
-                            $badgeClass = 'bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/70 dark:text-emerald-300 dark:border-emerald-800/80';
+                            $badgeClass = 'bg-emerald-100 text-emerald-800 border border-emerald-200 dark:bg-emerald-950 dark:text-emerald-300 dark:border-emerald-800';
                         } elseif ($sub->approval_status === 'rejected') {
                             $status = 'Ditolak: ' . ($sub->rejection_note ?? 'Perlu perbaikan');
-                            $badgeClass = 'bg-rose-50 text-rose-700 border border-rose-200 dark:bg-rose-950/70 dark:text-rose-300 dark:border-rose-800/80';
+                            $badgeClass = 'bg-rose-100 text-rose-800 border border-rose-200 dark:bg-rose-950 dark:text-rose-300 dark:border-rose-800';
                         } else {
                             $status = 'Menunggu Review';
-                            $badgeClass = 'bg-blue-50 text-blue-700 border border-blue-200 dark:bg-blue-950/70 dark:text-blue-300 dark:border-blue-800/80';
+                            $badgeClass = 'bg-blue-100 text-blue-800 border border-blue-200 dark:bg-blue-950 dark:text-blue-300 dark:border-blue-800';
                         }
                     }
 
