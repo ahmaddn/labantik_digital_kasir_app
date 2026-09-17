@@ -107,7 +107,7 @@
                                     </span>
                                     <div class="w-8 sm:w-11 flex items-end justify-center h-full">
                                         @if($barPct > 0)
-                                            <div class="w-full rounded-t-md transition-all duration-500 {{ $isPeak ? 'bg-blue-500 shadow-lg shadow-blue-500/40 ring-2 ring-blue-400/40' : 'bg-slate-600 hover:bg-blue-400' }}" style="height: {{ $barPct }}%;"></div>
+                                            <div class="w-full rounded-t-md transition-all duration-500 {{ $isPeak ? 'bg-blue-500 shadow-lg shadow-blue-500/50 ring-2 ring-blue-300' : 'bg-blue-600/75 hover:bg-blue-400' }}" style="height: {{ $barPct }}%;"></div>
                                         @else
                                             <div class="w-full h-1 bg-slate-800 rounded-t-sm"></div>
                                         @endif

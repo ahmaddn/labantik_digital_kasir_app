@@ -140,9 +140,15 @@ class WeeklyPerformancePresentation extends Component
         }
 
         // 3. Cashiers Evaluation
-        $cashierUsers = User::role('Kasir')
-            ->when($activeJurusanId, fn($q) => $q->where('jurusan_id', $activeJurusanId))
-            ->get();
+        $cashierUsers = User::whereDoesntHave('roles', function ($query) {
+            $query->whereIn('roles.name', ['superadmin', 'admin', 'pengelola_jurusan', 'pengelola']);
+        })
+        ->when($activeJurusanId, function ($q) use ($activeJurusanId) {
+            return $q->whereHas('roles', function ($sq) use ($activeJurusanId) {
+                $sq->where('role_user.jurusan_id', $activeJurusanId);
+            });
+        })
+        ->get();
 
         $cashierPerformanceList = $cashierUsers->map(function ($user) use ($weekStart, $weekEnd, $activeJurusanId) {
             $userSales = Transaction::forReporting()

@@ -160,12 +160,12 @@
                             {{-- The Actual Vertical Bar Column --}}
                             <div class="w-8 sm:w-11 flex items-end justify-center h-full">
                                 @if($barPct > 0)
-                                    <div class="w-full rounded-t-md transition-all duration-500 {{ $isPeak ? 'bg-primary-blue dark:bg-blue-500 shadow-md shadow-blue-500/30 ring-2 ring-blue-400/30' : 'bg-slate-400 dark:bg-slate-600 hover:bg-primary-blue dark:hover:bg-blue-400' }}" 
+                                    <div class="w-full rounded-t-md transition-all duration-500 {{ $isPeak ? 'bg-blue-600 dark:bg-blue-500 shadow-lg shadow-blue-500/50 ring-2 ring-blue-400' : 'bg-blue-400/80 dark:bg-blue-600/80 hover:bg-blue-500 hover:dark:bg-blue-400 shadow-sm' }}" 
                                          style="height: {{ $barPct }}%;"
                                          title="{{ $day['day_name'] }}: Rp {{ number_format($day['revenue']) }} ({{ $day['transactions'] }} Tx)">
                                     </div>
                                 @else
-                                    <div class="w-full h-1 bg-gray-200 dark:bg-gray-700 rounded-t-sm" title="Tidak ada penjualan"></div>
+                                    <div class="w-full h-1 bg-gray-300 dark:bg-gray-700 rounded-t-sm" title="Tidak ada penjualan"></div>
                                 @endif
                             </div>
 
