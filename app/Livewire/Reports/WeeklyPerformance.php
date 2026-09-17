@@ -154,15 +154,17 @@ class WeeklyPerformance extends Component
             $dayStr = $dayDate->toDateString();
             $dayName = $indonesianDays[$dayDate->dayOfWeek];
 
-            // Sales on this day
-            $daySalesQuery = Transaction::forReporting()
+            // Sales on this day (Aggregated)
+            $dayAgg = Transaction::forReporting()
+                ->selectRaw('COALESCE(SUM(total_price), 0) as total_rev, COALESCE(SUM(unit_profit * quantity), 0) as total_profit, COUNT(DISTINCT reference) as total_tx')
                 ->whereDate('transacted_at', $dayStr)
                 ->when($activeJurusanId, fn($q) => $q->where('jurusan_id', $activeJurusanId))
-                ->whereIn('status', ['uang_diterima', 'belum_kembalian']);
+                ->whereIn('status', ['uang_diterima', 'belum_kembalian'])
+                ->first();
 
-            $rev = $daySalesQuery->sum('total_price');
-            $txCount = $daySalesQuery->count('reference');
-            $profit = $daySalesQuery->sum(DB::raw('unit_profit * quantity'));
+            $rev = (float) ($dayAgg->total_rev ?? 0);
+            $txCount = (int) ($dayAgg->total_tx ?? 0);
+            $profit = (float) ($dayAgg->total_profit ?? 0);
 
             if ($rev > $maxDailyRevenue) {
                 $maxDailyRevenue = $rev;

@@ -124,16 +124,22 @@
                         {{-- Presentation Chart --}}
                         <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl space-y-4">
                             <h4 class="text-xs font-black text-slate-400 uppercase tracking-widest">Grafik Penjualan Harian</h4>
-                            <div class="h-60 flex items-end justify-between gap-3 pt-4 pb-2 border-b border-slate-800 overflow-x-auto">
+                            <div class="h-64 flex items-end justify-between gap-3 pt-6 pb-2 border-b border-slate-800 overflow-x-auto">
                                 @foreach($dailySales as $day)
                                     @php 
-                                        $barPct = $maxDailyRevenue > 0 ? max(12, round(($day['revenue'] / $maxDailyRevenue) * 100)) : 12;
+                                        $barPct = ($maxDailyRevenue > 0 && $day['revenue'] > 0) ? max(6, round(($day['revenue'] / $maxDailyRevenue) * 100)) : 0;
                                         $isPeak = ($day['day_name'] === $peakDay['day'] && $day['revenue'] > 0);
                                     @endphp
                                     <div class="flex-1 flex flex-col items-center justify-end h-full min-w-[55px] group">
-                                        <span class="text-xs font-black text-blue-400 mb-2 whitespace-nowrap">Rp {{ number_format($day['revenue'] / 1000, 0) }}k</span>
-                                        <div class="w-full max-w-[44px] bg-slate-800 rounded-t-xl flex items-end h-36 p-1 border border-slate-700 shrink-0">
-                                            <div class="w-full rounded-t-lg transition-all shadow-lg {{ $isPeak ? 'bg-blue-500 shadow-blue-500/30' : 'bg-blue-600/80 group-hover:bg-blue-500' }}" style="height: {{ $barPct }}%"></div>
+                                        <span class="text-xs font-black {{ $isPeak ? 'text-blue-400' : ($day['revenue'] > 0 ? 'text-slate-300' : 'text-slate-600') }} mb-2 whitespace-nowrap">
+                                            {{ $day['revenue'] > 0 ? 'Rp ' . number_format($day['revenue'] / 1000, 0) . 'k' : 'Rp 0' }}
+                                        </span>
+                                        <div class="w-full max-w-[44px] bg-slate-800 rounded-t-xl flex items-end h-44 p-1 border border-slate-700 shrink-0">
+                                            @if($barPct > 0)
+                                                <div class="w-full rounded-t-lg transition-all shadow-lg {{ $isPeak ? 'bg-blue-500 shadow-blue-500/30' : 'bg-blue-600/80 group-hover:bg-blue-500' }}" style="height: {{ $barPct }}%"></div>
+                                            @else
+                                                <div class="w-full rounded-t-sm bg-slate-700/60 h-1"></div>
+                                            @endif
                                         </div>
                                         <span class="text-xs font-black text-slate-200 pt-2.5">{{ substr($day['day_name'], 0, 3) }}</span>
                                         <span class="text-[10px] text-slate-400 font-medium">{{ $day['transactions'] }} Tx</span>
@@ -409,21 +415,25 @@
 
         {{-- VISIBLE BAR CHART --}}
         <div class="pt-4 pb-2 border-b border-gray-100 dark:border-gray-700/60 overflow-x-auto">
-            <div class="flex items-end justify-between gap-3 min-w-[600px] h-56 pt-2">
+            <div class="flex items-end justify-between gap-3 min-w-[600px] h-64 pt-6">
                 @foreach($dailySales as $day)
                     @php 
-                        $barPct = $maxDailyRevenue > 0 ? max(10, round(($day['revenue'] / $maxDailyRevenue) * 100)) : 10;
+                        $barPct = ($maxDailyRevenue > 0 && $day['revenue'] > 0) ? max(6, round(($day['revenue'] / $maxDailyRevenue) * 100)) : 0;
                         $isPeak = ($day['day_name'] === $peakDay['day'] && $day['revenue'] > 0);
                     @endphp
                     <div class="flex-1 flex flex-col items-center justify-end h-full min-w-[55px] group">
                         {{-- Omset Rp Label above bar --}}
-                        <span class="text-[11px] font-black mb-1.5 whitespace-nowrap {{ $isPeak ? 'text-blue-600 dark:text-blue-400' : 'text-gray-700 dark:text-gray-300' }}">
-                            Rp {{ number_format($day['revenue'] / 1000, 0) }}k
+                        <span class="text-[11px] font-black mb-1.5 whitespace-nowrap {{ $isPeak ? 'text-blue-600 dark:text-blue-400' : ($day['revenue'] > 0 ? 'text-gray-700 dark:text-gray-300' : 'text-gray-400 dark:text-gray-600') }}">
+                            {{ $day['revenue'] > 0 ? 'Rp ' . number_format($day['revenue'] / 1000, 0) . 'k' : 'Rp 0' }}
                         </span>
 
                         {{-- Bar Track & Inner Bar --}}
-                        <div class="w-full max-w-[44px] bg-gray-100 dark:bg-gray-700/60 rounded-t-xl flex items-end h-36 p-1 border border-gray-200/50 dark:border-gray-600/40 shrink-0">
-                            <div class="w-full rounded-t-lg transition-all duration-500 {{ $isPeak ? 'bg-blue-600 dark:bg-blue-500 shadow-md shadow-blue-500/30' : 'bg-blue-500/80 dark:bg-blue-400/80 group-hover:bg-blue-600' }}" style="height: {{ $barPct }}%;"></div>
+                        <div class="w-full max-w-[44px] bg-gray-100 dark:bg-gray-700/40 rounded-t-xl flex items-end h-44 p-1 border border-gray-200/50 dark:border-gray-600/40 shrink-0">
+                            @if($barPct > 0)
+                                <div class="w-full rounded-t-lg transition-all duration-500 {{ $isPeak ? 'bg-blue-600 dark:bg-blue-500 shadow-lg shadow-blue-500/40' : 'bg-blue-500/80 dark:bg-blue-400/80 group-hover:bg-blue-600' }}" style="height: {{ $barPct }}%;"></div>
+                            @else
+                                <div class="w-full rounded-t-sm bg-gray-200/60 dark:bg-gray-700/60 h-1"></div>
+                            @endif
                         </div>
 
                         {{-- Day Name & Tx Count below bar --}}
