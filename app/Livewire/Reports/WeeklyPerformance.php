@@ -278,15 +278,29 @@ class WeeklyPerformance extends Component
         }
 
         // --- 3. CASHIER SHIFT & PERFORMANCE AUDIT ---
-        $cashierUsers = User::whereDoesntHave('roles', function ($query) {
-            $query->whereIn('roles.name', ['superadmin', 'admin', 'pengelola_jurusan', 'pengelola']);
-        })
-        ->when($activeJurusanId, function ($q) use ($activeJurusanId) {
-            return $q->whereHas('roles', function ($sq) use ($activeJurusanId) {
-                $sq->where('role_user.jurusan_id', $activeJurusanId);
-            });
-        })
-        ->get();
+        // Filter: Hanya kasir yang memiliki jadwal piket (atau absensi/transaksi) pada periode ini
+        $scheduledUserIds = CashierSchedule::whereBetween('date', [$weekStart->toDateString(), $weekEnd->toDateString()])
+            ->when($activeJurusanId, fn($q) => $q->where('jurusan_id', $activeJurusanId))
+            ->pluck('user_id')
+            ->unique();
+
+        $attendedUserIds = CashierAttendance::whereBetween('date', [$weekStart->toDateString(), $weekEnd->toDateString()])
+            ->when($activeJurusanId, fn($q) => $q->where('jurusan_id', $activeJurusanId))
+            ->pluck('user_id')
+            ->unique();
+
+        $activeCashierIds = $scheduledUserIds->merge($attendedUserIds)->unique()->filter()->values();
+
+        $cashierUsers = User::whereIn('id', $activeCashierIds)
+            ->whereDoesntHave('roles', function ($query) {
+                $query->whereIn('roles.name', ['superadmin', 'admin', 'pengelola_jurusan', 'pengelola']);
+            })
+            ->when($activeJurusanId, function ($q) use ($activeJurusanId) {
+                return $q->whereHas('roles', function ($sq) use ($activeJurusanId) {
+                    $sq->where('role_user.jurusan_id', $activeJurusanId);
+                });
+            })
+            ->get();
 
         $cashierPerformanceList = $cashierUsers->map(function ($user) use ($weekStart, $weekEnd, $activeJurusanId) {
             // POS Sales

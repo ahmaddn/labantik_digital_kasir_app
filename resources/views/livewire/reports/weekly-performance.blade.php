@@ -787,70 +787,120 @@
     {{-- MODAL AUDIT KASIR DETAIL --}}
     @if ($showCashierDetailModal && $modalCashierData)
         <div
+            x-data="{ activeAccordion: null }"
+            x-transition:enter="transition ease-out duration-300"
+            x-transition:enter-start="opacity-0"
+            x-transition:enter-end="opacity-100"
+            x-transition:leave="transition ease-in duration-200"
+            x-transition:leave-start="opacity-100"
+            x-transition:leave-end="opacity-0"
             class="fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+            
             <div
-                class="bg-white dark:bg-gray-800 w-full max-w-2xl rounded-[3rem] shadow-2xl border border-gray-100 dark:border-gray-700 overflow-hidden">
+                x-transition:enter="transition ease-out duration-300 transform"
+                x-transition:enter-start="opacity-0 scale-95 translate-y-4"
+                x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+                x-transition:leave="transition ease-in duration-200 transform"
+                x-transition:leave-start="opacity-100 scale-100 translate-y-0"
+                x-transition:leave-end="opacity-0 scale-95 translate-y-4"
+                class="bg-white dark:bg-gray-800 w-full max-w-xl rounded-[2.5rem] shadow-2xl border border-gray-100 dark:border-gray-700 overflow-hidden flex flex-col max-h-[85vh]">
+                
+                {{-- Modal Header --}}
                 <div
-                    class="p-8 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between bg-gray-50 dark:bg-gray-900/50">
+                    class="p-6 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between bg-gray-50 dark:bg-gray-900/50 shrink-0">
                     <div>
-                        <h3 class="font-black text-gray-800 dark:text-white text-lg uppercase tracking-tight">Detail
+                        <h3 class="font-black text-gray-800 dark:text-white text-base uppercase tracking-tight">Detail
                             Log Harian: {{ $modalCashierData['user']->name }}</h3>
-                        <p class="text-xs text-gray-400 font-bold uppercase tracking-wider mt-0.5">Rekap Kehadiran,
-                            Tugas, & Catatan Operasional</p>
+                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mt-0.5">Rekap Kehadiran,
+                            Tugas, & Catatan Piket</p>
                     </div>
                     <button wire:click="closeCashierDetailModal"
-                        class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 rounded-xl">
-                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 rounded-xl transition-all cursor-pointer">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                            <path stroke-linecap="round" stroke-linejoin="round"
                                 d="M6 18L18 6M6 6l12 12" />
                         </svg>
                     </button>
                 </div>
-                <div class="p-8 max-h-[70vh] overflow-y-auto space-y-4 text-xs">
-                    @foreach ($modalCashierData['daily_breakdown'] as $dayLog)
-                        <div
-                            class="p-5 bg-gray-50 dark:bg-gray-900/40 rounded-2xl border border-gray-100 dark:border-gray-800 space-y-3">
-                            <div class="flex items-center justify-between font-black">
-                                <span
-                                    class="text-gray-800 dark:text-white uppercase tracking-tight">{{ $dayLog['day_name'] }}
-                                    ({{ $dayLog['date'] }})</span>
-                                <span
-                                    class="px-3 py-1 rounded-xl text-[10px] uppercase tracking-wider {{ $dayLog['attendance'] ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300' : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300' }}">
-                                    {{ $dayLog['attendance'] ? 'Absen Masuk' : 'Tidak Ada Absensi' }}
-                                </span>
-                            </div>
-                            <div class="grid grid-cols-2 gap-2 text-gray-500 dark:text-gray-400 text-xs font-bold">
-                                <div>Omset: <strong
-                                        class="text-gray-800 dark:text-white">Rp{{ number_format($dayLog['sales_omset']) }}</strong>
-                                    ({{ $dayLog['sales_count'] }} Tx)</div>
-                                <div>Tugas: <strong
-                                        class="text-gray-800 dark:text-white">{{ count($dayLog['tasks']) }}
-                                        Tugas</strong></div>
-                            </div>
-                            @if (count($dayLog['tasks']) > 0)
-                                <div class="pt-2 border-t border-gray-200 dark:border-gray-800 space-y-1.5">
-                                    <span
-                                        class="text-[9px] font-black text-gray-400 uppercase tracking-widest block">Daftar
-                                        Tugas:</span>
-                                    @foreach ($dayLog['tasks'] as $t)
-                                        <div
-                                            class="text-[11px] font-semibold text-gray-700 dark:text-gray-300 flex items-center justify-between">
-                                            <span>• {{ $t->taskDefinition->task_name ?? 'Tugas' }}</span>
-                                            <span
-                                                class="font-bold text-[10px] {{ $t->latestSubmission && $t->latestSubmission->approval_status === 'approved' ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400' }}">
-                                                {{ $t->latestSubmission ? ucfirst($t->latestSubmission->approval_status) : 'Belum Submit' }}
+
+                {{-- Modal Body: Scrollable with Smooth Accordion Per Day --}}
+                <div class="p-6 overflow-y-auto space-y-3 text-xs flex-1 divide-y divide-gray-100 dark:divide-gray-800">
+                    @foreach ($modalCashierData['daily_breakdown'] as $idx => $dayLog)
+                        @php
+                            $hasContent = $dayLog['attendance'] || count($dayLog['tasks']) > 0 || $dayLog['sales_omset'] > 0;
+                        @endphp
+                        <div class="pt-3 first:pt-0">
+                            {{-- Accordion Header / Trigger Button --}}
+                            <button
+                                type="button"
+                                @click="activeAccordion = (activeAccordion === {{ $idx }} ? null : {{ $idx }})"
+                                class="w-full text-left p-3.5 rounded-2xl transition-all flex items-center justify-between gap-3 cursor-pointer {{ $dayLog['attendance'] ? 'bg-emerald-50/50 dark:bg-emerald-950/20 hover:bg-emerald-50 dark:hover:bg-emerald-950/40' : 'bg-gray-50 dark:bg-gray-900/40 hover:bg-gray-100 dark:hover:bg-gray-900/70' }}">
+                                <div class="flex items-center gap-3 min-w-0">
+                                    <span class="w-2 h-2 rounded-full shrink-0 {{ $dayLog['attendance'] ? 'bg-emerald-500' : 'bg-gray-300 dark:bg-gray-600' }}"></span>
+                                    <div class="min-w-0">
+                                        <div class="flex items-center gap-2">
+                                            <span class="text-xs font-black text-gray-800 dark:text-white uppercase tracking-tight truncate">
+                                                {{ $dayLog['day_name'] }} ({{ $dayLog['date'] }})
                                             </span>
                                         </div>
-                                    @endforeach
+                                        <span class="text-[10px] text-gray-400 font-bold block mt-0.5">
+                                            Omset: Rp{{ number_format($dayLog['sales_omset'] / 1000, 0) }}k • {{ count($dayLog['tasks']) }} Tugas
+                                        </span>
+                                    </div>
                                 </div>
-                            @endif
+
+                                <div class="flex items-center gap-2 shrink-0">
+                                    <span class="px-2.5 py-1 rounded-xl text-[9px] font-black uppercase tracking-wider {{ $dayLog['attendance'] ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300' : 'bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400' }}">
+                                        {{ $dayLog['attendance'] ? 'Absen Masuk' : 'Tidak Absen' }}
+                                    </span>
+                                    <svg class="w-4 h-4 text-gray-400 transition-transform duration-200"
+                                        :class="activeAccordion === {{ $idx }} ? 'rotate-180 text-primary-blue' : ''"
+                                        fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                                    </svg>
+                                </div>
+                            </button>
+
+                            {{-- Accordion Collapsible Panel Content --}}
+                            <div
+                                x-show="activeAccordion === {{ $idx }}"
+                                x-collapse
+                                class="mt-2.5 px-4 py-3 bg-gray-50 dark:bg-gray-900/60 rounded-2xl border border-gray-100 dark:border-gray-800 space-y-3">
+                                
+                                {{-- Sales & Attendance Meta --}}
+                                <div class="grid grid-cols-2 gap-2 text-[11px] font-bold text-gray-500 dark:text-gray-400">
+                                    <div>Omset: <strong class="text-gray-800 dark:text-white">Rp{{ number_format($dayLog['sales_omset']) }}</strong> ({{ $dayLog['sales_count'] }} Tx)</div>
+                                    <div>Piket: <strong class="text-gray-800 dark:text-white">{{ $dayLog['is_scheduled'] ? 'Terjadwal' : 'Tidak Ada Jadwal' }}</strong></div>
+                                </div>
+
+                                {{-- Task List --}}
+                                @if (count($dayLog['tasks']) > 0)
+                                    <div class="pt-2 border-t border-gray-200 dark:border-gray-800 space-y-1.5">
+                                        <span class="text-[9px] font-black text-gray-400 uppercase tracking-widest block">Daftar Tugas:</span>
+                                        @foreach ($dayLog['tasks'] as $t)
+                                            <div class="text-[11px] font-semibold text-gray-700 dark:text-gray-300 flex items-center justify-between gap-2">
+                                                <span class="truncate">• {{ $t->taskDefinition->task_name ?? 'Tugas' }}</span>
+                                                <span class="font-bold text-[10px] shrink-0 {{ $t->latestSubmission && $t->latestSubmission->approval_status === 'approved' ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400' }}">
+                                                    {{ $t->latestSubmission ? ucfirst($t->latestSubmission->approval_status) : 'Belum Submit' }}
+                                                </span>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                @else
+                                    <div class="pt-2 border-t border-gray-200 dark:border-gray-800 text-[10px] text-gray-400 italic">
+                                        Tidak ada penugasan tugas piket pada hari ini.
+                                    </div>
+                                @endif
+                            </div>
                         </div>
                     @endforeach
                 </div>
+
+                {{-- Modal Footer --}}
                 <div
-                    class="p-6 bg-gray-50 dark:bg-gray-900/50 border-t border-gray-100 dark:border-gray-700 text-right">
+                    class="p-5 bg-gray-50 dark:bg-gray-900/50 border-t border-gray-100 dark:border-gray-700 text-right shrink-0">
                     <button wire:click="closeCashierDetailModal"
-                        class="px-6 py-3 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 font-black rounded-2xl text-xs uppercase tracking-wider">
+                        class="px-6 py-2.5 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-white font-black rounded-xl text-xs uppercase tracking-wider transition-all cursor-pointer">
                         Tutup
                     </button>
                 </div>
