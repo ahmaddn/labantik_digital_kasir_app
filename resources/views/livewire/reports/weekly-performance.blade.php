@@ -81,26 +81,37 @@
                 @if($activeSlide === 1)
                     <div class="space-y-6">
                         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                            <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl">
-                                <span class="text-xs uppercase tracking-wider text-slate-400 font-bold block mb-1">Total Omset Mingguan</span>
+                            <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl space-y-2">
+                                <span class="text-xs uppercase tracking-wider text-slate-400 font-bold block">Total Omset Toko</span>
                                 <h3 class="text-3xl font-black text-white">Rp {{ number_format($totalRevenue, 0, ',', '.') }}</h3>
-                                <span class="text-xs font-bold {{ $revenueGrowth >= 0 ? 'text-emerald-400' : 'text-rose-400' }} block mt-2">
-                                    {{ $revenueGrowth >= 0 ? '+'.$revenueGrowth.'%' : $revenueGrowth.'%' }} dibanding minggu lalu
-                                </span>
+                                <div class="pt-1 text-xs font-semibold flex items-center justify-between border-t border-slate-800/80">
+                                    <span class="{{ $revenueGrowth >= 0 ? 'text-emerald-400' : 'text-rose-400' }}">
+                                        {{ $revenueGrowth >= 0 ? '+'.$revenueGrowth.'%' : $revenueGrowth.'%' }}
+                                    </span>
+                                    <span class="text-slate-400 font-medium">Periode Lalu: Rp {{ number_format($prevRevenue) }}</span>
+                                </div>
                             </div>
 
-                            <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl">
-                                <span class="text-xs uppercase tracking-wider text-slate-400 font-bold block mb-1">Net Profit Toko</span>
+                            <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl space-y-2">
+                                <span class="text-xs uppercase tracking-wider text-slate-400 font-bold block">Net Profit Toko</span>
                                 <h3 class="text-3xl font-black text-emerald-400">Rp {{ number_format($totalProfit, 0, ',', '.') }}</h3>
-                                <span class="text-xs font-bold {{ $profitGrowth >= 0 ? 'text-emerald-400' : 'text-rose-400' }} block mt-2">
-                                    {{ $profitGrowth >= 0 ? '+'.$profitGrowth.'%' : $profitGrowth.'%' }} dibanding minggu lalu
-                                </span>
+                                <div class="pt-1 text-xs font-semibold flex items-center justify-between border-t border-slate-800/80">
+                                    <span class="{{ $profitGrowth >= 0 ? 'text-emerald-400' : 'text-rose-400' }}">
+                                        {{ $profitGrowth >= 0 ? '+'.$profitGrowth.'%' : $profitGrowth.'%' }}
+                                    </span>
+                                    <span class="text-slate-400 font-medium">Periode Lalu: Rp {{ number_format($prevProfit) }}</span>
+                                </div>
                             </div>
 
-                            <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl">
-                                <span class="text-xs uppercase tracking-wider text-slate-400 font-bold block mb-1">Total Transaksi</span>
+                            <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl space-y-2">
+                                <span class="text-xs uppercase tracking-wider text-slate-400 font-bold block">Total Transaksi</span>
                                 <h3 class="text-3xl font-black text-blue-400">{{ number_format($totalTransactions) }} Tx</h3>
-                                <span class="text-xs font-bold text-slate-400 block mt-2">Rata-rata {{ number_format($avgBasketSize) }} / transaksi</span>
+                                <div class="pt-1 text-xs font-semibold flex items-center justify-between border-t border-slate-800/80">
+                                    <span class="{{ $txGrowth >= 0 ? 'text-blue-400' : 'text-rose-400' }}">
+                                        {{ $txGrowth >= 0 ? '+'.$txGrowth.'%' : $txGrowth.'%' }}
+                                    </span>
+                                    <span class="text-slate-400 font-medium">Periode Lalu: {{ number_format($prevTxCount) }} Tx</span>
+                                </div>
                             </div>
 
                             <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl">
@@ -267,11 +278,11 @@
                 </div>
             </div>
             <h3 class="text-2xl font-black text-gray-900 dark:text-white">Rp {{ number_format($totalRevenue, 0, ',', '.') }}</h3>
-            <div class="mt-2 text-xs font-semibold flex items-center gap-1.5">
+            <div class="mt-2 text-xs font-semibold flex items-center justify-between gap-1">
                 <span class="{{ $revenueGrowth >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400' }}">
                     {{ $revenueGrowth >= 0 ? '+'.$revenueGrowth.'%' : $revenueGrowth.'%' }}
                 </span>
-                <span class="text-gray-500 dark:text-gray-400 font-normal">dibanding minggu lalu</span>
+                <span class="text-gray-500 dark:text-gray-400 font-normal">vs Periode Lalu (Rp {{ number_format($prevRevenue) }})</span>
             </div>
         </div>
 
@@ -284,11 +295,11 @@
                 </div>
             </div>
             <h3 class="text-2xl font-black text-emerald-600 dark:text-emerald-400">Rp {{ number_format($totalProfit, 0, ',', '.') }}</h3>
-            <div class="mt-2 text-xs font-semibold flex items-center gap-1.5">
+            <div class="mt-2 text-xs font-semibold flex items-center justify-between gap-1">
                 <span class="{{ $profitGrowth >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400' }}">
                     {{ $profitGrowth >= 0 ? '+'.$profitGrowth.'%' : $profitGrowth.'%' }}
                 </span>
-                <span class="text-gray-500 dark:text-gray-400 font-normal">margin keuntungan</span>
+                <span class="text-gray-500 dark:text-gray-400 font-normal">vs Periode Lalu (Rp {{ number_format($prevProfit) }})</span>
             </div>
         </div>
 
