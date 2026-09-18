@@ -1062,6 +1062,114 @@
                             </div>
                         </div>
                     </div>
+
+                    {{-- Form Input Hasil Pertanyaan, Saran & Diskusi Pengelola --}}
+                    <div class="bg-white dark:bg-gray-800 rounded-[2.5rem] sm:rounded-[3rem] p-8 sm:p-10 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700/80 space-y-6">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-gray-100 dark:border-gray-700/80 pb-6">
+                            <div>
+                                <h3 class="text-xl font-bold uppercase tracking-tight text-gray-800 dark:text-white leading-tight">
+                                    Catat Hasil Saran & Tanya Jawab Kasir
+                                </h3>
+                                <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1">
+                                    Dokumentasikan Masukan / Pertanyaan yang Muncul Selama Sesi Berlangsung
+                                </p>
+                            </div>
+                            <span class="px-3.5 py-1.5 bg-blue-500/10 text-primary-blue dark:text-blue-400 border border-blue-500/20 rounded-xl text-[10px] font-black uppercase tracking-wider self-start sm:self-center">
+                                {{ count($weeklyFeedbackNotes) }} Catatan Tersimpan
+                            </span>
+                        </div>
+
+                        {{-- Input Form --}}
+                        <form wire:submit.prevent="saveFeedbackNote" class="space-y-5">
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                {{-- Kategori --}}
+                                <div>
+                                    <label class="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2">
+                                        Kategori Masukan
+                                    </label>
+                                    <select wire:model="feedbackCategory"
+                                        class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900/60 border border-gray-200/80 dark:border-gray-700 rounded-2xl text-xs font-black text-gray-800 dark:text-white focus:ring-2 focus:ring-primary-blue focus:outline-none cursor-pointer">
+                                        <option value="aplikasi">📱 Sistem & Aplikasi</option>
+                                        <option value="admin">🤝 Pengelola & Admin</option>
+                                        <option value="piket">🗓️ Piket & Jadwal</option>
+                                    </select>
+                                    @error('feedbackCategory') <span class="text-primary-red text-[10px] font-bold mt-1 block">{{ $message }}</span> @enderror
+                                </div>
+
+                                {{-- Judul / Inti Pertanyaan --}}
+                                <div class="sm:col-span-2">
+                                    <label class="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2">
+                                        Judul / Poin Pembahasan
+                                    </label>
+                                    <input type="text" wire:model="feedbackTitle"
+                                        placeholder="Misal: Usulan shortcut tombol bayar cepat / Kendala absen pagi"
+                                        class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900/60 border border-gray-200/80 dark:border-gray-700 rounded-2xl text-xs font-bold text-gray-800 dark:text-white focus:ring-2 focus:ring-primary-blue focus:outline-none placeholder-gray-400">
+                                    @error('feedbackTitle') <span class="text-primary-red text-[10px] font-bold mt-1 block">{{ $message }}</span> @enderror
+                                </div>
+                            </div>
+
+                            {{-- Isi Masukan & Rencana Tindak Lanjut --}}
+                            <div>
+                                <label class="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2">
+                                    Rincian Pertanyaan / Saran & Jawaban / Solusi Pengelola
+                                </label>
+                                <textarea wire:model="feedbackContent" rows="3"
+                                    placeholder="Tuliskan pertanyaan/saran kasir secara lengkap serta jawaban, arahan, atau tindak lanjut dari pengelola..."
+                                    class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900/60 border border-gray-200/80 dark:border-gray-700 rounded-2xl text-xs font-medium text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-primary-blue focus:outline-none placeholder-gray-400 leading-relaxed"></textarea>
+                                @error('feedbackContent') <span class="text-primary-red text-[10px] font-bold mt-1 block">{{ $message }}</span> @enderror
+                            </div>
+
+                            <div class="flex justify-end">
+                                <button type="submit"
+                                    class="flex items-center gap-2 px-6 py-3 bg-primary-blue hover:bg-blue-600 text-white font-black text-xs uppercase tracking-wider rounded-xl transition-all shadow-lg shadow-blue-500/20 cursor-pointer">
+                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                                    </svg>
+                                    <span>Simpan Hasil Diskusi</span>
+                                </button>
+                            </div>
+                        </form>
+
+                        {{-- Daftar Catatan yang Telah Diinput Minggu Ini --}}
+                        <div class="pt-6 border-t border-gray-100 dark:border-gray-700/80 space-y-4">
+                            <h4 class="text-xs font-black uppercase tracking-widest text-gray-400">
+                                Riwayat Masukan & Saran Tercatat (Minggu Ini)
+                            </h4>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                @forelse($weeklyFeedbackNotes as $note)
+                                    <div class="p-5 rounded-2xl border transition-all bg-gray-50/70 dark:bg-gray-900/50 border-gray-100 dark:border-gray-800 flex flex-col justify-between space-y-3">
+                                        <div class="space-y-2">
+                                            <div class="flex items-start justify-between gap-3">
+                                                <h5 class="text-xs font-black text-gray-800 dark:text-white uppercase tracking-tight">
+                                                    {{ $note->title }}
+                                                </h5>
+                                                <button wire:click="deleteFeedbackNote({{ $note->id }})"
+                                                    wire:confirm="Yakin ingin menghapus catatan ini?"
+                                                    class="text-gray-400 hover:text-primary-red transition-colors shrink-0 p-1 cursor-pointer"
+                                                    title="Hapus Catatan">
+                                                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                            <p class="text-xs text-gray-600 dark:text-gray-300 font-medium leading-relaxed">
+                                                {{ $note->content }}
+                                            </p>
+                                        </div>
+                                        <div class="pt-2 border-t border-gray-200/50 dark:border-gray-800/80 flex items-center justify-between text-[9px] font-bold text-gray-400 uppercase tracking-wider">
+                                            <span>Oleh: {{ $note->user->name ?? 'Pengelola' }}</span>
+                                            <span>{{ \Carbon\Carbon::parse($note->created_at)->format('d M Y, H:i') }}</span>
+                                        </div>
+                                    </div>
+                                @empty
+                                    <div class="col-span-full py-8 text-center bg-gray-50/40 dark:bg-gray-900/30 rounded-2xl border border-gray-100 dark:border-gray-800">
+                                        <p class="text-xs text-gray-400 italic">Belum ada saran atau pertanyaan yang dicatat pada minggu ini. Silakan input melalui form di atas saat sesi berlangsung.</p>
+                                    </div>
+                                @endforelse
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
             {{-- ==================== STEP 6: PENUTUP & SESI EVALUASI LANGSUNG ==================== --}}
