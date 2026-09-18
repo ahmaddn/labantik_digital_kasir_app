@@ -24,6 +24,20 @@ class WeeklyPerformance extends Component
     public $selectedCashierId = null;
     public $showCashierDetailModal = false;
 
+    // Accordion state for Step 4 (managed by Livewire to avoid Alpine morph/DOM morphing collision)
+    public $activeDay = 0;
+    public $activeCashier = null;
+
+    public function toggleDay($idx)
+    {
+        $this->activeDay = $this->activeDay === $idx ? null : $idx;
+    }
+
+    public function toggleCashier($key)
+    {
+        $this->activeCashier = $this->activeCashier === $key ? null : $key;
+    }
+
     public function mount($startDate = null, $endDate = null)
     {
         $this->startDate = $startDate ?? now()->startOfWeek(Carbon::MONDAY)->toDateString();

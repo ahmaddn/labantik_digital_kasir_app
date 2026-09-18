@@ -727,17 +727,8 @@
                         </div>
                     </div>
                 </div>                {{-- Audit Piket & Tugas per Hari (Accordion Interaktif Fokus Performa Harian & Nested Kasir) --}}
-                <div x-data="{ 
-                        activeDay: 0, 
-                        activeCashier: null,
-                        toggleDay(idx) {
-                            this.activeDay = this.activeDay === idx ? null : idx;
-                        },
-                        toggleCashier(key) {
-                            this.activeCashier = this.activeCashier === key ? null : key;
-                        }
-                    }"
-                    class="bg-white dark:bg-gray-800 rounded-[2.5rem] sm:rounded-[3.5rem] p-6 sm:p-10 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700/80 space-y-6">
+                {{-- Audit Piket & Tugas per Hari (Accordion Interaktif Fokus Performa Harian & Nested Kasir) --}}
+                <div class="bg-white dark:bg-gray-800 rounded-[2.5rem] sm:rounded-[3.5rem] p-6 sm:p-10 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700/80 space-y-6">
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                         <div>
                             <h2
@@ -755,22 +746,19 @@
                     {{-- Daily Accordion List --}}
                     <div class="space-y-4 pt-2">
                         @forelse($dailyShiftAudits as $idx => $audit)
+                            @php
+                                $isDayOpen = ($activeDay === $idx);
+                            @endphp
                             <div
                                 class="border border-gray-100 dark:border-gray-800/80 rounded-3xl overflow-hidden transition-all duration-300 bg-gray-50/50 dark:bg-gray-900/40">
                                 {{-- Accordion Header (Ringkasan Performa Hari Tersebut) --}}
                                 <button type="button"
-                                    @click="toggleDay({{ $idx }})"
-                                    class="w-full text-left p-5 sm:p-6 transition-all flex flex-col md:flex-row md:items-center justify-between gap-4 cursor-pointer hover:bg-gray-100/60 dark:hover:bg-gray-800/60"
-                                    :class="activeDay === {{ $idx }} ?
-                                        'bg-blue-50/30 dark:bg-blue-950/20 border-b border-gray-200/70 dark:border-gray-800' :
-                                        ''">
+                                    wire:click="toggleDay({{ $idx }})"
+                                    class="w-full text-left p-5 sm:p-6 transition-all flex flex-col md:flex-row md:items-center justify-between gap-4 cursor-pointer hover:bg-gray-100/60 dark:hover:bg-gray-800/60 {{ $isDayOpen ? 'bg-blue-50/30 dark:bg-blue-950/20 border-b border-gray-200/70 dark:border-gray-800' : '' }}">
 
                                     {{-- Kolom Kiri: Nama Hari, Tanggal, dan Status Ringkas --}}
                                     <div class="flex items-center gap-4 min-w-0">
-                                        <div class="w-12 h-12 rounded-2xl flex flex-col items-center justify-center font-black transition-all shrink-0"
-                                            :class="activeDay === {{ $idx }} ?
-                                                'bg-primary-blue text-white shadow-lg shadow-blue-500/30' :
-                                                'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200/60 dark:border-gray-700'">
+                                        <div class="w-12 h-12 rounded-2xl flex flex-col items-center justify-center font-black transition-all shrink-0 {{ $isDayOpen ? 'bg-primary-blue text-white shadow-lg shadow-blue-500/30' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200/60 dark:border-gray-700' }}">
                                             <span
                                                 class="text-[9px] uppercase tracking-wider leading-none opacity-70">{{ substr($audit['day_name'], 0, 3) }}</span>
                                             <span
@@ -828,9 +816,7 @@
                                         </div>
 
                                         {{-- Toggle Arrow --}}
-                                        <div class="w-9 h-9 rounded-xl flex items-center justify-center transition-transform duration-300 bg-white dark:bg-gray-800 text-gray-400 border border-gray-100 dark:border-gray-700"
-                                            :class="activeDay === {{ $idx }} ?
-                                                'rotate-180 text-primary-blue bg-blue-50 dark:bg-blue-950/40' : ''">
+                                        <div class="w-9 h-9 rounded-xl flex items-center justify-center transition-transform duration-300 bg-white dark:bg-gray-800 text-gray-400 border border-gray-100 dark:border-gray-700 {{ $isDayOpen ? 'rotate-180 text-primary-blue bg-blue-50 dark:bg-blue-950/40' : '' }}">
                                             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24"
                                                 stroke="currentColor" stroke-width="2.5">
                                                 <path stroke-linecap="round" stroke-linejoin="round"
@@ -841,125 +827,116 @@
                                 </button>
 
                                 {{-- Accordion Body Level 1: Kasir Terjadwal Piket pada Hari Tersebut --}}
-                                <div x-show="activeDay === {{ $idx }}"
-                                    x-transition:enter="transition ease-out duration-200"
-                                    x-transition:enter-start="opacity-0 -translate-y-2"
-                                    x-transition:enter-end="opacity-100 translate-y-0"
-                                    x-transition:leave="transition ease-in duration-150"
-                                    x-transition:leave-start="opacity-100 translate-y-0"
-                                    x-transition:leave-end="opacity-0 -translate-y-2"
-                                    class="p-5 sm:p-7 space-y-4 bg-white dark:bg-gray-800/80">
-                                    
-                                    <div
-                                        class="flex items-center justify-between pb-3 border-b border-gray-100 dark:border-gray-800">
-                                        <h4 class="text-xs font-black uppercase tracking-widest text-gray-400">
-                                            Daftar Kasir Terjadwal Piket ({{ count($audit['cashiers']) }} Orang)
-                                        </h4>
-                                        <span class="text-[10px] font-bold text-gray-400 uppercase">
-                                            Total Omset Dicatat:
-                                            Rp{{ number_format(collect($audit['cashiers'])->sum('sales_omset'), 0, ',', '.') }}
-                                        </span>
-                                    </div>
+                                @if($isDayOpen)
+                                    <div class="p-5 sm:p-7 space-y-4 bg-white dark:bg-gray-800/80">
+                                        <div
+                                            class="flex items-center justify-between pb-3 border-b border-gray-100 dark:border-gray-800">
+                                            <h4 class="text-xs font-black uppercase tracking-widest text-gray-400">
+                                                Daftar Kasir Terjadwal Piket ({{ count($audit['cashiers']) }} Orang)
+                                            </h4>
+                                            <span class="text-[10px] font-bold text-gray-400 uppercase">
+                                                Total Omset Dicatat:
+                                                Rp{{ number_format(collect($audit['cashiers'])->sum('sales_omset'), 0, ',', '.') }}
+                                            </span>
+                                        </div>
 
-                                    {{-- NESTED ACCORDION: Masing-masing Kasir Memiliki Accordion Lagi --}}
-                                    <div class="space-y-3">
-                                        @foreach ($audit['cashiers'] as $cIdx => $c)
-                                            @php
-                                                $cashierKey = $idx . '-' . $cIdx;
-                                            @endphp
-                                            <div
-                                                class="rounded-2xl border border-gray-100 dark:border-gray-800/80 overflow-hidden bg-gray-50/70 dark:bg-gray-900/60 transition-all">
-                                                
-                                                {{-- Kasir Accordion Header (Klik untuk Buka/Tutup Rincian Tugas) --}}
-                                                <button type="button"
-                                                    @click="toggleCashier('{{ $cashierKey }}')"
-                                                    class="w-full text-left p-4 sm:p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 cursor-pointer hover:bg-gray-100/70 dark:hover:bg-gray-800/60 transition-all">
+                                        {{-- NESTED ACCORDION: Masing-masing Kasir Memiliki Accordion Lagi --}}
+                                        <div class="space-y-3">
+                                            @foreach ($audit['cashiers'] as $cIdx => $c)
+                                                @php
+                                                    $cashierKey = $idx . '-' . $cIdx;
+                                                    $isCashierOpen = ($activeCashier === $cashierKey);
+                                                @endphp
+                                                <div
+                                                    class="rounded-2xl border border-gray-100 dark:border-gray-800/80 overflow-hidden bg-gray-50/70 dark:bg-gray-900/60 transition-all">
                                                     
-                                                    <div class="space-y-2 min-w-0 flex-1">
-                                                        <div class="flex items-center gap-3 flex-wrap">
-                                                            <span
-                                                                class="font-black text-gray-800 dark:text-white text-sm sm:text-base uppercase tracking-tight">
-                                                                {{ $c['user']->name ?? 'Kasir' }}
-                                                            </span>
-                                                            <span
-                                                                class="px-2.5 py-0.5 rounded-lg font-black text-[10px] uppercase {{ $c['attended'] ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20' : 'bg-rose-500/15 text-primary-red border border-rose-500/20' }}">
-                                                                {{ $c['attended'] ? 'Hadir Piket' : 'Tidak Hadir' }}
-                                                            </span>
-                                                            @if ($c['attended'] && $c['clock_in'])
-                                                                <span class="text-[10px] font-bold text-gray-400">
-                                                                    Masuk: {{ $c['clock_in'] }}
-                                                                    ({{ ucfirst(str_replace('_', ' ', $c['clock_in_status'])) }})
+                                                    {{-- Kasir Accordion Header (Klik untuk Buka/Tutup Rincian Tugas) --}}
+                                                    <button type="button"
+                                                        wire:click="toggleCashier('{{ $cashierKey }}')"
+                                                        class="w-full text-left p-4 sm:p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 cursor-pointer hover:bg-gray-100/70 dark:hover:bg-gray-800/60 transition-all">
+                                                        
+                                                        <div class="space-y-2 min-w-0 flex-1">
+                                                            <div class="flex items-center gap-3 flex-wrap">
+                                                                <span
+                                                                    class="font-black text-gray-800 dark:text-white text-sm sm:text-base uppercase tracking-tight">
+                                                                    {{ $c['user']->name ?? 'Kasir' }}
                                                                 </span>
-                                                            @endif
-                                                        </div>
-
-                                                        {{-- Metrik Kasir Pada Hari Itu --}}
-                                                        <div
-                                                            class="text-gray-400 flex flex-wrap items-center gap-4 sm:gap-6 text-xs font-bold">
-                                                            <span>Omset: <strong
-                                                                    class="text-gray-800 dark:text-white">Rp{{ number_format($c['sales_omset']) }}</strong></span>
-                                                            <span>Transaksi: <strong
-                                                                    class="text-gray-800 dark:text-white">{{ $c['sales_tx'] }}
-                                                                    Tx</strong></span>
-                                                            <span>Tugas: <strong
-                                                                    class="text-gray-800 dark:text-white">{{ max(0, $c['assigned_task_count'] - $c['uncompleted_task_count']) }}
-                                                                    / {{ $c['assigned_task_count'] }} Selesai</strong></span>
-                                                        </div>
-                                                    </div>
-
-                                                    {{-- Status Tombol & Arrow Nested Accordion --}}
-                                                    <div class="flex items-center gap-3 self-end md:self-center shrink-0">
-                                                        <span class="text-[10px] font-black uppercase tracking-widest text-primary-blue dark:text-blue-400">
-                                                            Rincian Tugas ({{ count($c['task_details']) }})
-                                                        </span>
-                                                        <div class="w-7 h-7 rounded-lg flex items-center justify-center transition-transform duration-200 bg-white dark:bg-gray-800 text-gray-400 border border-gray-200/60 dark:border-gray-700"
-                                                            :class="activeCashier === '{{ $cashierKey }}' ? 'rotate-180 text-primary-blue' : ''">
-                                                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                                                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
-                                                            </svg>
-                                                        </div>
-                                                    </div>
-                                                </button>
-
-                                                {{-- Kasir Accordion Body Level 2: Rincian Lengkap Tugas Kasir --}}
-                                                <div x-show="activeCashier === '{{ $cashierKey }}'"
-                                                    x-transition:enter="transition ease-out duration-150"
-                                                    x-transition:enter-start="opacity-0 -translate-y-1"
-                                                    x-transition:enter-end="opacity-100 translate-y-0"
-                                                    class="p-4 sm:p-5 border-t border-gray-100 dark:border-gray-800 bg-white/60 dark:bg-gray-900/80 space-y-3">
-                                                    
-                                                    <div class="text-[10px] font-black uppercase tracking-widest text-gray-400">
-                                                        Daftar Check-List Tugas Kasir ({{ $c['user']->name ?? 'Kasir' }}):
-                                                    </div>
-
-                                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                                                        @forelse ($c['task_details'] as $t)
-                                                            <div class="p-3 rounded-xl border {{ $t['status'] === 'Disetujui' ? 'bg-emerald-50/40 dark:bg-emerald-950/20 border-emerald-500/20' : 'bg-amber-50/40 dark:bg-amber-950/20 border-amber-500/20' }} flex items-center justify-between gap-3">
-                                                                <div class="min-w-0">
-                                                                    <p class="text-xs font-bold text-gray-800 dark:text-gray-100 truncate">
-                                                                        {{ $t['task_name'] }}
-                                                                    </p>
-                                                                    @if(!empty($t['rejection_note']))
-                                                                        <p class="text-[10px] text-primary-red font-semibold mt-0.5">
-                                                                            Catatan: {{ $t['rejection_note'] }}
-                                                                        </p>
-                                                                    @endif
-                                                                </div>
-                                                                <span class="shrink-0 px-2 py-0.5 rounded-lg text-[9px] font-black uppercase {{ $t['status'] === 'Disetujui' ? 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-400' : 'bg-amber-500/20 text-amber-600 dark:text-amber-400' }}">
-                                                                    {{ $t['status'] }}
+                                                                <span
+                                                                    class="px-2.5 py-0.5 rounded-lg font-black text-[10px] uppercase {{ $c['attended'] ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20' : 'bg-rose-500/15 text-primary-red border border-rose-500/20' }}">
+                                                                    {{ $c['attended'] ? 'Hadir Piket' : 'Tidak Hadir' }}
                                                                 </span>
+                                                                @if ($c['attended'] && $c['clock_in'])
+                                                                    <span class="text-[10px] font-bold text-gray-400">
+                                                                        Masuk: {{ $c['clock_in'] }}
+                                                                        ({{ ucfirst(str_replace('_', ' ', $c['clock_in_status'])) }})
+                                                                    </span>
+                                                                @endif
                                                             </div>
-                                                        @empty
-                                                            <div class="col-span-full py-2 text-center text-xs text-gray-400 italic">
-                                                                Tidak ada tugas penugasan khusus pada hari ini.
+
+                                                            {{-- Metrik Kasir Pada Hari Itu --}}
+                                                            <div
+                                                                class="text-gray-400 flex flex-wrap items-center gap-4 sm:gap-6 text-xs font-bold">
+                                                                <span>Omset: <strong
+                                                                        class="text-gray-800 dark:text-white">Rp{{ number_format($c['sales_omset']) }}</strong></span>
+                                                                <span>Transaksi: <strong
+                                                                        class="text-gray-800 dark:text-white">{{ $c['sales_tx'] }}
+                                                                        Tx</strong></span>
+                                                                <span>Tugas: <strong
+                                                                        class="text-gray-800 dark:text-white">{{ max(0, $c['assigned_task_count'] - $c['uncompleted_task_count']) }}
+                                                                        / {{ $c['assigned_task_count'] }} Selesai</strong></span>
                                                             </div>
-                                                        @endforelse
-                                                    </div>
+                                                        </div>
+
+                                                        {{-- Status Tombol & Arrow Nested Accordion --}}
+                                                        <div class="flex items-center gap-3 self-end md:self-center shrink-0">
+                                                            <span class="text-[10px] font-black uppercase tracking-widest text-primary-blue dark:text-blue-400">
+                                                                Rincian Tugas ({{ count($c['task_details']) }})
+                                                            </span>
+                                                            <div class="w-7 h-7 rounded-lg flex items-center justify-center transition-transform duration-200 bg-white dark:bg-gray-800 text-gray-400 border border-gray-200/60 dark:border-gray-700 {{ $isCashierOpen ? 'rotate-180 text-primary-blue' : '' }}">
+                                                                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                                                                </svg>
+                                                            </div>
+                                                        </div>
+                                                    </button>
+
+                                                    {{-- Kasir Accordion Body Level 2: Rincian Lengkap Tugas Kasir --}}
+                                                    @if($isCashierOpen)
+                                                        <div class="p-4 sm:p-5 border-t border-gray-100 dark:border-gray-800 bg-white/60 dark:bg-gray-900/80 space-y-3">
+                                                            <div class="text-[10px] font-black uppercase tracking-widest text-gray-400">
+                                                                Daftar Check-List Tugas Kasir ({{ $c['user']->name ?? 'Kasir' }}):
+                                                            </div>
+
+                                                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                                                                @forelse ($c['task_details'] as $t)
+                                                                    <div class="p-3 rounded-xl border {{ $t['status'] === 'Disetujui' ? 'bg-emerald-50/40 dark:bg-emerald-950/20 border-emerald-500/20' : 'bg-amber-50/40 dark:bg-amber-950/20 border-amber-500/20' }} flex items-center justify-between gap-3">
+                                                                        <div class="min-w-0">
+                                                                            <p class="text-xs font-bold text-gray-800 dark:text-gray-100 truncate">
+                                                                                {{ $t['task_name'] }}
+                                                                            </p>
+                                                                            @if(!empty($t['rejection_note']))
+                                                                                <p class="text-[10px] text-primary-red font-semibold mt-0.5">
+                                                                                    Catatan: {{ $t['rejection_note'] }}
+                                                                                </p>
+                                                                            @endif
+                                                                        </div>
+                                                                        <span class="shrink-0 px-2 py-0.5 rounded-lg text-[9px] font-black uppercase {{ $t['status'] === 'Disetujui' ? 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-400' : 'bg-amber-500/20 text-amber-600 dark:text-amber-400' }}">
+                                                                            {{ $t['status'] }}
+                                                                        </span>
+                                                                    </div>
+                                                                @empty
+                                                                    <div class="col-span-full py-2 text-center text-xs text-gray-400 italic">
+                                                                        Tidak ada tugas penugasan khusus pada hari ini.
+                                                                    </div>
+                                                                @endforelse
+                                                            </div>
+                                                        </div>
+                                                    @endif
                                                 </div>
-                                            </div>
-                                        @endforeach
+                                            @endforeach
+                                        </div>
                                     </div>
-                                </div>
+                                @endif
                             </div>
                             @empty
                                 <div
