@@ -142,10 +142,10 @@
         {{-- ==================== STEP 1: RINGKASAN OMSET & TREN HARIAN ==================== --}}
         @if ($currentStep === 1)
             {{-- KPI Executive Cards matching Daily & Monthly Recaps rounded-[3rem] --}}
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-12">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-5 mb-12">
                 {{-- Card 1: Total Omset (Signature Primary Blue Card) --}}
                 <div
-                    class="bg-primary-blue rounded-[3rem] p-10 text-white shadow-2xl shadow-blue-900/30 relative overflow-hidden group">
+                    class="bg-primary-blue rounded-[3rem] p-8 sm:p-10 text-white shadow-2xl shadow-blue-900/30 relative overflow-hidden group">
                     <div
                         class="absolute -right-6 -bottom-6 opacity-10 group-hover:scale-110 transition-transform duration-700">
                         <svg class="w-40 h-40 text-white" xmlns="http://www.w3.org/2000/svg" width="24"
@@ -156,7 +156,7 @@
                         </svg>
                     </div>
                     <h3 class="text-[10px] font-black uppercase tracking-[0.3em] opacity-60 mb-3">Total Omset Toko</h3>
-                    <p class="text-4xl font-black text-white tracking-tight" :class="censorMode ? 'privacy-blur' : ''">
+                    <p class="text-3xl sm:text-4xl font-black text-white tracking-tight" :class="censorMode ? 'privacy-blur' : ''">
                         Rp{{ number_format($totalRevenue, 0, ',', '.') }}</p>
                     <div class="mt-8 pt-8 border-t border-white/10 flex justify-between items-center text-xs font-bold">
                         <span class="{{ $revenueGrowth >= 0 ? 'text-emerald-300' : 'text-rose-300' }}">
@@ -169,7 +169,7 @@
 
                 {{-- Card 2: Keuntungan Bersih (Signature Profit Card) --}}
                 <div
-                    class="bg-white dark:bg-gray-800 rounded-[3rem] p-10 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 relative overflow-hidden group">
+                    class="bg-white dark:bg-gray-800 rounded-[3rem] p-8 sm:p-10 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 relative overflow-hidden group">
                     <div
                         class="absolute -right-6 -bottom-6 opacity-5 group-hover:scale-110 transition-transform duration-700">
                         <svg class="w-40 h-40 text-primary-red" xmlns="http://www.w3.org/2000/svg" width="24"
@@ -181,7 +181,7 @@
                     </div>
                     <h3 class="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 mb-3">Keuntungan Bersih
                     </h3>
-                    <p class="text-4xl font-black text-primary-red tracking-tight"
+                    <p class="text-3xl sm:text-4xl font-black text-primary-red tracking-tight"
                         :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($totalProfit, 0, ',', '.') }}</p>
                     <div
                         class="mt-8 pt-8 border-t border-gray-100 dark:border-gray-700 flex justify-between items-center text-xs font-bold">
@@ -194,9 +194,35 @@
                     </div>
                 </div>
 
-                {{-- Card 3: Total Transaksi & Basket --}}
+                {{-- Card 3: Total Pengeluaran Kas (Manual Input dari Kas) --}}
                 <div
-                    class="bg-white dark:bg-gray-800 rounded-[3rem] p-10 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 relative overflow-hidden group">
+                    class="bg-white dark:bg-gray-800 rounded-[3rem] p-8 sm:p-10 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 relative overflow-hidden group">
+                    <div
+                        class="absolute -right-6 -bottom-6 opacity-5 group-hover:scale-110 transition-transform duration-700">
+                        <svg class="w-40 h-40 text-rose-500" xmlns="http://www.w3.org/2000/svg" width="24"
+                            height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="12" y1="19" x2="12" y2="5" />
+                            <polyline points="5 12 12 19 19 12" />
+                        </svg>
+                    </div>
+                    <h3 class="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 mb-3">Total Pengeluaran Kas
+                    </h3>
+                    <p class="text-3xl sm:text-4xl font-black text-rose-600 dark:text-rose-400 tracking-tight"
+                        :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($totalExpense, 0, ',', '.') }}</p>
+                    <div
+                        class="mt-8 pt-8 border-t border-gray-100 dark:border-gray-700 flex justify-between items-center text-xs font-bold">
+                        <span class="text-gray-500 dark:text-gray-400 text-[10px] uppercase tracking-wider">
+                            Input Kas Manual
+                        </span>
+                        <span class="text-gray-400 text-[10px] uppercase tracking-wider">Lalu:
+                            Rp{{ number_format($prevExpense / 1000, 0) }}k</span>
+                    </div>
+                </div>
+
+                {{-- Card 4: Total Transaksi & Basket --}}
+                <div
+                    class="bg-white dark:bg-gray-800 rounded-[3rem] p-8 sm:p-10 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 relative overflow-hidden group">
                     <div
                         class="absolute -right-6 -bottom-6 opacity-5 group-hover:scale-110 transition-transform duration-700">
                         <svg class="w-40 h-40 text-primary-blue" xmlns="http://www.w3.org/2000/svg" width="24"
@@ -207,7 +233,7 @@
                     </div>
                     <h3 class="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 mb-3">Volume Transaksi
                     </h3>
-                    <p class="text-4xl font-black text-gray-800 dark:text-white tracking-tight">
+                    <p class="text-3xl sm:text-4xl font-black text-gray-800 dark:text-white tracking-tight">
                         {{ number_format($totalTransactions) }} <span
                             class="text-xs uppercase font-bold text-gray-400 tracking-widest">Struk</span></p>
                     <div
@@ -218,9 +244,9 @@
                     </div>
                 </div>
 
-                {{-- Card 4: Kepatuhan Piket --}}
+                {{-- Card 5: Kepatuhan Piket --}}
                 <div
-                    class="bg-white dark:bg-gray-800 rounded-[3rem] p-10 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 relative overflow-hidden group">
+                    class="bg-white dark:bg-gray-800 rounded-[3rem] p-8 sm:p-10 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 relative overflow-hidden group">
                     <div
                         class="absolute -right-6 -bottom-6 opacity-5 group-hover:scale-110 transition-transform duration-700">
                         <svg class="w-40 h-40 text-amber-500" xmlns="http://www.w3.org/2000/svg" width="24"
@@ -231,7 +257,7 @@
                     </div>
                     <h3 class="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 mb-3">Kepatuhan Jadwal
                     </h3>
-                    <p class="text-4xl font-black text-amber-500 tracking-tight">{{ $shiftFulfillmentRate }}%</p>
+                    <p class="text-3xl sm:text-4xl font-black text-amber-500 tracking-tight">{{ $shiftFulfillmentRate }}%</p>
                     <div
                         class="mt-8 pt-8 border-t border-gray-100 dark:border-gray-700 flex justify-between items-center text-xs font-bold">
                         <span class="text-emerald-600 dark:text-emerald-400">{{ $taskApprovedRate }}% Tugas
@@ -1089,9 +1115,9 @@
                                     </label>
                                     <select wire:model="feedbackCategory"
                                         class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900/60 border border-gray-200/80 dark:border-gray-700 rounded-2xl text-xs font-black text-gray-800 dark:text-white focus:ring-2 focus:ring-primary-blue focus:outline-none cursor-pointer">
-                                        <option value="aplikasi">📱 Sistem & Aplikasi</option>
-                                        <option value="admin">🤝 Pengelola & Admin</option>
-                                        <option value="piket">🗓️ Piket & Jadwal</option>
+                                        <option value="aplikasi">Sistem & Aplikasi</option>
+                                        <option value="admin">Pengelola & Admin</option>
+                                        <option value="piket">Piket & Jadwal</option>
                                     </select>
                                     @error('feedbackCategory') <span class="text-primary-red text-[10px] font-bold mt-1 block">{{ $message }}</span> @enderror
                                 </div>

@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Reports;
 
+use App\Models\CashTransaction;
 use App\Models\CashierAttendance;
 use App\Models\CashierNote;
 use App\Models\CashierSchedule;
@@ -201,6 +202,18 @@ class WeeklyPerformance extends Component
         $totalItemsSold = (int) ($currentAgg->total_items ?? 0);
         $avgBasketSize = $totalTransactions > 0 ? round($totalRevenue / $totalTransactions) : 0;
 
+        // Manual expenses from cash (exclude automatic system postings)
+        $totalExpense = (float) CashTransaction::forReporting()
+            ->where('jurusan_id', $activeJurusanId)
+            ->whereBetween('date', [$weekStart->toDateString(), $weekEnd->toDateString()])
+            ->where('type', 'expense')
+            ->where(function ($q) {
+                $q->where('description', 'not like', '%(Sistem)%')
+                    ->where('description', 'not like', '%Penjualan Harian%')
+                    ->where('description', 'not like', '%Bagi Hasil%');
+            })
+            ->sum('amount');
+
         // Previous Period Metrics for Comparison (OPTIMIZED SINGLE QUERY)
         $prevAgg = Transaction::forReporting()
             ->selectRaw('COALESCE(SUM(total_price), 0) as total_rev, COALESCE(SUM(unit_profit * quantity), 0) as total_profit, COUNT(DISTINCT reference) as total_tx')
@@ -212,6 +225,19 @@ class WeeklyPerformance extends Component
         $prevRevenue = (float) ($prevAgg->total_rev ?? 0);
         $prevProfit = (float) ($prevAgg->total_profit ?? 0);
         $prevTxCount = (int) ($prevAgg->total_tx ?? 0);
+
+        $prevExpense = (float) CashTransaction::forReporting()
+            ->where('jurusan_id', $activeJurusanId)
+            ->whereBetween('date', [$prevWeekStart->toDateString(), $prevWeekEnd->toDateString()])
+            ->where('type', 'expense')
+            ->where(function ($q) {
+                $q->where('description', 'not like', '%(Sistem)%')
+                    ->where('description', 'not like', '%Penjualan Harian%')
+                    ->where('description', 'not like', '%Bagi Hasil%');
+            })
+            ->sum('amount');
+
+        $expenseGrowth = $prevExpense > 0 ? round((($totalExpense - $prevExpense) / $prevExpense) * 100, 1) : ($totalExpense > 0 ? 100 : 0);
 
         $revenueGrowth = $prevRevenue > 0 ? round((($totalRevenue - $prevRevenue) / $prevRevenue) * 100, 1) : ($totalRevenue > 0 ? 100 : 0);
         $profitGrowth = $prevProfit > 0 ? round((($totalProfit - $prevProfit) / $prevProfit) * 100, 1) : ($totalProfit > 0 ? 100 : 0);
@@ -292,9 +318,9 @@ class WeeklyPerformance extends Component
 
                 // Tasks assigned on this day (both routine and custom tasks created on/for this date)
                 $assignmentsOnDay = CashierTaskAssignment::where('assigned_to', $cUser->id)
-                    ->where(function($q) use ($dayStr) {
+                    ->where(function ($q) use ($dayStr) {
                         $q->whereDate('created_at', $dayStr)
-                          ->orWhereHas('taskDefinition', fn($sq) => $sq->whereDate('date', $dayStr));
+                            ->orWhereHas('taskDefinition', fn($sq) => $sq->whereDate('date', $dayStr));
                     })
                     ->when($activeJurusanId, fn($q) => $q->where('jurusan_id', $activeJurusanId))
                     ->with(['taskDefinition', 'latestSubmission'])
@@ -310,7 +336,7 @@ class WeeklyPerformance extends Component
                 $cRev = $cSalesOnDay->sum('total_price');
                 $cTx = $cSalesOnDay->count('reference');
 
-                $taskDetails = $assignmentsOnDay->map(function($asg) {
+                $taskDetails = $assignmentsOnDay->map(function ($asg) {
                     $def = $asg->taskDefinition;
                     $sub = $asg->latestSubmission;
                     $status = 'Belum Dikerjakan';
@@ -343,7 +369,7 @@ class WeeklyPerformance extends Component
                     ];
                 });
 
-                $uncompletedTaskCount = $assignmentsOnDay->filter(function($asg) {
+                $uncompletedTaskCount = $assignmentsOnDay->filter(function ($asg) {
                     return !$asg->latestSubmission || $asg->latestSubmission->approval_status === 'rejected';
                 })->count();
 
@@ -575,12 +601,12 @@ class WeeklyPerformance extends Component
 
         $allProducts = Product::when($activeJurusanId, fn($q) => $q->where('jurusan_id', $activeJurusanId))
             ->where('is_active', true)
-            ->whereHas('stockEntries', function($stq) use ($periodStartDate, $periodEndDate) {
+            ->whereHas('stockEntries', function ($stq) use ($periodStartDate, $periodEndDate) {
                 $stq->whereBetween('date', [$periodStartDate, $periodEndDate]);
             })
-            ->with(['category', 'supplier', 'stockEntries' => function($sq) use ($periodStartDate, $periodEndDate) {
+            ->with(['category', 'supplier', 'stockEntries' => function ($sq) use ($periodStartDate, $periodEndDate) {
                 $sq->whereBetween('date', [$periodStartDate, $periodEndDate])
-                   ->orderBy('date', 'desc');
+                    ->orderBy('date', 'desc');
             }])
             ->get();
 
@@ -646,9 +672,9 @@ class WeeklyPerformance extends Component
                     $sched = CashierSchedule::where('user_id', $cUser->id)->where('date', $dStr)->first();
                     $att = CashierAttendance::where('user_id', $cUser->id)->where('date', $dStr)->first();
                     $asgs = CashierTaskAssignment::where('assigned_to', $cUser->id)
-                        ->where(function($q) use ($dStr) {
+                        ->where(function ($q) use ($dStr) {
                             $q->whereDate('created_at', $dStr)
-                              ->orWhereHas('taskDefinition', fn($sq) => $sq->whereDate('date', $dStr));
+                                ->orWhereHas('taskDefinition', fn($sq) => $sq->whereDate('date', $dStr));
                         })
                         ->with(['taskDefinition', 'latestSubmission'])
                         ->get();
@@ -704,6 +730,9 @@ class WeeklyPerformance extends Component
             'weekEnd' => $weekEnd,
             'totalRevenue' => $totalRevenue,
             'totalProfit' => $totalProfit,
+            'totalExpense' => $totalExpense,
+            'prevExpense' => $prevExpense,
+            'expenseGrowth' => $expenseGrowth,
             'totalTransactions' => $totalTransactions,
             'totalItemsSold' => $totalItemsSold,
             'avgBasketSize' => $avgBasketSize,
