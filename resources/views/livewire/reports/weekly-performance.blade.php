@@ -693,40 +693,46 @@
                             Hasil Evaluasi Operasional Mingguan</p>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        {{-- 1. Analisis Penjualan --}}
                         <div
-                            class="p-6 bg-blue-50/50 dark:bg-blue-950/20 rounded-3xl border border-blue-100 dark:border-blue-900/40 space-y-3">
-                            <h4 class="font-black text-primary-blue text-sm uppercase tracking-wider">1. Analisis
-                                Penjualan</h4>
-                            <p class="text-xs text-gray-600 dark:text-gray-300 leading-relaxed font-medium">
+                            class="p-6 bg-blue-50/60 dark:bg-gray-900/60 rounded-3xl border border-blue-100/80 dark:border-blue-900/30 space-y-3">
+                            <h4 class="font-black text-primary-blue dark:text-blue-400 text-sm uppercase tracking-wider">
+                                1. Analisis Penjualan</h4>
+                            <p class="text-xs text-gray-600 dark:text-gray-400 leading-relaxed font-medium">
                                 Puncak omset terjadi pada hari <strong
-                                    class="text-gray-900 dark:text-white font-bold">{{ $peakDay['day'] }}</strong>
+                                    class="text-gray-900 dark:text-gray-200 font-bold">{{ $peakDay['day'] }}</strong>
                                 sebesar Rp{{ number_format($peakDay['revenue']) }}. Dianjurkan menambah program promo
                                 khusus pada hari-hari dengan omset lebih rendah.
                             </p>
                         </div>
+
+                        {{-- 2. Disiplin & Tugas Kasir --}}
                         <div
-                            class="p-6 bg-emerald-50/50 dark:bg-emerald-950/20 rounded-3xl border border-emerald-100 dark:border-emerald-900/40 space-y-3">
+                            class="p-6 bg-emerald-50/60 dark:bg-gray-900/60 rounded-3xl border border-emerald-100/80 dark:border-emerald-900/30 space-y-3">
                             <h4
                                 class="font-black text-emerald-600 dark:text-emerald-400 text-sm uppercase tracking-wider">
                                 2. Disiplin & Tugas Kasir</h4>
-                            <p class="text-xs text-gray-600 dark:text-gray-300 leading-relaxed font-medium">
+                            <p class="text-xs text-gray-600 dark:text-gray-400 leading-relaxed font-medium">
                                 Kehadiran kasir piket tercapai <strong
-                                    class="text-gray-900 dark:text-white font-bold">{{ $shiftFulfillmentRate }}%</strong>
+                                    class="text-gray-900 dark:text-gray-200 font-bold">{{ $shiftFulfillmentRate }}%</strong>
                                 dan tingkat penyelesaian tugas piket yang disetujui sebesar <strong
-                                    class="text-gray-900 dark:text-white font-bold">{{ $taskApprovedRate }}%</strong>.
+                                    class="text-gray-900 dark:text-gray-200 font-bold">{{ $taskApprovedRate }}%</strong>.
                             </p>
                         </div>
+
+                        {{-- 3. Rotasi Stok Barang --}}
                         <div
-                            class="p-6 bg-amber-50/50 dark:bg-amber-950/20 rounded-3xl border border-amber-100 dark:border-amber-900/40 space-y-3">
+                            class="p-6 bg-amber-50/60 dark:bg-gray-900/60 rounded-3xl border border-amber-100/80 dark:border-amber-900/30 space-y-3">
                             <h4 class="font-black text-amber-600 dark:text-amber-400 text-sm uppercase tracking-wider">
                                 3. Rotasi Stok Barang</h4>
-                            <p class="text-xs text-gray-600 dark:text-gray-300 leading-relaxed font-medium">
+                            <p class="text-xs text-gray-600 dark:text-gray-400 leading-relaxed font-medium">
                                 Buat penawaran diskon atau bundling paket untuk 10 barang lambat terjual guna
                                 menghindari risiko barang rusak atau kedaluwarsa.
                             </p>
                         </div>
                     </div>
-                </div>                {{-- Audit Piket & Tugas per Hari (Accordion Interaktif Fokus Performa Harian & Nested Kasir) --}}
+                </div>
+
                 {{-- Audit Piket & Tugas per Hari (Accordion Interaktif Fokus Performa Harian & Nested Kasir) --}}
                 <div class="bg-white dark:bg-gray-800 rounded-[2.5rem] sm:rounded-[3.5rem] p-6 sm:p-10 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700/80 space-y-6">
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
