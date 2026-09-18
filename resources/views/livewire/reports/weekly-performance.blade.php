@@ -1004,47 +1004,54 @@
                     </div>
                 </div>
 
-            {{-- ==================== STEP 5: KRITIK, SARAN & TANYA JAWAB ==================== --}}
+            {{-- ==================== STEP 5: KRITIK, SARAN & DISKUSI TIM ==================== --}}
             @elseif($currentStep === 5)
                 <div class="space-y-10">
-                    {{-- Header Step 5 --}}
-                    <div class="bg-white dark:bg-gray-800 rounded-[2.5rem] sm:rounded-[3.5rem] p-8 sm:p-12 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700/80 space-y-4 text-center max-w-4xl mx-auto">
-                        <span class="px-4 py-1.5 bg-blue-500/10 text-primary-blue dark:text-blue-400 border border-blue-500/20 rounded-xl text-xs font-black uppercase tracking-widest inline-block">
-                            Forum Terbuka & Umpan Balik
-                        </span>
-                        <h2 class="text-2xl sm:text-4xl font-black uppercase tracking-tight text-gray-800 dark:text-white leading-tight">
-                            Kritik, Saran & Tanya Jawab
-                        </h2>
-                        <p class="text-sm font-semibold text-gray-500 dark:text-gray-400 max-w-2xl mx-auto">
-                            Wadah terbuka untuk mendengarkan masukan, kendala operasional, dan pertanyaan kasir serta tim terkait sistem aplikasi maupun kebijakan piket.
-                        </p>
+                    {{-- Header / Context Banner --}}
+                    <div class="bg-gradient-to-r from-blue-600 via-indigo-600 to-primary-blue rounded-[3rem] p-8 sm:p-12 text-white shadow-2xl shadow-blue-900/30 relative overflow-hidden">
+                        <div class="absolute -right-8 -bottom-8 opacity-10 pointer-events-none">
+                            <svg class="w-56 h-56 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                            </svg>
+                        </div>
+                        <div class="max-w-2xl space-y-3">
+                            <span class="px-3.5 py-1 rounded-full bg-white/20 text-white text-[10px] font-black uppercase tracking-widest inline-block">
+                                Forum Terbuka & Tanya Jawab
+                            </span>
+                            <h2 class="text-2xl sm:text-4xl font-black uppercase tracking-tight text-white leading-tight">
+                                Kritik, Saran & Tanya Jawab Tim Kasir
+                            </h2>
+                            <p class="text-xs sm:text-sm text-white/80 font-medium leading-relaxed">
+                                Ruang diskusi interaktif untuk menampung masukan langsung dari kasir piket mengenai kemudahan sistem, kendala teknis, serta komunikasi dengan pengelola.
+                            </p>
+                        </div>
                     </div>
 
-                    {{-- 3 Main Feedback & Discussion Cards --}}
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
-                        {{-- Card 1: Kritik & Saran Aplikasi --}}
+                    {{-- 3 Kartu Panduan Diskusi Interaktif --}}
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        {{-- Card 1: Sistem & Aplikasi POS --}}
                         <div class="bg-white dark:bg-gray-800 rounded-[2.5rem] p-8 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 flex flex-col justify-between space-y-6 group hover:border-primary-blue/40 transition-all">
                             <div class="space-y-4">
                                 <div class="w-14 h-14 rounded-2xl bg-blue-500/10 text-primary-blue dark:text-blue-400 flex items-center justify-center border border-blue-500/20 group-hover:scale-110 transition-transform">
                                     <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
                                     </svg>
                                 </div>
                                 <h3 class="text-lg font-black uppercase tracking-tight text-gray-800 dark:text-white">
-                                    Sistem & Aplikasi Kasir
+                                    Sistem & Aplikasi POS
                                 </h3>
                                 <p class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed font-medium">
-                                    Apakah ada kendala teknis, bug pada scan barcode, proses pembayaran, cetak struk, atau usulan fitur baru yang mempermudah transaksi kasir?
+                                    Apakah ada bug, fitur kasir yang membingungkan, kendala cetak struk, atau alur transaksi yang terasa lambat saat jam ramai?
                                 </p>
                             </div>
                             <div class="pt-4 border-t border-gray-100 dark:border-gray-700/80">
                                 <span class="text-[10px] font-black uppercase tracking-widest text-primary-blue dark:text-blue-400 block">
-                                    Topik: Fitur, Kecepatan & Kemudahan UI
+                                    Topik: UX Kasir, Kecepatan & Stabilitas
                                 </span>
                             </div>
                         </div>
 
-                        {{-- Card 2: Pengelolaan & Admin --}}
+                        {{-- Card 2: Pengelola & Admin --}}
                         <div class="bg-white dark:bg-gray-800 rounded-[2.5rem] p-8 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 flex flex-col justify-between space-y-6 group hover:border-emerald-500/40 transition-all">
                             <div class="space-y-4">
                                 <div class="w-14 h-14 rounded-2xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center border border-emerald-500/20 group-hover:scale-110 transition-transform">
@@ -1056,7 +1063,7 @@
                                     Koordinasi Tim & Admin
                                 </h3>
                                 <p class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed font-medium">
-                                    Bagaimana alur komunikasi dengan Admin/Pengelola? Apakah persetujuan tugas, stok opname, dan pengajuan uang kas sudah responsif?
+                                    Bagaimana alur komunikasi dengan Admin/Pengelola? Apakah persetujuan tugas, stok opname, dan penanganan uang kas sudah responsif?
                                 </p>
                             </div>
                             <div class="pt-4 border-t border-gray-100 dark:border-gray-700/80">
@@ -1085,114 +1092,6 @@
                                 <span class="text-[10px] font-black uppercase tracking-widest text-amber-600 dark:text-amber-400 block">
                                     Topik: Pembagian Shift, Absensi & Beban Tugas
                                 </span>
-                            </div>
-                        </div>
-                    </div>
-
-                    {{-- Form Input Hasil Pertanyaan, Saran & Diskusi Pengelola --}}
-                    <div class="bg-white dark:bg-gray-800 rounded-[2.5rem] sm:rounded-[3rem] p-8 sm:p-10 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700/80 space-y-6">
-                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-gray-100 dark:border-gray-700/80 pb-6">
-                            <div>
-                                <h3 class="text-xl font-bold uppercase tracking-tight text-gray-800 dark:text-white leading-tight">
-                                    Catat Hasil Saran & Tanya Jawab Kasir
-                                </h3>
-                                <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1">
-                                    Dokumentasikan Masukan / Pertanyaan yang Muncul Selama Sesi Berlangsung
-                                </p>
-                            </div>
-                            <span class="px-3.5 py-1.5 bg-blue-500/10 text-primary-blue dark:text-blue-400 border border-blue-500/20 rounded-xl text-[10px] font-black uppercase tracking-wider self-start sm:self-center">
-                                {{ count($weeklyFeedbackNotes) }} Catatan Tersimpan
-                            </span>
-                        </div>
-
-                        {{-- Input Form --}}
-                        <form wire:submit.prevent="saveFeedbackNote" class="space-y-5">
-                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                                {{-- Kategori --}}
-                                <div>
-                                    <label class="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2">
-                                        Kategori Masukan
-                                    </label>
-                                    <select wire:model="feedbackCategory"
-                                        class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900/60 border border-gray-200/80 dark:border-gray-700 rounded-2xl text-xs font-black text-gray-800 dark:text-white focus:ring-2 focus:ring-primary-blue focus:outline-none cursor-pointer">
-                                        <option value="aplikasi">Sistem & Aplikasi</option>
-                                        <option value="admin">Pengelola & Admin</option>
-                                        <option value="piket">Piket & Jadwal</option>
-                                    </select>
-                                    @error('feedbackCategory') <span class="text-primary-red text-[10px] font-bold mt-1 block">{{ $message }}</span> @enderror
-                                </div>
-
-                                {{-- Judul / Inti Pertanyaan --}}
-                                <div class="sm:col-span-2">
-                                    <label class="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2">
-                                        Judul / Poin Pembahasan
-                                    </label>
-                                    <input type="text" wire:model="feedbackTitle"
-                                        placeholder="Misal: Usulan shortcut tombol bayar cepat / Kendala absen pagi"
-                                        class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900/60 border border-gray-200/80 dark:border-gray-700 rounded-2xl text-xs font-bold text-gray-800 dark:text-white focus:ring-2 focus:ring-primary-blue focus:outline-none placeholder-gray-400">
-                                    @error('feedbackTitle') <span class="text-primary-red text-[10px] font-bold mt-1 block">{{ $message }}</span> @enderror
-                                </div>
-                            </div>
-
-                            {{-- Isi Masukan & Rencana Tindak Lanjut --}}
-                            <div>
-                                <label class="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2">
-                                    Rincian Pertanyaan / Saran & Jawaban / Solusi Pengelola
-                                </label>
-                                <textarea wire:model="feedbackContent" rows="3"
-                                    placeholder="Tuliskan pertanyaan/saran kasir secara lengkap serta jawaban, arahan, atau tindak lanjut dari pengelola..."
-                                    class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900/60 border border-gray-200/80 dark:border-gray-700 rounded-2xl text-xs font-medium text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-primary-blue focus:outline-none placeholder-gray-400 leading-relaxed"></textarea>
-                                @error('feedbackContent') <span class="text-primary-red text-[10px] font-bold mt-1 block">{{ $message }}</span> @enderror
-                            </div>
-
-                            <div class="flex justify-end">
-                                <button type="submit"
-                                    class="flex items-center gap-2 px-6 py-3 bg-primary-blue hover:bg-blue-600 text-white font-black text-xs uppercase tracking-wider rounded-xl transition-all shadow-lg shadow-blue-500/20 cursor-pointer">
-                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
-                                    </svg>
-                                    <span>Simpan Hasil Diskusi</span>
-                                </button>
-                            </div>
-                        </form>
-
-                        {{-- Daftar Catatan yang Telah Diinput Minggu Ini --}}
-                        <div class="pt-6 border-t border-gray-100 dark:border-gray-700/80 space-y-4">
-                            <h4 class="text-xs font-black uppercase tracking-widest text-gray-400">
-                                Riwayat Masukan & Saran Tercatat (Minggu Ini)
-                            </h4>
-
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                @forelse($weeklyFeedbackNotes as $note)
-                                    <div class="p-5 rounded-2xl border transition-all bg-gray-50/70 dark:bg-gray-900/50 border-gray-100 dark:border-gray-800 flex flex-col justify-between space-y-3">
-                                        <div class="space-y-2">
-                                            <div class="flex items-start justify-between gap-3">
-                                                <h5 class="text-xs font-black text-gray-800 dark:text-white uppercase tracking-tight">
-                                                    {{ $note->title }}
-                                                </h5>
-                                                <button wire:click="deleteFeedbackNote({{ $note->id }})"
-                                                    wire:confirm="Yakin ingin menghapus catatan ini?"
-                                                    class="text-gray-400 hover:text-primary-red transition-colors shrink-0 p-1 cursor-pointer"
-                                                    title="Hapus Catatan">
-                                                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                                    </svg>
-                                                </button>
-                                            </div>
-                                            <p class="text-xs text-gray-600 dark:text-gray-300 font-medium leading-relaxed">
-                                                {{ $note->content }}
-                                            </p>
-                                        </div>
-                                        <div class="pt-2 border-t border-gray-200/50 dark:border-gray-800/80 flex items-center justify-between text-[9px] font-bold text-gray-400 uppercase tracking-wider">
-                                            <span>Oleh: {{ $note->user->name ?? 'Pengelola' }}</span>
-                                            <span>{{ \Carbon\Carbon::parse($note->created_at)->format('d M Y, H:i') }}</span>
-                                        </div>
-                                    </div>
-                                @empty
-                                    <div class="col-span-full py-8 text-center bg-gray-50/40 dark:bg-gray-900/30 rounded-2xl border border-gray-100 dark:border-gray-800">
-                                        <p class="text-xs text-gray-400 italic">Belum ada saran atau pertanyaan yang dicatat pada minggu ini. Silakan input melalui form di atas saat sesi berlangsung.</p>
-                                    </div>
-                                @endforelse
                             </div>
                         </div>
                     </div>
@@ -1265,85 +1164,34 @@
                             </div>
                         </div>
 
-                        {{-- Ringkasan Komitmen & Form Input Tindak Lanjut --}}
+                        {{-- Ringkasan Komitmen & Tindak Lanjut --}}
                         <div class="bg-white dark:bg-gray-800 rounded-[2.5rem] sm:rounded-[3rem] p-8 sm:p-10 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700/80 flex flex-col justify-between space-y-6">
-                            <div class="space-y-6">
-                                <div class="flex items-center justify-between gap-4 border-b border-gray-100 dark:border-gray-700/80 pb-5">
-                                    <div class="flex items-center gap-3">
-                                        <div class="w-10 h-10 rounded-xl bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center font-black">
-                                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                            </svg>
-                                        </div>
-                                        <div>
-                                            <h3 class="text-lg font-black uppercase tracking-tight text-gray-800 dark:text-white">
-                                                Penetapan Tindak Lanjut
-                                            </h3>
-                                            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Hasil Musyawarah & Kesepakatan Tim</p>
-                                        </div>
+                            <div class="space-y-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-xl bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center font-black">
+                                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
                                     </div>
-                                    <span class="px-3 py-1 bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20 rounded-xl text-[10px] font-black uppercase tracking-wider shrink-0">
-                                        {{ count($followUpNotes) }} Tindak Lanjut
-                                    </span>
+                                    <div>
+                                        <h3 class="text-lg font-black uppercase tracking-tight text-gray-800 dark:text-white">
+                                            Penetapan Tindak Lanjut
+                                        </h3>
+                                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Hasil Musyawarah Mingguan</p>
+                                    </div>
                                 </div>
 
-                                {{-- Form Input Tindak Lanjut Langsung --}}
-                                <form wire:submit.prevent="saveFollowUpNote" class="space-y-4">
-                                    <div>
-                                        <label class="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2">
-                                            Tuliskan Hasil Kesepakatan & Target Tindak Lanjut
-                                        </label>
-                                        <textarea wire:model="followUpNote" rows="3"
-                                            placeholder="Misal: Disepakati kasir yang bertugas shift pagi wajib datang 15 menit sebelum buka, dan briefing harian diadakan tiap pukul 07.45..."
-                                            class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900/60 border border-gray-200/80 dark:border-gray-700 rounded-2xl text-xs font-medium text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-purple-500 focus:outline-none placeholder-gray-400 leading-relaxed"></textarea>
-                                        @error('followUpNote') <span class="text-primary-red text-[10px] font-bold mt-1 block">{{ $message }}</span> @enderror
-                                    </div>
-                                    <div class="flex justify-end">
-                                        <button type="submit"
-                                            class="flex items-center gap-2 px-5 py-2.5 bg-purple-600 hover:bg-purple-500 text-white font-black text-xs uppercase tracking-wider rounded-xl transition-all shadow-lg shadow-purple-600/20 cursor-pointer">
-                                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-                                            </svg>
-                                            <span>Tetapkan Tindak Lanjut</span>
-                                        </button>
-                                    </div>
-                                </form>
-
-                                {{-- Daftar Catatan Tindak Lanjut yang Tersimpan --}}
-                                <div class="space-y-3 pt-3 border-t border-gray-100 dark:border-gray-700/80 max-h-60 overflow-y-auto no-scrollbar">
-                                    @forelse($followUpNotes as $fNote)
-                                        <div class="p-4 rounded-2xl bg-purple-50/40 dark:bg-purple-950/20 border border-purple-100/80 dark:border-purple-900/30 flex items-start justify-between gap-3">
-                                            <div class="space-y-1 min-w-0">
-                                                <p class="text-xs text-gray-800 dark:text-gray-200 font-semibold leading-relaxed">
-                                                    {{ $fNote->content }}
-                                                </p>
-                                                <span class="text-[9px] font-bold text-gray-400 block uppercase tracking-wider">
-                                                    Dicatat: {{ \Carbon\Carbon::parse($fNote->created_at)->format('d M Y, H:i') }}
-                                                </span>
-                                            </div>
-                                            <button wire:click="deleteFeedbackNote({{ $fNote->id }})"
-                                                wire:confirm="Hapus catatan tindak lanjut ini?"
-                                                class="text-gray-400 hover:text-primary-red transition-colors shrink-0 p-1 cursor-pointer"
-                                                title="Hapus Tindak Lanjut">
-                                                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                                </svg>
-                                            </button>
-                                        </div>
-                                    @empty
-                                        <div class="p-4 rounded-2xl bg-blue-50/60 dark:bg-gray-900/60 border border-blue-100/80 dark:border-blue-900/30 space-y-2">
-                                            <h4 class="text-xs font-black uppercase text-primary-blue dark:text-blue-400 tracking-wider">
-                                                Catatan Penting Tim:
-                                            </h4>
-                                            <p class="text-xs text-gray-600 dark:text-gray-300 leading-relaxed font-medium">
-                                                Belum ada ketetapan tindak lanjut yang dicatat. Input poin kesepakatan bersama pada form di atas agar terdokumentasi untuk evaluasi periode berikutnya.
-                                            </p>
-                                        </div>
-                                    @endforelse
+                                <div class="p-5 rounded-2xl bg-blue-50/60 dark:bg-gray-900/60 border border-blue-100/80 dark:border-blue-900/30 space-y-2">
+                                    <h4 class="text-xs font-black uppercase text-primary-blue dark:text-blue-400 tracking-wider">
+                                        Catatan Penting Tim:
+                                    </h4>
+                                    <p class="text-xs text-gray-600 dark:text-gray-300 leading-relaxed font-medium">
+                                        Seluruh catatan evaluasi dan usulan dari sesi tatap muka ini menjadi acuan kerja untuk meningkatkan efektivitas kasir dan kenyamanan belanja pelanggan di periode berikutnya.
+                                    </p>
                                 </div>
                             </div>
 
-                            <div class="text-center pt-5 border-t border-gray-100 dark:border-gray-700">
+                            <div class="text-center pt-6 border-t border-gray-100 dark:border-gray-700">
                                 <p class="text-xs font-black uppercase tracking-widest text-emerald-600 dark:text-emerald-400">
                                     "Kerja sama yang solid adalah kunci keberhasilan pelayanan toko kita."
                                 </p>

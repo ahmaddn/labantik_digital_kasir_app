@@ -29,14 +29,6 @@ class WeeklyPerformance extends Component
     public $activeDay = 0;
     public $activeCashier = null;
 
-    // Step 5: Input Hasil Pertanyaan, Saran & Diskusi Pengelola
-    public $feedbackCategory = 'aplikasi'; // 'aplikasi', 'admin', 'piket'
-    public $feedbackTitle = '';
-    public $feedbackContent = '';
-
-    // Step 6: Input Penetapan Tindak Lanjut & Komitmen Tim Tatap Muka
-    public $followUpNote = '';
-
     public function toggleDay($idx)
     {
         $this->activeDay = $this->activeDay === $idx ? null : $idx;
@@ -45,76 +37,6 @@ class WeeklyPerformance extends Component
     public function toggleCashier($key)
     {
         $this->activeCashier = $this->activeCashier === $key ? null : $key;
-    }
-
-    public function saveFeedbackNote()
-    {
-        $this->validate([
-            'feedbackTitle' => 'required|string|max:150',
-            'feedbackContent' => 'required|string|max:1000',
-            'feedbackCategory' => 'required|in:aplikasi,admin,piket',
-        ]);
-
-        $activeJurusanId = session('active_jurusan_id');
-        $colorMap = [
-            'aplikasi' => 'blue',
-            'admin' => 'green',
-            'piket' => 'yellow',
-        ];
-
-        CashierNote::create([
-            'jurusan_id' => $activeJurusanId,
-            'user_id' => auth()->id(),
-            'title' => '[' . strtoupper($this->feedbackCategory) . '] ' . $this->feedbackTitle,
-            'content' => $this->feedbackContent,
-            'color' => $colorMap[$this->feedbackCategory] ?? 'blue',
-            'date' => now()->toDateString(),
-        ]);
-
-        $this->reset(['feedbackTitle', 'feedbackContent']);
-
-        $this->dispatch('toast', [
-            'type' => 'success',
-            'message' => 'Catatan hasil saran & tanya jawab berhasil disimpan!',
-        ]);
-    }
-
-    public function deleteFeedbackNote($noteId)
-    {
-        $note = CashierNote::find($noteId);
-        if ($note) {
-            $note->delete();
-            $this->dispatch('toast', [
-                'type' => 'success',
-                'message' => 'Catatan berhasil dihapus.',
-            ]);
-        }
-    }
-
-    public function saveFollowUpNote()
-    {
-        $this->validate([
-            'followUpNote' => 'required|string|max:1000',
-        ]);
-
-        $activeJurusanId = session('active_jurusan_id');
-
-        CashierNote::create([
-            'jurusan_id' => $activeJurusanId,
-            'user_id' => auth()->id(),
-            'title' => '[TINDAK LANJUT EVALUASI] Komitmen Musyawarah Mingguan',
-            'content' => $this->followUpNote,
-            'color' => 'purple',
-            'date' => now()->toDateString(),
-            'is_pinned' => true,
-        ]);
-
-        $this->reset(['followUpNote']);
-
-        $this->dispatch('toast', [
-            'type' => 'success',
-            'message' => 'Catatan penetapan tindak lanjut berhasil disimpan!',
-        ]);
     }
 
     public function mount($startDate = null, $endDate = null)
@@ -602,7 +524,8 @@ class WeeklyPerformance extends Component
         $allProducts = Product::when($activeJurusanId, fn($q) => $q->where('jurusan_id', $activeJurusanId))
             ->where('is_active', true)
             ->whereHas('stockEntries', function ($stq) use ($periodStartDate, $periodEndDate) {
-                $stq->whereBetween('date', [$periodStartDate, $periodEndDate]);
+                $stq->whereBetween('date', [$periodStartDate, $periodEndDate])
+                    ->where('opening_stock', '>', 0);
             })
             ->with(['category', 'supplier', 'stockEntries' => function ($sq) use ($periodStartDate, $periodEndDate) {
                 $sq->whereBetween('date', [$periodStartDate, $periodEndDate])
@@ -709,22 +632,6 @@ class WeeklyPerformance extends Component
             }
         }
 
-        // Step 5: Notes & Questions entered during the week
-        $weeklyFeedbackNotes = CashierNote::with('user')
-            ->when($activeJurusanId, fn($q) => $q->where('jurusan_id', $activeJurusanId))
-            ->whereBetween('date', [$weekStart->toDateString(), $weekEnd->toDateString()])
-            ->where('title', 'not like', '[TINDAK LANJUT EVALUASI]%')
-            ->orderBy('created_at', 'desc')
-            ->get();
-
-        // Step 6: Follow-up Action Notes
-        $followUpNotes = CashierNote::with('user')
-            ->when($activeJurusanId, fn($q) => $q->where('jurusan_id', $activeJurusanId))
-            ->whereBetween('date', [$weekStart->toDateString(), $weekEnd->toDateString()])
-            ->where('title', 'like', '[TINDAK LANJUT EVALUASI]%')
-            ->orderBy('created_at', 'desc')
-            ->get();
-
         return view('livewire.reports.weekly-performance', [
             'weekStart' => $weekStart,
             'weekEnd' => $weekEnd,
@@ -756,8 +663,6 @@ class WeeklyPerformance extends Component
             'topSellingProducts' => $topSellingProducts,
             'leastSellingProducts' => $leastSellingProducts,
             'modalCashierData' => $modalCashierData,
-            'weeklyFeedbackNotes' => $weeklyFeedbackNotes,
-            'followUpNotes' => $followUpNotes,
         ])->layout('layouts.app', ['title' => 'Performa Penjualan & Kasir Mingguan']);
     }
 }
