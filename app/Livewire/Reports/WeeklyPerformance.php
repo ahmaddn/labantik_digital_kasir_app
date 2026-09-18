@@ -60,14 +60,14 @@ class WeeklyPerformance extends Component
 
     public function setStep($step)
     {
-        if ($step >= 1 && $step <= 4) {
+        if ($step >= 1 && $step <= 6) {
             $this->currentStep = $step;
         }
     }
 
     public function nextStep()
     {
-        if ($this->currentStep < 4) {
+        if ($this->currentStep < 6) {
             $this->currentStep++;
         }
     }

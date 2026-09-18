@@ -49,65 +49,88 @@
     {{-- INTERACTIVE FORM WIZARD STEPPER BAR (MATCHING THE 3.5rem / 2rem THEME DESIGN) --}}
     <div
         class="bg-white dark:bg-gray-800 rounded-[2.5rem] p-4 mb-10 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700">
-        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
             {{-- Step 1 Tab --}}
             <button wire:click="setStep(1)"
-                class="flex items-center gap-4 p-4 rounded-2xl transition-all text-left {{ $currentStep === 1 ? 'bg-primary-blue text-white shadow-xl shadow-blue-900/20' : 'bg-gray-50 dark:bg-gray-900/40 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-900/80' }}">
+                class="flex items-center gap-3 p-3.5 rounded-2xl transition-all text-left cursor-pointer {{ $currentStep === 1 ? 'bg-primary-blue text-white shadow-xl shadow-blue-900/20' : 'bg-gray-50 dark:bg-gray-900/40 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-900/80' }}">
                 <div
-                    class="w-10 h-10 rounded-xl flex items-center justify-center font-black text-sm shrink-0 {{ $currentStep === 1 ? 'bg-white/20 text-white' : 'bg-white dark:bg-gray-800 text-primary-blue shadow-xs' }}">
+                    class="w-8 h-8 rounded-xl flex items-center justify-center font-black text-xs shrink-0 {{ $currentStep === 1 ? 'bg-white/20 text-white' : 'bg-white dark:bg-gray-800 text-primary-blue shadow-xs' }}">
                     01
                 </div>
                 <div class="min-w-0">
                     <span
-                        class="block text-[9px] font-black uppercase tracking-[0.2em] {{ $currentStep === 1 ? 'text-white/70' : 'text-gray-400' }}">Tahap
-                        1</span>
-                    <span class="block text-xs font-black uppercase tracking-tight truncate">Omset & Tren Harian</span>
+                        class="block text-[8px] font-black uppercase tracking-[0.2em] {{ $currentStep === 1 ? 'text-white/70' : 'text-gray-400' }}">Tahap 1</span>
+                    <span class="block text-xs font-black uppercase tracking-tight truncate">Omset & Tren</span>
                 </div>
             </button>
 
             {{-- Step 2 Tab --}}
             <button wire:click="setStep(2)"
-                class="flex items-center gap-4 p-4 rounded-2xl transition-all text-left {{ $currentStep === 2 ? 'bg-primary-blue text-white shadow-xl shadow-blue-900/20' : 'bg-gray-50 dark:bg-gray-900/40 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-900/80' }}">
+                class="flex items-center gap-3 p-3.5 rounded-2xl transition-all text-left cursor-pointer {{ $currentStep === 2 ? 'bg-primary-blue text-white shadow-xl shadow-blue-900/20' : 'bg-gray-50 dark:bg-gray-900/40 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-900/80' }}">
                 <div
-                    class="w-10 h-10 rounded-xl flex items-center justify-center font-black text-sm shrink-0 {{ $currentStep === 2 ? 'bg-white/20 text-white' : 'bg-white dark:bg-gray-800 text-primary-blue shadow-xs' }}">
+                    class="w-8 h-8 rounded-xl flex items-center justify-center font-black text-xs shrink-0 {{ $currentStep === 2 ? 'bg-white/20 text-white' : 'bg-white dark:bg-gray-800 text-primary-blue shadow-xs' }}">
                     02
                 </div>
                 <div class="min-w-0">
                     <span
-                        class="block text-[9px] font-black uppercase tracking-[0.2em] {{ $currentStep === 2 ? 'text-white/70' : 'text-gray-400' }}">Tahap
-                        2</span>
-                    <span class="block text-xs font-black uppercase tracking-tight truncate">Kinerja & Kasir</span>
+                        class="block text-[8px] font-black uppercase tracking-[0.2em] {{ $currentStep === 2 ? 'text-white/70' : 'text-gray-400' }}">Tahap 2</span>
+                    <span class="block text-xs font-black uppercase tracking-tight truncate">Kinerja Kasir</span>
                 </div>
             </button>
 
             {{-- Step 3 Tab --}}
             <button wire:click="setStep(3)"
-                class="flex items-center gap-4 p-4 rounded-2xl transition-all text-left {{ $currentStep === 3 ? 'bg-primary-blue text-white shadow-xl shadow-blue-900/20' : 'bg-gray-50 dark:bg-gray-900/40 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-900/80' }}">
+                class="flex items-center gap-3 p-3.5 rounded-2xl transition-all text-left cursor-pointer {{ $currentStep === 3 ? 'bg-primary-blue text-white shadow-xl shadow-blue-900/20' : 'bg-gray-50 dark:bg-gray-900/40 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-900/80' }}">
                 <div
-                    class="w-10 h-10 rounded-xl flex items-center justify-center font-black text-sm shrink-0 {{ $currentStep === 3 ? 'bg-white/20 text-white' : 'bg-white dark:bg-gray-800 text-primary-blue shadow-xs' }}">
+                    class="w-8 h-8 rounded-xl flex items-center justify-center font-black text-xs shrink-0 {{ $currentStep === 3 ? 'bg-white/20 text-white' : 'bg-white dark:bg-gray-800 text-primary-blue shadow-xs' }}">
                     03
                 </div>
                 <div class="min-w-0">
                     <span
-                        class="block text-[9px] font-black uppercase tracking-[0.2em] {{ $currentStep === 3 ? 'text-white/70' : 'text-gray-400' }}">Tahap
-                        3</span>
+                        class="block text-[8px] font-black uppercase tracking-[0.2em] {{ $currentStep === 3 ? 'text-white/70' : 'text-gray-400' }}">Tahap 3</span>
                     <span class="block text-xs font-black uppercase tracking-tight truncate">Produk & Stok</span>
                 </div>
             </button>
 
             {{-- Step 4 Tab --}}
             <button wire:click="setStep(4)"
-                class="flex items-center gap-4 p-4 rounded-2xl transition-all text-left {{ $currentStep === 4 ? 'bg-primary-blue text-white shadow-xl shadow-blue-900/20' : 'bg-gray-50 dark:bg-gray-900/40 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-900/80' }}">
+                class="flex items-center gap-3 p-3.5 rounded-2xl transition-all text-left cursor-pointer {{ $currentStep === 4 ? 'bg-primary-blue text-white shadow-xl shadow-blue-900/20' : 'bg-gray-50 dark:bg-gray-900/40 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-900/80' }}">
                 <div
-                    class="w-10 h-10 rounded-xl flex items-center justify-center font-black text-sm shrink-0 {{ $currentStep === 4 ? 'bg-white/20 text-white' : 'bg-white dark:bg-gray-800 text-primary-blue shadow-xs' }}">
+                    class="w-8 h-8 rounded-xl flex items-center justify-center font-black text-xs shrink-0 {{ $currentStep === 4 ? 'bg-white/20 text-white' : 'bg-white dark:bg-gray-800 text-primary-blue shadow-xs' }}">
                     04
                 </div>
                 <div class="min-w-0">
                     <span
-                        class="block text-[9px] font-black uppercase tracking-[0.2em] {{ $currentStep === 4 ? 'text-white/70' : 'text-gray-400' }}">Tahap
-                        4</span>
-                    <span class="block text-xs font-black uppercase tracking-tight truncate">Audit Piket &
-                        Catatan</span>
+                        class="block text-[8px] font-black uppercase tracking-[0.2em] {{ $currentStep === 4 ? 'text-white/70' : 'text-gray-400' }}">Tahap 4</span>
+                    <span class="block text-xs font-black uppercase tracking-tight truncate">Audit Piket</span>
+                </div>
+            </button>
+
+            {{-- Step 5 Tab: Kritik, Saran & Tanya Jawab --}}
+            <button wire:click="setStep(5)"
+                class="flex items-center gap-3 p-3.5 rounded-2xl transition-all text-left cursor-pointer {{ $currentStep === 5 ? 'bg-primary-blue text-white shadow-xl shadow-blue-900/20' : 'bg-gray-50 dark:bg-gray-900/40 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-900/80' }}">
+                <div
+                    class="w-8 h-8 rounded-xl flex items-center justify-center font-black text-xs shrink-0 {{ $currentStep === 5 ? 'bg-white/20 text-white' : 'bg-white dark:bg-gray-800 text-primary-blue shadow-xs' }}">
+                    05
+                </div>
+                <div class="min-w-0">
+                    <span
+                        class="block text-[8px] font-black uppercase tracking-[0.2em] {{ $currentStep === 5 ? 'text-white/70' : 'text-gray-400' }}">Tahap 5</span>
+                    <span class="block text-xs font-black uppercase tracking-tight truncate">Saran & QnA</span>
+                </div>
+            </button>
+
+            {{-- Step 6 Tab: Penutup & Evaluasi Langsung --}}
+            <button wire:click="setStep(6)"
+                class="flex items-center gap-3 p-3.5 rounded-2xl transition-all text-left cursor-pointer {{ $currentStep === 6 ? 'bg-primary-blue text-white shadow-xl shadow-blue-900/20' : 'bg-gray-50 dark:bg-gray-900/40 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-900/80' }}">
+                <div
+                    class="w-8 h-8 rounded-xl flex items-center justify-center font-black text-xs shrink-0 {{ $currentStep === 6 ? 'bg-white/20 text-white' : 'bg-white dark:bg-gray-800 text-primary-blue shadow-xs' }}">
+                    06
+                </div>
+                <div class="min-w-0">
+                    <span
+                        class="block text-[8px] font-black uppercase tracking-[0.2em] {{ $currentStep === 6 ? 'text-white/70' : 'text-gray-400' }}">Tahap 6</span>
+                    <span class="block text-xs font-black uppercase tracking-tight truncate">Sesi Evaluasi</span>
                 </div>
             </button>
         </div>
@@ -954,6 +977,198 @@
                         </div>
                     </div>
                 </div>
+
+            {{-- ==================== STEP 5: KRITIK, SARAN & TANYA JAWAB ==================== --}}
+            @elseif($currentStep === 5)
+                <div class="space-y-10">
+                    {{-- Header Step 5 --}}
+                    <div class="bg-white dark:bg-gray-800 rounded-[2.5rem] sm:rounded-[3.5rem] p-8 sm:p-12 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700/80 space-y-4 text-center max-w-4xl mx-auto">
+                        <span class="px-4 py-1.5 bg-blue-500/10 text-primary-blue dark:text-blue-400 border border-blue-500/20 rounded-xl text-xs font-black uppercase tracking-widest inline-block">
+                            Forum Terbuka & Umpan Balik
+                        </span>
+                        <h2 class="text-2xl sm:text-4xl font-black uppercase tracking-tight text-gray-800 dark:text-white leading-tight">
+                            Kritik, Saran & Tanya Jawab
+                        </h2>
+                        <p class="text-sm font-semibold text-gray-500 dark:text-gray-400 max-w-2xl mx-auto">
+                            Wadah terbuka untuk mendengarkan masukan, kendala operasional, dan pertanyaan kasir serta tim terkait sistem aplikasi maupun kebijakan piket.
+                        </p>
+                    </div>
+
+                    {{-- 3 Main Feedback & Discussion Cards --}}
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
+                        {{-- Card 1: Kritik & Saran Aplikasi --}}
+                        <div class="bg-white dark:bg-gray-800 rounded-[2.5rem] p-8 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 flex flex-col justify-between space-y-6 group hover:border-primary-blue/40 transition-all">
+                            <div class="space-y-4">
+                                <div class="w-14 h-14 rounded-2xl bg-blue-500/10 text-primary-blue dark:text-blue-400 flex items-center justify-center border border-blue-500/20 group-hover:scale-110 transition-transform">
+                                    <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                    </svg>
+                                </div>
+                                <h3 class="text-lg font-black uppercase tracking-tight text-gray-800 dark:text-white">
+                                    Sistem & Aplikasi Kasir
+                                </h3>
+                                <p class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed font-medium">
+                                    Apakah ada kendala teknis, bug pada scan barcode, proses pembayaran, cetak struk, atau usulan fitur baru yang mempermudah transaksi kasir?
+                                </p>
+                            </div>
+                            <div class="pt-4 border-t border-gray-100 dark:border-gray-700/80">
+                                <span class="text-[10px] font-black uppercase tracking-widest text-primary-blue dark:text-blue-400 block">
+                                    Topik: Fitur, Kecepatan & Kemudahan UI
+                                </span>
+                            </div>
+                        </div>
+
+                        {{-- Card 2: Pengelolaan & Admin --}}
+                        <div class="bg-white dark:bg-gray-800 rounded-[2.5rem] p-8 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 flex flex-col justify-between space-y-6 group hover:border-emerald-500/40 transition-all">
+                            <div class="space-y-4">
+                                <div class="w-14 h-14 rounded-2xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center border border-emerald-500/20 group-hover:scale-110 transition-transform">
+                                    <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                                    </svg>
+                                </div>
+                                <h3 class="text-lg font-black uppercase tracking-tight text-gray-800 dark:text-white">
+                                    Koordinasi Tim & Admin
+                                </h3>
+                                <p class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed font-medium">
+                                    Bagaimana alur komunikasi dengan Admin/Pengelola? Apakah persetujuan tugas, stok opname, dan pengajuan uang kas sudah responsif?
+                                </p>
+                            </div>
+                            <div class="pt-4 border-t border-gray-100 dark:border-gray-700/80">
+                                <span class="text-[10px] font-black uppercase tracking-widest text-emerald-600 dark:text-emerald-400 block">
+                                    Topik: Respon Admin & Sinkronisasi Data
+                                </span>
+                            </div>
+                        </div>
+
+                        {{-- Card 3: Piket & Operasional Harian --}}
+                        <div class="bg-white dark:bg-gray-800 rounded-[2.5rem] p-8 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 flex flex-col justify-between space-y-6 group hover:border-amber-500/40 transition-all">
+                            <div class="space-y-4">
+                                <div class="w-14 h-14 rounded-2xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center border border-amber-500/20 group-hover:scale-110 transition-transform">
+                                    <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                </div>
+                                <h3 class="text-lg font-black uppercase tracking-tight text-gray-800 dark:text-white">
+                                    Tanya Jawab Piket & Jadwal
+                                </h3>
+                                <p class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed font-medium">
+                                    Ada pertanyaan terkait pembagian shift piket, bobot tugas rutin harian, atau jam kedatangan absen yang belum jelas?
+                                </p>
+                            </div>
+                            <div class="pt-4 border-t border-gray-100 dark:border-gray-700/80">
+                                <span class="text-[10px] font-black uppercase tracking-widest text-amber-600 dark:text-amber-400 block">
+                                    Topik: Pembagian Shift, Absensi & Beban Tugas
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            {{-- ==================== STEP 6: PENUTUP & SESI EVALUASI LANGSUNG ==================== --}}
+            @elseif($currentStep === 6)
+                <div class="space-y-10">
+                    {{-- Hero Banner Penutup --}}
+                    <div class="bg-primary-blue rounded-[3rem] p-8 sm:p-14 text-white shadow-2xl shadow-blue-900/30 relative overflow-hidden text-center space-y-6">
+                        <div class="absolute -right-10 -bottom-10 opacity-10 pointer-events-none">
+                            <svg class="w-64 h-64 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                            </svg>
+                        </div>
+                        <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/20 text-white text-xs font-black uppercase tracking-widest">
+                            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                            Sesi Langsung Sedang Berlangsung
+                        </div>
+                        <h2 class="text-3xl sm:text-5xl font-black uppercase tracking-tight text-white leading-tight">
+                            Penutup & Sesi Evaluasi Tatap Muka
+                        </h2>
+                        <p class="text-sm sm:text-base font-medium text-white/80 max-w-2xl mx-auto leading-relaxed">
+                            Pemaparan data performa mingguan toko telah selesai. Sekarang adalah waktu untuk berdiskusi, memberikan apresiasi, dan menetapkan kesepakatan bersama secara langsung.
+                        </p>
+                    </div>
+
+                    {{-- Agenda Sesi Evaluasi Tatap Muka --}}
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        {{-- Checklist Agenda Tatap Muka --}}
+                        <div class="bg-white dark:bg-gray-800 rounded-[2.5rem] sm:rounded-[3rem] p-8 sm:p-10 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700/80 space-y-6">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-black">
+                                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h3 class="text-lg font-black uppercase tracking-tight text-gray-800 dark:text-white">
+                                        Panduan Alur Evaluasi Langsung
+                                    </h3>
+                                    <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Langkah Diskusi Bersama Tim Kasir</p>
+                                </div>
+                            </div>
+
+                            <div class="space-y-4">
+                                <div class="flex items-start gap-4 p-4 rounded-2xl bg-gray-50/80 dark:bg-gray-900/60 border border-gray-100 dark:border-gray-800">
+                                    <span class="w-7 h-7 rounded-lg bg-primary-blue text-white text-xs font-black flex items-center justify-center shrink-0 mt-0.5">1</span>
+                                    <div>
+                                        <h4 class="text-xs font-black uppercase text-gray-800 dark:text-white">Apresiasi Kasir Terbaik</h4>
+                                        <p class="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5 font-medium">Beri apresiasi terbuka bagi kasir Top 3 dengan disiplin piket dan omset tertinggi minggu ini.</p>
+                                    </div>
+                                </div>
+
+                                <div class="flex items-start gap-4 p-4 rounded-2xl bg-gray-50/80 dark:bg-gray-900/60 border border-gray-100 dark:border-gray-800">
+                                    <span class="w-7 h-7 rounded-lg bg-primary-blue text-white text-xs font-black flex items-center justify-center shrink-0 mt-0.5">2</span>
+                                    <div>
+                                        <h4 class="text-xs font-black uppercase text-gray-800 dark:text-white">Klarifikasi Kasir Perlu Perbaikan</h4>
+                                        <p class="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5 font-medium">Dengarkan kendala personal/jadwal secara suportif bagi kasir yang tugasnya tertunda atau terlambat.</p>
+                                    </div>
+                                </div>
+
+                                <div class="flex items-start gap-4 p-4 rounded-2xl bg-gray-50/80 dark:bg-gray-900/60 border border-gray-100 dark:border-gray-800">
+                                    <span class="w-7 h-7 rounded-lg bg-primary-blue text-white text-xs font-black flex items-center justify-center shrink-0 mt-0.5">3</span>
+                                    <div>
+                                        <h4 class="text-xs font-black uppercase text-gray-800 dark:text-white">Komitmen Target Minggu Depan</h4>
+                                        <p class="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5 font-medium">Sepakati bersama target omset, jadwal piket yang tidak bentrok, dan penyelesaian tugas tepat waktu.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {{-- Ringkasan Komitmen & Doa Penutup --}}
+                        <div class="bg-white dark:bg-gray-800 rounded-[2.5rem] sm:rounded-[3rem] p-8 sm:p-10 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700/80 flex flex-col justify-between space-y-6">
+                            <div>
+                                <div class="flex items-center gap-3 mb-6">
+                                    <div class="w-10 h-10 rounded-xl bg-blue-500/10 text-primary-blue dark:text-blue-400 flex items-center justify-center font-black">
+                                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-lg font-black uppercase tracking-tight text-gray-800 dark:text-white">
+                                            Penetapan Tindak Lanjut
+                                        </h3>
+                                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Hasil Musyawarah Mingguan</p>
+                                    </div>
+                                </div>
+
+                                <div class="p-6 rounded-2xl bg-blue-50/60 dark:bg-gray-900/60 border border-blue-100/80 dark:border-blue-900/30 space-y-3">
+                                    <h4 class="text-xs font-black uppercase text-primary-blue dark:text-blue-400 tracking-wider">
+                                        Catatan Penting Tim:
+                                    </h4>
+                                    <p class="text-xs text-gray-600 dark:text-gray-300 leading-relaxed font-medium">
+                                        Seluruh catatan evaluasi dan usulan dari sesi tatap muka ini menjadi acuan kerja untuk meningkatkan efektivitas kasir dan kenyamanan belanja pelanggan di periode selanjutnya.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div class="text-center pt-6 border-t border-gray-100 dark:border-gray-700">
+                                <p class="text-xs font-black uppercase tracking-widest text-emerald-600 dark:text-emerald-400">
+                                    "Kerja sama yang solid adalah kunci keberhasilan pelayanan toko kita."
+                                </p>
+                                <p class="text-[10px] text-gray-400 font-bold mt-1 uppercase tracking-wider">
+                                    Terima kasih atas dedikasi dan kerja keras seluruh tim kasir!
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             @endif
 
         </div>
@@ -965,7 +1180,7 @@
             <div>
                 @if ($currentStep > 1)
                     <button wire:click="prevStep"
-                        class="flex items-center gap-3 px-6 py-3.5 bg-gray-100 dark:bg-gray-700/60 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-800 dark:text-white font-black text-xs uppercase tracking-wider rounded-2xl transition-all shadow-sm">
+                        class="flex items-center gap-3 px-6 py-3.5 bg-gray-100 dark:bg-gray-700/60 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-800 dark:text-white font-black text-xs uppercase tracking-wider rounded-2xl transition-all shadow-sm cursor-pointer">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"
                             stroke-width="2.5">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
@@ -977,21 +1192,21 @@
                 @endif
             </div>
 
-            {{-- Step Indicator Dots --}}
+            {{-- Step Indicator Dots (6 Steps) --}}
             <div class="flex items-center gap-2.5">
-                @for ($st = 1; $st <= 4; $st++)
+                @for ($st = 1; $st <= 6; $st++)
                     <button wire:click="setStep({{ $st }})"
-                        class="h-2.5 rounded-full transition-all {{ $currentStep === $st ? 'bg-primary-blue w-10' : 'bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 w-2.5' }}"
+                        class="h-2.5 rounded-full transition-all cursor-pointer {{ $currentStep === $st ? 'bg-primary-blue w-10' : 'bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 w-2.5' }}"
                         title="Ke Tahap {{ $st }}">
                     </button>
                 @endfor
             </div>
 
-            {{-- Tombol Selanjutnya --}}
+            {{-- Tombol Selanjutnya / Kembali ke Awal --}}
             <div>
-                @if ($currentStep < 4)
+                @if ($currentStep < 6)
                     <button wire:click="nextStep"
-                        class="flex items-center gap-3 px-8 py-3.5 bg-primary-blue hover:bg-blue-600 text-white font-black text-xs uppercase tracking-wider rounded-2xl transition-all shadow-xl shadow-blue-500/20">
+                        class="flex items-center gap-3 px-8 py-3.5 bg-primary-blue hover:bg-blue-600 text-white font-black text-xs uppercase tracking-wider rounded-2xl transition-all shadow-xl shadow-blue-500/20 cursor-pointer">
                         <span>Selanjutnya</span>
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"
                             stroke-width="2.5">
@@ -1000,8 +1215,8 @@
                     </button>
                 @else
                     <button wire:click="setStep(1)"
-                        class="flex items-center gap-3 px-8 py-3.5 bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs uppercase tracking-wider rounded-2xl transition-all shadow-xl shadow-emerald-600/20">
-                        <span>Kembali ke Tahap 1</span>
+                        class="flex items-center gap-3 px-8 py-3.5 bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs uppercase tracking-wider rounded-2xl transition-all shadow-xl shadow-emerald-600/20 cursor-pointer">
+                        <span>Selesai & Ke Tahap 1</span>
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"
                             stroke-width="2.5">
                             <path stroke-linecap="round" stroke-linejoin="round"
