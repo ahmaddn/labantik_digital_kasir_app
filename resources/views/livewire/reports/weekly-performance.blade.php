@@ -1239,34 +1239,85 @@
                             </div>
                         </div>
 
-                        {{-- Ringkasan Komitmen & Doa Penutup --}}
+                        {{-- Ringkasan Komitmen & Form Input Tindak Lanjut --}}
                         <div class="bg-white dark:bg-gray-800 rounded-[2.5rem] sm:rounded-[3rem] p-8 sm:p-10 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700/80 flex flex-col justify-between space-y-6">
-                            <div>
-                                <div class="flex items-center gap-3 mb-6">
-                                    <div class="w-10 h-10 rounded-xl bg-blue-500/10 text-primary-blue dark:text-blue-400 flex items-center justify-center font-black">
-                                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                        </svg>
+                            <div class="space-y-6">
+                                <div class="flex items-center justify-between gap-4 border-b border-gray-100 dark:border-gray-700/80 pb-5">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-10 h-10 rounded-xl bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center font-black">
+                                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <h3 class="text-lg font-black uppercase tracking-tight text-gray-800 dark:text-white">
+                                                Penetapan Tindak Lanjut
+                                            </h3>
+                                            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Hasil Musyawarah & Kesepakatan Tim</p>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <h3 class="text-lg font-black uppercase tracking-tight text-gray-800 dark:text-white">
-                                            Penetapan Tindak Lanjut
-                                        </h3>
-                                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Hasil Musyawarah Mingguan</p>
-                                    </div>
+                                    <span class="px-3 py-1 bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20 rounded-xl text-[10px] font-black uppercase tracking-wider shrink-0">
+                                        {{ count($followUpNotes) }} Tindak Lanjut
+                                    </span>
                                 </div>
 
-                                <div class="p-6 rounded-2xl bg-blue-50/60 dark:bg-gray-900/60 border border-blue-100/80 dark:border-blue-900/30 space-y-3">
-                                    <h4 class="text-xs font-black uppercase text-primary-blue dark:text-blue-400 tracking-wider">
-                                        Catatan Penting Tim:
-                                    </h4>
-                                    <p class="text-xs text-gray-600 dark:text-gray-300 leading-relaxed font-medium">
-                                        Seluruh catatan evaluasi dan usulan dari sesi tatap muka ini menjadi acuan kerja untuk meningkatkan efektivitas kasir dan kenyamanan belanja pelanggan di periode selanjutnya.
-                                    </p>
+                                {{-- Form Input Tindak Lanjut Langsung --}}
+                                <form wire:submit.prevent="saveFollowUpNote" class="space-y-4">
+                                    <div>
+                                        <label class="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2">
+                                            Tuliskan Hasil Kesepakatan & Target Tindak Lanjut
+                                        </label>
+                                        <textarea wire:model="followUpNote" rows="3"
+                                            placeholder="Misal: Disepakati kasir yang bertugas shift pagi wajib datang 15 menit sebelum buka, dan briefing harian diadakan tiap pukul 07.45..."
+                                            class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900/60 border border-gray-200/80 dark:border-gray-700 rounded-2xl text-xs font-medium text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-purple-500 focus:outline-none placeholder-gray-400 leading-relaxed"></textarea>
+                                        @error('followUpNote') <span class="text-primary-red text-[10px] font-bold mt-1 block">{{ $message }}</span> @enderror
+                                    </div>
+                                    <div class="flex justify-end">
+                                        <button type="submit"
+                                            class="flex items-center gap-2 px-5 py-2.5 bg-purple-600 hover:bg-purple-500 text-white font-black text-xs uppercase tracking-wider rounded-xl transition-all shadow-lg shadow-purple-600/20 cursor-pointer">
+                                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                                            </svg>
+                                            <span>Tetapkan Tindak Lanjut</span>
+                                        </button>
+                                    </div>
+                                </form>
+
+                                {{-- Daftar Catatan Tindak Lanjut yang Tersimpan --}}
+                                <div class="space-y-3 pt-3 border-t border-gray-100 dark:border-gray-700/80 max-h-60 overflow-y-auto no-scrollbar">
+                                    @forelse($followUpNotes as $fNote)
+                                        <div class="p-4 rounded-2xl bg-purple-50/40 dark:bg-purple-950/20 border border-purple-100/80 dark:border-purple-900/30 flex items-start justify-between gap-3">
+                                            <div class="space-y-1 min-w-0">
+                                                <p class="text-xs text-gray-800 dark:text-gray-200 font-semibold leading-relaxed">
+                                                    {{ $fNote->content }}
+                                                </p>
+                                                <span class="text-[9px] font-bold text-gray-400 block uppercase tracking-wider">
+                                                    Dicatat: {{ \Carbon\Carbon::parse($fNote->created_at)->format('d M Y, H:i') }}
+                                                </span>
+                                            </div>
+                                            <button wire:click="deleteFeedbackNote({{ $fNote->id }})"
+                                                wire:confirm="Hapus catatan tindak lanjut ini?"
+                                                class="text-gray-400 hover:text-primary-red transition-colors shrink-0 p-1 cursor-pointer"
+                                                title="Hapus Tindak Lanjut">
+                                                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    @empty
+                                        <div class="p-4 rounded-2xl bg-blue-50/60 dark:bg-gray-900/60 border border-blue-100/80 dark:border-blue-900/30 space-y-2">
+                                            <h4 class="text-xs font-black uppercase text-primary-blue dark:text-blue-400 tracking-wider">
+                                                Catatan Penting Tim:
+                                            </h4>
+                                            <p class="text-xs text-gray-600 dark:text-gray-300 leading-relaxed font-medium">
+                                                Belum ada ketetapan tindak lanjut yang dicatat. Input poin kesepakatan bersama pada form di atas agar terdokumentasi untuk evaluasi periode berikutnya.
+                                            </p>
+                                        </div>
+                                    @endforelse
                                 </div>
                             </div>
 
-                            <div class="text-center pt-6 border-t border-gray-100 dark:border-gray-700">
+                            <div class="text-center pt-5 border-t border-gray-100 dark:border-gray-700">
                                 <p class="text-xs font-black uppercase tracking-widest text-emerald-600 dark:text-emerald-400">
                                     "Kerja sama yang solid adalah kunci keberhasilan pelayanan toko kita."
                                 </p>

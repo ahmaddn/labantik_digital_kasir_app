@@ -33,6 +33,9 @@ class WeeklyPerformance extends Component
     public $feedbackTitle = '';
     public $feedbackContent = '';
 
+    // Step 6: Input Penetapan Tindak Lanjut & Komitmen Tim Tatap Muka
+    public $followUpNote = '';
+
     public function toggleDay($idx)
     {
         $this->activeDay = $this->activeDay === $idx ? null : $idx;
@@ -85,6 +88,32 @@ class WeeklyPerformance extends Component
                 'message' => 'Catatan berhasil dihapus.',
             ]);
         }
+    }
+
+    public function saveFollowUpNote()
+    {
+        $this->validate([
+            'followUpNote' => 'required|string|max:1000',
+        ]);
+
+        $activeJurusanId = session('active_jurusan_id');
+
+        CashierNote::create([
+            'jurusan_id' => $activeJurusanId,
+            'user_id' => auth()->id(),
+            'title' => '[TINDAK LANJUT EVALUASI] Komitmen Musyawarah Mingguan',
+            'content' => $this->followUpNote,
+            'color' => 'purple',
+            'date' => now()->toDateString(),
+            'is_pinned' => true,
+        ]);
+
+        $this->reset(['followUpNote']);
+
+        $this->dispatch('toast', [
+            'type' => 'success',
+            'message' => 'Catatan penetapan tindak lanjut berhasil disimpan!',
+        ]);
     }
 
     public function mount($startDate = null, $endDate = null)
@@ -658,6 +687,15 @@ class WeeklyPerformance extends Component
         $weeklyFeedbackNotes = CashierNote::with('user')
             ->when($activeJurusanId, fn($q) => $q->where('jurusan_id', $activeJurusanId))
             ->whereBetween('date', [$weekStart->toDateString(), $weekEnd->toDateString()])
+            ->where('title', 'not like', '[TINDAK LANJUT EVALUASI]%')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        // Step 6: Follow-up Action Notes
+        $followUpNotes = CashierNote::with('user')
+            ->when($activeJurusanId, fn($q) => $q->where('jurusan_id', $activeJurusanId))
+            ->whereBetween('date', [$weekStart->toDateString(), $weekEnd->toDateString()])
+            ->where('title', 'like', '[TINDAK LANJUT EVALUASI]%')
             ->orderBy('created_at', 'desc')
             ->get();
 
@@ -690,6 +728,7 @@ class WeeklyPerformance extends Component
             'leastSellingProducts' => $leastSellingProducts,
             'modalCashierData' => $modalCashierData,
             'weeklyFeedbackNotes' => $weeklyFeedbackNotes,
+            'followUpNotes' => $followUpNotes,
         ])->layout('layouts.app', ['title' => 'Performa Penjualan & Kasir Mingguan']);
     }
 }
