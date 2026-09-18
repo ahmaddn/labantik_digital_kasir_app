@@ -237,10 +237,12 @@ class WeeklyPerformance extends Component
                         }
                     }
 
-                    $prefix = ($def && $def->is_routine) ? '[Rutin] ' : '';
+                    $rawTaskName = $def->task_name ?? 'Tugas Piket';
+                    $hasRoutinePrefix = str_starts_with(strtolower($rawTaskName), '[rutin]');
+                    $prefix = ($def && $def->is_routine && !$hasRoutinePrefix) ? '[Rutin] ' : '';
 
                     return [
-                        'task_name' => $prefix . ($def->task_name ?? 'Tugas Piket'),
+                        'task_name' => $prefix . $rawTaskName,
                         'is_routine' => $def->is_routine ?? false,
                         'priority' => $def->priority ?? 'medium',
                         'status' => $status,
