@@ -443,7 +443,7 @@
                                 </td>
                                 <td class="px-8 py-6">
                                     @if(($activeTab === 'change' && $changeSubTab === 'history') || ($activeTab === 'debt' && $debtSubTab === 'history'))
-                                        <span class="px-3 py-1 bg-emerald-500/10 text-emerald-500 text-[9px] font-black uppercase rounded-full tracking-widest border border-emerald-500/20">
+                                        <span class="px-3 py-1 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[9px] font-black uppercase rounded-full tracking-widest border border-emerald-500/20">
                                             UANG DITERIMA
                                         </span>
                                     @else

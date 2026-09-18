@@ -695,7 +695,7 @@
                     <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Status Pembayaran
                     </p>
                     <span
-                        class="px-4 py-1.5 rounded-full text-[9px] font-black uppercase {{ ($this->detailItems->first()->status ?? '') === 'uang_diterima' ? 'bg-green-100 text-green-700' : 'bg-primary-red/10 text-primary-red' }}">
+                        class="px-4 py-1.5 rounded-full text-[9px] font-black uppercase {{ ($this->detailItems->first()->status ?? '') === 'uang_diterima' ? 'bg-emerald-500/15 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300 border border-emerald-500/20' : 'bg-primary-red/10 text-primary-red' }}">
                         {{ str_replace('_', ' ', $this->detailItems->first()->status ?? 'Unknown') }}
                     </span>
                 </div>

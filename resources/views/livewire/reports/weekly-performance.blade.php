@@ -13,11 +13,11 @@
             <div
                 class="flex items-center bg-white dark:bg-gray-800 p-1.5 rounded-2xl shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-800">
                 <button wire:click="setPresetRange('this_week')"
-                    class="px-4 py-2 text-xs font-black uppercase tracking-wider rounded-xl transition-all {{ $startDate === now()->startOfWeek()->toDateString() && $endDate === now()->endOfWeek()->toDateString() ? 'bg-primary-blue text-white shadow-md' : 'text-gray-500 hover:text-gray-900 dark:hover:text-white' }}">
+                    class="px-4 py-2 text-xs font-black uppercase tracking-wider rounded-xl transition-all {{ $startDate === now()->startOfWeek(\Carbon\Carbon::MONDAY)->toDateString() && $endDate === now()->startOfWeek(\Carbon\Carbon::MONDAY)->addDays(4)->toDateString() ? 'bg-primary-blue text-white shadow-md' : 'text-gray-500 hover:text-gray-900 dark:hover:text-white' }}">
                     Minggu Ini
                 </button>
                 <button wire:click="setPresetRange('last_week')"
-                    class="px-4 py-2 text-xs font-black uppercase tracking-wider rounded-xl transition-all {{ $startDate === now()->subWeek()->startOfWeek()->toDateString() && $endDate === now()->subWeek()->endOfWeek()->toDateString() ? 'bg-primary-blue text-white shadow-md' : 'text-gray-500 hover:text-gray-900 dark:hover:text-white' }}">
+                    class="px-4 py-2 text-xs font-black uppercase tracking-wider rounded-xl transition-all {{ $startDate === now()->subWeek()->startOfWeek(\Carbon\Carbon::MONDAY)->toDateString() && $endDate === now()->subWeek()->startOfWeek(\Carbon\Carbon::MONDAY)->addDays(4)->toDateString() ? 'bg-primary-blue text-white shadow-md' : 'text-gray-500 hover:text-gray-900 dark:hover:text-white' }}">
                     Minggu Lalu
                 </button>
                 <button wire:click="setPresetRange('this_month')"
@@ -274,7 +274,8 @@
                                         $day['revenue'] > 0 &&
                                         $day['revenue'] == $peakDay['revenue'];
                                 @endphp
-                                <div class="flex-1 flex flex-col items-center justify-end group max-w-[80px] relative px-1">
+                                <div
+                                    class="flex-1 flex flex-col items-center justify-end group max-w-[80px] relative px-1">
                                     {{-- Value Label Above Column --}}
                                     <div class="mb-2 text-center transition-transform group-hover:-translate-y-1">
                                         <span
@@ -316,45 +317,51 @@
 
             {{-- ==================== STEP 2: KINERJA KASIR & EVALUASI ==================== --}}
         @elseif($currentStep === 2)
-            <div class="space-y-12">
+            <div class="space-y-10">
                 {{-- Top 3 and Bottom Performers --}}
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-10">
                     {{-- Top 3 Kasir Berkinerja Terbaik --}}
                     <div
-                        class="bg-white dark:bg-gray-800 rounded-[3rem] p-10 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 space-y-6">
+                        class="bg-white dark:bg-gray-800 rounded-[2.5rem] sm:rounded-[3rem] p-6 sm:p-10 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700/80 flex flex-col justify-between space-y-6">
                         <div>
-                            <h2
-                                class="text-2xl font-bold uppercase tracking-tight text-emerald-600 dark:text-emerald-400 leading-none">
-                                Bintang Piket (Top 3)</h2>
+                            <div class="flex items-center justify-between gap-4">
+                                <h2
+                                    class="text-xl sm:text-2xl font-bold uppercase tracking-tight text-emerald-600 dark:text-emerald-400 leading-none">
+                                    Bintang Piket (Top 3)</h2>
+                                <span
+                                    class="px-3 py-1 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 rounded-xl text-[10px] font-black uppercase tracking-wider">
+                                    Terbaik
+                                </span>
+                            </div>
                             <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-2">Kedisiplinan
                                 Piket, Kepatuhan Tugas & Omset Tertinggi</p>
                         </div>
-                        <div class="space-y-4">
+                        <div class="space-y-3.5 flex-1">
                             @forelse($topPerformers as $idx => $item)
                                 <div
-                                    class="flex items-center justify-between p-5 bg-gray-50 dark:bg-gray-900/50 rounded-2xl border border-gray-100 dark:border-gray-800">
-                                    <div class="flex items-center gap-4">
+                                    class="flex items-center justify-between p-4 sm:p-5 bg-gray-50/80 dark:bg-gray-900/60 rounded-2xl border border-gray-100 dark:border-gray-800/80 hover:border-emerald-500/30 transition-all">
+                                    <div class="flex items-center gap-3 sm:gap-4 min-w-0">
                                         <span
-                                            class="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-black text-base flex items-center justify-center border border-emerald-500/20">
+                                            class="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-black text-sm sm:text-base flex items-center justify-center border border-emerald-500/20 shrink-0">
                                             #{{ $idx + 1 }}
                                         </span>
-                                        <div>
+                                        <div class="min-w-0">
                                             <h4
-                                                class="font-black text-gray-800 dark:text-white text-sm uppercase tracking-tight">
+                                                class="font-black text-gray-800 dark:text-white text-xs sm:text-sm uppercase tracking-tight truncate">
                                                 {{ $item->user->name }}</h4>
                                             <p
-                                                class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mt-0.5">
+                                                class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mt-0.5 truncate">
                                                 {{ $item->total_tx }} Tx • Omset
                                                 Rp{{ number_format($item->total_sales) }}</p>
                                         </div>
                                     </div>
-                                    <div class="text-right">
+                                    <div class="text-right shrink-0 pl-3">
                                         <span
-                                            class="px-3.5 py-1.5 bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 font-black text-xs rounded-xl">
+                                            class="px-3 py-1 bg-emerald-500/15 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300 font-black text-xs rounded-xl border border-emerald-500/20">
                                             {{ $item->overall_score }} Pts
                                         </span>
                                         <button wire:click="viewCashierDetail('{{ $item->user->id }}')"
-                                            class="block text-[10px] font-black text-primary-blue uppercase tracking-widest hover:underline mt-1.5">
+                                            class="block text-[10px] font-black text-primary-blue uppercase tracking-widest hover:underline mt-1.5 ml-auto cursor-pointer">
                                             Log Detail
                                         </button>
                                     </div>
@@ -368,43 +375,51 @@
 
                     {{-- Kasir Perlu Evaluasi --}}
                     <div
-                        class="bg-white dark:bg-gray-800 rounded-[3rem] p-10 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 space-y-6">
+                        class="bg-white dark:bg-gray-800 rounded-[2.5rem] sm:rounded-[3rem] p-6 sm:p-10 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700/80 flex flex-col justify-between space-y-6">
                         <div>
-                            <h2 class="text-2xl font-bold uppercase tracking-tight text-primary-red leading-none">Perlu
-                                Evaluasi</h2>
+                            <div class="flex items-center justify-between gap-4">
+                                <h2
+                                    class="text-xl sm:text-2xl font-bold uppercase tracking-tight text-primary-red leading-none">
+                                    Perlu
+                                    Evaluasi</h2>
+                                <span
+                                    class="px-3 py-1 bg-rose-500/10 text-primary-red border border-rose-500/20 rounded-xl text-[10px] font-black uppercase tracking-wider">
+                                    Catatan
+                                </span>
+                            </div>
                             <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-2">Kasir dengan
                                 Tugas Tertunda atau Kehadiran Kurang</p>
                         </div>
-                        <div class="space-y-4">
+                        <div class="space-y-3.5 flex-1">
                             @forelse($bottomPerformers as $item)
                                 <div
-                                    class="p-5 bg-rose-50/50 dark:bg-rose-950/20 rounded-2xl border border-rose-100 dark:border-rose-900/40 space-y-3">
+                                    class="p-4 sm:p-5 bg-rose-50/40 dark:bg-rose-950/20 rounded-2xl border border-rose-100/80 dark:border-rose-900/30 space-y-2.5">
                                     <div class="flex items-center justify-between">
                                         <h4
-                                            class="font-black text-gray-800 dark:text-white text-sm uppercase tracking-tight">
+                                            class="font-black text-gray-800 dark:text-white text-xs sm:text-sm uppercase tracking-tight">
                                             {{ $item->user->name }}</h4>
                                         <div class="flex items-center gap-2">
                                             <span
-                                                class="px-3 py-1 bg-primary-red text-white text-[10px] font-black uppercase tracking-wider rounded-xl">
+                                                class="px-2.5 py-0.5 bg-rose-500/15 text-rose-700 dark:bg-rose-950/50 dark:text-rose-300 text-[10px] font-black uppercase tracking-wider rounded-xl border border-rose-500/20">
                                                 Skor: {{ $item->overall_score }}
                                             </span>
                                             <button wire:click="viewCashierDetail('{{ $item->user->id }}')"
-                                                class="text-[10px] font-black text-primary-blue uppercase tracking-widest hover:underline">
+                                                class="text-[10px] font-black text-primary-blue uppercase tracking-widest hover:underline cursor-pointer">
                                                 Detail
                                             </button>
                                         </div>
                                     </div>
-                                    <p class="text-xs text-rose-800 dark:text-rose-300 font-semibold leading-relaxed">
+                                    <p class="text-xs text-rose-700 dark:text-rose-300 font-semibold leading-relaxed">
                                         {{ $item->evaluation_notes }}</p>
                                     <div
-                                        class="text-[10px] font-bold text-gray-400 pt-2 flex justify-between border-t border-rose-100 dark:border-rose-900/40 uppercase tracking-wider">
+                                        class="text-[10px] font-bold text-gray-400 pt-2 flex justify-between border-t border-rose-100/80 dark:border-rose-900/30 uppercase tracking-wider">
                                         <span>Omset: Rp{{ number_format($item->total_sales) }}</span>
                                         <span>{{ $item->total_tx }} Transaksi</span>
                                     </div>
                                 </div>
                             @empty
-                                <div class="p-8 text-center">
-                                    <svg class="w-12 h-12 text-emerald-500 mx-auto mb-3" fill="none"
+                                <div class="p-8 text-center flex flex-col items-center justify-center h-full">
+                                    <svg class="w-12 h-12 text-emerald-500 mb-3 opacity-80" fill="none"
                                         viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -420,7 +435,7 @@
 
                 {{-- Tabel Seluruh Kinerja Kasir matching category-recap-table styling --}}
                 <div
-                    class="bg-white dark:bg-gray-800 rounded-[3.5rem] shadow-2xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 overflow-hidden">
+                    class="bg-white dark:bg-gray-800 rounded-[2.5rem] sm:rounded-[3.5rem] shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700/80 overflow-hidden">
                     <div class="p-10 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
                         <div>
                             <h2
@@ -470,10 +485,13 @@
                                         </td>
                                         <td class="px-6 py-8 text-center">
                                             @php
-                                                $attRate = $c->scheduled_count > 0 ? round(($c->attended_count / $c->scheduled_count) * 100) : 100;
+                                                $attRate =
+                                                    $c->scheduled_count > 0
+                                                        ? round(($c->attended_count / $c->scheduled_count) * 100)
+                                                        : 100;
                                             @endphp
                                             <span
-                                                class="px-3 py-1 rounded-xl text-xs font-black {{ $attRate >= 80 ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300' : 'bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300' }}">
+                                                class="px-3 py-1 rounded-xl text-xs font-black {{ $attRate >= 80 ? 'bg-emerald-500/15 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300 border border-emerald-500/20' : 'bg-rose-500/15 text-rose-700 dark:bg-rose-950/50 dark:text-rose-300 border border-rose-500/20' }}">
                                                 {{ $c->attended_count }} ({{ $attRate }}%)
                                             </span>
                                         </td>
@@ -490,7 +508,7 @@
                                         </td>
                                         <td class="px-6 py-8 text-center">
                                             <span
-                                                class="px-3 py-1 rounded-xl font-black text-xs {{ $c->overall_score >= 80 ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300' : ($c->overall_score >= 60 ? 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300' : 'bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300') }}">
+                                                class="px-3 py-1 rounded-xl font-black text-xs {{ $c->overall_score >= 80 ? 'bg-emerald-500/15 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300 border border-emerald-500/20' : ($c->overall_score >= 60 ? 'bg-amber-500/15 text-amber-700 dark:bg-amber-950/50 dark:text-amber-300 border border-amber-500/20' : 'bg-rose-500/15 text-rose-700 dark:bg-rose-950/50 dark:text-rose-300 border border-rose-500/20') }}">
                                                 {{ $c->overall_score }} Pts
                                             </span>
                                         </td>
@@ -515,18 +533,34 @@
 
             {{-- ==================== STEP 3: ANALISIS PRODUK & STOK ==================== --}}
         @elseif($currentStep === 3)
-            <div class="space-y-12">
+            <div class="space-y-10">
                 {{-- Product Comparison Chart --}}
                 <div
-                    class="bg-white dark:bg-gray-800 rounded-[3.5rem] p-10 shadow-2xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 space-y-6">
-                    <div>
-                        <h2
-                            class="text-2xl font-bold uppercase tracking-tight text-gray-800 dark:text-white leading-none">
-                            Grafik Perbandingan Produk Terlaris</h2>
-                        <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-2">Volume Penjualan
-                            Periode Ini vs Periode Lalu (Internal TEFA vs Supplier)</p>
+                    class="bg-white dark:bg-gray-800 rounded-[2.5rem] sm:rounded-[3.5rem] p-6 sm:p-10 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700/80 space-y-6">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div>
+                            <h2
+                                class="text-xl sm:text-2xl font-bold uppercase tracking-tight text-gray-800 dark:text-white leading-none">
+                                Grafik Perbandingan Produk Terlaris</h2>
+                            <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-2">Volume
+                                Penjualan
+                                Periode Ini vs Periode Lalu (Internal TEFA vs Supplier)</p>
+                        </div>
+                        <div class="flex items-center gap-3 self-start sm:self-center">
+                            <span
+                                class="inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                                <span class="w-2.5 h-2.5 rounded-full bg-primary-blue"></span> Periode Ini
+                            </span>
+                            <span
+                                class="inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider text-gray-400 dark:text-gray-500">
+                                <span class="w-2.5 h-2.5 rounded-full bg-gray-300 dark:bg-gray-600"></span> Periode
+                                Lalu
+                            </span>
+                        </div>
                     </div>
-                    <div class="space-y-4 pt-2">
+
+                    {{-- Cards Grid 2 Kolom untuk Produk Terlaris --}}
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 pt-2">
                         @foreach ($topSellingProducts as $p)
                             @php
                                 $maxQty = max(1, max($p->qty_sold, $p->prev_qty));
@@ -534,41 +568,62 @@
                                 $prevWidth = round(($p->prev_qty / $maxQty) * 100);
                             @endphp
                             <div
-                                class="space-y-2 p-5 bg-gray-50 dark:bg-gray-900/40 rounded-2xl border border-gray-100 dark:border-gray-800">
-                                <div class="flex items-center justify-between text-xs">
-                                    <div class="flex items-center gap-3">
+                                class="p-5 bg-gray-50/70 dark:bg-gray-900/50 rounded-2xl border border-gray-100 dark:border-gray-800/80 space-y-3.5 hover:border-primary-blue/30 transition-all">
+                                <div class="flex items-start justify-between gap-3 text-xs">
+                                    <div class="min-w-0">
+                                        <div class="flex items-center gap-2 flex-wrap">
+                                            <span
+                                                class="font-black text-gray-800 dark:text-white text-sm uppercase tracking-tight truncate max-w-[220px]"
+                                                title="{{ $p->product->name }}">{{ $p->product->name }}</span>
+                                            <span
+                                                class="px-2.5 py-0.5 {{ $p->is_tefa_internal ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20' : 'bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20' }} border rounded-lg text-[9px] font-black uppercase tracking-wider">
+                                                {{ $p->is_tefa_internal ? 'TEFA Internal' : 'Supplier' }}
+                                            </span>
+                                        </div>
                                         <span
-                                            class="font-black text-gray-800 dark:text-white text-sm uppercase tracking-tight">{{ $p->product->name }}</span>
-                                        <span
-                                            class="px-2.5 py-0.5 {{ $p->is_tefa_internal ? 'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-950 dark:text-blue-300 dark:border-blue-800' : 'bg-purple-100 text-purple-800 border-purple-200 dark:bg-purple-950 dark:text-purple-300 dark:border-purple-800' }} border rounded-lg text-[9px] font-black uppercase tracking-wider">
-                                            {{ $p->is_tefa_internal ? 'TEFA Internal' : 'Supplier' }}
+                                            class="text-[10px] font-bold text-gray-400 uppercase tracking-wider block mt-1">
+                                            Omset: Rp{{ number_format($p->omset) }}
                                         </span>
                                     </div>
-                                    <span
-                                        class="font-black {{ $p->qty_growth >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-primary-red' }} text-sm">
-                                        {{ $p->qty_sold }} pcs
-                                        ({{ $p->qty_growth >= 0 ? '+' . $p->qty_growth . '%' : $p->qty_growth . '%' }} vs
-                                        {{ $p->prev_qty }} pcs lalu)
-                                    </span>
-                                </div>
-                                <div class="space-y-2">
-                                    <div class="flex items-center gap-4 text-xs">
+                                    <div class="text-right shrink-0">
                                         <span
-                                            class="w-28 text-gray-500 dark:text-gray-300 font-bold shrink-0 text-[10px] uppercase tracking-wider">Periode
-                                            Ini: {{ $p->qty_sold }}</span>
+                                            class="inline-block px-2.5 py-1 rounded-xl text-xs font-black {{ $p->qty_growth >= 0 ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20' : 'bg-rose-500/15 text-primary-red border border-rose-500/20' }}">
+                                            {{ $p->qty_sold }} pcs
+                                        </span>
+                                        <span
+                                            class="block text-[9px] font-bold {{ $p->qty_growth >= 0 ? 'text-emerald-500 dark:text-emerald-400' : 'text-rose-400' }} mt-0.5">
+                                            {{ $p->qty_growth >= 0 ? '+' . $p->qty_growth . '%' : $p->qty_growth . '%' }}
+                                            vs lalu
+                                        </span>
+                                    </div>
+                                </div>
+
+                                {{-- Visual Progress Bars --}}
+                                <div class="space-y-2 pt-1 border-t border-gray-100 dark:border-gray-800/80">
+                                    {{-- Periode Ini --}}
+                                    <div class="space-y-1">
+                                        <div class="flex justify-between items-center text-[10px] font-bold">
+                                            <span
+                                                class="text-gray-500 dark:text-gray-400 uppercase tracking-wider">Periode
+                                                Ini</span>
+                                            <span class="text-primary-blue font-black">{{ $p->qty_sold }} pcs</span>
+                                        </div>
                                         <div
-                                            class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3 overflow-hidden p-0.5">
-                                            <div class="bg-primary-blue h-full rounded-full transition-all"
-                                                style="width: {{ max(6, $currWidth) }}%"></div>
+                                            class="w-full bg-gray-200/80 dark:bg-gray-700/50 rounded-full h-2.5 overflow-hidden">
+                                            <div class="bg-gradient-to-r from-blue-600 to-indigo-500 h-full rounded-full transition-all duration-500 shadow-xs"
+                                                style="width: {{ max(5, $currWidth) }}%"></div>
                                         </div>
                                     </div>
-                                    <div class="flex items-center gap-4 text-xs">
-                                        <span
-                                            class="w-28 text-gray-400 font-bold shrink-0 text-[10px] uppercase tracking-wider">Periode
-                                            Lalu: {{ $p->prev_qty }}</span>
+
+                                    {{-- Periode Lalu --}}
+                                    <div class="space-y-1">
+                                        <div class="flex justify-between items-center text-[10px] font-bold">
+                                            <span class="text-gray-400 uppercase tracking-wider">Periode Lalu</span>
+                                            <span class="text-gray-400 font-black">{{ $p->prev_qty }} pcs</span>
+                                        </div>
                                         <div
-                                            class="w-full bg-gray-200 dark:bg-gray-700/60 rounded-full h-2.5 overflow-hidden p-0.5">
-                                            <div class="bg-gray-400 dark:bg-gray-500 h-full rounded-full transition-all"
+                                            class="w-full bg-gray-200/80 dark:bg-gray-700/50 rounded-full h-2 overflow-hidden">
+                                            <div class="bg-gray-400/80 dark:bg-gray-500 h-full rounded-full transition-all duration-500"
                                                 style="width: {{ max(4, $prevWidth) }}%"></div>
                                         </div>
                                     </div>
@@ -580,32 +635,46 @@
 
                 {{-- 10 Slow-Moving Products matching grid --}}
                 <div
-                    class="bg-white dark:bg-gray-800 rounded-[3.5rem] p-10 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 space-y-6">
-                    <div>
-                        <h2
-                            class="text-2xl font-bold uppercase tracking-tight text-amber-600 dark:text-amber-400 leading-none">
-                            10 Produk Stagnan / Slow-Moving</h2>
-                        <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-2">Perlu Atensi
-                            Promosi Bundling atau Rotasi Stok</p>
+                    class="bg-white dark:bg-gray-800 rounded-[2.5rem] sm:rounded-[3.5rem] p-6 sm:p-10 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700/80 space-y-6">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                        <div>
+                            <h2
+                                class="text-xl sm:text-2xl font-bold uppercase tracking-tight text-amber-500 dark:text-amber-400 leading-none">
+                                10 Produk Stagnan / Slow-Moving</h2>
+                            <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-2">Perlu Atensi
+                                Promosi Bundling atau Rotasi Stok</p>
+                        </div>
+                        <span
+                            class="px-3.5 py-1.5 bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 rounded-xl text-[10px] font-black uppercase tracking-wider self-start sm:self-center">
+                            Perlu Rotasi
+                        </span>
                     </div>
-                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
-                        @foreach ($leastSellingProducts as $p)
+                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3.5">
+                        @forelse ($leastSellingProducts as $p)
                             <div
-                                class="p-5 bg-gray-50 dark:bg-gray-900/40 rounded-2xl border border-gray-100 dark:border-gray-800 text-xs flex flex-col justify-between space-y-3">
+                                class="p-4 bg-gray-50/70 dark:bg-gray-900/50 rounded-2xl border border-gray-100 dark:border-gray-800/80 text-xs flex flex-col justify-between space-y-3 hover:border-amber-500/30 transition-all">
                                 <div>
                                     <span
-                                        class="font-black text-gray-800 dark:text-white block truncate text-sm uppercase tracking-tight"
+                                        class="font-black text-gray-800 dark:text-white block truncate text-xs sm:text-sm uppercase tracking-tight"
                                         title="{{ $p->product->name }}">{{ $p->product->name }}</span>
                                     <span
-                                        class="text-[10px] text-amber-600 dark:text-amber-400 font-black uppercase tracking-wider block mt-1">Sisa
-                                        Stok: {{ $p->stock }} {{ $p->product->unit ?? 'pcs' }}</span>
+                                        class="text-[10px] text-amber-600 dark:text-amber-400 font-bold uppercase tracking-wider block mt-1">Sisa:
+                                        {{ $p->stock }} {{ $p->product->unit ?? 'pcs' }}</span>
                                 </div>
-                                <span
-                                    class="text-primary-red font-black block bg-rose-50 dark:bg-rose-950/40 p-2 rounded-xl text-center border border-rose-100 dark:border-rose-900/30 text-xs">
-                                    {{ $p->qty_sold }} Terjual
-                                </span>
+                                <div class="pt-2 border-t border-gray-100 dark:border-gray-800">
+                                    <span
+                                        class="text-primary-red font-black block bg-rose-500/10 text-primary-red py-1.5 px-2 rounded-xl text-center border border-rose-500/20 text-xs">
+                                        {{ $p->qty_sold }} Terjual
+                                    </span>
+                                </div>
                             </div>
-                        @endforeach
+                        @empty
+                            <div
+                                class="col-span-full p-8 text-center bg-gray-50/50 dark:bg-gray-900/30 rounded-2xl border border-gray-100 dark:border-gray-800">
+                                <p class="text-xs text-gray-400 italic">Tidak ada data stok produk yang tercatat pada
+                                    rentang minggu ini.</p>
+                            </div>
+                        @endforelse
                     </div>
                 </div>
             </div>
@@ -659,252 +728,379 @@
                     </div>
                 </div>
 
-                {{-- Audit Piket & Tugas per Hari --}}
-                <div
-                    class="bg-white dark:bg-gray-800 rounded-[3.5rem] p-10 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 space-y-6">
-                    <div>
-                        <h2
-                            class="text-2xl font-bold uppercase tracking-tight text-gray-800 dark:text-white leading-none">
-                            Audit Piket Kasir & Laporan Tugas Harian</h2>
-                        <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-2">Daftar Kehadiran
-                            dan Realisasi Tugas Piket Per Hari</p>
+                {{-- Audit Piket & Tugas per Hari (Accordion Interaktif Fokus Performa Harian) --}}
+                <div x-data="{ activeDayIndex: 0 }"
+                    class="bg-white dark:bg-gray-800 rounded-[2.5rem] sm:rounded-[3.5rem] p-6 sm:p-10 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700/80 space-y-6">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div>
+                            <h2
+                                class="text-xl sm:text-2xl font-bold uppercase tracking-tight text-gray-800 dark:text-white leading-none">
+                                Audit Performa & Piket Kasir Harian</h2>
+                            <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-2">Evaluasi
+                                Performa
+                                Toko Per Hari dengan Rincian Kasir Terjadwal Piket</p>
+                        </div>
+                        <span
+                            class="px-3.5 py-1.5 bg-blue-500/10 text-primary-blue dark:text-blue-400 border border-blue-500/20 rounded-xl text-[10px] font-black uppercase tracking-wider self-start sm:self-center">
+                            {{ count($dailyShiftAudits) }} Hari Terdata
+                        </span>
                     </div>
-                    <div class="space-y-5">
-                        @forelse($dailyShiftAudits as $audit)
+
+                    {{-- Daily Accordion List --}}
+                    <div class="space-y-4 pt-2">
+                        @forelse($dailyShiftAudits as $idx => $audit)
                             <div
-                                class="border border-gray-100 dark:border-gray-800 rounded-3xl overflow-hidden shadow-xs">
-                                <div
-                                    class="bg-gray-50 dark:bg-gray-900/60 px-6 py-4 font-black text-xs text-gray-800 dark:text-white flex items-center justify-between border-b border-gray-100 dark:border-gray-800 uppercase tracking-wider">
-                                    <span>{{ $audit['day_name'] }} ({{ $audit['date'] }})</span>
-                                    <span class="text-primary-blue font-bold">{{ count($audit['cashiers']) }} Kasir
-                                        Bertugas</span>
-                                </div>
-                                <div class="p-6 divide-y divide-gray-100 dark:divide-gray-800 space-y-4">
-                                    @foreach ($audit['cashiers'] as $c)
-                                        <div
-                                            class="pt-4 first:pt-0 flex flex-col md:flex-row md:items-center justify-between gap-4 text-xs">
-                                            <div>
-                                                <div class="flex items-center gap-3">
-                                                    <span
-                                                        class="font-black text-gray-800 dark:text-white text-sm uppercase tracking-tight">{{ $c['user']->name ?? 'Kasir' }}</span>
-                                                    <span
-                                                        class="px-2.5 py-0.5 rounded-lg font-black text-[10px] uppercase {{ $c['attended'] ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300' : 'bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300' }}">
-                                                        {{ $c['attended'] ? 'Hadir' : 'Tidak Hadir' }}
-                                                    </span>
-                                                    @if($c['attended'] && $c['clock_in'])
-                                                        <span class="text-[10px] font-bold text-gray-400">Masuk: {{ $c['clock_in'] }}</span>
-                                                    @endif
-                                                </div>
-                                                <div
-                                                    class="mt-1.5 text-gray-400 flex items-center gap-4 text-[11px] font-bold">
-                                                    <span>Omset: <strong
-                                                            class="text-gray-800 dark:text-white">Rp{{ number_format($c['sales_omset']) }}</strong></span>
-                                                    <span>Transaksi: <strong
-                                                            class="text-gray-800 dark:text-white">{{ $c['sales_tx'] }}
-                                                            Tx</strong></span>
-                                                    <span>Tugas: <strong
-                                                            class="text-gray-800 dark:text-white">{{ max(0, $c['assigned_task_count'] - $c['uncompleted_task_count']) }}
-                                                            / {{ $c['assigned_task_count'] }}</strong></span>
-                                                </div>
+                                class="border border-gray-100 dark:border-gray-800/80 rounded-3xl overflow-hidden transition-all duration-300 bg-gray-50/50 dark:bg-gray-900/40">
+                                {{-- Accordion Header (Ringkasan Performa Hari Tersebut) --}}
+                                <button type="button"
+                                    @click="activeDayIndex = (activeDayIndex === {{ $idx }} ? null : {{ $idx }})"
+                                    class="w-full text-left p-5 sm:p-6 transition-all flex flex-col md:flex-row md:items-center justify-between gap-4 cursor-pointer hover:bg-gray-100/60 dark:hover:bg-gray-800/60"
+                                    :class="activeDayIndex === {{ $idx }} ?
+                                        'bg-blue-50/30 dark:bg-blue-950/20 border-b border-gray-200/70 dark:border-gray-800' :
+                                        ''">
+
+                                    {{-- Kolom Kiri: Nama Hari, Tanggal, dan Status Ringkas --}}
+                                    <div class="flex items-center gap-4 min-w-0">
+                                        <div class="w-12 h-12 rounded-2xl flex flex-col items-center justify-center font-black transition-all shrink-0"
+                                            :class="activeDayIndex === {{ $idx }} ?
+                                                'bg-primary-blue text-white shadow-lg shadow-blue-500/30' :
+                                                'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200/60 dark:border-gray-700'">
+                                            <span
+                                                class="text-[9px] uppercase tracking-wider leading-none opacity-70">{{ substr($audit['day_name'], 0, 3) }}</span>
+                                            <span
+                                                class="text-sm font-black leading-none mt-0.5">{{ explode(' ', $audit['date'])[0] }}</span>
+                                        </div>
+                                        <div class="min-w-0">
+                                            <div class="flex items-center gap-2 flex-wrap">
+                                                <span
+                                                    class="text-sm sm:text-base font-black text-gray-800 dark:text-white uppercase tracking-tight">
+                                                    {{ $audit['day_name'] }}, {{ $audit['date'] }}
+                                                </span>
+                                                <span
+                                                    class="px-2.5 py-0.5 rounded-lg text-[9px] font-black uppercase tracking-wider {{ $audit['attended_count'] === $audit['scheduled_count'] ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20' : 'bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/20' }}">
+                                                    {{ $audit['attended_count'] }}/{{ $audit['scheduled_count'] }}
+                                                    Kasir Hadir
+                                                </span>
                                             </div>
-                                            <div class="flex flex-wrap gap-2 max-w-md">
-                                                @foreach ($c['task_details'] as $t)
-                                                    <span
-                                                        class="px-2.5 py-1 rounded-xl text-[10px] font-bold {{ $t['status'] === 'Disetujui' ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300' : 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300' }}">
-                                                        {{ $t['task_name'] }} ({{ $t['status'] }})
-                                                    </span>
-                                                @endforeach
+                                            <p
+                                                class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mt-1 truncate">
+                                                Piket:
+                                                {{ collect($audit['cashiers'])->pluck('user.name')->implode(', ') }}
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    {{-- Kolom Kanan: Metrik Performa Hari Itu (Omset & Transaksi) & Icon Accordion --}}
+                                    <div
+                                        class="flex items-center justify-between md:justify-end gap-6 shrink-0 pt-2 md:pt-0 border-t md:border-t-0 border-gray-100 dark:border-gray-800">
+                                        <div class="flex items-center gap-4 sm:gap-6 text-right">
+                                            <div>
+                                                <span
+                                                    class="block text-[9px] font-bold text-gray-400 uppercase tracking-wider">Omset
+                                                    Hari Ini</span>
+                                                <span
+                                                    class="text-sm sm:text-base font-black text-primary-blue dark:text-primary-blue-light tracking-tight">
+                                                    Rp{{ number_format($audit['day_revenue'], 0, ',', '.') }}
+                                                </span>
+                                            </div>
+                                            <div class="hidden sm:block">
+                                                <span
+                                                    class="block text-[9px] font-bold text-gray-400 uppercase tracking-wider">Transaksi</span>
+                                                <span
+                                                    class="text-xs sm:text-sm font-black text-gray-700 dark:text-gray-200">
+                                                    {{ $audit['day_tx'] }} Tx
+                                                </span>
+                                            </div>
+                                            <div>
+                                                <span
+                                                    class="block text-[9px] font-bold text-gray-400 uppercase tracking-wider">Tugas</span>
+                                                <span
+                                                    class="text-xs sm:text-sm font-black {{ $audit['task_rate'] >= 80 ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400' }}">
+                                                    {{ $audit['task_rate'] }}%
+                                                </span>
                                             </div>
                                         </div>
-                                    @endforeach
+
+                                        {{-- Toggle Arrow --}}
+                                        <div class="w-9 h-9 rounded-xl flex items-center justify-center transition-transform duration-300 bg-white dark:bg-gray-800 text-gray-400 border border-gray-100 dark:border-gray-700"
+                                            :class="activeDayIndex === {{ $idx }} ?
+                                                'rotate-180 text-primary-blue bg-blue-50 dark:bg-blue-950/40' : ''">
+                                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24"
+                                                stroke="currentColor" stroke-width="2.5">
+                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                    d="M19 9l-7 7-7-7" />
+                                            </svg>
+                                        </div>
+                                    </div>
+                                </button>
+
+                                {{-- Accordion Body: Kasir Terjadwal Piket pada Hari Tersebut --}}
+                                <div x-show="activeDayIndex === {{ $idx }}" x-collapse
+                                    class="p-5 sm:p-7 space-y-4 bg-white dark:bg-gray-800/80">
+                                    <div
+                                        class="flex items-center justify-between pb-3 border-b border-gray-100 dark:border-gray-800">
+                                        <h4 class="text-xs font-black uppercase tracking-widest text-gray-400">
+                                            Daftar Kasir Terjadwal Piket ({{ count($audit['cashiers']) }} Orang)
+                                        </h4>
+                                        <span class="text-[10px] font-bold text-gray-400 uppercase">
+                                            Total Omset Dicatat:
+                                            Rp{{ number_format(collect($audit['cashiers'])->sum('sales_omset'), 0, ',', '.') }}
+                                        </span>
+                                    </div>
+
+                                    <div class="grid grid-cols-1 gap-4">
+                                        @foreach ($audit['cashiers'] as $c)
+                                            <div
+                                                class="p-4 sm:p-5 rounded-2xl bg-gray-50/80 dark:bg-gray-900/60 border border-gray-100 dark:border-gray-800/80 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                                                <div class="space-y-2 min-w-0">
+                                                    <div class="flex items-center gap-3 flex-wrap">
+                                                        <span
+                                                            class="font-black text-gray-800 dark:text-white text-sm uppercase tracking-tight">
+                                                            {{ $c['user']->name ?? 'Kasir' }}
+                                                        </span>
+                                                        <span
+                                                            class="px-2.5 py-0.5 rounded-lg font-black text-[10px] uppercase {{ $c['attended'] ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20' : 'bg-rose-500/15 text-primary-red border border-rose-500/20' }}">
+                                                            {{ $c['attended'] ? 'Hadir Piket' : 'Tidak Hadir' }}
+                                                        </span>
+                                                        @if ($c['attended'] && $c['clock_in'])
+                                                            <span class="text-[10px] font-bold text-gray-400">
+                                                                Masuk: {{ $c['clock_in'] }}
+                                                                ({{ ucfirst(str_replace('_', ' ', $c['clock_in_status'])) }})
+                                                            </span>
+                                                        @endif
+                                                    </div>
+
+                                                    {{-- Metrik Kasir Pada Hari Itu --}}
+                                                    <div
+                                                        class="text-gray-400 flex flex-wrap items-center gap-4 sm:gap-6 text-xs font-bold">
+                                                        <span>Omset Kasir: <strong
+                                                                class="text-gray-800 dark:text-white">Rp{{ number_format($c['sales_omset']) }}</strong></span>
+                                                        <span>Transaksi: <strong
+                                                                class="text-gray-800 dark:text-white">{{ $c['sales_tx'] }}
+                                                                Tx</strong></span>
+                                                        <span>Tugas Diselesaikan: <strong
+                                                                class="text-gray-800 dark:text-white">{{ max(0, $c['assigned_task_count'] - $c['uncompleted_task_count']) }}
+                                                                / {{ $c['assigned_task_count'] }}</strong></span>
+                                                    </div>
+                                                </div>
+
+                                                {{-- Badges Tugas Kasir --}}
+                                                <div class="flex flex-wrap gap-2 max-w-lg self-start md:self-center">
+                                                    @forelse ($c['task_details'] as $t)
+                                                        <span
+                                                            class="px-2.5 py-1 rounded-xl text-[10px] font-bold {{ $t['status'] === 'Disetujui' ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20' : 'bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/20' }}"
+                                                            title="{{ $t['status'] }}">
+                                                            {{ $t['task_name'] }} ({{ $t['status'] }})
+                                                        </span>
+                                                    @empty
+                                                        <span class="text-[10px] text-gray-400 italic">Tidak ada tugas
+                                                            penugasan khusus</span>
+                                                    @endforelse
+                                                </div>
+                                            </div>
+                                        @endforeach
+                                    </div>
                                 </div>
                             </div>
-                        @empty
-                            <p class="text-xs text-gray-400 py-6 text-center italic">Belum ada data audit jadwal untuk
-                                rentang tanggal ini.</p>
-                        @endforelse
+                            @empty
+                                <div
+                                    class="p-8 text-center bg-gray-50 dark:bg-gray-900/40 rounded-3xl border border-gray-100 dark:border-gray-800">
+                                    <p class="text-xs text-gray-400 italic">Belum ada data audit jadwal untuk rentang
+                                        tanggal ini.</p>
+                                </div>
+                            @endforelse
+                        </div>
+                    </div>
+                </div>
+            @endif
+
+        </div>
+
+        {{-- BOTTOM WIZARD NAVIGATION BAR MATCHING 2.5rem CORNERS --}}
+        <div
+            class="bg-white dark:bg-gray-800 rounded-[2.5rem] p-6 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 flex items-center justify-between gap-4 mt-12">
+            {{-- Tombol Sebelumnya --}}
+            <div>
+                @if ($currentStep > 1)
+                    <button wire:click="prevStep"
+                        class="flex items-center gap-3 px-6 py-3.5 bg-gray-100 dark:bg-gray-700/60 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-800 dark:text-white font-black text-xs uppercase tracking-wider rounded-2xl transition-all shadow-sm">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                            stroke-width="2.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+                        </svg>
+                        <span>Sebelumnya</span>
+                    </button>
+                @else
+                    <span class="text-xs font-black uppercase tracking-widest text-gray-400 pl-2">Tahap Awal</span>
+                @endif
+            </div>
+
+            {{-- Step Indicator Dots --}}
+            <div class="flex items-center gap-2.5">
+                @for ($st = 1; $st <= 4; $st++)
+                    <button wire:click="setStep({{ $st }})"
+                        class="h-2.5 rounded-full transition-all {{ $currentStep === $st ? 'bg-primary-blue w-10' : 'bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 w-2.5' }}"
+                        title="Ke Tahap {{ $st }}">
+                    </button>
+                @endfor
+            </div>
+
+            {{-- Tombol Selanjutnya --}}
+            <div>
+                @if ($currentStep < 4)
+                    <button wire:click="nextStep"
+                        class="flex items-center gap-3 px-8 py-3.5 bg-primary-blue hover:bg-blue-600 text-white font-black text-xs uppercase tracking-wider rounded-2xl transition-all shadow-xl shadow-blue-500/20">
+                        <span>Selanjutnya</span>
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                            stroke-width="2.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                        </svg>
+                    </button>
+                @else
+                    <button wire:click="setStep(1)"
+                        class="flex items-center gap-3 px-8 py-3.5 bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs uppercase tracking-wider rounded-2xl transition-all shadow-xl shadow-emerald-600/20">
+                        <span>Kembali ke Tahap 1</span>
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                            stroke-width="2.5">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                    </button>
+                @endif
+            </div>
+        </div>
+
+        {{-- MODAL AUDIT KASIR DETAIL --}}
+        @if ($showCashierDetailModal && $modalCashierData)
+            <div x-data="{ activeAccordion: null }" x-transition:enter="transition ease-out duration-300"
+                x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+                x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100"
+                x-transition:leave-end="opacity-0"
+                class="fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+
+                <div x-transition:enter="transition ease-out duration-300 transform"
+                    x-transition:enter-start="opacity-0 scale-95 translate-y-4"
+                    x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+                    x-transition:leave="transition ease-in duration-200 transform"
+                    x-transition:leave-start="opacity-100 scale-100 translate-y-0"
+                    x-transition:leave-end="opacity-0 scale-95 translate-y-4"
+                    class="bg-white dark:bg-gray-800 w-full max-w-xl rounded-[2.5rem] shadow-2xl border border-gray-100 dark:border-gray-700 overflow-hidden flex flex-col max-h-[85vh]">
+
+                    {{-- Modal Header --}}
+                    <div
+                        class="p-6 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between bg-gray-50 dark:bg-gray-900/50 shrink-0">
+                        <div>
+                            <h3 class="font-black text-gray-800 dark:text-white text-base uppercase tracking-tight">Detail
+                                Log Harian: {{ $modalCashierData['user']->name }}</h3>
+                            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mt-0.5">Rekap Kehadiran,
+                                Tugas, & Catatan Piket</p>
+                        </div>
+                        <button wire:click="closeCashierDetailModal"
+                            class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 rounded-xl transition-all cursor-pointer">
+                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                                stroke-width="2.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+
+                    {{-- Modal Body: Scrollable with Smooth Accordion Per Day --}}
+                    <div
+                        class="p-6 overflow-y-auto space-y-3 text-xs flex-1 divide-y divide-gray-100 dark:divide-gray-800">
+                        @foreach ($modalCashierData['daily_breakdown'] as $idx => $dayLog)
+                            @php
+                                $hasContent =
+                                    $dayLog['attendance'] || count($dayLog['tasks']) > 0 || $dayLog['sales_omset'] > 0;
+                            @endphp
+                            <div class="pt-3 first:pt-0">
+                                {{-- Accordion Header / Trigger Button --}}
+                                <button type="button"
+                                    @click="activeAccordion = (activeAccordion === {{ $idx }} ? null : {{ $idx }})"
+                                    class="w-full text-left p-3.5 rounded-2xl transition-all flex items-center justify-between gap-3 cursor-pointer {{ $dayLog['attendance'] ? 'bg-emerald-50/50 dark:bg-emerald-950/20 hover:bg-emerald-50 dark:hover:bg-emerald-950/40' : 'bg-gray-50 dark:bg-gray-900/40 hover:bg-gray-100 dark:hover:bg-gray-900/70' }}">
+                                    <div class="flex items-center gap-3 min-w-0">
+                                        <span
+                                            class="w-2 h-2 rounded-full shrink-0 {{ $dayLog['attendance'] ? 'bg-emerald-500' : 'bg-gray-300 dark:bg-gray-600' }}"></span>
+                                        <div class="min-w-0">
+                                            <div class="flex items-center gap-2">
+                                                <span
+                                                    class="text-xs font-black text-gray-800 dark:text-white uppercase tracking-tight truncate">
+                                                    {{ $dayLog['day_name'] }} ({{ $dayLog['date'] }})
+                                                </span>
+                                            </div>
+                                            <span class="text-[10px] text-gray-400 font-bold block mt-0.5">
+                                                Omset: Rp{{ number_format($dayLog['sales_omset'] / 1000, 0) }}k •
+                                                {{ count($dayLog['tasks']) }} Tugas
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <div class="flex items-center gap-2 shrink-0">
+                                        <span
+                                            class="px-2.5 py-1 rounded-xl text-[9px] font-black uppercase tracking-wider {{ $dayLog['attendance'] ? 'bg-emerald-500/15 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300 border border-emerald-500/20' : 'bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400' }}">
+                                            {{ $dayLog['attendance'] ? 'Absen Masuk' : 'Tidak Absen' }}
+                                        </span>
+                                        <svg class="w-4 h-4 text-gray-400 transition-transform duration-200"
+                                            :class="activeAccordion === {{ $idx }} ? 'rotate-180 text-primary-blue' :
+                                                ''"
+                                            fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                                        </svg>
+                                    </div>
+                                </button>
+
+                                {{-- Accordion Collapsible Panel Content --}}
+                                <div x-show="activeAccordion === {{ $idx }}" x-collapse
+                                    class="mt-2.5 px-4 py-3 bg-gray-50 dark:bg-gray-900/60 rounded-2xl border border-gray-100 dark:border-gray-800 space-y-3">
+
+                                    {{-- Sales & Attendance Meta --}}
+                                    <div
+                                        class="grid grid-cols-2 gap-2 text-[11px] font-bold text-gray-500 dark:text-gray-400">
+                                        <div>Omset: <strong
+                                                class="text-gray-800 dark:text-white">Rp{{ number_format($dayLog['sales_omset']) }}</strong>
+                                            ({{ $dayLog['sales_count'] }} Tx)</div>
+                                        <div>Piket: <strong
+                                                class="text-gray-800 dark:text-white">{{ $dayLog['is_scheduled'] ? 'Terjadwal' : 'Tidak Ada Jadwal' }}</strong>
+                                        </div>
+                                    </div>
+
+                                    {{-- Task List --}}
+                                    @if (count($dayLog['tasks']) > 0)
+                                        <div class="pt-2 border-t border-gray-200 dark:border-gray-800 space-y-1.5">
+                                            <span
+                                                class="text-[9px] font-black text-gray-400 uppercase tracking-widest block">Daftar
+                                                Tugas:</span>
+                                            @foreach ($dayLog['tasks'] as $t)
+                                                <div
+                                                    class="text-[11px] font-semibold text-gray-700 dark:text-gray-300 flex items-center justify-between gap-2">
+                                                    <span class="truncate">•
+                                                        {{ $t->taskDefinition->task_name ?? 'Tugas' }}</span>
+                                                    <span
+                                                        class="font-bold text-[10px] shrink-0 {{ $t->latestSubmission && $t->latestSubmission->approval_status === 'approved' ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400' }}">
+                                                        {{ $t->latestSubmission ? ucfirst($t->latestSubmission->approval_status) : 'Belum Submit' }}
+                                                    </span>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    @else
+                                        <div
+                                            class="pt-2 border-t border-gray-200 dark:border-gray-800 text-[10px] text-gray-400 italic">
+                                            Tidak ada penugasan tugas piket pada hari ini.
+                                        </div>
+                                    @endif
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+
+                    {{-- Modal Footer --}}
+                    <div
+                        class="p-5 bg-gray-50 dark:bg-gray-900/50 border-t border-gray-100 dark:border-gray-700 text-right shrink-0">
+                        <button wire:click="closeCashierDetailModal"
+                            class="px-6 py-2.5 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-white font-black rounded-xl text-xs uppercase tracking-wider transition-all cursor-pointer">
+                            Tutup
+                        </button>
                     </div>
                 </div>
             </div>
         @endif
-
     </div>
-
-    {{-- BOTTOM WIZARD NAVIGATION BAR MATCHING 2.5rem CORNERS --}}
-    <div
-        class="bg-white dark:bg-gray-800 rounded-[2.5rem] p-6 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 flex items-center justify-between gap-4 mt-12">
-        {{-- Tombol Sebelumnya --}}
-        <div>
-            @if ($currentStep > 1)
-                <button wire:click="prevStep"
-                    class="flex items-center gap-3 px-6 py-3.5 bg-gray-100 dark:bg-gray-700/60 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-800 dark:text-white font-black text-xs uppercase tracking-wider rounded-2xl transition-all shadow-sm">
-                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                        stroke-width="2.5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
-                    </svg>
-                    <span>Sebelumnya</span>
-                </button>
-            @else
-                <span class="text-xs font-black uppercase tracking-widest text-gray-400 pl-2">Tahap Awal</span>
-            @endif
-        </div>
-
-        {{-- Step Indicator Dots --}}
-        <div class="flex items-center gap-2.5">
-            @for ($st = 1; $st <= 4; $st++)
-                <button wire:click="setStep({{ $st }})"
-                    class="h-2.5 rounded-full transition-all {{ $currentStep === $st ? 'bg-primary-blue w-10' : 'bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 w-2.5' }}"
-                    title="Ke Tahap {{ $st }}">
-                </button>
-            @endfor
-        </div>
-
-        {{-- Tombol Selanjutnya --}}
-        <div>
-            @if ($currentStep < 4)
-                <button wire:click="nextStep"
-                    class="flex items-center gap-3 px-8 py-3.5 bg-primary-blue hover:bg-blue-600 text-white font-black text-xs uppercase tracking-wider rounded-2xl transition-all shadow-xl shadow-blue-500/20">
-                    <span>Selanjutnya</span>
-                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                        stroke-width="2.5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
-                    </svg>
-                </button>
-            @else
-                <button wire:click="setStep(1)"
-                    class="flex items-center gap-3 px-8 py-3.5 bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs uppercase tracking-wider rounded-2xl transition-all shadow-xl shadow-emerald-600/20">
-                    <span>Kembali ke Tahap 1</span>
-                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                        stroke-width="2.5">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                    </svg>
-                </button>
-            @endif
-        </div>
-    </div>
-
-    {{-- MODAL AUDIT KASIR DETAIL --}}
-    @if ($showCashierDetailModal && $modalCashierData)
-        <div
-            x-data="{ activeAccordion: null }"
-            x-transition:enter="transition ease-out duration-300"
-            x-transition:enter-start="opacity-0"
-            x-transition:enter-end="opacity-100"
-            x-transition:leave="transition ease-in duration-200"
-            x-transition:leave-start="opacity-100"
-            x-transition:leave-end="opacity-0"
-            class="fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-            
-            <div
-                x-transition:enter="transition ease-out duration-300 transform"
-                x-transition:enter-start="opacity-0 scale-95 translate-y-4"
-                x-transition:enter-end="opacity-100 scale-100 translate-y-0"
-                x-transition:leave="transition ease-in duration-200 transform"
-                x-transition:leave-start="opacity-100 scale-100 translate-y-0"
-                x-transition:leave-end="opacity-0 scale-95 translate-y-4"
-                class="bg-white dark:bg-gray-800 w-full max-w-xl rounded-[2.5rem] shadow-2xl border border-gray-100 dark:border-gray-700 overflow-hidden flex flex-col max-h-[85vh]">
-                
-                {{-- Modal Header --}}
-                <div
-                    class="p-6 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between bg-gray-50 dark:bg-gray-900/50 shrink-0">
-                    <div>
-                        <h3 class="font-black text-gray-800 dark:text-white text-base uppercase tracking-tight">Detail
-                            Log Harian: {{ $modalCashierData['user']->name }}</h3>
-                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mt-0.5">Rekap Kehadiran,
-                            Tugas, & Catatan Piket</p>
-                    </div>
-                    <button wire:click="closeCashierDetailModal"
-                        class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 rounded-xl transition-all cursor-pointer">
-                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </button>
-                </div>
-
-                {{-- Modal Body: Scrollable with Smooth Accordion Per Day --}}
-                <div class="p-6 overflow-y-auto space-y-3 text-xs flex-1 divide-y divide-gray-100 dark:divide-gray-800">
-                    @foreach ($modalCashierData['daily_breakdown'] as $idx => $dayLog)
-                        @php
-                            $hasContent = $dayLog['attendance'] || count($dayLog['tasks']) > 0 || $dayLog['sales_omset'] > 0;
-                        @endphp
-                        <div class="pt-3 first:pt-0">
-                            {{-- Accordion Header / Trigger Button --}}
-                            <button
-                                type="button"
-                                @click="activeAccordion = (activeAccordion === {{ $idx }} ? null : {{ $idx }})"
-                                class="w-full text-left p-3.5 rounded-2xl transition-all flex items-center justify-between gap-3 cursor-pointer {{ $dayLog['attendance'] ? 'bg-emerald-50/50 dark:bg-emerald-950/20 hover:bg-emerald-50 dark:hover:bg-emerald-950/40' : 'bg-gray-50 dark:bg-gray-900/40 hover:bg-gray-100 dark:hover:bg-gray-900/70' }}">
-                                <div class="flex items-center gap-3 min-w-0">
-                                    <span class="w-2 h-2 rounded-full shrink-0 {{ $dayLog['attendance'] ? 'bg-emerald-500' : 'bg-gray-300 dark:bg-gray-600' }}"></span>
-                                    <div class="min-w-0">
-                                        <div class="flex items-center gap-2">
-                                            <span class="text-xs font-black text-gray-800 dark:text-white uppercase tracking-tight truncate">
-                                                {{ $dayLog['day_name'] }} ({{ $dayLog['date'] }})
-                                            </span>
-                                        </div>
-                                        <span class="text-[10px] text-gray-400 font-bold block mt-0.5">
-                                            Omset: Rp{{ number_format($dayLog['sales_omset'] / 1000, 0) }}k • {{ count($dayLog['tasks']) }} Tugas
-                                        </span>
-                                    </div>
-                                </div>
-
-                                <div class="flex items-center gap-2 shrink-0">
-                                    <span class="px-2.5 py-1 rounded-xl text-[9px] font-black uppercase tracking-wider {{ $dayLog['attendance'] ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300' : 'bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400' }}">
-                                        {{ $dayLog['attendance'] ? 'Absen Masuk' : 'Tidak Absen' }}
-                                    </span>
-                                    <svg class="w-4 h-4 text-gray-400 transition-transform duration-200"
-                                        :class="activeAccordion === {{ $idx }} ? 'rotate-180 text-primary-blue' : ''"
-                                        fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
-                                    </svg>
-                                </div>
-                            </button>
-
-                            {{-- Accordion Collapsible Panel Content --}}
-                            <div
-                                x-show="activeAccordion === {{ $idx }}"
-                                x-collapse
-                                class="mt-2.5 px-4 py-3 bg-gray-50 dark:bg-gray-900/60 rounded-2xl border border-gray-100 dark:border-gray-800 space-y-3">
-                                
-                                {{-- Sales & Attendance Meta --}}
-                                <div class="grid grid-cols-2 gap-2 text-[11px] font-bold text-gray-500 dark:text-gray-400">
-                                    <div>Omset: <strong class="text-gray-800 dark:text-white">Rp{{ number_format($dayLog['sales_omset']) }}</strong> ({{ $dayLog['sales_count'] }} Tx)</div>
-                                    <div>Piket: <strong class="text-gray-800 dark:text-white">{{ $dayLog['is_scheduled'] ? 'Terjadwal' : 'Tidak Ada Jadwal' }}</strong></div>
-                                </div>
-
-                                {{-- Task List --}}
-                                @if (count($dayLog['tasks']) > 0)
-                                    <div class="pt-2 border-t border-gray-200 dark:border-gray-800 space-y-1.5">
-                                        <span class="text-[9px] font-black text-gray-400 uppercase tracking-widest block">Daftar Tugas:</span>
-                                        @foreach ($dayLog['tasks'] as $t)
-                                            <div class="text-[11px] font-semibold text-gray-700 dark:text-gray-300 flex items-center justify-between gap-2">
-                                                <span class="truncate">• {{ $t->taskDefinition->task_name ?? 'Tugas' }}</span>
-                                                <span class="font-bold text-[10px] shrink-0 {{ $t->latestSubmission && $t->latestSubmission->approval_status === 'approved' ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400' }}">
-                                                    {{ $t->latestSubmission ? ucfirst($t->latestSubmission->approval_status) : 'Belum Submit' }}
-                                                </span>
-                                            </div>
-                                        @endforeach
-                                    </div>
-                                @else
-                                    <div class="pt-2 border-t border-gray-200 dark:border-gray-800 text-[10px] text-gray-400 italic">
-                                        Tidak ada penugasan tugas piket pada hari ini.
-                                    </div>
-                                @endif
-                            </div>
-                        </div>
-                    @endforeach
-                </div>
-
-                {{-- Modal Footer --}}
-                <div
-                    class="p-5 bg-gray-50 dark:bg-gray-900/50 border-t border-gray-100 dark:border-gray-700 text-right shrink-0">
-                    <button wire:click="closeCashierDetailModal"
-                        class="px-6 py-2.5 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-white font-black rounded-xl text-xs uppercase tracking-wider transition-all cursor-pointer">
-                        Tutup
-                    </button>
-                </div>
-            </div>
-        </div>
-    @endif
-</div>

@@ -26,18 +26,18 @@ class WeeklyPerformance extends Component
 
     public function mount($startDate = null, $endDate = null)
     {
-        $this->startDate = $startDate ?? now()->startOfWeek()->toDateString();
-        $this->endDate = $endDate ?? now()->endOfWeek()->toDateString();
+        $this->startDate = $startDate ?? now()->startOfWeek(Carbon::MONDAY)->toDateString();
+        $this->endDate = $endDate ?? now()->startOfWeek(Carbon::MONDAY)->addDays(4)->toDateString();
     }
 
     public function setPresetRange($preset)
     {
         if ($preset === 'this_week') {
-            $this->startDate = now()->startOfWeek()->toDateString();
-            $this->endDate = now()->endOfWeek()->toDateString();
+            $this->startDate = now()->startOfWeek(Carbon::MONDAY)->toDateString();
+            $this->endDate = now()->startOfWeek(Carbon::MONDAY)->addDays(4)->toDateString();
         } elseif ($preset === 'last_week') {
-            $this->startDate = now()->subWeek()->startOfWeek()->toDateString();
-            $this->endDate = now()->subWeek()->endOfWeek()->toDateString();
+            $this->startDate = now()->subWeek()->startOfWeek(Carbon::MONDAY)->toDateString();
+            $this->endDate = now()->subWeek()->startOfWeek(Carbon::MONDAY)->addDays(4)->toDateString();
         } elseif ($preset === 'this_month') {
             $this->startDate = now()->startOfMonth()->toDateString();
             $this->endDate = now()->endOfMonth()->toDateString();
@@ -267,9 +267,24 @@ class WeeklyPerformance extends Component
             }
 
             if (!empty($cashierAuditsForDay)) {
+                $totalCashiersScheduled = count($cashierAuditsForDay);
+                $totalCashiersAttended = collect($cashierAuditsForDay)->where('attended', true)->count();
+                $totalAssignedTasksDay = collect($cashierAuditsForDay)->sum('assigned_task_count');
+                $totalUncompletedTasksDay = collect($cashierAuditsForDay)->sum('uncompleted_task_count');
+                $totalApprovedTasksDay = max(0, $totalAssignedTasksDay - $totalUncompletedTasksDay);
+                $taskRateDay = $totalAssignedTasksDay > 0 ? round(($totalApprovedTasksDay / $totalAssignedTasksDay) * 100) : 100;
+
                 $dailyShiftAudits[] = [
                     'day_name' => $dayName,
                     'date' => $dayDate->format('d M Y'),
+                    'day_revenue' => $rev,
+                    'day_profit' => $profit,
+                    'day_tx' => $txCount,
+                    'scheduled_count' => $totalCashiersScheduled,
+                    'attended_count' => $totalCashiersAttended,
+                    'task_approved_count' => $totalApprovedTasksDay,
+                    'task_assigned_count' => $totalAssignedTasksDay,
+                    'task_rate' => $taskRateDay,
                     'cashiers' => $cashierAuditsForDay,
                 ];
             }
@@ -461,21 +476,17 @@ class WeeklyPerformance extends Component
             ->get()
             ->keyBy('product_id');
 
+        $periodStartDate = $weekStart->toDateString();
+        $periodEndDate = $weekEnd->toDateString();
+
         $allProducts = Product::when($activeJurusanId, fn($q) => $q->where('jurusan_id', $activeJurusanId))
             ->where('is_active', true)
-            ->where(function($q) {
-                // Internal TEFA products (no supplier) OR supplier products that have recorded stock entries (>0)
-                $q->whereNull('supplier_id')
-                  ->orWhere(function($sq) {
-                      $sq->whereNotNull('supplier_id')
-                        ->whereHas('stockEntries', function($stq) {
-                            $stq->where('opening_stock', '>', 0)
-                               ->orWhere('closing_stock', '>', 0);
-                        });
-                  });
+            ->whereHas('stockEntries', function($stq) use ($periodStartDate, $periodEndDate) {
+                $stq->whereBetween('date', [$periodStartDate, $periodEndDate]);
             })
-            ->with(['category', 'supplier', 'stockEntries' => function($sq) {
-                $sq->orderBy('date', 'desc')->limit(1);
+            ->with(['category', 'supplier', 'stockEntries' => function($sq) use ($periodStartDate, $periodEndDate) {
+                $sq->whereBetween('date', [$periodStartDate, $periodEndDate])
+                   ->orderBy('date', 'desc');
             }])
             ->get();
 

@@ -396,7 +396,7 @@
                             <span class="text-lg font-black text-primary-red">Rp{{ number_format($tx->total_amount, 0, ',', '.') }}</span>
                         </td>
                         <td class="px-10 py-8 text-right">
-                            <span class="text-[9px] font-black uppercase px-4 py-1.5 rounded-full {{ $tx->status === 'uang_diterima' ? 'bg-green-100 text-green-700' : 'bg-primary-red/10 text-primary-red' }}">
+                            <span class="text-[9px] font-black uppercase px-4 py-1.5 rounded-full {{ $tx->status === 'uang_diterima' ? 'bg-emerald-500/15 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300 border border-emerald-500/20' : 'bg-primary-red/10 text-primary-red' }}">
                                 {{ str_replace('_', ' ', $tx->status) }}
                             </span>
                         </td>
@@ -483,7 +483,7 @@
             <div class="p-10 bg-gray-50 dark:bg-gray-900/50 border-t border-gray-100 dark:border-gray-800 flex justify-between items-center">
                 <div>
                     <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Status Pembayaran</p>
-                    <span class="px-4 py-1.5 rounded-full text-[9px] font-black uppercase {{ $this->detailItems->first()->status ?? '' === 'uang_diterima' ? 'bg-green-100 text-green-700' : 'bg-primary-red/10 text-primary-red' }}">
+                    <span class="px-4 py-1.5 rounded-full text-[9px] font-black uppercase {{ $this->detailItems->first()->status ?? '' === 'uang_diterima' ? 'bg-emerald-500/15 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300 border border-emerald-500/20' : 'bg-primary-red/10 text-primary-red' }}">
                         {{ str_replace('_', ' ', $this->detailItems->first()->status ?? 'Unknown') }}
                     </span>
                 </div>
