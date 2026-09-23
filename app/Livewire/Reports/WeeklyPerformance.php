@@ -8,6 +8,7 @@ use App\Models\CashierNote;
 use App\Models\CashierSchedule;
 use App\Models\CashierTaskAssignment;
 use App\Models\CashierTaskSubmission;
+use App\Models\DailyRecap;
 use App\Models\Product;
 use App\Models\Transaction;
 use App\Models\User;
@@ -213,6 +214,20 @@ class WeeklyPerformance extends Component
 
             $netProfit = $grossProfit - $dayExpense;
 
+            // Fetch DailyRecap audit kas for this day
+            $dailyRecapModel = DailyRecap::forReporting()
+                ->where('date', $dayStr)
+                ->when($activeJurusanId, fn($q) => $q->where('jurusan_id', $activeJurusanId))
+                ->first();
+
+            $actualCash = $dailyRecapModel ? (float) $dailyRecapModel->actual_cash : 0;
+            $retainedChangeCash = $dailyRecapModel ? (float) $dailyRecapModel->retained_change_cash : 0;
+            $hasAudit = $dailyRecapModel && ($actualCash > 0 || !empty($dailyRecapModel->cash_note));
+
+            // Selisih = (Setoran Bersih) - Total Omzet Sistem (Real)
+            // Selisih positif (+): Lebih/Untung kas laci; Selisih negatif (-): Defisit/Rugi kas laci
+            $cashDiff = $hasAudit ? (($actualCash - $retainedChangeCash) - $rev) : 0;
+
             if ($rev > $maxDailyRevenue) {
                 $maxDailyRevenue = $rev;
             }
@@ -234,6 +249,10 @@ class WeeklyPerformance extends Component
                 'profit' => $grossProfit,
                 'expense' => $dayExpense,
                 'net_profit' => $netProfit,
+                'has_audit' => $hasAudit,
+                'cash_diff' => $cashDiff,
+                'actual_cash' => $actualCash,
+                'retained_change_cash' => $retainedChangeCash,
                 'transactions' => $txCount,
             ];
 
@@ -339,6 +358,10 @@ class WeeklyPerformance extends Component
                     'day_profit' => $grossProfit,
                     'day_expense' => $dayExpense,
                     'day_net_profit' => $netProfit,
+                    'has_audit' => $hasAudit,
+                    'cash_diff' => $cashDiff,
+                    'actual_cash' => $actualCash,
+                    'retained_change_cash' => $retainedChangeCash,
                     'day_tx' => $txCount,
                     'scheduled_count' => $totalCashiersScheduled,
                     'attended_count' => $totalCashiersAttended,

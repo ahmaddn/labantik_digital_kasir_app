@@ -346,7 +346,7 @@
                                         @endif
                                     </div>
 
-                                    {{-- X-Axis Day, Transaction, Profit & Expense --}}
+                                    {{-- X-Axis Day, Transaction, Profit & Cash Audit Selisih --}}
                                     <div class="mt-3 text-center space-y-0.5">
                                         <span
                                             class="text-xs font-black uppercase tracking-tight block {{ $isPeak ? 'text-primary-blue' : 'text-gray-800 dark:text-white' }}">
@@ -356,11 +356,21 @@
                                             class="text-[9px] font-bold text-gray-400 uppercase tracking-wider block">
                                             {{ $day['transactions'] }} Tx
                                         </span>
-                                        @if($day['net_profit'] != 0 || $day['expense'] > 0)
+                                        @if($day['has_audit'])
                                             <div class="text-[9px] font-black uppercase tracking-tight leading-none pt-1">
-                                                <span class="{{ $day['net_profit'] >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400' }}" title="Laba/Rugi Bersih Harian">
-                                                    {{ $day['net_profit'] >= 0 ? '+' : '' }}Rp{{ number_format($day['net_profit'] / 1000, 0) }}k
-                                                </span>
+                                                @if($day['cash_diff'] > 0)
+                                                    <span class="text-emerald-600 dark:text-emerald-400" title="Kas Lebih (Untung Kas Laci): +Rp{{ number_format($day['cash_diff']) }}">
+                                                        +Rp{{ number_format($day['cash_diff'] / 1000, 0) }}k
+                                                    </span>
+                                                @elseif($day['cash_diff'] < 0)
+                                                    <span class="text-rose-600 dark:text-rose-400" title="Kas Kurang (Rugi/Loss Kas Laci): Rp{{ number_format($day['cash_diff']) }}">
+                                                        -Rp{{ number_format(abs($day['cash_diff']) / 1000, 0) }}k
+                                                    </span>
+                                                @else
+                                                    <span class="text-gray-400" title="Kas Cocok (Match / Tidak Ada Selisih)">
+                                                        Rp0
+                                                    </span>
+                                                @endif
                                             </div>
                                         @endif
                                     </div>
@@ -873,14 +883,25 @@
                                             </div>
                                             <div>
                                                 <span
-                                                    class="block text-[9px] font-bold text-gray-400 uppercase tracking-wider">Untung Bersih</span>
-                                                <span
-                                                    class="text-xs sm:text-sm font-black {{ $audit['day_net_profit'] >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400' }}">
-                                                    {{ $audit['day_net_profit'] >= 0 ? '+' : '' }}Rp{{ number_format($audit['day_net_profit'], 0, ',', '.') }}
-                                                </span>
-                                                @if($audit['day_expense'] > 0)
-                                                    <span class="block text-[9px] font-bold text-rose-500" title="Pengeluaran Kas Harian">
-                                                        -Rp{{ number_format($audit['day_expense'], 0, ',', '.') }} (Pengeluaran)
+                                                    class="block text-[9px] font-bold text-gray-400 uppercase tracking-wider">Audit Kas (Selisih)</span>
+                                                @if($audit['has_audit'])
+                                                    @if($audit['cash_diff'] == 0)
+                                                        <span class="text-xs sm:text-sm font-black text-emerald-600 dark:text-emerald-400 flex items-center justify-end gap-1">
+                                                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+                                                            Match (Rp0)
+                                                        </span>
+                                                    @elseif($audit['cash_diff'] < 0)
+                                                        <span class="text-xs sm:text-sm font-black text-rose-600 dark:text-rose-400 flex items-center justify-end gap-1" title="Rugi / Defisit Kas Laci">
+                                                            -Rp{{ number_format(abs($audit['cash_diff']), 0, ',', '.') }} (Selisih Loss)
+                                                        </span>
+                                                    @else
+                                                        <span class="text-xs sm:text-sm font-black text-emerald-600 dark:text-emerald-400 flex items-center justify-end gap-1" title="Surplus / Kelebihan Kas Laci">
+                                                            +Rp{{ number_format($audit['cash_diff'], 0, ',', '.') }} (Kas Lebih)
+                                                        </span>
+                                                    @endif
+                                                @else
+                                                    <span class="text-xs sm:text-sm font-bold text-gray-400 italic">
+                                                        Belum Diaudit
                                                     </span>
                                                 @endif
                                             </div>
