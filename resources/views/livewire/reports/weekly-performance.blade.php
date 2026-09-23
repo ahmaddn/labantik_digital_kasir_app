@@ -346,11 +346,15 @@
                                         @endif
                                     </div>
 
-                                    {{-- X-Axis Day, Transaction, Profit & Cash Audit Selisih --}}
+                                    {{-- X-Axis Day, Omset, Transaction, & Cash Audit Selisih --}}
                                     <div class="mt-3 text-center space-y-0.5">
                                         <span
                                             class="text-xs font-black uppercase tracking-tight block {{ $isPeak ? 'text-primary-blue' : 'text-gray-800 dark:text-white' }}">
                                             {{ $day['day_name'] }}
+                                        </span>
+                                        <span
+                                            class="text-[10px] font-black block tracking-tight {{ $day['revenue'] > 0 ? 'text-primary-blue dark:text-primary-blue-light' : 'text-gray-400' }}">
+                                            Rp{{ number_format($day['revenue'], 0, ',', '.') }}
                                         </span>
                                         <span
                                             class="text-[9px] font-bold text-gray-400 uppercase tracking-wider block">
@@ -360,15 +364,15 @@
                                             <div class="text-[9px] font-black uppercase tracking-tight leading-none pt-1">
                                                 @if($day['cash_diff'] > 0)
                                                     <span class="text-emerald-600 dark:text-emerald-400" title="Kas Lebih (Untung Kas Laci): +Rp{{ number_format($day['cash_diff']) }}">
-                                                        +Rp{{ number_format($day['cash_diff'] / 1000, 0) }}k
+                                                        Selisih: +Rp{{ number_format($day['cash_diff'], 0, ',', '.') }}
                                                     </span>
                                                 @elseif($day['cash_diff'] < 0)
-                                                    <span class="text-rose-600 dark:text-rose-400" title="Kas Kurang (Rugi/Loss Kas Laci): Rp{{ number_format($day['cash_diff']) }}">
-                                                        -Rp{{ number_format(abs($day['cash_diff']) / 1000, 0) }}k
+                                                    <span class="text-rose-600 dark:text-rose-400" title="Kas Kurang (Rugi/Loss Kas Laci): -Rp{{ number_format(abs($day['cash_diff'])) }}">
+                                                        Selisih: -Rp{{ number_format(abs($day['cash_diff']), 0, ',', '.') }}
                                                     </span>
                                                 @else
                                                     <span class="text-gray-400" title="Kas Cocok (Match / Tidak Ada Selisih)">
-                                                        Rp0
+                                                        Selisih: Rp0
                                                     </span>
                                                 @endif
                                             </div>
