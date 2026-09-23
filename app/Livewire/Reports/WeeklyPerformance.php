@@ -220,13 +220,20 @@ class WeeklyPerformance extends Component
                 ->when($activeJurusanId, fn($q) => $q->where('jurusan_id', $activeJurusanId))
                 ->first();
 
+            // Fetch modal awal kembalian (retained_change_cash dari rekap hari sebelumnya)
+            $previousRecapModel = DailyRecap::forReporting()
+                ->where('jurusan_id', $activeJurusanId)
+                ->where('date', '<', $dayStr)
+                ->orderBy('date', 'desc')
+                ->first();
+
+            $startingChangeCash = $previousRecapModel ? (float) ($previousRecapModel->retained_change_cash ?? 0) : 0;
             $actualCash = $dailyRecapModel ? (float) $dailyRecapModel->actual_cash : 0;
             $retainedChangeCash = $dailyRecapModel ? (float) $dailyRecapModel->retained_change_cash : 0;
             $hasAudit = $dailyRecapModel && ($actualCash > 0 || !empty($dailyRecapModel->cash_note));
 
-            // Selisih = (Setoran Bersih) - Total Omzet Sistem (Real)
-            // Selisih positif (+): Lebih/Untung kas laci; Selisih negatif (-): Defisit/Rugi kas laci
-            $cashDiff = $hasAudit ? (($actualCash - $retainedChangeCash) - $rev) : 0;
+            // Formula Selisih persis Rekap Harian: ((Uang Fisik - Modal Awal Kembalian) - Total Omzet Sistem)
+            $cashDiff = $hasAudit ? (($actualCash - $startingChangeCash) - $rev) : 0;
 
             if ($rev > $maxDailyRevenue) {
                 $maxDailyRevenue = $rev;
