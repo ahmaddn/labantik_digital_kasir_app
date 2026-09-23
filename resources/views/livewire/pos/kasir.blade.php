@@ -1280,7 +1280,13 @@
                         return 0;
                     },
 
+                    isAddingToCart: false,
+
                     addToCart(product, force) {
+                        if (this.isAddingToCart) return;
+                        this.isAddingToCart = true;
+                        setTimeout(() => { this.isAddingToCart = false; }, 300);
+
                         /* Tentukan nilai default force secara aman */
                         const shouldForce = (force === true);
                         

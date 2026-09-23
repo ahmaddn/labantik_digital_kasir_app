@@ -538,11 +538,23 @@
                                                     $c->scheduled_count > 0
                                                         ? round(($c->attended_count / $c->scheduled_count) * 100)
                                                         : 100;
+                                                $missedShift = max(0, $c->scheduled_count - $c->attended_count);
                                             @endphp
-                                            <span
-                                                class="px-3 py-1 rounded-xl text-xs font-black {{ $attRate >= 80 ? 'bg-emerald-500/15 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300 border border-emerald-500/20' : 'bg-rose-500/15 text-rose-700 dark:bg-rose-950/50 dark:text-rose-300 border border-rose-500/20' }}">
-                                                {{ $c->attended_count }} ({{ $attRate }}%)
-                                            </span>
+                                            <div class="space-y-1">
+                                                <span
+                                                    class="px-3 py-1 rounded-xl text-xs font-black inline-block {{ $attRate >= 80 ? 'bg-emerald-500/15 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300 border border-emerald-500/20' : 'bg-rose-500/15 text-rose-700 dark:bg-rose-950/50 dark:text-rose-300 border border-rose-500/20' }}">
+                                                    {{ $c->attended_count }} / {{ $c->scheduled_count }} ({{ $attRate }}%)
+                                                </span>
+                                                <div class="flex items-center justify-center gap-1.5 text-[10px] font-black uppercase tracking-tight">
+                                                    <span class="text-emerald-600 dark:text-emerald-400" title="Hadir Tepat Waktu">+{{ $c->on_time_count }} Tepat</span>
+                                                    @if($c->late_count > 0)
+                                                        <span class="text-amber-600 dark:text-amber-400" title="Terlambat Piket">-{{ $c->late_count }} Telat</span>
+                                                    @endif
+                                                    @if($missedShift > 0)
+                                                        <span class="text-rose-600 dark:text-rose-400" title="Tidak Hadir Piket">-{{ $missedShift }} Absen</span>
+                                                    @endif
+                                                </div>
+                                            </div>
                                         </td>
                                         <td
                                             class="px-6 py-8 text-center text-xs font-bold text-gray-600 dark:text-gray-300">

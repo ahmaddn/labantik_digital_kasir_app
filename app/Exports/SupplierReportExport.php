@@ -51,13 +51,7 @@ class SupplierReportExport implements FromCollection, WithHeadings, WithMapping,
                 $trxQuery->where('transactions.jurusan_id', $activeJurusanId);
             }
 
-            if ($lastSettledAt) {
-                $trxQuery->where('transactions.transacted_at', '>', $lastSettledAt);
-            } else {
-                $trxQuery->whereBetween('transactions.transacted_at', [$this->dateFrom . ' 00:00:00', $this->dateTo . ' 23:59:59']);
-            }
-
-            $trxQuery->where('transactions.transacted_at', '<=', $this->dateTo . ' 23:59:59');
+            $trxQuery->whereBetween('transactions.transacted_at', [$this->dateFrom . ' 00:00:00', $this->dateTo . ' 23:59:59']);
 
             $trxSummary = $trxQuery->selectRaw('
                     SUM(transactions.quantity) as total_qty,

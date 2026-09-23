@@ -61,17 +61,8 @@ class SupplierReport extends Component
                 ->join('products', 'transactions.product_id', '=', 'products.id')
                 ->where('products.supplier_id', $supplier->id)
                 ->where('transactions.jurusan_id', $activeJurusanId)
-                ->whereIn('transactions.status', ['uang_diterima', 'belum_kembalian']);
-
-            // Jika pernah ada pelunasan sebelumnya, hanya hitung transaksi SETELAH waktu pelunasan terakhir
-            if ($lastSettledAt) {
-                $trxQuery->where('transactions.transacted_at', '>', $lastSettledAt);
-            } else {
-                $trxQuery->whereBetween('transactions.transacted_at', [$this->dateFrom . ' 00:00:00', $this->dateTo . ' 23:59:59']);
-            }
-
-            // Filter batas akhir sesuai input dateTo
-            $trxQuery->where('transactions.transacted_at', '<=', $this->dateTo . ' 23:59:59');
+                ->whereIn('transactions.status', ['uang_diterima', 'belum_kembalian'])
+                ->whereBetween('transactions.transacted_at', [$this->dateFrom . ' 00:00:00', $this->dateTo . ' 23:59:59']);
 
             $trxSummary = $trxQuery->selectRaw('
                     SUM(transactions.quantity) as total_qty,
