@@ -196,6 +196,18 @@ class WeeklyPerformance extends Component
                 ->whereIn('status', ['uang_diterima', 'belum_kembalian'])
                 ->first();
 
+            // Cash-Only Revenue for Cash Audit (Total Omzet Tunai Sistem)
+            $cashRev = (float) Transaction::forReporting()
+                ->whereDate('transacted_at', $dayStr)
+                ->when($activeJurusanId, fn($q) => $q->where('jurusan_id', $activeJurusanId))
+                ->whereIn('status', ['uang_diterima', 'belum_kembalian'])
+                ->where(function ($q) {
+                    $q->whereNull('payment_method')
+                        ->orWhere('payment_method', '')
+                        ->orWhere('payment_method', 'cash');
+                })
+                ->sum('total_price');
+
             $rev = (float) ($dayAgg->total_rev ?? 0);
             $txCount = (int) ($dayAgg->total_tx ?? 0);
             $grossProfit = (float) ($dayAgg->total_profit ?? 0);
@@ -220,20 +232,13 @@ class WeeklyPerformance extends Component
                 ->when($activeJurusanId, fn($q) => $q->where('jurusan_id', $activeJurusanId))
                 ->first();
 
-            // Fetch modal awal kembalian (retained_change_cash dari rekap hari sebelumnya)
-            $previousRecapModel = DailyRecap::forReporting()
-                ->where('jurusan_id', $activeJurusanId)
-                ->where('date', '<', $dayStr)
-                ->orderBy('date', 'desc')
-                ->first();
-
-            $startingChangeCash = $previousRecapModel ? (float) ($previousRecapModel->retained_change_cash ?? 0) : 0;
             $actualCash = $dailyRecapModel ? (float) $dailyRecapModel->actual_cash : 0;
             $retainedChangeCash = $dailyRecapModel ? (float) $dailyRecapModel->retained_change_cash : 0;
             $hasAudit = $dailyRecapModel && ($actualCash > 0 || !empty($dailyRecapModel->cash_note));
 
-            // Formula Selisih persis Rekap Harian: ((Uang Fisik - Modal Awal Kembalian) - Total Omzet Sistem)
-            $cashDiff = $hasAudit ? (($actualCash - $startingChangeCash) - $rev) : 0;
+            // Formula Selisih PERSIS Rekap Harian:
+            // Selisih = Setoran Bersih (Uang Fisik - Kembalian Ditahan) - Total Omzet Tunai Sistem
+            $cashDiff = $hasAudit ? (($actualCash - $retainedChangeCash) - $cashRev) : 0;
 
             if ($rev > $maxDailyRevenue) {
                 $maxDailyRevenue = $rev;
