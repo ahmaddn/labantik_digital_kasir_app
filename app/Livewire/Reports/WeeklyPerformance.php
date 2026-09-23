@@ -197,7 +197,21 @@ class WeeklyPerformance extends Component
 
             $rev = (float) ($dayAgg->total_rev ?? 0);
             $txCount = (int) ($dayAgg->total_tx ?? 0);
-            $profit = (float) ($dayAgg->total_profit ?? 0);
+            $grossProfit = (float) ($dayAgg->total_profit ?? 0);
+
+            // Expense on this day (Manual Input dari Kas)
+            $dayExpense = (float) CashTransaction::forReporting()
+                ->where('jurusan_id', $activeJurusanId)
+                ->whereDate('date', $dayStr)
+                ->where('type', 'expense')
+                ->where(function ($q) {
+                    $q->where('description', 'not like', '%(Sistem)%')
+                        ->where('description', 'not like', '%Penjualan Harian%')
+                        ->where('description', 'not like', '%Bagi Hasil%');
+                })
+                ->sum('amount');
+
+            $netProfit = $grossProfit - $dayExpense;
 
             if ($rev > $maxDailyRevenue) {
                 $maxDailyRevenue = $rev;
@@ -217,7 +231,9 @@ class WeeklyPerformance extends Component
                 'day_name' => $dayName,
                 'date' => $dayDate->format('d M Y'),
                 'revenue' => $rev,
-                'profit' => $profit,
+                'profit' => $grossProfit,
+                'expense' => $dayExpense,
+                'net_profit' => $netProfit,
                 'transactions' => $txCount,
             ];
 
@@ -320,7 +336,9 @@ class WeeklyPerformance extends Component
                     'day_name' => $dayName,
                     'date' => $dayDate->format('d M Y'),
                     'day_revenue' => $rev,
-                    'day_profit' => $profit,
+                    'day_profit' => $grossProfit,
+                    'day_expense' => $dayExpense,
+                    'day_net_profit' => $netProfit,
                     'day_tx' => $txCount,
                     'scheduled_count' => $totalCashiersScheduled,
                     'attended_count' => $totalCashiersAttended,

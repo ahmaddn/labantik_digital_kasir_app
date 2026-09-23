@@ -346,8 +346,8 @@
                                         @endif
                                     </div>
 
-                                    {{-- X-Axis Day & Transaction --}}
-                                    <div class="mt-3 text-center">
+                                    {{-- X-Axis Day, Transaction, Profit & Expense --}}
+                                    <div class="mt-3 text-center space-y-0.5">
                                         <span
                                             class="text-xs font-black uppercase tracking-tight block {{ $isPeak ? 'text-primary-blue' : 'text-gray-800 dark:text-white' }}">
                                             {{ $day['day_name'] }}
@@ -356,6 +356,13 @@
                                             class="text-[9px] font-bold text-gray-400 uppercase tracking-wider block">
                                             {{ $day['transactions'] }} Tx
                                         </span>
+                                        @if($day['net_profit'] != 0 || $day['expense'] > 0)
+                                            <div class="text-[9px] font-black uppercase tracking-tight leading-none pt-1">
+                                                <span class="{{ $day['net_profit'] >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400' }}" title="Laba/Rugi Bersih Harian">
+                                                    {{ $day['net_profit'] >= 0 ? '+' : '' }}Rp{{ number_format($day['net_profit'] / 1000, 0) }}k
+                                                </span>
+                                            </div>
+                                        @endif
                                     </div>
                                 </div>
                             @endforeach
@@ -863,6 +870,19 @@
                                                     class="text-sm sm:text-base font-black text-primary-blue dark:text-primary-blue-light tracking-tight">
                                                     Rp{{ number_format($audit['day_revenue'], 0, ',', '.') }}
                                                 </span>
+                                            </div>
+                                            <div>
+                                                <span
+                                                    class="block text-[9px] font-bold text-gray-400 uppercase tracking-wider">Untung Bersih</span>
+                                                <span
+                                                    class="text-xs sm:text-sm font-black {{ $audit['day_net_profit'] >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400' }}">
+                                                    {{ $audit['day_net_profit'] >= 0 ? '+' : '' }}Rp{{ number_format($audit['day_net_profit'], 0, ',', '.') }}
+                                                </span>
+                                                @if($audit['day_expense'] > 0)
+                                                    <span class="block text-[9px] font-bold text-rose-500" title="Pengeluaran Kas Harian">
+                                                        -Rp{{ number_format($audit['day_expense'], 0, ',', '.') }} (Pengeluaran)
+                                                    </span>
+                                                @endif
                                             </div>
                                             <div class="hidden sm:block">
                                                 <span
