@@ -5,8 +5,6 @@ namespace App\Livewire\Reports;
 use App\Exports\SupplierReportExport;
 use App\Models\CashCategory;
 use App\Models\CashTransaction;
-use App\Models\Product;
-use App\Models\StockEntry;
 use App\Models\Supplier;
 use App\Models\Transaction;
 use Carbon\Carbon;
@@ -19,15 +17,19 @@ class SupplierReport extends Component
     use WithPagination;
 
     public $dateFrom;
-
     public $dateTo;
-
     public $supplierId = '';
+    public $activeTab = 'unsettled'; // 'unsettled' atau 'history'
 
     public function mount()
     {
         $this->dateFrom = now()->startOfMonth()->toDateString();
         $this->dateTo = now()->toDateString();
+    }
+
+    public function setTab($tab)
+    {
+        $this->activeTab = $tab;
     }
 
     public function exportExcel()
@@ -37,39 +39,37 @@ class SupplierReport extends Component
         return Excel::download(new SupplierReportExport($this->dateFrom, $this->dateTo, $this->supplierId), $filename);
     }
 
-    public $statusFilter = '';
-
     public function render()
     {
         $activeJurusanId = session('active_jurusan_id');
-        $suppliersList = Supplier::pluck('name', 'id');
 
+        // 1. DATA TAB UNSETTLED (Tagihan Bagi Hasil Aktif / Belum Dilunasi)
         $suppliersQuery = Supplier::query();
         if ($this->supplierId) {
             $suppliersQuery->where('id', $this->supplierId);
         }
 
-        $reports = $suppliersQuery->get()->map(function ($supplier) use ($activeJurusanId) {
-            // Cari pelunasan terakhir untuk supplier ini
+        $unsettledReports = $suppliersQuery->get()->map(function ($supplier) use ($activeJurusanId) {
+            // Cari transaksi pelunasan terakhir untuk supplier ini
             $lastSettlement = CashTransaction::forReporting()
                 ->where('reference', 'like', "SETTLE-SUPPLIER-{$supplier->id}-%")
                 ->orderBy('created_at', 'desc')
                 ->first();
-            
-            $lastSettledDate = $lastSettlement ? $lastSettlement->date : null;
 
-            // Cek apakah untuk periode tanggal yang sedang dibuka supplier ini sudah dilunasi
-            $reference = "SETTLE-SUPPLIER-{$supplier->id}-{$this->dateFrom}-{$this->dateTo}";
-            $isSettled = CashTransaction::forReporting()
-                ->where('reference', $reference)
-                ->exists();
+            $lastSettledAt = $lastSettlement ? $lastSettlement->created_at : null;
 
+            // Ambil hanya transaksi penjualan SETELAH pelunasan terakhir
             $trxQuery = Transaction::forReporting()
                 ->join('products', 'transactions.product_id', '=', 'products.id')
                 ->where('products.supplier_id', $supplier->id)
                 ->where('transactions.jurusan_id', $activeJurusanId)
                 ->whereIn('transactions.status', ['uang_diterima', 'belum_kembalian'])
                 ->whereBetween('transactions.transacted_at', [$this->dateFrom . ' 00:00:00', $this->dateTo . ' 23:59:59']);
+
+            if ($lastSettledAt) {
+                // Hanya hitung penjualan yang terjadi setelah waktu pelunasan terakhir
+                $trxQuery->where('transactions.created_at', '>', $lastSettledAt);
+            }
 
             $trxSummary = $trxQuery->selectRaw('
                     SUM(transactions.quantity) as total_qty,
@@ -91,25 +91,44 @@ class SupplierReport extends Component
                 'total_sales' => $totalSales,
                 'total_supplier_share' => $totalSupplierShare,
                 'total_shop_profit' => $totalShopProfit,
-                'is_settled' => $isSettled,
-                'last_settled_date' => $lastSettledDate,
+                'last_settled_at' => $lastSettledAt,
             ];
-        })
-        ->filter(fn($r) => $r->total_qty > 0)
-        ->filter(function($r) {
-            if ($this->statusFilter === 'unsettled') {
-                return ! $r->is_settled;
-            }
-            if ($this->statusFilter === 'settled') {
-                return $r->is_settled;
-            }
-            return true;
+        })->filter(fn($r) => $r->total_qty > 0);
+
+        // 2. DATA TAB HISTORY (Riwayat Pelunasan Bagi Hasil Supplier)
+        $historyQuery = CashTransaction::forReporting()
+            ->where('reference', 'like', 'SETTLE-SUPPLIER-%')
+            ->where('jurusan_id', $activeJurusanId)
+            ->whereBetween('date', [$this->dateFrom, $this->dateTo])
+            ->orderBy('created_at', 'desc');
+
+        if ($this->supplierId) {
+            $historyQuery->where('reference', 'like', "SETTLE-SUPPLIER-{$this->supplierId}-%");
+        }
+
+        $settlementHistory = $historyQuery->get()->map(function ($tx) {
+            // Extract supplier id from reference
+            $parts = explode('-', $tx->reference);
+            $supplierId = $parts[2] ?? null;
+            $supplier = $supplierId ? Supplier::find($supplierId) : null;
+
+            return (object) [
+                'id' => $tx->id,
+                'reference' => $tx->reference,
+                'date' => $tx->date,
+                'created_at' => $tx->created_at,
+                'supplier_id' => $supplierId,
+                'supplier_name' => $supplier ? $supplier->name : 'Supplier',
+                'amount' => $tx->amount,
+                'description' => $tx->description,
+            ];
         });
 
         return view('livewire.reports.supplier-report', [
-            'reports' => $reports,
+            'unsettledReports' => $unsettledReports,
+            'settlementHistory' => $settlementHistory,
             'suppliers' => Supplier::all(),
-        ])->layout('layouts.app', ['title' => 'Laporan Supplier']);
+        ])->layout('layouts.app', ['title' => 'Laporan Bagi Hasil Supplier']);
     }
 
     public function settleSupplier($supplierId, $supplierName, $amount, $isNoCash = false)
@@ -127,14 +146,8 @@ class SupplierReport extends Component
             ]);
         }
 
-        $reference = "SETTLE-SUPPLIER-{$supplierId}-{$this->dateFrom}-{$this->dateTo}";
-
-        $exists = CashTransaction::forReporting()->where('reference', $reference)->exists();
-        if ($exists) {
-            $this->dispatch('toast', message: 'Bagi hasil supplier ini sudah dilunasi sebelumnya.');
-
-            return;
-        }
+        $timestamp = now()->format('YmdHis');
+        $reference = "SETTLE-SUPPLIER-{$supplierId}-{$timestamp}";
 
         $finalAmount = $isNoCash ? 0 : $amount;
         $prefix = $isNoCash ? '[Tanpa Potong Kas] ' : '';
@@ -146,23 +159,20 @@ class SupplierReport extends Component
             'cash_type' => 'modal',
             'cash_category_id' => $category->id,
             'amount' => $finalAmount,
-            'description' => $prefix . "Pelunasan bagi hasil supplier {$supplierName} periode " . Carbon::parse($this->dateFrom)->translatedFormat('d M Y') . ' s/d ' . Carbon::parse($this->dateTo)->translatedFormat('d M Y'),
+            'description' => $prefix . "Pelunasan bagi hasil supplier {$supplierName} sebesar Rp" . number_format($amount, 0, ',', '.') . ' pada ' . now()->format('d/m/Y H:i'),
             'reference' => $reference,
         ]);
 
-        $this->dispatch('toast', message: "Berhasil melunasi bagi hasil {$supplierName}.");
+        $this->dispatch('toast', message: "Berhasil melunasi bagi hasil {$supplierName}. Data telah dipindahkan ke Riwayat Pelunasan.");
     }
 
-    public function unsettleSupplier($supplierId)
+    public function unsettleSupplier($historyId)
     {
-        $reference = "SETTLE-SUPPLIER-{$supplierId}-{$this->dateFrom}-{$this->dateTo}";
+        $tx = CashTransaction::forReporting()->find($historyId);
 
-        $deleted = CashTransaction::forReporting()
-            ->where('reference', $reference)
-            ->delete();
-
-        if ($deleted) {
-            $this->dispatch('toast', message: 'Pelunasan berhasil dibatalkan.');
+        if ($tx) {
+            $tx->delete();
+            $this->dispatch('toast', message: "Pelunasan berhasil dibatalkan. Transaksi dikembalikan ke Tagihan Aktif.");
         }
     }
 
@@ -172,7 +182,7 @@ class SupplierReport extends Component
 
         $msg = "📢 *LAPORAN BAGI HASIL SUPPLIER*\n";
         $msg .= "👤 *Supplier:* {$supplierName}\n";
-        $msg .= '📅 *Periode:* ' . Carbon::parse($this->dateFrom)->translatedFormat('d M Y') . ' s/d ' . Carbon::parse($this->dateTo)->translatedFormat('d M Y') . "\n";
+        $msg .= '📅 *Tanggal Pelunasan:* ' . now()->translatedFormat('d M Y H:i') . "\n";
         $msg .= '💰 *Total Hak Supplier:* Rp' . number_format($amount, 0, ',', '.') . "\n\n";
         $msg .= "*Status:* ✅ LUNAS" . ($isNoCash ? " (Di luar sistem kas)" : " (Sudah dibayarkan)") . "\n\n";
         $msg .= '_Terima kasih atas kerjasamanya._';
