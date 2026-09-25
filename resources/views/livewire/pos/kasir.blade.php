@@ -4,6 +4,24 @@
     x-on:keydown.window.escape="search = ''; $nextTick(() => { const el = document.getElementById('pos-search-input'); if (el) el.focus(); })"
     x-on:keydown.window.prevent.slash="if (document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') { $nextTick(() => { const el = document.getElementById('pos-search-input'); if (el) el.focus(); }) }">
 
+    @if ($isLockedForUser)
+    <div class="fixed top-0 left-0 right-0 z-[999] bg-rose-500 text-white px-4 py-2 text-xs font-black uppercase tracking-wider flex items-center justify-between border-b-2 border-black shadow-md">
+        <div class="flex items-center gap-2">
+            <flux:icon.lock-closed class="w-4 h-4 text-white shrink-0" />
+            <span>SESI KASIR DITUTUP: Sesi kasir hari ini telah selesai & terkunci. Transaksi susulan hanya dapat dilakukan melalui Pengelola.</span>
+        </div>
+        <span class="bg-black text-rose-300 px-2.5 py-0.5 rounded text-[10px] font-black border border-rose-300 whitespace-nowrap">MODE TERKUNCI</span>
+    </div>
+    @elseif ($isPostClosingMode)
+    <div class="fixed top-0 left-0 right-0 z-[999] bg-amber-400 text-black px-4 py-2 text-xs font-black uppercase tracking-wider flex items-center justify-between border-b-2 border-black shadow-md">
+        <div class="flex items-center gap-2">
+            <flux:icon.clock class="w-4 h-4 text-black shrink-0 animate-pulse" />
+            <span>MODE PASCA-CLOSING (KHUSUS PENGELOLA): Sesi kasir hari ini telah ditutup. Transaksi baru ini akan otomatis dicatat untuk HARI BESOK.</span>
+        </div>
+        <span class="bg-black text-amber-300 px-2.5 py-0.5 rounded text-[10px] font-black border border-amber-300 whitespace-nowrap">REKAP BESOK</span>
+    </div>
+    @endif
+
     <!-- Global Loading Indicator (only for key actions, exclude short polling) -->
     <div wire:loading.flex.delay
         wire:target="checkout, saveQuickExpense, saveOpeningStock, saveClosingStockAndNext, submitClosingReport"
@@ -190,7 +208,7 @@
                 :style="'grid-template-columns: repeat(auto-fill, minmax(180px, 1fr))'">
                 <template x-for="product in filteredProducts" :key="product.id">
                     <button type="button" @click="addToCart(product)"
-                        :disabled="{{ $isSessionFinished ? 'true' : 'false' }}"
+                        :disabled="{{ $isLockedForUser ? 'true' : 'false' }}"
                         :class="getCategoryBorderColor(product.category_name)"
                         class="nb-card nb-card-hover group p-0 text-left overflow-hidden flex flex-col h-full bg-white dark:bg-slate-900">
                         <div
@@ -558,11 +576,11 @@
                 </template>
 
                 <button @click="checkout()"
-                    :disabled="{{ $isSessionFinished ? 'true' : 'false' }} || cart.length === 0 || (payment_method === 'cash' && payment_amount < total && status === 'uang_diterima') || loading"
+                    :disabled="{{ $isLockedForUser ? 'true' : 'false' }} || cart.length === 0 || (payment_method === 'cash' && payment_amount < total && status === 'uang_diterima') || loading"
                     @keydown.enter="handleCheckoutKeydown($event)"
-                    class="nb-btn checkout-trigger w-full py-3.5 text-base font-black bg-black text-white hover:bg-primary-blue disabled:bg-gray-400 disabled:opacity-50 group shadow-[4px_4px_0_0_rgba(37,99,235,0.4)] dark:shadow-[4px_4px_0_0_rgba(255,255,255,0.8)]">
+                    class="nb-btn checkout-trigger w-full py-3.5 text-base font-black {{ $isPostClosingMode ? 'bg-amber-500 text-black hover:bg-amber-400 border-2 border-black' : 'bg-black text-white hover:bg-primary-blue' }} disabled:bg-gray-400 disabled:opacity-50 group shadow-[4px_4px_0_0_rgba(37,99,235,0.4)] dark:shadow-[4px_4px_0_0_rgba(255,255,255,0.8)]">
                     <span x-show="!loading" class="flex items-center justify-center gap-3">
-                        PROCESS NOW
+                        {{ $isPostClosingMode ? 'PROSES (REKAP BESOK)' : 'PROCESS NOW' }}
                         <svg class="w-4 h-4 group-hover:translate-x-1.5 transition-transform" fill="none"
                             stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="4"

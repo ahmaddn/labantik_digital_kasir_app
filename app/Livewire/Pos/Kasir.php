@@ -802,10 +802,16 @@ class Kasir extends Component
             ->where('date', $today)
             ->first();
 
+        $isKasirRole = session('active_role_name') === 'kasir';
+        $isLockedForUser = $isSessionFinished && $isKasirRole;
+        $isPostClosingMode = $isSessionFinished && ! $isKasirRole;
+
         return view('livewire.pos.kasir', [
             'products'          => $this->products,
             'allProductsJson'   => $allProducts,
             'isSessionFinished' => $isSessionFinished,
+            'isLockedForUser'   => $isLockedForUser,
+            'isPostClosingMode' => $isPostClosingMode,
             'categories'        => $categories,
             'dailyTasks'        => $dailyAssignments,
             'todayDocSchedule'  => $todayDocSchedule,

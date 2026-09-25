@@ -207,6 +207,26 @@ class PosSessionService
         });
     }
 
+    public function isSessionClosed(string $date, ?string $jurusanId, ?string $userId = null): bool
+    {
+        if (DailyRecap::isSessionFinished($date, $jurusanId)) {
+            return true;
+        }
+
+        if ($userId && session('active_role_name') === 'kasir') {
+            $attendance = \App\Models\CashierAttendance::where('user_id', $userId)
+                ->where('jurusan_id', $jurusanId)
+                ->where('date', $date)
+                ->first();
+
+            if ($attendance && $attendance->clock_out) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     public function checkout(
         array $cart,
         float $change,
@@ -221,7 +241,14 @@ class PosSessionService
     ): string {
         $tDate = $transactionDate ?: now()->toDateString();
         $isBackdate = $tDate < now()->toDateString();
-        $transactedAt = $tDate === now()->toDateString() ? now() : Carbon::parse($tDate.' '.now()->format('H:i:s'));
+
+        // Jika transaksi dilakukan setelah sesi kasir hari ini ditutup, alihkan tanggal ke esok hari (H+1)
+        $isClosed = $this->isSessionClosed($tDate, $activeJurusanId, $userId);
+        if ($isClosed && $tDate === now()->toDateString()) {
+            $transactedAt = now()->addDay()->setTime(8, 0, 0);
+        } else {
+            $transactedAt = $tDate === now()->toDateString() ? now() : Carbon::parse($tDate.' '.now()->format('H:i:s'));
+        }
 
         $cleanName = preg_replace('/[^A-Za-z0-9]/', '', $buyerName ?: 'GUEST');
         $initials = strtoupper(substr($cleanName, 0, 2));

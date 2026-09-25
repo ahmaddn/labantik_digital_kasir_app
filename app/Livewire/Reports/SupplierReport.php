@@ -37,6 +37,8 @@ class SupplierReport extends Component
         return Excel::download(new SupplierReportExport($this->dateFrom, $this->dateTo, $this->supplierId), $filename);
     }
 
+    public $statusFilter = '';
+
     public function render()
     {
         $activeJurusanId = session('active_jurusan_id');
@@ -55,7 +57,12 @@ class SupplierReport extends Component
                 ->first();
             
             $lastSettledDate = $lastSettlement ? $lastSettlement->date : null;
-            $lastSettledAt = $lastSettlement ? $lastSettlement->created_at : null;
+
+            // Cek apakah untuk periode tanggal yang sedang dibuka supplier ini sudah dilunasi
+            $reference = "SETTLE-SUPPLIER-{$supplier->id}-{$this->dateFrom}-{$this->dateTo}";
+            $isSettled = CashTransaction::forReporting()
+                ->where('reference', $reference)
+                ->exists();
 
             $trxQuery = Transaction::forReporting()
                 ->join('products', 'transactions.product_id', '=', 'products.id')
@@ -84,10 +91,20 @@ class SupplierReport extends Component
                 'total_sales' => $totalSales,
                 'total_supplier_share' => $totalSupplierShare,
                 'total_shop_profit' => $totalShopProfit,
-                'is_settled' => false,
+                'is_settled' => $isSettled,
                 'last_settled_date' => $lastSettledDate,
             ];
-        })->filter(fn($r) => $r->total_qty > 0);
+        })
+        ->filter(fn($r) => $r->total_qty > 0)
+        ->filter(function($r) {
+            if ($this->statusFilter === 'unsettled') {
+                return ! $r->is_settled;
+            }
+            if ($this->statusFilter === 'settled') {
+                return $r->is_settled;
+            }
+            return true;
+        });
 
         return view('livewire.reports.supplier-report', [
             'reports' => $reports,
@@ -134,6 +151,19 @@ class SupplierReport extends Component
         ]);
 
         $this->dispatch('toast', message: "Berhasil melunasi bagi hasil {$supplierName}.");
+    }
+
+    public function unsettleSupplier($supplierId)
+    {
+        $reference = "SETTLE-SUPPLIER-{$supplierId}-{$this->dateFrom}-{$this->dateTo}";
+
+        $deleted = CashTransaction::forReporting()
+            ->where('reference', $reference)
+            ->delete();
+
+        if ($deleted) {
+            $this->dispatch('toast', message: 'Pelunasan berhasil dibatalkan.');
+        }
     }
 
     public function settleAndShare($supplierId, $supplierName, $amount, $isNoCash = false)

@@ -25,28 +25,36 @@
 
     <!-- Filters -->
     <div class="bg-white dark:bg-gray-800 rounded-2xl p-5 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 mb-10">
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
             <div>
                 <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 ml-2">Dari Tanggal</label>
-                <input type="date" wire:model.live="dateFrom" class="w-full px-6 py-3 bg-gray-50 dark:bg-gray-900 border-none rounded-xl focus:ring-2 focus:ring-primary-blue/20 font-black text-xs text-gray-800 dark:text-white uppercase tracking-tight">
+                <input type="date" wire:model.live="dateFrom" class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 border-none rounded-xl focus:ring-2 focus:ring-primary-blue/20 font-black text-xs text-gray-800 dark:text-white uppercase tracking-tight">
             </div>
             <div>
                 <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 ml-2">Sampai Tanggal</label>
-                <input type="date" wire:model.live="dateTo" class="w-full px-6 py-3 bg-gray-50 dark:bg-gray-900 border-none rounded-xl focus:ring-2 focus:ring-primary-blue/20 font-black text-xs text-gray-800 dark:text-white uppercase tracking-tight">
+                <input type="date" wire:model.live="dateTo" class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 border-none rounded-xl focus:ring-2 focus:ring-primary-blue/20 font-black text-xs text-gray-800 dark:text-white uppercase tracking-tight">
             </div>
             <div>
                 <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 ml-2">Supplier</label>
-                <select wire:model.live="supplierId" class="w-full px-6 py-3 bg-gray-50 dark:bg-gray-900 border-none rounded-xl focus:ring-2 focus:ring-primary-blue/20 font-black text-xs text-gray-800 dark:text-white uppercase tracking-tight">
+                <select wire:model.live="supplierId" class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 border-none rounded-xl focus:ring-2 focus:ring-primary-blue/20 font-black text-xs text-gray-800 dark:text-white uppercase tracking-tight">
                     <option value="">Semua Supplier</option>
                     @foreach($suppliers as $sup)
                         <option value="{{ $sup->id }}">{{ $sup->name }}</option>
                     @endforeach
                 </select>
             </div>
+            <div>
+                <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 ml-2">Status Pelunasan</label>
+                <select wire:model.live="statusFilter" class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 border-none rounded-xl focus:ring-2 focus:ring-primary-blue/20 font-black text-xs text-gray-800 dark:text-white uppercase tracking-tight">
+                    <option value="">Semua Status</option>
+                    <option value="unsettled">Belum Lunas</option>
+                    <option value="settled">Sudah Lunas</option>
+                </select>
+            </div>
             <div class="flex items-end">
-                <div class="w-full p-4 bg-primary-blue/5 rounded-xl border border-primary-blue/10 flex items-center justify-between">
-                    <span class="text-[9px] font-black text-primary-blue uppercase tracking-widest">Total Bayar Supplier</span>
-                    <span class="text-lg font-black text-primary-blue">Rp{{ number_format($reports->sum('total_supplier_share'), 0, ',', '.') }}</span>
+                <div class="w-full p-3.5 bg-primary-blue/5 rounded-xl border border-primary-blue/10 flex items-center justify-between">
+                    <span class="text-[9px] font-black text-primary-blue uppercase tracking-widest">Total Hak Supplier</span>
+                    <span class="text-base font-black text-primary-blue">Rp{{ number_format($reports->sum('total_supplier_share'), 0, ',', '.') }}</span>
                 </div>
             </div>
         </div>
@@ -97,9 +105,12 @@
                                 </a>
                                 
                                 @if($report->is_settled)
-                                    <span class="px-4 py-2 bg-green-500/10 text-green-500 text-[10px] font-black uppercase tracking-widest rounded-xl inline-flex items-center gap-1.5 border border-green-500/20">
-                                        ✅ Lunas
+                                    <span class="px-4 py-2 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px] font-black uppercase tracking-widest rounded-xl inline-flex items-center gap-1.5 border border-emerald-500/20">
+                                        LUNAS
                                     </span>
+                                    <button wire:click="unsettleSupplier('{{ $report->supplier_id }}')" class="px-3 py-2 bg-rose-500/10 hover:bg-rose-500 text-rose-500 hover:text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-all inline-flex items-center gap-1 shadow-sm" title="Batalkan Pelunasan Periode Ini">
+                                        Batal
+                                    </button>
                                 @else
                                     <button wire:click="settleSupplier('{{ $report->supplier_id }}', '{{ addslashes($report->supplier_name) }}', {{ $report->total_supplier_share }})" class="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-all inline-flex items-center gap-1.5 shadow-md shadow-emerald-500/10">
                                         Bayar Lunas
