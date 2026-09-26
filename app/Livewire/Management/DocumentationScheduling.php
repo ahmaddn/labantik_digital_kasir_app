@@ -547,64 +547,72 @@ class DocumentationScheduling extends Component
                     }
 
                     if ($numShifts > 1) {
-                        $cannotDoShift1 = [];
-                        $canDoShift1 = [];
+                        $shift1Cap = $shiftCapacities[1] ?? $baseCap;
+                        $shift1Assigned = [];
 
+                        // 1. Sheren & Meta: MUST ONLY DO SHIFT 1
+                        $remainingForPool = [];
                         foreach ($dailySelectedCashiers as $item) {
                             $uid = $item['user_id'];
-                            $lastS = $lastShiftAssigned[$uid] ?? null;
+                            if ($uid === $sherenId || $uid === $metaId) {
+                                $s1Count = $userShiftCounts[$uid][1] ?? 0;
+                                if ($s1Count < 2) {
+                                    $shift1Assigned[] = $item;
+                                }
+                            } else {
+                                $remainingForPool[] = $item;
+                            }
+                        }
+
+                        // 2. Separate remaining cashiers based on max limit constraints (max 2 per shift type)
+                        $mustDoShift1 = [];
+                        $mustDoShift2 = [];
+                        $flexiblePool = [];
+
+                        foreach ($remainingForPool as $item) {
+                            $uid = $item['user_id'];
                             $s1Count = $userShiftCounts[$uid][1] ?? 0;
                             $s2Count = $userShiftCounts[$uid][2] ?? 0;
 
-                            // Sheren & Meta: MUST ONLY DO SHIFT 1
-                            if ($uid === $sherenId || $uid === $metaId) {
-                                if ($s1Count < 2) {
-                                    // Place at front of canDoShift1
-                                    array_unshift($canDoShift1, $item);
-                                }
-                                continue;
-                            }
-
-                            // Cashier reached Shift 1 limit (2): MUST DO SHIFT 2
                             if ($s1Count >= 2) {
                                 if ($s2Count < 2) {
-                                    $cannotDoShift1[] = $item;
+                                    $mustDoShift2[] = $item;
                                 }
-                                continue;
-                            }
-
-                            // Cashier reached Shift 2 limit (2): MUST DO SHIFT 1
-                            if ($s2Count >= 2) {
+                            } elseif ($s2Count >= 2) {
                                 if ($s1Count < 2) {
-                                    $canDoShift1[] = $item;
+                                    $mustDoShift1[] = $item;
                                 }
-                                continue;
-                            }
-
-                            // Cashier worked Shift 2 yesterday: CANNOT DO SHIFT 1 TODAY
-                            if ($lastS !== null && $lastS >= 2) {
-                                $cannotDoShift1[] = $item;
                             } else {
-                                $canDoShift1[] = $item;
+                                $flexiblePool[] = $item;
                             }
                         }
 
-                        $shift1Cap = $shiftCapacities[1] ?? $baseCap;
+                        // Shuffle flexible candidates truly randomly for fresh team mixing every day
+                        shuffle($flexiblePool);
+                        shuffle($mustDoShift1);
+                        shuffle($mustDoShift2);
 
-                        // Fill Shift 1 from candidates eligible for Shift 1
-                        $shift1Assigned = array_slice($canDoShift1, 0, $shift1Cap);
-                        $leftoverCanDoShift1 = array_slice($canDoShift1, $shift1Cap);
-
-                        // Fallback: If not enough canDoShift1 candidates to fill Shift 1, fill remaining from cannotDoShift1 (excluding Sheren/Meta)
-                        if (count($shift1Assigned) < $shift1Cap && !empty($cannotDoShift1)) {
-                            $needed = $shift1Cap - count($shift1Assigned);
-                            $fallback = array_slice($cannotDoShift1, 0, $needed);
-                            $cannotDoShift1 = array_slice($cannotDoShift1, $needed);
-                            $shift1Assigned = array_merge($shift1Assigned, $fallback);
+                        // Add mustDoShift1 candidates to Shift 1
+                        foreach ($mustDoShift1 as $item) {
+                            if (count($shift1Assigned) < $shift1Cap) {
+                                $shift1Assigned[] = $item;
+                            } else {
+                                $mustDoShift2[] = $item;
+                            }
                         }
 
-                        $shift2Candidates = array_merge($cannotDoShift1, $leftoverCanDoShift1);
-                        shuffle($shift2Candidates);
+                        // Fill remaining Shift 1 capacity from flexiblePool
+                        $neededForShift1 = $shift1Cap - count($shift1Assigned);
+                        if ($neededForShift1 > 0) {
+                            $fromFlexibleForShift1 = array_slice($flexiblePool, 0, $neededForShift1);
+                            $leftoverFlexible = array_slice($flexiblePool, $neededForShift1);
+                            $shift1Assigned = array_merge($shift1Assigned, $fromFlexibleForShift1);
+                        } else {
+                            $leftoverFlexible = $flexiblePool;
+                        }
+
+                        // Shift 2 gets mustDoShift2 + leftoverFlexible
+                        $shift2Assigned = array_merge($mustDoShift2, $leftoverFlexible);
 
                         // Assign Shift 1
                         foreach ($shift1Assigned as $item) {
@@ -632,7 +640,7 @@ class DocumentationScheduling extends Component
                         $shiftCap = $shiftCapacities[$currentShift] ?? $baseCap;
                         $assignedInShift = 0;
 
-                        foreach ($shift2Candidates as $item) {
+                        foreach ($shift2Assigned as $item) {
                             $uid = $item['user_id'];
 
                             // Hard block Sheren and Meta from getting Shift 2
