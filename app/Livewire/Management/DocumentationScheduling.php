@@ -367,13 +367,17 @@ class DocumentationScheduling extends Component
                     ->toArray();
 
                 $runCount = [];
+                $userShiftCounts = [];
                 $assignedSchedules = [];
                 $numShifts = max(1, (int)$this->shiftsPerDay);
 
                 foreach ($days as $day) {
                     $dayAssignedUsers = [];
+                    // Randomize processing order of shifts per day
+                    $shifts = range(1, $numShifts);
+                    shuffle($shifts);
 
-                    for ($s = 1; $s <= $numShifts; $s++) {
+                    foreach ($shifts as $s) {
                         if (!empty($activeGradeQuotas)) {
                             foreach ($activeGradeQuotas as $g => $quota) {
                                 $gradeCashiers = $cashierUsers->where('grade_level', (string)$g)->pluck('id')->toArray();
@@ -390,10 +394,9 @@ class DocumentationScheduling extends Component
                                 $unassignedToday = array_values(array_diff($eligible, $dayAssignedUsers));
                                 $candidatePool = !empty($unassignedToday) ? $unassignedToday : array_values($eligible);
 
-                                usort($candidatePool, function ($a, $b) use ($globalSchedulesCount, $runCount) {
-                                    $scoreA = ($globalSchedulesCount[$a] ?? 0) + ($runCount[$a] ?? 0);
-                                    $scoreB = ($globalSchedulesCount[$b] ?? 0) + ($runCount[$b] ?? 0);
-                                    if ($scoreA === $scoreB) return rand(-1, 1);
+                                usort($candidatePool, function ($a, $b) use ($globalSchedulesCount, $runCount, $userShiftCounts, $s) {
+                                    $scoreA = (($globalSchedulesCount[$a] ?? 0) * 10) + (($runCount[$a] ?? 0) * 10) + (($userShiftCounts[$a][$s] ?? 0) * 25) + rand(0, 9);
+                                    $scoreB = (($globalSchedulesCount[$b] ?? 0) * 10) + (($runCount[$b] ?? 0) * 10) + (($userShiftCounts[$b][$s] ?? 0) * 25) + rand(0, 9);
                                     return $scoreA <=> $scoreB;
                                 });
 
@@ -402,6 +405,7 @@ class DocumentationScheduling extends Component
                                 foreach ($picked as $uid) {
                                     $dayAssignedUsers[] = $uid;
                                     $runCount[$uid] = ($runCount[$uid] ?? 0) + 1;
+                                    $userShiftCounts[$uid][$s] = ($userShiftCounts[$uid][$s] ?? 0) + 1;
 
                                     $assignedSchedules[] = [
                                         'activity_id' => $activity->id,
@@ -424,10 +428,9 @@ class DocumentationScheduling extends Component
                                 $unassignedToday = array_values(array_diff($eligible, $dayAssignedUsers));
                                 $candidatePool = !empty($unassignedToday) ? $unassignedToday : array_values($eligible);
 
-                                usort($candidatePool, function ($a, $b) use ($globalSchedulesCount, $runCount) {
-                                    $scoreA = ($globalSchedulesCount[$a] ?? 0) + ($runCount[$a] ?? 0);
-                                    $scoreB = ($globalSchedulesCount[$b] ?? 0) + ($runCount[$b] ?? 0);
-                                    if ($scoreA === $scoreB) return rand(-1, 1);
+                                usort($candidatePool, function ($a, $b) use ($globalSchedulesCount, $runCount, $userShiftCounts, $s) {
+                                    $scoreA = (($globalSchedulesCount[$a] ?? 0) * 10) + (($runCount[$a] ?? 0) * 10) + (($userShiftCounts[$a][$s] ?? 0) * 25) + rand(0, 9);
+                                    $scoreB = (($globalSchedulesCount[$b] ?? 0) * 10) + (($runCount[$b] ?? 0) * 10) + (($userShiftCounts[$b][$s] ?? 0) * 25) + rand(0, 9);
                                     return $scoreA <=> $scoreB;
                                 });
 
@@ -437,6 +440,7 @@ class DocumentationScheduling extends Component
                                 foreach ($picked as $uid) {
                                     $dayAssignedUsers[] = $uid;
                                     $runCount[$uid] = ($runCount[$uid] ?? 0) + 1;
+                                    $userShiftCounts[$uid][$s] = ($userShiftCounts[$uid][$s] ?? 0) + 1;
 
                                     $assignedSchedules[] = [
                                         'activity_id' => $activity->id,
