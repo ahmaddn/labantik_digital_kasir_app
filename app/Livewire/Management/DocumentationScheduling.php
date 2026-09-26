@@ -35,6 +35,7 @@ class DocumentationScheduling extends Component
     public $useGradeQuotas = true;
     public $gradeQuotas = ['12' => 1, '11' => 1, '10' => 0];
     public $availableGrades = ['12', '11', '10'];
+    public $selectedNoGradeUserIds = [];
 
     // UI Modals
     public $showActivityModal = false;
@@ -284,6 +285,19 @@ class DocumentationScheduling extends Component
             if (in_array('11', $this->availableGrades)) $this->gradeQuotas['11'] = 1;
         }
 
+        $this->selectedNoGradeUserIds = User::whereHas('roles', function ($q) use ($activeJurusanId) {
+            $q->where('roles.name', 'kasir')
+                ->when($activeJurusanId, function ($sq) use ($activeJurusanId) {
+                    $sq->where('role_user.jurusan_id', $activeJurusanId);
+                });
+        })
+        ->where(function ($q) {
+            $q->whereNull('grade_level')->orWhere('grade_level', '');
+        })
+        ->pluck('id')
+        ->map(fn($id) => (string)$id)
+        ->toArray();
+
         $this->showRandomModal = true;
     }
 
@@ -304,20 +318,16 @@ class DocumentationScheduling extends Component
             'randomizeEndDate' => 'required|date|after_or_equal:randomizeStartDate',
         ]);
 
-        // Get cashiers
-        $allJurusanCashierIds = DB::table('role_user')
-            ->join('roles', 'role_user.role_id', '=', 'roles.id')
-            ->where('role_user.jurusan_id', $activeJurusanId)
-            ->where('roles.name', 'kasir')
-            ->pluck('role_user.user_id')
-            ->toArray();
-
-        $cashierUsers = User::whereIn('id', $allJurusanCashierIds)->get()->filter(function ($u) {
-            return DB::table('role_user')->where('user_id', $u->id)->count() === 1;
-        });
+        // Get cashiers for active jurusan
+        $cashierUsers = User::whereHas('roles', function ($q) use ($activeJurusanId) {
+            $q->where('roles.name', 'kasir')
+                ->when($activeJurusanId, function ($sq) use ($activeJurusanId) {
+                    $sq->where('role_user.jurusan_id', $activeJurusanId);
+                });
+        })->get();
 
         if ($cashierUsers->isEmpty()) {
-            $this->dispatch('toast', message: 'Tidak ada kasir murni yang terdaftar di jurusan ini.', type: 'danger');
+            $this->dispatch('toast', message: 'Tidak ada kasir yang terdaftar di jurusan ini.', type: 'danger');
             return;
         }
 
@@ -384,8 +394,10 @@ class DocumentationScheduling extends Component
                         if (!empty($activeGradeQuotas)) {
                             foreach ($activeGradeQuotas as $g => $totalGradeQuota) {
                                 if ($g === 'none' || $g === '') {
-                                    $gradeCashiers = $cashierUsers->filter(function ($u) {
-                                        return empty($u->grade_level) || trim((string)$u->grade_level) === '';
+                                    $selectedIdsStr = array_map('strval', $this->selectedNoGradeUserIds);
+                                    $gradeCashiers = $cashierUsers->filter(function ($u) use ($selectedIdsStr) {
+                                        $isNoGrade = empty($u->grade_level) || trim((string)$u->grade_level) === '';
+                                        return $isNoGrade && in_array((string)$u->id, $selectedIdsStr);
                                     })->pluck('id')->toArray();
                                 } else {
                                     $gradeCashiers = $cashierUsers->filter(function ($u) use ($g) {
@@ -450,7 +462,14 @@ class DocumentationScheduling extends Component
                                 }
                             }
                         } else {
-                            $allCashiers = $cashierUsers->pluck('id')->toArray();
+                            $selectedIdsStr = array_map('strval', $this->selectedNoGradeUserIds);
+                            $allCashiers = $cashierUsers->filter(function ($u) use ($selectedIdsStr) {
+                                $isNoGrade = empty($u->grade_level) || trim((string)$u->grade_level) === '';
+                                if ($isNoGrade) {
+                                    return in_array((string)$u->id, $selectedIdsStr);
+                                }
+                                return true;
+                            })->pluck('id')->toArray();
                             $eligible = array_values(array_filter($allCashiers, function ($uid) use ($cashierShiftMap, $day) {
                                 return !isset($cashierShiftMap[$uid . '_' . $day]);
                             }));
@@ -644,6 +663,9 @@ class DocumentationScheduling extends Component
                 ->where('user_id', auth()->id())
                 ->orderBy('date', 'desc')
                 ->get();
+            $noGradeCashiers = $cashiers->filter(function ($u) {
+                return empty($u->grade_level) || trim((string)$u->grade_level) === '';
+            })->values();
         } catch (\Exception $e) {
             $dbError = 'Database Error / Tabel belum dimigrasi di server production: ' . $e->getMessage();
         }
@@ -654,6 +676,7 @@ class DocumentationScheduling extends Component
             'activitySchedules' => $activitySchedules,
             'daysList' => $daysList,
             'cashiers' => $cashiers,
+            'noGradeCashiers' => $noGradeCashiers ?? collect(),
             'cashierStats' => $cashierStats,
             'mySchedules' => $mySchedules ?? collect(),
             'jurusans' => $jurusans,
