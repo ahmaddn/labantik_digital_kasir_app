@@ -75,6 +75,16 @@
 
                 @if ($isSessionFinished)
                     <div class="flex items-center space-x-2" x-data="{ showEmergencyConfirm: false }">
+                        @if ($hasHigherRole)
+                        <a href="{{ route('kasir') }}"
+                            class="px-4 py-3 sm:px-5 sm:py-3 md:py-3.5 bg-amber-500 hover:bg-amber-400 text-black rounded-xl md:rounded-2xl shadow-xl font-bold uppercase tracking-wide text-xs flex flex-col items-center leading-tight transition transform hover:-translate-y-1 active:scale-95">
+                            <div class="flex items-center font-black">
+                                <flux:icon.clock class="w-5 h-5 mr-2 text-black shrink-0 animate-pulse" />
+                                Mode Pasca-Closing
+                            </div>
+                            <span class="text-[8px] font-black uppercase tracking-widest mt-1 opacity-90">Input Transaksi Besok</span>
+                        </a>
+                        @else
                         <button disabled
                             class="px-4 py-3 sm:px-5 sm:py-3 md:py-3.5 bg-gray-400 text-white rounded-xl md:rounded-2xl shadow-xl font-bold uppercase tracking-wide text-xs cursor-not-allowed flex flex-col items-center leading-tight">
                             <div class="flex items-center">
@@ -89,6 +99,7 @@
                             <span class="text-[8px] font-black uppercase tracking-widest mt-1 opacity-60">Data hari ini
                                 telah dikunci</span>
                         </button>
+                        @endif
                         <button type="button" @click="showEmergencyConfirm = true" @class([
                             'px-4 py-3 sm:px-5 sm:py-3 md:py-3.5 bg-red-600 hover:bg-red-700 text-white rounded-xl md:rounded-2xl shadow-xl shadow-red-600/30 font-bold uppercase tracking-wide text-xs flex flex-col items-center leading-tight transition transform hover:-translate-y-1 active:scale-95',
                             'hidden' => !$hasHigherRole,
