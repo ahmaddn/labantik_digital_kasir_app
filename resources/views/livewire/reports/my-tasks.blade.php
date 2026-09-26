@@ -56,13 +56,18 @@
                                     <span class="font-black tracking-wider uppercase text-indigo-200">
                                         {{ \Carbon\Carbon::parse($docSched->date)->translatedFormat('l, d M Y') }}
                                     </span>
-                                    @if($isToday)
-                                        <span class="px-2 py-0.5 rounded-full text-[9px] font-black uppercase bg-amber-400 text-amber-950 animate-pulse">Hari Ini</span>
-                                    @elseif($isPast)
-                                        <span class="px-2 py-0.5 rounded-full text-[9px] font-black uppercase bg-white/20 text-gray-300">Lewat</span>
-                                    @else
-                                        <span class="px-2 py-0.5 rounded-full text-[9px] font-black uppercase bg-emerald-400 text-emerald-950">Mendatang</span>
-                                    @endif
+                                    <div class="flex items-center gap-1">
+                                        <span class="px-2 py-0.5 rounded-full text-[9px] font-black uppercase bg-indigo-500/30 text-indigo-200 border border-indigo-400/30">
+                                            Shift {{ $docSched->shift ?? 1 }}
+                                        </span>
+                                        @if($isToday)
+                                            <span class="px-2 py-0.5 rounded-full text-[9px] font-black uppercase bg-amber-400 text-amber-950 animate-pulse">Hari Ini</span>
+                                        @elseif($isPast)
+                                            <span class="px-2 py-0.5 rounded-full text-[9px] font-black uppercase bg-white/20 text-gray-300">Lewat</span>
+                                        @else
+                                            <span class="px-2 py-0.5 rounded-full text-[9px] font-black uppercase bg-emerald-400 text-emerald-950">Mendatang</span>
+                                        @endif
+                                    </div>
                                 </div>
                                 <h4 class="text-sm font-bold text-white line-clamp-1">{{ $docSched->activity->title ?? 'Kegiatan Dokumentasi' }}</h4>
                                 @if($docSched->notes)

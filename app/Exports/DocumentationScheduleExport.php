@@ -35,6 +35,7 @@ class DocumentationScheduleExport implements FromCollection, WithHeadings, WithM
         return DocumentationSchedule::with(['user', 'jurusan'])
             ->where('activity_id', $this->activityId)
             ->orderBy('date')
+            ->orderBy('shift')
             ->get();
     }
 
@@ -44,6 +45,7 @@ class DocumentationScheduleExport implements FromCollection, WithHeadings, WithM
             'No',
             'Hari',
             'Tanggal',
+            'Shift',
             'Nama Anggota Kasir',
             'Tingkatan',
             'Catatan / Keterangan Tugas',
@@ -56,6 +58,7 @@ class DocumentationScheduleExport implements FromCollection, WithHeadings, WithM
             $this->rowNo++,
             $schedule->date->translatedFormat('l'),
             $schedule->date->translatedFormat('d F Y'),
+            'Shift ' . ($schedule->shift ?? 1),
             $schedule->user ? $schedule->user->name : '-',
             $schedule->user && $schedule->user->grade_level ? 'Tingkat ' . $schedule->user->grade_level : '-',
             $schedule->notes ?: 'Tugas Dokumentasi',
@@ -80,48 +83,49 @@ class DocumentationScheduleExport implements FromCollection, WithHeadings, WithM
         $desc = $this->activity && $this->activity->description ? $this->activity->description : '-';
 
         // Document Title Banner
-        $sheet->mergeCells('A1:F1');
+        $sheet->mergeCells('A1:G1');
         $sheet->setCellValue('A1', 'LAPORAN PENJADWALAN DOKUMENTASI LABANTIK');
         $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14)->getColor()->setARGB('FF1E40AF');
 
         // Document Subtitle
-        $sheet->mergeCells('A2:F2');
+        $sheet->mergeCells('A2:G2');
         $sheet->setCellValue('A2', 'Kegiatan: ' . $title . ' (Periode: ' . $start . ' - ' . $end . ')');
         $sheet->getStyle('A2')->getFont()->setBold(true)->setSize(11)->getColor()->setARGB('FF0F172A');
 
-        $sheet->mergeCells('A3:F3');
+        $sheet->mergeCells('A3:G3');
         $sheet->setCellValue('A3', 'Deskripsi Event: ' . $desc);
         $sheet->getStyle('A3')->getFont()->setItalic(true)->setSize(10)->getColor()->setARGB('FF475569');
 
-        $sheet->mergeCells('A4:F4');
+        $sheet->mergeCells('A4:G4');
         $sheet->setCellValue('A4', 'Dicetak Pada: ' . now()->translatedFormat('d F Y H:i:s'));
         $sheet->getStyle('A4')->getFont()->setSize(9)->getColor()->setARGB('FF64748B');
 
         // Header style (Row 6)
-        $sheet->getStyle('A6:F6')->getFont()->setBold(true)->getColor()->setARGB('FFFFFFFF');
-        $sheet->getStyle('A6:F6')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+        $sheet->getStyle('A6:G6')->getFont()->setBold(true)->getColor()->setARGB('FFFFFFFF');
+        $sheet->getStyle('A6:G6')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
             ->getStartColor()->setARGB('FF059669'); // Emerald Green
 
         $sheet->getColumnDimension('A')->setWidth(8);
         $sheet->getColumnDimension('B')->setWidth(15);
         $sheet->getColumnDimension('C')->setWidth(22);
-        $sheet->getColumnDimension('D')->setWidth(30);
-        $sheet->getColumnDimension('E')->setWidth(18);
-        $sheet->getColumnDimension('F')->setWidth(35);
+        $sheet->getColumnDimension('D')->setWidth(15);
+        $sheet->getColumnDimension('E')->setWidth(30);
+        $sheet->getColumnDimension('F')->setWidth(18);
+        $sheet->getColumnDimension('G')->setWidth(35);
 
-        // Center align No, Day, Date, and Grade columns
-        $sheet->getStyle('A6:C100')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
-        $sheet->getStyle('E6:E100')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        // Center align No, Day, Date, Shift, and Grade columns
+        $sheet->getStyle('A6:D100')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('F6:F100')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
 
         // Grid Borders and Alternate Zebra Stripe Colors
         $lastRow = $sheet->getHighestRow();
         if ($lastRow >= 6) {
-            $sheet->getStyle('A6:F' . $lastRow)->getBorders()->getAllBorders()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
-            $sheet->getStyle('A6:F' . $lastRow)->getBorders()->getAllBorders()->getColor()->setARGB('FFCBD5E1');
+            $sheet->getStyle('A6:G' . $lastRow)->getBorders()->getAllBorders()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
+            $sheet->getStyle('A6:G' . $lastRow)->getBorders()->getAllBorders()->getColor()->setARGB('FFCBD5E1');
 
             for ($row = 7; $row <= $lastRow; $row++) {
                 if ($row % 2 === 0) {
-                    $sheet->getStyle('A' . $row . ':F' . $row)->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+                    $sheet->getStyle('A' . $row . ':G' . $row)->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
                         ->getStartColor()->setARGB('FFF0FDF4'); // emerald-50 background for alternate rows
                 }
             }

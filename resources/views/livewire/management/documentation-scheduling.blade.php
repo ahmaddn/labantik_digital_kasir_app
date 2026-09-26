@@ -87,13 +87,18 @@
                             <span class="font-black uppercase tracking-wider text-indigo-200">
                                 {{ \Carbon\Carbon::parse($mySched->date)->translatedFormat('d M Y') }}
                             </span>
-                            @if($isToday)
-                                <span class="px-2 py-0.5 rounded-full text-[9px] font-black uppercase bg-amber-400 text-amber-950 animate-pulse">Hari Ini</span>
-                            @elseif($isPast)
-                                <span class="px-2 py-0.5 rounded-full text-[9px] font-black uppercase bg-white/20 text-gray-300">Selesai</span>
-                            @else
-                                <span class="px-2 py-0.5 rounded-full text-[9px] font-black uppercase bg-emerald-400 text-emerald-950">Mendatang</span>
-                            @endif
+                            <div class="flex items-center gap-1">
+                                <span class="px-2 py-0.5 rounded-full text-[9px] font-black uppercase bg-indigo-500/30 text-indigo-200 border border-indigo-400/30">
+                                    Shift {{ $mySched->shift ?? 1 }}
+                                </span>
+                                @if($isToday)
+                                    <span class="px-2 py-0.5 rounded-full text-[9px] font-black uppercase bg-amber-400 text-amber-950 animate-pulse">Hari Ini</span>
+                                @elseif($isPast)
+                                    <span class="px-2 py-0.5 rounded-full text-[9px] font-black uppercase bg-white/20 text-gray-300">Selesai</span>
+                                @else
+                                    <span class="px-2 py-0.5 rounded-full text-[9px] font-black uppercase bg-emerald-400 text-emerald-950">Mendatang</span>
+                                @endif
+                            </div>
                         </div>
                         <h3 class="text-sm font-bold text-white line-clamp-1">{{ $mySched->activity->title ?? 'Kegiatan' }}</h3>
                         @if($mySched->notes)
@@ -199,20 +204,26 @@
                                             @endif
                                         </div>
 
-                                        @if($sched->user->grade_level)
-                                            @php
-                                                $gLevel = (string) $sched->user->grade_level;
-                                                $gBadge = match($gLevel) {
-                                                    '12' => 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20',
-                                                    '11' => 'bg-sky-500/10 text-sky-600 dark:text-sky-400 border-sky-500/20',
-                                                    '10' => 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20',
-                                                    default => 'bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20',
-                                                };
-                                            @endphp
-                                            <span class="px-2 py-0.5 text-[9px] font-black rounded-lg border {{ $gBadge }} shrink-0">
-                                                Tingkat {{ $gLevel }}
+                                        <div class="flex items-center gap-1 shrink-0">
+                                            <span class="px-2 py-0.5 text-[9px] font-black rounded-lg border bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20">
+                                                Shift {{ $sched->shift ?? 1 }}
                                             </span>
-                                        @endif
+
+                                            @if($sched->user->grade_level)
+                                                @php
+                                                    $gLevel = (string) $sched->user->grade_level;
+                                                    $gBadge = match($gLevel) {
+                                                        '12' => 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20',
+                                                        '11' => 'bg-sky-500/10 text-sky-600 dark:text-sky-400 border-sky-500/20',
+                                                        '10' => 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20',
+                                                        default => 'bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20',
+                                                    };
+                                                @endphp
+                                                <span class="px-2 py-0.5 text-[9px] font-black rounded-lg border {{ $gBadge }}">
+                                                    Tingkat {{ $gLevel }}
+                                                </span>
+                                            @endif
+                                        </div>
                                     </div>
 
                                     <div class="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400 pt-1 border-t border-gray-100 dark:border-gray-800">
@@ -365,10 +376,23 @@
                         @error('selectedUserId') <span class="text-xs text-rose-500 mt-1 block font-semibold">{{ $message }}</span> @enderror
                     </div>
 
-                    <div>
-                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Tanggal Penugasan</label>
-                        <input type="date" wire:model="date" class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-semibold text-gray-800 dark:text-white focus:ring-2 focus:ring-primary-blue">
-                        @error('date') <span class="text-xs text-rose-500 mt-1 block font-semibold">{{ $message }}</span> @enderror
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Tanggal Penugasan</label>
+                            <input type="date" wire:model="date" class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-semibold text-gray-800 dark:text-white focus:ring-2 focus:ring-primary-blue">
+                            @error('date') <span class="text-xs text-rose-500 mt-1 block font-semibold">{{ $message }}</span> @enderror
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Pilih Shift</label>
+                            <select wire:model="shift" class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-semibold text-gray-800 dark:text-white focus:ring-2 focus:ring-primary-blue">
+                                <option value="1">Shift 1</option>
+                                <option value="2">Shift 2</option>
+                                <option value="3">Shift 3</option>
+                                <option value="4">Shift 4</option>
+                                <option value="5">Shift 5</option>
+                            </select>
+                            @error('shift') <span class="text-xs text-rose-500 mt-1 block font-semibold">{{ $message }}</span> @enderror
+                        </div>
                     </div>
 
                     <div>
@@ -401,6 +425,7 @@
                     <p class="font-bold uppercase tracking-wider">Algoritma Anti-Bentrok & Pemerataan Shift:</p>
                     <p>1. Memprioritaskan kasir dengan <strong>riwayat penugasan paling sedikit</strong>.</p>
                     <p>2. Otomatis <strong>menghindari kasir yang sedang piket kasir</strong> pada tanggal tersebut agar tidak bentrok.</p>
+                    <p>3. Fleksibel mendistribusikan kasir sesuai jumlah shift per hari & anggota yang tersedia.</p>
                 </div>
 
                 <form wire:submit.prevent="randomizeSchedules" class="space-y-4">
@@ -415,6 +440,18 @@
                         </div>
                     </div>
 
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Jumlah Shift per Hari</label>
+                        <select wire:model="shiftsPerDay" class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-semibold text-gray-800 dark:text-white focus:ring-2 focus:ring-primary-blue">
+                            <option value="1">1 Shift per Hari</option>
+                            <option value="2">2 Shift per Hari</option>
+                            <option value="3">3 Shift per Hari</option>
+                            <option value="4">4 Shift per Hari</option>
+                            <option value="5">5 Shift per Hari</option>
+                        </select>
+                        <p class="text-[11px] text-gray-400 mt-1">Setiap harinya akan dibuatkan beberapa sesi shift penugasan.</p>
+                    </div>
+
                     <!-- Grade Level Quotas Toggle -->
                     <div class="p-4 bg-gray-50 dark:bg-gray-800/60 rounded-2xl border border-gray-200 dark:border-gray-700/60 space-y-3">
                         <label class="flex items-center gap-3 cursor-pointer">
@@ -426,14 +463,14 @@
                             <div class="grid grid-cols-3 gap-3 pt-2">
                                 @foreach($availableGrades as $g)
                                     <div>
-                                        <label class="block text-[10px] font-black uppercase text-gray-500 mb-1">Tingkat {{ $g }} (Orang/Hari)</label>
+                                        <label class="block text-[10px] font-black uppercase text-gray-500 mb-1">Tingkat {{ $g }} (Orang/Shift)</label>
                                         <input type="number" min="0" max="10" wire:model="gradeQuotas.{{ $g }}" class="w-full px-3 py-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-bold text-gray-800 dark:text-white">
                                     </div>
                                 @endforeach
                             </div>
                         @else
                             <div>
-                                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Jumlah Kasir per Hari</label>
+                                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Jumlah Kasir per Shift</label>
                                 <input type="number" min="1" max="10" wire:model="maxCashiersPerDay" class="w-full px-4 py-3 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-semibold text-gray-800 dark:text-white">
                             </div>
                         @endif

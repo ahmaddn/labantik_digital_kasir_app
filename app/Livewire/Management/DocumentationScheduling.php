@@ -22,10 +22,12 @@ class DocumentationScheduling extends Component
 
     // Schedule Form State
     public $date = '';
+    public $shift = 1;
     public $selectedUserId = '';
     public $notes = '';
 
     // Randomize State
+    public $shiftsPerDay = 1;
     public $maxCashiersPerDay = 1;
     public $maxShiftsPerWeek = 2;
     public $randomizeStartDate = '';
@@ -154,6 +156,7 @@ class DocumentationScheduling extends Component
             return;
         }
         $this->selectedUserId = '';
+        $this->shift = 1;
         $this->notes = '';
 
         $activity = DocumentationActivity::find($this->selectedActivityId);
@@ -171,6 +174,7 @@ class DocumentationScheduling extends Component
         $this->validate([
             'selectedUserId' => 'required|exists:users,id',
             'date' => 'required|date',
+            'shift' => 'required|integer|min:1|max:10',
             'notes' => 'nullable|string|max:255',
         ]);
 
@@ -190,10 +194,11 @@ class DocumentationScheduling extends Component
         $alreadyScheduled = DocumentationSchedule::where('activity_id', $this->selectedActivityId)
             ->where('user_id', $this->selectedUserId)
             ->where('date', $this->date)
+            ->where('shift', $this->shift)
             ->exists();
 
         if ($alreadyScheduled) {
-            $this->dispatch('toast', message: 'Kasir sudah ditugaskan dokumentasi pada tanggal tersebut.', type: 'danger');
+            $this->dispatch('toast', message: 'Kasir sudah ditugaskan dokumentasi pada tanggal dan shift tersebut.', type: 'danger');
             return;
         }
 
@@ -213,14 +218,15 @@ class DocumentationScheduling extends Component
                 'jurusan_id' => $activity->jurusan_id,
                 'user_id' => $this->selectedUserId,
                 'date' => $this->date,
-                'notes' => $this->notes ?: 'Tugas Dokumentasi',
+                'shift' => $this->shift,
+                'notes' => $this->notes ?: 'Tugas Dokumentasi (Shift ' . $this->shift . ')',
                 'created_by' => auth()->id(),
             ]);
 
             \App\Models\Notification::create([
                 'user_id' => $this->selectedUserId,
                 'title' => 'Tugas Dokumentasi Baru',
-                'body' => 'Anda ditugaskan dokumentasi ' . $activity->title . ' pada ' . Carbon::parse($this->date)->translatedFormat('d M Y'),
+                'body' => 'Anda ditugaskan dokumentasi ' . $activity->title . ' (Shift ' . $this->shift . ') pada ' . Carbon::parse($this->date)->translatedFormat('d M Y'),
                 'type' => 'system',
                 'action_url' => '/management/documentation-schedules'
             ]);
@@ -242,6 +248,7 @@ class DocumentationScheduling extends Component
         $activity = DocumentationActivity::findOrFail($this->selectedActivityId);
         $this->randomizeStartDate = $activity->start_date->toDateString();
         $this->randomizeEndDate = $activity->end_date->toDateString();
+        $this->shiftsPerDay = 1;
 
         $activeJurusanId = session('active_jurusan_id') ?: $activity->jurusan_id;
 
@@ -287,8 +294,8 @@ class DocumentationScheduling extends Component
         $activeJurusanId = session('active_jurusan_id') ?: $activity->jurusan_id;
 
         $this->validate([
+            'shiftsPerDay' => 'required|integer|min:1|max:5',
             'maxCashiersPerDay' => 'required|integer|min:1|max:10',
-            'maxShiftsPerWeek' => 'required|integer|min:1|max:7',
             'randomizeStartDate' => 'required|date',
             'randomizeEndDate' => 'required|date|after_or_equal:randomizeStartDate',
         ]);
@@ -324,8 +331,6 @@ class DocumentationScheduling extends Component
             }
         }
 
-        $totalDays = count($days);
-
         $activeGradeQuotas = [];
         if ($this->useGradeQuotas) {
             foreach ($this->gradeQuotas as $g => $q) {
@@ -336,31 +341,8 @@ class DocumentationScheduling extends Component
             }
         }
 
-        if (!empty($activeGradeQuotas)) {
-            $this->maxCashiersPerDay = array_sum($activeGradeQuotas);
-
-            foreach ($activeGradeQuotas as $g => $quota) {
-                $gradeCashierCount = $cashierUsers->where('grade_level', (string)$g)->count();
-                $neededGradeSlots = $totalDays * $quota;
-                $maxGradeCapacity = $gradeCashierCount * $this->maxShiftsPerWeek;
-
-                if ($neededGradeSlots > $maxGradeCapacity) {
-                    $this->dispatch('toast', message: "Jumlah kasir tingkat {$g} tidak cukup ({$gradeCashierCount} orang) untuk kuota {$quota} orang/hari selama {$totalDays} hari.", type: 'danger');
-                    return;
-                }
-            }
-        } else {
-            $neededSlots = $totalDays * $this->maxCashiersPerDay;
-            $maxCapacity = $cashierUsers->count() * $this->maxShiftsPerWeek;
-
-            if ($neededSlots > $maxCapacity) {
-                $this->dispatch('toast', message: 'Jumlah kasir tidak cukup untuk memenuhi slot harian kegiatan ini.', type: 'danger');
-                return;
-            }
-        }
-
         try {
-            DB::transaction(function () use ($activity, $cashierUsers, $startDate, $endDate, $days, $activeJurusanId, $activeGradeQuotas, $totalDays) {
+            DB::transaction(function () use ($activity, $cashierUsers, $startDate, $endDate, $days, $activeJurusanId, $activeGradeQuotas) {
                 // Delete existing schedules for this activity within date range
                 DocumentationSchedule::where('activity_id', $activity->id)
                     ->whereBetween('date', [$startDate->toDateString(), $endDate->toDateString()])
@@ -384,148 +366,95 @@ class DocumentationScheduling extends Component
                     ->pluck('total', 'user_id')
                     ->toArray();
 
+                $runCount = [];
                 $assignedSchedules = [];
-                $success = false;
+                $numShifts = max(1, (int)$this->shiftsPerDay);
 
-                if (!empty($activeGradeQuotas)) {
-                    $gradePools = [];
-                    foreach ($activeGradeQuotas as $g => $quota) {
-                        $cInGrade = $cashierUsers->where('grade_level', (string)$g)->pluck('id')->toArray();
+                foreach ($days as $day) {
+                    $dayAssignedUsers = [];
 
-                        usort($cInGrade, function ($a, $b) use ($globalSchedulesCount) {
-                            $cA = $globalSchedulesCount[$a] ?? 0;
-                            $cB = $globalSchedulesCount[$b] ?? 0;
-                            if ($cA === $cB) return rand(-1, 1);
-                            return $cA <=> $cB;
-                        });
-
-                        $n = count($cInGrade);
-                        $totalSlotsForGrade = $totalDays * $quota;
-                        $baseShifts = (int) floor($totalSlotsForGrade / $n);
-                        $extraShifts = $totalSlotsForGrade % $n;
-
-                        $pool = [];
-                        foreach ($cInGrade as $idx => $uid) {
-                            $target = $baseShifts + ($idx < $extraShifts ? 1 : 0);
-                            for ($j = 0; $j < $target; $j++) {
-                                $pool[] = $uid;
-                            }
-                        }
-                        $gradePools[(string)$g] = $pool;
-                    }
-
-                    for ($attempt = 0; $attempt < 150; $attempt++) {
-                        $success = true;
-                        $assignedSchedules = [];
-                        $tempGradePools = [];
-                        foreach ($gradePools as $g => $p) {
-                            $temp = $p;
-                            shuffle($temp);
-                            $tempGradePools[$g] = $temp;
-                        }
-
-                        foreach ($days as $day) {
-                            $dayAssigned = [];
+                    for ($s = 1; $s <= $numShifts; $s++) {
+                        if (!empty($activeGradeQuotas)) {
                             foreach ($activeGradeQuotas as $g => $quota) {
-                                for ($slot = 0; $slot < $quota; $slot++) {
-                                    $candIdx = null;
-                                    foreach ($tempGradePools[$g] as $idx => $uid) {
-                                        $hasCashierShift = isset($cashierShiftMap[$uid . '_' . $day]);
-                                        if (!in_array($uid, $dayAssigned) && !$hasCashierShift) {
-                                            $candIdx = $idx;
-                                            break;
-                                        }
-                                    }
+                                $gradeCashiers = $cashierUsers->where('grade_level', (string)$g)->pluck('id')->toArray();
+                                if (empty($gradeCashiers)) continue;
 
-                                    if ($candIdx === null) {
-                                        $success = false;
-                                        break 3;
-                                    }
+                                // Filter out cashiers with cashier piket clash on this date
+                                $eligible = array_filter($gradeCashiers, function ($uid) use ($cashierShiftMap, $day) {
+                                    return !isset($cashierShiftMap[$uid . '_' . $day]);
+                                });
 
-                                    $selectedUser = $tempGradePools[$g][$candIdx];
-                                    $dayAssigned[] = $selectedUser;
-                                    array_splice($tempGradePools[$g], $candIdx, 1);
+                                if (empty($eligible)) continue;
+
+                                // Prefer candidates not assigned yet today
+                                $unassignedToday = array_values(array_diff($eligible, $dayAssignedUsers));
+                                $candidatePool = !empty($unassignedToday) ? $unassignedToday : array_values($eligible);
+
+                                usort($candidatePool, function ($a, $b) use ($globalSchedulesCount, $runCount) {
+                                    $scoreA = ($globalSchedulesCount[$a] ?? 0) + ($runCount[$a] ?? 0);
+                                    $scoreB = ($globalSchedulesCount[$b] ?? 0) + ($runCount[$b] ?? 0);
+                                    if ($scoreA === $scoreB) return rand(-1, 1);
+                                    return $scoreA <=> $scoreB;
+                                });
+
+                                $picked = array_slice($candidatePool, 0, $quota);
+
+                                foreach ($picked as $uid) {
+                                    $dayAssignedUsers[] = $uid;
+                                    $runCount[$uid] = ($runCount[$uid] ?? 0) + 1;
 
                                     $assignedSchedules[] = [
                                         'activity_id' => $activity->id,
                                         'jurusan_id' => $activeJurusanId,
-                                        'user_id' => $selectedUser,
+                                        'user_id' => $uid,
                                         'date' => $day,
-                                        'notes' => 'Acak Dokumentasi (Tingkat ' . $g . ')',
+                                        'shift' => $s,
+                                        'notes' => 'Acak Dokumentasi (Shift ' . $s . ' - Tingkat ' . $g . ')',
+                                        'created_by' => auth()->id(),
+                                    ];
+                                }
+                            }
+                        } else {
+                            $allCashiers = $cashierUsers->pluck('id')->toArray();
+                            $eligible = array_filter($allCashiers, function ($uid) use ($cashierShiftMap, $day) {
+                                return !isset($cashierShiftMap[$uid . '_' . $day]);
+                            });
+
+                            if (!empty($eligible)) {
+                                $unassignedToday = array_values(array_diff($eligible, $dayAssignedUsers));
+                                $candidatePool = !empty($unassignedToday) ? $unassignedToday : array_values($eligible);
+
+                                usort($candidatePool, function ($a, $b) use ($globalSchedulesCount, $runCount) {
+                                    $scoreA = ($globalSchedulesCount[$a] ?? 0) + ($runCount[$a] ?? 0);
+                                    $scoreB = ($globalSchedulesCount[$b] ?? 0) + ($runCount[$b] ?? 0);
+                                    if ($scoreA === $scoreB) return rand(-1, 1);
+                                    return $scoreA <=> $scoreB;
+                                });
+
+                                $targetCount = (int)$this->maxCashiersPerDay;
+                                $picked = array_slice($candidatePool, 0, $targetCount);
+
+                                foreach ($picked as $uid) {
+                                    $dayAssignedUsers[] = $uid;
+                                    $runCount[$uid] = ($runCount[$uid] ?? 0) + 1;
+
+                                    $assignedSchedules[] = [
+                                        'activity_id' => $activity->id,
+                                        'jurusan_id' => $activeJurusanId,
+                                        'user_id' => $uid,
+                                        'date' => $day,
+                                        'shift' => $s,
+                                        'notes' => 'Acak Dokumentasi (Shift ' . $s . ')',
                                         'created_by' => auth()->id(),
                                     ];
                                 }
                             }
                         }
-
-                        if ($success) break;
-                    }
-                } else {
-                    $cashierIds = $cashierUsers->pluck('id')->toArray();
-                    usort($cashierIds, function ($a, $b) use ($globalSchedulesCount) {
-                        $countA = $globalSchedulesCount[$a] ?? 0;
-                        $countB = $globalSchedulesCount[$b] ?? 0;
-                        if ($countA === $countB) return rand(-1, 1);
-                        return $countA <=> $countB;
-                    });
-
-                    $neededSlots = $totalDays * $this->maxCashiersPerDay;
-                    $n = count($cashierIds);
-                    $baseShifts = (int) floor($neededSlots / $n);
-                    $extraShiftsCount = $neededSlots % $n;
-
-                    $pool = [];
-                    foreach ($cashierIds as $index => $uid) {
-                        $targetShifts = $baseShifts + ($index < $extraShiftsCount ? 1 : 0);
-                        for ($j = 0; $j < $targetShifts; $j++) {
-                            $pool[] = $uid;
-                        }
-                    }
-
-                    for ($attempt = 0; $attempt < 150; $attempt++) {
-                        $success = true;
-                        $assignedSchedules = [];
-                        $tempPool = $pool;
-                        shuffle($tempPool);
-
-                        foreach ($days as $day) {
-                            $dayAssigned = [];
-                            for ($slot = 0; $slot < $this->maxCashiersPerDay; $slot++) {
-                                $candidateIndex = null;
-                                foreach ($tempPool as $idx => $uid) {
-                                    $hasCashierShift = isset($cashierShiftMap[$uid . '_' . $day]);
-                                    if (!in_array($uid, $dayAssigned) && !$hasCashierShift) {
-                                        $candidateIndex = $idx;
-                                        break;
-                                    }
-                                }
-
-                                if ($candidateIndex === null) {
-                                    $success = false;
-                                    break 2;
-                                }
-
-                                $selectedUser = $tempPool[$candidateIndex];
-                                $dayAssigned[] = $selectedUser;
-                                array_splice($tempPool, $candidateIndex, 1);
-
-                                $assignedSchedules[] = [
-                                    'activity_id' => $activity->id,
-                                    'jurusan_id' => $activeJurusanId,
-                                    'user_id' => $selectedUser,
-                                    'date' => $day,
-                                    'notes' => 'Acak Dokumentasi',
-                                    'created_by' => auth()->id(),
-                                ];
-                            }
-                        }
-
-                        if ($success) break;
                     }
                 }
 
-                if (!$success) {
-                    throw new \Exception('Gagal mendistribusikan penugasan dokumentasi tanpa bentrok dengan jadwal piket kasir. Pastikan jumlah anggota kasir mencukupi.');
+                if (empty($assignedSchedules)) {
+                    throw new \Exception('Tidak ada kasir yang tersedia untuk dijadwalkan (mungkin semua kasir sedang piket pada tanggal tersebut).');
                 }
 
                 foreach ($assignedSchedules as $sched) {
@@ -534,7 +463,7 @@ class DocumentationScheduling extends Component
                     \App\Models\Notification::create([
                         'user_id' => $createdSched->user_id,
                         'title' => 'Tugas Dokumentasi Baru (Acak Otomatis)',
-                        'body' => 'Anda ditugaskan dokumentasi ' . $activity->title . ' pada ' . Carbon::parse($createdSched->date)->translatedFormat('d M Y'),
+                        'body' => 'Anda ditugaskan dokumentasi ' . $activity->title . ' (Shift ' . $createdSched->shift . ') pada ' . Carbon::parse($createdSched->date)->translatedFormat('d M Y'),
                         'type' => 'system',
                         'action_url' => '/management/documentation-schedules'
                     ]);
@@ -613,6 +542,7 @@ class DocumentationScheduling extends Component
                     $activitySchedules = DocumentationSchedule::with('user')
                         ->where('activity_id', $activeActivity->id)
                         ->orderBy('date')
+                        ->orderBy('shift')
                         ->get();
 
                     // Days list between start and end date safely

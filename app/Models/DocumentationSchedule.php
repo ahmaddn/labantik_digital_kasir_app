@@ -15,6 +15,7 @@ class DocumentationSchedule extends Model
         'jurusan_id',
         'user_id',
         'date',
+        'shift',
         'notes',
         'created_by',
     ];
@@ -23,6 +24,7 @@ class DocumentationSchedule extends Model
     {
         return [
             'date' => 'date',
+            'shift' => 'integer',
         ];
     }
 
