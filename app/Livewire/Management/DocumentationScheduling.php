@@ -382,13 +382,24 @@ class DocumentationScheduling extends Component
 
                 $runCount = [];
                 $userShiftCounts = [];
+                $lastShiftAssigned = [];
                 $assignedSchedules = [];
                 $numShifts = max(1, (int)$this->shiftsPerDay);
 
-                foreach ($days as $day) {
+                foreach ($days as $dayIdx => $day) {
                     $dayAssignedUsers = [];
 
-                    for ($s = 1; $s <= $numShifts; $s++) {
+                    // Rotate shift processing order per day so Shift 1 is not always processed first
+                    $shiftsForDay = range(1, $numShifts);
+                    $rotateOffset = $dayIdx % $numShifts;
+                    if ($rotateOffset > 0) {
+                        $shiftsForDay = array_merge(
+                            array_slice($shiftsForDay, $rotateOffset),
+                            array_slice($shiftsForDay, 0, $rotateOffset)
+                        );
+                    }
+
+                    foreach ($shiftsForDay as $s) {
                         $shiftIdx = $s - 1;
 
                         if (!empty($activeGradeQuotas)) {
@@ -426,14 +437,22 @@ class DocumentationScheduling extends Component
                                     $shiftTargetQuota = 1;
                                 }
 
-                                usort($candidatePool, function ($a, $b) use ($globalSchedulesCount, $runCount, $userShiftCounts, $s) {
+                                usort($candidatePool, function ($a, $b) use ($globalSchedulesCount, $runCount, $userShiftCounts, $lastShiftAssigned, $s) {
+                                    // 1. Penalize if candidate was assigned to this exact shift on their previous assignment
+                                    $lastA = ($lastShiftAssigned[$a] ?? null) === $s ? 1 : 0;
+                                    $lastB = ($lastShiftAssigned[$b] ?? null) === $s ? 1 : 0;
+                                    if ($lastA !== $lastB) {
+                                        return $lastA <=> $lastB;
+                                    }
+
+                                    // 2. Compare how many times assigned to this shift overall
                                     $sameShiftA = $userShiftCounts[$a][$s] ?? 0;
                                     $sameShiftB = $userShiftCounts[$b][$s] ?? 0;
-
                                     if ($sameShiftA !== $sameShiftB) {
                                         return $sameShiftA <=> $sameShiftB;
                                     }
 
+                                    // 3. Global total assignments score
                                     $scoreA = (($globalSchedulesCount[$a] ?? 0) * 10) + (($runCount[$a] ?? 0) * 10);
                                     $scoreB = (($globalSchedulesCount[$b] ?? 0) * 10) + (($runCount[$b] ?? 0) * 10);
                                     if ($scoreA !== $scoreB) {
@@ -446,17 +465,25 @@ class DocumentationScheduling extends Component
                                 $picked = array_slice($candidatePool, 0, $shiftTargetQuota);
 
                                 foreach ($picked as $uid) {
+                                    // If 1 shift per day is configured, alternate the shift number between 1 and 2 per user across days
+                                    $actualShift = $s;
+                                    if ($numShifts === 1) {
+                                        $prevShift = $lastShiftAssigned[$uid] ?? null;
+                                        $actualShift = ($prevShift === 1) ? 2 : (($prevShift === 2) ? 1 : (($dayIdx % 2) + 1));
+                                    }
+
                                     $dayAssignedUsers[] = $uid;
                                     $runCount[$uid] = ($runCount[$uid] ?? 0) + 1;
-                                    $userShiftCounts[$uid][$s] = ($userShiftCounts[$uid][$s] ?? 0) + 1;
+                                    $userShiftCounts[$uid][$actualShift] = ($userShiftCounts[$uid][$actualShift] ?? 0) + 1;
+                                    $lastShiftAssigned[$uid] = $actualShift;
 
                                     $assignedSchedules[] = [
                                         'activity_id' => $activity->id,
                                         'jurusan_id' => $activeJurusanId,
                                         'user_id' => $uid,
                                         'date' => $day,
-                                        'shift' => $s,
-                                        'notes' => 'Acak Dokumentasi (Shift ' . $s . ($g === 'none' ? ' - Tanpa Tingkat' : ' - Tingkat ' . $g) . ')',
+                                        'shift' => $actualShift,
+                                        'notes' => 'Acak Dokumentasi (Shift ' . $actualShift . ($g === 'none' ? ' - Tanpa Tingkat' : ' - Tingkat ' . $g) . ')',
                                         'created_by' => auth()->id(),
                                     ];
                                 }
@@ -485,10 +512,15 @@ class DocumentationScheduling extends Component
                                         $shiftTargetQuota = 1;
                                     }
 
-                                    usort($candidatePool, function ($a, $b) use ($globalSchedulesCount, $runCount, $userShiftCounts, $s) {
+                                    usort($candidatePool, function ($a, $b) use ($globalSchedulesCount, $runCount, $userShiftCounts, $lastShiftAssigned, $s) {
+                                        $lastA = ($lastShiftAssigned[$a] ?? null) === $s ? 1 : 0;
+                                        $lastB = ($lastShiftAssigned[$b] ?? null) === $s ? 1 : 0;
+                                        if ($lastA !== $lastB) {
+                                            return $lastA <=> $lastB;
+                                        }
+
                                         $sameShiftA = $userShiftCounts[$a][$s] ?? 0;
                                         $sameShiftB = $userShiftCounts[$b][$s] ?? 0;
-
                                         if ($sameShiftA !== $sameShiftB) {
                                             return $sameShiftA <=> $sameShiftB;
                                         }
@@ -505,17 +537,24 @@ class DocumentationScheduling extends Component
                                     $picked = array_slice($candidatePool, 0, $shiftTargetQuota);
 
                                     foreach ($picked as $uid) {
+                                        $actualShift = $s;
+                                        if ($numShifts === 1) {
+                                            $prevShift = $lastShiftAssigned[$uid] ?? null;
+                                            $actualShift = ($prevShift === 1) ? 2 : (($prevShift === 2) ? 1 : (($dayIdx % 2) + 1));
+                                        }
+
                                         $dayAssignedUsers[] = $uid;
                                         $runCount[$uid] = ($runCount[$uid] ?? 0) + 1;
-                                        $userShiftCounts[$uid][$s] = ($userShiftCounts[$uid][$s] ?? 0) + 1;
+                                        $userShiftCounts[$uid][$actualShift] = ($userShiftCounts[$uid][$actualShift] ?? 0) + 1;
+                                        $lastShiftAssigned[$uid] = $actualShift;
 
                                         $assignedSchedules[] = [
                                             'activity_id' => $activity->id,
                                             'jurusan_id' => $activeJurusanId,
                                             'user_id' => $uid,
                                             'date' => $day,
-                                            'shift' => $s,
-                                            'notes' => 'Acak Dokumentasi (Shift ' . $s . ')',
+                                            'shift' => $actualShift,
+                                            'notes' => 'Acak Dokumentasi (Shift ' . $actualShift . ')',
                                             'created_by' => auth()->id(),
                                         ];
                                     }
