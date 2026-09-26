@@ -386,6 +386,12 @@ class DocumentationScheduling extends Component
                 $assignedSchedules = [];
                 $numShifts = max(1, (int)$this->shiftsPerDay);
 
+                // Identify Sheren & Meta
+                $sherenUser = $cashierUsers->first(fn($u) => stripos($u->name, 'sheren') !== false);
+                $metaUser = $cashierUsers->first(fn($u) => stripos($u->name, 'meta') !== false);
+                $sherenId = $sherenUser?->id;
+                $metaId = $metaUser?->id;
+
                 foreach ($days as $dayIdx => $day) {
                     $dailySelectedCashiers = [];
 
@@ -409,9 +415,19 @@ class DocumentationScheduling extends Component
 
                             if (empty($gradeCashiers)) continue;
 
-                            // Filter out cashiers with piket clash on this date
-                            $eligible = array_values(array_filter($gradeCashiers, function ($uid) use ($cashierShiftMap, $day) {
-                                return !isset($cashierShiftMap[$uid . '_' . $day]);
+                            // Filter out cashiers with piket clash on this date or who have reached max 2 for BOTH shifts
+                            $eligible = array_values(array_filter($gradeCashiers, function ($uid) use ($cashierShiftMap, $day, $userShiftCounts, $sherenId, $metaId) {
+                                if (isset($cashierShiftMap[$uid . '_' . $day])) return false;
+
+                                $s1Count = $userShiftCounts[$uid][1] ?? 0;
+                                $s2Count = $userShiftCounts[$uid][2] ?? 0;
+
+                                // Sheren & Meta can never get Shift 2, so stop if Shift 1 count >= 2
+                                if ($uid === $sherenId || $uid === $metaId) {
+                                    return $s1Count < 2;
+                                }
+
+                                return ($s1Count < 2 || $s2Count < 2);
                             }));
 
                             if (empty($eligible)) continue;
@@ -451,8 +467,17 @@ class DocumentationScheduling extends Component
                             return true;
                         })->pluck('id')->toArray();
 
-                        $eligible = array_values(array_filter($allCashiers, function ($uid) use ($cashierShiftMap, $day) {
-                            return !isset($cashierShiftMap[$uid . '_' . $day]);
+                        $eligible = array_values(array_filter($allCashiers, function ($uid) use ($cashierShiftMap, $day, $userShiftCounts, $sherenId, $metaId) {
+                            if (isset($cashierShiftMap[$uid . '_' . $day])) return false;
+
+                            $s1Count = $userShiftCounts[$uid][1] ?? 0;
+                            $s2Count = $userShiftCounts[$uid][2] ?? 0;
+
+                            if ($uid === $sherenId || $uid === $metaId) {
+                                return $s1Count < 2;
+                            }
+
+                            return ($s1Count < 2 || $s2Count < 2);
                         }));
 
                         $grouped = [];
@@ -481,10 +506,37 @@ class DocumentationScheduling extends Component
                         }
                     }
 
+                    // Special rule for Sheren and Meta: ALWAYS PAIRED TOGETHER IN SHIFT 1
+                    if ($sherenId && $metaId) {
+                        $hasSheren = false;
+                        $hasMeta = false;
+                        foreach ($dailySelectedCashiers as $item) {
+                            if ($item['user_id'] === $sherenId) $hasSheren = true;
+                            if ($item['user_id'] === $metaId) $hasMeta = true;
+                        }
+
+                        // If either Sheren or Meta is selected today, force pair both together if eligible
+                        if ($hasSheren || $hasMeta) {
+                            $sherenCan = !isset($cashierShiftMap[$sherenId . '_' . $day]) && (($userShiftCounts[$sherenId][1] ?? 0) < 2);
+                            $metaCan = !isset($cashierShiftMap[$metaId . '_' . $day]) && (($userShiftCounts[$metaId][1] ?? 0) < 2);
+
+                            if ($sherenCan && $metaCan) {
+                                if (!$hasSheren) {
+                                    $dailySelectedCashiers[] = ['user_id' => $sherenId, 'grade' => (string)($sherenUser->grade_level ?: '12')];
+                                }
+                                if (!$hasMeta) {
+                                    $dailySelectedCashiers[] = ['user_id' => $metaId, 'grade' => (string)($metaUser->grade_level ?: '12')];
+                                }
+                            }
+                        }
+                    }
+
                     if (empty($dailySelectedCashiers)) continue;
 
                     // STEP 2: Distribute selected daily cashiers into shifts while respecting constraints:
-                    // Rule: Cashiers who worked Shift 2 (or higher) yesterday MUST NOT get Shift 1 today!
+                    // 1. Sheren & Meta NEVER get Shift 2, MUST get Shift 1!
+                    // 2. Max 2 Shift 1 per cashier, Max 2 Shift 2 per cashier
+                    // 3. Cashiers who worked Shift 2 yesterday MUST NOT get Shift 1 today
                     $totalDailyCount = count($dailySelectedCashiers);
                     $shiftCapacities = [];
                     $baseCap = (int) floor($totalDailyCount / $numShifts);
@@ -501,6 +553,35 @@ class DocumentationScheduling extends Component
                         foreach ($dailySelectedCashiers as $item) {
                             $uid = $item['user_id'];
                             $lastS = $lastShiftAssigned[$uid] ?? null;
+                            $s1Count = $userShiftCounts[$uid][1] ?? 0;
+                            $s2Count = $userShiftCounts[$uid][2] ?? 0;
+
+                            // Sheren & Meta: MUST ONLY DO SHIFT 1
+                            if ($uid === $sherenId || $uid === $metaId) {
+                                if ($s1Count < 2) {
+                                    // Place at front of canDoShift1
+                                    array_unshift($canDoShift1, $item);
+                                }
+                                continue;
+                            }
+
+                            // Cashier reached Shift 1 limit (2): MUST DO SHIFT 2
+                            if ($s1Count >= 2) {
+                                if ($s2Count < 2) {
+                                    $cannotDoShift1[] = $item;
+                                }
+                                continue;
+                            }
+
+                            // Cashier reached Shift 2 limit (2): MUST DO SHIFT 1
+                            if ($s2Count >= 2) {
+                                if ($s1Count < 2) {
+                                    $canDoShift1[] = $item;
+                                }
+                                continue;
+                            }
+
+                            // Cashier worked Shift 2 yesterday: CANNOT DO SHIFT 1 TODAY
                             if ($lastS !== null && $lastS >= 2) {
                                 $cannotDoShift1[] = $item;
                             } else {
@@ -508,16 +589,13 @@ class DocumentationScheduling extends Component
                             }
                         }
 
-                        shuffle($canDoShift1);
-                        shuffle($cannotDoShift1);
-
                         $shift1Cap = $shiftCapacities[1] ?? $baseCap;
 
                         // Fill Shift 1 from candidates eligible for Shift 1
                         $shift1Assigned = array_slice($canDoShift1, 0, $shift1Cap);
                         $leftoverCanDoShift1 = array_slice($canDoShift1, $shift1Cap);
 
-                        // Fallback: If not enough canDoShift1 candidates to fill Shift 1, fill remaining from cannotDoShift1
+                        // Fallback: If not enough canDoShift1 candidates to fill Shift 1, fill remaining from cannotDoShift1 (excluding Sheren/Meta)
                         if (count($shift1Assigned) < $shift1Cap && !empty($cannotDoShift1)) {
                             $needed = $shift1Cap - count($shift1Assigned);
                             $fallback = array_slice($cannotDoShift1, 0, $needed);
@@ -555,13 +633,19 @@ class DocumentationScheduling extends Component
                         $assignedInShift = 0;
 
                         foreach ($shift2Candidates as $item) {
+                            $uid = $item['user_id'];
+
+                            // Hard block Sheren and Meta from getting Shift 2
+                            if ($uid === $sherenId || $uid === $metaId) {
+                                continue;
+                            }
+
                             if ($assignedInShift >= $shiftCap && $currentShift < $numShifts) {
                                 $currentShift++;
                                 $shiftCap = $shiftCapacities[$currentShift] ?? $baseCap;
                                 $assignedInShift = 0;
                             }
 
-                            $uid = $item['user_id'];
                             $g = $item['grade'];
                             $actualShift = $currentShift;
 
@@ -588,8 +672,11 @@ class DocumentationScheduling extends Component
                             $uid = $item['user_id'];
                             $g = $item['grade'];
 
-                            $prevShift = $lastShiftAssigned[$uid] ?? null;
-                            $actualShift = ($prevShift === 1) ? 2 : (($prevShift === 2) ? 1 : (($dayIdx % 2) + 1));
+                            $actualShift = 1;
+                            if ($uid !== $sherenId && $uid !== $metaId) {
+                                $prevShift = $lastShiftAssigned[$uid] ?? null;
+                                $actualShift = ($prevShift === 1) ? 2 : (($prevShift === 2) ? 1 : (($dayIdx % 2) + 1));
+                            }
 
                             $runCount[$uid] = ($runCount[$uid] ?? 0) + 1;
                             $userShiftCounts[$uid][$actualShift] = ($userShiftCounts[$uid][$actualShift] ?? 0) + 1;
