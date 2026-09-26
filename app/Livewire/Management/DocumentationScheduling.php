@@ -416,17 +416,24 @@ class DocumentationScheduling extends Component
 
                             if (empty($eligible)) continue;
 
-                            // Sort eligible candidates fairly
-                            usort($eligible, function ($a, $b) use ($globalSchedulesCount, $runCount) {
-                                $scoreA = (($globalSchedulesCount[$a] ?? 0) * 10) + (($runCount[$a] ?? 0) * 10);
-                                $scoreB = (($globalSchedulesCount[$b] ?? 0) * 10) + (($runCount[$b] ?? 0) * 10);
-                                if ($scoreA !== $scoreB) {
-                                    return $scoreA <=> $scoreB;
-                                }
-                                return rand(-1, 1);
-                            });
+                            // Group eligible candidates by fairness score and shuffle ties truly randomly
+                            $grouped = [];
+                            foreach ($eligible as $uid) {
+                                $score = (($globalSchedulesCount[$uid] ?? 0) * 10) + (($runCount[$uid] ?? 0) * 10);
+                                $grouped[$score][] = $uid;
+                            }
+                            ksort($grouped);
 
-                            $pickedGrade = array_slice($eligible, 0, $targetQuotaForGrade);
+                            $pickedGrade = [];
+                            foreach ($grouped as $score => $uids) {
+                                shuffle($uids);
+                                foreach ($uids as $uid) {
+                                    if (count($pickedGrade) < $targetQuotaForGrade) {
+                                        $pickedGrade[] = $uid;
+                                    }
+                                }
+                            }
+
                             foreach ($pickedGrade as $uid) {
                                 $dailySelectedCashiers[] = [
                                     'user_id' => $uid,
@@ -448,17 +455,24 @@ class DocumentationScheduling extends Component
                             return !isset($cashierShiftMap[$uid . '_' . $day]);
                         }));
 
-                        usort($eligible, function ($a, $b) use ($globalSchedulesCount, $runCount) {
-                            $scoreA = (($globalSchedulesCount[$a] ?? 0) * 10) + (($runCount[$a] ?? 0) * 10);
-                            $scoreB = (($globalSchedulesCount[$b] ?? 0) * 10) + (($runCount[$b] ?? 0) * 10);
-                            if ($scoreA !== $scoreB) {
-                                return $scoreA <=> $scoreB;
-                            }
-                            return rand(-1, 1);
-                        });
+                        $grouped = [];
+                        foreach ($eligible as $uid) {
+                            $score = (($globalSchedulesCount[$uid] ?? 0) * 10) + (($runCount[$uid] ?? 0) * 10);
+                            $grouped[$score][] = $uid;
+                        }
+                        ksort($grouped);
 
+                        $pickedDaily = [];
                         $totalDailyQuota = (int)$this->maxCashiersPerDay;
-                        $pickedDaily = array_slice($eligible, 0, $totalDailyQuota);
+                        foreach ($grouped as $score => $uids) {
+                            shuffle($uids);
+                            foreach ($uids as $uid) {
+                                if (count($pickedDaily) < $totalDailyQuota) {
+                                    $pickedDaily[] = $uid;
+                                }
+                            }
+                        }
+
                         foreach ($pickedDaily as $uid) {
                             $dailySelectedCashiers[] = [
                                 'user_id' => $uid,
@@ -469,7 +483,8 @@ class DocumentationScheduling extends Component
 
                     if (empty($dailySelectedCashiers)) continue;
 
-                    // STEP 2: Distribute selected daily cashiers evenly into $numShifts shifts
+                    // STEP 2: Distribute selected daily cashiers into shifts while respecting constraints:
+                    // Rule: Cashiers who worked Shift 2 (or higher) yesterday MUST NOT get Shift 1 today!
                     $totalDailyCount = count($dailySelectedCashiers);
                     $shiftCapacities = [];
                     $baseCap = (int) floor($totalDailyCount / $numShifts);
@@ -479,43 +494,76 @@ class DocumentationScheduling extends Component
                         $shiftCapacities[$s] = $baseCap + ($s <= $remCap ? 1 : 0);
                     }
 
-                    // Sort candidates for shift assignment preference (favoring shift rotation from previous day)
-                    usort($dailySelectedCashiers, function ($itemA, $itemB) use ($lastShiftAssigned) {
-                        $a = $itemA['user_id'];
-                        $b = $itemB['user_id'];
+                    if ($numShifts > 1) {
+                        $cannotDoShift1 = [];
+                        $canDoShift1 = [];
 
-                        $lastA = $lastShiftAssigned[$a] ?? 0;
-                        $lastB = $lastShiftAssigned[$b] ?? 0;
-
-                        if ($lastA !== $lastB) {
-                            return $lastA <=> $lastB;
+                        foreach ($dailySelectedCashiers as $item) {
+                            $uid = $item['user_id'];
+                            $lastS = $lastShiftAssigned[$uid] ?? null;
+                            if ($lastS !== null && $lastS >= 2) {
+                                $cannotDoShift1[] = $item;
+                            } else {
+                                $canDoShift1[] = $item;
+                            }
                         }
 
-                        return rand(-1, 1);
-                    });
+                        shuffle($canDoShift1);
+                        shuffle($cannotDoShift1);
 
-                    // Determine shift filling order for this day
-                    $shiftOrder = range(1, $numShifts);
-                    $offset = $dayIdx % $numShifts;
-                    if ($offset > 0) {
-                        $shiftOrder = array_merge(array_slice($shiftOrder, $offset), array_slice($shiftOrder, 0, $offset));
-                    }
+                        $shift1Cap = $shiftCapacities[1] ?? $baseCap;
 
-                    $assignedIndex = 0;
-                    foreach ($shiftOrder as $targetShift) {
-                        $cap = $shiftCapacities[$targetShift] ?? 0;
-                        for ($c = 0; $c < $cap; $c++) {
-                            if ($assignedIndex >= $totalDailyCount) break;
+                        // Fill Shift 1 from candidates eligible for Shift 1
+                        $shift1Assigned = array_slice($canDoShift1, 0, $shift1Cap);
+                        $leftoverCanDoShift1 = array_slice($canDoShift1, $shift1Cap);
 
-                            $item = $dailySelectedCashiers[$assignedIndex];
+                        // Fallback: If not enough canDoShift1 candidates to fill Shift 1, fill remaining from cannotDoShift1
+                        if (count($shift1Assigned) < $shift1Cap && !empty($cannotDoShift1)) {
+                            $needed = $shift1Cap - count($shift1Assigned);
+                            $fallback = array_slice($cannotDoShift1, 0, $needed);
+                            $cannotDoShift1 = array_slice($cannotDoShift1, $needed);
+                            $shift1Assigned = array_merge($shift1Assigned, $fallback);
+                        }
+
+                        $shift2Candidates = array_merge($cannotDoShift1, $leftoverCanDoShift1);
+                        shuffle($shift2Candidates);
+
+                        // Assign Shift 1
+                        foreach ($shift1Assigned as $item) {
                             $uid = $item['user_id'];
                             $g = $item['grade'];
+                            $actualShift = 1;
 
-                            $actualShift = $targetShift;
-                            if ($numShifts === 1) {
-                                $prevShift = $lastShiftAssigned[$uid] ?? null;
-                                $actualShift = ($prevShift === 1) ? 2 : (($prevShift === 2) ? 1 : (($dayIdx % 2) + 1));
+                            $runCount[$uid] = ($runCount[$uid] ?? 0) + 1;
+                            $userShiftCounts[$uid][$actualShift] = ($userShiftCounts[$uid][$actualShift] ?? 0) + 1;
+                            $lastShiftAssigned[$uid] = $actualShift;
+
+                            $assignedSchedules[] = [
+                                'activity_id' => $activity->id,
+                                'jurusan_id' => $activeJurusanId,
+                                'user_id' => $uid,
+                                'date' => $day,
+                                'shift' => $actualShift,
+                                'notes' => 'Acak Dokumentasi (Shift ' . $actualShift . ($g === 'none' ? ' - Tanpa Tingkat' : ($g !== 'all' ? ' - Tingkat ' . $g : '')) . ')',
+                                'created_by' => auth()->id(),
+                            ];
+                        }
+
+                        // Assign Shift 2 (and higher shifts)
+                        $currentShift = 2;
+                        $shiftCap = $shiftCapacities[$currentShift] ?? $baseCap;
+                        $assignedInShift = 0;
+
+                        foreach ($shift2Candidates as $item) {
+                            if ($assignedInShift >= $shiftCap && $currentShift < $numShifts) {
+                                $currentShift++;
+                                $shiftCap = $shiftCapacities[$currentShift] ?? $baseCap;
+                                $assignedInShift = 0;
                             }
+
+                            $uid = $item['user_id'];
+                            $g = $item['grade'];
+                            $actualShift = $currentShift;
 
                             $runCount[$uid] = ($runCount[$uid] ?? 0) + 1;
                             $userShiftCounts[$uid][$actualShift] = ($userShiftCounts[$uid][$actualShift] ?? 0) + 1;
@@ -531,7 +579,31 @@ class DocumentationScheduling extends Component
                                 'created_by' => auth()->id(),
                             ];
 
-                            $assignedIndex++;
+                            $assignedInShift++;
+                        }
+                    } else {
+                        // numShifts == 1: alternate shift number between 1 and 2 per user across days
+                        shuffle($dailySelectedCashiers);
+                        foreach ($dailySelectedCashiers as $item) {
+                            $uid = $item['user_id'];
+                            $g = $item['grade'];
+
+                            $prevShift = $lastShiftAssigned[$uid] ?? null;
+                            $actualShift = ($prevShift === 1) ? 2 : (($prevShift === 2) ? 1 : (($dayIdx % 2) + 1));
+
+                            $runCount[$uid] = ($runCount[$uid] ?? 0) + 1;
+                            $userShiftCounts[$uid][$actualShift] = ($userShiftCounts[$uid][$actualShift] ?? 0) + 1;
+                            $lastShiftAssigned[$uid] = $actualShift;
+
+                            $assignedSchedules[] = [
+                                'activity_id' => $activity->id,
+                                'jurusan_id' => $activeJurusanId,
+                                'user_id' => $uid,
+                                'date' => $day,
+                                'shift' => $actualShift,
+                                'notes' => 'Acak Dokumentasi (Shift ' . $actualShift . ($g === 'none' ? ' - Tanpa Tingkat' : ($g !== 'all' ? ' - Tingkat ' . $g : '')) . ')',
+                                'created_by' => auth()->id(),
+                            ];
                         }
                     }
                 }
