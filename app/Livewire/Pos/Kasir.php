@@ -216,12 +216,7 @@ class Kasir extends Component
                     return;
                 }
             } else {
-                // Higher-role cashier: once the session is finished, the cashier mode
-                // is locked too — block re-entry (can only be reopened via emergency reactivate)
-                session()->flash('error', 'Sesi kasir hari ini telah diselesaikan. Mode kasir terkunci.');
-                $this->redirectRoute('dashboard', navigate: true);
-
-                return;
+                // Higher-role (Pengelola/Admin): Izinkan masuk ke layar Kasir dalam Mode Pasca-Closing (Transaksi Besok)
             }
         }
 
