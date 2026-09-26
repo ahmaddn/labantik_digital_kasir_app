@@ -460,10 +460,12 @@
                         </label>
 
                         @if($useGradeQuotas)
-                            <div class="grid grid-cols-3 gap-3 pt-2">
+                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
                                 @foreach($availableGrades as $g)
                                     <div>
-                                        <label class="block text-[10px] font-black uppercase text-gray-500 mb-1">Tingkat {{ $g }} (Orang/Shift)</label>
+                                        <label class="block text-[10px] font-black uppercase text-gray-500 mb-1">
+                                            {{ $g === 'none' ? 'Tanpa Tingkat' : 'Tingkat ' . $g }} (Orang/Shift)
+                                        </label>
                                         <input type="number" min="0" max="10" wire:model="gradeQuotas.{{ $g }}" class="w-full px-3 py-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-bold text-gray-800 dark:text-white">
                                     </div>
                                 @endforeach

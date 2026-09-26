@@ -258,15 +258,19 @@ class DocumentationScheduling extends Component
                     $sq->where('role_user.jurusan_id', $activeJurusanId);
                 });
         })
-        ->whereNotNull('grade_level')
-        ->where('grade_level', '!=', '')
         ->pluck('grade_level')
+        ->map(fn($g) => ($g === null || trim((string)$g) === '') ? 'none' : (string)$g)
         ->unique()
         ->values()
         ->toArray();
 
         $mergedGrades = array_unique(array_merge(['12', '11', '10'], $dbGrades));
-        rsort($mergedGrades);
+        usort($mergedGrades, function ($a, $b) {
+            if ($a === 'none') return 1;
+            if ($b === 'none') return -1;
+            return (int)$b <=> (int)$a;
+        });
+
         $this->availableGrades = array_values($mergedGrades);
 
         foreach ($this->availableGrades as $g) {
@@ -379,7 +383,16 @@ class DocumentationScheduling extends Component
 
                         if (!empty($activeGradeQuotas)) {
                             foreach ($activeGradeQuotas as $g => $totalGradeQuota) {
-                                $gradeCashiers = $cashierUsers->where('grade_level', (string)$g)->pluck('id')->toArray();
+                                if ($g === 'none' || $g === '') {
+                                    $gradeCashiers = $cashierUsers->filter(function ($u) {
+                                        return empty($u->grade_level) || trim((string)$u->grade_level) === '';
+                                    })->pluck('id')->toArray();
+                                } else {
+                                    $gradeCashiers = $cashierUsers->filter(function ($u) use ($g) {
+                                        return (string)$u->grade_level === (string)$g;
+                                    })->pluck('id')->toArray();
+                                }
+
                                 if (empty($gradeCashiers)) continue;
 
                                 // Filter out cashiers with cashier piket clash on this date
@@ -431,7 +444,7 @@ class DocumentationScheduling extends Component
                                         'user_id' => $uid,
                                         'date' => $day,
                                         'shift' => $s,
-                                        'notes' => 'Acak Dokumentasi (Shift ' . $s . ' - Tingkat ' . $g . ')',
+                                        'notes' => 'Acak Dokumentasi (Shift ' . $s . ($g === 'none' ? ' - Tanpa Tingkat' : ' - Tingkat ' . $g) . ')',
                                         'created_by' => auth()->id(),
                                     ];
                                 }
