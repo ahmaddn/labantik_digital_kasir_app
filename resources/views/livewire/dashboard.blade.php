@@ -119,13 +119,10 @@
                                 class="bg-white dark:bg-gray-900 w-full max-w-md rounded-2xl shadow-2xl overflow-hidden border border-gray-100 dark:border-gray-800">
                                 <!-- Header -->
                                 <div
-                                    class="p-5 bg-gradient-to-br from-red-600 to-red-700 text-white relative overflow-hidden">
-                                    <div
-                                        class="absolute -right-10 -bottom-10 w-32 h-32 bg-white/10 rounded-full blur-2xl">
-                                    </div>
+                                    class="p-5 bg-red-600 text-white relative overflow-hidden">
                                     <div class="relative z-10 flex items-center gap-4">
                                         <div
-                                            class="w-14 h-14 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/20 flex-shrink-0">
+                                            class="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center border border-white/20 flex-shrink-0">
                                             <svg class="w-8 h-8 text-white" xmlns="http://www.w3.org/2000/svg"
                                                 fill="none" viewBox="0 0 24 24" stroke="currentColor"
                                                 stroke-width="2.5">
@@ -138,7 +135,7 @@
                                                 class="px-2.5 py-0.5 bg-white/25 text-[10px] font-black uppercase tracking-widest rounded-full border border-white/10">Tindakan
                                                 Darurat</span>
                                             <h3 class="text-2xl font-black italic tracking-tight mt-1">Aktifkan Kembali
-                                                Sesi?</h3>
+                                                 Sesi?</h3>
                                         </div>
                                     </div>
                                 </div>
@@ -161,7 +158,7 @@
                                     </button>
                                     <button type="button" wire:click="emergencyReactivateSession"
                                         @click="showEmergencyConfirm = false"
-                                        class="px-5 py-2.5 bg-gradient-to-r from-red-600 to-red-700 text-white text-xs font-black rounded-2xl hover:bg-red-700 shadow-lg shadow-red-600/25 transition-all text-center uppercase tracking-widest">
+                                        class="px-5 py-2.5 bg-red-600 text-white text-xs font-black rounded-2xl hover:bg-red-700 shadow-lg shadow-red-600/25 transition-all text-center uppercase tracking-widest">
                                         Ya, Aktifkan Sesi
                                     </button>
                                 </div>
@@ -251,11 +248,10 @@
             <!-- Card Utama Absensi & Shift Realtime -->
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <!-- 1. Status Kehadiran & Jam Masuk -->
-                <div class="bg-gradient-to-br from-primary-blue to-blue-800 text-white rounded-3xl p-6 shadow-xl relative overflow-hidden flex flex-col justify-between">
-                    <div class="absolute -right-10 -bottom-10 w-36 h-36 bg-white/10 rounded-full blur-2xl pointer-events-none"></div>
+                <div class="bg-primary-blue text-white rounded-3xl p-6 shadow-md flex flex-col justify-between">
                     <div>
                         <div class="flex items-center justify-between mb-4">
-                            <span class="px-3 py-1 bg-white/20 backdrop-blur-md rounded-xl text-[10px] font-black uppercase tracking-widest border border-white/20 flex items-center gap-1.5">
+                            <span class="px-3 py-1 bg-white/20 rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5">
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                                 </svg>
@@ -271,20 +267,20 @@
                                 </span>
                             @endif
                         </div>
-                        <p class="text-xs text-blue-200 uppercase font-black tracking-wider">Jam Absen / Login Masuk</p>
+                        <p class="text-xs text-blue-100 uppercase font-black tracking-wider">Jam Absen / Login Masuk</p>
                         <h3 class="text-3xl font-black italic tracking-tight mt-1">
                             {{ $todayAttendance && $todayAttendance->clock_in ? \Carbon\Carbon::parse($todayAttendance->clock_in)->format('H:i:s') : now()->format('H:i:s') }}
-                            <span class="text-sm font-bold text-blue-200 not-italic">WIB</span>
+                            <span class="text-sm font-bold text-blue-100 not-italic">WIB</span>
                         </h3>
                     </div>
-                    <div class="mt-6 pt-4 border-t border-white/15 flex items-center justify-between text-xs text-blue-100">
+                    <div class="mt-6 pt-4 border-t border-white/20 flex items-center justify-between text-xs text-blue-100">
                         <span>Batas Mulai Shift:</span>
                         <span class="font-black text-white">{{ $targetClockIn }} WIB</span>
                     </div>
                 </div>
 
                 <!-- 2. Stopwatch Durasi Berjalan Realtime -->
-                <div class="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-xl border border-gray-100 dark:border-gray-700/60 flex flex-col justify-between">
+                <div class="bg-[#f8f6f0] dark:bg-gray-800 rounded-3xl p-6 shadow-md border border-gray-200 dark:border-gray-700 flex flex-col justify-between">
                     <div>
                         <div class="flex items-center justify-between mb-4">
                             <span class="px-3 py-1 bg-amber-500/10 text-amber-600 dark:text-amber-400 rounded-xl text-[10px] font-black uppercase tracking-widest border border-amber-500/20 flex items-center gap-1.5">
@@ -293,31 +289,30 @@
                                 </svg>
                                 Waktu Berjalan
                             </span>
-                            <span class="inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider text-emerald-500">
-                                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+                            <span class="inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
                                 Sedang Bertugas
                             </span>
                         </div>
-                        <p class="text-xs text-gray-400 uppercase font-black tracking-wider">Durasi Sesi Kasir Hari Ini</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 uppercase font-black tracking-wider">Durasi Sesi Kasir Hari Ini</p>
                         <div class="mt-1 flex items-baseline gap-2">
                             <span class="text-3xl md:text-4xl font-black font-mono tracking-tight text-gray-850 dark:text-white" x-text="`${elapsedHours}:${elapsedMinutes}:${elapsedSeconds}`">
                                 00:00:00
                             </span>
                         </div>
                     </div>
-                    <div class="mt-6 pt-4 border-t border-gray-100 dark:border-gray-700/60 flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+                    <div class="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
                         <span>Waktu lokal sistem:</span>
                         <span class="font-bold text-gray-700 dark:text-gray-300">{{ now()->format('d M Y') }}</span>
                     </div>
                 </div>
 
                 <!-- 3. Batas Minimal Closing & Poin Tambahan -->
-                <div :class="isPastClosing ? 'bg-gradient-to-br from-emerald-600 to-teal-700 text-white' : 'bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700/60 text-gray-850 dark:text-white'"
-                    class="rounded-3xl p-6 shadow-xl flex flex-col justify-between transition-all">
+                <div :class="isPastClosing ? 'bg-emerald-600 text-white' : 'bg-[#f8f6f0] dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-850 dark:text-white'"
+                    class="rounded-3xl p-6 shadow-md flex flex-col justify-between transition-colors">
                     <div>
                         <div class="flex items-center justify-between mb-4">
-                            <span :class="isPastClosing ? 'bg-white/20 text-white border-white/20' : 'bg-blue-500/10 text-primary-blue dark:text-blue-400 border-blue-500/20'"
-                                class="px-3 py-1 rounded-xl text-[10px] font-black uppercase tracking-widest border flex items-center gap-1.5">
+                            <span :class="isPastClosing ? 'bg-white/20 text-white' : 'bg-blue-500/10 text-primary-blue dark:text-blue-400 border border-blue-500/20'"
+                                class="px-3 py-1 rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5">
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
@@ -355,7 +350,7 @@
                             </div>
                         </template>
                     </div>
-                    <div class="mt-6 pt-4 border-t" :class="isPastClosing ? 'border-white/15' : 'border-gray-100 dark:border-gray-700/60'">
+                    <div class="mt-6 pt-4 border-t" :class="isPastClosing ? 'border-white/20' : 'border-gray-200 dark:border-gray-700'">
                         <div class="flex items-center justify-between text-xs">
                             <span :class="isPastClosing ? 'text-emerald-100' : 'text-gray-400'">Bonus Closing:</span>
                             <span class="font-black" :class="isPastClosing ? 'text-white' : 'text-emerald-500'">+10 Poin & Streak</span>
@@ -365,7 +360,7 @@
             </div>
 
             <!-- Bagian Aksi Cepat Kasir -->
-            <div class="p-6 bg-white dark:bg-gray-800 rounded-3xl shadow-xl border border-gray-100 dark:border-gray-700/60 flex flex-col md:flex-row items-center justify-between gap-4">
+            <div class="p-6 bg-[#f8f6f0] dark:bg-gray-800 rounded-3xl shadow-md border border-gray-200 dark:border-gray-700 flex flex-col md:flex-row items-center justify-between gap-4">
                 <div class="flex items-center gap-4">
                     <div class="w-12 h-12 bg-primary-blue/10 text-primary-blue dark:text-blue-400 rounded-2xl flex items-center justify-center shrink-0">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -381,7 +376,7 @@
                     <form method="POST" action="{{ route('logout') }}" class="w-full md:w-auto">
                         @csrf
                         <button type="submit"
-                            class="w-full md:w-auto px-6 py-4 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-2xl font-black uppercase tracking-wider text-xs flex items-center justify-center gap-2 transition active:scale-95"
+                            class="w-full md:w-auto px-6 py-4 bg-white hover:bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-600 rounded-2xl font-black uppercase tracking-wider text-xs flex items-center justify-center gap-2 transition active:scale-95"
                             title="Logout dan clock out absensi hari ini">
                             <svg class="w-4.5 h-4.5 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -390,7 +385,7 @@
                         </button>
                     </form>
                     <a href="{{ route('kasir') }}"
-                        class="w-full md:w-auto px-8 py-4 bg-primary-red hover:bg-red-700 text-white rounded-2xl shadow-xl shadow-red-500/20 font-black uppercase tracking-wider text-xs flex items-center justify-center gap-2.5 transition transform hover:-translate-y-0.5 active:scale-95">
+                        class="w-full md:w-auto px-8 py-4 bg-primary-red hover:bg-red-700 text-white rounded-2xl shadow-md font-black uppercase tracking-wider text-xs flex items-center justify-center gap-2.5 transition transform hover:-translate-y-0.5 active:scale-95">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
                         </svg>
@@ -415,12 +410,12 @@
                 </div>
 
                 @if(isset($myDocSchedules) && $myDocSchedules->count() > 0)
-                    <div class="bg-gradient-to-br from-indigo-900 to-blue-900 text-white rounded-3xl p-6 shadow-xl space-y-4 border border-indigo-700/50">
+                    <div class="bg-indigo-900 text-white rounded-3xl p-6 shadow-md space-y-4 border border-indigo-700">
                         <div class="flex items-center justify-between">
                             <div class="flex items-center gap-3">
                                 <span class="p-2.5 bg-white/10 rounded-2xl">
                                     <svg class="w-5 h-5 text-indigo-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
                                     </svg>
                                 </span>
@@ -438,7 +433,7 @@
                         </div>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                             @foreach($myDocSchedules as $docSched)
-                                <div class="p-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/10 space-y-1">
+                                <div class="p-4 rounded-2xl bg-white/10 border border-white/10 space-y-1">
                                     <div class="flex items-center justify-between text-xs">
                                         <span class="font-black tracking-wider uppercase text-indigo-200">
                                             {{ \Carbon\Carbon::parse($docSched->date)->translatedFormat('l, d M Y') }}
@@ -459,7 +454,7 @@
 
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     @forelse($todayTaskAssignments as $assignment)
-                        <div class="bg-white dark:bg-gray-800 rounded-3xl p-5 shadow-lg border border-gray-100 dark:border-gray-700/60 flex flex-col justify-between space-y-3">
+                        <div class="bg-[#f8f6f0] dark:bg-gray-800 rounded-3xl p-5 shadow-sm border border-gray-200 dark:border-gray-700 flex flex-col justify-between space-y-3">
                             <div>
                                 <div class="flex items-center justify-between mb-2">
                                     <span class="px-2.5 py-1 bg-blue-500/10 text-primary-blue dark:text-blue-400 rounded-xl text-[9px] font-black uppercase tracking-wider">
@@ -478,19 +473,19 @@
                                     </p>
                                 @endif
                             </div>
-                            <div class="pt-3 border-t border-gray-100 dark:border-gray-700/60 flex items-center justify-between">
+                            <div class="pt-3 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between">
                                 <span class="text-xs font-bold text-amber-500">+{{ $assignment->taskDefinition->reward_points ?? 5 }} Poin</span>
-                                <a href="{{ route('my-tasks') }}" class="px-3 py-1.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-xl text-xs font-bold text-gray-700 dark:text-gray-200 transition-all">
+                                <a href="{{ route('my-tasks') }}" class="px-3 py-1.5 bg-white dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-xl text-xs font-bold text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-600 transition-all">
                                     Kerjakan &rarr;
                                 </a>
                             </div>
                         </div>
                     @empty
-                        <div class="col-span-full p-8 bg-white dark:bg-gray-800 rounded-3xl border border-dashed border-gray-200 dark:border-gray-700 text-center">
-                            <svg class="w-10 h-10 mx-auto text-gray-300 dark:text-gray-600 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div class="col-span-full p-8 bg-[#f8f6f0] dark:bg-gray-800 rounded-3xl border border-dashed border-gray-300 dark:border-gray-700 text-center">
+                            <svg class="w-10 h-10 mx-auto text-gray-400 dark:text-gray-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
                             </svg>
-                            <p class="text-xs font-black uppercase tracking-wider text-gray-400">Tidak ada tugas tambahan yang tertunda hari ini.</p>
+                            <p class="text-xs font-black uppercase tracking-wider text-gray-400 dark:text-gray-400">Tidak ada tugas tambahan yang tertunda hari ini.</p>
                         </div>
                     @endforelse
                 </div>

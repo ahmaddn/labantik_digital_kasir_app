@@ -9,10 +9,10 @@
     --color-primary-red-dark: #e11d48;
     --color-primary-yellow: #fbbf24; /* Soft Amber Yellow */
     --color-accent-yellow: #fde047;
-    --color-bone-white: #ffffff;
+    --color-bone-white: #f8f6f0; /* Off-White / Putih Tulang */
     --color-dark-bg: #020617; /* Deep Slate Blue */
     --color-dark-soft: #1e293b;
-    --color-neutral-bg: #f8fafc;
+    --color-neutral-bg: #f8f6f0;
     --color-dark-neutral: #0f172a;
     
     /* Soft Modern UI Tokens */
