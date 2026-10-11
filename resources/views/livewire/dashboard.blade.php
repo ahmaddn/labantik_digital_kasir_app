@@ -27,18 +27,6 @@
                 </div>
             @endif
 
-            <a href="{{ route('guide') }}"
-                class="px-4 py-3 sm:px-5 sm:py-3 md:py-3.5 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 text-gray-800 dark:text-white rounded-xl md:rounded-2xl shadow-xl shadow-blue-900/5 font-bold uppercase tracking-wide text-xs transition transform hover:-translate-y-1 hover:bg-gray-50 dark:hover:bg-gray-700 active:scale-95 flex items-center">
-                <svg class="w-5.5 h-5.5 mr-2.5 text-blue-600 dark:text-blue-400" xmlns="http://www.w3.org/2000/svg"
-                    width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                    stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="12" cy="12" r="10" />
-                    <path d="M12 16v-4" />
-                    <path d="M12 8h.01" />
-                </svg>
-                Petunjuk & SOP
-            </a>
-
             <a href="{{ route('leaderboard') }}"
                 class="px-4 py-3 sm:px-5 sm:py-3 md:py-3.5 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 text-gray-800 dark:text-white rounded-xl md:rounded-2xl shadow-xl shadow-blue-900/5 font-bold uppercase tracking-wide text-xs transition transform hover:-translate-y-1 hover:bg-gray-50 dark:hover:bg-gray-700 active:scale-95 flex items-center">
                 <svg class="w-5.5 h-5.5 mr-2.5 text-amber-500" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
@@ -214,30 +202,326 @@
         </div>
     </div>
 
-    @if ($orphanCarryForwardAmount > 0 && in_array(session('active_role_name'), ['pengelola_jurusan', 'superadmin']))
-        <div
-            class="mb-8 bg-amber-500/10 border-2 border-dashed border-amber-500 rounded-3xl p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div>
-                <p class="text-xs font-bold text-amber-600/80 dark:text-amber-400/80 mt-1">
-                    Ditemukan saldo bawaan sebesar Rp{{ number_format($orphanCarryForwardAmount, 0, ',', '.') }} tanggal
-                    {{ now()->startOfMonth()->translatedFormat('d F Y') }}.
-                    Ini membuat statistik kas terlihat lebih besar dari transaksi riil bulan ini.
-                </p>
-            </div>
-            <button wire:click="cleanupOrphanCarryForward"
-                class="px-6 py-4 bg-amber-500 text-white rounded-2xl font-black italic uppercase text-xs tracking-widest shadow-xl shadow-amber-500/20 hover:scale-[1.02] active:scale-[0.98] transition-all whitespace-nowrap">
-                Bersihkan Saldo Yatim
-            </button>
-        </div>
-    @endif
+    @if ($isCashier)
+        <!-- CASHIER SPECIALIZED DASHBOARD -->
+        <div class="space-y-8" x-data="{
+            loginTime: '{{ $todayAttendance && $todayAttendance->clock_in ? \Carbon\Carbon::parse($todayAttendance->clock_in)->format('Y-m-d H:i:s') : '' }}',
+            targetClosingStr: '{{ $targetClockOutCarbon ? $targetClockOutCarbon->format('Y-m-d H:i:s') : '' }}',
+            elapsedHours: '00',
+            elapsedMinutes: '00',
+            elapsedSeconds: '00',
+            isPastClosing: {{ $isPastClosingTarget ? 'true' : 'false' }},
+            remainingText: '',
+            init() {
+                if (this.loginTime) {
+                    this.updateTimer();
+                    setInterval(() => {
+                        this.updateTimer();
+                    }, 1000);
+                }
+            },
+            updateTimer() {
+                const now = new Date();
+                const start = new Date(this.loginTime.replace(/-/g, '/'));
+                const diffMs = Math.max(0, now - start);
+                
+                const totalSec = Math.floor(diffMs / 1000);
+                const hrs = Math.floor(totalSec / 3600);
+                const mins = Math.floor((totalSec % 3600) / 60);
+                const secs = totalSec % 60;
+                
+                this.elapsedHours = String(hrs).padStart(2, '0');
+                this.elapsedMinutes = String(mins).padStart(2, '0');
+                this.elapsedSeconds = String(secs).padStart(2, '0');
 
-    <!-- Summary Cards (Today vs Yesterday) -->
-    <div class="mb-8 md:mb-10">
-        <div class="flex items-center gap-4 mb-4 md:mb-5">
-            <div class="h-8 w-2 bg-primary-blue rounded-full"></div>
-            <h2 class="text-2xl font-bold uppercase tracking-tight text-gray-800 dark:text-white">Statistik
-                Hari Ini</h2>
+                if (this.targetClosingStr) {
+                    const target = new Date(this.targetClosingStr.replace(/-/g, '/'));
+                    if (now >= target) {
+                        this.isPastClosing = true;
+                    } else {
+                        this.isPastClosing = false;
+                        const remSec = Math.floor((target - now) / 1000);
+                        const rH = Math.floor(remSec / 3600);
+                        const rM = Math.floor((remSec % 3600) / 60);
+                        this.remainingText = `${rH}j ${rM}m lagi menuju batas minimal`;
+                    }
+                }
+            }
+        }">
+            <!-- Card Utama Absensi & Shift Realtime -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- 1. Status Kehadiran & Jam Masuk -->
+                <div class="bg-gradient-to-br from-primary-blue to-blue-800 text-white rounded-3xl p-6 shadow-xl relative overflow-hidden flex flex-col justify-between">
+                    <div class="absolute -right-10 -bottom-10 w-36 h-36 bg-white/10 rounded-full blur-2xl pointer-events-none"></div>
+                    <div>
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="px-3 py-1 bg-white/20 backdrop-blur-md rounded-xl text-[10px] font-black uppercase tracking-widest border border-white/20 flex items-center gap-1.5">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                </svg>
+                                Kehadiran Kasir
+                            </span>
+                            @if ($todayAttendance && $todayAttendance->clock_in_status === 'late')
+                                <span class="px-3 py-1 bg-rose-500 text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-sm">
+                                    Terlambat
+                                </span>
+                            @else
+                                <span class="px-3 py-1 bg-emerald-400 text-emerald-950 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-sm">
+                                    Tepat Waktu
+                                </span>
+                            @endif
+                        </div>
+                        <p class="text-xs text-blue-200 uppercase font-black tracking-wider">Jam Absen / Login Masuk</p>
+                        <h3 class="text-3xl font-black italic tracking-tight mt-1">
+                            {{ $todayAttendance && $todayAttendance->clock_in ? \Carbon\Carbon::parse($todayAttendance->clock_in)->format('H:i:s') : now()->format('H:i:s') }}
+                            <span class="text-sm font-bold text-blue-200 not-italic">WIB</span>
+                        </h3>
+                    </div>
+                    <div class="mt-6 pt-4 border-t border-white/15 flex items-center justify-between text-xs text-blue-100">
+                        <span>Batas Mulai Shift:</span>
+                        <span class="font-black text-white">{{ $targetClockIn }} WIB</span>
+                    </div>
+                </div>
+
+                <!-- 2. Stopwatch Durasi Berjalan Realtime -->
+                <div class="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-xl border border-gray-100 dark:border-gray-700/60 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="px-3 py-1 bg-amber-500/10 text-amber-600 dark:text-amber-400 rounded-xl text-[10px] font-black uppercase tracking-widest border border-amber-500/20 flex items-center gap-1.5">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                Waktu Berjalan
+                            </span>
+                            <span class="inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider text-emerald-500">
+                                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+                                Sedang Bertugas
+                            </span>
+                        </div>
+                        <p class="text-xs text-gray-400 uppercase font-black tracking-wider">Durasi Sesi Kasir Hari Ini</p>
+                        <div class="mt-1 flex items-baseline gap-2">
+                            <span class="text-3xl md:text-4xl font-black font-mono tracking-tight text-gray-850 dark:text-white" x-text="`${elapsedHours}:${elapsedMinutes}:${elapsedSeconds}`">
+                                00:00:00
+                            </span>
+                        </div>
+                    </div>
+                    <div class="mt-6 pt-4 border-t border-gray-100 dark:border-gray-700/60 flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+                        <span>Waktu lokal sistem:</span>
+                        <span class="font-bold text-gray-700 dark:text-gray-300">{{ now()->format('d M Y') }}</span>
+                    </div>
+                </div>
+
+                <!-- 3. Batas Minimal Closing & Poin Tambahan -->
+                <div :class="isPastClosing ? 'bg-gradient-to-br from-emerald-600 to-teal-700 text-white' : 'bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700/60 text-gray-850 dark:text-white'"
+                    class="rounded-3xl p-6 shadow-xl flex flex-col justify-between transition-all">
+                    <div>
+                        <div class="flex items-center justify-between mb-4">
+                            <span :class="isPastClosing ? 'bg-white/20 text-white border-white/20' : 'bg-blue-500/10 text-primary-blue dark:text-blue-400 border-blue-500/20'"
+                                class="px-3 py-1 rounded-xl text-[10px] font-black uppercase tracking-widest border flex items-center gap-1.5">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                Batas Minimal Closing
+                            </span>
+                            <span :class="isPastClosing ? 'bg-white text-emerald-800' : 'bg-amber-500/20 text-amber-600 dark:text-amber-400'"
+                                class="px-3 py-1 rounded-xl text-[10px] font-black uppercase tracking-widest">
+                                Target: {{ $targetClockOut }} WIB
+                            </span>
+                        </div>
+                        <template x-if="isPastClosing">
+                            <div>
+                                <h3 class="text-xl font-black uppercase tracking-tight flex items-center gap-2">
+                                    <svg class="w-6 h-6 text-white shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+                                    </svg>
+                                    Target Terpenuhi!
+                                </h3>
+                                <p class="text-xs text-emerald-100 mt-1 font-semibold leading-relaxed">
+                                    Anda telah melewati batas minimal closing ({{ $targetClockOut }}). Anda berhak mendapatkan bonus <strong>+10 Poin & +1 Streak</strong> saat logout atau closing shift!
+                                </p>
+                            </div>
+                        </template>
+                        <template x-if="!isPastClosing">
+                            <div>
+                                <h3 class="text-xl font-black uppercase tracking-tight text-gray-850 dark:text-white flex items-center gap-2">
+                                    <svg class="w-5 h-5 text-amber-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    Belum Batas Minimal
+                                </h3>
+                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 font-medium leading-relaxed" x-text="remainingText || 'Bertugaslah hingga batas minimal closing untuk mengklaim poin tambahan.'">
+                                    Bertugaslah hingga minimal pukul {{ $targetClockOut }} untuk mengklaim bonus poin closing.
+                                </p>
+                            </div>
+                        </template>
+                    </div>
+                    <div class="mt-6 pt-4 border-t" :class="isPastClosing ? 'border-white/15' : 'border-gray-100 dark:border-gray-700/60'">
+                        <div class="flex items-center justify-between text-xs">
+                            <span :class="isPastClosing ? 'text-emerald-100' : 'text-gray-400'">Bonus Closing:</span>
+                            <span class="font-black" :class="isPastClosing ? 'text-white' : 'text-emerald-500'">+10 Poin & Streak</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bagian Aksi Cepat Kasir -->
+            <div class="p-6 bg-white dark:bg-gray-800 rounded-3xl shadow-xl border border-gray-100 dark:border-gray-700/60 flex flex-col md:flex-row items-center justify-between gap-4">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 bg-primary-blue/10 text-primary-blue dark:text-blue-400 rounded-2xl flex items-center justify-center shrink-0">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-black uppercase tracking-tight text-gray-850 dark:text-white">Akses Mesin Kasir (POS)</h3>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 font-medium">Buka menu kasir untuk melayani transaksi pembelian barang dan cetak struk.</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3 w-full md:w-auto">
+                    <form method="POST" action="{{ route('logout') }}" class="w-full md:w-auto">
+                        @csrf
+                        <button type="submit"
+                            class="w-full md:w-auto px-6 py-4 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-2xl font-black uppercase tracking-wider text-xs flex items-center justify-center gap-2 transition active:scale-95"
+                            title="Logout dan clock out absensi hari ini">
+                            <svg class="w-4.5 h-4.5 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                            </svg>
+                            Logout Shift
+                        </button>
+                    </form>
+                    <a href="{{ route('kasir') }}"
+                        class="w-full md:w-auto px-8 py-4 bg-primary-red hover:bg-red-700 text-white rounded-2xl shadow-xl shadow-red-500/20 font-black uppercase tracking-wider text-xs flex items-center justify-center gap-2.5 transition transform hover:-translate-y-0.5 active:scale-95">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                        </svg>
+                        Buka Mesin Kasir
+                    </a>
+                </div>
+            </div>
+
+            <!-- Widget Tugas Kasir Hari Ini & Dokumentasi -->
+            <div class="space-y-4">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="h-6 w-2 bg-primary-blue rounded-full"></div>
+                        <h2 class="text-xl font-bold uppercase tracking-tight text-gray-850 dark:text-white">Penugasan Hari Ini</h2>
+                    </div>
+                    <a href="{{ route('my-tasks') }}" class="text-xs font-black uppercase tracking-wider text-primary-blue dark:text-blue-400 hover:underline flex items-center gap-1">
+                        Buka Semua Tugas
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                    </a>
+                </div>
+
+                @if(isset($myDocSchedules) && $myDocSchedules->count() > 0)
+                    <div class="bg-gradient-to-br from-indigo-900 to-blue-900 text-white rounded-3xl p-6 shadow-xl space-y-4 border border-indigo-700/50">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <span class="p-2.5 bg-white/10 rounded-2xl">
+                                    <svg class="w-5 h-5 text-indigo-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                    </svg>
+                                </span>
+                                <div>
+                                    <h3 class="text-base font-black uppercase tracking-tight">Jadwal Tugas Dokumentasi</h3>
+                                    <p class="text-xs text-indigo-200 font-medium">Jadwal kegiatan dokumentasi yang ditugaskan kepada Anda</p>
+                                </div>
+                            </div>
+                            <a href="{{ route('documentation-schedules') }}" class="px-3.5 py-1.5 bg-white/10 hover:bg-white/20 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1">
+                                Detail
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                </svg>
+                            </a>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            @foreach($myDocSchedules as $docSched)
+                                <div class="p-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/10 space-y-1">
+                                    <div class="flex items-center justify-between text-xs">
+                                        <span class="font-black tracking-wider uppercase text-indigo-200">
+                                            {{ \Carbon\Carbon::parse($docSched->date)->translatedFormat('l, d M Y') }}
+                                        </span>
+                                        <span class="px-2 py-0.5 rounded-full text-[9px] font-black uppercase bg-indigo-500/30 text-indigo-200 border border-indigo-400/30">
+                                            Shift {{ $docSched->shift ?? 1 }}
+                                        </span>
+                                    </div>
+                                    <h4 class="text-sm font-bold text-white line-clamp-1">{{ $docSched->activity->title ?? 'Kegiatan Dokumentasi' }}</h4>
+                                    @if($docSched->notes)
+                                        <p class="text-xs text-indigo-200 line-clamp-1 italic">Catatan: {{ $docSched->notes }}</p>
+                                    @endif
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    @forelse($todayTaskAssignments as $assignment)
+                        <div class="bg-white dark:bg-gray-800 rounded-3xl p-5 shadow-lg border border-gray-100 dark:border-gray-700/60 flex flex-col justify-between space-y-3">
+                            <div>
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="px-2.5 py-1 bg-blue-500/10 text-primary-blue dark:text-blue-400 rounded-xl text-[9px] font-black uppercase tracking-wider">
+                                        {{ $assignment->taskDefinition->is_routine ? 'Tugas Rutin' : 'Tugas Khusus' }}
+                                    </span>
+                                    <span class="text-[10px] font-black uppercase text-gray-400">
+                                        {{ $assignment->assignment_status }}
+                                    </span>
+                                </div>
+                                <h4 class="text-sm font-black uppercase tracking-tight text-gray-850 dark:text-white line-clamp-1">
+                                    {{ $assignment->taskDefinition->task_name }}
+                                </h4>
+                                @if($assignment->taskDefinition->description)
+                                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 line-clamp-2">
+                                        {{ $assignment->taskDefinition->description }}
+                                    </p>
+                                @endif
+                            </div>
+                            <div class="pt-3 border-t border-gray-100 dark:border-gray-700/60 flex items-center justify-between">
+                                <span class="text-xs font-bold text-amber-500">+{{ $assignment->taskDefinition->reward_points ?? 5 }} Poin</span>
+                                <a href="{{ route('my-tasks') }}" class="px-3 py-1.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-xl text-xs font-bold text-gray-700 dark:text-gray-200 transition-all">
+                                    Kerjakan &rarr;
+                                </a>
+                            </div>
+                        </div>
+                    @empty
+                        <div class="col-span-full p-8 bg-white dark:bg-gray-800 rounded-3xl border border-dashed border-gray-200 dark:border-gray-700 text-center">
+                            <svg class="w-10 h-10 mx-auto text-gray-300 dark:text-gray-600 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                            </svg>
+                            <p class="text-xs font-black uppercase tracking-wider text-gray-400">Tidak ada tugas tambahan yang tertunda hari ini.</p>
+                        </div>
+                    @endforelse
+                </div>
+            </div>
         </div>
+    @else
+        <!-- ADMIN & PENGELOLA JURUSAN DASHBOARD (Statistik & Finansial) -->
+        @if ($orphanCarryForwardAmount > 0 && in_array(session('active_role_name'), ['pengelola_jurusan', 'superadmin']))
+            <div
+                class="mb-8 bg-amber-500/10 border-2 border-dashed border-amber-500 rounded-3xl p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <p class="text-xs font-bold text-amber-600/80 dark:text-amber-400/80 mt-1">
+                        Ditemukan saldo bawaan sebesar Rp{{ number_format($orphanCarryForwardAmount, 0, ',', '.') }} tanggal
+                        {{ now()->startOfMonth()->translatedFormat('d F Y') }}.
+                        Ini membuat statistik kas terlihat lebih besar dari transaksi riil bulan ini.
+                    </p>
+                </div>
+                <button wire:click="cleanupOrphanCarryForward"
+                    class="px-6 py-4 bg-amber-500 text-white rounded-2xl font-black italic uppercase text-xs tracking-widest shadow-xl shadow-amber-500/20 hover:scale-[1.02] active:scale-[0.98] transition-all whitespace-nowrap">
+                    Bersihkan Saldo Yatim
+                </button>
+            </div>
+        @endif
+
+        <!-- Summary Cards (Today vs Yesterday) -->
+        <div class="mb-8 md:mb-10">
+            <div class="flex items-center gap-4 mb-4 md:mb-5">
+                <div class="h-8 w-2 bg-primary-blue rounded-full"></div>
+                <h2 class="text-2xl font-bold uppercase tracking-tight text-gray-800 dark:text-white">Statistik
+                    Hari Ini</h2>
+            </div>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
             <div
                 class="bg-primary-blue rounded-2xl p-4 md:p-6 shadow-2xl shadow-blue-900/30 border border-transparent hover:scale-105 transition-all group overflow-hidden relative">
@@ -850,7 +1134,9 @@
             </div>
         </div>
     </div>
+    @endif
 
+    @if (!$isCashier)
     <script>
         document.addEventListener('livewire:navigated', function() {
             // Function to safely create/recreate charts
@@ -1072,156 +1358,7 @@
             });
         });
     </script>
+    @endif
 
-    <!-- Welcome SOP Modal -->
-    <div x-data="{
-        showWelcome: false,
-        init() {
-            const isStaff = ['kasir', 'pengelola_jurusan'].includes('{{ session('active_role_name') }}');
-            if (isStaff && !localStorage.getItem('hasSeenWelcomeGuide_v1')) {
-                setTimeout(() => { this.showWelcome = true; }, 800);
-            }
-        },
-        closeWelcome(goToGuide = false) {
-            localStorage.setItem('hasSeenWelcomeGuide_v1', 'true');
-            this.showWelcome = false;
-            if (goToGuide) {
-                window.location.href = '{{ route('guide') }}';
-            }
-        }
-    }" x-show="showWelcome" x-transition:enter="transition ease-out duration-350"
-        x-transition:enter-start="opacity-0 scale-90" x-transition:enter-end="opacity-100 scale-100"
-        x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100 scale-100"
-        x-transition:leave-end="opacity-0 scale-90"
-        class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-950/80 backdrop-blur-md"
-        style="display: none;">
-
-        <div
-            class="bg-white dark:bg-gray-900 w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden border border-gray-100 dark:border-gray-800 transition-all max-h-[90vh] flex flex-col">
-            <!-- Modal Header -->
-            <div
-                class="p-5 bg-gradient-to-br from-primary-blue to-blue-700 text-white relative overflow-hidden flex-shrink-0">
-                <div class="absolute -right-10 -bottom-10 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
-                <div class="relative z-10 flex items-center gap-4">
-                    <div
-                        class="w-14 h-14 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/20">
-                        <svg class="w-8 h-8 text-white animate-bounce mt-1" xmlns="http://www.w3.org/2000/svg"
-                            fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                        </svg>
-                    </div>
-                    <div>
-                        <span
-                            class="px-2.5 py-0.5 bg-white/25 text-[10px] font-black uppercase tracking-widest rounded-full border border-white/10">Staff
-                            Baru / Operator</span>
-                        <h3 class="text-2xl font-black italic tracking-tight mt-1">Halo, Selamat Datang!</h3>
-                        <p class="text-xs text-blue-100/90 mt-1">Kami telah menyiapkan ringkasan SOP kerja kasir untuk
-                            Anda.</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Modal Content (Scrollable) -->
-            <div class="p-5 space-y-6 overflow-y-auto no-scrollbar flex-1">
-                <h4 class="text-sm font-black text-gray-900 dark:text-white uppercase tracking-wider">3 Langkah Utama
-                    Alur Kerja Kasir:</h4>
-
-                <div class="space-y-4">
-                    <!-- Step 1 -->
-                    <div
-                        class="flex gap-4 items-start p-4 bg-gray-50 dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-800">
-                        <div
-                            class="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center text-xs font-black flex-shrink-0">
-                            1</div>
-                        <div>
-                            <h5 class="text-sm font-black text-gray-900 dark:text-white leading-tight">Absen Buka &
-                                Stok Awal</h5>
-                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 leading-relaxed">
-                                Klik tombol <strong>"Buka Kasir"</strong> di dashboard utama. Isi absen masuk Anda, lalu
-                                input jumlah <strong>Stok Awal (Opening Stock)</strong> untuk semua produk aktif di toko
-                                sebelum memulai pelayanan.
-                            </p>
-                        </div>
-                    </div>
-
-                    <!-- Step 2 -->
-                    <div
-                        class="flex gap-4 items-start p-4 bg-gray-50 dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-800">
-                        <div
-                            class="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center text-xs font-black flex-shrink-0">
-                            2</div>
-                        <div>
-                            <h5 class="text-sm font-black text-gray-900 dark:text-white leading-tight">Proses Transaksi
-                                & Struk</h5>
-                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 leading-relaxed">
-                                Pilih produk customer di menu instan atau scan barcode. Tentukan kuantitas dan status
-                                pelunasan (Lunas, Hutang/Piutang, atau Pending Kembalian), lalu enter untuk mencetak
-                                struk belanja.
-                            </p>
-                        </div>
-                    </div>
-
-                    <!-- Step 3 -->
-                    <div
-                        class="flex gap-4 items-start p-4 bg-gray-50 dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-800">
-                        <div
-                            class="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center text-xs font-black flex-shrink-0">
-                            3</div>
-                        <div>
-                            <h5 class="text-sm font-black text-gray-900 dark:text-white leading-tight">Stok Akhir &
-                                Tutup Sesi</h5>
-                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 leading-relaxed">
-                                Di akhir shift, tekan tombol <strong>"Selesai"</strong> di POS. Masukkan sisa produk
-                                fisik (Closing Stock) di rak, hitung uang fisik laci kasir secara manual, dan tulis
-                                laporan serah terima.
-                            </p>
-                        </div>
-                    </div>
-
-                    <!-- Step 4 -->
-                    <div
-                        class="flex gap-4 items-start p-4 bg-red-500/5 dark:bg-red-950/10 rounded-2xl border border-red-500/10">
-                        <div
-                            class="w-8 h-8 rounded-full bg-primary-red text-white flex items-center justify-center text-xs font-black flex-shrink-0">
-                            4</div>
-                        <div>
-                            <h5 class="text-sm font-black text-primary-red leading-tight">Kerahasiaan & Keamanan Data
-                            </h5>
-                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 leading-relaxed">
-                                <strong>Dilarang keras</strong> mengambil screenshot, merekam, atau menyebarkan data
-                                transaksi, kas, dan informasi keuangan aplikasi ini ke pihak luar. Seluruh tindakan
-                                mencurigakan akan terekam otomatis di log audit keamanan.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-
-                <div
-                    class="p-4 bg-amber-500/10 text-amber-600 dark:text-amber-400 rounded-2xl border border-amber-500/20 text-xs font-semibold flex items-center gap-3">
-                    <svg class="w-5 h-5 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none"
-                        viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    <span>Anda dapat membuka halaman panduan lengkap & SOP interaktif kapan saja melalui menu
-                        <strong>"Petunjuk & SOP"</strong> di sidebar.</span>
-                </div>
-            </div>
-
-            <!-- Modal Footer -->
-            <div
-                class="p-6 bg-gray-50 dark:bg-gray-800 border-t border-gray-100 dark:border-gray-800 flex flex-col sm:flex-row gap-3 justify-end flex-shrink-0">
-                <button @click="closeWelcome(false)"
-                    class="px-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 text-xs font-black rounded-2xl hover:bg-gray-50 dark:hover:bg-gray-750 transition-all text-center">
-                    Langsung Kerja
-                </button>
-                <button @click="closeWelcome(true)"
-                    class="px-5 py-2.5 bg-gradient-to-r from-primary-blue to-blue-600 text-white text-xs font-black rounded-2xl hover:bg-blue-600 shadow-lg shadow-blue-500/25 transition-all text-center">
-                    Pelajari SOP Lengkap
-                </button>
-            </div>
-        </div>
-
-    </div>
 </div>
+

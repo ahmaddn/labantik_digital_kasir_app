@@ -4,8 +4,12 @@ namespace App\Livewire;
 
 use App\Models\CashTransaction;
 use App\Models\CashierAttendance;
+use App\Models\CashierSchedule;
+use App\Models\CashierTaskAssignment;
 use App\Models\DailyRecap;
+use App\Models\DocumentationSchedule;
 use App\Models\Jurusan;
+use App\Models\ProductCategory;
 use App\Models\Transaction;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Cache;
@@ -18,8 +22,78 @@ class Dashboard extends Component
 
     public function mount()
     {
-        // Dashboard dimuat secara instan dan wus-wus. 
-        // Auto-sync berjalan otomatis via background cron (every minute) atau di API deduct secara real-time.
+        // Auto clock in cashier if logged in as kasir and scheduled today
+        if (session('active_role_name') === 'kasir') {
+            $this->ensureCashierClockIn();
+        }
+    }
+
+    protected function ensureCashierClockIn(): void
+    {
+        $userId = auth()->id();
+        $activeJurusanId = session('active_jurusan_id');
+        if (! $userId || ! $activeJurusanId) {
+            return;
+        }
+
+        $activeJurusan = Jurusan::find($activeJurusanId);
+        $allowedJurusanIds = [$activeJurusanId];
+        if ($activeJurusan && $activeJurusan->parent_id) {
+            $allowedJurusanIds[] = $activeJurusan->parent_id;
+        }
+
+        $isScheduled = CashierSchedule::where('user_id', $userId)
+            ->whereIn('jurusan_id', $allowedJurusanIds)
+            ->where('date', now()->toDateString())
+            ->exists();
+
+        if (! $isScheduled) {
+            return;
+        }
+
+        $attendance = CashierAttendance::where('user_id', $userId)
+            ->where('jurusan_id', $activeJurusanId)
+            ->where('date', now()->toDateString())
+            ->first();
+
+        if (! $attendance) {
+            $schedule = CashierSchedule::where('user_id', $userId)
+                ->whereIn('jurusan_id', $allowedJurusanIds)
+                ->where('date', now()->toDateString())
+                ->first();
+
+            $currentTime = now();
+            $settings = $activeJurusan ? ($activeJurusan->theme_settings ?: []) : [];
+            $targetClockIn = $settings['clock_in_time'] ?? '07:00';
+
+            $status = 'present';
+            $clockInStatus = 'on_time';
+            if ($targetClockIn) {
+                try {
+                    $targetTime = Carbon::createFromFormat('H:i', $targetClockIn);
+                    $targetTime->setDate($currentTime->year, $currentTime->month, $currentTime->day);
+                    if ($currentTime->gt($targetTime)) {
+                        $status = 'late';
+                        $clockInStatus = 'late';
+                    } else {
+                        $status = 'present';
+                        $clockInStatus = 'on_time';
+                    }
+                } catch (\Exception $e) {
+                    // ignore
+                }
+            }
+
+            CashierAttendance::create([
+                'cashier_schedule_id' => $schedule ? $schedule->id : null,
+                'user_id' => $userId,
+                'jurusan_id' => $activeJurusanId,
+                'date' => now()->toDateString(),
+                'clock_in' => $currentTime,
+                'status' => $status,
+                'clock_in_status' => $clockInStatus,
+            ]);
+        }
     }
 
     public function setTopCategory($categoryId)
@@ -58,6 +132,102 @@ class Dashboard extends Component
     public function render()
     {
         $today = today();
+        $yesterday = today()->subDay();
+        $activeJurusanId = session('active_jurusan_id') ?: ($this->filterJurusan ?: null);
+
+        $hasHigherRole = auth()->user()
+            ->roles()
+            ->whereIn('roles.name', ['superadmin', 'pengelola_jurusan'])
+            ->exists();
+
+        $isCashier = (session('active_role_name') === 'kasir') && ! $hasHigherRole;
+
+        // Check if session is finished (Daily Recap exists with actual cash)
+        $isSessionFinished = DailyRecap::whereDate('date', now())
+            ->when($activeJurusanId, function ($q) use ($activeJurusanId) {
+                return $q->where('jurusan_id', $activeJurusanId);
+            })
+            ->where('actual_cash', '>', 0)
+            ->exists();
+
+        // 1. DATA KHUSUS KASIR
+        if ($isCashier) {
+            $userId = auth()->id();
+
+            // Auto-assign routine tasks for cashier if scheduled
+            try {
+                app(\App\Services\CashierTaskService::class)->autoAssignRoutineTasksForCashier($userId, $activeJurusanId);
+            } catch (\Exception $e) {
+                // ignore
+            }
+
+            // Attendance Data Hari Ini
+            $todayAttendance = CashierAttendance::where('user_id', $userId)
+                ->where('jurusan_id', $activeJurusanId)
+                ->whereDate('date', $today)
+                ->first();
+
+            $jurusan = Jurusan::find($activeJurusanId);
+            $settings = $jurusan ? ($jurusan->theme_settings ?: []) : [];
+            $targetClockOut = $settings['clock_out_time'] ?? '15:00';
+            $targetClockIn = $settings['clock_in_time'] ?? '07:00';
+
+            $targetClockOutCarbon = null;
+            $isPastClosingTarget = false;
+            if ($targetClockOut) {
+                try {
+                    $targetClockOutCarbon = Carbon::createFromFormat('H:i', $targetClockOut);
+                    $targetClockOutCarbon->setDate(now()->year, now()->month, now()->day);
+                    $isPastClosingTarget = now()->gte($targetClockOutCarbon);
+                } catch (\Exception $e) {
+                    // ignore
+                }
+            }
+
+            // Tasks Hari Ini
+            $todayTaskAssignments = CashierTaskAssignment::with([
+                'taskDefinition',
+                'submissions' => fn ($q) => $q->orderBy('submission_version', 'desc'),
+            ])
+                ->where('assigned_to', $userId)
+                ->where(function ($query) use ($today) {
+                    $query->whereHas('taskDefinition', function ($q) use ($today) {
+                        $q->where('date', $today->toDateString());
+                    })
+                    ->orWhere(function ($q) use ($today) {
+                        $q->whereHas('taskDefinition', function ($sq) {
+                            $sq->where('is_routine', true);
+                        })
+                        ->whereDate('created_at', $today->toDateString());
+                    });
+                })
+                ->orderBy('created_at', 'desc')
+                ->get();
+
+            // Documentation Schedules Hari Ini & Terdekat
+            $myDocSchedules = DocumentationSchedule::with('activity')
+                ->where('user_id', $userId)
+                ->whereDate('date', '>=', now()->toDateString())
+                ->orderBy('date', 'asc')
+                ->limit(4)
+                ->get();
+
+            return view('livewire.dashboard', [
+                'today' => $today,
+                'isCashier' => true,
+                'hasHigherRole' => $hasHigherRole,
+                'isSessionFinished' => $isSessionFinished,
+                'todayAttendance' => $todayAttendance,
+                'targetClockOut' => $targetClockOut,
+                'targetClockIn' => $targetClockIn,
+                'targetClockOutCarbon' => $targetClockOutCarbon,
+                'isPastClosingTarget' => $isPastClosingTarget,
+                'todayTaskAssignments' => $todayTaskAssignments,
+                'myDocSchedules' => $myDocSchedules,
+                'jurusans' => Jurusan::all(),
+            ])->layout('layouts.app', ['title' => 'Dashboard Kasir']);
+        }
+
         $yesterday = today()->subDay();
         $activeJurusanId = session('active_jurusan_id') ?: ($this->filterJurusan ?: null);
 
