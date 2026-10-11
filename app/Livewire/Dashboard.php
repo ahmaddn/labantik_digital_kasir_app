@@ -518,6 +518,15 @@ class Dashboard extends Component
 
         return view('livewire.dashboard', [
             'today' => $today,
+            'isCashier' => false,
+            'hasHigherRole' => $hasHigherRole,
+            'todayAttendance' => null,
+            'targetClockOut' => '15:00',
+            'targetClockIn' => '07:00',
+            'targetClockOutCarbon' => null,
+            'isPastClosingTarget' => false,
+            'todayTaskAssignments' => collect(),
+            'myDocSchedules' => collect(),
             'stats' => $stats,
             'recentTransactions' => $recentTransactions,
             'topProducts' => $topProducts,
