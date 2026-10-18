@@ -3,8 +3,13 @@
 namespace App\Livewire\Reports;
 
 use App\Models\CashCategory;
+use App\Models\CashierSchedule;
 use App\Models\CashTransaction;
+use App\Models\DailyRecap;
+use App\Models\Jurusan;
 use App\Models\Transaction;
+use App\Models\User;
+use App\Models\VirtualCashTransaction;
 use App\Models\WeeklyProfitShare;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -34,13 +39,14 @@ class WeeklyProfit extends Component
 
     // Detail breakdown bagi hasil per laporan
     public ?string $expandedReportId = null;
+
     public array $reportBreakdown = [];
 
     public function mount()
     {
         $activeRole = session('active_role_name');
         if ($activeRole === 'kasir') {
-            $isScheduled = \App\Models\CashierSchedule::where('user_id', auth()->id())->exists();
+            $isScheduled = CashierSchedule::where('user_id', auth()->id())->exists();
             if ($isScheduled) {
                 abort(403, 'Akses ditolak. Kasir terjadwal tidak diperkenankan mengakses menu Bagi Hasil Mingguan.');
             }
@@ -53,16 +59,16 @@ class WeeklyProfit extends Component
 
         // Automatically rename existing "Penjualan Umum" to "Keuntungan Jurusan"
         $activeJurusanId = session('active_jurusan_id');
-        $existingPenjualanUmum = \App\Models\CashCategory::where('jurusan_id', $activeJurusanId)
+        $existingPenjualanUmum = CashCategory::where('jurusan_id', $activeJurusanId)
             ->where('name', 'Penjualan Umum')
             ->first();
         if ($existingPenjualanUmum) {
-            $keuntunganJurusan = \App\Models\CashCategory::where('jurusan_id', $activeJurusanId)
+            $keuntunganJurusan = CashCategory::where('jurusan_id', $activeJurusanId)
                 ->where('name', 'Keuntungan Jurusan')
                 ->first();
             if ($keuntunganJurusan) {
                 // Merge transactions to existing Keuntungan Jurusan, then delete Penjualan Umum
-                \App\Models\CashTransaction::where('jurusan_id', $activeJurusanId)
+                CashTransaction::where('jurusan_id', $activeJurusanId)
                     ->where('cash_category_id', $existingPenjualanUmum->id)
                     ->update(['cash_category_id' => $keuntunganJurusan->id]);
                 $existingPenjualanUmum->delete();
@@ -89,11 +95,11 @@ class WeeklyProfit extends Component
                 $weekEnd = Carbon::parse($report->week_end);
 
                 // Delete all cash transactions matching this period
-                $descriptionPattern = 'Bagi Hasil Mingguan%Periode ' . $weekStart->format('d/m/Y') . ' s.d ' . $weekEnd->format('d/m/Y') . '%';
+                $descriptionPattern = 'Bagi Hasil Mingguan%Periode '.$weekStart->format('d/m/Y').' s.d '.$weekEnd->format('d/m/Y').'%';
                 CashTransaction::where('jurusan_id', $activeJurusanId)
                     ->where('description', 'like', $descriptionPattern)
                     ->delete();
-                \App\Models\VirtualCashTransaction::where('jurusan_id', $activeJurusanId)
+                VirtualCashTransaction::where('jurusan_id', $activeJurusanId)
                     ->where('description', 'like', $descriptionPattern)
                     ->delete();
 
@@ -139,7 +145,7 @@ class WeeklyProfit extends Component
             ->sum(DB::raw('unit_profit * quantity'));
 
         // Calculate total shortage & surplus from daily recaps for the current week
-        $dailyRecaps = \App\Models\DailyRecap::whereBetween('date', [$weekStart->toDateString(), $weekEnd->toDateString()])
+        $dailyRecaps = DailyRecap::whereBetween('date', [$weekStart->toDateString(), $weekEnd->toDateString()])
             ->where('jurusan_id', $activeJurusanId)
             ->get();
 
@@ -150,7 +156,7 @@ class WeeklyProfit extends Component
                 continue;
             }
 
-            $previousRecap = \App\Models\DailyRecap::forReporting()
+            $previousRecap = DailyRecap::forReporting()
                 ->where('jurusan_id', $activeJurusanId)
                 ->where('date', '<', $recap->date)
                 ->orderBy('date', 'desc')
@@ -207,11 +213,11 @@ class WeeklyProfit extends Component
         );
 
         // Delete old postings for this period first to prevent duplicates on regeneration
-        $descriptionPattern = 'Bagi Hasil Mingguan%Periode ' . $weekStart->format('d/m/Y') . ' s.d ' . $weekEnd->format('d/m/Y') . '%';
+        $descriptionPattern = 'Bagi Hasil Mingguan%Periode '.$weekStart->format('d/m/Y').' s.d '.$weekEnd->format('d/m/Y').'%';
         CashTransaction::where('jurusan_id', $activeJurusanId)
             ->where('description', 'like', $descriptionPattern)
             ->delete();
-        \App\Models\VirtualCashTransaction::where('jurusan_id', $activeJurusanId)
+        VirtualCashTransaction::where('jurusan_id', $activeJurusanId)
             ->where('description', 'like', $descriptionPattern)
             ->delete();
 
@@ -225,9 +231,9 @@ class WeeklyProfit extends Component
             ->whereIn('status', ['uang_diterima', 'belum_kembalian'])
             ->get();
 
-        $grouped = $transactions->groupBy(fn($tx) => ($tx->product->supplier_id ?? $tx->supplier_id) ? 'supplier_' . ($tx->product->supplier_id ?? $tx->supplier_id) : 'category_' . ($tx->product->category_id ?? 'other'));
+        $grouped = $transactions->groupBy(fn ($tx) => ($tx->product->supplier_id ?? $tx->supplier_id) ? 'supplier_'.($tx->product->supplier_id ?? $tx->supplier_id) : 'category_'.($tx->product->category_id ?? 'other'));
 
-        $najmyUser = \App\Models\User::where('name', 'like', '%Najmy%')->first();
+        $najmyUser = User::where('name', 'like', '%Najmy%')->first();
         $najmyName = $najmyUser ? $najmyUser->name : 'Najmy';
 
         $scaleFactor = 1;
@@ -237,20 +243,20 @@ class WeeklyProfit extends Component
             if (str_starts_with($key, 'supplier_')) {
                 $supplierName = $firstTx->product->supplier->name ?? 'Supplier';
                 $categoryNameClean = trim($supplierName);
-                $cashCategoryName = 'Penjualan ' . $categoryNameClean;
+                $cashCategoryName = 'Penjualan '.$categoryNameClean;
             } else {
                 $categoryName = $firstTx->product->category->name ?? 'Lainnya';
                 $categoryNameClean = trim($categoryName);
 
                 $categoryNameLower = strtolower($categoryNameClean);
                 if ($categoryNameLower === 'makanan' || $categoryNameLower === 'minuman' || $categoryNameLower === 'makanan & minuman' || $categoryNameLower === 'makanan dan minuman' || $categoryNameLower === 'snack') {
-                    $activeJurusan = \App\Models\Jurusan::find($activeJurusanId);
+                    $activeJurusan = Jurusan::find($activeJurusanId);
                     $activeJurusanNameLower = $activeJurusan ? strtolower($activeJurusan->name) : '';
                     $cashCategoryName = str_contains($activeJurusanNameLower, 'doku') ? 'Kas Doku' : 'Jurusan Snack & Minuman';
                 } elseif ($categoryNameLower === 'umum' || $categoryNameLower === 'lainnya' || $categoryNameLower === 'lain-lain') {
                     $cashCategoryName = 'Keuntungan Jurusan';
                 } else {
-                    $cashCategoryName = 'Penjualan ' . $categoryNameClean;
+                    $cashCategoryName = 'Penjualan '.$categoryNameClean;
                 }
             }
 
@@ -259,11 +265,11 @@ class WeeklyProfit extends Component
             );
 
             // Separate Cash vs Non-Cash transactions within group
-            $cashGroupTxs = $txs->filter(fn($tx) => in_array($tx->payment_method ?? 'cash', ['cash', '', null]));
-            $nonCashGroupTxs = $txs->filter(fn($tx) => in_array($tx->payment_method, ['transfer', 'qris']));
+            $cashGroupTxs = $txs->filter(fn ($tx) => in_array($tx->payment_method ?? 'cash', ['cash', '', null]));
+            $nonCashGroupTxs = $txs->filter(fn ($tx) => in_array($tx->payment_method, ['transfer', 'qris']));
 
             // --- 1) Post Cash Profit Share to CashTransaction ---
-            $adjustedCashGroupProfit = $cashGroupTxs->sum(fn($tx) => $tx->unit_profit * $tx->quantity);
+            $adjustedCashGroupProfit = $cashGroupTxs->sum(fn ($tx) => $tx->unit_profit * $tx->quantity);
 
             if ($adjustedCashGroupProfit > 0) {
                 $najmyShare = $adjustedCashGroupProfit * 0.30;
@@ -275,8 +281,8 @@ class WeeklyProfit extends Component
                         'cash_category_id' => $catPenjualan->id,
                         'type' => 'expense',
                         'amount' => $najmyShare,
-                        'description' => 'Bagi Hasil Mingguan dengan ' . $najmyName . ' (30% - Kategori: ' . $categoryNameClean . ') - Periode ' . $weekStart->format('d/m/Y') . ' s.d ' . $weekEnd->format('d/m/Y'),
-                        'reference' => 'WD-PROFIT-NAJMY-' . now()->format('Ymd') . '-' . strtoupper(bin2hex(random_bytes(2))),
+                        'description' => 'Bagi Hasil Mingguan dengan '.$najmyName.' (30% - Kategori: '.$categoryNameClean.') - Periode '.$weekStart->format('d/m/Y').' s.d '.$weekEnd->format('d/m/Y'),
+                        'reference' => 'WD-PROFIT-NAJMY-'.now()->format('Ymd').'-'.strtoupper(bin2hex(random_bytes(2))),
                     ]);
                 }
 
@@ -289,8 +295,8 @@ class WeeklyProfit extends Component
                         'cash_category_id' => $catPenjualan->id,
                         'type' => 'expense',
                         'amount' => $labantikShare,
-                        'description' => 'Bagi Hasil Mingguan Labantik (30% - Kategori: ' . $categoryNameClean . ') - Periode ' . $weekStart->format('d/m/Y') . ' s.d ' . $weekEnd->format('d/m/Y'),
-                        'reference' => 'WD-PROFIT-LABANTIK-' . now()->format('Ymd') . '-' . strtoupper(bin2hex(random_bytes(2))),
+                        'description' => 'Bagi Hasil Mingguan Labantik (30% - Kategori: '.$categoryNameClean.') - Periode '.$weekStart->format('d/m/Y').' s.d '.$weekEnd->format('d/m/Y'),
+                        'reference' => 'WD-PROFIT-LABANTIK-'.now()->format('Ymd').'-'.strtoupper(bin2hex(random_bytes(2))),
                     ]);
                 }
 
@@ -303,8 +309,8 @@ class WeeklyProfit extends Component
                         'cash_category_id' => $catPenjualan->id,
                         'type' => 'expense',
                         'amount' => $jurusanShare,
-                        'description' => 'Bagi Hasil Mingguan Jurusan (40% - Kategori: ' . $categoryNameClean . ') - Periode ' . $weekStart->format('d/m/Y') . ' s.d ' . $weekEnd->format('d/m/Y'),
-                        'reference' => 'WD-PROFIT-JURUSAN-OUT-' . now()->format('Ymd') . '-' . strtoupper(bin2hex(random_bytes(2))),
+                        'description' => 'Bagi Hasil Mingguan Jurusan (40% - Kategori: '.$categoryNameClean.') - Periode '.$weekStart->format('d/m/Y').' s.d '.$weekEnd->format('d/m/Y'),
+                        'reference' => 'WD-PROFIT-JURUSAN-OUT-'.now()->format('Ymd').'-'.strtoupper(bin2hex(random_bytes(2))),
                     ]);
 
                     $catKeuntunganJurusan = CashCategory::firstOrCreate(
@@ -318,8 +324,8 @@ class WeeklyProfit extends Component
                         'cash_category_id' => $catKeuntunganJurusan->id,
                         'type' => 'income',
                         'amount' => $jurusanShare,
-                        'description' => 'Terima Bagi Hasil Mingguan Jurusan (40% - Dari: ' . $categoryNameClean . ') - Periode ' . $weekStart->format('d/m/Y') . ' s.d ' . $weekEnd->format('d/m/Y'),
-                        'reference' => 'WD-PROFIT-JURUSAN-IN-' . now()->format('Ymd') . '-' . strtoupper(bin2hex(random_bytes(2))),
+                        'description' => 'Terima Bagi Hasil Mingguan Jurusan (40% - Dari: '.$categoryNameClean.') - Periode '.$weekStart->format('d/m/Y').' s.d '.$weekEnd->format('d/m/Y'),
+                        'reference' => 'WD-PROFIT-JURUSAN-IN-'.now()->format('Ymd').'-'.strtoupper(bin2hex(random_bytes(2))),
                     ]);
                 }
             }
@@ -328,64 +334,64 @@ class WeeklyProfit extends Component
             $byMethod = $nonCashGroupTxs->groupBy('payment_method');
             foreach ($byMethod as $method => $methodTxs) {
                 $sourceMethod = in_array($method, ['transfer', 'qris']) ? $method : 'transfer';
-                $methodGroupProfit = $methodTxs->sum(fn($tx) => $tx->unit_profit * $tx->quantity);
+                $methodGroupProfit = $methodTxs->sum(fn ($tx) => $tx->unit_profit * $tx->quantity);
                 $adjustedMethodGroupProfit = $methodGroupProfit;
 
                 if ($adjustedMethodGroupProfit > 0) {
                     $najmyShare = $adjustedMethodGroupProfit * 0.30;
                     if ($najmyShare > 0) {
-                        \App\Models\VirtualCashTransaction::create([
+                        VirtualCashTransaction::create([
                             'jurusan_id' => $activeJurusanId,
                             'date' => now()->toDateString(),
                             'source_method' => $sourceMethod,
                             'cash_category_id' => $catPenjualan->id,
                             'type' => 'expense',
                             'amount' => $najmyShare,
-                            'description' => 'Bagi Hasil Mingguan dengan ' . $najmyName . ' (30% - Kategori: ' . $categoryNameClean . ' - ' . strtoupper($sourceMethod) . ') - Periode ' . $weekStart->format('d/m/Y') . ' s.d ' . $weekEnd->format('d/m/Y'),
-                            'reference' => 'WD-VIRTUAL-NAJMY-' . now()->format('Ymd') . '-' . strtoupper(bin2hex(random_bytes(2))),
+                            'description' => 'Bagi Hasil Mingguan dengan '.$najmyName.' (30% - Kategori: '.$categoryNameClean.' - '.strtoupper($sourceMethod).') - Periode '.$weekStart->format('d/m/Y').' s.d '.$weekEnd->format('d/m/Y'),
+                            'reference' => 'WD-VIRTUAL-NAJMY-'.now()->format('Ymd').'-'.strtoupper(bin2hex(random_bytes(2))),
                         ]);
                     }
 
                     $labantikShare = $adjustedMethodGroupProfit * 0.30;
                     if ($labantikShare > 0) {
-                        \App\Models\VirtualCashTransaction::create([
+                        VirtualCashTransaction::create([
                             'jurusan_id' => $activeJurusanId,
                             'date' => now()->toDateString(),
                             'source_method' => $sourceMethod,
                             'cash_category_id' => $catPenjualan->id,
                             'type' => 'expense',
                             'amount' => $labantikShare,
-                            'description' => 'Bagi Hasil Mingguan Labantik (30% - Kategori: ' . $categoryNameClean . ' - ' . strtoupper($sourceMethod) . ') - Periode ' . $weekStart->format('d/m/Y') . ' s.d ' . $weekEnd->format('d/m/Y'),
-                            'reference' => 'WD-VIRTUAL-LABANTIK-' . now()->format('Ymd') . '-' . strtoupper(bin2hex(random_bytes(2))),
+                            'description' => 'Bagi Hasil Mingguan Labantik (30% - Kategori: '.$categoryNameClean.' - '.strtoupper($sourceMethod).') - Periode '.$weekStart->format('d/m/Y').' s.d '.$weekEnd->format('d/m/Y'),
+                            'reference' => 'WD-VIRTUAL-LABANTIK-'.now()->format('Ymd').'-'.strtoupper(bin2hex(random_bytes(2))),
                         ]);
                     }
 
                     $jurusanShare = $adjustedMethodGroupProfit * 0.40;
                     if ($jurusanShare > 0 && $catPenjualan->name !== 'Keuntungan Jurusan') {
-                        \App\Models\VirtualCashTransaction::create([
+                        VirtualCashTransaction::create([
                             'jurusan_id' => $activeJurusanId,
                             'date' => now()->toDateString(),
                             'source_method' => $sourceMethod,
                             'cash_category_id' => $catPenjualan->id,
                             'type' => 'expense',
                             'amount' => $jurusanShare,
-                            'description' => 'Bagi Hasil Mingguan Jurusan (40% - Kategori: ' . $categoryNameClean . ' - ' . strtoupper($sourceMethod) . ') - Periode ' . $weekStart->format('d/m/Y') . ' s.d ' . $weekEnd->format('d/m/Y'),
-                            'reference' => 'WD-VIRTUAL-JURUSAN-OUT-' . now()->format('Ymd') . '-' . strtoupper(bin2hex(random_bytes(2))),
+                            'description' => 'Bagi Hasil Mingguan Jurusan (40% - Kategori: '.$categoryNameClean.' - '.strtoupper($sourceMethod).') - Periode '.$weekStart->format('d/m/Y').' s.d '.$weekEnd->format('d/m/Y'),
+                            'reference' => 'WD-VIRTUAL-JURUSAN-OUT-'.now()->format('Ymd').'-'.strtoupper(bin2hex(random_bytes(2))),
                         ]);
 
                         $catKeuntunganJurusan = CashCategory::firstOrCreate(
                             ['name' => 'Keuntungan Jurusan', 'jurusan_id' => $activeJurusanId]
                         );
 
-                        \App\Models\VirtualCashTransaction::create([
+                        VirtualCashTransaction::create([
                             'jurusan_id' => $activeJurusanId,
                             'date' => now()->toDateString(),
                             'source_method' => $sourceMethod,
                             'cash_category_id' => $catKeuntunganJurusan->id,
                             'type' => 'income',
                             'amount' => $jurusanShare,
-                            'description' => 'Terima Bagi Hasil Mingguan Jurusan (40% - Dari: ' . $categoryNameClean . ' - ' . strtoupper($sourceMethod) . ') - Periode ' . $weekStart->format('d/m/Y') . ' s.d ' . $weekEnd->format('d/m/Y'),
-                            'reference' => 'WD-VIRTUAL-JURUSAN-IN-' . now()->format('Ymd') . '-' . strtoupper(bin2hex(random_bytes(2))),
+                            'description' => 'Terima Bagi Hasil Mingguan Jurusan (40% - Dari: '.$categoryNameClean.' - '.strtoupper($sourceMethod).') - Periode '.$weekStart->format('d/m/Y').' s.d '.$weekEnd->format('d/m/Y'),
+                            'reference' => 'WD-VIRTUAL-JURUSAN-IN-'.now()->format('Ymd').'-'.strtoupper(bin2hex(random_bytes(2))),
                         ]);
                     }
                 }
@@ -403,20 +409,21 @@ class WeeklyProfit extends Component
     {
         if ($this->expandedReportId === $reportId) {
             $this->expandedReportId = null;
-            $this->reportBreakdown  = [];
+            $this->reportBreakdown = [];
+
             return;
         }
 
-        $report          = \App\Models\WeeklyProfitShare::find($reportId);
+        $report = WeeklyProfitShare::find($reportId);
         $activeJurusanId = session('active_jurusan_id');
 
         if (! $report) {
             return;
         }
 
-        $weekStart = \Carbon\Carbon::parse($report->week_start)->format('d/m/Y');
-        $weekEnd   = \Carbon\Carbon::parse($report->week_end)->format('d/m/Y');
-        $pattern   = '%Periode ' . $weekStart . ' s.d ' . $weekEnd . '%';
+        $weekStart = Carbon::parse($report->week_start)->format('d/m/Y');
+        $weekEnd = Carbon::parse($report->week_end)->format('d/m/Y');
+        $pattern = '%Periode '.$weekStart.' s.d '.$weekEnd.'%';
 
         // Ambil transaksi kas tunai & virtual bagi hasil
         $txsCash = CashTransaction::where('jurusan_id', $activeJurusanId)
@@ -426,7 +433,7 @@ class WeeklyProfit extends Component
             ->orderBy('description')
             ->get(['id', 'description', 'amount', 'cash_category_id']);
 
-        $txsVirtual = \App\Models\VirtualCashTransaction::where('jurusan_id', $activeJurusanId)
+        $txsVirtual = VirtualCashTransaction::where('jurusan_id', $activeJurusanId)
             ->where('description', 'like', 'Bagi Hasil Mingguan%')
             ->where('description', 'like', $pattern)
             ->where('type', 'expense')
@@ -443,27 +450,27 @@ class WeeklyProfit extends Component
             preg_match('/(\d+)%/i', $tx->description, $pctMatch);
 
             $recipient = isset($nameMatch[1]) ? trim($nameMatch[1]) : 'Lainnya';
-            $category  = isset($catMatch[1])  ? trim($catMatch[1])  : '-';
-            $pct       = isset($pctMatch[1])  ? $pctMatch[1] . '%'  : '-';
+            $category = isset($catMatch[1]) ? trim($catMatch[1]) : '-';
+            $pct = isset($pctMatch[1]) ? $pctMatch[1].'%' : '-';
 
             if (! isset($grouped[$recipient])) {
                 $grouped[$recipient] = [
-                    'name'        => $recipient,
-                    'percentage'  => $pct,
-                    'total'       => 0,
-                    'categories'  => [],
+                    'name' => $recipient,
+                    'percentage' => $pct,
+                    'total' => 0,
+                    'categories' => [],
                 ];
             }
 
-            $grouped[$recipient]['total']          += $tx->amount;
-            $grouped[$recipient]['categories'][]    = [
-                'name'   => $category,
+            $grouped[$recipient]['total'] += $tx->amount;
+            $grouped[$recipient]['categories'][] = [
+                'name' => $category,
                 'amount' => $tx->amount,
             ];
         }
 
         $this->expandedReportId = $reportId;
-        $this->reportBreakdown  = array_values($grouped);
+        $this->reportBreakdown = array_values($grouped);
     }
 
     public function render()
@@ -519,7 +526,7 @@ class WeeklyProfit extends Component
         $totalRevenue = $weeklyData->total_revenue ?? 0;
         $supplierHak = $weeklyData->supplier_hak ?? 0;
 
-        $najmyUser = \App\Models\User::where('name', 'like', '%Najmy%')->first();
+        $najmyUser = User::where('name', 'like', '%Najmy%')->first();
         $najmyName = $najmyUser ? $najmyUser->name : 'Najmy';
 
         $adminContributions = collect([
@@ -538,7 +545,7 @@ class WeeklyProfit extends Component
                 'user_profit' => $currentProfit * 0.30,
                 'cash_profit' => $cashProfit * 0.30,
                 'non_cash_profit' => $nonCashProfit * 0.30,
-            ]
+            ],
         ]);
 
         $dailyBreakdown = [];
@@ -551,7 +558,7 @@ class WeeklyProfit extends Component
                 ->whereIn('status', ['uang_diterima', 'belum_kembalian'])
                 ->sum(DB::raw('unit_profit * quantity'));
 
-            $recap = \App\Models\DailyRecap::where('date', $dateStr)
+            $recap = DailyRecap::where('date', $dateStr)
                 ->where('jurusan_id', $activeJurusanId)
                 ->first();
 
@@ -560,7 +567,7 @@ class WeeklyProfit extends Component
             $dayDiff = 0;
 
             if ($recap && (float) $recap->actual_cash > 1) {
-                $previousRecap = \App\Models\DailyRecap::forReporting()
+                $previousRecap = DailyRecap::forReporting()
                     ->where('jurusan_id', $activeJurusanId)
                     ->where('date', '<', $dateStr)
                     ->orderBy('date', 'desc')
@@ -609,7 +616,7 @@ class WeeklyProfit extends Component
             DB::raw('COUNT(*) as weeks_count'),
             DB::raw('MIN(created_at) as created_at')
         )
-            ->where('month_name', 'like', '%' . $monthName . '%')
+            ->where('month_name', 'like', '%'.$monthName.'%')
             ->where('jurusan_id', $activeJurusanId)
             ->groupBy('month_name')
             ->orderByDesc(DB::raw('MAX(week_end)'))

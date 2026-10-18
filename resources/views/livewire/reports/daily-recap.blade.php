@@ -1,38 +1,35 @@
-<div class="p-6">
-    <div class="flex flex-col md:flex-row md:items-center justify-between mb-10 gap-6">
-        <div>
-            <h1 class="text-4xl font-bold uppercase tracking-tight text-primary-blue dark:text-primary-blue-light">Rekap Harian</h1>
-            <p class="text-gray-400 font-bold text-xs uppercase tracking-[0.2em] italic">Pembukuan Transaksi Digital</p>
-        </div>
-        
-        <div class="flex flex-wrap items-center gap-4">
+<div class="p-4 sm:p-6">
+    <x-hub-tabs hub="laporan" :title="session('active_role_name') === 'kasir' ? 'Rekap Harian & Sesi' : 'Rekap Harian & Audit'" subtitle="Ringkasan transaksi harian kasir, total omzet tunai, margin laba, dan audit kas." />
+
+    <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 mb-6">
+        <div></div>
+        <div class="flex items-center gap-2 flex-wrap sm:flex-nowrap">
             <div wire:ignore x-data="{ value: @entangle('selectedDate').live, instance: null }" 
                  x-init="instance = flatpickr($refs.input, { dateFormat: 'Y-m-d', defaultDate: value, onChange: (s, d) => value = d }); $watch('value', v => instance.setDate(v, false))"
-                 class="flex items-center bg-white dark:bg-gray-800 px-6 py-3 rounded-2xl shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-800 transition-all cursor-pointer">
-                <svg class="w-4 h-4 text-primary-blue mr-3 cursor-pointer" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
-                <input x-ref="input" type="text" readonly class="border-none p-0 focus:ring-0 font-black text-sm bg-transparent dark:text-white cursor-pointer w-28">
+                 class="flex items-center bg-white dark:bg-slate-900 px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-800 transition-all cursor-pointer">
+                <svg class="w-4 h-4 text-blue-600 mr-2 shrink-0 cursor-pointer" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
+                <input x-ref="input" type="text" readonly class="border-none p-0 focus:ring-0 font-bold text-xs bg-transparent dark:text-white cursor-pointer w-24">
             </div>
 
-            <a href="{{ route('inventory-report', ['date' => $selectedDate]) }}" class="px-8 py-4 bg-primary-blue text-white rounded-2xl shadow-xl shadow-blue-500/20 font-black italic uppercase text-xs tracking-widest transform hover:-translate-y-1 transition-all flex items-center">
-                <svg class="w-4 h-4 mr-3" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20"/><path d="M2 12h20"/><path d="m5 7-3 5 3 5"/><path d="m19 7 3 5-3 5"/></svg>
-                Audit Stok
+            <a href="{{ route('inventory-report', ['date' => $selectedDate]) }}" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold shadow-sm transition-all flex items-center gap-1.5">
+                <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M12 2v20"/><path d="M2 12h20"/><path d="m5 7-3 5 3 5"/><path d="m19 7 3 5-3 5"/></svg>
+                <span>Audit Stok</span>
             </a>
 
             @if($recap)
-            <button wire:click="exportExcel" wire:loading.attr="disabled" class="px-8 py-4 bg-primary-red text-white rounded-2xl shadow-xl shadow-red-500/20 font-black italic uppercase text-xs tracking-widest transform hover:-translate-y-1 transition-all flex items-center">
-                <svg wire:loading.remove wire:target="exportExcel" class="w-4 h-4 mr-3" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
-                <svg wire:loading wire:target="exportExcel" class="animate-spin w-4 h-4 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                Export Excel
+            <button wire:click="exportExcel" wire:loading.attr="disabled" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold shadow-sm transition-all flex items-center gap-1.5">
+                <svg wire:loading.remove wire:target="exportExcel" class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+                <span wire:loading.remove wire:target="exportExcel">Export Excel</span>
+                <span wire:loading wire:target="exportExcel">Mengekspor...</span>
             </button>
             @endif
-
         </div>
     </div>
 
     @if($recap)
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-12">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         <!-- Revenue Card -->
-        <div class="bg-primary-blue rounded-[3rem] p-10 text-white shadow-2xl shadow-blue-900/30 relative overflow-hidden group">
+        <div class="bg-blue-600 rounded-2xl p-6 text-white shadow-sm relative overflow-hidden group">
             <div class="absolute -right-6 -bottom-6 opacity-10 group-hover:scale-110 transition-transform duration-700">
                 <svg class="w-40 h-40 text-white" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
             </div>

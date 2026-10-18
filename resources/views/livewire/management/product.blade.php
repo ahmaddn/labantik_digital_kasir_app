@@ -1,26 +1,19 @@
-<div class="p-6" x-data="{ showProductDetail: false, detailProduct: {} }">
-    <div class="flex flex-col md:flex-row md:items-center justify-between mb-10 gap-6">
-        <div>
-            <h1 class="text-4xl font-bold uppercase tracking-tight text-primary-blue dark:text-primary-blue-light">Katalog Produk</h1>
-            <p class="text-gray-400 font-bold text-xs uppercase tracking-[0.2em] italic">Manajemen Inventaris Digital</p>
-        </div>
-        
-        @if(session('active_role_name') !== 'superadmin')
-        <div class="flex flex-wrap items-center gap-4">
-            <div class="flex items-center bg-white dark:bg-gray-800 px-6 py-2 rounded-2xl shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-800">
-                <button wire:click="$set('tab', 'products'); $set('activeTab', 'products');" class="px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all {{ ($tab === 'products' && $activeTab === 'products') ? 'bg-primary-blue text-white shadow-lg shadow-blue-900/20' : 'text-gray-400 hover:text-gray-600' }}">Daftar Produk</button>
-                <button wire:click="$set('tab', 'products'); $set('activeTab', 'grouping');" class="px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all {{ ($tab === 'products' && $activeTab === 'grouping') ? 'bg-primary-blue text-white shadow-lg shadow-blue-900/20' : 'text-gray-400 hover:text-gray-600' }}">Pengelompokan Kas</button>
-                <button wire:click="$set('tab', 'stock')" class="px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all {{ $tab === 'stock' ? 'bg-primary-blue text-white shadow-lg shadow-blue-900/20' : 'text-gray-400 hover:text-gray-600' }}">Input Stok Awal</button>
-            </div>
-        </div>
-        @endif
+<div class="p-4 sm:p-6" x-data="{ showProductDetail: false, detailProduct: {} }">
+    <x-hub-tabs hub="inventaris" title="Daftar Produk" subtitle="Kelola data produk, harga modal, harga jual, dan status ketersediaan barang." />
+
+    @if(session('active_role_name') !== 'superadmin')
+    <div class="flex items-center gap-1.5 mb-6 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl w-fit overflow-x-auto no-scrollbar">
+        <button wire:click="$set('tab', 'products'); $set('activeTab', 'products');" class="px-4 py-1.5 rounded-lg text-xs font-bold transition-all {{ ($tab === 'products' && $activeTab === 'products') ? 'bg-white dark:bg-slate-900 text-blue-600 dark:text-blue-400 shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white' }}">Daftar Produk</button>
+        <button wire:click="$set('tab', 'products'); $set('activeTab', 'grouping');" class="px-4 py-1.5 rounded-lg text-xs font-bold transition-all {{ ($tab === 'products' && $activeTab === 'grouping') ? 'bg-white dark:bg-slate-900 text-blue-600 dark:text-blue-400 shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white' }}">Pengelompokan Kas</button>
+        <button wire:click="$set('tab', 'stock')" class="px-4 py-1.5 rounded-lg text-xs font-bold transition-all {{ $tab === 'stock' ? 'bg-white dark:bg-slate-900 text-blue-600 dark:text-blue-400 shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white' }}">Input Stok Awal</button>
     </div>
+    @endif
 
     @if($tab === 'products')
     <div class="w-full">
         @if($activeTab === 'products')
         <!-- List Section -->
-        <div class="bg-white dark:bg-gray-800 rounded-[3.5rem] shadow-2xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 overflow-hidden">
+        <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden">
             <div class="p-5 border-b border-gray-100 dark:border-gray-700 flex flex-col lg:flex-row justify-between items-stretch lg:items-center gap-6">
                 <!-- Left Filters & Add Button -->
                 <div class="flex flex-col lg:flex-row items-stretch lg:items-center gap-4 w-full lg:w-auto">

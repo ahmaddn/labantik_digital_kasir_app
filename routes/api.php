@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\Tefa\AuthController;
 use App\Http\Controllers\Api\Tefa\MerchantController;
 use App\Http\Controllers\Api\Tefa\StockController;
+use App\Http\Controllers\Api\Tefa\TransactionController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -74,6 +75,6 @@ Route::prefix('v1/tefa')->name('tefa.')->middleware('tefa.apikey')->group(functi
 
     // ── Histori Transaksi Penjualan Kantin TEFA ───────────────────────────
     // GET /api/v1/tefa/transactions
-    Route::get('transactions', [\App\Http\Controllers\Api\Tefa\TransactionController::class, 'index'])
+    Route::get('transactions', [TransactionController::class, 'index'])
         ->name('transactions.index');
 });

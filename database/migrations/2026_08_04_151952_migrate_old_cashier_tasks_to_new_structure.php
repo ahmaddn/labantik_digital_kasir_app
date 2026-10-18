@@ -19,17 +19,17 @@ return new class extends Migration
         $oldTasks = DB::table('cashier_tasks')->get();
 
         // Group by (task_name, date, jurusan_id) untuk deduplicate
-        $grouped = $oldTasks->groupBy(function($task) {
-            return $task->task_name . '|||' . $task->date . '|||' . $task->jurusan_id;
+        $grouped = $oldTasks->groupBy(function ($task) {
+            return $task->task_name.'|||'.$task->date.'|||'.$task->jurusan_id;
         });
 
         foreach ($grouped as $groupKey => $tasksInGroup) {
             // Use first task as template
             $templateTask = $tasksInGroup->first();
-            
+
             // 1. Create ONE task_definition untuk group ini
             $taskDefinitionId = Str::uuid();
-            
+
             DB::table('cashier_task_definitions')->insert([
                 'id' => $taskDefinitionId,
                 'jurusan_id' => $templateTask->jurusan_id,
@@ -50,7 +50,7 @@ return new class extends Migration
             foreach ($tasksInGroup as $oldTask) {
                 // Create task_assignment
                 $assignmentId = Str::uuid();
-                
+
                 DB::table('cashier_task_assignments')->insert([
                     'id' => $assignmentId,
                     'task_definition_id' => $taskDefinitionId,
@@ -64,7 +64,7 @@ return new class extends Migration
                 // 3. Jika ada completion_report/proof, create ONE submission per kasir
                 if ($oldTask->completion_report || $oldTask->proof_image || $oldTask->is_completed) {
                     $submissionId = Str::uuid();
-                    
+
                     DB::table('cashier_task_submissions')->insert([
                         'id' => $submissionId,
                         'task_assignment_id' => $assignmentId,
@@ -84,7 +84,7 @@ return new class extends Migration
             }
         }
 
-        echo "Migration complete! " . count($grouped) . " unique tasks created.\n";
+        echo 'Migration complete! '.count($grouped)." unique tasks created.\n";
     }
 
     /**

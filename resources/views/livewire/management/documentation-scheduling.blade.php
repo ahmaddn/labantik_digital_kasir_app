@@ -10,11 +10,9 @@
     @endif
 
     <!-- Header -->
+    <x-hub-tabs hub="operasional" title="Jadwal Dokumentasi" subtitle="Kelola penugasan dokumentasi kegiatan khusus anggota kasir, jadwal publikasi, dan verifikasi dokumenter." />
+
     <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-        <div>
-            <h1 class="text-2xl md:text-2xl font-bold uppercase tracking-tight text-primary-blue dark:text-primary-yellow">Penjadwalan Dokumentasi</h1>
-            <p class="text-gray-400 text-xs md:text-sm font-semibold uppercase tracking-widest mt-1">Kelola penugasan dokumentasi kegiatan khusus anggota kasir</p>
-        </div>
         <div class="flex flex-wrap items-center gap-3">
             @if(session('active_role_name') === 'superadmin')
                 <div class="w-full sm:w-64">
@@ -547,35 +545,36 @@
             </div>
         </div>
     @endif
+
+    <script src="https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/dist/html-to-image.min.js"></script>
+    <script>
+        function exportDocScheduleToImage() {
+            const element = document.getElementById('doc-schedule-capture-area');
+            if (!element) return;
+
+            htmlToImage.toPng(element, {
+                quality: 0.95,
+                pixelRatio: 2,
+                backgroundColor: document.documentElement.classList.contains('dark') ? '#111827' : '#ffffff',
+                skipFonts: true,
+                filter: (node) => {
+                    if (node.tagName === 'BUTTON' || (node.classList && node.classList.contains('capture-exclude'))) {
+                        return false;
+                    }
+                    return true;
+                }
+            })
+            .then(function (dataUrl) {
+                const link = document.createElement('a');
+                let titleStr = '{{ $activeActivity ? \Illuminate\Support\Str::slug($activeActivity->title) : "Dokumentasi" }}';
+                link.download = 'Jadwal_Dokumentasi_' + titleStr + '.png';
+                link.href = dataUrl;
+                link.click();
+            })
+            .catch(function (error) {
+                console.error('Oops, export image error:', error);
+            });
+        }
+    </script>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/dist/html-to-image.min.js"></script>
-<script>
-    function exportDocScheduleToImage() {
-        const element = document.getElementById('doc-schedule-capture-area');
-        if (!element) return;
-
-        htmlToImage.toPng(element, {
-            quality: 0.95,
-            pixelRatio: 2,
-            backgroundColor: document.documentElement.classList.contains('dark') ? '#111827' : '#ffffff',
-            skipFonts: true,
-            filter: (node) => {
-                if (node.tagName === 'BUTTON' || (node.classList && node.classList.contains('capture-exclude'))) {
-                    return false;
-                }
-                return true;
-            }
-        })
-        .then(function (dataUrl) {
-            const link = document.createElement('a');
-            let titleStr = '{{ $activeActivity ? \Illuminate\Support\Str::slug($activeActivity->title) : "Dokumentasi" }}';
-            link.download = 'Jadwal_Dokumentasi_' + titleStr + '.png';
-            link.href = dataUrl;
-            link.click();
-        })
-        .catch(function (error) {
-            console.error('Oops, export image error:', error);
-        });
-    }
-</script>

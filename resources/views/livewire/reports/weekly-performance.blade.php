@@ -1,27 +1,21 @@
-<div class="p-6">
-    {{-- Header & Date Range Selection matching Daily & Monthly Recaps --}}
-    <div class="flex flex-col md:flex-row md:items-center justify-between mb-10 gap-6">
-        <div>
-            <h1 class="text-4xl font-bold uppercase tracking-tight text-primary-blue dark:text-primary-blue-light">
-                Performa Mingguan</h1>
-            <p class="text-gray-400 font-bold text-xs uppercase tracking-[0.2em] italic">Evaluasi Penjualan & Kinerja
-                Kasir Digital</p>
-        </div>
+<div class="p-4 sm:p-6">
+    <x-hub-tabs hub="laporan" title="Performa Mingguan" subtitle="Evaluasi tren omzet harian, efektivitas shift kasir, dan analisis produk terlaris mingguan." />
 
-        <div class="flex flex-wrap items-center gap-4">
+    <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 mb-6">
+        <div></div>
+        <div class="flex flex-wrap items-center gap-3">
             {{-- Quick Presets --}}
-            <div
-                class="flex items-center bg-white dark:bg-gray-800 p-1.5 rounded-2xl shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-800">
+            <div class="flex items-center bg-slate-100 dark:bg-slate-800 p-1 rounded-xl">
                 <button wire:click="setPresetRange('this_week')"
-                    class="px-4 py-2 text-xs font-black uppercase tracking-wider rounded-xl transition-all {{ $startDate === now()->startOfWeek(\Carbon\Carbon::MONDAY)->toDateString() && $endDate === now()->startOfWeek(\Carbon\Carbon::MONDAY)->addDays(4)->toDateString() ? 'bg-primary-blue text-white shadow-md' : 'text-gray-500 hover:text-gray-900 dark:hover:text-white' }}">
+                    class="px-3 py-1.5 text-xs font-bold rounded-lg transition-all {{ $startDate === now()->startOfWeek(\Carbon\Carbon::MONDAY)->toDateString() && $endDate === now()->startOfWeek(\Carbon\Carbon::MONDAY)->addDays(4)->toDateString() ? 'bg-white dark:bg-slate-900 text-blue-600 dark:text-blue-400 shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white' }}">
                     Minggu Ini
                 </button>
                 <button wire:click="setPresetRange('last_week')"
-                    class="px-4 py-2 text-xs font-black uppercase tracking-wider rounded-xl transition-all {{ $startDate === now()->subWeek()->startOfWeek(\Carbon\Carbon::MONDAY)->toDateString() && $endDate === now()->subWeek()->startOfWeek(\Carbon\Carbon::MONDAY)->addDays(4)->toDateString() ? 'bg-primary-blue text-white shadow-md' : 'text-gray-500 hover:text-gray-900 dark:hover:text-white' }}">
+                    class="px-3 py-1.5 text-xs font-bold rounded-lg transition-all {{ $startDate === now()->subWeek()->startOfWeek(\Carbon\Carbon::MONDAY)->toDateString() && $endDate === now()->subWeek()->startOfWeek(\Carbon\Carbon::MONDAY)->addDays(4)->toDateString() ? 'bg-white dark:bg-slate-900 text-blue-600 dark:text-blue-400 shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white' }}">
                     Minggu Lalu
                 </button>
                 <button wire:click="setPresetRange('this_month')"
-                    class="px-4 py-2 text-xs font-black uppercase tracking-wider rounded-xl transition-all {{ $startDate === now()->startOfMonth()->toDateString() && $endDate === now()->endOfMonth()->toDateString() ? 'bg-primary-blue text-white shadow-md' : 'text-gray-500 hover:text-gray-900 dark:hover:text-white' }}">
+                    class="px-3 py-1.5 text-xs font-bold rounded-lg transition-all {{ $startDate === now()->startOfMonth()->toDateString() && $endDate === now()->endOfMonth()->toDateString() ? 'bg-white dark:bg-slate-900 text-blue-600 dark:text-blue-400 shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white' }}">
                     Bulan Ini
                 </button>
             </div>

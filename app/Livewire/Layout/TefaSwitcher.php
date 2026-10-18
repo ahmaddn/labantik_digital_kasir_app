@@ -8,6 +8,7 @@ use Livewire\Component;
 class TefaSwitcher extends Component
 {
     public $availableUnits = [];
+
     public $selectedUnitId = '';
 
     public function mount()
@@ -47,7 +48,7 @@ class TefaSwitcher extends Component
     public function switchUnit($unitId)
     {
         $unit = Jurusan::find($unitId);
-        if (!$unit) {
+        if (! $unit) {
             return;
         }
 
@@ -69,7 +70,7 @@ class TefaSwitcher extends Component
                 }
             }
 
-            if (!in_array($unit->id, $allowedParentIds) && !in_array($unit->parent_id, $allowedParentIds)) {
+            if (! in_array($unit->id, $allowedParentIds) && ! in_array($unit->parent_id, $allowedParentIds)) {
                 abort(403, 'Akses Ditolak: Anda tidak memiliki wewenang mengakses unit ini.');
             }
         }

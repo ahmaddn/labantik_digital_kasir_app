@@ -3,23 +3,27 @@
 namespace App\Exports;
 
 use Maatwebsite\Excel\Concerns\Exportable;
-use Maatwebsite\Excel\Concerns\WithMultipleSheets;
 use Maatwebsite\Excel\Concerns\FromCollection;
-use Maatwebsite\Excel\Concerns\WithHeadings;
-use Maatwebsite\Excel\Concerns\WithTitle;
-use Maatwebsite\Excel\Concerns\WithStyles;
 use Maatwebsite\Excel\Concerns\WithCustomStartCell;
+use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
+use Maatwebsite\Excel\Concerns\WithMultipleSheets;
+use Maatwebsite\Excel\Concerns\WithStyles;
+use Maatwebsite\Excel\Concerns\WithTitle;
+use PhpOffice\PhpSpreadsheet\Style\Border;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
-use Carbon\Carbon;
 
 class MonthlyRecapExport implements WithMultipleSheets
 {
     use Exportable;
 
     protected $recap;
+
     protected $categoryRecap;
+
     protected $dailyBreakdown;
+
     protected $monthName;
 
     public function __construct($recap, $categoryRecap, $dailyBreakdown, $monthName)
@@ -34,15 +38,17 @@ class MonthlyRecapExport implements WithMultipleSheets
     {
         return [
             new MonthlyRecapSummarySheet($this->recap, $this->categoryRecap, $this->monthName),
-            new MonthlyRecapDailySheet($this->dailyBreakdown)
+            new MonthlyRecapDailySheet($this->dailyBreakdown),
         ];
     }
 }
 
-class MonthlyRecapSummarySheet implements FromCollection, WithTitle, WithStyles, WithCustomStartCell
+class MonthlyRecapSummarySheet implements FromCollection, WithCustomStartCell, WithStyles, WithTitle
 {
     protected $recap;
+
     protected $categoryRecap;
+
     protected $monthName;
 
     public function __construct($recap, $categoryRecap, $monthName)
@@ -64,7 +70,7 @@ class MonthlyRecapSummarySheet implements FromCollection, WithTitle, WithStyles,
         $data->push(['Total Modal Terputar', $this->recap->total_modal ?? 0, '', '', '']);
         $data->push(['Volume Transaksi', $this->recap->total_transactions ?? 0, '', '', '']);
         $data->push(['', '', '', '', '']);
-        
+
         $data->push(['Kategori', 'Volume', 'Modal', 'Keuntungan', 'Omzet']);
         foreach ($this->categoryRecap as $catName => $stats) {
             $data->push([$catName, $stats->qty, $stats->modal, $stats->profit, $stats->revenue]);
@@ -90,10 +96,10 @@ class MonthlyRecapSummarySheet implements FromCollection, WithTitle, WithStyles,
         $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(16)->getColor()->setARGB('FF1E40AF');
 
         $sheet->mergeCells('A2:B2');
-        $sheet->setCellValue('A2', 'Bulan: ' . $this->monthName);
+        $sheet->setCellValue('A2', 'Bulan: '.$this->monthName);
 
         $sheet->mergeCells('A3:B3');
-        $sheet->setCellValue('A3', 'Dicetak Pada: ' . now()->translatedFormat('d M Y H:i:s'));
+        $sheet->setCellValue('A3', 'Dicetak Pada: '.now()->translatedFormat('d M Y H:i:s'));
 
         $sheet->getColumnDimension('A')->setWidth(35);
         $sheet->getColumnDimension('B')->setWidth(25);
@@ -103,26 +109,26 @@ class MonthlyRecapSummarySheet implements FromCollection, WithTitle, WithStyles,
 
         // Styling for summary header
         $sheet->getStyle('A5')->getFont()->setBold(true)->getColor()->setARGB('FFFFFFFF');
-        $sheet->getStyle('A5')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('FF1E40AF');
-        
+        $sheet->getStyle('A5')->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('FF1E40AF');
+
         // Format numbers for summary
         $sheet->getStyle('B6:B11')->getNumberFormat()->setFormatCode('#,##0');
 
         // Styling for category header (which is at row 13)
         $sheet->getStyle('A13:E13')->getFont()->setBold(true)->getColor()->setARGB('FFFFFFFF');
-        $sheet->getStyle('A13:E13')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('FFEF4444');
+        $sheet->getStyle('A13:E13')->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('FFEF4444');
         $sheet->getStyle('A13:E13')->getAlignment()->setHorizontal('center');
-        
+
         // Format numbers for category
         $lastRow = $sheet->getHighestRow();
         if ($lastRow >= 14) {
-            $sheet->getStyle('B14:E' . $lastRow)->getNumberFormat()->setFormatCode('#,##0');
-            $sheet->getStyle('A13:E' . $lastRow)->getBorders()->getAllBorders()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
+            $sheet->getStyle('B14:E'.$lastRow)->getNumberFormat()->setFormatCode('#,##0');
+            $sheet->getStyle('A13:E'.$lastRow)->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
         }
     }
 }
 
-class MonthlyRecapDailySheet implements FromCollection, WithHeadings, WithTitle, WithStyles, WithMapping
+class MonthlyRecapDailySheet implements FromCollection, WithHeadings, WithMapping, WithStyles, WithTitle
 {
     protected $dailyBreakdown;
 
@@ -138,8 +144,8 @@ class MonthlyRecapDailySheet implements FromCollection, WithHeadings, WithTitle,
 
     public function map($row): array
     {
-        $kasFisik = $row->actual_cash !== null ? (float)$row->actual_cash - (float)$row->retained_change_cash : null;
-        $selisih = $row->actual_cash !== null ? $kasFisik - (float)$row->total_revenue_real : null;
+        $kasFisik = $row->actual_cash !== null ? (float) $row->actual_cash - (float) $row->retained_change_cash : null;
+        $selisih = $row->actual_cash !== null ? $kasFisik - (float) $row->total_revenue_real : null;
 
         return [
             $row->date,
@@ -173,12 +179,12 @@ class MonthlyRecapDailySheet implements FromCollection, WithHeadings, WithTitle,
         $sheet->getColumnDimension('G')->setWidth(25);
 
         $sheet->getStyle('A1:G1')->getFont()->setBold(true)->getColor()->setARGB('FFFFFFFF');
-        $sheet->getStyle('A1:G1')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('FF1E40AF');
+        $sheet->getStyle('A1:G1')->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('FF1E40AF');
         $sheet->getStyle('A1:G1')->getAlignment()->setHorizontal('center');
 
         $lastRow = $sheet->getHighestRow();
         if ($lastRow >= 2) {
-            $sheet->getStyle('B2:G' . $lastRow)->getNumberFormat()->setFormatCode('#,##0');
+            $sheet->getStyle('B2:G'.$lastRow)->getNumberFormat()->setFormatCode('#,##0');
         }
     }
 }

@@ -12,9 +12,9 @@ class DailyDataImport implements WithMultipleSheets
     public function sheets(): array
     {
         return [
-            'Products' => new ProductsSheetImport(),
-            'StockEntries' => new StockEntriesSheetImport(),
-            'Transactions' => new TransactionsSheetImport(),
+            'Products' => new ProductsSheetImport,
+            'StockEntries' => new StockEntriesSheetImport,
+            'Transactions' => new TransactionsSheetImport,
         ];
     }
 }

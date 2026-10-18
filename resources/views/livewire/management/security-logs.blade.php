@@ -1,16 +1,16 @@
-<div class="space-y-8 pt-6">
+<div class="p-4 sm:p-6 space-y-6">
     <!-- Header -->
     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-            <h1 class="text-2xl font-bold uppercase tracking-tight text-primary-blue dark:text-primary-yellow">Log Audit Keamanan</h1>
-            <p class="text-gray-400 text-sm font-semibold uppercase tracking-widest mt-1">Pelacakan Aktivitas Perekaman Layar, Print, & Screenshot</p>
+            <h1 class="text-xl sm:text-2xl font-black uppercase tracking-tight text-slate-900 dark:text-white font-outfit">Log Audit Keamanan</h1>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Pelacakan riwayat aktivitas perekaman layar, print, dan aksi keamanan sistem.</p>
         </div>
         
         @if(session('active_role_name') === 'superadmin')
             <div x-data="{ showClearConfirm: false }">
-                <button type="button" @click="showClearConfirm = true" class="inline-flex items-center px-5 py-3.5 bg-red-50 hover:bg-red-100 dark:bg-red-950/20 dark:hover:bg-red-900/30 text-primary-red rounded-2xl font-black text-sm uppercase italic tracking-wider transition-all duration-300">
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                    Kosongkan Log
+                <button type="button" @click="showClearConfirm = true" class="inline-flex items-center px-3.5 py-2 bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 rounded-xl font-bold text-xs border border-rose-200 dark:border-rose-900/50 transition-colors">
+                    <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                    <span>Kosongkan Log</span>
                 </button>
 
                 <!-- Clear Logs Confirmation Modal -->

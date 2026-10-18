@@ -17,8 +17,11 @@ class SupplierReport extends Component
     use WithPagination;
 
     public $dateFrom;
+
     public $dateTo;
+
     public $supplierId = '';
+
     public $activeTab = 'unsettled'; // 'unsettled' atau 'history'
 
     public function mount()
@@ -34,7 +37,7 @@ class SupplierReport extends Component
 
     public function exportExcel()
     {
-        $filename = 'Laporan_Supplier_' . Carbon::parse($this->dateFrom)->format('Ymd') . '-' . Carbon::parse($this->dateTo)->format('Ymd') . '.xlsx';
+        $filename = 'Laporan_Supplier_'.Carbon::parse($this->dateFrom)->format('Ymd').'-'.Carbon::parse($this->dateTo)->format('Ymd').'.xlsx';
 
         return Excel::download(new SupplierReportExport($this->dateFrom, $this->dateTo, $this->supplierId), $filename);
     }
@@ -64,7 +67,7 @@ class SupplierReport extends Component
                 ->where('products.supplier_id', $supplier->id)
                 ->where('transactions.jurusan_id', $activeJurusanId)
                 ->whereIn('transactions.status', ['uang_diterima', 'belum_kembalian'])
-                ->whereBetween('transactions.transacted_at', [$this->dateFrom . ' 00:00:00', $this->dateTo . ' 23:59:59']);
+                ->whereBetween('transactions.transacted_at', [$this->dateFrom.' 00:00:00', $this->dateTo.' 23:59:59']);
 
             if ($lastSettledAt) {
                 // Hanya hitung penjualan yang terjadi setelah waktu pelunasan terakhir
@@ -93,7 +96,7 @@ class SupplierReport extends Component
                 'total_shop_profit' => $totalShopProfit,
                 'last_settled_at' => $lastSettledAt,
             ];
-        })->filter(fn($r) => $r->total_qty > 0);
+        })->filter(fn ($r) => $r->total_qty > 0);
 
         // 2. DATA TAB HISTORY (Riwayat Pelunasan Bagi Hasil Supplier)
         $historyQuery = CashTransaction::forReporting()
@@ -159,7 +162,7 @@ class SupplierReport extends Component
             'cash_type' => 'modal',
             'cash_category_id' => $category->id,
             'amount' => $finalAmount,
-            'description' => $prefix . "Pelunasan bagi hasil supplier {$supplierName} sebesar Rp" . number_format($amount, 0, ',', '.') . ' pada ' . now()->format('d/m/Y H:i'),
+            'description' => $prefix."Pelunasan bagi hasil supplier {$supplierName} sebesar Rp".number_format($amount, 0, ',', '.').' pada '.now()->format('d/m/Y H:i'),
             'reference' => $reference,
         ]);
 
@@ -172,7 +175,7 @@ class SupplierReport extends Component
 
         if ($tx) {
             $tx->delete();
-            $this->dispatch('toast', message: "Pelunasan berhasil dibatalkan. Transaksi dikembalikan ke Tagihan Aktif.");
+            $this->dispatch('toast', message: 'Pelunasan berhasil dibatalkan. Transaksi dikembalikan ke Tagihan Aktif.');
         }
     }
 
@@ -182,12 +185,12 @@ class SupplierReport extends Component
 
         $msg = "📢 *LAPORAN BAGI HASIL SUPPLIER*\n";
         $msg .= "👤 *Supplier:* {$supplierName}\n";
-        $msg .= '📅 *Tanggal Pelunasan:* ' . now()->translatedFormat('d M Y H:i') . "\n";
-        $msg .= '💰 *Total Hak Supplier:* Rp' . number_format($amount, 0, ',', '.') . "\n\n";
-        $msg .= "*Status:* ✅ LUNAS" . ($isNoCash ? " (Di luar sistem kas)" : " (Sudah dibayarkan)") . "\n\n";
+        $msg .= '📅 *Tanggal Pelunasan:* '.now()->translatedFormat('d M Y H:i')."\n";
+        $msg .= '💰 *Total Hak Supplier:* Rp'.number_format($amount, 0, ',', '.')."\n\n";
+        $msg .= '*Status:* ✅ LUNAS'.($isNoCash ? ' (Di luar sistem kas)' : ' (Sudah dibayarkan)')."\n\n";
         $msg .= '_Terima kasih atas kerjasamanya._';
 
-        $waUrl = 'https://api.whatsapp.com/send?text=' . urlencode($msg);
+        $waUrl = 'https://api.whatsapp.com/send?text='.urlencode($msg);
 
         $this->dispatch('open-link', url: $waUrl);
     }

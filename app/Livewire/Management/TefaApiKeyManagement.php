@@ -12,9 +12,13 @@ class TefaApiKeyManagement extends Component
     use WithPagination;
 
     public $search = '';
+
     public $name = '';
+
     public $isModalOpen = false;
+
     public $newlyGeneratedKey = null;
+
     public $dompetSiswaApiKey = '';
 
     public function mount()
@@ -45,9 +49,9 @@ class TefaApiKeyManagement extends Component
         if (file_exists($envPath)) {
             $envContent = file_get_contents($envPath);
             if (str_contains($envContent, 'DOMPET_SISWA_API_KEY=')) {
-                $envContent = preg_replace('/DOMPET_SISWA_API_KEY=.*/', 'DOMPET_SISWA_API_KEY=' . $this->dompetSiswaApiKey, $envContent);
+                $envContent = preg_replace('/DOMPET_SISWA_API_KEY=.*/', 'DOMPET_SISWA_API_KEY='.$this->dompetSiswaApiKey, $envContent);
             } else {
-                $envContent .= "\nDOMPET_SISWA_API_KEY=" . $this->dompetSiswaApiKey;
+                $envContent .= "\nDOMPET_SISWA_API_KEY=".$this->dompetSiswaApiKey;
             }
             file_put_contents($envPath, $envContent);
         }
@@ -82,13 +86,13 @@ class TefaApiKeyManagement extends Component
         $this->authorizeAccess();
         $this->validate();
 
-        $rawKey = 'tfk_' . Str::random(56);
+        $rawKey = 'tfk_'.Str::random(56);
 
         TefaApiKey::create([
             'jurusan_id' => null, // Global Key berlaku untuk seluruh merchant/kantin TEFA
-            'name'       => $this->name,
-            'key'        => $rawKey,
-            'is_active'  => true,
+            'name' => $this->name,
+            'key' => $rawKey,
+            'is_active' => true,
         ]);
 
         $this->newlyGeneratedKey = $rawKey;
@@ -123,7 +127,7 @@ class TefaApiKeyManagement extends Component
                 $sub->where('jurusan_id', $activeJurusanId)
                     ->orWhereNull('jurusan_id');
             }))
-            ->when($this->search, fn ($q) => $q->where('name', 'like', '%' . $this->search . '%'))
+            ->when($this->search, fn ($q) => $q->where('name', 'like', '%'.$this->search.'%'))
             ->orderBy('created_at', 'desc')
             ->paginate(10);
 

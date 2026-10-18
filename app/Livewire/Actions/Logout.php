@@ -64,7 +64,7 @@ class Logout
                         }
                     }
 
-                    $status = $clockInStatus . '_' . $clockOutStatus;
+                    $status = $clockInStatus.'_'.$clockOutStatus;
 
                     $attendance->update([
                         'clock_out' => $currentTime,
@@ -87,4 +87,3 @@ class Logout
         return redirect('/');
     }
 }
-

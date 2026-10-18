@@ -45,7 +45,7 @@ class TransactionsSheetExport implements FromCollection, WithHeadings, WithMappi
     }
 
     /**
-     * @param Transaction $transaction
+     * @param  Transaction  $transaction
      */
     public function map($transaction): array
     {

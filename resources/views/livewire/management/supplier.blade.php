@@ -1,15 +1,10 @@
-<div class="p-6">
-    <div class="flex flex-col md:flex-row md:items-center justify-between mb-10 gap-6">
-        <div>
-            <h1 class="text-4xl font-bold uppercase tracking-tight text-primary-blue dark:text-primary-blue-light">Manajemen Supplier</h1>
-            <p class="text-gray-400 font-bold text-xs uppercase tracking-[0.2em] italic">Data Penitip Barang & Supplier</p>
-        </div>
-    </div>
+<div class="p-4 sm:p-6">
+    <x-hub-tabs hub="inventaris" title="Supplier Rekanan" subtitle="Data pihak ketiga, mitra penitip barang, dan perincian konsinyasi TEFA." />
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- Form Section -->
         <div class="lg:col-span-1">
-            <div class="bg-white dark:bg-gray-800 rounded-[3rem] p-10 shadow-2xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 sticky top-10">
+            <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm border border-slate-200 dark:border-slate-800 sticky top-6">
                 <div class="flex items-center mb-8">
                     <div class="w-12 h-12 bg-primary-blue rounded-2xl flex items-center justify-center text-white mr-4 shadow-lg shadow-blue-900/20">
                         <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>

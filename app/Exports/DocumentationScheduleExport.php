@@ -4,20 +4,24 @@ namespace App\Exports;
 
 use App\Models\DocumentationActivity;
 use App\Models\DocumentationSchedule;
-use Carbon\Carbon;
 use Maatwebsite\Excel\Concerns\FromCollection;
+use Maatwebsite\Excel\Concerns\ShouldAutoSize;
+use Maatwebsite\Excel\Concerns\WithCustomStartCell;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
-use Maatwebsite\Excel\Concerns\WithTitle;
-use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithStyles;
-use Maatwebsite\Excel\Concerns\WithCustomStartCell;
+use Maatwebsite\Excel\Concerns\WithTitle;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Style\Border;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class DocumentationScheduleExport implements FromCollection, WithHeadings, WithMapping, WithTitle, ShouldAutoSize, WithStyles, WithCustomStartCell
+class DocumentationScheduleExport implements FromCollection, ShouldAutoSize, WithCustomStartCell, WithHeadings, WithMapping, WithStyles, WithTitle
 {
     protected $activityId;
+
     protected $activity;
+
     protected $rowNo = 1;
 
     public function __construct($activityId)
@@ -28,7 +32,7 @@ class DocumentationScheduleExport implements FromCollection, WithHeadings, WithM
 
     public function collection()
     {
-        if (!$this->activityId) {
+        if (! $this->activityId) {
             return collect();
         }
 
@@ -58,9 +62,9 @@ class DocumentationScheduleExport implements FromCollection, WithHeadings, WithM
             $this->rowNo++,
             $schedule->date->translatedFormat('l'),
             $schedule->date->translatedFormat('d F Y'),
-            'Shift ' . ($schedule->shift ?? 1),
+            'Shift '.($schedule->shift ?? 1),
             $schedule->user ? $schedule->user->name : '-',
-            $schedule->user && $schedule->user->grade_level ? 'Tingkat ' . $schedule->user->grade_level : '-',
+            $schedule->user && $schedule->user->grade_level ? 'Tingkat '.$schedule->user->grade_level : '-',
             $schedule->notes ?: 'Tugas Dokumentasi',
         ];
     }
@@ -89,20 +93,20 @@ class DocumentationScheduleExport implements FromCollection, WithHeadings, WithM
 
         // Document Subtitle
         $sheet->mergeCells('A2:G2');
-        $sheet->setCellValue('A2', 'Kegiatan: ' . $title . ' (Periode: ' . $start . ' - ' . $end . ')');
+        $sheet->setCellValue('A2', 'Kegiatan: '.$title.' (Periode: '.$start.' - '.$end.')');
         $sheet->getStyle('A2')->getFont()->setBold(true)->setSize(11)->getColor()->setARGB('FF0F172A');
 
         $sheet->mergeCells('A3:G3');
-        $sheet->setCellValue('A3', 'Deskripsi Event: ' . $desc);
+        $sheet->setCellValue('A3', 'Deskripsi Event: '.$desc);
         $sheet->getStyle('A3')->getFont()->setItalic(true)->setSize(10)->getColor()->setARGB('FF475569');
 
         $sheet->mergeCells('A4:G4');
-        $sheet->setCellValue('A4', 'Dicetak Pada: ' . now()->translatedFormat('d F Y H:i:s'));
+        $sheet->setCellValue('A4', 'Dicetak Pada: '.now()->translatedFormat('d F Y H:i:s'));
         $sheet->getStyle('A4')->getFont()->setSize(9)->getColor()->setARGB('FF64748B');
 
         // Header style (Row 6)
         $sheet->getStyle('A6:G6')->getFont()->setBold(true)->getColor()->setARGB('FFFFFFFF');
-        $sheet->getStyle('A6:G6')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+        $sheet->getStyle('A6:G6')->getFill()->setFillType(Fill::FILL_SOLID)
             ->getStartColor()->setARGB('FF059669'); // Emerald Green
 
         $sheet->getColumnDimension('A')->setWidth(8);
@@ -114,18 +118,18 @@ class DocumentationScheduleExport implements FromCollection, WithHeadings, WithM
         $sheet->getColumnDimension('G')->setWidth(35);
 
         // Center align No, Day, Date, Shift, and Grade columns
-        $sheet->getStyle('A6:D100')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
-        $sheet->getStyle('F6:F100')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('A6:D100')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('F6:F100')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
         // Grid Borders and Alternate Zebra Stripe Colors
         $lastRow = $sheet->getHighestRow();
         if ($lastRow >= 6) {
-            $sheet->getStyle('A6:G' . $lastRow)->getBorders()->getAllBorders()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
-            $sheet->getStyle('A6:G' . $lastRow)->getBorders()->getAllBorders()->getColor()->setARGB('FFCBD5E1');
+            $sheet->getStyle('A6:G'.$lastRow)->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+            $sheet->getStyle('A6:G'.$lastRow)->getBorders()->getAllBorders()->getColor()->setARGB('FFCBD5E1');
 
             for ($row = 7; $row <= $lastRow; $row++) {
                 if ($row % 2 === 0) {
-                    $sheet->getStyle('A' . $row . ':G' . $row)->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+                    $sheet->getStyle('A'.$row.':G'.$row)->getFill()->setFillType(Fill::FILL_SOLID)
                         ->getStartColor()->setARGB('FFF0FDF4'); // emerald-50 background for alternate rows
                 }
             }

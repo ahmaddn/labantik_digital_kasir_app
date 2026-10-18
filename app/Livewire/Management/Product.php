@@ -3,6 +3,7 @@
 namespace App\Livewire\Management;
 
 use App\Models\Jurusan;
+use App\Models\ModifierGroup;
 use App\Models\Product as ProductModel;
 use App\Models\ProductCategory;
 use App\Models\Supplier;
@@ -41,7 +42,9 @@ class Product extends Component
 
     // Restock Assistant properties
     public $restockQty = '';
+
     public $totalModalCost = '';
+
     public string $activeTab = 'products'; // 'products' | 'grouping'
 
     // Stok harian
@@ -360,8 +363,8 @@ class Product extends Component
 
         $this->validate([
             'stock_product_id' => 'required|exists:products,id',
-            'opening_stock'    => 'required|integer|min:0',
-            'stock_date'       => 'required|date',
+            'opening_stock' => 'required|integer|min:0',
+            'stock_date' => 'required|date',
         ]);
 
         try {
@@ -397,7 +400,7 @@ class Product extends Component
 
         foreach ($products as $product) {
             if ($product->supplier_id) {
-                $categoryName = 'Penjualan ' . trim($product->supplier->name ?? 'Supplier');
+                $categoryName = 'Penjualan '.trim($product->supplier->name ?? 'Supplier');
             } else {
                 $categoryNameClean = trim($product->category->name ?? 'Lainnya');
                 $categoryNameLower = strtolower($categoryNameClean);
@@ -408,7 +411,7 @@ class Product extends Component
                 } elseif (in_array($categoryNameLower, ['umum', 'lainnya', 'lain-lain'])) {
                     $categoryName = 'Keuntungan Jurusan';
                 } else {
-                    $categoryName = 'Penjualan ' . $categoryNameClean;
+                    $categoryName = 'Penjualan '.$categoryNameClean;
                 }
             }
 
@@ -421,6 +424,7 @@ class Product extends Component
     }
 
     public $selectedModifierGroupId = '';
+
     public bool $showBulkModifierModal = false;
 
     public function applyModifierGroupMassive()
@@ -435,6 +439,7 @@ class Product extends Component
 
         if (empty($this->selectedProducts)) {
             $this->dispatch('toast', message: 'Silakan pilih produk terlebih dahulu.', type: 'danger');
+
             return;
         }
 
@@ -460,7 +465,7 @@ class Product extends Component
         $this->showBulkModifierModal = false;
         $this->selectedModifierGroupId = '';
 
-        $msg = $isRemoveMode 
+        $msg = $isRemoveMode
             ? "Berhasil menghapus semua topping dari {$count} produk."
             : "Berhasil menerapkan kelompok topping ke {$count} produk.";
 
@@ -495,7 +500,7 @@ class Product extends Component
             });
         }
 
-        $modifierGroups = \App\Models\ModifierGroup::when($activeJurusanId, function($q) use ($activeJurusanId) {
+        $modifierGroups = ModifierGroup::when($activeJurusanId, function ($q) use ($activeJurusanId) {
             $q->where('jurusan_id', $activeJurusanId);
         })->get();
 

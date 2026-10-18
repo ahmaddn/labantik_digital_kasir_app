@@ -20,7 +20,7 @@
         }
     </script>
 </head>
-<body class="min-h-screen bg-bone-white dark:bg-dark-soft flex flex-col items-center justify-center py-4 sm:py-6 px-3 sm:px-6 font-sans overflow-y-auto">
+<body class="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col items-center justify-center py-6 sm:py-10 px-4 sm:px-6 font-outfit antialiased selection:bg-blue-600 selection:text-white transition-colors duration-200 overflow-y-auto">
     {{ $slot }}
     
     @persist('toast')

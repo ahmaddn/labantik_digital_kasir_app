@@ -74,7 +74,7 @@ class ThemeCustomizer extends Component
     public function mount(): void
     {
         $activeRole = session('active_role_name');
-        if (!in_array($activeRole, ['superadmin', 'pengelola_jurusan', 'pengelola', 'kasir'])) {
+        if (! in_array($activeRole, ['superadmin', 'pengelola_jurusan', 'pengelola', 'kasir'])) {
             abort(403, 'Akses ditolak. Anda tidak memiliki izin untuk mengatur konfigurasi tampilan TEFA.');
         }
 
@@ -118,12 +118,12 @@ class ThemeCustomizer extends Component
             $this->secondaryColor = $settings['secondary_color'] ?? '#F43F5E';
             $this->fontFamily = $settings['font_family'] ?? 'Outfit';
 
-            $isSubUnit = !is_null($jurusan->parent_id);
+            $isSubUnit = ! is_null($jurusan->parent_id);
             $loadedStyle = $settings['theme_style'] ?? null;
 
             if ($isSubUnit) {
                 // Sub-unit: fallback to culinary/restaurant if not business style
-                if (!in_array($loadedStyle, ['restaurant-aesthetic', 'retail-aesthetic', 'bank-aesthetic'])) {
+                if (! in_array($loadedStyle, ['restaurant-aesthetic', 'retail-aesthetic', 'bank-aesthetic'])) {
                     $this->themeStyle = 'restaurant-aesthetic';
                 } else {
                     $this->themeStyle = $loadedStyle;
@@ -210,7 +210,7 @@ class ThemeCustomizer extends Component
     public function render()
     {
         $selectedJurusan = Jurusan::find($this->selectedJurusanId);
-        $isSubUnit = $selectedJurusan && !is_null($selectedJurusan->parent_id);
+        $isSubUnit = $selectedJurusan && ! is_null($selectedJurusan->parent_id);
 
         $filteredStyles = [];
         foreach ($this->stylePresets as $style) {
@@ -223,7 +223,7 @@ class ThemeCustomizer extends Component
                 }
             } else {
                 // For parent units: show only the general presets
-                if (!$isBusinessStyle) {
+                if (! $isBusinessStyle) {
                     $filteredStyles[] = $style;
                 }
             }

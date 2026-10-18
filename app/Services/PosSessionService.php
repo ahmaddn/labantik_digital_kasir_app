@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\CashierAttendance;
 use App\Models\DailyRecap;
 use App\Models\StockEntry;
 use App\Models\Transaction;
@@ -66,8 +67,8 @@ class PosSessionService
 
             DailyRecap::upsertForSession($date, $activeJurusanId, [
                 'actual_cash' => $newActualCash,
-                'cash_note' => $existingRecap && $existingRecap->actual_cash > 1 
-                    ? ($existingRecap->cash_note ?? 'Auto-finished by system') 
+                'cash_note' => $existingRecap && $existingRecap->actual_cash > 1
+                    ? ($existingRecap->cash_note ?? 'Auto-finished by system')
                     : 'Auto-finished by system (Forgot to click finish)',
             ]);
         });
@@ -100,16 +101,16 @@ class PosSessionService
 
         $entries = StockEntry::joinSub($subQuery, 'latest_entries', function ($join) {
             $join->on('stock_entries.product_id', '=', 'latest_entries.product_id')
-                 ->on('stock_entries.date', '=', 'latest_entries.max_date');
+                ->on('stock_entries.date', '=', 'latest_entries.max_date');
         })
-        ->select('stock_entries.product_id', 'stock_entries.closing_stock', 'stock_entries.date')
-        ->get();
+            ->select('stock_entries.product_id', 'stock_entries.closing_stock', 'stock_entries.date')
+            ->get();
 
         $details = [];
         foreach ($entries as $e) {
             $details[$e->product_id] = [
                 'stock' => (int) $e->closing_stock,
-                'date'  => $e->date ? Carbon::parse($e->date)->translatedFormat('d M') : '-',
+                'date' => $e->date ? Carbon::parse($e->date)->translatedFormat('d M') : '-',
                 'raw_date' => $e->date,
             ];
         }
@@ -130,10 +131,10 @@ class PosSessionService
 
         return StockEntry::joinSub($subQuery, 'latest_entries', function ($join) {
             $join->on('stock_entries.product_id', '=', 'latest_entries.product_id')
-                 ->on('stock_entries.date', '=', 'latest_entries.max_date');
+                ->on('stock_entries.date', '=', 'latest_entries.max_date');
         })
-        ->pluck('stock_entries.closing_stock', 'stock_entries.product_id')
-        ->toArray();
+            ->pluck('stock_entries.closing_stock', 'stock_entries.product_id')
+            ->toArray();
     }
 
     public function saveOpeningStock(array $stockItems, string $today): void
@@ -214,7 +215,7 @@ class PosSessionService
         }
 
         if ($userId && session('active_role_name') === 'kasir') {
-            $attendance = \App\Models\CashierAttendance::where('user_id', $userId)
+            $attendance = CashierAttendance::where('user_id', $userId)
                 ->where('jurusan_id', $jurusanId)
                 ->where('date', $date)
                 ->first();
@@ -256,10 +257,11 @@ class PosSessionService
 
         DB::transaction(function () use ($cart, $change, $buyerName, &$status, $note, $tDate, $isBackdate, $transactedAt, $activeJurusanId, $userId, $reference, $paymentMethod) {
             $first = true;
-            
+
             // Prevent Rp 0 transactions from being saved as debt (HUTANG)
-            $calculatedTotal = collect($cart)->sum(function($item) {
+            $calculatedTotal = collect($cart)->sum(function ($item) {
                 $modifiersPrice = collect($item['selected_modifiers'] ?? [])->sum('price');
+
                 return ($item['price'] + $modifiersPrice) * $item['quantity'];
             });
 
@@ -293,10 +295,10 @@ class PosSessionService
                 ]);
 
                 // Simpan item topping terpilih ke database pivot
-                if (!empty($item['selected_modifiers'])) {
+                if (! empty($item['selected_modifiers'])) {
                     foreach ($item['selected_modifiers'] as $mod) {
                         $transaction->modifiers()->attach($mod['id'], [
-                            'price' => $mod['price']
+                            'price' => $mod['price'],
                         ]);
                     }
                 }

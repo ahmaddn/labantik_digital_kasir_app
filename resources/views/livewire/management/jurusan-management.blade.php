@@ -1,17 +1,13 @@
-<div class="p-6">
-    <!-- Header -->
-    <div class="flex flex-col md:flex-row md:items-center justify-between mb-10 gap-6">
-        <div>
-            <h1 class="text-4xl font-bold uppercase tracking-tight text-primary-blue dark:text-primary-blue-light">Manajemen Jurusan</h1>
-            <p class="text-gray-400 font-bold text-xs uppercase tracking-[0.2em] italic">Kelola Unit TEFA Jurusan SMKN 1 Talaga</p>
-        </div>
-        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
-            <button wire:click="openCreateModal" class="px-5 sm:px-5 py-2.5 sm:py-4 bg-primary-blue text-white rounded-2xl shadow-xl shadow-blue-500/20 font-black italic uppercase text-xs tracking-widest transform hover:-translate-y-1 transition-all flex items-center justify-center">
-                <svg class="w-4 h-4 mr-3" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
-                Tambah Sub-Unit Baru
+<div class="p-4 sm:p-6 space-y-6">
+    <x-hub-tabs hub="pengaturan" title="Jurusan & Unit TEFA" subtitle="Kelola unit TEFA dan jurusan SMK Negeri 1 Talaga serta relasi kasir." />
+
+    <!-- Actions -->
+    <div class="flex items-center justify-end gap-2">
+            <button wire:click="openCreateModal" class="px-3.5 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold shadow-sm transition-all flex items-center justify-center gap-1.5">
+                <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+                <span>Tambah Sub-Unit</span>
             </button>
         </div>
-    </div>
 
     <!-- Table & Filters Container -->
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-800 p-4 md:p-6">

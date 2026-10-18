@@ -23,7 +23,7 @@ class Jurusan extends Model
 
     protected $casts = [
         'theme_settings' => 'array',
-        'is_active'      => 'boolean',
+        'is_active' => 'boolean',
     ];
 
     public function parent()

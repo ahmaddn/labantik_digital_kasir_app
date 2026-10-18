@@ -2,6 +2,8 @@
 
 namespace App\Livewire\Management;
 
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Pagination\Paginator;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -12,13 +14,13 @@ class SecurityLogs extends Component
     public function getLogs()
     {
         $logPath = storage_path('logs/laravel.log');
-        if (!file_exists($logPath)) {
+        if (! file_exists($logPath)) {
             return [];
         }
 
         $logs = [];
         $file = new \SplFileObject($logPath, 'r');
-        while (!$file->eof()) {
+        while (! $file->eof()) {
             $line = $file->fgets();
             if (strpos($line, 'SECURITY ALERT') !== false) {
                 // Parse date, environment, severity, and message
@@ -26,12 +28,12 @@ class SecurityLogs extends Component
                 if (count($matches) >= 4) {
                     $logs[] = [
                         'timestamp' => $matches[1],
-                        'message' => $matches[3]
+                        'message' => $matches[3],
                     ];
                 } else {
                     $logs[] = [
                         'timestamp' => 'N/A',
-                        'message' => trim($line)
+                        'message' => trim($line),
                     ];
                 }
             }
@@ -45,6 +47,7 @@ class SecurityLogs extends Component
         // Only allow superadmin to clear logs
         if (session('active_role_name') !== 'superadmin') {
             $this->dispatch('toast', message: 'Hanya Superadmin yang dapat mengosongkan log keamanan.');
+
             return;
         }
 
@@ -66,16 +69,16 @@ class SecurityLogs extends Component
         $offset = ($currentPage - 1) * $perPage;
         $paginatedLogs = array_slice($allLogs, $offset, $perPage);
 
-        $paginator = new \Illuminate\Pagination\LengthAwarePaginator(
+        $paginator = new LengthAwarePaginator(
             $paginatedLogs,
             count($allLogs),
             $perPage,
             $currentPage,
-            ['path' => \Illuminate\Pagination\Paginator::resolveCurrentPath()]
+            ['path' => Paginator::resolveCurrentPath()]
         );
 
         return view('livewire.management.security-logs', [
-            'logs' => $paginator
+            'logs' => $paginator,
         ]);
     }
 }

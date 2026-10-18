@@ -2,20 +2,26 @@
 
 namespace App\Exports;
 
+use App\Models\CashTransaction;
+use App\Models\Supplier;
 use App\Models\Transaction;
 use Carbon\Carbon;
 use Maatwebsite\Excel\Concerns\FromCollection;
+use Maatwebsite\Excel\Concerns\WithCustomStartCell;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
-use Maatwebsite\Excel\Concerns\WithTitle;
 use Maatwebsite\Excel\Concerns\WithStyles;
-use Maatwebsite\Excel\Concerns\WithCustomStartCell;
+use Maatwebsite\Excel\Concerns\WithTitle;
+use PhpOffice\PhpSpreadsheet\Style\Border;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class SupplierReportExport implements FromCollection, WithHeadings, WithMapping, WithTitle, WithStyles, WithCustomStartCell
+class SupplierReportExport implements FromCollection, WithCustomStartCell, WithHeadings, WithMapping, WithStyles, WithTitle
 {
     protected $dateFrom;
+
     protected $dateTo;
+
     protected $supplierId;
 
     public function __construct($dateFrom, $dateTo, $supplierId)
@@ -29,13 +35,13 @@ class SupplierReportExport implements FromCollection, WithHeadings, WithMapping,
     {
         $activeJurusanId = session('active_jurusan_id');
 
-        $suppliersQuery = \App\Models\Supplier::query();
+        $suppliersQuery = Supplier::query();
         if ($this->supplierId) {
             $suppliersQuery->where('id', $this->supplierId);
         }
 
         $reports = $suppliersQuery->get()->map(function ($supplier) use ($activeJurusanId) {
-            $lastSettlement = \App\Models\CashTransaction::forReporting()
+            $lastSettlement = CashTransaction::forReporting()
                 ->where('reference', 'like', "SETTLE-SUPPLIER-{$supplier->id}-%")
                 ->orderBy('created_at', 'desc')
                 ->first();
@@ -51,7 +57,7 @@ class SupplierReportExport implements FromCollection, WithHeadings, WithMapping,
                 $trxQuery->where('transactions.jurusan_id', $activeJurusanId);
             }
 
-            $trxQuery->whereBetween('transactions.transacted_at', [$this->dateFrom . ' 00:00:00', $this->dateTo . ' 23:59:59']);
+            $trxQuery->whereBetween('transactions.transacted_at', [$this->dateFrom.' 00:00:00', $this->dateTo.' 23:59:59']);
 
             $trxSummary = $trxQuery->selectRaw('
                     SUM(transactions.quantity) as total_qty,
@@ -61,7 +67,7 @@ class SupplierReportExport implements FromCollection, WithHeadings, WithMapping,
                 ')
                 ->first();
 
-            if (!$trxSummary || $trxSummary->total_qty <= 0) {
+            if (! $trxSummary || $trxSummary->total_qty <= 0) {
                 return null;
             }
 
@@ -115,18 +121,18 @@ class SupplierReportExport implements FromCollection, WithHeadings, WithMapping,
         $sheet->setCellValue('A1', 'LAPORAN BAGI HASIL SUPPLIER - LABANTIK');
         $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(16)->getColor()->setARGB('FF1E40AF');
 
-        $period = Carbon::parse($this->dateFrom)->translatedFormat('d M Y') . ' - ' . Carbon::parse($this->dateTo)->translatedFormat('d M Y');
+        $period = Carbon::parse($this->dateFrom)->translatedFormat('d M Y').' - '.Carbon::parse($this->dateTo)->translatedFormat('d M Y');
         $sheet->mergeCells('A2:B2');
-        $sheet->setCellValue('A2', 'Periode: ' . $period);
+        $sheet->setCellValue('A2', 'Periode: '.$period);
 
         $sheet->mergeCells('A3:B3');
-        $sheet->setCellValue('A3', 'Dicetak Pada: ' . now()->translatedFormat('d M Y H:i:s'));
+        $sheet->setCellValue('A3', 'Dicetak Pada: '.now()->translatedFormat('d M Y H:i:s'));
 
         // Header style
         $sheet->getStyle('A5:E5')->getFont()->setBold(true)->getColor()->setARGB('FFFFFFFF');
-        $sheet->getStyle('A5:E5')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+        $sheet->getStyle('A5:E5')->getFill()->setFillType(Fill::FILL_SOLID)
             ->getStartColor()->setARGB('FF2563EB');
-        
+
         $sheet->getColumnDimension('A')->setWidth(30);
         $sheet->getColumnDimension('B')->setWidth(15);
         $sheet->getColumnDimension('C')->setWidth(25);
@@ -136,13 +142,13 @@ class SupplierReportExport implements FromCollection, WithHeadings, WithMapping,
         // Number format
         $lastRow = $sheet->getHighestRow();
         if ($lastRow >= 6) {
-            $sheet->getStyle('B6:B' . $lastRow)->getNumberFormat()->setFormatCode('#,##0');
-            $sheet->getStyle('C6:E' . $lastRow)->getNumberFormat()->setFormatCode('#,##0');
+            $sheet->getStyle('B6:B'.$lastRow)->getNumberFormat()->setFormatCode('#,##0');
+            $sheet->getStyle('C6:E'.$lastRow)->getNumberFormat()->setFormatCode('#,##0');
         }
 
         // Borders
         if ($lastRow >= 5) {
-            $sheet->getStyle('A5:E' . $lastRow)->getBorders()->getAllBorders()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
+            $sheet->getStyle('A5:E'.$lastRow)->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
         }
     }
 }

@@ -35,9 +35,9 @@ class MerchantController extends Controller
             ->get();
 
         return response()->json([
-            'status'  => 'success',
+            'status' => 'success',
             'message' => 'Daftar merchant kantin TEFA berhasil dimuat',
-            'data'    => MerchantResource::collection($merchants),
+            'data' => MerchantResource::collection($merchants),
         ]);
     }
 
@@ -66,16 +66,16 @@ class MerchantController extends Controller
 
         if (! $merchant) {
             return response()->json([
-                'status'  => 'error',
+                'status' => 'error',
                 'message' => 'Merchant tidak ditemukan.',
-                'data'    => null,
+                'data' => null,
             ], 404);
         }
 
         return response()->json([
-            'status'  => 'success',
+            'status' => 'success',
             'message' => 'Daftar produk menu TEFA berhasil dimuat',
-            'data'    => new MerchantWithProductsResource($merchant),
+            'data' => new MerchantWithProductsResource($merchant),
         ]);
     }
 }

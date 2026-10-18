@@ -1,37 +1,25 @@
-<div class="py-10">
-    <!-- Header Section -->
-    <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
-        <div>
-            <h2 class="text-2xl font-bold uppercase tracking-tight text-primary-blue dark:text-white">
-                Hutang & Kembalian
-            </h2>
-            <p class="text-gray-400 font-bold uppercase tracking-widest text-[10px] mt-1">
-                Monitoring Piutang Pembeli & Hutang Kembalian
-            </p>
-        </div>
+<div class="p-4 sm:p-6">
+    <x-hub-tabs hub="keuangan" title="Hutang & Kembalian" subtitle="Monitoring piutang pembeli (kasbon), tanggungan kembalian, dan hutang operasional toko." />
 
-        <div class="flex flex-wrap items-center gap-3">
-            <div class="bg-white dark:bg-gray-800 p-1 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm flex">
-                <button 
-                    wire:click="setTab('debt')"
-                    class="px-6 py-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all {{ $activeTab === 'debt' ? 'bg-primary-blue text-white shadow-lg shadow-blue-900/20' : 'text-gray-400 hover:text-primary-blue' }}"
-                >
-                    Hutang Pembeli
-                </button>
-                <button 
-                    wire:click="setTab('change')"
-                    class="px-6 py-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all {{ $activeTab === 'change' ? 'bg-primary-red text-white shadow-lg shadow-red-900/20' : 'text-gray-400 hover:text-primary-red' }}"
-                >
-                    Belum Kembalian
-                </button>
-                <button 
-                    wire:click="setTab('store_debt')"
-                    class="px-6 py-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all {{ $activeTab === 'store_debt' ? 'bg-amber-500 text-white shadow-lg shadow-amber-900/20' : 'text-gray-400 hover:text-amber-500' }}"
-                >
-                    Hutang Toko
-                </button>
-            </div>
-        </div>
+    <div class="flex items-center gap-1.5 mb-6 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl w-fit overflow-x-auto no-scrollbar">
+        <button 
+            wire:click="setTab('debt')"
+            class="px-4 py-1.5 rounded-lg text-xs font-bold transition-all {{ $activeTab === 'debt' ? 'bg-white dark:bg-slate-900 text-blue-600 dark:text-blue-400 shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white' }}"
+        >
+            Hutang Pembeli (Piutang)
+        </button>
+        <button 
+            wire:click="setTab('change')"
+            class="px-4 py-1.5 rounded-lg text-xs font-bold transition-all {{ $activeTab === 'change' ? 'bg-white dark:bg-slate-900 text-rose-600 dark:text-rose-400 shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white' }}"
+        >
+            Belum Kembalian
+        </button>
+        <button 
+            wire:click="setTab('store_debt')"
+            class="px-4 py-1.5 rounded-lg text-xs font-bold transition-all {{ $activeTab === 'store_debt' ? 'bg-white dark:bg-slate-900 text-amber-600 dark:text-amber-400 shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white' }}"
+        >
+            Hutang Toko
+        </button>
     </div>
 
     <!-- Summary Stats -->

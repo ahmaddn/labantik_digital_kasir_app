@@ -2,21 +2,27 @@
 
 namespace App\Livewire\Reports;
 
+use App\Exports\InventoryReportExport;
 use App\Models\Product;
+use App\Models\ProductCategory;
 use App\Models\StockEntry;
 use App\Models\Transaction;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Maatwebsite\Excel\Facades\Excel;
 
 class InventoryReport extends Component
 {
     use WithPagination;
 
     public $selectedDate;
+
     public $search = '';
+
     public $filterCategory = '';
+
     public $filterStatus = '';
 
     protected $queryString = [
@@ -26,9 +32,10 @@ class InventoryReport extends Component
         'selectedDate' => ['except' => ''],
     ];
 
-
     public $editingProductId = null;
+
     public $newOpeningStock;
+
     public $newClosingStock;
 
     public function mount($date = null)
@@ -88,11 +95,11 @@ class InventoryReport extends Component
         $this->resetPage();
     }
 
-
     public function exportExcel()
     {
-        $filename = 'Laporan_Stok_' . Carbon::parse($this->selectedDate)->format('Ymd') . '.xlsx';
-        return \Maatwebsite\Excel\Facades\Excel::download(new \App\Exports\InventoryReportExport($this->selectedDate, $this->search, $this->filterCategory), $filename);
+        $filename = 'Laporan_Stok_'.Carbon::parse($this->selectedDate)->format('Ymd').'.xlsx';
+
+        return Excel::download(new InventoryReportExport($this->selectedDate, $this->search, $this->filterCategory), $filename);
     }
 
     public function render()
@@ -102,23 +109,23 @@ class InventoryReport extends Component
 
         $query = Product::with('category')
             ->where('is_active', true)
-            ->when($activeJurusanId, function($q) use ($activeJurusanId) {
+            ->when($activeJurusanId, function ($q) use ($activeJurusanId) {
                 $q->where('jurusan_id', $activeJurusanId);
             })
             ->select('products.*')
-            ->selectSub(function($q) use ($selectedDate) {
+            ->selectSub(function ($q) use ($selectedDate) {
                 $q->from('stock_entries')
                     ->select('opening_stock')
                     ->whereColumn('product_id', 'products.id')
                     ->where('date', $selectedDate);
             }, 'opening_stock')
-            ->selectSub(function($q) use ($selectedDate) {
+            ->selectSub(function ($q) use ($selectedDate) {
                 $q->from('stock_entries')
                     ->select('closing_stock')
                     ->whereColumn('product_id', 'products.id')
                     ->where('date', $selectedDate);
             }, 'closing_stock')
-            ->selectSub(function($q) use ($selectedDate) {
+            ->selectSub(function ($q) use ($selectedDate) {
                 $q->from('transactions')
                     ->selectRaw('COALESCE(SUM(quantity), 0)')
                     ->whereColumn('product_id', 'products.id')
@@ -126,7 +133,7 @@ class InventoryReport extends Component
             }, 'total_sold');
 
         if ($this->search) {
-            $query->where('name', 'like', '%' . $this->search . '%');
+            $query->where('name', 'like', '%'.$this->search.'%');
         }
 
         if ($this->filterCategory) {
@@ -187,7 +194,7 @@ class InventoryReport extends Component
                 $join->on('products.id', '=', 'stock_entries.product_id')
                     ->where('stock_entries.date', '=', $this->selectedDate);
             })
-            ->leftJoin(DB::raw('(SELECT product_id, SUM(quantity) as total_sold FROM transactions WHERE DATE(transacted_at) = "' . $this->selectedDate . '" GROUP BY product_id) as daily_sales'), 'products.id', '=', 'daily_sales.product_id')
+            ->leftJoin(DB::raw('(SELECT product_id, SUM(quantity) as total_sold FROM transactions WHERE DATE(transacted_at) = "'.$this->selectedDate.'" GROUP BY product_id) as daily_sales'), 'products.id', '=', 'daily_sales.product_id')
             ->where('products.is_active', true);
 
         if ($activeJurusanId) {
@@ -205,18 +212,20 @@ class InventoryReport extends Component
             $expected = $d->opening - $d->sold;
             $diff = $d->closing - $expected;
             $totalDiscrepancyGlobal += $diff;
-            if ($diff != 0) $itemsWithIssueGlobal++;
+            if ($diff != 0) {
+                $itemsWithIssueGlobal++;
+            }
         }
 
         return view('livewire.reports.inventory-report', [
             'reportData' => $reportData,
             'products' => $products,
-            'categories' => \App\Models\ProductCategory::orderBy('name')->get(),
+            'categories' => ProductCategory::orderBy('name')->get(),
             'totalSold' => $totalSoldGlobal,
 
             'totalDiscrepancy' => $totalDiscrepancyGlobal,
             'itemsWithIssue' => $itemsWithIssueGlobal,
-            'dateFormatted' => Carbon::parse($this->selectedDate)->translatedFormat('d F Y')
+            'dateFormatted' => Carbon::parse($this->selectedDate)->translatedFormat('d F Y'),
         ])->layout('layouts.app', ['title' => 'Laporan Selisih Stok']);
     }
 }

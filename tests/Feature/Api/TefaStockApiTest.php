@@ -2,8 +2,6 @@
 
 namespace Tests\Feature\Api;
 
-use App\Models\Merchant;
-use App\Models\Product;
 use App\Models\TefaApiKey;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -15,7 +13,7 @@ class TefaStockApiTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         TefaApiKey::create([
             'name' => 'Dompet App Key',
             'api_key' => 'tefa_test_key_123456789',
@@ -28,7 +26,7 @@ class TefaStockApiTest extends TestCase
         $response = $this->getJson('/api/v1/tefa/merchants');
 
         $response->assertStatus(401)
-                 ->assertJson(['status' => 'error']);
+            ->assertJson(['status' => 'error']);
     }
 
     public function test_api_key_authentication_success(): void
@@ -38,6 +36,6 @@ class TefaStockApiTest extends TestCase
         ])->getJson('/api/v1/tefa/merchants');
 
         $response->assertStatus(200)
-                 ->assertJson(['status' => 'success']);
+            ->assertJson(['status' => 'success']);
     }
 }

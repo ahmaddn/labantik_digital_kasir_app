@@ -16,10 +16,10 @@ class MerchantWithProductsResource extends JsonResource
 
         return [
             'tefa_merchant_id' => $this->id,
-            'store_name'       => $this->name,
-            'pic_name'         => $picName,
-            'stand_location'   => $this->stand_location,
-            'products'         => ProductResource::collection($this->whenLoaded('products')),
+            'store_name' => $this->name,
+            'pic_name' => $picName,
+            'stand_location' => $this->stand_location,
+            'products' => ProductResource::collection($this->whenLoaded('products')),
         ];
     }
 }

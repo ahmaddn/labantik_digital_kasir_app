@@ -5,7 +5,9 @@ namespace App\Livewire\History;
 use App\Models\Jurusan;
 use App\Models\StockEntry;
 use App\Models\Transaction;
+use App\Services\DompetSiswaApiService;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -30,14 +32,14 @@ class Transactions extends Component
 
     public $successMessage = '';
 
-    public function mount(\App\Services\DompetSiswaApiService $apiService)
+    public function mount(DompetSiswaApiService $apiService)
     {
         // Realtime automatic sync dari Server Dompet Siswa setiap kali Halaman Riwayat Transaksi dibuka
         try {
             $activeJurusanId = session('active_jurusan_id') ?: ($this->filterJurusan ?: null);
             $apiService->syncRealtimeTransactions($activeJurusanId);
         } catch (\Throwable $e) {
-            \Illuminate\Support\Facades\Log::warning('Auto-sync Dompet Siswa pada Riwayat Transaksi skipped: ' . $e->getMessage());
+            Log::warning('Auto-sync Dompet Siswa pada Riwayat Transaksi skipped: '.$e->getMessage());
         }
     }
 
@@ -255,10 +257,10 @@ class Transactions extends Component
         } elseif ($this->search) {
             $query->whereIn('reference', Transaction::query()
                 ->select('reference')
-                ->where('reference', 'like', '%' . $this->search . '%')
-                ->orWhere('buyer_name', 'like', '%' . $this->search . '%')
+                ->where('reference', 'like', '%'.$this->search.'%')
+                ->orWhere('buyer_name', 'like', '%'.$this->search.'%')
                 ->orWhereHas('product', function ($pq) {
-                    $pq->where('name', 'like', '%' . $this->search . '%');
+                    $pq->where('name', 'like', '%'.$this->search.'%');
                 })
             );
         }
@@ -268,7 +270,7 @@ class Transactions extends Component
         }
 
         if ($this->filterMonth) {
-            $date = Carbon::parse($this->filterMonth . '-01');
+            $date = Carbon::parse($this->filterMonth.'-01');
             $query->whereYear('transacted_at', $date->year)
                 ->whereMonth('transacted_at', $date->month);
         } elseif ($this->filterDate) {
@@ -286,19 +288,19 @@ class Transactions extends Component
             'all' => ['count' => $groupedSub->count(), 'total' => $groupedSub->sum('sum_paid_total')],
             'cash' => [
                 'count' => $groupedSub->whereIn('p_method', ['cash', '', null])->count(),
-                'total' => $groupedSub->whereIn('p_method', ['cash', '', null])->sum('sum_paid_total')
+                'total' => $groupedSub->whereIn('p_method', ['cash', '', null])->sum('sum_paid_total'),
             ],
             'transfer' => [
                 'count' => $groupedSub->where('p_method', 'transfer')->count(),
-                'total' => $groupedSub->where('p_method', 'transfer')->sum('sum_paid_total')
+                'total' => $groupedSub->where('p_method', 'transfer')->sum('sum_paid_total'),
             ],
             'qris' => [
                 'count' => $groupedSub->where('p_method', 'qris')->count(),
-                'total' => $groupedSub->where('p_method', 'qris')->sum('sum_paid_total')
+                'total' => $groupedSub->where('p_method', 'qris')->sum('sum_paid_total'),
             ],
             'dompet_digital' => [
                 'count' => $groupedSub->where('p_method', 'dompet_digital')->count(),
-                'total' => $groupedSub->where('p_method', 'dompet_digital')->sum('sum_paid_total')
+                'total' => $groupedSub->where('p_method', 'dompet_digital')->sum('sum_paid_total'),
             ],
         ];
 

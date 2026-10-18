@@ -1,9 +1,7 @@
 <div class="p-6">
-    <div class="flex flex-col md:flex-row md:items-center justify-between mb-10 gap-6">
-        <div>
-            <h1 class="text-4xl font-bold uppercase tracking-tight text-primary-blue dark:text-primary-blue-light">Rekap Tahunan</h1>
-            <p class="text-gray-400 font-bold text-xs uppercase tracking-[0.2em] italic">Performansi Keuangan Per Tahun</p>
-        </div>
+    <x-hub-tabs hub="laporan" title="Rekap Tahunan" subtitle="Performansi keuangan dan laba TEFA akumulasi per tahun." />
+
+    <div class="flex flex-col md:flex-row md:items-center justify-end mb-8 gap-6">
         
         <div class="flex flex-wrap items-center gap-4">
             <div class="flex items-center bg-white dark:bg-gray-800 px-6 py-3 rounded-2xl shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-800 transition-all">
@@ -193,7 +191,7 @@
                 </tbody>
             </table>
         </div>
-
+    </div>
 
     @else
     <div class="bg-white dark:bg-gray-800 rounded-[4rem] p-32 border border-gray-100 dark:border-gray-700 text-center flex flex-col items-center shadow-xl shadow-blue-900/5">

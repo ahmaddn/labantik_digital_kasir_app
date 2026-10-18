@@ -2,17 +2,15 @@
     <!-- Google Fonts Loader for Customizer -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Outfit:wght@400;600;800&family=Plus+Jakarta+Sans:wght@400;600;800&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
 
-    <div class="flex flex-col md:flex-row md:items-center justify-between mb-10 gap-6">
-        <div>
-            <h1 class="text-4xl font-bold uppercase tracking-tight text-primary-blue dark:text-primary-blue-light">Kustomisasi Tampilan</h1>
-            <p class="text-gray-400 font-bold text-xs uppercase tracking-[0.2em] italic">Desain Identitas Visual Unit TEFA</p>
-        </div>
+    <div class="mb-6">
+        <h1 class="text-xl sm:text-2xl font-black uppercase tracking-tight text-slate-900 dark:text-white font-outfit">Kustomisasi Tampilan</h1>
+        <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Pengaturan identitas visual, logo unit TEFA, dan kustomisasi branding nota cetak.</p>
     </div>
 
-    <div class="grid grid-cols-1 xl:grid-cols-12 gap-10">
+    <div class="grid grid-cols-1 xl:grid-cols-12 gap-6">
         <!-- Settings Panel -->
-        <div class="xl:col-span-5 space-y-8">
-            <div class="bg-white dark:bg-gray-800 rounded-[3rem] p-5 md:p-10 shadow-2xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700">
+        <div class="xl:col-span-5 space-y-6">
+            <div class="bg-white dark:bg-slate-900 rounded-2xl p-5 md:p-6 shadow-sm border border-slate-200 dark:border-slate-800">
                 
                 <!-- Jurusan Selection (Locked if not Superadmin) -->
                 <div class="mb-8">

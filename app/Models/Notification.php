@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Database\Eloquent\Model;
 
 class Notification extends Model
 {
@@ -15,7 +15,7 @@ class Notification extends Model
         'body',
         'type',
         'action_url',
-        'is_read'
+        'is_read',
     ];
 
     public function user()

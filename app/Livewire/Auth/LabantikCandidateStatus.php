@@ -8,18 +8,20 @@ use Livewire\Component;
 class LabantikCandidateStatus extends Component
 {
     public ?LabantikRegistration $candidate = null;
+
     public string $waGroupLink = '';
 
     public function mount()
     {
         $candidateId = session('labantik_candidate_id');
-        if (!$candidateId) {
+        if (! $candidateId) {
             return redirect()->route('labantik.login');
         }
 
         $this->candidate = LabantikRegistration::find($candidateId);
-        if (!$this->candidate) {
+        if (! $this->candidate) {
             session()->forget('labantik_candidate_id');
+
             return redirect()->route('labantik.login');
         }
 
@@ -30,6 +32,7 @@ class LabantikCandidateStatus extends Component
     public function logoutCandidate()
     {
         session()->forget('labantik_candidate_id');
+
         return redirect()->route('labantik.login');
     }
 

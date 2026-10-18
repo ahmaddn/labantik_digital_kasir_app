@@ -2,15 +2,15 @@
 
 namespace App\Exports;
 
-use App\Models\LabantikRegistration;
 use Maatwebsite\Excel\Concerns\FromCollection;
+use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
-use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 
-class LabantikCandidatesExport implements FromCollection, WithHeadings, WithMapping, ShouldAutoSize
+class LabantikCandidatesExport implements FromCollection, ShouldAutoSize, WithHeadings, WithMapping
 {
     protected $candidates;
+
     private $index = 0;
 
     public function __construct($candidates)
@@ -42,6 +42,7 @@ class LabantikCandidatesExport implements FromCollection, WithHeadings, WithMapp
     public function map($candidate): array
     {
         $this->index++;
+
         return [
             $this->index,
             $candidate->created_at->setTimezone('Asia/Jakarta')->format('d/m/Y H:i'),

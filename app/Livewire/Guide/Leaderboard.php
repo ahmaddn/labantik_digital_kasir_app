@@ -2,16 +2,19 @@
 
 namespace App\Livewire\Guide;
 
-use App\Models\User;
 use App\Models\CashierAttendance;
 use App\Models\CashierTaskSubmission;
 use App\Models\Transaction;
+use App\Models\User;
+use Carbon\Carbon;
 use Livewire\Component;
 
 class Leaderboard extends Component
 {
     public $selectedUserId = null;
+
     public $showUserDetailModal = false;
+
     public $period = 'weekly'; // 'weekly' or 'monthly'
 
     public function setPeriod($period)
@@ -45,10 +48,15 @@ class Leaderboard extends Component
             default => now()->endOfWeek(),
         };
 
-        // Filter OUT users who have manager/admin roles (hanya kasir murni)
-        $cashierUsers = User::whereDoesntHave('roles', function ($query) {
-            $query->whereIn('roles.name', ['superadmin', 'admin', 'pengelola_jurusan', 'pengelola']);
-        })->get();
+        // Ambil kasir murni, atau sertakan pengguna yang memiliki hak akses kasir jika kasir murni belum ada
+        $pureCashiers = User::whereHas('roles', fn ($q) => $q->where('roles.name', 'kasir'))
+            ->whereDoesntHave('roles', function ($query) {
+                $query->whereIn('roles.name', ['superadmin', 'admin', 'pengelola_jurusan', 'pengelola']);
+            })->get();
+
+        $cashierUsers = $pureCashiers->isNotEmpty()
+            ? $pureCashiers
+            : User::whereHas('roles', fn ($q) => $q->where('roles.name', 'kasir'))->get();
 
         // Calculate dynamic period score for each cashier user
         $leaderboardCollection = $cashierUsers->map(function ($u) use ($startDate, $endDate) {
@@ -68,6 +76,7 @@ class Leaderboard extends Component
                 ->get();
             $taskPts = $approvedSubmissions->sum(function ($sub) {
                 $priority = $sub->assignment->taskDefinition->priority ?? 'medium';
+
                 return match ($priority) {
                     'low' => 5,
                     'high' => 20,
@@ -82,9 +91,16 @@ class Leaderboard extends Component
                 ->get();
             $attPts = $attendances->sum(function ($att) {
                 $pts = 0;
-                if ($att->clock_in) $pts += 15;
-                if ($att->clock_out) $pts += 15;
-                if ($att->clock_out_status === 'overtime' || $att->clock_out_status === 'on_time') $pts += 10;
+                if ($att->clock_in) {
+                    $pts += 15;
+                }
+                if ($att->clock_out) {
+                    $pts += 15;
+                }
+                if ($att->clock_out_status === 'overtime' || $att->clock_out_status === 'on_time') {
+                    $pts += 10;
+                }
+
                 return $pts;
             });
 
@@ -111,50 +127,54 @@ class Leaderboard extends Component
         }
 
         $periodLabel = $this->period === 'monthly' ? 'Bulan Ini' : 'Minggu Ini';
+        $maxScore = $leaderboardCollection->max('total_score') ?? 0;
+        $hasActiveScores = $maxScore > 0;
 
         // Dynamic Motivation Message & Badge based on Rank
         $motivation = [
-            'title' => 'Kerja Bagus!',
-            'message' => 'Terus pertahankan semangat dan kualitas kerja Anda!',
-            'badge' => 'Pejuang Kasir',
-            'type' => 'info'
+            'title' => 'Belum Ada Poin Terekap',
+            'message' => 'Belum ada aktivitas transaksi POS, checklist tugas harian, atau presensi shift yang terekap pada periode '.strtolower($periodLabel).'.',
+            'badge' => 'Menunggu Aktivitas',
+            'type' => 'neutral',
         ];
 
-        if ($currentUserRank === 1) {
-            $motivation = [
-                'title' => 'Luar Biasa, ' . $currentUser->name . '!',
-                'message' => 'Anda memimpin papan skor di Posisi Pertama! Pertahankan tahta juara Anda ' . strtolower($periodLabel) . '!',
-                'badge' => 'Juara 1 Utama',
-                'type' => 'gold'
-            ];
-        } elseif ($currentUserRank === 2) {
-            $motivation = [
-                'title' => 'Hebat Sekali, ' . $currentUser->name . '!',
-                'message' => 'Anda berada di Peringkat 2! Sedikit lagi dorongan poin untuk merebut posisi puncak!',
-                'badge' => 'Runner Up (Peringkat 2)',
-                'type' => 'silver'
-            ];
-        } elseif ($currentUserRank === 3) {
-            $motivation = [
-                'title' => 'Mantap, ' . $currentUser->name . '!',
-                'message' => 'Selamat! Anda mengamankan Peringkat 3 dan berada di jajaran Top 3 Kasir Terbaik!',
-                'badge' => 'Top 3 Podiums',
-                'type' => 'bronze'
-            ];
-        } elseif ($currentUserRank && $currentUserRank <= 5) {
-            $motivation = [
-                'title' => 'Kerja Bagus, ' . $currentUser->name . '!',
-                'message' => 'Anda berada di Peringkat ' . $currentUserRank . '! Tembus 3 besar dengan menyelesaikan lebih banyak transaksi & tugas!',
-                'badge' => 'Top 5 Elite',
-                'type' => 'purple'
-            ];
-        } else {
-            $motivation = [
-                'title' => 'Ayo Semangat, ' . $currentUser->name . '!',
-                'message' => 'Anda saat ini berada di Peringkat ke-' . ($currentUserRank ?? '-') . ' dari ' . $totalUsers . ' kasir. Jangan menyerah, tingkatkan terus transaksi & tugas untuk masuk ke 3 besar!',
-                'badge' => 'Tetap Semangat',
-                'type' => 'danger'
-            ];
+        if ($hasActiveScores) {
+            if ($currentUserRank === 1) {
+                $motivation = [
+                    'title' => 'Luar Biasa, '.$currentUser->name.'!',
+                    'message' => 'Anda memimpin papan skor di Posisi Pertama! Pertahankan tahta juara Anda '.strtolower($periodLabel).'!',
+                    'badge' => 'Juara 1 Utama',
+                    'type' => 'gold',
+                ];
+            } elseif ($currentUserRank === 2) {
+                $motivation = [
+                    'title' => 'Hebat Sekali, '.$currentUser->name.'!',
+                    'message' => 'Anda berada di Peringkat 2! Sedikit lagi dorongan poin untuk merebut posisi puncak!',
+                    'badge' => 'Runner Up (Peringkat 2)',
+                    'type' => 'silver',
+                ];
+            } elseif ($currentUserRank === 3) {
+                $motivation = [
+                    'title' => 'Mantap, '.$currentUser->name.'!',
+                    'message' => 'Selamat! Anda mengamankan Peringkat 3 dan berada di jajaran Top 3 Kasir Terbaik!',
+                    'badge' => 'Top 3 Podiums',
+                    'type' => 'bronze',
+                ];
+            } elseif ($currentUserRank && $currentUserRank <= 5) {
+                $motivation = [
+                    'title' => 'Kerja Bagus, '.$currentUser->name.'!',
+                    'message' => 'Anda berada di Peringkat '.$currentUserRank.'! Tembus 3 besar dengan menyelesaikan lebih banyak transaksi & tugas!',
+                    'badge' => 'Top 5 Elite',
+                    'type' => 'purple',
+                ];
+            } else {
+                $motivation = [
+                    'title' => 'Ayo Semangat, '.$currentUser->name.'!',
+                    'message' => 'Anda saat ini berada di Peringkat ke-'.($currentUserRank ?? '-').' dari '.$totalUsers.' kasir. Tingkatkan terus transaksi & tugas untuk masuk ke 3 besar!',
+                    'badge' => 'Tetap Semangat',
+                    'type' => 'danger',
+                ];
+            }
         }
 
         // Details calculation for modal audit
@@ -193,6 +213,7 @@ class Leaderboard extends Component
                     $taskCount = $approvedSubmissions->count();
                     $taskPts = $approvedSubmissions->sum(function ($sub) {
                         $priority = $sub->assignment->taskDefinition->priority ?? 'medium';
+
                         return match ($priority) {
                             'low' => 5,
                             'high' => 20,
@@ -208,9 +229,16 @@ class Leaderboard extends Component
                     $attCount = $attendances->count();
                     $attPts = $attendances->sum(function ($att) {
                         $pts = 0;
-                        if ($att->clock_in) $pts += 15;
-                        if ($att->clock_out) $pts += 15;
-                        if ($att->clock_out_status === 'overtime' || $att->clock_out_status === 'on_time') $pts += 10;
+                        if ($att->clock_in) {
+                            $pts += 15;
+                        }
+                        if ($att->clock_out) {
+                            $pts += 15;
+                        }
+                        if ($att->clock_out_status === 'overtime' || $att->clock_out_status === 'on_time') {
+                            $pts += 10;
+                        }
+
                         return $pts;
                     });
 
@@ -244,13 +272,14 @@ class Leaderboard extends Component
                         'critical' => 30,
                         default => 10,
                     };
+
                     return [
                         'type' => 'Tugas',
-                        'title' => 'Penyelesaian Tugas: ' . ($def->task_name ?? 'Tugas Kasir'),
+                        'title' => 'Penyelesaian Tugas: '.($def->task_name ?? 'Tugas Kasir'),
                         'date' => $sub->reviewed_at ?? $sub->submitted_at,
-                        'points' => '+' . $pts . ' Pts',
-                        'badge' => 'Tugas ' . ucfirst($priority),
-                        'badge_color' => 'bg-indigo-50 text-indigo-600 border-indigo-200 dark:bg-indigo-500/20 dark:text-indigo-300 dark:border-indigo-500/30'
+                        'points' => '+'.$pts.' Pts',
+                        'badge' => 'Tugas '.ucfirst($priority),
+                        'badge_color' => 'bg-indigo-50 text-indigo-600 border-indigo-200 dark:bg-indigo-500/20 dark:text-indigo-300 dark:border-indigo-500/30',
                     ];
                 });
 
@@ -260,30 +289,39 @@ class Leaderboard extends Component
 
                 $attendanceLogs = $attendances->map(function ($att) {
                     $pts = 0;
-                    if ($att->clock_in) $pts += 15;
-                    if ($att->clock_out) $pts += 15;
-                    if ($att->clock_out_status === 'overtime' || $att->clock_out_status === 'on_time') $pts += 10;
+                    if ($att->clock_in) {
+                        $pts += 15;
+                    }
+                    if ($att->clock_out) {
+                        $pts += 15;
+                    }
+                    if ($att->clock_out_status === 'overtime' || $att->clock_out_status === 'on_time') {
+                        $pts += 10;
+                    }
 
                     return [
                         'type' => 'Absensi',
-                        'title' => 'Sesi Laci & Absensi Shift (' . \Carbon\Carbon::parse($att->date)->format('d M Y') . ')',
+                        'title' => 'Sesi Laci & Absensi Shift ('.Carbon::parse($att->date)->format('d M Y').')',
                         'date' => $att->clock_out ?? $att->clock_in ?? $att->created_at,
-                        'points' => '+' . $pts . ' Pts',
+                        'points' => '+'.$pts.' Pts',
                         'badge' => 'Absensi Shift',
-                        'badge_color' => 'bg-emerald-50 text-emerald-600 border-emerald-200 dark:bg-emerald-500/20 dark:text-emerald-300 dark:border-emerald-500/30'
+                        'badge_color' => 'bg-emerald-50 text-emerald-600 border-emerald-200 dark:bg-emerald-500/20 dark:text-emerald-300 dark:border-emerald-500/30',
                     ];
                 });
 
-                $posSummaryLog = collect([
-                    [
-                        'type' => 'POS Penjualan',
-                        'title' => 'Akumulasi Penjualan Kasir (' . $userBreakdown[$this->period]['total_transactions'] . ' Transaksi)',
-                        'date' => now(),
-                        'points' => '+' . $userBreakdown[$this->period]['pos_points'] . ' Pts',
-                        'badge' => 'Transaksi POS',
-                        'badge_color' => 'bg-blue-50 text-blue-600 border-blue-200 dark:bg-blue-500/20 dark:text-blue-300 dark:border-blue-500/30'
-                    ]
-                ]);
+                $posSummaryLog = collect();
+                if (($userBreakdown[$this->period]['total_transactions'] ?? 0) > 0) {
+                    $posSummaryLog = collect([
+                        [
+                            'type' => 'POS Penjualan',
+                            'title' => 'Akumulasi Penjualan Kasir ('.$userBreakdown[$this->period]['total_transactions'].' Transaksi)',
+                            'date' => now(),
+                            'points' => '+'.$userBreakdown[$this->period]['pos_points'].' Pts',
+                            'badge' => 'Transaksi POS',
+                            'badge_color' => 'bg-blue-50 text-blue-600 border-blue-200 dark:bg-blue-500/20 dark:text-blue-300 dark:border-blue-500/30',
+                        ],
+                    ]);
+                }
 
                 $recentLogs = $taskLogs->concat($attendanceLogs)->concat($posSummaryLog)
                     ->sortByDesc('date')
@@ -291,15 +329,28 @@ class Leaderboard extends Component
             }
         }
 
+        $chartData = $leaderboardCollection->take(8)->map(function ($u) {
+            return [
+                'name' => strlen($u->name) > 14 ? substr($u->name, 0, 12).'..' : $u->name,
+                'full_name' => $u->name,
+                'pos' => (int) $u->period_pos_pts,
+                'task' => (int) $u->period_task_pts,
+                'attendance' => (int) $u->period_att_pts,
+                'total' => (int) $u->total_score,
+            ];
+        })->values()->toArray();
+
         return view('livewire.guide.leaderboard', [
+            'period' => $this->period,
             'leaderboard' => $leaderboardCollection,
             'currentUserRank' => $currentUserRank,
+            'hasActiveScores' => $hasActiveScores,
             'motivation' => $motivation,
             'detailUser' => $detailUser,
             'userBreakdown' => $userBreakdown,
             'recentLogs' => $recentLogs,
-            'isManager' => in_array(session('active_role_name'), ['superadmin', 'pengelola_jurusan'])
+            'chartData' => $chartData,
+            'isManager' => in_array(session('active_role_name'), ['superadmin', 'pengelola_jurusan']),
         ])->layout('layouts.app', ['title' => 'Sistem Peringkat & Poin']);
     }
 }
-

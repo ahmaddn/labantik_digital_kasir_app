@@ -2,10 +2,17 @@
 
 namespace App\Livewire\Finance;
 
+use App\Exports\CashTransactionsExport;
+use App\Models\CashCategory;
 use App\Models\CashTransaction;
+use App\Models\Jurusan;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Maatwebsite\Excel\Facades\Excel;
 
 class CashManagement extends Component
 {
@@ -13,52 +20,81 @@ class CashManagement extends Component
 
     // Filters
     public string $filterMonth = '';
+
     public string $filterType = 'weekly';
+
     public string $filterWeek = 'this_week';
+
     public string $activeTab = 'cumulative';
 
     // Form inputs
     public string $date = '';
+
     public string $cashType = 'modal';
+
     public $cashCategoryId = '';
+
     public string $newCategoryName = '';
+
     public string $type = 'expense';
+
     public $amount;
+
     public string $description = '';
 
     // Split details
     public $amountModal;
+
     public $amountProfit;
+
     public float $selectedCategoryModalBalance = 0;
+
     public float $selectedCategoryProfitBalance = 0;
 
     // Modal state
     public bool $showModal = false;
+
     public $editingId = null;
+
     public bool $showDeleteConfirmation = false;
+
     public $confirmingDeleteId = null;
+
     public bool $showDeleteCategoryConfirmation = false;
+
     public $confirmingDeleteCategoryId = null;
+
     public string $confirmingDeleteCategoryName = '';
+
     public int $confirmingDeleteCategoryTxCount = 0;
 
     // Physical Cash Adjustment Modal properties
     public bool $showAdjustModal = false;
+
     public $adjustCategoryId = '';
+
     public $adjustCategoryName = '';
+
     public $adjustSystemBalance = 0;
+
     public $adjustPhysicalBalance;
+
     public string $adjustCashType = 'keuntungan';
 
     // Consolidation Modal properties
     public bool $showConsolidateModal = false;
+
     public $consolidateAmount;
+
     public string $consolidateCashType = 'keuntungan';
+
     public array $chartData = [];
 
     // Category Detail Modal properties
     public bool $showCategoryDetailModal = false;
+
     public string $categoryDetailName = '';
+
     public array $categoryDetailTransactions = [];
 
     public function mount()
@@ -68,16 +104,16 @@ class CashManagement extends Component
 
         // Automatically rename existing "Penjualan Umum" to "Keuntungan Jurusan"
         $activeJurusanId = session('active_jurusan_id');
-        $existingPenjualanUmum = \App\Models\CashCategory::where('jurusan_id', $activeJurusanId)
+        $existingPenjualanUmum = CashCategory::where('jurusan_id', $activeJurusanId)
             ->where('name', 'Penjualan Umum')
             ->first();
         if ($existingPenjualanUmum) {
-            $keuntunganJurusan = \App\Models\CashCategory::where('jurusan_id', $activeJurusanId)
+            $keuntunganJurusan = CashCategory::where('jurusan_id', $activeJurusanId)
                 ->where('name', 'Keuntungan Jurusan')
                 ->first();
             if ($keuntunganJurusan) {
                 // Merge transactions to existing Keuntungan Jurusan, then delete Penjualan Umum
-                \App\Models\CashTransaction::where('jurusan_id', $activeJurusanId)
+                CashTransaction::where('jurusan_id', $activeJurusanId)
                     ->where('cash_category_id', $existingPenjualanUmum->id)
                     ->update(['cash_category_id' => $keuntunganJurusan->id]);
                 $existingPenjualanUmum->delete();
@@ -88,19 +124,19 @@ class CashManagement extends Component
         }
 
         // Clean up and rename categories dynamically for Doku
-        $activeJurusan = \App\Models\Jurusan::find($activeJurusanId);
+        $activeJurusan = Jurusan::find($activeJurusanId);
         $activeJurusanNameLower = $activeJurusan ? strtolower($activeJurusan->name) : '';
         if ($activeJurusan && str_contains($activeJurusanNameLower, 'doku')) {
             // Rename "Jurusan Snack & Minuman" to "Kas Doku"
-            $oldCat = \App\Models\CashCategory::where('jurusan_id', $activeJurusanId)
+            $oldCat = CashCategory::where('jurusan_id', $activeJurusanId)
                 ->where('name', 'Jurusan Snack & Minuman')
                 ->first();
             if ($oldCat) {
-                $newCat = \App\Models\CashCategory::where('jurusan_id', $activeJurusanId)
+                $newCat = CashCategory::where('jurusan_id', $activeJurusanId)
                     ->where('name', 'Kas Doku')
                     ->first();
                 if ($newCat) {
-                    \App\Models\CashTransaction::where('jurusan_id', $activeJurusanId)
+                    CashTransaction::where('jurusan_id', $activeJurusanId)
                         ->where('cash_category_id', $oldCat->id)
                         ->update(['cash_category_id' => $newCat->id]);
                     $oldCat->delete();
@@ -110,11 +146,11 @@ class CashManagement extends Component
             }
 
             // Remove "Penjualan Cinuy" and "Penjualan Eskrim" categories and their transactions from Doku
-            $buggyCats = \App\Models\CashCategory::where('jurusan_id', $activeJurusanId)
+            $buggyCats = CashCategory::where('jurusan_id', $activeJurusanId)
                 ->whereIn('name', ['Penjualan Cinuy', 'Penjualan Eskrim'])
                 ->get();
             foreach ($buggyCats as $buggyCat) {
-                \App\Models\CashTransaction::where('jurusan_id', $activeJurusanId)
+                CashTransaction::where('jurusan_id', $activeJurusanId)
                     ->where('cash_category_id', $buggyCat->id)
                     ->delete();
                 $buggyCat->delete();
@@ -145,14 +181,14 @@ class CashManagement extends Component
     public function updatedAmountModal($value)
     {
         if ($this->cashType === 'keduanya') {
-            $this->amount = (float)($this->amountModal ?: 0) + (float)($this->amountProfit ?: 0);
+            $this->amount = (float) ($this->amountModal ?: 0) + (float) ($this->amountProfit ?: 0);
         }
     }
 
     public function updatedAmountProfit($value)
     {
         if ($this->cashType === 'keduanya') {
-            $this->amount = (float)($this->amountModal ?: 0) + (float)($this->amountProfit ?: 0);
+            $this->amount = (float) ($this->amountModal ?: 0) + (float) ($this->amountProfit ?: 0);
         }
     }
 
@@ -162,7 +198,7 @@ class CashManagement extends Component
             $this->amountModal = null;
             $this->amountProfit = null;
         } else {
-            $this->amount = (float)($this->amountModal ?: 0) + (float)($this->amountProfit ?: 0);
+            $this->amount = (float) ($this->amountModal ?: 0) + (float) ($this->amountProfit ?: 0);
         }
     }
 
@@ -177,9 +213,10 @@ class CashManagement extends Component
 
     public function calculateSelectedCategoryBalances($categoryId)
     {
-        if (!$categoryId) {
+        if (! $categoryId) {
             $this->selectedCategoryModalBalance = 0;
             $this->selectedCategoryProfitBalance = 0;
+
             return;
         }
 
@@ -193,10 +230,10 @@ class CashManagement extends Component
         $profitExpense = CashTransaction::where('jurusan_id', $activeJurusanId)->where('cash_category_id', $categoryId)->where('cash_type', 'keuntungan')->where('type', 'expense')->sum('amount');
 
         // Handle Bagi Hasil Mingguan deduction if applicable
-        $category = \App\Models\CashCategory::find($categoryId);
+        $category = CashCategory::find($categoryId);
         $bagiHasilDeduction = 0;
         if ($category && $category->name !== 'Bagi Hasil Mingguan') {
-            $catBagiHasil = \App\Models\CashCategory::where('jurusan_id', $activeJurusanId)->where('name', 'Bagi Hasil Mingguan')->first();
+            $catBagiHasil = CashCategory::where('jurusan_id', $activeJurusanId)->where('name', 'Bagi Hasil Mingguan')->first();
             if ($catBagiHasil) {
                 $bagiHasilTransactions = CashTransaction::where('jurusan_id', $activeJurusanId)
                     ->where('cash_category_id', $catBagiHasil->id)
@@ -261,16 +298,17 @@ class CashManagement extends Component
         $this->validate($validationRules);
 
         if ($this->cashType === 'keduanya') {
-            $this->amount = (float)($this->amountModal ?: 0) + (float)($this->amountProfit ?: 0);
+            $this->amount = (float) ($this->amountModal ?: 0) + (float) ($this->amountProfit ?: 0);
             if ($this->amount <= 0) {
                 $this->addError('amount', 'Total nominal gabungan harus lebih dari 0.');
+
                 return;
             }
         }
 
         $activeJurusanId = session('active_jurusan_id');
 
-        \Illuminate\Support\Facades\DB::transaction(function () use ($activeJurusanId) {
+        DB::transaction(function () use ($activeJurusanId) {
             // If editing, delete original transaction(s) first
             if ($this->editingId) {
                 $oldTx = CashTransaction::find($this->editingId);
@@ -285,7 +323,7 @@ class CashManagement extends Component
 
             // Create new transaction(s)
             if ($this->cashType === 'keduanya') {
-                $splitRef = 'SPLIT-' . \Illuminate\Support\Str::uuid()->toString();
+                $splitRef = 'SPLIT-'.Str::uuid()->toString();
 
                 if ($this->amountModal > 0) {
                     CashTransaction::create([
@@ -366,10 +404,10 @@ class CashManagement extends Component
     {
         $activeJurusanId = session('active_jurusan_id');
         $this->validate([
-            'newCategoryName' => 'required|string|max:100|unique:cash_categories,name,NULL,id,jurusan_id,' . $activeJurusanId,
+            'newCategoryName' => 'required|string|max:100|unique:cash_categories,name,NULL,id,jurusan_id,'.$activeJurusanId,
         ]);
 
-        $category = \App\Models\CashCategory::create([
+        $category = CashCategory::create([
             'name' => $this->newCategoryName,
             'jurusan_id' => $activeJurusanId,
         ]);
@@ -417,7 +455,7 @@ class CashManagement extends Component
             // Delete all transactions associated with this category
             CashTransaction::where('cash_category_id', $this->confirmingDeleteCategoryId)->delete();
 
-            $category = \App\Models\CashCategory::find($this->confirmingDeleteCategoryId);
+            $category = CashCategory::find($this->confirmingDeleteCategoryId);
             if ($category) {
                 $category->delete();
                 $this->dispatch('toast', message: 'Kategori dan seluruh transaksi di dalamnya berhasil dihapus.');
@@ -429,7 +467,7 @@ class CashManagement extends Component
 
             // Invalidate cache
             $activeJurusanId = session('active_jurusan_id');
-            \Illuminate\Support\Facades\Cache::forget('cash_balances_' . ($activeJurusanId ?: 'global'));
+            Cache::forget('cash_balances_'.($activeJurusanId ?: 'global'));
         }
     }
 
@@ -457,6 +495,7 @@ class CashManagement extends Component
         if (abs($difference) < 0.01) {
             $this->showAdjustModal = false;
             $this->dispatch('toast', message: 'Saldo fisik sudah sesuai dengan saldo sistem.');
+
             return;
         }
 
@@ -475,7 +514,7 @@ class CashManagement extends Component
         ]);
 
         // Invalidate cache
-        \Illuminate\Support\Facades\Cache::forget('cash_balances_' . ($activeJurusanId ?: 'global'));
+        Cache::forget('cash_balances_'.($activeJurusanId ?: 'global'));
 
         $this->showAdjustModal = false;
         $this->dispatch('toast', message: 'Penyesuaian kas fisik berhasil disimpan!');
@@ -491,10 +530,11 @@ class CashManagement extends Component
     public function consolidateToParent(): void
     {
         $activeJurusanId = session('active_jurusan_id');
-        $jurusan = \App\Models\Jurusan::with('parent')->find($activeJurusanId);
+        $jurusan = Jurusan::with('parent')->find($activeJurusanId);
 
-        if (!$jurusan || !$jurusan->parent_id) {
+        if (! $jurusan || ! $jurusan->parent_id) {
             $this->dispatch('toast', message: 'Hanya sub-unit usaha yang dapat melakukan konsolidasi kas ke induk.', type: 'error');
+
             return;
         }
 
@@ -503,7 +543,7 @@ class CashManagement extends Component
             'consolidateCashType' => 'required|in:modal,keuntungan',
         ]);
 
-        $catKeuntunganJurusan = \App\Models\CashCategory::where('jurusan_id', $activeJurusanId)
+        $catKeuntunganJurusan = CashCategory::where('jurusan_id', $activeJurusanId)
             ->where('name', 'Keuntungan Jurusan')
             ->first();
         $keuntunganJurusanId = $catKeuntunganJurusan ? $catKeuntunganJurusan->id : 0;
@@ -522,8 +562,9 @@ class CashManagement extends Component
         $currentProfitBalance = ($balances->profit_income ?? 0) - ($balances->profit_expense ?? 0);
         $availableBalance = $this->consolidateCashType === 'modal' ? $currentModalBalance : $currentProfitBalance;
 
-        if ((float)$this->consolidateAmount > $availableBalance) {
+        if ((float) $this->consolidateAmount > $availableBalance) {
             $this->dispatch('toast', message: 'Saldo tidak mencukupi untuk melakukan konsolidasi kas.', type: 'error');
+
             return;
         }
 
@@ -533,17 +574,17 @@ class CashManagement extends Component
             'date' => now()->format('Y-m-d'),
             'cash_type' => $this->consolidateCashType,
             'type' => 'expense',
-            'amount' => (float)$this->consolidateAmount,
+            'amount' => (float) $this->consolidateAmount,
             'description' => "Konsolidasi Saldo ke Unit Induk (TEFA {$jurusan->parent->name})",
         ]);
 
         // 2. Find or create Category in Parent for "Konsolidasi Sub-Unit"
         $parentCategoryId = null;
-        $parentCategory = \App\Models\CashCategory::where('jurusan_id', $jurusan->parent_id)
+        $parentCategory = CashCategory::where('jurusan_id', $jurusan->parent_id)
             ->where('name', 'Konsolidasi Sub-Unit')
             ->first();
-        if (!$parentCategory) {
-            $parentCategory = \App\Models\CashCategory::create([
+        if (! $parentCategory) {
+            $parentCategory = CashCategory::create([
                 'jurusan_id' => $jurusan->parent_id,
                 'name' => 'Konsolidasi Sub-Unit',
             ]);
@@ -557,13 +598,13 @@ class CashManagement extends Component
             'cash_type' => $this->consolidateCashType,
             'cash_category_id' => $parentCategoryId,
             'type' => 'income',
-            'amount' => (float)$this->consolidateAmount,
+            'amount' => (float) $this->consolidateAmount,
             'description' => "Penerimaan Konsolidasi dari Sub-Unit: {$jurusan->name}",
         ]);
 
         // Invalidate caches
-        \Illuminate\Support\Facades\Cache::forget('cash_balances_' . $activeJurusanId);
-        \Illuminate\Support\Facades\Cache::forget('cash_balances_' . $jurusan->parent_id);
+        Cache::forget('cash_balances_'.$activeJurusanId);
+        Cache::forget('cash_balances_'.$jurusan->parent_id);
 
         $this->showConsolidateModal = false;
         $this->dispatch('toast', message: 'Konsolidasi kas ke induk berhasil dicatat!');
@@ -572,7 +613,8 @@ class CashManagement extends Component
     public function exportExcel()
     {
         $filename = 'Laporan_Buku_Kas_Internal_Kumulatif.xlsx';
-        return \Maatwebsite\Excel\Facades\Excel::download(new \App\Exports\CashTransactionsExport(null), $filename);
+
+        return Excel::download(new CashTransactionsExport(null), $filename);
     }
 
     /**
@@ -584,19 +626,19 @@ class CashManagement extends Component
     {
         $activeJurusanId = session('active_jurusan_id');
 
-        $this->categoryDetailName         = $categoryName;
+        $this->categoryDetailName = $categoryName;
         $this->categoryDetailTransactions = CashTransaction::where('jurusan_id', $activeJurusanId)
             ->where('cash_category_id', $categoryId)
             ->orderBy('date', 'desc')
             ->orderBy('id', 'desc')
             ->get()
             ->map(fn ($tx) => [
-                'id'          => $tx->id,
-                'date'        => \Carbon\Carbon::parse($tx->date)->translatedFormat('d M Y'),
+                'id' => $tx->id,
+                'date' => Carbon::parse($tx->date)->translatedFormat('d M Y'),
                 'description' => $tx->description,
-                'type'        => $tx->type,
-                'cash_type'   => $tx->cash_type,
-                'amount'      => $tx->amount,
+                'type' => $tx->type,
+                'cash_type' => $tx->cash_type,
+                'amount' => $tx->amount,
             ])
             ->toArray();
 
@@ -606,11 +648,11 @@ class CashManagement extends Component
     public function render()
     {
         $activeJurusanId = session('active_jurusan_id');
-        $jurusan = \App\Models\Jurusan::find($activeJurusanId);
+        $jurusan = Jurusan::find($activeJurusanId);
         $isSubUnit = $jurusan && $jurusan->parent_id;
 
         // Get Keuntungan Jurusan Category ID
-        $catKeuntunganJurusan = \App\Models\CashCategory::where('jurusan_id', $activeJurusanId)
+        $catKeuntunganJurusan = CashCategory::where('jurusan_id', $activeJurusanId)
             ->where('name', 'Keuntungan Jurusan')
             ->first();
         $keuntunganJurusanId = $catKeuntunganJurusan ? $catKeuntunganJurusan->id : 0;
@@ -644,7 +686,7 @@ class CashManagement extends Component
             } else {
                 $monthDate = Carbon::createFromFormat('Y-m', $this->filterMonth);
                 $weekNumber = (int) str_replace('week_', '', $this->filterWeek);
-                
+
                 if ($weekNumber === 1) {
                     $startDate = $monthDate->copy()->startOfMonth()->format('Y-m-d');
                     $endDate = $monthDate->copy()->startOfMonth()->addDays(6)->format('Y-m-d');
@@ -680,8 +722,8 @@ class CashManagement extends Component
                     SUM(CASE WHEN type = 'income' AND cash_type = 'keuntungan' THEN amount ELSE 0 END) - SUM(CASE WHEN type = 'expense' AND cash_type = 'keuntungan' THEN amount ELSE 0 END) as profit_bal
                 ")
                 ->first();
-            $startingModal = (float)($startingSums->modal_bal ?? 0);
-            $startingProfit = (float)($startingSums->profit_bal ?? 0);
+            $startingModal = (float) ($startingSums->modal_bal ?? 0);
+            $startingProfit = (float) ($startingSums->profit_bal ?? 0);
             $startingBalance = $startingModal + $startingProfit;
         }
 
@@ -716,10 +758,10 @@ class CashManagement extends Component
             ")
             ->first();
 
-        $periodModalIn = (float)($periodBalances->modal_income ?? 0);
-        $periodModalOut = (float)($periodBalances->modal_expense ?? 0);
-        $periodProfitIn = (float)($periodBalances->profit_income ?? 0);
-        $periodProfitOut = (float)($periodBalances->profit_expense ?? 0);
+        $periodModalIn = (float) ($periodBalances->modal_income ?? 0);
+        $periodModalOut = (float) ($periodBalances->modal_expense ?? 0);
+        $periodProfitIn = (float) ($periodBalances->profit_income ?? 0);
+        $periodProfitOut = (float) ($periodBalances->profit_expense ?? 0);
 
         $displayIncome = $periodModalIn + $periodProfitIn;
         $displayExpense = $periodModalOut + $periodProfitOut;
@@ -734,7 +776,7 @@ class CashManagement extends Component
 
         // Calculate Audit Adjustments (deficits/surpluses from physical cash checks)
         // Exclude transaksi dari kategori "Keuntungan Jurusan" — itu bukan selisih kas fisik
-        $keuntunganJurusanCatIds = \App\Models\CashCategory::where('jurusan_id', $activeJurusanId)
+        $keuntunganJurusanCatIds = CashCategory::where('jurusan_id', $activeJurusanId)
             ->where('name', 'Keuntungan Jurusan')
             ->pluck('id')
             ->toArray();
@@ -742,8 +784,7 @@ class CashManagement extends Component
         $adjustments = (clone $activeQuery)
             ->where('description', 'like', 'Penyesuaian Selisih%')
             ->where('description', 'not like', '%(Manual)%')
-            ->when(!empty($keuntunganJurusanCatIds), fn ($q) =>
-                $q->whereNotIn('cash_category_id', $keuntunganJurusanCatIds)
+            ->when(! empty($keuntunganJurusanCatIds), fn ($q) => $q->whereNotIn('cash_category_id', $keuntunganJurusanCatIds)
             )
             ->get();
         $totalDeficit = 0;
@@ -763,23 +804,23 @@ class CashManagement extends Component
             'outflowLabels' => [],
             'outflowValues' => [],
         ];
-        
-        $categoriesMap = \App\Models\CashCategory::where('jurusan_id', $activeJurusanId)->get()->keyBy('id');
+
+        $categoriesMap = CashCategory::where('jurusan_id', $activeJurusanId)->get()->keyBy('id');
         foreach ($categorySums as $catId => $sum) {
             $catName = isset($categoriesMap[$catId]) ? $categoriesMap[$catId]->name : 'Tanpa Kategori';
             if ($sum->cat_income > 0) {
                 $chartData['inflowLabels'][] = $catName;
-                $chartData['inflowValues'][] = (float)$sum->cat_income;
+                $chartData['inflowValues'][] = (float) $sum->cat_income;
             }
             if ($sum->cat_expense > 0) {
                 $chartData['outflowLabels'][] = $catName;
-                $chartData['outflowValues'][] = (float)$sum->cat_expense;
+                $chartData['outflowValues'][] = (float) $sum->cat_expense;
             }
         }
 
         $this->chartData = $chartData;
 
-        $catBagiHasil = \App\Models\CashCategory::where('jurusan_id', $activeJurusanId)->where('name', 'Bagi Hasil Mingguan')->first();
+        $catBagiHasil = CashCategory::where('jurusan_id', $activeJurusanId)->where('name', 'Bagi Hasil Mingguan')->first();
         $bagiHasilTransactions = [];
         if ($catBagiHasil) {
             $bagiHasilTransactions = (clone $activeQuery)
@@ -788,36 +829,36 @@ class CashManagement extends Component
                 ->toArray();
         }
 
-        $categories = \App\Models\CashCategory::where('jurusan_id', $activeJurusanId)
+        $categories = CashCategory::where('jurusan_id', $activeJurusanId)
             ->whereNotIn('name', [
-                'Bagi Hasil Mingguan', 
-                'Bagi Hasil Supplier', 
-                'Bagi Hasil Pengelola', 
-                'Bagi Hasil Labantik'
+                'Bagi Hasil Mingguan',
+                'Bagi Hasil Supplier',
+                'Bagi Hasil Pengelola',
+                'Bagi Hasil Labantik',
             ])
             ->get();
 
-        if (\App\Models\CashCategory::where('jurusan_id', $activeJurusanId)->count() === 0) {
+        if (CashCategory::where('jurusan_id', $activeJurusanId)->count() === 0) {
             $defaultCategories = [
                 'Modal Awal',
                 'Penjualan Toko / POS',
                 'Pembelian Stok Barang',
                 'Biaya Operasional',
                 'Gaji & Insentif Kasir',
-                'Lain-lain / Dana Darurat'
+                'Lain-lain / Dana Darurat',
             ];
             foreach ($defaultCategories as $catName) {
-                \App\Models\CashCategory::create([
+                CashCategory::create([
                     'jurusan_id' => $activeJurusanId,
-                    'name' => $catName
+                    'name' => $catName,
                 ]);
             }
-            $categories = \App\Models\CashCategory::where('jurusan_id', $activeJurusanId)
+            $categories = CashCategory::where('jurusan_id', $activeJurusanId)
                 ->whereNotIn('name', [
-                    'Bagi Hasil Mingguan', 
-                    'Bagi Hasil Supplier', 
-                    'Bagi Hasil Pengelola', 
-                    'Bagi Hasil Labantik'
+                    'Bagi Hasil Mingguan',
+                    'Bagi Hasil Supplier',
+                    'Bagi Hasil Pengelola',
+                    'Bagi Hasil Labantik',
                 ])
                 ->get();
         }
@@ -843,10 +884,10 @@ class CashManagement extends Component
                 'Jurusan Snack & Minuman', 'Toko / POS',
             ]) || str_starts_with($category->name, 'Penjualan Toko');
 
-            if ($category->name !== 'Bagi Hasil Mingguan' && $isProductCategory && !empty($bagiHasilTransactions)) {
+            if ($category->name !== 'Bagi Hasil Mingguan' && $isProductCategory && ! empty($bagiHasilTransactions)) {
                 foreach ($bagiHasilTransactions as $tx) {
                     // Hanya proses deskripsi yang punya pola "Kategori: {nama}"
-                    if (!str_contains(strtolower($tx['description']), 'kategori:')) {
+                    if (! str_contains(strtolower($tx['description']), 'kategori:')) {
                         continue;
                     }
 

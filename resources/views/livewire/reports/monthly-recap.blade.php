@@ -1,19 +1,17 @@
-<div class="p-6">
-    <div class="flex flex-col md:flex-row md:items-center justify-between mb-10 gap-6">
-        <div>
-            <h1 class="text-4xl font-bold uppercase tracking-tight text-primary-blue dark:text-primary-blue-light">Rekap Bulanan</h1>
-            <p class="text-gray-400 font-bold text-xs uppercase tracking-[0.2em] italic">Analisis Keuangan Per Bulan</p>
-        </div>
-        
-        <div class="flex flex-wrap items-center gap-4">
-            <div class="flex items-center bg-white dark:bg-gray-800 px-6 py-3 rounded-2xl shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-800 transition-all">
-                <svg class="w-4 h-4 text-primary-blue mr-3" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/></svg>
-                <select wire:model.live="selectedMonth" class="border-none p-0 focus:ring-0 font-black text-sm bg-transparent dark:text-white mr-2">
+<div class="p-4 sm:p-6">
+    <x-hub-tabs hub="laporan" title="Rekap Bulanan" subtitle="Konsolidasi laporan omzet bulanan, profit bersih TEFA, dan performa per kategori." />
+
+    <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 mb-6">
+        <div></div>
+        <div class="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+            <div class="flex items-center bg-white dark:bg-slate-900 px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 transition-all">
+                <svg class="w-4 h-4 text-blue-600 mr-2 shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/></svg>
+                <select wire:model.live="selectedMonth" class="border-none p-0 focus:ring-0 font-bold text-xs bg-transparent dark:text-white mr-2">
                     @for($m = 1; $m <= 12; $m++)
                         <option value="{{ $m }}">{{ \Carbon\Carbon::create(null, $m)->translatedFormat('F') }}</option>
                     @endfor
                 </select>
-                <select wire:model.live="selectedYear" class="border-none p-0 focus:ring-0 font-black text-sm bg-transparent dark:text-white">
+                <select wire:model.live="selectedYear" class="border-none p-0 focus:ring-0 font-bold text-xs bg-transparent dark:text-white">
                     @foreach($availableYears as $y)
                         <option value="{{ $y }}">{{ $y }}</option>
                     @endforeach
@@ -21,9 +19,9 @@
             </div>
 
             @if($recap)
-            <button wire:click="exportExcel" wire:loading.attr="disabled" class="px-8 py-4 bg-primary-red text-white rounded-2xl shadow-xl shadow-red-500/20 font-black italic uppercase text-xs tracking-widest transform hover:-translate-y-1 transition-all flex items-center">
-                <svg class="w-4 h-4 mr-3" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
-                <span wire:loading.remove wire:target="exportExcel">Export XLSX</span>
+            <button wire:click="exportExcel" wire:loading.attr="disabled" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold shadow-sm transition-all flex items-center gap-1.5">
+                <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+                <span wire:loading.remove wire:target="exportExcel">Export Excel</span>
                 <span wire:loading wire:target="exportExcel">Mengekspor...</span>
             </button>
             @endif
@@ -31,8 +29,8 @@
     </div>
 
     @if($recap)
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-12">
-        <div class="bg-primary-blue rounded-[3rem] p-10 text-white shadow-2xl shadow-blue-900/30 relative overflow-hidden group" id="card-revenue">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+        <div class="bg-blue-600 rounded-2xl p-6 text-white shadow-sm relative overflow-hidden group" id="card-revenue">
             <div class="absolute -right-6 -bottom-6 opacity-10 group-hover:scale-110 transition-transform duration-700">
                 <svg class="w-48 h-48 text-white" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
             </div>
@@ -223,6 +221,7 @@
             });
         });
     </script>
+    </div>
 
     <!-- Monthly Breakdown -->
     <div class="bg-white dark:bg-gray-800 rounded-[3.5rem] shadow-2xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 overflow-hidden">

@@ -1,13 +1,9 @@
-<div class="p-6 space-y-8">
-    <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-4">
-        <div>
-            <h1 class="text-4xl font-bold uppercase tracking-tight text-primary-blue dark:text-primary-blue-light">Topping & Modifikasi Produk</h1>
-            <p class="text-gray-400 font-bold text-xs uppercase tracking-[0.2em] italic">Atur variasi pilihan tambahan menu di kasir</p>
-        </div>
-        <div class="flex items-center bg-white dark:bg-gray-800 px-4 py-1.5 rounded-2xl shadow-md border border-gray-100 dark:border-gray-800">
-            <button wire:click="$set('activeTab', 'modifiers')" class="px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all {{ $activeTab === 'modifiers' ? 'bg-primary-blue text-white shadow-lg' : 'text-gray-400' }}">Daftar Topping</button>
-            <button wire:click="$set('activeTab', 'groups')" class="px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all {{ $activeTab === 'groups' ? 'bg-primary-blue text-white shadow-lg' : 'text-gray-400' }}">Kelompok Topping</button>
-        </div>
+<div class="p-4 sm:p-6 space-y-6">
+    <x-hub-tabs hub="inventaris" title="Topping & Varian" subtitle="Atur opsi variasi, topping tambahan, dan kelompok modifier menu kasir." />
+
+    <div class="flex items-center gap-1.5 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl w-fit">
+        <button wire:click="$set('activeTab', 'modifiers')" class="px-4 py-1.5 rounded-lg text-xs font-bold transition-all {{ $activeTab === 'modifiers' ? 'bg-white dark:bg-slate-900 text-blue-600 dark:text-blue-400 shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white' }}">Daftar Topping</button>
+        <button wire:click="$set('activeTab', 'groups')" class="px-4 py-1.5 rounded-lg text-xs font-bold transition-all {{ $activeTab === 'groups' ? 'bg-white dark:bg-slate-900 text-blue-600 dark:text-blue-400 shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white' }}">Kelompok Topping</button>
     </div>
 
     @if($activeTab === 'modifiers')

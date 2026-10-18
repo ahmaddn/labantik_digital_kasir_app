@@ -4,22 +4,24 @@ namespace App\Services;
 
 use App\Models\Product;
 use App\Models\StockEntry;
+use App\Models\Transaction;
 use Illuminate\Support\Facades\DB;
 
 class ProductService
 {
     /**
      * Delete a single product.
+     *
      * @throws \Exception
      */
     public function deleteProduct(string $productId): void
     {
         $product = Product::findOrFail($productId);
-        
+
         if ($product->transactions()->exists()) {
             throw new \Exception("Produk '{$product->name}' tidak bisa dihapus karena memiliki riwayat transaksi. Silakan nonaktifkan status produk saja.");
         }
-        
+
         DB::transaction(function () use ($product) {
             $product->stockEntries()->delete();
             $product->delete();
@@ -28,18 +30,19 @@ class ProductService
 
     /**
      * Delete multiple products.
+     *
      * @throws \Exception
      */
     public function bulkDelete(array $productIds): void
     {
         $products = Product::whereIn('id', $productIds)->get();
-        
+
         foreach ($products as $product) {
             if ($product->transactions()->exists()) {
                 throw new \Exception("Produk '{$product->name}' tidak bisa dihapus karena memiliki riwayat transaksi. Silakan nonaktifkan status produk saja.");
             }
         }
-        
+
         DB::transaction(function () use ($productIds) {
             StockEntry::whereIn('product_id', $productIds)->delete();
             Product::whereIn('id', $productIds)->delete();
@@ -76,8 +79,8 @@ class ProductService
                     $newModal = $data['modal_price'];
                     $newProfit = $newPrice - $newModal;
 
-                    \Illuminate\Support\Facades\DB::transaction(function () use ($product, $newPrice, $newProfit) {
-                        $transactions = \App\Models\Transaction::where('product_id', $product->id)->get();
+                    DB::transaction(function () use ($product, $newPrice, $newProfit) {
+                        $transactions = Transaction::where('product_id', $product->id)->get();
                         foreach ($transactions as $tx) {
                             $tx->update([
                                 'unit_price' => $newPrice,
@@ -92,6 +95,7 @@ class ProductService
                 return $product;
             }
         }
+
         return Product::create($data);
     }
 
@@ -106,7 +110,7 @@ class ProductService
         StockEntry::updateOrCreate(
             [
                 'product_id' => $productId,
-                'date'       => $date,
+                'date' => $date,
             ],
             [
                 'opening_stock' => $openingStock,

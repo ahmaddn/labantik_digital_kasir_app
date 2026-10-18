@@ -1,11 +1,5 @@
-<div class="p-6">
-    <div class="flex flex-col lg:flex-row lg:items-center justify-between mb-10 gap-6">
-        <div>
-            <h1
-                class="text-4xl font-bold uppercase tracking-tight text-primary-blue dark:text-primary-blue-light">
-                Riwayat Transaksi</h1>
-            <p class="text-gray-400 font-bold text-xs uppercase tracking-[0.2em] italic">Log Aktivitas Penjualan</p>
-        </div>
+<div class="p-4 sm:p-6">
+    <x-hub-tabs hub="laporan" title="Riwayat Transaksi" subtitle="Log aktivitas penjualan kasir, rincian pembayaran, dan status transaksi belanja." />
 
         <!-- Filter Toolbar -->
         <div class="flex flex-col lg:flex-row items-stretch lg:items-center gap-4 w-full lg:w-auto">
@@ -80,7 +74,6 @@
 
             </div>
         </div>
-    </div>
 
     <!-- Payment Method Filter Tabs -->
     <div class="flex flex-wrap items-center gap-3 mb-6">

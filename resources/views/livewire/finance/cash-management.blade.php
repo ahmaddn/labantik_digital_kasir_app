@@ -1,28 +1,25 @@
-<div class="p-6">
-    <!-- Header -->
-    <div class="flex flex-col md:flex-row md:items-center justify-between mb-10 gap-6">
-        <div>
-            <h1 class="text-4xl font-bold uppercase tracking-tight text-primary-blue dark:text-primary-blue-light">Buku Kas Internal</h1>
-            <p class="text-gray-400 font-bold text-xs uppercase tracking-[0.2em] italic">Pencatatan Uang Riil & Operasional</p>
-        </div>
-        
-        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
-            <button wire:click="exportExcel" wire:loading.attr="disabled" class="px-5 sm:px-5 py-2.5 sm:py-4 bg-green-500 text-white rounded-2xl shadow-xl shadow-green-500/20 font-black italic uppercase text-xs tracking-widest transform hover:-translate-y-1 transition-all flex items-center justify-center">
-                <svg class="w-4 h-4 mr-3" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+<div class="p-4 sm:p-6">
+    <x-hub-tabs hub="keuangan" title="Buku Kas Internal" subtitle="Pencatatan mutasi kas riil, pengeluaran operasional, modal, dan konsolidasi kas." />
+
+    <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 mb-6">
+        <div></div>
+        <div class="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+            <button wire:click="exportExcel" wire:loading.attr="disabled" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold shadow-sm transition-all flex items-center justify-center gap-2">
+                <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
                 <span wire:loading.remove wire:target="exportExcel">Export Excel</span>
                 <span wire:loading wire:target="exportExcel">Mengekspor...</span>
             </button>
 
             @if($isSubUnit)
-            <button wire:click="openConsolidateModal" class="px-5 sm:px-5 py-2.5 sm:py-4 bg-amber-500 text-white rounded-2xl shadow-xl shadow-amber-500/20 font-black italic uppercase text-xs tracking-widest transform hover:-translate-y-1 transition-all flex items-center justify-center">
-                <svg class="w-4 h-4 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m16 16 3-8 5-5-5-5-8 3"/><path d="M7 21A14 14 0 0 1 21 7"/></svg>
-                Gabungkan Ke Kas Induk
+            <button wire:click="openConsolidateModal" class="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-white rounded-xl text-xs font-bold shadow-sm transition-all flex items-center justify-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="m16 16 3-8 5-5-5-5-8 3"/><path d="M7 21A14 14 0 0 1 21 7"/></svg>
+                <span>Gabung Kas Induk</span>
             </button>
             @endif
 
-            <button wire:click="openModal" class="px-5 sm:px-5 py-2.5 sm:py-4 bg-primary-blue text-white rounded-2xl shadow-xl shadow-blue-500/20 font-black italic uppercase text-xs tracking-widest transform hover:-translate-y-1 transition-all flex items-center justify-center">
-                <svg class="w-4 h-4 mr-3" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
-                Catat Kas Baru
+            <button wire:click="openModal" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold shadow-sm transition-all flex items-center justify-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+                <span>Catat Transaksi Kas</span>
             </button>
         </div>
     </div>

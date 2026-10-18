@@ -5,17 +5,17 @@ namespace App\Imports\Sheets;
 use App\Models\Product;
 use App\Models\Supplier;
 use App\Models\Transaction;
+use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
-use Carbon\Carbon;
 
 class TransactionsSheetImport implements ToCollection, WithHeadingRow
 {
     public function collection(Collection $rows)
     {
         foreach ($rows as $row) {
-            if (!isset($row['reference']) || empty($row['reference'])) {
+            if (! isset($row['reference']) || empty($row['reference'])) {
                 continue;
             }
 
@@ -26,7 +26,7 @@ class TransactionsSheetImport implements ToCollection, WithHeadingRow
             }
 
             $productId = null;
-            if (!empty($row['nama_produk'])) {
+            if (! empty($row['nama_produk'])) {
                 $product = Product::where('name', $row['nama_produk'])->first();
                 if ($product) {
                     $productId = $product->id;
@@ -34,7 +34,7 @@ class TransactionsSheetImport implements ToCollection, WithHeadingRow
             }
 
             $supplierId = null;
-            if (!empty($row['nama_supplier'])) {
+            if (! empty($row['nama_supplier'])) {
                 $supplier = Supplier::where('name', $row['nama_supplier'])->first();
                 if ($supplier) {
                     $supplierId = $supplier->id;
@@ -42,7 +42,7 @@ class TransactionsSheetImport implements ToCollection, WithHeadingRow
             }
 
             $transactedAt = null;
-            if (!empty($row['transacted_at'])) {
+            if (! empty($row['transacted_at'])) {
                 try {
                     $transactedAt = Carbon::parse($row['transacted_at']);
                 } catch (\Exception $e) {

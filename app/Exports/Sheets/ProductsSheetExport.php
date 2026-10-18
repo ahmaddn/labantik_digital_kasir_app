@@ -30,7 +30,7 @@ class ProductsSheetExport implements FromCollection, WithHeadings, WithMapping, 
     }
 
     /**
-     * @param Product $product
+     * @param  Product  $product
      */
     public function map($product): array
     {

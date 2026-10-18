@@ -2,9 +2,10 @@
 
 namespace App\Livewire;
 
-use Livewire\Component;
 use App\Models\Product;
+use App\Models\Supplier;
 use App\Models\Transaction;
+use Livewire\Component;
 
 class GlobalSearch extends Component
 {
@@ -12,7 +13,7 @@ class GlobalSearch extends Component
 
     public function getResults()
     {
-        \Log::info('Global Search query: ' . $this->search);
+        \Log::info('Global Search query: '.$this->search);
         if (strlen($this->search) < 2) {
             return [];
         }
@@ -32,41 +33,41 @@ class GlobalSearch extends Component
             ['name' => 'Bagi Hasil Mingguan', 'url' => route('bagi-hasil'), 'icon' => 'wallet', 'type' => 'Menu'],
         ];
 
-        $filteredMenus = array_filter($menus, function($menu) {
+        $filteredMenus = array_filter($menus, function ($menu) {
             return str_contains(strtolower($menu['name']), strtolower($this->search));
         });
 
         $products = Product::where('name', 'like', "%{$this->search}%")
             ->limit(5)
             ->get()
-            ->map(fn($p) => [
+            ->map(fn ($p) => [
                 'name' => $p->name,
-                'url' => route('products') . '?highlight=' . $p->id,
+                'url' => route('products').'?highlight='.$p->id,
                 'icon' => 'package-search',
                 'type' => 'Produk',
-                'price' => 'Rp ' . number_format($p->price, 0, ',', '.')
+                'price' => 'Rp '.number_format($p->price, 0, ',', '.'),
             ]);
 
         $transactions = Transaction::where('reference', 'like', "%{$this->search}%")
             ->orWhere('buyer_name', 'like', "%{$this->search}%")
             ->limit(3)
             ->get()
-            ->map(fn($t) => [
-                'name' => $t->reference . ' (' . ($t->buyer_name ?: 'GUEST') . ')',
-                'url' => route('transactions') . '?highlight=' . urlencode($t->reference),
+            ->map(fn ($t) => [
+                'name' => $t->reference.' ('.($t->buyer_name ?: 'GUEST').')',
+                'url' => route('transactions').'?highlight='.urlencode($t->reference),
                 'icon' => 'receipt',
                 'type' => 'Transaksi',
-                'date' => $t->transacted_at->format('d/m/Y H:i')
+                'date' => $t->transacted_at->format('d/m/Y H:i'),
             ]);
 
-        $suppliers = \App\Models\Supplier::where('name', 'like', "%{$this->search}%")
+        $suppliers = Supplier::where('name', 'like', "%{$this->search}%")
             ->limit(3)
             ->get()
-            ->map(fn($s) => [
+            ->map(fn ($s) => [
                 'name' => $s->name,
-                'url' => route('suppliers') . '?highlight=' . $s->id,
+                'url' => route('suppliers').'?highlight='.$s->id,
                 'icon' => 'truck',
-                'type' => 'Supplier'
+                'type' => 'Supplier',
             ]);
 
         return array_merge($filteredMenus, $products->toArray(), $transactions->toArray(), $suppliers->toArray());
@@ -75,7 +76,7 @@ class GlobalSearch extends Component
     public function render()
     {
         return view('livewire.global-search', [
-            'results' => $this->getResults()
+            'results' => $this->getResults(),
         ]);
     }
 }

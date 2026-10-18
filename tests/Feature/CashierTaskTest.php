@@ -3,8 +3,8 @@
 namespace Tests\Feature;
 
 use App\Livewire\Management\CashierTasks;
-use App\Models\CashierTask;
 use App\Models\CashierSchedule;
+use App\Models\CashierTask;
 use App\Models\Jurusan;
 use App\Models\Role;
 use App\Models\TaskCategory;

@@ -38,7 +38,7 @@ class LabantikRegistration extends Model
 
     public function isFinalRejected(): bool
     {
-        return !$this->is_accepted || $this->final_status === 'rejected';
+        return ! $this->is_accepted || $this->final_status === 'rejected';
     }
 
     public function jurusan(): BelongsTo

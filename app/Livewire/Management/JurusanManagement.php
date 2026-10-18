@@ -46,6 +46,7 @@ class JurusanManagement extends Component
         $jurusan = Jurusan::findOrFail($id);
         if (session('active_role_name') === 'pengelola_jurusan' && is_null($jurusan->parent_id)) {
             $this->dispatch('toast', message: 'Akses Ditolak: Pengelola hanya dapat mengedit Sub-Unit.');
+
             return;
         }
         $this->jurusanId = $jurusan->id;
@@ -65,6 +66,7 @@ class JurusanManagement extends Component
     {
         if (session('active_role_name') === 'pengelola_jurusan' && empty($this->parent_id)) {
             $this->addError('parent_id', 'Pengelola wajib memilih Unit Induk (Parent TEFA).');
+
             return;
         }
 
@@ -99,6 +101,7 @@ class JurusanManagement extends Component
         $jurusan = Jurusan::findOrFail($id);
         if (session('active_role_name') === 'pengelola_jurusan' && is_null($jurusan->parent_id)) {
             $this->dispatch('toast', message: 'Akses Ditolak: Pengelola hanya dapat menghapus Sub-Unit.');
+
             return;
         }
         $this->deleteId = $id;

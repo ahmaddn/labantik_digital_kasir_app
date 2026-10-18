@@ -2,6 +2,8 @@
 
 namespace App\Livewire\Management;
 
+use App\Models\CashCategory;
+use App\Models\Jurusan;
 use App\Models\Supplier as SupplierModel;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -46,25 +48,25 @@ class Supplier extends Component
             if ($supplier) {
                 $oldName = $supplier->name;
                 $supplier->update($data);
-                
+
                 if (trim($oldName) !== trim($this->name)) {
-                    \App\Models\CashCategory::where('name', 'Penjualan ' . trim($oldName))
-                        ->update(['name' => 'Penjualan ' . trim($this->name)]);
+                    CashCategory::where('name', 'Penjualan '.trim($oldName))
+                        ->update(['name' => 'Penjualan '.trim($this->name)]);
                 }
             }
             $this->dispatch('toast', message: 'Supplier berhasil diperbarui.');
         } else {
             $supplier = SupplierModel::create($data);
-            
+
             // Auto create CashCategory for each Jurusan
-            $jurusans = \App\Models\Jurusan::all();
+            $jurusans = Jurusan::all();
             foreach ($jurusans as $jurusan) {
-                \App\Models\CashCategory::firstOrCreate([
+                CashCategory::firstOrCreate([
                     'jurusan_id' => $jurusan->id,
-                    'name' => 'Penjualan ' . trim($supplier->name),
+                    'name' => 'Penjualan '.trim($supplier->name),
                 ]);
             }
-            
+
             $this->dispatch('toast', message: 'Supplier berhasil ditambahkan.');
         }
 
@@ -90,7 +92,7 @@ class Supplier extends Component
     {
         $supplier = SupplierModel::find($id);
         if ($supplier) {
-            \App\Models\CashCategory::where('name', 'Penjualan ' . trim($supplier->name))->delete();
+            CashCategory::where('name', 'Penjualan '.trim($supplier->name))->delete();
             $supplier->delete();
         }
         $this->dispatch('toast', message: 'Supplier berhasil dihapus.');

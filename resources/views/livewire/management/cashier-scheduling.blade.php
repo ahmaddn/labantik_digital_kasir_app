@@ -1,10 +1,7 @@
-<div class="space-y-8 pt-6">
-    <!-- Header -->
+<div class="p-4 sm:p-6 space-y-6">
+    <x-hub-tabs hub="operasional" :title="session('active_role_name') === 'kasir' ? 'Jadwal Jaga Kasir' : 'Jadwal Piket Kasir'" subtitle="Atur penugasan shift jaga kasir siswa per unit TEFA, rolling acak, dan ekspor jadwal." />
+
     <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-        <div>
-            <h1 class="text-2xl md:text-2xl font-bold uppercase tracking-tight text-primary-blue dark:text-primary-yellow">Penjadwalan Kasir</h1>
-            <p class="text-gray-400 text-xs md:text-sm font-semibold uppercase tracking-widest mt-1">Atur jadwal jaga kasir per unit TEFA</p>
-        </div>
         <div class="flex flex-wrap items-center gap-3">
             @if(session('active_role_name') === 'superadmin')
                 <div class="w-full sm:w-64">
@@ -341,36 +338,37 @@
             </form>
         </div>
     </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/dist/html-to-image.min.js"></script>
+    <script>
+        function exportScheduleToImage() {
+            const element = document.getElementById('schedule-capture-area');
+            if (!element) return;
+
+            htmlToImage.toPng(element, {
+                quality: 0.95,
+                pixelRatio: 2, // Double quality for high-definition screenshot
+                backgroundColor: document.documentElement.classList.contains('dark') ? '#111827' : '#ffffff',
+                skipFonts: true, // Fix CORS/SecurityError with remote Google Fonts
+                filter: (node) => {
+                    // Exclude action buttons (like delete) from being drawn in the exported image
+                    if (node.tagName === 'BUTTON' || (node.classList && node.classList.contains('capture-exclude'))) {
+                        return false;
+                    }
+                    return true;
+                }
+            })
+            .then(function (dataUrl) {
+                const link = document.createElement('a');
+                let rangeStr = '{{ $weekRange }}'.replace(/ /g, '_');
+                link.download = 'Jadwal_Kasir_' + rangeStr + '.png';
+                link.href = dataUrl;
+                link.click();
+            })
+            .catch(function (error) {
+                console.error('Oops, something went wrong!', error);
+            });
+        }
+    </script>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/dist/html-to-image.min.js"></script>
-<script>
-    function exportScheduleToImage() {
-        const element = document.getElementById('schedule-capture-area');
-        if (!element) return;
-
-        htmlToImage.toPng(element, {
-            quality: 0.95,
-            pixelRatio: 2, // Double quality for high-definition screenshot
-            backgroundColor: document.documentElement.classList.contains('dark') ? '#111827' : '#ffffff',
-            skipFonts: true, // Fix CORS/SecurityError with remote Google Fonts
-            filter: (node) => {
-                // Exclude action buttons (like delete) from being drawn in the exported image
-                if (node.tagName === 'BUTTON' || (node.classList && node.classList.contains('capture-exclude'))) {
-                    return false;
-                }
-                return true;
-            }
-        })
-        .then(function (dataUrl) {
-            const link = document.createElement('a');
-            let rangeStr = '{{ $weekRange }}'.replace(/ /g, '_');
-            link.download = 'Jadwal_Kasir_' + rangeStr + '.png';
-            link.href = dataUrl;
-            link.click();
-        })
-        .catch(function (error) {
-            console.error('Oops, something went wrong!', error);
-        });
-    }
-</script>

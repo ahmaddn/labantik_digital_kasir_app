@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 #[ObservedBy([TransactionObserver::class])]
 class Transaction extends Model
@@ -76,7 +77,7 @@ class Transaction extends Model
         return $query->withoutGlobalScope('active');
     }
 
-    public function modifiers(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    public function modifiers(): BelongsToMany
     {
         return $this->belongsToMany(Modifier::class, 'transaction_modifiers')->withPivot('price')->withTimestamps();
     }

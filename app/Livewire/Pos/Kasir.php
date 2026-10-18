@@ -5,7 +5,6 @@ namespace App\Livewire\Pos;
 use App\Models\CashCategory;
 use App\Models\CashierAttendance;
 use App\Models\CashierSchedule;
-use App\Models\CashierTaskDefinition;
 use App\Models\CashierTaskAssignment;
 use App\Models\CashTransaction;
 use App\Models\DailyRecap;
@@ -14,8 +13,10 @@ use App\Models\Jurusan;
 use App\Models\Product;
 use App\Models\StockEntry;
 use App\Models\Transaction;
+use App\Services\CashierTaskService;
 use App\Services\PosQueryService;
 use App\Services\PosSessionService;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Cache;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
@@ -63,6 +64,7 @@ class Kasir extends Component
 
     // Audit non-cash saat penutupan sesi
     public float $actualTransfer = 0;
+
     public float $actualQris = 0;
 
     public function refreshProducts(): void
@@ -132,22 +134,22 @@ class Kasir extends Component
                         ->first();
 
                     $currentTime = now();
-                    
+
                     // Ambil pengaturan absensi untuk clock in dari database
                     $jurusan = Jurusan::find($activeJurusanId);
                     $settings = $jurusan ? ($jurusan->theme_settings ?: []) : [];
                     $targetClockIn = $settings['clock_in_time'] ?? '07:00';
                     $penaltyClockIn = (int) ($settings['late_clock_in_penalty'] ?? 0);
-                    
+
                     $status = 'present';
                     $toastMessage = 'Clock in otomatis tercatat. Selamat bertugas!';
-                    
+
                     $clockInStatus = 'on_time';
                     if ($targetClockIn) {
                         try {
-                            $targetTime = \Carbon\Carbon::createFromFormat('H:i', $targetClockIn);
+                            $targetTime = Carbon::createFromFormat('H:i', $targetClockIn);
                             $targetTime->setDate($currentTime->year, $currentTime->month, $currentTime->day);
-                            
+
                             // Jika telat (melebihi batas maksimal absen)
                             if ($currentTime->gt($targetTime)) {
                                 $status = 'late';
@@ -157,7 +159,7 @@ class Kasir extends Component
                                     if (auth()->user()->points < 0) {
                                         auth()->user()->update(['points' => 0]);
                                     }
-                                    $toastMessage = 'Clock in otomatis tercatat. Anda terlambat! Poin berkurang ' . $penaltyClockIn;
+                                    $toastMessage = 'Clock in otomatis tercatat. Anda terlambat! Poin berkurang '.$penaltyClockIn;
                                 } else {
                                     $toastMessage = 'Clock in otomatis tercatat. Anda terlambat!';
                                 }
@@ -295,10 +297,10 @@ class Kasir extends Component
 
         if ($newAssignments->isNotEmpty()) {
             $first = $newAssignments->first();
-            $this->dispatch('toast', message: 'Tugas baru: "' . $first->taskDefinition->task_name . '"', type: 'success');
+            $this->dispatch('toast', message: 'Tugas baru: "'.$first->taskDefinition->task_name.'"', type: 'success');
             // Also dispatch a custom event carrying CTA url
             $this->dispatch('new-task',
-                message: 'Terdapat tugas baru: "' . $first->taskDefinition->task_name . '" — buka halaman tugas Anda.',
+                message: 'Terdapat tugas baru: "'.$first->taskDefinition->task_name.'" — buka halaman tugas Anda.',
                 cta_url: route('my-tasks')
             );
             // update last check
@@ -494,11 +496,11 @@ class Kasir extends Component
             $parts = explode('_', $clockInStatus);
             $clockInStatus = $parts[0];
         }
-        
+
         $clockOutStatus = 'overtime';
         if ($targetClockOut) {
             try {
-                $targetTime = \Carbon\Carbon::createFromFormat('H:i', $targetClockOut);
+                $targetTime = Carbon::createFromFormat('H:i', $targetClockOut);
                 $targetTime->setDate($currentTime->year, $currentTime->month, $currentTime->day);
                 if ($currentTime->lt($targetTime)) {
                     $isEarlyClockOut = true;
@@ -522,7 +524,7 @@ class Kasir extends Component
         }
 
         // Gabungkan status clock-in dan clock-out
-        $status = $clockInStatus . '_' . $clockOutStatus;
+        $status = $clockInStatus.'_'.$clockOutStatus;
 
         $closingCash = 1; // Default to 1 to lock the session (actual_cash > 0)
 
@@ -554,9 +556,9 @@ class Kasir extends Component
         }
 
         DailyRecap::upsertForSession($today, $activeJurusanId, [
-            'actual_cash'     => $newActualCash,
+            'actual_cash' => $newActualCash,
             'actual_transfer' => $this->actualTransfer,
-            'actual_qris'     => $this->actualQris,
+            'actual_qris' => $this->actualQris,
         ]);
 
         $this->showClosingStockModal = false;
@@ -564,9 +566,9 @@ class Kasir extends Component
         $this->stockItems = [];
 
         if ($isEarlyClockOut && $deductedClockOut > 0) {
-            session()->flash('toast', 'Sesi kasir berhasil diselesaikan. Anda clock-out TERLALU CEPAT! Poin berkurang ' . $deductedClockOut);
+            session()->flash('toast', 'Sesi kasir berhasil diselesaikan. Anda clock-out TERLALU CEPAT! Poin berkurang '.$deductedClockOut);
         } elseif ($isBonusClockOut) {
-            session()->flash('toast', 'Sesi kasir berhasil diselesaikan. Selamat, Anda mendapat bonus +' . $bonusPoints . ' poin & +1 streak!');
+            session()->flash('toast', 'Sesi kasir berhasil diselesaikan. Selamat, Anda mendapat bonus +'.$bonusPoints.' poin & +1 streak!');
         } else {
             session()->flash('toast', 'Sesi kasir berhasil diselesaikan.');
         }
@@ -590,6 +592,7 @@ class Kasir extends Component
 
             if ($invalidProductsExist) {
                 $this->dispatch('toast', message: 'Gagal Checkout: Terdapat produk dari unit usaha/TEFA lain di keranjang belanja Anda!', type: 'error');
+
                 return;
             }
         }
@@ -634,7 +637,7 @@ class Kasir extends Component
             $reachedAmount = $newMultiple * 50000;
             $this->dispatch(
                 'toast',
-                message: 'Total transaksi hari ini telah mencapai Rp' . number_format($reachedAmount, 0, ',', '.') . '. Segera cek uang tunai di laci!',
+                message: 'Total transaksi hari ini telah mencapai Rp'.number_format($reachedAmount, 0, ',', '.').'. Segera cek uang tunai di laci!',
                 type: 'warning'
             );
         }
@@ -714,11 +717,11 @@ class Kasir extends Component
             'cash_category_id' => $categoryId,
             'type' => 'expense',
             'amount' => (float) $amount,
-            'description' => trim($description) . ' (Sistem - Pengeluaran Cepat)',
+            'description' => trim($description).' (Sistem - Pengeluaran Cepat)',
         ]);
 
         // Invalidate cache
-        Cache::forget('cash_balances_' . ($activeJurusanId ?: 'global'));
+        Cache::forget('cash_balances_'.($activeJurusanId ?: 'global'));
 
         $this->dispatch('toast', message: 'Pengeluaran berhasil dicatat!');
     }
@@ -730,7 +733,7 @@ class Kasir extends Component
         $userId = auth()->id();
 
         // Auto-assign routine tasks to kasir jika mereka terjadwal hari ini
-        $service = app(\App\Services\CashierTaskService::class);
+        $service = app(CashierTaskService::class);
         $service->autoAssignRoutineTasksForCashier($userId, $activeJurusanId);
 
         $allProducts = $this->getProductsForAlpine($posQueryService);
@@ -759,12 +762,12 @@ class Kasir extends Component
                 $query->whereHas('taskDefinition', function ($q) use ($today) {
                     $q->where('date', $today);
                 })
-                ->orWhere(function ($q) use ($today) {
-                    $q->whereHas('taskDefinition', function ($sq) {
-                        $sq->where('is_routine', true);
-                    })
-                    ->whereDate('created_at', $today);
-                });
+                    ->orWhere(function ($q) use ($today) {
+                        $q->whereHas('taskDefinition', function ($sq) {
+                            $sq->where('is_routine', true);
+                        })
+                            ->whereDate('created_at', $today);
+                    });
             })
             ->whereDoesntHave('submissions', function ($q) {
                 $q->where('approval_status', 'approved');
@@ -784,7 +787,7 @@ class Kasir extends Component
                     ->first();
 
                 if ($attendance && $attendance->clock_in) {
-                    $taskDef->computed_deadline = \Carbon\Carbon::parse($attendance->clock_in)->addHours(8);
+                    $taskDef->computed_deadline = Carbon::parse($attendance->clock_in)->addHours(8);
                 } else {
                     $taskDef->computed_deadline = null;
                 }
@@ -802,26 +805,26 @@ class Kasir extends Component
         $isPostClosingMode = $isSessionFinished && ! $isKasirRole;
 
         return view('livewire.pos.kasir', [
-            'products'          => $this->products,
-            'allProductsJson'   => $allProducts,
+            'products' => $this->products,
+            'allProductsJson' => $allProducts,
             'isSessionFinished' => $isSessionFinished,
-            'isLockedForUser'   => $isLockedForUser,
+            'isLockedForUser' => $isLockedForUser,
             'isPostClosingMode' => $isPostClosingMode,
-            'categories'        => $categories,
-            'dailyTasks'        => $dailyAssignments,
-            'todayDocSchedule'  => $todayDocSchedule,
+            'categories' => $categories,
+            'dailyTasks' => $dailyAssignments,
+            'todayDocSchedule' => $todayDocSchedule,
             // Revenue per metode hari ini — untuk audit di closing modal
-            'todayRevenueCash'     => \App\Models\Transaction::whereDate('transacted_at', $today)
+            'todayRevenueCash' => Transaction::whereDate('transacted_at', $today)
                 ->where('jurusan_id', $activeJurusanId)
                 ->where('payment_method', 'cash')
                 ->whereIn('status', ['uang_diterima', 'belum_kembalian'])
                 ->sum('total_price'),
-            'todayRevenueTransfer' => \App\Models\Transaction::whereDate('transacted_at', $today)
+            'todayRevenueTransfer' => Transaction::whereDate('transacted_at', $today)
                 ->where('jurusan_id', $activeJurusanId)
                 ->where('payment_method', 'transfer')
                 ->whereIn('status', ['uang_diterima', 'belum_kembalian'])
                 ->sum('total_price'),
-            'todayRevenueQris'     => \App\Models\Transaction::whereDate('transacted_at', $today)
+            'todayRevenueQris' => Transaction::whereDate('transacted_at', $today)
                 ->where('jurusan_id', $activeJurusanId)
                 ->where('payment_method', 'qris')
                 ->whereIn('status', ['uang_diterima', 'belum_kembalian'])

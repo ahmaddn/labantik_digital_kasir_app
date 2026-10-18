@@ -1,12 +1,7 @@
-<div class="space-y-8 pt-6">
-    <!-- Header -->
+<div class="p-4 sm:p-6 space-y-6">
+    <x-hub-tabs hub="operasional" title="Penugasan & Verifikasi" subtitle="Kelola instruksi tugas operasional, checklist harian, dan verifikasi persetujuan (ACC) tugas kasir." />
+
     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div>
-            <h1 class="text-xl md:text-2xl font-bold uppercase tracking-tight text-primary-blue dark:text-primary-yellow">
-                Tugas Harian Kasir</h1>
-            <p class="text-gray-400 text-xs font-medium uppercase tracking-wider mt-0.5">Kelola tugas operasional untuk
-                kasir</p>
-        </div>
         <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
             @if (session('active_role_name') === 'superadmin')
                 <div class="w-full sm:w-64">

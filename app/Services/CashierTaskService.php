@@ -2,9 +2,12 @@
 
 namespace App\Services;
 
-use App\Models\CashierTaskDefinition;
+use App\Models\CashierSchedule;
 use App\Models\CashierTaskAssignment;
+use App\Models\CashierTaskDefinition;
 use App\Models\CashierTaskSubmission;
+use App\Models\Jurusan;
+use App\Models\Notification;
 use App\Models\User;
 use Illuminate\Support\Str;
 
@@ -59,19 +62,19 @@ class CashierTaskService
      */
     public function assignTaskToAllCashiers(CashierTaskDefinition $taskDef): void
     {
-        $targetJurusan = \App\Models\Jurusan::find($taskDef->jurusan_id);
+        $targetJurusan = Jurusan::find($taskDef->jurusan_id);
         $allowedJurusanIds = [$taskDef->jurusan_id];
         if ($targetJurusan) {
             if ($targetJurusan->parent_id) {
                 $allowedJurusanIds[] = $targetJurusan->parent_id;
             }
-            $childIds = \App\Models\Jurusan::where('parent_id', $targetJurusan->id)->pluck('id')->toArray();
+            $childIds = Jurusan::where('parent_id', $targetJurusan->id)->pluck('id')->toArray();
             $allowedJurusanIds = array_merge($allowedJurusanIds, $childIds);
         }
         $allowedJurusanIds = array_unique(array_filter($allowedJurusanIds));
 
         // Only assign to cashiers who are SCHEDULED on the task's date
-        $scheduledUserIds = \App\Models\CashierSchedule::where('date', $taskDef->date)
+        $scheduledUserIds = CashierSchedule::where('date', $taskDef->date)
             ->whereIn('jurusan_id', $allowedJurusanIds)
             ->pluck('user_id')
             ->unique();
@@ -89,10 +92,10 @@ class CashierTaskService
             );
 
             if ($assignment->wasRecentlyCreated) {
-                \App\Models\Notification::create([
+                Notification::create([
                     'user_id' => $userId,
                     'title' => 'Tugas Rutin Baru',
-                    'body' => 'Anda mendapatkan tugas rutin: "' . $taskDef->task_name . '"',
+                    'body' => 'Anda mendapatkan tugas rutin: "'.$taskDef->task_name.'"',
                     'type' => 'task',
                     'action_url' => '/my-tasks',
                 ]);
@@ -107,25 +110,25 @@ class CashierTaskService
     public function autoAssignRoutineTasksForCashier(string $userId, string $jurusanId): void
     {
         $today = now()->toDateString();
-        
-        $targetJurusan = \App\Models\Jurusan::find($jurusanId);
+
+        $targetJurusan = Jurusan::find($jurusanId);
         $allowedJurusanIds = [$jurusanId];
         if ($targetJurusan) {
             if ($targetJurusan->parent_id) {
                 $allowedJurusanIds[] = $targetJurusan->parent_id;
             }
-            $childIds = \App\Models\Jurusan::where('parent_id', $targetJurusan->id)->pluck('id')->toArray();
+            $childIds = Jurusan::where('parent_id', $targetJurusan->id)->pluck('id')->toArray();
             $allowedJurusanIds = array_merge($allowedJurusanIds, $childIds);
         }
         $allowedJurusanIds = array_unique(array_filter($allowedJurusanIds));
 
         // Check if this kasir has schedule today
-        $isScheduled = \App\Models\CashierSchedule::where('user_id', $userId)
+        $isScheduled = CashierSchedule::where('user_id', $userId)
             ->whereIn('jurusan_id', $allowedJurusanIds)
             ->where('date', $today)
             ->exists();
 
-        if (!$isScheduled) {
+        if (! $isScheduled) {
             return;
         }
 
@@ -134,7 +137,7 @@ class CashierTaskService
             ->where('is_routine', true)
             ->whereDoesntHave('assignments', function ($q) use ($userId, $today) {
                 $q->where('assigned_to', $userId)
-                  ->whereDate('created_at', $today);
+                    ->whereDate('created_at', $today);
             })
             ->get();
 
@@ -146,10 +149,10 @@ class CashierTaskService
                 'assignment_status' => 'new',
             ]);
 
-            \App\Models\Notification::create([
+            Notification::create([
                 'user_id' => $userId,
                 'title' => 'Tugas Rutin Baru',
-                'body' => 'Anda mendapatkan tugas rutin hari ini: "' . $taskDef->task_name . '"',
+                'body' => 'Anda mendapatkan tugas rutin hari ini: "'.$taskDef->task_name.'"',
                 'type' => 'task',
                 'action_url' => '/my-tasks',
             ]);
@@ -283,7 +286,7 @@ class CashierTaskService
     {
         $latestSubmission = $assignment->latestSubmission;
 
-        if (!$latestSubmission) {
+        if (! $latestSubmission) {
             return [
                 'has_submission' => false,
                 'status' => 'not_submitted',

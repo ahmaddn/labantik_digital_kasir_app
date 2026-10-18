@@ -5,11 +5,8 @@ namespace Tests\Feature;
 use App\Models\Product;
 use App\Models\ProductCategory;
 use App\Models\StockEntry;
-use App\Models\User;
 use App\Services\PosSessionService;
-use App\Livewire\Pos\Kasir;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Livewire\Livewire;
 use Tests\TestCase;
 
 class PosSessionStockTest extends TestCase

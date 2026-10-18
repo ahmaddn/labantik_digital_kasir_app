@@ -2,15 +2,16 @@
 
 namespace App\Livewire;
 
-use App\Models\CashTransaction;
 use App\Models\CashierAttendance;
 use App\Models\CashierSchedule;
 use App\Models\CashierTaskAssignment;
+use App\Models\CashTransaction;
 use App\Models\DailyRecap;
 use App\Models\DocumentationSchedule;
 use App\Models\Jurusan;
 use App\Models\ProductCategory;
 use App\Models\Transaction;
+use App\Services\CashierTaskService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Cache;
 use Livewire\Component;
@@ -18,6 +19,7 @@ use Livewire\Component;
 class Dashboard extends Component
 {
     public $filterJurusan = '';
+
     public $selectedTopCategory = 'all';
 
     public function mount()
@@ -140,7 +142,7 @@ class Dashboard extends Component
             ->whereIn('roles.name', ['superadmin', 'pengelola_jurusan'])
             ->exists();
 
-        $isCashier = (session('active_role_name') === 'kasir') && ! $hasHigherRole;
+        $isCashier = session('active_role_name') === 'kasir';
 
         // Check if session is finished (Daily Recap exists with actual cash)
         $isSessionFinished = DailyRecap::whereDate('date', now())
@@ -156,7 +158,7 @@ class Dashboard extends Component
 
             // Auto-assign routine tasks for cashier if scheduled
             try {
-                app(\App\Services\CashierTaskService::class)->autoAssignRoutineTasksForCashier($userId, $activeJurusanId);
+                app(CashierTaskService::class)->autoAssignRoutineTasksForCashier($userId, $activeJurusanId);
             } catch (\Exception $e) {
                 // ignore
             }
@@ -194,12 +196,12 @@ class Dashboard extends Component
                     $query->whereHas('taskDefinition', function ($q) use ($today) {
                         $q->where('date', $today->toDateString());
                     })
-                    ->orWhere(function ($q) use ($today) {
-                        $q->whereHas('taskDefinition', function ($sq) {
-                            $sq->where('is_routine', true);
-                        })
-                        ->whereDate('created_at', $today->toDateString());
-                    });
+                        ->orWhere(function ($q) use ($today) {
+                            $q->whereHas('taskDefinition', function ($sq) {
+                                $sq->where('is_routine', true);
+                            })
+                                ->whereDate('created_at', $today->toDateString());
+                        });
                 })
                 ->orderBy('created_at', 'desc')
                 ->get();
@@ -225,6 +227,13 @@ class Dashboard extends Component
                 'todayTaskAssignments' => $todayTaskAssignments,
                 'myDocSchedules' => $myDocSchedules,
                 'jurusans' => Jurusan::all(),
+                'topProducts' => collect(),
+                'categories' => collect(),
+                'topCategories' => collect(),
+                'weeklyData' => [],
+                'stats' => (object)[],
+                'recentTransactions' => collect(),
+                'orphanCarryForwardAmount' => 0,
             ])->layout('layouts.app', ['title' => 'Dashboard Kasir']);
         }
 
@@ -425,7 +434,7 @@ class Dashboard extends Component
             ->limit(5)
             ->get();
 
-        $categories = \App\Models\ProductCategory::when($activeJurusanId, function ($q) use ($activeJurusanId) {
+        $categories = ProductCategory::when($activeJurusanId, function ($q) use ($activeJurusanId) {
             return $q->where(function ($query) use ($activeJurusanId) {
                 $query->where('jurusan_id', $activeJurusanId)
                     ->orWhereNull('jurusan_id');
@@ -531,6 +540,7 @@ class Dashboard extends Component
             'recentTransactions' => $recentTransactions,
             'topProducts' => $topProducts,
             'categories' => $categories,
+            'topCategories' => $categories,
             'selectedTopCategory' => $this->selectedTopCategory,
             'weeklyData' => $weeklyData,
             'categoryData' => $categoryData,
@@ -553,7 +563,7 @@ class Dashboard extends Component
         }
 
         $activeJurusanId = session('active_jurusan_id');
-        
+
         // 1. Reset or delete DailyRecap for today so isSessionFinished returns false
         DailyRecap::withoutGlobalScope('active')
             ->whereDate('date', now())

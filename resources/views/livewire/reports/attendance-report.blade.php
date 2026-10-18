@@ -1,22 +1,18 @@
-<div class="space-y-8 pt-6">
-    <!-- Header -->
-    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div>
-            <h1 class="text-2xl font-bold uppercase tracking-tight text-primary-blue dark:text-primary-yellow">Laporan Absensi & Shift</h1>
-            <p class="text-gray-400 text-sm font-semibold uppercase tracking-widest mt-1">Daftar kehadiran & laporan closing harian kasir</p>
-        </div>
-        <div class="flex items-center gap-3">
-            @if(session('active_role_name') === 'superadmin')
-                <div class="w-64">
-                    <select wire:model.live="selectedJurusanId" class="w-full px-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-semibold text-gray-700 dark:text-gray-200">
-                        <option value="">-- Pilih Jurusan --</option>
-                        @foreach($jurusans as $j)
-                            <option value="{{ $j->id }}">{{ $j->name }}</option>
-                        @endforeach
-                    </select>
-                </div>
-            @endif
-        </div>
+<div class="p-4 sm:p-6 space-y-6">
+    <x-hub-tabs hub="operasional" title="Presensi & Shift Kasir" subtitle="Daftar kehadiran piket, jam clock in & clock out, serta laporan closing shift kasir." />
+
+    <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+        <div></div>
+        @if(session('active_role_name') === 'superadmin')
+            <div class="w-full sm:w-64">
+                <select wire:model.live="selectedJurusanId" class="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-200">
+                    <option value="">-- Semua Jurusan --</option>
+                    @foreach($jurusans as $j)
+                        <option value="{{ $j->id }}">{{ $j->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+        @endif
     </div>
 
     <!-- Filters & Table -->

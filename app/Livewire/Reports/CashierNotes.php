@@ -4,6 +4,7 @@ namespace App\Livewire\Reports;
 
 use App\Models\CashierNote;
 use App\Models\NoteReply;
+use App\Models\Notification;
 use App\Models\User;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -16,19 +17,28 @@ class CashierNotes extends Component
 
     // Modal state for Create / Edit Note
     public bool $showModal = false;
+
     public bool $showDeleteModal = false;
 
     // Modal state for Replies
     public bool $showReplyModal = false;
+
     public $activeNoteId = null;
+
     public string $replyContent = '';
 
     public $noteId = null;
+
     public string $title = '';
+
     public string $content = '';
+
     public string $color = 'default';
+
     public bool $is_pinned = false;
+
     public ?string $target_user_id = null;
+
     public ?string $date = null;
 
     public $deletingNoteId = null;
@@ -71,7 +81,9 @@ class CashierNotes extends Component
             $msg = $note->is_pinned ? 'Catatan disematkan ke paling atas!' : 'Sematkan catatan dilepas.';
             $this->dispatch('toast', message: $msg);
         }
-    }    public function openCreateModal(): void
+    }
+
+    public function openCreateModal(): void
     {
         $this->resetForm();
         $this->showModal = true;
@@ -100,6 +112,7 @@ class CashierNotes extends Component
             $this->dispatch('quill-update', content: $this->content);
         }
     }
+
     public function saveNote(): void
     {
         $this->validate();
@@ -137,12 +150,12 @@ class CashierNotes extends Component
             ]);
 
             if ($this->target_user_id && $this->target_user_id !== auth()->id()) {
-                \App\Models\Notification::create([
+                Notification::create([
                     'user_id' => $this->target_user_id,
                     'title' => 'Catatan Baru Ditujukan Untuk Anda',
-                    'body' => auth()->user()->name . ' membuat catatan: "' . $this->title . '"',
+                    'body' => auth()->user()->name.' membuat catatan: "'.$this->title.'"',
                     'type' => 'note',
-                    'action_url' => '/cashier-notes'
+                    'action_url' => '/cashier-notes',
                 ]);
             }
             $this->dispatch('toast', message: 'Catatan baru berhasil ditambahkan!');
@@ -199,20 +212,20 @@ class CashierNotes extends Component
                 'content' => trim($this->replyContent),
             ]);
 
-            $note = \App\Models\CashierNote::find($this->activeNoteId);
+            $note = CashierNote::find($this->activeNoteId);
             if ($note) {
                 $recipients = collect([$note->user_id, $note->target_user_id])
                     ->filter()
                     ->unique()
-                    ->reject(fn($id) => $id === auth()->id());
-                
+                    ->reject(fn ($id) => $id === auth()->id());
+
                 foreach ($recipients as $recipientId) {
-                    \App\Models\Notification::create([
+                    Notification::create([
                         'user_id' => $recipientId,
                         'title' => 'Balasan Catatan Baru',
-                        'body' => auth()->user()->name . ' membalas catatan "' . $note->title . '"',
+                        'body' => auth()->user()->name.' membalas catatan "'.$note->title.'"',
                         'type' => 'note',
-                        'action_url' => '/cashier-notes'
+                        'action_url' => '/cashier-notes',
                     ]);
                 }
             }

@@ -5,14 +5,16 @@ namespace App\Exports;
 use App\Models\CashTransaction;
 use Carbon\Carbon;
 use Maatwebsite\Excel\Concerns\FromCollection;
+use Maatwebsite\Excel\Concerns\WithCustomStartCell;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
-use Maatwebsite\Excel\Concerns\WithTitle;
 use Maatwebsite\Excel\Concerns\WithStyles;
-use Maatwebsite\Excel\Concerns\WithCustomStartCell;
+use Maatwebsite\Excel\Concerns\WithTitle;
+use PhpOffice\PhpSpreadsheet\Style\Border;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class CashTransactionsExport implements FromCollection, WithHeadings, WithMapping, WithTitle, WithStyles, WithCustomStartCell
+class CashTransactionsExport implements FromCollection, WithCustomStartCell, WithHeadings, WithMapping, WithStyles, WithTitle
 {
     protected $month;
 
@@ -42,7 +44,7 @@ class CashTransactionsExport implements FromCollection, WithHeadings, WithMappin
             $tx->cash_type === 'modal' ? 'Kas Modal' : 'Kas Keuntungan',
             $tx->description,
             $tx->type === 'income' ? 'Pemasukan' : 'Pengeluaran',
-            $tx->amount
+            $tx->amount,
         ];
     }
 
@@ -76,19 +78,19 @@ class CashTransactionsExport implements FromCollection, WithHeadings, WithMappin
 
         $sheet->mergeCells('A2:B2');
         if ($this->month) {
-            $sheet->setCellValue('A2', 'Bulan: ' . Carbon::parse($this->month)->translatedFormat('F Y'));
+            $sheet->setCellValue('A2', 'Bulan: '.Carbon::parse($this->month)->translatedFormat('F Y'));
         } else {
             $sheet->setCellValue('A2', 'Semua Periode (Kumulatif)');
         }
 
         $sheet->mergeCells('A3:B3');
-        $sheet->setCellValue('A3', 'Dicetak Pada: ' . now()->translatedFormat('d M Y H:i:s'));
+        $sheet->setCellValue('A3', 'Dicetak Pada: '.now()->translatedFormat('d M Y H:i:s'));
 
         // Header style
         $sheet->getStyle('A5:F5')->getFont()->setBold(true)->getColor()->setARGB('FFFFFFFF');
-        $sheet->getStyle('A5:F5')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+        $sheet->getStyle('A5:F5')->getFill()->setFillType(Fill::FILL_SOLID)
             ->getStartColor()->setARGB('FF2563EB');
-        
+
         $sheet->getColumnDimension('A')->setWidth(15);
         $sheet->getColumnDimension('B')->setWidth(25);
         $sheet->getColumnDimension('C')->setWidth(20);
@@ -99,10 +101,10 @@ class CashTransactionsExport implements FromCollection, WithHeadings, WithMappin
         // Number format for Nominal column
         $lastRow = $sheet->getHighestRow();
         if ($lastRow >= 6) {
-            $sheet->getStyle('F6:F' . $lastRow)->getNumberFormat()->setFormatCode('#,##0');
+            $sheet->getStyle('F6:F'.$lastRow)->getNumberFormat()->setFormatCode('#,##0');
         }
 
         // Borders
-        $sheet->getStyle('A5:F' . $lastRow)->getBorders()->getAllBorders()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
+        $sheet->getStyle('A5:F'.$lastRow)->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
     }
 }

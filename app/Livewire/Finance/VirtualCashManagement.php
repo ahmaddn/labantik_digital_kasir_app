@@ -4,6 +4,7 @@ namespace App\Livewire\Finance;
 
 use App\Models\CashCategory;
 use App\Models\Jurusan;
+use App\Models\Transaction;
 use App\Models\VirtualCashTransaction;
 use Carbon\Carbon;
 use Livewire\Component;
@@ -15,22 +16,33 @@ class VirtualCashManagement extends Component
 
     // Filters
     public string $filterMonth = '';
+
     public string $filterType = 'weekly';
+
     public string $filterWeek = 'this_week';
+
     public string $filterSourceMethod = ''; // '', 'transfer', 'qris'
 
     // Form inputs
     public string $date = '';
+
     public string $sourceMethod = 'transfer'; // 'transfer', 'qris'
+
     public $cashCategoryId = '';
+
     public string $type = 'expense'; // 'income', 'expense'
+
     public $amount;
+
     public string $description = '';
 
     // Modal state
     public bool $showModal = false;
+
     public $editingId = null;
+
     public bool $showDeleteConfirmation = false;
+
     public $confirmingDeleteId = null;
 
     public array $chartData = [];
@@ -133,8 +145,11 @@ class VirtualCashManagement extends Component
 
     // Delete category confirmation state
     public bool $showDeleteCategoryConfirmation = false;
+
     public $confirmingDeleteCategoryId = null;
+
     public string $confirmingDeleteCategoryName = '';
+
     public int $confirmingDeleteCategoryTxCount = 0;
 
     public function confirmDeleteCategory($id, $name)
@@ -259,11 +274,11 @@ class VirtualCashManagement extends Component
             ")
             ->first();
 
-        $displayIncome = (float)($periodBalances->total_income ?? 0);
-        $displayExpense = (float)($periodBalances->total_expense ?? 0);
+        $displayIncome = (float) ($periodBalances->total_income ?? 0);
+        $displayExpense = (float) ($periodBalances->total_expense ?? 0);
 
         // Calculate non-cash sales modal (HPP) and gross profit from Transaction table
-        $salesQuery = \App\Models\Transaction::where('transactions.jurusan_id', $activeJurusanId)
+        $salesQuery = Transaction::where('transactions.jurusan_id', $activeJurusanId)
             ->whereIn('transactions.status', ['uang_diterima', 'belum_kembalian']);
 
         if ($startDate && $endDate) {
@@ -281,15 +296,15 @@ class VirtualCashManagement extends Component
 
         $salesStats = (clone $salesQuery)
             ->leftJoin('products', 'transactions.product_id', '=', 'products.id')
-            ->selectRaw("
+            ->selectRaw('
                 SUM(COALESCE(products.modal_price, transactions.unit_price - transactions.unit_profit) * transactions.quantity) as total_modal,
                 SUM(transactions.unit_profit * transactions.quantity) as total_sales_profit,
                 SUM(transactions.total_price) as total_sales_revenue
-            ")
+            ')
             ->first();
 
-        $virtualModal = (float)($salesStats->total_modal ?? 0);
-        $salesProfit = (float)($salesStats->total_sales_profit ?? 0);
+        $virtualModal = (float) ($salesStats->total_modal ?? 0);
+        $salesProfit = (float) ($salesStats->total_sales_profit ?? 0);
 
         // Virtual Profit Calculation:
         // Net Virtual Profit = Sales Profit + Other Income (VirtualCashTransaction income) - Virtual Expenses
@@ -298,24 +313,24 @@ class VirtualCashManagement extends Component
         // Fetch non-cash sales grouped by product category / supplier category using aggregated database query
         $salesStatsByCatName = [];
 
-        $rawCategorySales = \App\Models\Transaction::query()
+        $rawCategorySales = Transaction::query()
             ->leftJoin('products', 'transactions.product_id', '=', 'products.id')
             ->leftJoin('product_categories', 'products.category_id', '=', 'product_categories.id')
             ->leftJoin('suppliers', 'products.supplier_id', '=', 'suppliers.id')
             ->where('transactions.jurusan_id', $activeJurusanId)
             ->whereIn('transactions.status', ['uang_diterima', 'belum_kembalian'])
-            ->when($startDate && $endDate, fn($q) => $q->whereBetween('transactions.transacted_at', [
+            ->when($startDate && $endDate, fn ($q) => $q->whereBetween('transactions.transacted_at', [
                 Carbon::parse($startDate)->startOfDay()->toDateTimeString(),
                 Carbon::parse($endDate)->endOfDay()->toDateTimeString(),
             ]))
-            ->when($this->filterSourceMethod, fn($q) => $q->where('transactions.payment_method', $this->filterSourceMethod), fn($q) => $q->whereIn('transactions.payment_method', ['transfer', 'qris']))
-            ->selectRaw("
+            ->when($this->filterSourceMethod, fn ($q) => $q->where('transactions.payment_method', $this->filterSourceMethod), fn ($q) => $q->whereIn('transactions.payment_method', ['transfer', 'qris']))
+            ->selectRaw('
                 suppliers.name as supplier_name,
                 product_categories.name as category_name,
                 SUM(transactions.total_price) as sales_income,
                 SUM(COALESCE(products.modal_price, transactions.unit_price - transactions.unit_profit) * transactions.quantity) as modal,
                 SUM(transactions.unit_profit * transactions.quantity) as profit
-            ")
+            ')
             ->groupBy('suppliers.name', 'product_categories.name')
             ->get();
 
@@ -324,7 +339,7 @@ class VirtualCashManagement extends Component
 
         foreach ($rawCategorySales as $row) {
             if ($row->supplier_name) {
-                $cashCatName = 'Penjualan ' . trim($row->supplier_name);
+                $cashCatName = 'Penjualan '.trim($row->supplier_name);
             } else {
                 $catNameClean = trim($row->category_name ?? 'Lainnya');
                 $categoryNameLower = strtolower($catNameClean);
@@ -333,16 +348,16 @@ class VirtualCashManagement extends Component
                 } elseif (in_array($categoryNameLower, ['umum', 'lainnya', 'lain-lain'])) {
                     $cashCatName = 'Keuntungan Jurusan';
                 } else {
-                    $cashCatName = 'Penjualan ' . $catNameClean;
+                    $cashCatName = 'Penjualan '.$catNameClean;
                 }
             }
 
-            if (!isset($salesStatsByCatName[$cashCatName])) {
+            if (! isset($salesStatsByCatName[$cashCatName])) {
                 $salesStatsByCatName[$cashCatName] = ['sales_income' => 0, 'modal' => 0, 'profit' => 0];
             }
-            $salesStatsByCatName[$cashCatName]['sales_income'] += (float)$row->sales_income;
-            $salesStatsByCatName[$cashCatName]['modal'] += (float)$row->modal;
-            $salesStatsByCatName[$cashCatName]['profit'] += (float)$row->profit;
+            $salesStatsByCatName[$cashCatName]['sales_income'] += (float) $row->sales_income;
+            $salesStatsByCatName[$cashCatName]['modal'] += (float) $row->modal;
+            $salesStatsByCatName[$cashCatName]['profit'] += (float) $row->profit;
         }
 
         // Aggregate category sums directly from VirtualCashTransaction
@@ -364,16 +379,16 @@ class VirtualCashManagement extends Component
             $catName = $categoriesMap[$catId]->name ?? 'Penjualan Umum';
 
             $salesData = $salesStatsByCatName[$catName] ?? null;
-            $catIncome = (float)$sum->cat_income;
-            $catExpense = (float)$sum->cat_expense;
+            $catIncome = (float) $sum->cat_income;
+            $catExpense = (float) $sum->cat_expense;
 
             $categoryStatsMap[$catId ?: 'null'] = [
                 'id' => $catId,
                 'name' => $catName,
                 'income' => $catIncome,
                 'expense' => $catExpense,
-                'modal' => $salesData ? (float)$salesData['modal'] : 0,
-                'profit' => $salesData ? (float)$salesData['profit'] : ($catIncome - $catExpense),
+                'modal' => $salesData ? (float) $salesData['modal'] : 0,
+                'profit' => $salesData ? (float) $salesData['profit'] : ($catIncome - $catExpense),
                 'balance' => $catIncome - $catExpense,
             ];
         }

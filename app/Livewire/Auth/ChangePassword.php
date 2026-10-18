@@ -9,7 +9,9 @@ use Livewire\Component;
 class ChangePassword extends Component
 {
     public $currentPassword = '';
+
     public $newPassword = '';
+
     public $newPasswordConfirmation = '';
 
     public function resetInput()
@@ -33,8 +35,9 @@ class ChangePassword extends Component
 
         $user = User::find(auth()->id());
 
-        if (!Hash::check($this->currentPassword, $user->password)) {
+        if (! Hash::check($this->currentPassword, $user->password)) {
             $this->addError('currentPassword', 'Password saat ini tidak sesuai.');
+
             return;
         }
 

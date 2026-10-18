@@ -3,9 +3,7 @@
 namespace App\Livewire\Reports;
 
 use App\Models\CashierAttendance;
-use App\Models\CashierTaskDefinition;
 use App\Models\CashierTaskAssignment;
-use App\Models\CashierTaskSubmission;
 use App\Models\DocumentationSchedule;
 use App\Models\Notification;
 use App\Services\CashierTaskService;
@@ -19,11 +17,17 @@ class MyTasks extends Component
     use WithFileUploads, WithPagination;
 
     public bool $showTaskDetailModal = false;
+
     public bool $showSubmissionModal = false;
+
     public $selectedAssignmentId = null;
+
     public $selectedAssignment = null;
+
     public string $submissionReport = '';
+
     public $submissionProofImage = null;
+
     public string $activeTab = 'today';
 
     public function showTaskDetail($assignmentId): void
@@ -46,7 +50,7 @@ class MyTasks extends Component
             ->where('id', $assignmentId)
             ->first();
 
-        if (!$assignment) {
+        if (! $assignment) {
             return;
         }
 
@@ -78,7 +82,7 @@ class MyTasks extends Component
             ->where('id', $this->selectedAssignmentId)
             ->first();
 
-        if (!$assignment) {
+        if (! $assignment) {
             return;
         }
 
@@ -88,6 +92,7 @@ class MyTasks extends Component
         // Check if latest submission is already approved
         if ($latestSubmission && $latestSubmission->approval_status === 'approved') {
             $this->dispatch('toast', message: 'Tugas sudah disetujui admin dan tidak bisa diubah.', type: 'warning');
+
             return;
         }
 
@@ -98,7 +103,7 @@ class MyTasks extends Component
 
         if ($taskDef->requires_proof) {
             // New submission requires proof
-            if (!$latestSubmission) {
+            if (! $latestSubmission) {
                 $rules['submissionProofImage'] = 'required|image|max:5120';
             } else {
                 // Revision: proof is optional if already provided
@@ -135,7 +140,7 @@ class MyTasks extends Component
         Notification::create([
             'user_id' => $taskDef->created_by,
             'title' => $isRevision ? 'Revisi Tugas Menunggu ACC' : 'Laporan Tugas Menunggu ACC',
-            'body' => auth()->user()->name . ' menyelesaikan tugas "' . $taskDef->task_name . '". Silakan review & ACC.',
+            'body' => auth()->user()->name.' menyelesaikan tugas "'.$taskDef->task_name.'". Silakan review & ACC.',
             'type' => 'task',
             'action_url' => '/management/tasks',
         ]);
@@ -154,25 +159,25 @@ class MyTasks extends Component
         $today = now()->toDateString();
 
         // Auto-assign routine tasks to kasir jika mereka terjadwal hari ini
-        $service = app(\App\Services\CashierTaskService::class);
+        $service = app(CashierTaskService::class);
         $service->autoAssignRoutineTasksForCashier($userId, $activeJurusanId);
 
         // Get task assignments untuk kasir ini
         $todayAssignments = CashierTaskAssignment::with([
             'taskDefinition',
-            'submissions' => fn($q) => $q->orderBy('submission_version', 'desc'),
+            'submissions' => fn ($q) => $q->orderBy('submission_version', 'desc'),
         ])
             ->where('assigned_to', $userId)
             ->where(function ($query) use ($today) {
                 $query->whereHas('taskDefinition', function ($q) use ($today) {
                     $q->where('date', $today);
                 })
-                ->orWhere(function ($q) use ($today) {
-                    $q->whereHas('taskDefinition', function ($sq) {
-                        $sq->where('is_routine', true);
-                    })
-                    ->whereDate('created_at', $today);
-                });
+                    ->orWhere(function ($q) use ($today) {
+                        $q->whereHas('taskDefinition', function ($sq) {
+                            $sq->where('is_routine', true);
+                        })
+                            ->whereDate('created_at', $today);
+                    });
             })
             ->whereDoesntHave('submissions', function ($q) {
                 $q->where('approval_status', 'approved');
@@ -185,7 +190,7 @@ class MyTasks extends Component
 
         // Compute deadline untuk routine tasks
         foreach ($todayAssignments as $assignment) {
-            if ($assignment->taskDefinition->is_routine && !$assignment->taskDefinition->deadline_at) {
+            if ($assignment->taskDefinition->is_routine && ! $assignment->taskDefinition->deadline_at) {
                 $attendance = CashierAttendance::where('user_id', $userId)
                     ->where('date', $assignment->created_at->toDateString())
                     ->orderBy('clock_in', 'asc')
@@ -202,34 +207,34 @@ class MyTasks extends Component
         // History: assignments yang sudah disetujui (approved), ditolak >= 3 kali, atau tugas non-rutin yang lewat hari
         $historyAssignments = CashierTaskAssignment::with([
             'taskDefinition',
-            'submissions' => fn($q) => $q->orderBy('submission_version', 'desc'),
+            'submissions' => fn ($q) => $q->orderBy('submission_version', 'desc'),
         ])
             ->where('assigned_to', $userId)
             ->where(function ($query) use ($today) {
                 $query->whereHas('submissions', function ($q) {
                     $q->where('approval_status', 'approved');
                 })
-                ->orWhereHas('submissions', function ($q) {
-                    $q->where('approval_status', 'rejected');
-                }, '>=', 3)
-                ->orWhere(function ($q) use ($today) {
-                    $q->whereHas('taskDefinition', function ($sq) use ($today) {
-                        $sq->where('date', '<', $today)
-                           ->where('is_routine', false);
-                    });
-                })
-                ->orWhere(function ($q) use ($today) {
-                    $q->whereHas('taskDefinition', function ($sq) {
-                        $sq->where('is_routine', true);
+                    ->orWhereHas('submissions', function ($q) {
+                        $q->where('approval_status', 'rejected');
+                    }, '>=', 3)
+                    ->orWhere(function ($q) use ($today) {
+                        $q->whereHas('taskDefinition', function ($sq) use ($today) {
+                            $sq->where('date', '<', $today)
+                                ->where('is_routine', false);
+                        });
                     })
-                    ->whereDate('created_at', '<', $today);
-                });
+                    ->orWhere(function ($q) use ($today) {
+                        $q->whereHas('taskDefinition', function ($sq) {
+                            $sq->where('is_routine', true);
+                        })
+                            ->whereDate('created_at', '<', $today);
+                    });
             })
             ->orderBy('created_at', 'desc')
             ->paginate(10);
 
         foreach ($historyAssignments as $assignment) {
-            if ($assignment->taskDefinition->is_routine && !$assignment->taskDefinition->deadline_at) {
+            if ($assignment->taskDefinition->is_routine && ! $assignment->taskDefinition->deadline_at) {
                 $attendance = CashierAttendance::where('user_id', $userId)
                     ->where('date', $assignment->created_at->toDateString())
                     ->orderBy('clock_in', 'asc')

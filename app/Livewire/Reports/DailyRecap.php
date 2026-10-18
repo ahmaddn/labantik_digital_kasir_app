@@ -113,7 +113,7 @@ class DailyRecap extends Component
     public function postToCashBook(DailyRecapActionService $service): void
     {
         $activeJurusanId = session('active_jurusan_id');
-        
+
         // Auto-save the cash audit values first to ensure we post the latest typed inputs
         $service->saveCashAudit($this->selectedDate, $this->actualCash, $this->retainedChangeCash, $this->cashNote, $activeJurusanId);
 

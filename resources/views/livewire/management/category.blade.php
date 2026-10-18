@@ -1,35 +1,33 @@
-<div class="p-6">
-    <div class="flex flex-col md:flex-row md:items-center justify-between mb-10 gap-6">
-        <div>
-            <h1 class="text-4xl font-bold uppercase tracking-tight text-primary-blue dark:text-primary-blue-light">Kategori Produk</h1>
-            <p class="text-gray-400 font-bold text-xs uppercase tracking-[0.2em] italic">Klasifikasi Inventaris Digital</p>
+<div class="p-4 sm:p-6">
+    <x-hub-tabs hub="inventaris" title="Kategori Produk" subtitle="Klasifikasi produk dan pengaturan kategori menu TEFA." />
+
+    <div class="flex flex-col md:flex-row gap-3 items-center justify-between mb-6">
+        @if(!session('active_jurusan_id'))
+        <div class="relative w-full md:w-48 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 px-3 py-2 flex items-center">
+            <svg class="w-4 h-4 text-slate-400 mr-2 shrink-0" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
+            <select wire:model.live="filterJurusan" class="bg-transparent border-none p-0 focus:ring-0 text-xs font-semibold text-slate-600 dark:text-slate-300 w-full">
+                <option value="">Semua Jurusan</option>
+                @foreach($jurusans as $jur)
+                    <option value="{{ $jur->id }}">{{ $jur->name }}</option>
+                @endforeach
+            </select>
         </div>
-        
-        <div class="flex flex-col md:flex-row gap-4 items-center w-full md:w-auto">
-            @if(!session('active_jurusan_id'))
-            <div class="relative w-full md:w-48 bg-white dark:bg-gray-850 rounded-2xl border border-gray-100 dark:border-gray-800 px-4 py-3 flex items-center shadow-lg shadow-blue-900/5">
-                <svg class="w-4 h-4 text-gray-400 mr-2" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
-                <select wire:model.live="filterJurusan" class="bg-transparent border-none p-0 focus:ring-0 text-[10px] font-black uppercase tracking-widest text-gray-500 w-full">
-                    <option value="">Semua Jurusan</option>
-                    @foreach($jurusans as $jur)
-                        <option value="{{ $jur->id }}">{{ $jur->name }}</option>
-                    @endforeach
-                </select>
+        @else
+        <div></div>
+        @endif
+
+        <div class="relative w-full md:w-72">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
             </div>
-            @endif
-            <div class="relative group w-full md:w-80">
-                <div class="absolute inset-y-0 left-0 pl-6 flex items-center pointer-events-none">
-                    <svg class="w-4 h-4 text-gray-400 group-focus-within:text-primary-blue transition-colors" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-                </div>
-                <input type="text" wire:model.live="search" placeholder="Cari kategori..." class="w-full pl-14 pr-6 py-4 bg-white dark:bg-gray-850 rounded-2xl border border-gray-100 dark:border-gray-800 focus:ring-4 focus:ring-primary-blue/10 focus:border-primary-blue transition-all font-black text-sm text-gray-800 dark:text-white placeholder:text-gray-300 placeholder:italic">
-            </div>
+            <input type="text" wire:model.live="search" placeholder="Cari kategori..." class="w-full pl-9 pr-3 py-2 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 text-xs font-medium text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500">
         </div>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- Form Section -->
         <div class="lg:col-span-1">
-            <div class="bg-white dark:bg-gray-800 rounded-[3rem] p-10 shadow-2xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 sticky top-10">
+            <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm border border-slate-200 dark:border-slate-800 sticky top-6">
                 <div class="flex items-center mb-8">
                     <div class="w-12 h-12 bg-primary-blue rounded-2xl flex items-center justify-center text-white mr-4 shadow-lg shadow-blue-900/20">
                         <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>

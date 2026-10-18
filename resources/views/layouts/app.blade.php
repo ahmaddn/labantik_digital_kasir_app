@@ -89,15 +89,7 @@
         localStorage.setItem('censor-mode', this.censorMode);
     }
 }" x-init="if (darkMode) document.documentElement.classList.add('dark'); else document.documentElement.classList.remove('dark')"
-    class="bg-bone-white dark:bg-dark-soft text-slate-900 dark:text-bone-white antialiased transition-colors duration-300 theme-{{ $themeStyle }} relative">
-    @if($themeStyle === 'glassmorphism')
-        <!-- Glassmorphism Background Blobs -->
-        <div class="fixed inset-0 pointer-events-none overflow-hidden z-0">
-            <div class="absolute -top-[10%] -left-[10%] w-[50%] h-[50%] rounded-full bg-[var(--color-primary-blue)] opacity-[0.15] dark:opacity-[0.2] blur-[120px]"></div>
-            <div class="absolute top-[40%] -right-[10%] w-[60%] h-[60%] rounded-full bg-[var(--color-primary-red)] opacity-[0.1] dark:opacity-[0.15] blur-[140px]"></div>
-            <div class="absolute -bottom-[10%] left-[20%] w-[45%] h-[45%] rounded-full bg-[var(--color-primary-blue)] opacity-[0.1] dark:opacity-[0.15] blur-[120px]"></div>
-        </div>
-    @endif
+    class="bg-slate-50 dark:bg-[#020617] text-slate-900 dark:text-slate-100 antialiased transition-colors duration-200 relative min-h-screen">
     @livewire('global-search')
     @livewire('auth.change-password')
     <div class="flex h-screen overflow-hidden relative z-10">
@@ -106,17 +98,19 @@
 
         <!-- Main Content -->
         <main
-            class="flex-1 overflow-y-auto relative no-scrollbar bg-bone-white dark:bg-dark-bg transition-all duration-500">
+            class="flex-1 overflow-y-auto relative no-scrollbar bg-slate-50 dark:bg-[#020617] transition-all">
             
             @include('partials.layout.header')
 
-            <div class="w-full px-6 md:px-10 min-h-screen pb-20 transition-all duration-500">
+            <div class="w-full px-4 sm:px-6 lg:px-8 min-h-screen pb-28 lg:pb-16">
                 {{ $slot }}
             </div>
 
             @include('partials.toasts')
         </main>
     </div>
+
+    @include('partials.layout.mobile-bottom-nav')
 
     @auth
     <script>

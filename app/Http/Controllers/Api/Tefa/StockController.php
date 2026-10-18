@@ -7,10 +7,12 @@ use App\Http\Resources\Api\Tefa\StockResource;
 use App\Models\Jurusan;
 use App\Models\Product;
 use App\Models\StockEntry;
+use App\Models\Transaction;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 
 class StockController extends Controller
 {
@@ -27,16 +29,16 @@ class StockController extends Controller
 
         if (! $product) {
             return response()->json([
-                'status'  => 'error',
+                'status' => 'error',
                 'message' => 'Produk tidak ditemukan.',
-                'data'    => null,
+                'data' => null,
             ], 404);
         }
 
         return response()->json([
-            'status'  => 'success',
+            'status' => 'success',
             'message' => 'Stok produk berhasil dimuat',
-            'data'    => new StockResource($product),
+            'data' => new StockResource($product),
         ]);
     }
 
@@ -52,9 +54,9 @@ class StockController extends Controller
 
         if (! $merchant) {
             return response()->json([
-                'status'  => 'error',
+                'status' => 'error',
                 'message' => 'Merchant tidak ditemukan.',
-                'data'    => null,
+                'data' => null,
             ], 404);
         }
 
@@ -65,12 +67,12 @@ class StockController extends Controller
             ->get();
 
         return response()->json([
-            'status'  => 'success',
+            'status' => 'success',
             'message' => 'Daftar stok produk merchant berhasil dimuat',
-            'data'    => [
+            'data' => [
                 'tefa_merchant_id' => $merchant->id,
-                'store_name'       => $merchant->name,
-                'stocks'           => StockResource::collection($products),
+                'store_name' => $merchant->name,
+                'stocks' => StockResource::collection($products),
             ],
         ]);
     }
@@ -82,17 +84,17 @@ class StockController extends Controller
     public function deductStock(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), [
-            'items'                    => 'required|array|min:1',
-            'items.*.tefa_product_id'  => 'required|string|exists:products,id',
-            'items.*.quantity'         => 'required|integer|min:1',
-            'reference_id'             => 'nullable|string|max:100',
+            'items' => 'required|array|min:1',
+            'items.*.tefa_product_id' => 'required|string|exists:products,id',
+            'items.*.quantity' => 'required|integer|min:1',
+            'reference_id' => 'nullable|string|max:100',
         ]);
 
         if ($validator->fails()) {
             return response()->json([
-                'status'  => 'error',
+                'status' => 'error',
                 'message' => 'Validasi request gagal.',
-                'errors'  => $validator->errors(),
+                'errors' => $validator->errors(),
             ], 422);
         }
 
@@ -130,11 +132,11 @@ class StockController extends Controller
 
                         // Auto-create pencatatan stok hari ini
                         $stockEntry = StockEntry::create([
-                            'jurusan_id'     => $product->jurusan_id,
-                            'product_id'     => $product->id,
-                            'date'           => $today,
-                            'opening_stock'  => $initialStock,
-                            'closing_stock'  => $initialStock,
+                            'jurusan_id' => $product->jurusan_id,
+                            'product_id' => $product->id,
+                            'date' => $today,
+                            'opening_stock' => $initialStock,
+                            'closing_stock' => $initialStock,
                             'expected_stock' => $initialStock,
                         ]);
                     }
@@ -148,30 +150,30 @@ class StockController extends Controller
                     $stockEntry->refresh();
 
                     // Catat transaksi di aplikasi TEFA Kasir dengan payment_method 'dompet_digital'
-                    \App\Models\Transaction::create([
-                        'jurusan_id'     => $product->jurusan_id,
-                        'user_id'        => null,
-                        'product_id'     => $product->id,
-                        'supplier_id'    => $product->supplier_id,
-                        'reference'      => $request->input('reference_id') ?? 'DOMPET-'.strtoupper(\Illuminate\Support\Str::random(8)),
-                        'transacted_at'  => now(),
-                        'buyer_name'     => 'Siswa (Dompet Digital)',
-                        'quantity'       => $qtyToDeduct,
-                        'unit_price'     => $product->price,
-                        'unit_profit'    => $product->profit ?? 0,
-                        'total_price'    => $product->price * $qtyToDeduct,
-                        'debt_amount'    => 0,
-                        'change_due'     => 0,
-                        'status'         => 'uang_diterima',
+                    Transaction::create([
+                        'jurusan_id' => $product->jurusan_id,
+                        'user_id' => null,
+                        'product_id' => $product->id,
+                        'supplier_id' => $product->supplier_id,
+                        'reference' => $request->input('reference_id') ?? 'DOMPET-'.strtoupper(Str::random(8)),
+                        'transacted_at' => now(),
+                        'buyer_name' => 'Siswa (Dompet Digital)',
+                        'quantity' => $qtyToDeduct,
+                        'unit_price' => $product->price,
+                        'unit_profit' => $product->profit ?? 0,
+                        'total_price' => $product->price * $qtyToDeduct,
+                        'debt_amount' => 0,
+                        'change_due' => 0,
+                        'status' => 'uang_diterima',
                         'payment_method' => 'dompet_digital',
-                        'note'           => 'Transaksi via API Dompet Siswa (Saldo Digital)',
+                        'note' => 'Transaksi via API Dompet Siswa (Saldo Digital)',
                     ]);
 
                     $processed[] = [
-                        'tefa_product_id'   => $product->id,
-                        'name'              => $product->name,
+                        'tefa_product_id' => $product->id,
+                        'name' => $product->name,
                         'deducted_quantity' => $qtyToDeduct,
-                        'remaining_stock'   => (int) $stockEntry->closing_stock,
+                        'remaining_stock' => (int) $stockEntry->closing_stock,
                     ];
                 }
 
@@ -179,19 +181,19 @@ class StockController extends Controller
             });
 
             return response()->json([
-                'status'  => 'success',
+                'status' => 'success',
                 'message' => 'Pengurangan stok berhasil diproses',
-                'data'    => [
-                    'reference_id'     => $request->input('reference_id'),
-                    'deducted_at'      => now()->toIso8601String(),
-                    'deducted_items'   => $deductedProducts,
+                'data' => [
+                    'reference_id' => $request->input('reference_id'),
+                    'deducted_at' => now()->toIso8601String(),
+                    'deducted_items' => $deductedProducts,
                 ],
             ]);
         } catch (\Exception $e) {
             return response()->json([
-                'status'  => 'error',
+                'status' => 'error',
                 'message' => $e->getMessage(),
-                'data'    => null,
+                'data' => null,
             ], 400);
         }
     }

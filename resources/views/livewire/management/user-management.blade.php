@@ -1,44 +1,40 @@
-<div class="space-y-8 pt-6">
-    <!-- Header -->
-    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div>
-            <h1 class="text-2xl font-bold uppercase tracking-tight text-primary-blue dark:text-primary-yellow">Manajemen User</h1>
-            <p class="text-gray-400 text-sm font-semibold uppercase tracking-widest mt-1">Kelola Pengguna & Hak Akses TEFA</p>
-        </div>
-        <div class="flex items-center gap-3">
-            <button wire:click="downloadTemplate" class="inline-flex items-center px-5 py-3.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:text-white rounded-2xl font-black text-sm uppercase italic tracking-wider transition-all duration-300">
-                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                Template Excel
+<div class="p-4 sm:p-6 space-y-6">
+    <x-hub-tabs hub="pengaturan" title="Manajemen User" subtitle="Kelola akun pengguna, hak akses role, serta import dan export data akun kasir." />
+
+    <!-- Actions -->
+    <div class="flex items-center justify-end gap-2 flex-wrap">
+            <button wire:click="downloadTemplate" class="inline-flex items-center px-3.5 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:text-white rounded-xl font-bold text-xs transition-colors">
+                <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                Template
             </button>
 
-            <button wire:click="$set('showImportModal', true)" class="inline-flex items-center px-5 py-3.5 bg-amber-500 hover:bg-amber-600 text-white rounded-2xl font-black text-sm uppercase italic tracking-wider transition-all duration-300">
-                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
-                Import Excel
+            <button wire:click="$set('showImportModal', true)" class="inline-flex items-center px-3.5 py-2 bg-amber-500 hover:bg-amber-400 text-white rounded-xl font-bold text-xs shadow-sm transition-colors">
+                <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                Import
             </button>
 
             <!-- Export Excel Dropdown -->
             <div class="relative" x-data="{ openExport: false }" @click.outside="openExport = false">
-                <button @click="openExport = !openExport" class="inline-flex items-center px-5 py-3.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-2xl font-black text-sm uppercase italic tracking-wider transition-all duration-300 shadow-xl shadow-emerald-950/10 active:scale-95">
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                    Export Excel
+                <button @click="openExport = !openExport" class="inline-flex items-center px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold text-xs shadow-sm transition-colors">
+                    <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                    Export
                 </button>
                 <div x-show="openExport" x-cloak
-                    class="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-100 dark:border-gray-700 py-2 z-50 transform origin-top-right">
-                    <button @click="openExport = false; $wire.exportToExcel('all')" class="w-full flex items-center gap-3 px-4 py-3 text-xs font-black uppercase tracking-wider italic text-gray-500 dark:text-gray-300 hover:text-emerald-500 dark:hover:text-emerald-400 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-all text-left">
+                    class="absolute right-0 mt-2 w-48 bg-white dark:bg-slate-900 rounded-xl shadow-xl border border-slate-200 dark:border-slate-800 py-1.5 z-50">
+                    <button @click="openExport = false; $wire.exportToExcel('all')" class="w-full flex items-center px-3 py-2 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors text-left">
                         Semua Akun
                     </button>
-                    <button @click="openExport = false; $wire.exportToExcel('kasir')" class="w-full flex items-center gap-3 px-4 py-3 text-xs font-black uppercase tracking-wider italic text-gray-500 dark:text-gray-300 hover:text-emerald-500 dark:hover:text-emerald-400 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-all text-left border-t border-gray-50 dark:border-gray-700/50">
+                    <button @click="openExport = false; $wire.exportToExcel('kasir')" class="w-full flex items-center px-3 py-2 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors text-left border-t border-slate-100 dark:border-slate-800">
                         Hanya Kasir
                     </button>
                 </div>
             </div>
 
-            <button wire:click="openCreateModal" class="inline-flex items-center px-5 py-3.5 bg-primary-blue hover:bg-blue-900 text-primary-yellow rounded-2xl font-black text-sm uppercase italic tracking-wider transition-all duration-300 shadow-xl shadow-blue-900/10 active:scale-95">
-                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
+            <button wire:click="openCreateModal" class="inline-flex items-center px-3.5 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-bold text-xs shadow-sm transition-colors">
+                <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                 Tambah Pengguna
             </button>
         </div>
-    </div>
 
     <!-- Table & Filters Container -->
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-800 p-4 md:p-6">

@@ -2,11 +2,11 @@
 
 namespace App\Exports;
 
-use Maatwebsite\Excel\Concerns\Exportable;
-use Maatwebsite\Excel\Concerns\WithMultipleSheets;
 use App\Exports\Sheets\ProductsSheetExport;
 use App\Exports\Sheets\StockEntriesSheetExport;
 use App\Exports\Sheets\TransactionsSheetExport;
+use Maatwebsite\Excel\Concerns\Exportable;
+use Maatwebsite\Excel\Concerns\WithMultipleSheets;
 
 class DailyDataExport implements WithMultipleSheets
 {
@@ -22,7 +22,7 @@ class DailyDataExport implements WithMultipleSheets
     public function sheets(): array
     {
         return [
-            new ProductsSheetExport(),
+            new ProductsSheetExport,
             new StockEntriesSheetExport($this->date),
             new TransactionsSheetExport($this->date),
         ];

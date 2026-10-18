@@ -16,11 +16,11 @@ class MerchantResource extends JsonResource
 
         return [
             'tefa_merchant_id' => $this->id,
-            'store_name'       => $this->name,
-            'pic_name'         => $picName,
-            'phone'            => $this->phone,
-            'stand_location'   => $this->stand_location,
-            'is_active'        => $this->is_active,
+            'store_name' => $this->name,
+            'pic_name' => $picName,
+            'phone' => $this->phone,
+            'stand_location' => $this->stand_location,
+            'is_active' => $this->is_active,
         ];
     }
 }

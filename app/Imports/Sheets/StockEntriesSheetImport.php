@@ -13,12 +13,12 @@ class StockEntriesSheetImport implements ToCollection, WithHeadingRow
     public function collection(Collection $rows)
     {
         foreach ($rows as $row) {
-            if (!isset($row['nama_produk']) || empty($row['nama_produk'])) {
+            if (! isset($row['nama_produk']) || empty($row['nama_produk'])) {
                 continue;
             }
 
             $product = Product::where('name', $row['nama_produk'])->first();
-            
+
             if ($product) {
                 StockEntry::updateOrCreate(
                     [

@@ -1,25 +1,28 @@
-<div class="p-4 md:p-6">
-    <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-8 md:mb-12">
+<div class="py-4 space-y-6">
+    <!-- Top Bar: Title, Context Filter & Actions -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-            <h1
-                class="text-2xl md:text-4xl font-bold uppercase tracking-tight text-primary-blue dark:text-primary-blue-light">
-                Dashboard Digital</h1>
-            <p class="text-gray-400 font-semibold text-[10px] uppercase tracking-[0.2em]">
-                {{ \Carbon\Carbon::parse($today)->translatedFormat('l, d F Y') }}</p>
+            <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
+                {{ $isCashier ? 'Dashboard Kasir' : 'Dashboard Overview' }}
+            </h1>
+            <p class="text-xs font-medium text-slate-500 dark:text-slate-400 mt-0.5">
+                @if($isCashier)
+                    Shift Kasir • {{ session('active_jurusan_name') ? 'TEFA ' . session('active_jurusan_name') : 'Unit TEFA' }} • {{ \Carbon\Carbon::parse($today)->translatedFormat('l, d F Y') }}
+                @else
+                    {{ \Carbon\Carbon::parse($today)->translatedFormat('l, d F Y') }}
+                @endif
+            </p>
         </div>
-        <div class="flex flex-wrap items-center gap-3 sm:gap-4 w-full lg:w-auto lg:justify-end">
-            @if (!session('active_jurusan_id'))
-                <div
-                    class="flex items-center bg-white dark:bg-gray-800 px-4 md:px-6 py-2 md:py-2.5 rounded-xl shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-800">
-                    <svg class="w-5 h-5 text-primary-blue mr-3" xmlns="http://www.w3.org/2000/svg" width="24"
-                        height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z" />
-                        <line x1="4" y1="22" x2="4" y2="15" />
+
+        <div class="flex flex-wrap items-center gap-2.5 sm:justify-end">
+            <!-- Global Jurusan Filter (Only on Manager/Admin view if not fixed to specific jurusan) -->
+            @if (!$isCashier && !session('active_jurusan_id'))
+                <div class="flex items-center bg-white dark:bg-slate-900 px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs">
+                    <svg class="w-4 h-4 text-blue-600 mr-2 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
                     </svg>
-                    <select wire:model.live="filterJurusan"
-                        class="border-none p-0 focus:ring-0 font-black text-sm bg-transparent dark:text-white uppercase tracking-widest cursor-pointer">
-                        <option value="">Semua Jurusan / Global</option>
+                    <select wire:model.live="filterJurusan" class="bg-transparent border-none p-0 text-xs font-semibold text-slate-800 dark:text-slate-200 focus:ring-0 cursor-pointer">
+                        <option value="">Semua Unit TEFA</option>
                         @foreach ($jurusans as $jur)
                             <option value="{{ $jur->id }}">TEFA {{ $jur->name }}</option>
                         @endforeach
@@ -27,25 +30,19 @@
                 </div>
             @endif
 
+            <!-- Leaderboard Shortcut -->
             <a href="{{ route('leaderboard') }}"
-                class="px-4 py-3 sm:px-5 sm:py-3 md:py-3.5 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 text-gray-800 dark:text-white rounded-xl md:rounded-2xl shadow-xl shadow-blue-900/5 font-bold uppercase tracking-wide text-xs transition transform hover:-translate-y-1 hover:bg-gray-50 dark:hover:bg-gray-700 active:scale-95 flex items-center">
-                <svg class="w-5.5 h-5.5 mr-2.5 text-amber-500" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
-                    stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="12" cy="12" r="10" />
-                    <path d="M12 16v-4" />
-                    <path d="M12 8h.01" />
+                class="inline-flex items-center gap-2 px-3.5 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/80 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-semibold shadow-xs transition-colors">
+                <svg class="w-4 h-4 text-amber-500" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
                 </svg>
-                Peringkat & Poin
+                <span>Peringkat</span>
             </a>
 
+            <!-- Cashier Action Button -->
             @if (session('active_role_name') !== 'superadmin')
                 @php
-                    $hasHigherRole = auth()
-                        ->user()
-                        ->roles()
-                        ->whereIn('roles.name', ['superadmin', 'pengelola_jurusan'])
-                        ->exists();
+                    $hasHigherRole = auth()->user()->roles()->whereIn('roles.name', ['superadmin', 'pengelola_jurusan'])->exists();
                     $isScheduled = true;
                     if (session('active_role_name') === 'kasir' && !$hasHigherRole) {
                         $activeJurusanId = session('active_jurusan_id');
@@ -62,137 +59,68 @@
                 @endphp
 
                 @if ($isSessionFinished)
-                    <div class="flex items-center space-x-2" x-data="{ showEmergencyConfirm: false }">
+                    <div class="flex items-center gap-2" x-data="{ showEmergencyConfirm: false }">
                         @if ($hasHigherRole)
-                        <a href="{{ route('kasir') }}"
-                            class="px-4 py-3 sm:px-5 sm:py-3 md:py-3.5 bg-amber-500 hover:bg-amber-400 text-black rounded-xl md:rounded-2xl shadow-xl font-bold uppercase tracking-wide text-xs flex flex-col items-center leading-tight transition transform hover:-translate-y-1 active:scale-95">
-                            <div class="flex items-center font-black">
-                                <flux:icon.clock class="w-5 h-5 mr-2 text-black shrink-0 animate-pulse" />
-                                Mode Pasca-Closing
-                            </div>
-                            <span class="text-[8px] font-black uppercase tracking-widest mt-1 opacity-90">Input Transaksi Besok</span>
-                        </a>
+                            <a href="{{ route('kasir') }}"
+                                class="inline-flex items-center gap-2 px-4 py-2 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs uppercase tracking-wider rounded-xl shadow-xs transition-colors">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                                </svg>
+                                <span>Pasca-Closing</span>
+                            </a>
                         @else
-                        <button disabled
-                            class="px-4 py-3 sm:px-5 sm:py-3 md:py-3.5 bg-gray-400 text-white rounded-xl md:rounded-2xl shadow-xl font-bold uppercase tracking-wide text-xs cursor-not-allowed flex flex-col items-center leading-tight">
-                            <div class="flex items-center">
-                                <svg class="w-6 h-6 mr-3" xmlns="http://www.w3.org/2000/svg" width="24"
-                                    height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                    stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-                                    <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
-                                    <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-                                </svg>
-                                Sesi Selesai
-                            </div>
-                            <span class="text-[8px] font-black uppercase tracking-widest mt-1 opacity-60">Data hari ini
-                                telah dikunci</span>
-                        </button>
+                            <button disabled class="inline-flex items-center gap-2 px-4 py-2 bg-slate-200 dark:bg-slate-800 text-slate-400 font-bold text-xs uppercase tracking-wider rounded-xl cursor-not-allowed">
+                                <span>Sesi Selesai</span>
+                            </button>
                         @endif
-                        <button type="button" @click="showEmergencyConfirm = true" @class([
-                            'px-4 py-3 sm:px-5 sm:py-3 md:py-3.5 bg-red-600 hover:bg-red-700 text-white rounded-xl md:rounded-2xl shadow-xl shadow-red-600/30 font-bold uppercase tracking-wide text-xs flex flex-col items-center leading-tight transition transform hover:-translate-y-1 active:scale-95',
-                            'hidden' => !$hasHigherRole,
-                        ])>
-                            <div class="flex items-center">
-                                <svg class="w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" width="24"
-                                    height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                    stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
-                                    <path d="M3 3v5h5" />
-                                </svg>
-                                Darurat
-                            </div>
-                            <span class="text-[8px] font-black uppercase tracking-widest mt-1 opacity-90">Aktifkan
-                                Sesi</span>
-                        </button>
 
-                        <!-- Emergency Reactivate Confirmation Modal -->
-                        <div x-show="showEmergencyConfirm" x-cloak x-transition:enter="transition ease-out duration-300"
-                            x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
-                            x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100"
-                            x-transition:leave-end="opacity-0" @keydown.window.escape="showEmergencyConfirm = false"
-                            class="fixed inset-0 z-[500] flex items-center justify-center p-4 bg-gray-950/80 backdrop-blur-md text-left"
-                            style="display: none;">
-                            <div @click.outside="showEmergencyConfirm = false"
-                                x-transition:enter="transition ease-out duration-300"
-                                x-transition:enter-start="opacity-0 scale-90"
-                                x-transition:enter-end="opacity-100 scale-100"
-                                class="bg-white dark:bg-gray-900 w-full max-w-md rounded-2xl shadow-2xl overflow-hidden border border-gray-100 dark:border-gray-800">
-                                <!-- Header -->
-                                <div
-                                    class="p-5 bg-red-600 text-white relative overflow-hidden">
-                                    <div class="relative z-10 flex items-center gap-4">
-                                        <div
-                                            class="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center border border-white/20 flex-shrink-0">
-                                            <svg class="w-8 h-8 text-white" xmlns="http://www.w3.org/2000/svg"
-                                                fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                                                stroke-width="2.5">
-                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        @if ($hasHigherRole)
+                            <button type="button" @click="showEmergencyConfirm = true"
+                                class="px-3 py-2 bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/40 dark:hover:bg-rose-900/40 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-800 rounded-xl text-xs font-bold transition-colors">
+                                Aktifkan Sesi
+                            </button>
+
+                            <!-- Emergency Modal -->
+                            <div x-show="showEmergencyConfirm" x-cloak
+                                class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm">
+                                <div @click.outside="showEmergencyConfirm = false"
+                                    class="bg-white dark:bg-slate-900 w-full max-w-md rounded-2xl shadow-xl border border-slate-200 dark:border-slate-800 p-6 space-y-4">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-10 h-10 rounded-xl bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 flex items-center justify-center shrink-0">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
                                             </svg>
                                         </div>
                                         <div>
-                                            <span
-                                                class="px-2.5 py-0.5 bg-white/25 text-[10px] font-black uppercase tracking-widest rounded-full border border-white/10">Tindakan
-                                                Darurat</span>
-                                            <h3 class="text-2xl font-black italic tracking-tight mt-1">Aktifkan Kembali
-                                                 Sesi?</h3>
+                                            <h3 class="text-base font-bold text-slate-900 dark:text-white">Aktifkan Kembali Sesi Kasir?</h3>
+                                            <p class="text-xs text-slate-500 dark:text-slate-400">Data penutupan rekap harian hari ini akan direset.</p>
                                         </div>
                                     </div>
-                                </div>
-
-                                <!-- Content -->
-                                <div class="p-5">
-                                    <p class="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
-                                        Anda yakin ingin mengaktifkan kembali sesi ini? <strong
-                                            class="text-primary-red">Data rekap hari ini akan dihapus</strong> dan Anda
-                                        harus melakukan tutup kasir ulang nantinya.
-                                    </p>
-                                </div>
-
-                                <!-- Footer -->
-                                <div
-                                    class="p-6 bg-gray-50 dark:bg-gray-800 border-t border-gray-100 dark:border-gray-800 flex flex-col sm:flex-row gap-3 justify-end">
-                                    <button type="button" @click="showEmergencyConfirm = false"
-                                        class="px-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 text-xs font-black rounded-2xl hover:bg-gray-50 dark:hover:bg-gray-750 transition-all text-center uppercase tracking-widest">
-                                        Batal
-                                    </button>
-                                    <button type="button" wire:click="emergencyReactivateSession"
-                                        @click="showEmergencyConfirm = false"
-                                        class="px-5 py-2.5 bg-red-600 text-white text-xs font-black rounded-2xl hover:bg-red-700 shadow-lg shadow-red-600/25 transition-all text-center uppercase tracking-widest">
-                                        Ya, Aktifkan Sesi
-                                    </button>
+                                    <div class="flex justify-end gap-2.5 pt-2">
+                                        <button type="button" @click="showEmergencyConfirm = false"
+                                            class="px-4 py-2 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors">
+                                            Batal
+                                        </button>
+                                        <button type="button" wire:click="emergencyReactivateSession" @click="showEmergencyConfirm = false"
+                                            class="px-4 py-2 text-xs font-semibold bg-rose-600 hover:bg-rose-700 text-white rounded-xl shadow-xs transition-colors">
+                                            Ya, Aktifkan Sesi
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                        @endif
                     </div>
-                @elseif(!$isScheduled)
-                    <div
-                        class="px-4 py-3 sm:px-5 sm:py-3 md:py-3.5 bg-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-400 rounded-xl md:rounded-2xl shadow-xl opacity-90 cursor-not-allowed flex flex-col items-center justify-center leading-tight text-center">
-                        <div class="flex items-center text-xs font-black uppercase italic tracking-wider">
-                            <svg class="w-5 h-5 mr-2.5 shrink-0" xmlns="http://www.w3.org/2000/svg"
-                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
-                                stroke-linecap="round" stroke-linejoin="round">
-                                <rect width="18" height="18" x="3" y="4" rx="2" ry="2" />
-                                <line x1="16" x2="16" y1="2" y2="6" />
-                                <line x1="8" x2="8" y1="2" y2="6" />
-                                <line x1="3" x2="21" y1="10" y2="10" />
-                            </svg>
-                            Tidak Ada Jadwal
-                        </div>
-                        <span class="text-[8px] font-black uppercase tracking-widest mt-1 opacity-90">Anda tidak
-                            dijadwalkan hari ini</span>
+                @elseif (!$isScheduled)
+                    <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 text-xs font-semibold border border-amber-500/20">
+                        <span>Tidak Ada Jadwal Hari Ini</span>
                     </div>
                 @else
                     <a href="{{ route('kasir') }}"
-                        class="px-4 py-3 sm:px-5 sm:py-3 md:py-3.5 bg-primary-red text-white rounded-xl md:rounded-2xl shadow-2xl shadow-red-500/30 font-bold uppercase tracking-wide text-xs transition transform hover:-translate-y-2 active:scale-95 flex items-center">
-                        <svg class="w-6 h-6 mr-3" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
-                            stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" />
-                            <path d="M3 6h18" />
-                            <path d="M16 10a4 4 0 0 1-8 0" />
+                        class="inline-flex items-center gap-2 px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs uppercase tracking-wider rounded-xl shadow-sm transition-colors">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25 5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z" />
                         </svg>
-                        Buka Kasir
+                        <span>Buka Kasir</span>
                     </a>
                 @endif
             @endif
@@ -201,7 +129,7 @@
 
     @if ($isCashier)
         <!-- CASHIER SPECIALIZED DASHBOARD -->
-        <div class="space-y-8" x-data="{
+        <div class="space-y-6" x-data="{
             loginTime: '{{ $todayAttendance && $todayAttendance->clock_in ? \Carbon\Carbon::parse($todayAttendance->clock_in)->format('Y-m-d H:i:s') : '' }}',
             targetClosingStr: '{{ $targetClockOutCarbon ? $targetClockOutCarbon->format('Y-m-d H:i:s') : '' }}',
             elapsedHours: '00',
@@ -212,24 +140,17 @@
             init() {
                 if (this.loginTime) {
                     this.updateTimer();
-                    setInterval(() => {
-                        this.updateTimer();
-                    }, 1000);
+                    setInterval(() => { this.updateTimer(); }, 1000);
                 }
             },
             updateTimer() {
                 const now = new Date();
                 const start = new Date(this.loginTime.replace(/-/g, '/'));
                 const diffMs = Math.max(0, now - start);
-                
                 const totalSec = Math.floor(diffMs / 1000);
-                const hrs = Math.floor(totalSec / 3600);
-                const mins = Math.floor((totalSec % 3600) / 60);
-                const secs = totalSec % 60;
-                
-                this.elapsedHours = String(hrs).padStart(2, '0');
-                this.elapsedMinutes = String(mins).padStart(2, '0');
-                this.elapsedSeconds = String(secs).padStart(2, '0');
+                this.elapsedHours = String(Math.floor(totalSec / 3600)).padStart(2, '0');
+                this.elapsedMinutes = String(Math.floor((totalSec % 3600) / 60)).padStart(2, '0');
+                this.elapsedSeconds = String(totalSec % 60).padStart(2, '0');
 
                 if (this.targetClosingStr) {
                     const target = new Date(this.targetClosingStr.replace(/-/g, '/'));
@@ -240,1120 +161,423 @@
                         const remSec = Math.floor((target - now) / 1000);
                         const rH = Math.floor(remSec / 3600);
                         const rM = Math.floor((remSec % 3600) / 60);
-                        this.remainingText = `${rH}j ${rM}m lagi menuju batas minimal`;
+                        this.remainingText = `${rH}j ${rM}m lagi menuju batas closing`;
                     }
                 }
             }
         }">
-            <!-- Card Utama Absensi & Shift Realtime -->
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <!-- 1. Status Kehadiran & Jam Masuk -->
-                <div class="bg-primary-blue text-white rounded-3xl p-6 shadow-md flex flex-col justify-between">
+            <!-- Shift Status & Timer Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <!-- 1. Check-in Time -->
+                <div class="app-card p-5 flex flex-col justify-between">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-xs font-semibold text-slate-500 dark:text-slate-400">Absensi Shift Hari Ini</span>
+                        @if ($todayAttendance && $todayAttendance->clock_in_status === 'late')
+                            <span class="px-2 py-0.5 bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 rounded-md text-[10px] font-bold">Terlambat</span>
+                        @else
+                            <span class="px-2 py-0.5 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 rounded-md text-[10px] font-bold">Tepat Waktu</span>
+                        @endif
+                    </div>
                     <div>
-                        <div class="flex items-center justify-between mb-4">
-                            <span class="px-3 py-1 bg-white/20 rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5">
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                                </svg>
-                                Kehadiran Kasir
-                            </span>
-                            @if ($todayAttendance && $todayAttendance->clock_in_status === 'late')
-                                <span class="px-3 py-1 bg-rose-500 text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-sm">
-                                    Terlambat
-                                </span>
-                            @else
-                                <span class="px-3 py-1 bg-emerald-400 text-emerald-950 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-sm">
-                                    Tepat Waktu
-                                </span>
-                            @endif
-                        </div>
-                        <p class="text-xs text-blue-100 uppercase font-black tracking-wider">Jam Absen / Login Masuk</p>
-                        <h3 class="text-3xl font-black italic tracking-tight mt-1">
+                        <div class="text-2xl font-bold text-slate-900 dark:text-white tabular-nums">
                             {{ $todayAttendance && $todayAttendance->clock_in ? \Carbon\Carbon::parse($todayAttendance->clock_in)->format('H:i:s') : now()->format('H:i:s') }}
-                            <span class="text-sm font-bold text-blue-100 not-italic">WIB</span>
-                        </h3>
-                    </div>
-                    <div class="mt-6 pt-4 border-t border-white/20 flex items-center justify-between text-xs text-blue-100">
-                        <span>Batas Mulai Shift:</span>
-                        <span class="font-black text-white">{{ $targetClockIn }} WIB</span>
+                            <span class="text-xs font-normal text-slate-400">WIB</span>
+                        </div>
+                        <p class="text-xs text-slate-400 mt-1">Batas mulai shift: {{ $targetClockIn }} WIB</p>
                     </div>
                 </div>
 
-                <!-- 2. Stopwatch Durasi Berjalan Realtime -->
-                <div class="bg-[#f8f6f0] dark:bg-gray-800 rounded-3xl p-6 shadow-md border border-gray-200 dark:border-gray-700 flex flex-col justify-between">
-                    <div>
-                        <div class="flex items-center justify-between mb-4">
-                            <span class="px-3 py-1 bg-amber-500/10 text-amber-600 dark:text-amber-400 rounded-xl text-[10px] font-black uppercase tracking-widest border border-amber-500/20 flex items-center gap-1.5">
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                                Waktu Berjalan
-                            </span>
-                            <span class="inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
-                                Sedang Bertugas
-                            </span>
-                        </div>
-                        <p class="text-xs text-gray-500 dark:text-gray-400 uppercase font-black tracking-wider">Durasi Sesi Kasir Hari Ini</p>
-                        <div class="mt-1 flex items-baseline gap-2">
-                            <span class="text-3xl md:text-4xl font-black font-mono tracking-tight text-gray-850 dark:text-white" x-text="`${elapsedHours}:${elapsedMinutes}:${elapsedSeconds}`">
-                                00:00:00
-                            </span>
-                        </div>
+                <!-- 2. Elapsed Duration -->
+                <div class="app-card p-5 flex flex-col justify-between">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-xs font-semibold text-slate-500 dark:text-slate-400">Durasi Jaga Kasir</span>
+                        <span class="px-2 py-0.5 bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 rounded-md text-[10px] font-bold">Aktif</span>
                     </div>
-                    <div class="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
-                        <span>Waktu lokal sistem:</span>
-                        <span class="font-bold text-gray-700 dark:text-gray-300">{{ now()->format('d M Y') }}</span>
+                    <div>
+                        <div class="text-2xl font-bold font-mono text-slate-900 dark:text-white tracking-tight" x-text="`${elapsedHours}:${elapsedMinutes}:${elapsedSeconds}`">
+                            00:00:00
+                        </div>
+                        <p class="text-xs text-slate-400 mt-1">Waktu berjalan di perangkat</p>
                     </div>
                 </div>
 
-                <!-- 3. Batas Minimal Closing & Poin Tambahan -->
-                <div :class="isPastClosing ? 'bg-emerald-600 text-white' : 'bg-[#f8f6f0] dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-850 dark:text-white'"
-                    class="rounded-3xl p-6 shadow-md flex flex-col justify-between transition-colors">
-                    <div>
-                        <div class="flex items-center justify-between mb-4">
-                            <span :class="isPastClosing ? 'bg-white/20 text-white' : 'bg-blue-500/10 text-primary-blue dark:text-blue-400 border border-blue-500/20'"
-                                class="px-3 py-1 rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5">
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                                Batas Minimal Closing
-                            </span>
-                            <span :class="isPastClosing ? 'bg-white text-emerald-800' : 'bg-amber-500/20 text-amber-600 dark:text-amber-400'"
-                                class="px-3 py-1 rounded-xl text-[10px] font-black uppercase tracking-widest">
-                                Target: {{ $targetClockOut }} WIB
-                            </span>
-                        </div>
-                        <template x-if="isPastClosing">
-                            <div>
-                                <h3 class="text-xl font-black uppercase tracking-tight flex items-center gap-2">
-                                    <svg class="w-6 h-6 text-white shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
-                                    </svg>
-                                    Target Terpenuhi!
-                                </h3>
-                                <p class="text-xs text-emerald-100 mt-1 font-semibold leading-relaxed">
-                                    Anda telah melewati batas minimal closing ({{ $targetClockOut }}). Anda berhak mendapatkan bonus <strong>+10 Poin & +1 Streak</strong> saat logout atau closing shift!
-                                </p>
-                            </div>
-                        </template>
-                        <template x-if="!isPastClosing">
-                            <div>
-                                <h3 class="text-xl font-black uppercase tracking-tight text-gray-850 dark:text-white flex items-center gap-2">
-                                    <svg class="w-5 h-5 text-amber-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                    Belum Batas Minimal
-                                </h3>
-                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 font-medium leading-relaxed" x-text="remainingText || 'Bertugaslah hingga batas minimal closing untuk mengklaim poin tambahan.'">
-                                    Bertugaslah hingga minimal pukul {{ $targetClockOut }} untuk mengklaim bonus poin closing.
-                                </p>
-                            </div>
-                        </template>
+                <!-- 3. Closing Target -->
+                <div class="app-card p-5 flex flex-col justify-between">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-xs font-semibold text-slate-500 dark:text-slate-400">Batas Minimal Closing</span>
+                        <span class="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-md text-[10px] font-bold">
+                            {{ $targetClockOut }} WIB
+                        </span>
                     </div>
-                    <div class="mt-6 pt-4 border-t" :class="isPastClosing ? 'border-white/20' : 'border-gray-200 dark:border-gray-700'">
-                        <div class="flex items-center justify-between text-xs">
-                            <span :class="isPastClosing ? 'text-emerald-100' : 'text-gray-400'">Bonus Closing:</span>
-                            <span class="font-black" :class="isPastClosing ? 'text-white' : 'text-emerald-500'">+10 Poin & Streak</span>
+                    <div>
+                        <div class="text-sm font-bold" :class="isPastClosing ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-700 dark:text-slate-300'">
+                            <span x-show="isPastClosing">Target Terpenuhi (+10 Poin)</span>
+                            <span x-show="!isPastClosing" x-text="remainingText || 'Bertugaslah hingga batas closing'"></span>
                         </div>
+                        <p class="text-xs text-slate-400 mt-1">Klaim bonus poin saat rekap harian ditutup.</p>
                     </div>
                 </div>
             </div>
 
-            <!-- Bagian Aksi Cepat Kasir -->
-            <div class="p-6 bg-[#f8f6f0] dark:bg-gray-800 rounded-3xl shadow-md border border-gray-200 dark:border-gray-700 flex flex-col md:flex-row items-center justify-between gap-4">
+            <!-- Primary POS Launch Banner -->
+            <div class="app-card p-5 sm:p-6 flex flex-col sm:flex-row items-center justify-between gap-4 bg-gradient-to-r from-blue-600/5 to-transparent border-blue-600/20">
                 <div class="flex items-center gap-4">
-                    <div class="w-12 h-12 bg-primary-blue/10 text-primary-blue dark:text-blue-400 rounded-2xl flex items-center justify-center shrink-0">
+                    <div class="w-12 h-12 rounded-xl bg-blue-600 text-white flex items-center justify-center shrink-0">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25 5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z" />
                         </svg>
                     </div>
                     <div>
-                        <h3 class="text-lg font-black uppercase tracking-tight text-gray-850 dark:text-white">Akses Mesin Kasir (POS)</h3>
-                        <p class="text-xs text-gray-500 dark:text-gray-400 font-medium">Buka menu kasir untuk melayani transaksi pembelian barang dan cetak struk.</p>
+                        <h3 class="text-base font-bold text-slate-900 dark:text-white">Akses Mesin Kasir (POS)</h3>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">Layani transaksi penjualan, input topping, cetak nota, dan catat pembayaran.</p>
                     </div>
                 </div>
-                <div class="flex items-center gap-3 w-full md:w-auto">
-                    <form method="POST" action="{{ route('logout') }}" class="w-full md:w-auto">
+                <div class="flex items-center gap-2.5 w-full sm:w-auto">
+                    <form method="POST" action="{{ route('logout') }}" class="w-full sm:w-auto">
                         @csrf
                         <button type="submit"
-                            class="w-full md:w-auto px-6 py-4 bg-white hover:bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-600 rounded-2xl font-black uppercase tracking-wider text-xs flex items-center justify-center gap-2 transition active:scale-95"
-                            title="Logout dan clock out absensi hari ini">
-                            <svg class="w-4.5 h-4.5 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                            </svg>
-                            Logout Shift
+                            class="w-full sm:w-auto px-4 py-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-semibold transition-colors">
+                            Selesai & Keluar
                         </button>
                     </form>
                     <a href="{{ route('kasir') }}"
-                        class="w-full md:w-auto px-8 py-4 bg-primary-red hover:bg-red-700 text-white rounded-2xl shadow-md font-black uppercase tracking-wider text-xs flex items-center justify-center gap-2.5 transition transform hover:-translate-y-0.5 active:scale-95">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                        class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold shadow-sm transition-colors">
+                        <span>Buka Kasir Sekarang</span>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
                         </svg>
-                        Buka Mesin Kasir
                     </a>
                 </div>
             </div>
 
-            <!-- Widget Tugas Kasir Hari Ini & Dokumentasi -->
-            <div class="space-y-4">
+            <!-- Cashier Daily Tasks List -->
+            <div class="space-y-3">
                 <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-3">
-                        <div class="h-6 w-2 bg-primary-blue rounded-full"></div>
-                        <h2 class="text-xl font-bold uppercase tracking-tight text-gray-850 dark:text-white">Penugasan Hari Ini</h2>
-                    </div>
-                    <a href="{{ route('my-tasks') }}" class="text-xs font-black uppercase tracking-wider text-primary-blue dark:text-blue-400 hover:underline flex items-center gap-1">
-                        Buka Semua Tugas
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                        </svg>
+                    <h2 class="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider">Tugas Kasir Hari Ini</h2>
+                    <a href="{{ route('my-tasks') }}" class="text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline">
+                        Lihat Semua Tugas &rarr;
                     </a>
                 </div>
 
-                @if(isset($myDocSchedules) && $myDocSchedules->count() > 0)
-                    <div class="bg-indigo-900 text-white rounded-3xl p-6 shadow-md space-y-4 border border-indigo-700">
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center gap-3">
-                                <span class="p-2.5 bg-white/10 rounded-2xl">
-                                    <svg class="w-5 h-5 text-indigo-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                    </svg>
-                                </span>
-                                <div>
-                                    <h3 class="text-base font-black uppercase tracking-tight">Jadwal Tugas Dokumentasi</h3>
-                                    <p class="text-xs text-indigo-200 font-medium">Jadwal kegiatan dokumentasi yang ditugaskan kepada Anda</p>
-                                </div>
-                            </div>
-                            <a href="{{ route('documentation-schedules') }}" class="px-3.5 py-1.5 bg-white/10 hover:bg-white/20 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1">
-                                Detail
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                                </svg>
-                            </a>
-                        </div>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                            @foreach($myDocSchedules as $docSched)
-                                <div class="p-4 rounded-2xl bg-white/10 border border-white/10 space-y-1">
-                                    <div class="flex items-center justify-between text-xs">
-                                        <span class="font-black tracking-wider uppercase text-indigo-200">
-                                            {{ \Carbon\Carbon::parse($docSched->date)->translatedFormat('l, d M Y') }}
-                                        </span>
-                                        <span class="px-2 py-0.5 rounded-full text-[9px] font-black uppercase bg-indigo-500/30 text-indigo-200 border border-indigo-400/30">
-                                            Shift {{ $docSched->shift ?? 1 }}
-                                        </span>
-                                    </div>
-                                    <h4 class="text-sm font-bold text-white line-clamp-1">{{ $docSched->activity->title ?? 'Kegiatan Dokumentasi' }}</h4>
-                                    @if($docSched->notes)
-                                        <p class="text-xs text-indigo-200 line-clamp-1 italic">Catatan: {{ $docSched->notes }}</p>
-                                    @endif
-                                </div>
-                            @endforeach
-                        </div>
-                    </div>
-                @endif
-
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                     @forelse($todayTaskAssignments as $assignment)
-                        <div class="bg-[#f8f6f0] dark:bg-gray-800 rounded-3xl p-5 shadow-sm border border-gray-200 dark:border-gray-700 flex flex-col justify-between space-y-3">
+                        <div class="app-card p-4 flex flex-col justify-between space-y-3">
                             <div>
-                                <div class="flex items-center justify-between mb-2">
-                                    <span class="px-2.5 py-1 bg-blue-500/10 text-primary-blue dark:text-blue-400 rounded-xl text-[9px] font-black uppercase tracking-wider">
+                                <div class="flex items-center justify-between mb-1.5">
+                                    <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400">
                                         {{ $assignment->taskDefinition->is_routine ? 'Tugas Rutin' : 'Tugas Khusus' }}
                                     </span>
-                                    <span class="text-[10px] font-black uppercase text-gray-400">
+                                    <span class="text-[10px] font-semibold text-slate-400">
                                         {{ $assignment->assignment_status }}
                                     </span>
                                 </div>
-                                <h4 class="text-sm font-black uppercase tracking-tight text-gray-850 dark:text-white line-clamp-1">
+                                <h4 class="text-xs font-bold text-slate-900 dark:text-white line-clamp-1">
                                     {{ $assignment->taskDefinition->task_name }}
                                 </h4>
                                 @if($assignment->taskDefinition->description)
-                                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 line-clamp-2">
+                                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 line-clamp-2">
                                         {{ $assignment->taskDefinition->description }}
                                     </p>
                                 @endif
                             </div>
-                            <div class="pt-3 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                            <div class="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
                                 <span class="text-xs font-bold text-amber-500">+{{ $assignment->taskDefinition->reward_points ?? 5 }} Poin</span>
-                                <a href="{{ route('my-tasks') }}" class="px-3 py-1.5 bg-white dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-xl text-xs font-bold text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-600 transition-all">
+                                <a href="{{ route('my-tasks') }}" class="text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline">
                                     Kerjakan &rarr;
                                 </a>
                             </div>
                         </div>
                     @empty
-                        <div class="col-span-full p-8 bg-[#f8f6f0] dark:bg-gray-800 rounded-3xl border border-dashed border-gray-300 dark:border-gray-700 text-center">
-                            <svg class="w-10 h-10 mx-auto text-gray-400 dark:text-gray-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-                            </svg>
-                            <p class="text-xs font-black uppercase tracking-wider text-gray-400 dark:text-gray-400">Tidak ada tugas tambahan yang tertunda hari ini.</p>
+                        <div class="col-span-full app-card p-6 text-center text-slate-400">
+                            <p class="text-xs">Tidak ada tugas tambahan yang tertunda hari ini.</p>
                         </div>
                     @endforelse
                 </div>
             </div>
+
+            <!-- Cashier Documentation Schedule (If available) -->
+            @if(isset($myDocSchedules) && $myDocSchedules->count() > 0)
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between">
+                        <h2 class="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider">Jadwal Dokumentasi Shift</h2>
+                        <a href="{{ route('documentation-schedules') }}" class="text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline">
+                            Lihat Jadwal &rarr;
+                        </a>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        @foreach($myDocSchedules as $doc)
+                            <div class="app-card p-4 flex items-center justify-between">
+                                <div class="min-w-0">
+                                    <h4 class="text-xs font-bold text-slate-900 dark:text-white truncate">
+                                        {{ $doc->activity->name ?? 'Dokumentasi Kasir' }}
+                                    </h4>
+                                    <span class="text-[10px] text-slate-400">
+                                        {{ \Carbon\Carbon::parse($doc->date)->translatedFormat('d F Y') }} • {{ $doc->start_time }} - {{ $doc->end_time }}
+                                    </span>
+                                </div>
+                                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-50 text-blue-600 dark:bg-blue-950/40 dark:text-blue-400 shrink-0">
+                                    {{ $doc->status ?? 'Terjadwal' }}
+                                </span>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+            @endif
         </div>
     @else
-        <!-- ADMIN & PENGELOLA JURUSAN DASHBOARD (Statistik & Finansial) -->
+        <!-- ADMIN & PENGELOLA DASHBOARD -->
+
         @if ($orphanCarryForwardAmount > 0 && in_array(session('active_role_name'), ['pengelola_jurusan', 'superadmin']))
-            <div
-                class="mb-8 bg-amber-500/10 border-2 border-dashed border-amber-500 rounded-3xl p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div>
-                    <p class="text-xs font-bold text-amber-600/80 dark:text-amber-400/80 mt-1">
-                        Ditemukan saldo bawaan sebesar Rp{{ number_format($orphanCarryForwardAmount, 0, ',', '.') }} tanggal
-                        {{ now()->startOfMonth()->translatedFormat('d F Y') }}.
-                        Ini membuat statistik kas terlihat lebih besar dari transaksi riil bulan ini.
-                    </p>
-                </div>
+            <div class="app-card p-4 border-amber-500/30 bg-amber-500/5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <p class="text-xs text-amber-700 dark:text-amber-400">
+                    Ditemukan saldo bawaan sebesar <strong>Rp{{ number_format($orphanCarryForwardAmount, 0, ',', '.') }}</strong> tanggal {{ now()->startOfMonth()->translatedFormat('d F Y') }}.
+                </p>
                 <button wire:click="cleanupOrphanCarryForward"
-                    class="px-6 py-4 bg-amber-500 text-white rounded-2xl font-black italic uppercase text-xs tracking-widest shadow-xl shadow-amber-500/20 hover:scale-[1.02] active:scale-[0.98] transition-all whitespace-nowrap">
+                    class="px-3.5 py-1.5 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-xs font-semibold shrink-0 transition-colors">
                     Bersihkan Saldo Yatim
                 </button>
             </div>
         @endif
 
-        <!-- Summary Cards (Today vs Yesterday) -->
-        <div class="mb-8 md:mb-10">
-            <div class="flex items-center gap-4 mb-4 md:mb-5">
-                <div class="h-8 w-2 bg-primary-blue rounded-full"></div>
-                <h2 class="text-2xl font-bold uppercase tracking-tight text-gray-800 dark:text-white">Statistik
-                    Hari Ini</h2>
-            </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-            <div
-                class="bg-primary-blue rounded-2xl p-4 md:p-6 shadow-2xl shadow-blue-900/30 border border-transparent hover:scale-105 transition-all group overflow-hidden relative">
-                <div
-                    class="absolute -right-8 -bottom-8 opacity-10 group-hover:scale-110 transition-transform duration-700">
-                    <svg class="w-32 h-32 text-white" xmlns="http://www.w3.org/2000/svg" width="24"
-                        height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="12" y1="1" x2="12" y2="23" />
-                        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-                    </svg>
-                </div>
-                <div class="flex items-center justify-between mb-4 md:mb-5">
-                    <div class="p-3 bg-white/10 rounded-xl text-white">
-                        <svg class="w-6 h-6 md:w-7 h-7" xmlns="http://www.w3.org/2000/svg" width="24"
-                            height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M12 2v20" />
-                            <path d="m17 5-5-3-5 3" />
-                            <path d="m17 19-5 3-5-3" />
-                            <path d="M2 12h20" />
-                            <path d="m5 7-3 5 3 5" />
-                            <path d="m19 7 3 5-3 5" />
-                        </svg>
-                    </div>
-                    <span
-                        class="text-[10px] font-black uppercase tracking-widest text-white/60 bg-white/5 px-4 py-2 rounded-full">Omzet</span>
-                </div>
-                <h3 class="text-white/60 text-[10px] font-black uppercase tracking-widest mb-1">Total Omzet Tunai</h3>
-                <p class="text-xl md:text-2xl font-bold text-white tracking-tight"
-                    :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($stats->today_revenue, 0, ',', '.') }}
-                </p>
-                <div class="mt-4 pt-4 border-t border-white/10 flex flex-col gap-2">
-                    <div class="flex justify-between items-center">
-                        <span class="text-[9px] font-bold text-white/40 uppercase tracking-widest">Murni
-                            Jurusan:</span>
-                        <span class="text-xs font-black text-white italic"
-                            :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($stats->today_internal_revenue, 0, ',', '.') }}</span>
-                    </div>
-                    <div class="flex items-center">
-                        <span class="text-[9px] font-black uppercase px-2 py-1 rounded-md bg-white/20 text-white">
-                            {{ $stats->revenue_change >= 0 ? '+' : '' }}{{ number_format($stats->revenue_change, 1) }}%
-                            vs Kemarin
+        <!-- Primary KPI Metrics (Consolidated 3 Cards) -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <!-- 1. Omzet Hari Ini -->
+            <div class="app-card p-5 flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-semibold text-slate-500 dark:text-slate-400">Total Omzet Penjualan (Hari Ini)</span>
+                        <span class="text-[10px] font-bold px-2 py-0.5 rounded {{ $stats->revenue_change >= 0 ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400' : 'bg-rose-50 text-rose-600 dark:bg-rose-950/40 dark:text-rose-400' }}">
+                            {{ $stats->revenue_change >= 0 ? '+' : '' }}{{ number_format($stats->revenue_change, 1) }}% vs Kemarin
                         </span>
                     </div>
+                    <div class="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white tabular-nums" :class="censorMode ? 'privacy-blur' : ''">
+                        Rp{{ number_format($stats->today_revenue, 0, ',', '.') }}
+                    </div>
+                </div>
+                <div class="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
+                    <span>Murni Hak TEFA:</span>
+                    <span class="font-bold text-slate-800 dark:text-slate-200 tabular-nums" :class="censorMode ? 'privacy-blur' : ''">
+                        Rp{{ number_format($stats->today_internal_revenue, 0, ',', '.') }}
+                    </span>
                 </div>
             </div>
 
-            <div
-                class="bg-white dark:bg-gray-800 rounded-2xl p-4 md:p-6 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 hover:border-primary-red transition-all group overflow-hidden relative">
-                <div
-                    class="absolute -right-8 -bottom-8 opacity-5 group-hover:scale-110 transition-transform duration-700">
-                    <svg class="w-32 h-32 text-primary-red" xmlns="http://www.w3.org/2000/svg" width="24"
-                        height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <path d="m22 7-8.5 8.5-5-5L2 17" />
-                        <polyline points="18 7 22 7 22 11" />
-                    </svg>
-                </div>
-                <div class="flex items-center justify-between mb-4 md:mb-5">
-                    <div class="p-3 bg-primary-red/10 rounded-xl text-primary-red">
-                        <svg class="w-6 h-6 md:w-7 h-7" xmlns="http://www.w3.org/2000/svg" width="24"
-                            height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10" />
-                        </svg>
+            <!-- 2. Profit Bersih Hari Ini -->
+            <div class="app-card p-5 flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-semibold text-slate-500 dark:text-slate-400">Keuntungan Bersih (Hari Ini)</span>
+                        <span class="text-[10px] font-bold px-2 py-0.5 rounded {{ $stats->profit_change >= 0 ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400' : 'bg-rose-50 text-rose-600 dark:bg-rose-950/40 dark:text-rose-400' }}">
+                            {{ $stats->profit_change >= 0 ? '+' : '' }}{{ number_format($stats->profit_change, 1) }}% vs Kemarin
+                        </span>
                     </div>
-                    <span
-                        class="text-[10px] font-black uppercase tracking-widest text-primary-red bg-primary-red/5 px-4 py-2 rounded-full">Profit</span>
+                    <div class="text-2xl sm:text-3xl font-bold text-emerald-600 dark:text-emerald-400 tabular-nums" :class="censorMode ? 'privacy-blur' : ''">
+                        Rp{{ number_format($stats->today_profit, 0, ',', '.') }}
+                    </div>
                 </div>
-                <h3 class="text-gray-400 text-[10px] font-black uppercase tracking-widest mb-1">Keuntungan Bersih</h3>
-                <p class="text-xl md:text-2xl font-bold text-primary-red tracking-tight"
-                    :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($stats->today_profit, 0, ',', '.') }}
-                </p>
-                <div class="mt-4 flex items-center">
-                    <span
-                        class="text-[9px] font-black uppercase px-2 py-1 rounded-md bg-primary-red/10 text-primary-red">
-                        {{ $stats->profit_change >= 0 ? '+' : '' }}{{ number_format($stats->profit_change, 1) }}% vs
-                        Kemarin
+                <div class="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
+                    <span>Transaksi Berhasil:</span>
+                    <span class="font-bold text-slate-800 dark:text-slate-200">
+                        {{ $stats->today_transactions }} Pesanan
+                    </span>
+                </div>
+            </div>
+
+            <!-- 3. Kas Fisik & Piutang -->
+            <div class="app-card p-5 flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-semibold text-slate-500 dark:text-slate-400">Saldo Kas & Piutang</span>
+                        <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-50 text-blue-600 dark:bg-blue-950/40 dark:text-blue-400">Total Akumulasi</span>
+                    </div>
+                    <div class="text-2xl sm:text-3xl font-bold text-blue-600 dark:text-blue-400 tabular-nums" :class="censorMode ? 'privacy-blur' : ''">
+                        Rp{{ number_format($stats->total_audit_cash, 0, ',', '.') }}
+                    </div>
+                </div>
+                <div class="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
+                    <span>Piutang Belum Lunas:</span>
+                    <span class="font-bold text-rose-600 dark:text-rose-400 tabular-nums" :class="censorMode ? 'privacy-blur' : ''">
+                        Rp{{ number_format($stats->total_outstanding_debt, 0, ',', '.') }}
                     </span>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- General Insights (All Time) -->
-    <div class="mb-8 md:mb-16">
-        <div class="flex items-center gap-4 mb-4 md:mb-5">
-            <div class="h-8 w-2 bg-green-500 rounded-full"></div>
-            <h2 class="text-2xl font-bold uppercase tracking-tight text-gray-800 dark:text-white">General
-                Insights</h2>
-        </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-            <!-- Pemasukan (Bulan Ini) -->
-            <div
-                class="bg-white dark:bg-gray-800 rounded-2xl p-4 md:p-6 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 hover:border-green-500 transition-all group overflow-hidden relative">
-                <div
-                    class="absolute -right-8 -bottom-8 opacity-5 group-hover:scale-110 transition-transform duration-700">
-                    <svg class="w-32 h-32 text-green-500" xmlns="http://www.w3.org/2000/svg" width="24"
-                        height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M12 2v20" />
-                        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-                    </svg>
-                </div>
-                <div class="flex items-center justify-between mb-4 md:mb-5">
-                    <div class="p-3 bg-green-500/10 rounded-xl text-green-500">
-                        <svg class="w-6 h-6 md:w-7 h-7" xmlns="http://www.w3.org/2000/svg" width="24"
-                            height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                            <rect width="20" height="12" x="2" y="6" rx="2" />
-                            <circle cx="12" cy="12" r="2" />
-                            <path d="M6 12h.01M18 12h.01" />
-                        </svg>
-                    </div>
-                    <span
-                        class="text-[10px] font-black uppercase tracking-widest text-green-600 bg-green-500/5 px-4 py-2 rounded-full">Pemasukan</span>
-                </div>
-                <h3 class="text-gray-400 text-[10px] font-black uppercase tracking-widest mb-1">Bulan Ini</h3>
-                <p class="text-2xl md:text-4xl font-black text-green-600 dark:text-green-400 tracking-tighter"
-                    :class="censorMode ? 'privacy-blur' : ''">
-                    Rp{{ number_format($stats->monthly_income, 0, ',', '.') }}</p>
-                <p class="mt-4 text-[9px] font-bold text-gray-400 uppercase tracking-widest">Akumulasi Kas Masuk</p>
+        <!-- Monthly Balance Comparison Strip -->
+        <div class="app-card p-4 sm:p-5 grid grid-cols-2 sm:grid-cols-4 gap-4 divide-y sm:divide-y-0 sm:divide-x divide-slate-100 dark:divide-slate-800">
+            <div class="pt-2 sm:pt-0">
+                <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block">Pemasukan Bulan Ini</span>
+                <span class="text-sm sm:text-base font-bold text-emerald-600 dark:text-emerald-400 tabular-nums" :class="censorMode ? 'privacy-blur' : ''">
+                    +Rp{{ number_format($stats->monthly_income, 0, ',', '.') }}
+                </span>
             </div>
-
-            <!-- Pengeluaran (Bulan Ini) -->
-            <div
-                class="bg-white dark:bg-gray-800 rounded-2xl p-4 md:p-6 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 hover:border-red-500 transition-all group overflow-hidden relative">
-                <div
-                    class="absolute -right-8 -bottom-8 opacity-5 group-hover:scale-110 transition-transform duration-700">
-                    <svg class="w-32 h-32 text-red-500" xmlns="http://www.w3.org/2000/svg" width="24"
-                        height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M12 2v20" />
-                        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-                    </svg>
-                </div>
-                <div class="flex items-center justify-between mb-4 md:mb-5">
-                    <div class="p-4 md:p-5 bg-red-500/10 rounded-2xl text-red-500">
-                        <svg class="w-6 h-6 md:w-7 h-7" xmlns="http://www.w3.org/2000/svg" width="24"
-                            height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                            <rect width="20" height="12" x="2" y="6" rx="2" />
-                            <circle cx="12" cy="12" r="2" />
-                            <path d="M6 12h.01M18 12h.01" />
-                        </svg>
-                    </div>
-                    <span
-                        class="text-[10px] font-black uppercase tracking-widest text-red-600 bg-red-500/5 px-4 py-2 rounded-full">Pengeluaran</span>
-                </div>
-                <h3 class="text-gray-400 text-[10px] font-black uppercase tracking-widest mb-1">Bulan Ini</h3>
-                <p class="text-2xl md:text-4xl font-black text-red-600 dark:text-red-400 tracking-tighter"
-                    :class="censorMode ? 'privacy-blur' : ''">
-                    Rp{{ number_format($stats->monthly_expense, 0, ',', '.') }}</p>
-                <p class="mt-4 text-[9px] font-bold text-gray-400 uppercase tracking-widest">Akumulasi Kas Keluar</p>
+            <div class="pt-2 sm:pt-0 sm:pl-4">
+                <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block">Pengeluaran Bulan Ini</span>
+                <span class="text-sm sm:text-base font-bold text-rose-600 dark:text-rose-400 tabular-nums" :class="censorMode ? 'privacy-blur' : ''">
+                    -Rp{{ number_format($stats->monthly_expense, 0, ',', '.') }}
+                </span>
             </div>
-
-            <div
-                class="bg-white dark:bg-gray-800 rounded-2xl p-4 md:p-6 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 hover:border-green-500 transition-all group overflow-hidden relative">
-                <div
-                    class="absolute -right-8 -bottom-8 opacity-5 group-hover:scale-110 transition-transform duration-700">
-                    <svg class="w-32 h-32 text-green-500" xmlns="http://www.w3.org/2000/svg" width="24"
-                        height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M12 2v20" />
-                        <path d="m17 5-5-3-5 3" />
-                        <path d="m17 19-5 3-5-3" />
-                        <path d="M2 12h20" />
-                        <path d="m5 7-3 5 3 5" />
-                        <path d="m19 7 3 5-3 5" />
-                    </svg>
-                </div>
-                <div class="flex items-center justify-between mb-4 md:mb-5">
-                    <div class="p-3 bg-green-500/10 rounded-xl text-green-500">
-                        <svg class="w-6 h-6 md:w-7 h-7" xmlns="http://www.w3.org/2000/svg" width="24"
-                            height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M11 15h2a2 2 0 1 0 0-4h-2a2 2 0 1 1 0-4h2" />
-                            <path d="M12 17V5" />
-                        </svg>
-                    </div>
-                    <span
-                        class="text-[10px] font-black uppercase tracking-widest text-green-600 bg-green-500/5 px-4 py-2 rounded-full">Total
-                        Untung</span>
-                </div>
-                <h3 class="text-gray-400 text-[10px] font-black uppercase tracking-widest mb-1">Seluruh Waktu</h3>
-                <p class="text-2xl md:text-4xl font-black text-gray-800 dark:text-white tracking-tighter"
-                    :class="censorMode ? 'privacy-blur' : ''">
-                    Rp{{ number_format($stats->total_all_time_profit, 0, ',', '.') }}</p>
-                <p class="mt-4 text-[9px] font-bold text-gray-400 uppercase tracking-widest">Akumulasi Profit Bersih
-                </p>
+            <div class="pt-2 sm:pt-0 sm:pl-4">
+                <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block">Saldo Kas Modal</span>
+                <span class="text-sm sm:text-base font-bold text-slate-900 dark:text-white tabular-nums" :class="censorMode ? 'privacy-blur' : ''">
+                    Rp{{ number_format($stats->total_modal_balance, 0, ',', '.') }}
+                </span>
             </div>
-
-            <div
-                class="bg-white dark:bg-gray-800 rounded-2xl p-4 md:p-6 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 hover:border-primary-blue transition-all group overflow-hidden relative">
-                <div
-                    class="absolute -right-8 -bottom-8 opacity-5 group-hover:scale-110 transition-transform duration-700">
-                    <svg class="w-32 h-32 text-primary-blue" xmlns="http://www.w3.org/2000/svg" width="24"
-                        height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <rect width="20" height="12" x="2" y="6" rx="2" />
-                        <circle cx="12" cy="12" r="2" />
-                        <path d="M6 12h.01M18 12h.01" />
-                    </svg>
-                </div>
-                <div class="flex items-center justify-between mb-4 md:mb-5">
-                    <div class="p-4 md:p-5 bg-primary-blue/10 rounded-2xl text-primary-blue">
-                        <svg class="w-6 h-6 md:w-7 h-7" xmlns="http://www.w3.org/2000/svg" width="24"
-                            height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M21 12V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h7" />
-                            <path d="m16 19 2 2 4-4" />
-                        </svg>
-                    </div>
-                    <span
-                        class="text-[10px] font-black uppercase tracking-widest text-primary-blue bg-primary-blue/5 px-4 py-2 rounded-full">Kas
-                        Terverifikasi</span>
-                </div>
-                <h3 class="text-gray-400 text-[10px] font-black uppercase tracking-widest mb-1">Kas Terverifikasi</h3>
-                <p class="text-2xl md:text-4xl font-black text-gray-800 dark:text-white tracking-tighter"
-                    :class="censorMode ? 'privacy-blur' : ''">
-                    Rp{{ number_format($stats->total_audit_cash, 0, ',', '.') }}</p>
-                <p class="mt-4 text-[9px] font-bold text-gray-400 uppercase tracking-widest">Total Uang Fisik Terkumpul
-                </p>
-            </div>
-
-
-
-            <div
-                class="bg-white dark:bg-gray-800 rounded-2xl p-4 md:p-6 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 hover:border-primary-red transition-all group overflow-hidden relative">
-                <div
-                    class="absolute -right-8 -bottom-8 opacity-5 group-hover:scale-110 transition-transform duration-700">
-                    <svg class="w-32 h-32 text-primary-red" xmlns="http://www.w3.org/2000/svg" width="24"
-                        height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" />
-                        <path d="M12 9v4" />
-                        <path d="M12 17h.01" />
-                    </svg>
-                </div>
-                <div class="flex items-center justify-between mb-4 md:mb-5">
-                    <div class="p-3 bg-primary-red/10 rounded-xl text-primary-red">
-                        <svg class="w-6 h-6 md:w-7 h-7" xmlns="http://www.w3.org/2000/svg" width="24"
-                            height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-                            <circle cx="9" cy="7" r="4" />
-                            <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
-                            <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-                        </svg>
-                    </div>
-                    <span
-                        class="text-[10px] font-black uppercase tracking-widest text-primary-red bg-primary-red/5 px-4 py-2 rounded-full">Hutang</span>
-                </div>
-                <h3 class="text-gray-400 text-[10px] font-black uppercase tracking-widest mb-1">Piutang Belum Bayar
-                </h3>
-                <p class="text-2xl md:text-4xl font-black text-gray-800 dark:text-white tracking-tighter"
-                    :class="censorMode ? 'privacy-blur' : ''">
-                    Rp{{ number_format($stats->total_outstanding_debt, 0, ',', '.') }}</p>
-                <p class="mt-4 text-[9px] font-bold text-gray-400 uppercase tracking-widest">Total Tagihan Piutang</p>
-            </div>
-
-
-
-            <!-- Total Omzet (Seluruh Waktu) -->
-            <div
-                class="bg-white dark:bg-gray-800 rounded-2xl p-4 md:p-6 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 hover:border-indigo-500 transition-all group overflow-hidden relative">
-                <div
-                    class="absolute -right-8 -bottom-8 opacity-5 group-hover:scale-110 transition-transform duration-700">
-                    <svg class="w-32 h-32 text-indigo-500" xmlns="http://www.w3.org/2000/svg" width="24"
-                        height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M12 2v20" />
-                        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-                    </svg>
-                </div>
-                <div class="flex items-center justify-between mb-4 md:mb-5">
-                    <div class="p-4 md:p-5 bg-indigo-500/10 rounded-2xl text-indigo-500">
-                        <svg class="w-6 h-6 md:w-7 h-7" xmlns="http://www.w3.org/2000/svg" width="24"
-                            height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                            <rect width="20" height="12" x="2" y="6" rx="2" />
-                            <circle cx="12" cy="12" r="2" />
-                            <path d="M6 12h.01M18 12h.01" />
-                        </svg>
-                    </div>
-                    <span
-                        class="text-[10px] font-black uppercase tracking-widest text-indigo-600 bg-indigo-500/5 px-4 py-2 rounded-full">Total
-                        Omzet</span>
-                </div>
-                <h3 class="text-gray-400 text-[10px] font-black uppercase tracking-widest mb-1">Seluruh Waktu</h3>
-                <p class="text-2xl md:text-4xl font-black text-gray-800 dark:text-white tracking-tighter"
-                    :class="censorMode ? 'privacy-blur' : ''">
-                    Rp{{ number_format($stats->total_all_time_revenue, 0, ',', '.') }}</p>
-                <p class="mt-4 text-[9px] font-bold text-gray-400 uppercase tracking-widest">Akumulasi Pendapatan Kotor
-                </p>
-            </div>
-
-            <!-- Keuntungan (Bulan Ini) -->
-            <!-- Saldo Modal (Seluruh Waktu) -->
-            <div
-                class="bg-white dark:bg-gray-800 rounded-2xl p-4 md:p-6 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 hover:border-indigo-500 transition-all group overflow-hidden relative">
-                <div
-                    class="absolute -right-8 -bottom-8 opacity-5 group-hover:scale-110 transition-transform duration-700">
-                    <svg class="w-32 h-32 text-indigo-500" xmlns="http://www.w3.org/2000/svg" width="24"
-                        height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <rect width="20" height="12" x="2" y="6" rx="2" />
-                        <circle cx="12" cy="12" r="2" />
-                        <path d="M6 12h.01M18 12h.01" />
-                    </svg>
-                </div>
-                <div class="flex items-center justify-between mb-4 md:mb-5">
-                    <div class="p-4 md:p-5 bg-indigo-500/10 rounded-2xl text-indigo-500">
-                        <svg class="w-6 h-6 md:w-7 h-7" xmlns="http://www.w3.org/2000/svg" width="24"
-                            height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                            <rect width="20" height="12" x="2" y="6" rx="2" />
-                            <circle cx="12" cy="12" r="2" />
-                            <path d="M6 12h.01M18 12h.01" />
-                        </svg>
-                    </div>
-                    <span
-                        class="text-[10px] font-black uppercase tracking-widest text-indigo-600 bg-indigo-500/5 px-4 py-2 rounded-full">Saldo
-                        Modal</span>
-                </div>
-                <h3 class="text-gray-400 text-[10px] font-black uppercase tracking-widest mb-1">Seluruh Waktu</h3>
-                <p class="text-2xl md:text-4xl font-black text-indigo-600 dark:text-indigo-400 tracking-tighter"
-                    :class="censorMode ? 'privacy-blur' : ''">
-                    Rp{{ number_format($stats->total_modal_balance, 0, ',', '.') }}</p>
-                <p class="mt-4 text-[9px] font-bold text-gray-400 uppercase tracking-widest">Akumulasi Kas Modal Aktif
-                </p>
+            <div class="pt-2 sm:pt-0 sm:pl-4">
+                <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block">Total Omzet Sepanjang Waktu</span>
+                <span class="text-sm sm:text-base font-bold text-slate-900 dark:text-white tabular-nums" :class="censorMode ? 'privacy-blur' : ''">
+                    Rp{{ number_format($stats->total_all_time_revenue, 0, ',', '.') }}
+                </span>
             </div>
         </div>
-    </div>
 
-    <!-- Chart Section -->
-    <div
-        class="bg-white dark:bg-gray-800 rounded-3xl md:rounded-[3.5rem] p-4 md:p-6 mb-8 md:mb-16 shadow-2xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 overflow-hidden">
-        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 md:mb-10">
-            <div>
-                <h2
-                    class="text-xl md:text-2xl font-bold uppercase tracking-tight text-gray-800 dark:text-white leading-none">
-                    Grafik Performa Mingguan</h2>
-                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-2">Analisis Omzet & Profit 7
-                    Hari Terakhir</p>
-            </div>
-            <div class="flex items-center space-x-6">
-                <div class="flex items-center">
-                    <div class="w-3 h-3 bg-primary-blue rounded-full mr-2"></div>
-                    <span class="text-[9px] font-black uppercase tracking-widest text-gray-400">Omzet</span>
+        <!-- Weekly Chart & Top Products -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Weekly Chart -->
+            <div class="app-card p-5 lg:col-span-2 space-y-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h2 class="text-sm font-bold text-slate-900 dark:text-white">Tren Penjualan & Profit Mingguan</h2>
+                        <p class="text-xs text-slate-400">Perbandingan omzet harian dan keuntungan 7 hari terakhir</p>
+                    </div>
+                    <a href="{{ route('weekly-performance') }}" class="text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline">
+                        Detail Analitik &rarr;
+                    </a>
                 </div>
-                <div class="flex items-center">
-                    <div class="w-3 h-3 bg-primary-red rounded-full mr-2"></div>
-                    <span class="text-[9px] font-black uppercase tracking-widest text-gray-400">Profit</span>
+
+                <div class="h-64 relative" wire:ignore>
+                    <canvas id="dashboardWeeklyChart"></canvas>
                 </div>
             </div>
-        </div>
-        <div class="relative h-[280px] md:h-[400px]" wire:ignore>
-            <canvas id="weeklyChart"></canvas>
-        </div>
-    </div>
 
-    <script>
-        document.addEventListener('livewire:navigated', function() {
-            const ctx = document.getElementById('weeklyChart');
-            if (!ctx) return;
-
-            const data = @json($weeklyData);
-
-            new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: data.map(d => d.day),
-                    datasets: [{
-                            label: 'Omzet',
-                            data: data.map(d => d.revenue),
-                            borderColor: '#1e40af',
-                            backgroundColor: 'rgba(30, 64, 175, 0.1)',
-                            fill: true,
-                            tension: 0.4,
-                            borderWidth: 4,
-                            pointRadius: 6,
-                            pointBackgroundColor: '#1e40af',
-                            pointBorderColor: '#ffffff',
-                            pointBorderWidth: 2
-                        },
-                        {
-                            label: 'Profit',
-                            data: data.map(d => d.profit),
-                            borderColor: '#ef4444',
-                            backgroundColor: 'rgba(239, 68, 68, 0.1)',
-                            fill: true,
-                            tension: 0.4,
-                            borderWidth: 4,
-                            pointRadius: 6,
-                            pointBackgroundColor: '#ef4444',
-                            pointBorderColor: '#ffffff',
-                            pointBorderWidth: 2
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            display: false
-                        },
-                        tooltip: {
-                            mode: 'index',
-                            intersect: false,
-                            backgroundColor: 'rgba(17, 24, 39, 0.9)',
-                            titleFont: {
-                                size: 12,
-                                weight: 'bold'
-                            },
-                            bodyFont: {
-                                size: 11
-                            },
-                            padding: 12,
-                            cornerRadius: 8,
-                            callbacks: {
-                                label: function(context) {
-                                    let label = context.dataset.label || '';
-                                    if (label) {
-                                        label += ': ';
-                                    }
-                                    if (context.parsed.y !== null) {
-                                        label += new Intl.NumberFormat('id-ID', {
-                                            style: 'currency',
-                                            currency: 'IDR',
-                                            maximumFractionDigits: 0
-                                        }).format(context.parsed.y);
-                                    }
-                                    return label;
-                                }
-                            }
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            grid: {
-                                display: true,
-                                color: 'rgba(156, 163, 175, 0.1)',
-                                drawBorder: false
-                            },
-                            ticks: {
-                                font: {
-                                    size: 10,
-                                    weight: 'bold'
-                                },
-                                color: '#9ca3af',
-                                callback: function(value) {
-                                    return new Intl.NumberFormat('id-ID', {
-                                        style: 'currency',
-                                        currency: 'IDR',
-                                        maximumFractionDigits: 0
-                                    }).format(value);
-                                }
-                            }
-                        },
-                        x: {
-                            grid: {
-                                display: false
-                            },
-                            ticks: {
-                                font: {
-                                    size: 10,
-                                    weight: 'bold'
-                                },
-                                color: '#9ca3af'
-                            }
-                        }
-                    }
-                }
-            });
-        });
-    </script>
-
-    <div class="grid grid-cols-1 gap-6 md:gap-12">
-        <!-- Top Products -->
-        <div
-            class="bg-white dark:bg-gray-800 rounded-3xl md:rounded-[3.5rem] shadow-2xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 overflow-hidden">
-            <div class="p-4 md:p-6 border-b border-gray-100 dark:border-gray-700 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div>
-                    <h2
-                        class="text-xl md:text-2xl font-bold uppercase tracking-tight text-gray-800 dark:text-white">
-                        Produk Terlaris</h2>
-                    <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">Peringkat penjualan berdasarkan total unit terjual</p>
+            <!-- Top Products -->
+            <div class="app-card p-5 space-y-4">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-sm font-bold text-slate-900 dark:text-white">Produk Terlaris</h2>
+                    <a href="{{ route('products') }}" class="text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline">
+                        Katalog &rarr;
+                    </a>
                 </div>
 
-                <!-- Category Filter Tabs -->
-                <div class="flex items-center gap-2 overflow-x-auto pb-2 md:pb-0 scrollbar-none">
-                    <button wire:click="setTopCategory('all')"
-                        class="px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wide transition-all duration-200 whitespace-nowrap {{ ($selectedTopCategory ?? $this->selectedTopCategory) === 'all' ? 'bg-primary-blue text-white shadow-lg shadow-blue-500/20' : 'bg-gray-100 dark:bg-gray-700/60 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700' }}">
-                        Semua Kategori
+                <!-- Category filter chips -->
+                <div class="flex gap-1.5 overflow-x-auto no-scrollbar pb-1">
+                    <button wire:click="setTopCategory('all')" type="button"
+                        class="px-2.5 py-1 text-[10px] font-bold rounded-lg transition-colors {{ ($selectedTopCategory ?? 'all') === 'all' ? 'bg-blue-600 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300' }}">
+                        Semua
                     </button>
                     @foreach($categories as $cat)
-                        <button wire:click="setTopCategory('{{ $cat->id }}')"
-                            class="px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wide transition-all duration-200 whitespace-nowrap {{ ($selectedTopCategory ?? $this->selectedTopCategory) == $cat->id ? 'bg-primary-blue text-white shadow-lg shadow-blue-500/20' : 'bg-gray-100 dark:bg-gray-700/60 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700' }}">
+                        <button wire:click="setTopCategory('{{ $cat->id }}')" type="button"
+                            class="px-2.5 py-1 text-[10px] font-bold rounded-lg whitespace-nowrap transition-colors {{ ($selectedTopCategory ?? 'all') == $cat->id ? 'bg-blue-600 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300' }}">
                             {{ $cat->name }}
                         </button>
                     @endforeach
                 </div>
-            </div>
 
-            <!-- List Area & Loading Skeleton inside table -->
-            <div class="p-4 md:p-6 space-y-6 md:space-y-10 min-h-[380px] relative">
-                <!-- Skeleton Loader inside list (Shown only when loading setTopCategory) -->
-                <div wire:loading wire:target="setTopCategory" class="space-y-6 md:space-y-10">
-                    @for ($i = 1; $i <= 5; $i++)
-                        <div class="flex items-center animate-pulse">
-                            <div class="flex-shrink-0 w-12 h-12 md:w-16 md:h-16 bg-gray-200 dark:bg-gray-700/80 rounded-2xl md:rounded-[1.5rem]"></div>
-                            <div class="ml-4 md:ml-6 flex-1 space-y-2">
-                                <div class="h-4 bg-gray-200 dark:bg-gray-700/80 rounded w-1/3"></div>
-                                <div class="h-3 bg-gray-200 dark:bg-gray-700/80 rounded w-1/5"></div>
+                <div class="space-y-2.5">
+                    @forelse($topProducts as $idx => $prod)
+                        <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/50">
+                            <div class="flex items-center gap-2.5 min-w-0">
+                                <span class="w-6 h-6 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center text-xs font-bold text-slate-600 dark:text-slate-300 shrink-0">
+                                    {{ $idx + 1 }}
+                                </span>
+                                <div class="min-w-0">
+                                    <h4 class="text-xs font-bold text-slate-900 dark:text-white truncate">
+                                        {{ $prod->product->name ?? 'Produk Dihapus' }}
+                                    </h4>
+                                    <span class="text-[10px] text-slate-400">
+                                        {{ $prod->total_qty ?? 0 }} Unit Terjual
+                                    </span>
+                                </div>
                             </div>
-                            <div class="w-20 md:w-24 h-5 bg-gray-200 dark:bg-gray-700/80 rounded"></div>
-                        </div>
-                    @endfor
-                </div>
-
-                <!-- Actual Product Rows (Hidden while loading setTopCategory) -->
-                <div wire:loading.remove wire:target="setTopCategory" class="space-y-6 md:space-y-10">
-                    @forelse($topProducts as $top)
-                        <div class="flex items-center group transition-all duration-300 transform hover:translate-x-1" wire:key="top-prod-{{ $top->product_id }}">
-                            <div
-                                class="flex-shrink-0 w-12 h-12 md:w-16 md:h-16 bg-primary-blue dark:bg-gray-900 text-white rounded-2xl md:rounded-[1.5rem] flex items-center justify-center font-black italic shadow-2xl shadow-blue-900/10 group-hover:scale-110 transition-transform">
-                                {{ $loop->iteration }}
-                            </div>
-                            <div class="ml-4 md:ml-6 flex-1">
-                                <h4
-                                    class="text-sm md:text-base font-black text-gray-800 dark:text-white uppercase tracking-tight leading-tight">
-                                    {{ $top->product->name }}</h4>
-                                <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1">
-                                    {{ $top->total_qty }} Unit Terjual</p>
-                            </div>
-                            <div class="text-right">
-                                <p class="text-base md:text-lg font-black text-primary-red italic">
-                                    Rp{{ number_format($top->total_revenue, 0, ',', '.') }}</p>
+                            <div class="text-right shrink-0">
+                                <span class="text-xs font-bold text-slate-800 dark:text-slate-200">
+                                    Rp{{ number_format($prod->total_revenue ?? 0, 0, ',', '.') }}
+                                </span>
                             </div>
                         </div>
                     @empty
-                        <div class="py-16 md:py-32 text-center opacity-40">
-                            <svg class="w-16 h-16 md:w-24 md:h-24 mx-auto mb-4 md:mb-6 text-gray-400" xmlns="http://www.w3.org/2000/svg"
-                                width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
-                                <polyline points="14 2 14 8 20 8" />
-                                <path d="M12 18v-6" />
-                                <path d="m9 15 3 3 3-3" />
-                            </svg>
-                            <p class="text-xs font-bold uppercase tracking-widest text-gray-500">Tidak ada produk dalam kategori ini</p>
-                        </div>
+                        <p class="text-xs text-slate-400 text-center py-6">Belum ada data penjualan tercatat.</p>
                     @endforelse
                 </div>
-        </div>
-    </div>
-
-    <!-- New Visualization Section -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-12 mt-8 md:mt-12 mb-8 md:mb-16">
-        <!-- Category Revenue Chart -->
-        <div
-            class="bg-white dark:bg-gray-800 rounded-3xl md:rounded-[3.5rem] shadow-2xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 overflow-hidden flex flex-col">
-            <div class="p-4 md:p-6 border-b border-gray-100 dark:border-gray-700">
-                <h2
-                    class="text-xl md:text-2xl font-bold uppercase tracking-tight text-gray-800 dark:text-white">
-                    Revenue by Category</h2>
-                <p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mt-1">Distribusi Omzet Per
-                    Kategori</p>
-            </div>
-            <div class="p-4 md:p-6 flex-1 flex flex-col justify-center">
-                <div class="relative h-[250px] md:h-[300px]" wire:ignore>
-                    <canvas id="categoryChart"></canvas>
-                </div>
-                <div class="mt-6 md:mt-8 grid grid-cols-2 gap-3 md:gap-4">
-                    @foreach ($categoryData->take(4) as $cat)
-                        <div
-                            class="flex items-center justify-between text-[10px] font-black uppercase tracking-tight bg-gray-50 dark:bg-gray-900/50 p-3 md:p-4 rounded-2xl">
-                            <div class="flex items-center">
-                                <div class="w-2.5 h-2.5 rounded-full mr-2"
-                                    style="background-color: {{ ['#60a5fa', '#f87171', '#fbbf24', '#34d399', '#a78bfa', '#38bdf8'][$loop->index % 6] }}">
-                                </div>
-                                <span class="text-gray-500 line-clamp-1">{{ $cat->category_name }}</span>
-                            </div>
-                            <span
-                                class="text-gray-800 dark:text-white ml-2">Rp{{ number_format($cat->total_revenue, 0, ',', '.') }}</span>
-                        </div>
-                    @endforeach
-                </div>
             </div>
         </div>
 
-        <!-- Monthly Growth Chart -->
-        <div
-            class="bg-white dark:bg-gray-800 rounded-3xl md:rounded-[3.5rem] shadow-2xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 overflow-hidden flex flex-col">
-            <div class="p-4 md:p-6 border-b border-gray-100 dark:border-gray-700">
-                <h2
-                    class="text-xl md:text-2xl font-bold uppercase tracking-tight text-gray-800 dark:text-white">
-                    Monthly Growth</h2>
-                <p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mt-1">Tren Omzet 6 Bulan
-                    Terakhir</p>
-            </div>
-            <div class="p-4 md:p-6 flex-1">
-                <div class="relative h-[280px] md:h-[350px]" wire:ignore>
-                    <canvas id="monthlyChart"></canvas>
-                </div>
-            </div>
-        </div>
-    </div>
-    @endif
+        <script>
+            document.addEventListener('livewire:navigated', function () {
+                initDashboardChart();
+            });
+            document.addEventListener('DOMContentLoaded', function () {
+                initDashboardChart();
+            });
 
-    @if (!$isCashier)
-    <script>
-        document.addEventListener('livewire:navigated', function() {
-            // Function to safely create/recreate charts
-            const initChart = (id, config) => {
-                const canvas = document.getElementById(id);
-                if (!canvas) return;
+            function initDashboardChart() {
+                const ctx = document.getElementById('dashboardWeeklyChart');
+                if (!ctx || typeof Chart === 'undefined') return;
 
-                // Destroy existing instance if it exists
-                const existingChart = Chart.getChart(canvas);
+                const existingChart = Chart.getChart(ctx);
                 if (existingChart) {
                     existingChart.destroy();
                 }
 
-                return new Chart(canvas, config);
-            };
+                const weeklyData = @json($weeklyData ?? []);
+                const isDark = document.documentElement.classList.contains('dark');
 
-            // 1. Weekly Performance Chart
-            const weeklyData = @json($weeklyData);
-            initChart('weeklyChart', {
-                type: 'line',
-                data: {
-                    labels: weeklyData.map(d => d.day),
-                    datasets: [{
-                            label: 'Omzet',
-                            data: weeklyData.map(d => d.revenue),
-                            borderColor: '#60a5fa',
-                            backgroundColor: 'rgba(96, 165, 250, 0.12)',
-                            fill: true,
-                            tension: 0.4,
-                            borderWidth: 3,
-                            pointRadius: 4,
-                            pointBackgroundColor: '#60a5fa',
-                        },
-                        {
-                            label: 'Profit',
-                            data: weeklyData.map(d => d.profit),
-                            borderColor: '#f87171',
-                            backgroundColor: 'rgba(248, 113, 113, 0.12)',
-                            fill: true,
-                            tension: 0.4,
-                            borderWidth: 3,
-                            pointRadius: 4,
-                            pointBackgroundColor: '#f87171',
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            display: false
-                        },
-                        tooltip: {
-                            mode: 'index',
-                            intersect: false,
-                            backgroundColor: 'rgba(17, 24, 39, 0.9)',
-                            callbacks: {
-                                label: (context) => {
-                                    let label = context.dataset.label || '';
-                                    if (label) label += ': ';
-                                    label += new Intl.NumberFormat('id-ID', {
-                                        style: 'currency',
-                                        currency: 'IDR',
-                                        maximumFractionDigits: 0
-                                    }).format(context.parsed.y);
-                                    return label;
-                                }
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: weeklyData.map(d => d.day),
+                        datasets: [
+                            {
+                                label: 'Omzet',
+                                data: weeklyData.map(d => d.revenue),
+                                borderColor: '#2563EB',
+                                backgroundColor: 'rgba(37, 99, 235, 0.08)',
+                                tension: 0.3,
+                                borderWidth: 2,
+                                pointRadius: 3,
+                                fill: true
+                            },
+                            {
+                                label: 'Profit Bersih',
+                                data: weeklyData.map(d => d.profit),
+                                borderColor: '#10B981',
+                                backgroundColor: 'rgba(16, 185, 129, 0.08)',
+                                tension: 0.3,
+                                borderWidth: 2,
+                                pointRadius: 3,
+                                fill: true
                             }
-                        }
+                        ]
                     },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            grid: {
-                                color: 'rgba(156, 163, 175, 0.1)',
-                                drawBorder: false
-                            },
-                            ticks: {
-                                font: {
-                                    size: 10,
-                                    weight: 'bold'
-                                },
-                                color: '#9ca3af',
-                                callback: (value) => new Intl.NumberFormat('id-ID', {
-                                    style: 'currency',
-                                    currency: 'IDR',
-                                    maximumFractionDigits: 0
-                                }).format(value)
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                                labels: {
+                                    color: isDark ? '#94A3B8' : '#64748B',
+                                    font: { size: 11, weight: 'bold' }
+                                }
                             }
                         },
-                        x: {
-                            grid: {
-                                display: false
+                        scales: {
+                            x: {
+                                grid: { display: false },
+                                ticks: { color: isDark ? '#64748B' : '#94A3B8', font: { size: 10 } }
                             },
-                            ticks: {
-                                font: {
-                                    size: 10,
-                                    weight: 'bold'
-                                },
-                                color: '#9ca3af'
-                            }
-                        }
-                    }
-                }
-            });
-
-            // 2. Category Distribution Chart
-            const catData = @json($categoryData);
-            initChart('categoryChart', {
-                type: 'doughnut',
-                data: {
-                    labels: catData.map(d => d.category_name),
-                    datasets: [{
-                        data: catData.map(d => d.total_revenue),
-                        backgroundColor: ['#60a5fa', '#f87171', '#fbbf24', '#34d399', '#a78bfa', '#38bdf8'],
-                        borderWidth: 0,
-                        hoverOffset: 12
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    cutout: '75%',
-                    plugins: {
-                        legend: {
-                            display: false
-                        },
-                        tooltip: {
-                            backgroundColor: 'rgba(17, 24, 39, 0.9)',
-                            callbacks: {
-                                label: (context) => {
-                                    let label = context.label || '';
-                                    if (label) label += ': ';
-                                    label += new Intl.NumberFormat('id-ID', {
-                                        style: 'currency',
-                                        currency: 'IDR',
-                                        maximumFractionDigits: 0
-                                    }).format(context.parsed);
-                                    return label;
+                            y: {
+                                grid: { color: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' },
+                                ticks: {
+                                    color: isDark ? '#64748B' : '#94A3B8',
+                                    font: { size: 10 },
+                                    callback: function(val) { return 'Rp' + (val >= 1000 ? (val / 1000) + 'k' : val); }
                                 }
                             }
                         }
                     }
-                }
-            });
-
-            // 3. Monthly Growth Chart
-            const monthlyData = @json($monthlyData);
-            initChart('monthlyChart', {
-                type: 'bar',
-                data: {
-                    labels: monthlyData.map(d => d.month),
-                    datasets: [{
-                        label: 'Omzet',
-                        data: monthlyData.map(d => d.revenue),
-                        backgroundColor: '#60a5fa',
-                        borderRadius: 12,
-                        barThickness: 30,
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            display: false
-                        },
-                        tooltip: {
-                            backgroundColor: 'rgba(17, 24, 39, 0.9)',
-                            callbacks: {
-                                label: (context) => {
-                                    let label = context.dataset.label || '';
-                                    if (label) label += ': ';
-                                    label += new Intl.NumberFormat('id-ID', {
-                                        style: 'currency',
-                                        currency: 'IDR',
-                                        maximumFractionDigits: 0
-                                    }).format(context.parsed.y);
-                                    return label;
-                                }
-                            }
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            grid: {
-                                color: 'rgba(156, 163, 175, 0.1)',
-                                drawBorder: false
-                            },
-                            ticks: {
-                                font: {
-                                    size: 10,
-                                    weight: 'bold'
-                                },
-                                color: '#9ca3af',
-                                callback: (value) => new Intl.NumberFormat('id-ID', {
-                                    style: 'currency',
-                                    currency: 'IDR',
-                                    maximumFractionDigits: 0
-                                }).format(value)
-                            }
-                        },
-                        x: {
-                            grid: {
-                                display: false
-                            },
-                            ticks: {
-                                font: {
-                                    size: 10,
-                                    weight: 'bold'
-                                },
-                                color: '#9ca3af'
-                            }
-                        }
-                    }
-                }
-            });
-        });
-    </script>
+                });
+            }
+        </script>
     @endif
-
 </div>
-

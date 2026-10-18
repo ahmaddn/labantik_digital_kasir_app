@@ -2,12 +2,12 @@
 
 namespace App\Livewire\Reports;
 
-use App\Models\CashTransaction;
 use App\Models\CashierAttendance;
 use App\Models\CashierNote;
 use App\Models\CashierSchedule;
 use App\Models\CashierTaskAssignment;
 use App\Models\CashierTaskSubmission;
+use App\Models\CashTransaction;
 use App\Models\DailyRecap;
 use App\Models\Product;
 use App\Models\Transaction;
@@ -19,15 +19,19 @@ use Livewire\Component;
 class WeeklyPerformance extends Component
 {
     public $startDate;
+
     public $endDate;
+
     public $currentStep = 1; // 1: Ringkasan & Tren, 2: Kinerja Kasir & Disiplin, 3: Analisis Produk & Stok, 4: Audit Harian & Catatan
 
     // Modal state for viewing detailed cashier audit
     public $selectedCashierId = null;
+
     public $showCashierDetailModal = false;
 
     // Accordion state for Step 4 (managed by Livewire to avoid Alpine morph/DOM morphing collision)
     public $activeDay = 0;
+
     public $activeCashier = null;
 
     public function toggleDay($idx)
@@ -115,7 +119,7 @@ class WeeklyPerformance extends Component
         $currentAgg = Transaction::forReporting()
             ->selectRaw('COALESCE(SUM(total_price), 0) as total_rev, COALESCE(SUM(unit_profit * quantity), 0) as total_profit, COUNT(DISTINCT reference) as total_tx, COALESCE(SUM(quantity), 0) as total_items')
             ->whereBetween('transacted_at', [$weekStart->format('Y-m-d 00:00:00'), $weekEnd->format('Y-m-d 23:59:59')])
-            ->when($activeJurusanId, fn($q) => $q->where('jurusan_id', $activeJurusanId))
+            ->when($activeJurusanId, fn ($q) => $q->where('jurusan_id', $activeJurusanId))
             ->whereIn('status', ['uang_diterima', 'belum_kembalian'])
             ->first();
 
@@ -141,7 +145,7 @@ class WeeklyPerformance extends Component
         $prevAgg = Transaction::forReporting()
             ->selectRaw('COALESCE(SUM(total_price), 0) as total_rev, COALESCE(SUM(unit_profit * quantity), 0) as total_profit, COUNT(DISTINCT reference) as total_tx')
             ->whereBetween('transacted_at', [$prevWeekStart->format('Y-m-d 00:00:00'), $prevWeekEnd->format('Y-m-d 23:59:59')])
-            ->when($activeJurusanId, fn($q) => $q->where('jurusan_id', $activeJurusanId))
+            ->when($activeJurusanId, fn ($q) => $q->where('jurusan_id', $activeJurusanId))
             ->whereIn('status', ['uang_diterima', 'belum_kembalian'])
             ->first();
 
@@ -192,14 +196,14 @@ class WeeklyPerformance extends Component
             $dayAgg = Transaction::forReporting()
                 ->selectRaw('COALESCE(SUM(total_price), 0) as total_rev, COALESCE(SUM(unit_profit * quantity), 0) as total_profit, COUNT(DISTINCT reference) as total_tx')
                 ->whereDate('transacted_at', $dayStr)
-                ->when($activeJurusanId, fn($q) => $q->where('jurusan_id', $activeJurusanId))
+                ->when($activeJurusanId, fn ($q) => $q->where('jurusan_id', $activeJurusanId))
                 ->whereIn('status', ['uang_diterima', 'belum_kembalian'])
                 ->first();
 
             // Cash-Only Revenue for Cash Audit (Total Omzet Tunai Sistem)
             $cashRev = (float) Transaction::forReporting()
                 ->whereDate('transacted_at', $dayStr)
-                ->when($activeJurusanId, fn($q) => $q->where('jurusan_id', $activeJurusanId))
+                ->when($activeJurusanId, fn ($q) => $q->where('jurusan_id', $activeJurusanId))
                 ->whereIn('status', ['uang_diterima', 'belum_kembalian'])
                 ->where(function ($q) {
                     $q->whereNull('payment_method')
@@ -229,12 +233,12 @@ class WeeklyPerformance extends Component
             // Fetch DailyRecap audit kas for this day
             $dailyRecapModel = DailyRecap::forReporting()
                 ->where('date', $dayStr)
-                ->when($activeJurusanId, fn($q) => $q->where('jurusan_id', $activeJurusanId))
+                ->when($activeJurusanId, fn ($q) => $q->where('jurusan_id', $activeJurusanId))
                 ->first();
 
             $actualCash = $dailyRecapModel ? (float) $dailyRecapModel->actual_cash : 0;
             $retainedChangeCash = $dailyRecapModel ? (float) $dailyRecapModel->retained_change_cash : 0;
-            $hasAudit = $dailyRecapModel && ($actualCash > 0 || !empty($dailyRecapModel->cash_note));
+            $hasAudit = $dailyRecapModel && ($actualCash > 0 || ! empty($dailyRecapModel->cash_note));
 
             // Formula Selisih PERSIS Rekap Harian:
             // Selisih = Setoran Bersih (Uang Fisik - Kembalian Ditahan) - Total Omzet Tunai Sistem
@@ -249,7 +253,7 @@ class WeeklyPerformance extends Component
                     'day' => $dayName,
                     'date' => $dayDate->format('d M'),
                     'revenue' => $rev,
-                    'transactions' => $txCount
+                    'transactions' => $txCount,
                 ];
             }
 
@@ -270,28 +274,30 @@ class WeeklyPerformance extends Component
 
             // Factual Shift & Task Audit on this specific day
             $schedulesOnDay = CashierSchedule::where('date', $dayStr)
-                ->when($activeJurusanId, fn($q) => $q->where('jurusan_id', $activeJurusanId))
+                ->when($activeJurusanId, fn ($q) => $q->where('jurusan_id', $activeJurusanId))
                 ->with('user')
                 ->get();
 
             $cashierAuditsForDay = [];
             foreach ($schedulesOnDay as $sched) {
                 $cUser = $sched->user;
-                if (!$cUser) continue;
+                if (! $cUser) {
+                    continue;
+                }
 
                 // Attendance on this day
                 $att = CashierAttendance::where('user_id', $cUser->id)
                     ->where('date', $dayStr)
-                    ->when($activeJurusanId, fn($q) => $q->where('jurusan_id', $activeJurusanId))
+                    ->when($activeJurusanId, fn ($q) => $q->where('jurusan_id', $activeJurusanId))
                     ->first();
 
                 // Tasks assigned on this day (both routine and custom tasks created on/for this date)
                 $assignmentsOnDay = CashierTaskAssignment::where('assigned_to', $cUser->id)
                     ->where(function ($q) use ($dayStr) {
                         $q->whereDate('created_at', $dayStr)
-                            ->orWhereHas('taskDefinition', fn($sq) => $sq->whereDate('date', $dayStr));
+                            ->orWhereHas('taskDefinition', fn ($sq) => $sq->whereDate('date', $dayStr));
                     })
-                    ->when($activeJurusanId, fn($q) => $q->where('jurusan_id', $activeJurusanId))
+                    ->when($activeJurusanId, fn ($q) => $q->where('jurusan_id', $activeJurusanId))
                     ->with(['taskDefinition', 'latestSubmission'])
                     ->get();
 
@@ -299,7 +305,7 @@ class WeeklyPerformance extends Component
                 $cSalesOnDay = Transaction::forReporting()
                     ->where('user_id', $cUser->id)
                     ->whereDate('transacted_at', $dayStr)
-                    ->when($activeJurusanId, fn($q) => $q->where('jurusan_id', $activeJurusanId))
+                    ->when($activeJurusanId, fn ($q) => $q->where('jurusan_id', $activeJurusanId))
                     ->whereIn('status', ['uang_diterima', 'belum_kembalian']);
 
                 $cRev = $cSalesOnDay->sum('total_price');
@@ -316,7 +322,7 @@ class WeeklyPerformance extends Component
                             $status = 'Disetujui';
                             $badgeClass = 'bg-emerald-100 text-emerald-800 border border-emerald-200 dark:bg-emerald-950 dark:text-emerald-300 dark:border-emerald-800';
                         } elseif ($sub->approval_status === 'rejected') {
-                            $status = 'Ditolak: ' . ($sub->rejection_note ?? 'Perlu perbaikan');
+                            $status = 'Ditolak: '.($sub->rejection_note ?? 'Perlu perbaikan');
                             $badgeClass = 'bg-rose-100 text-rose-800 border border-rose-200 dark:bg-rose-950 dark:text-rose-300 dark:border-rose-800';
                         } else {
                             $status = 'Menunggu Review';
@@ -326,10 +332,10 @@ class WeeklyPerformance extends Component
 
                     $rawTaskName = $def->task_name ?? 'Tugas Piket';
                     $hasRoutinePrefix = str_starts_with(strtolower($rawTaskName), '[rutin]');
-                    $prefix = ($def && $def->is_routine && !$hasRoutinePrefix) ? '[Rutin] ' : '';
+                    $prefix = ($def && $def->is_routine && ! $hasRoutinePrefix) ? '[Rutin] ' : '';
 
                     return [
-                        'task_name' => $prefix . $rawTaskName,
+                        'task_name' => $prefix.$rawTaskName,
                         'is_routine' => $def->is_routine ?? false,
                         'priority' => $def->priority ?? 'medium',
                         'status' => $status,
@@ -339,7 +345,7 @@ class WeeklyPerformance extends Component
                 });
 
                 $uncompletedTaskCount = $assignmentsOnDay->filter(function ($asg) {
-                    return !$asg->latestSubmission || $asg->latestSubmission->approval_status === 'rejected';
+                    return ! $asg->latestSubmission || $asg->latestSubmission->approval_status === 'rejected';
                 })->count();
 
                 $cashierAuditsForDay[] = [
@@ -355,7 +361,7 @@ class WeeklyPerformance extends Component
                 ];
             }
 
-            if (!empty($cashierAuditsForDay)) {
+            if (! empty($cashierAuditsForDay)) {
                 $totalCashiersScheduled = count($cashierAuditsForDay);
                 $totalCashiersAttended = collect($cashierAuditsForDay)->where('attended', true)->count();
                 $totalAssignedTasksDay = collect($cashierAuditsForDay)->sum('assigned_task_count');
@@ -390,12 +396,12 @@ class WeeklyPerformance extends Component
         // --- 3. CASHIER SHIFT & PERFORMANCE AUDIT ---
         // Filter: Hanya kasir yang memiliki jadwal piket (atau absensi/transaksi) pada periode ini
         $scheduledUserIds = CashierSchedule::whereBetween('date', [$weekStart->toDateString(), $weekEnd->toDateString()])
-            ->when($activeJurusanId, fn($q) => $q->where('jurusan_id', $activeJurusanId))
+            ->when($activeJurusanId, fn ($q) => $q->where('jurusan_id', $activeJurusanId))
             ->pluck('user_id')
             ->unique();
 
         $attendedUserIds = CashierAttendance::whereBetween('date', [$weekStart->toDateString(), $weekEnd->toDateString()])
-            ->when($activeJurusanId, fn($q) => $q->where('jurusan_id', $activeJurusanId))
+            ->when($activeJurusanId, fn ($q) => $q->where('jurusan_id', $activeJurusanId))
             ->pluck('user_id')
             ->unique();
 
@@ -417,7 +423,7 @@ class WeeklyPerformance extends Component
             $userSales = Transaction::forReporting()
                 ->where('user_id', $user->id)
                 ->whereBetween('transacted_at', [$weekStart->format('Y-m-d 00:00:00'), $weekEnd->format('Y-m-d 23:59:59')])
-                ->when($activeJurusanId, fn($q) => $q->where('jurusan_id', $activeJurusanId))
+                ->when($activeJurusanId, fn ($q) => $q->where('jurusan_id', $activeJurusanId))
                 ->whereIn('status', ['uang_diterima', 'belum_kembalian']);
 
             $totalSales = $userSales->sum('total_price');
@@ -427,14 +433,14 @@ class WeeklyPerformance extends Component
             // Schedules & Attendance
             $schedules = CashierSchedule::where('user_id', $user->id)
                 ->whereBetween('date', [$weekStart->toDateString(), $weekEnd->toDateString()])
-                ->when($activeJurusanId, fn($q) => $q->where('jurusan_id', $activeJurusanId))
+                ->when($activeJurusanId, fn ($q) => $q->where('jurusan_id', $activeJurusanId))
                 ->get();
 
             $scheduledCount = $schedules->count();
 
             $attendances = CashierAttendance::where('user_id', $user->id)
                 ->whereBetween('date', [$weekStart->toDateString(), $weekEnd->toDateString()])
-                ->when($activeJurusanId, fn($q) => $q->where('jurusan_id', $activeJurusanId))
+                ->when($activeJurusanId, fn ($q) => $q->where('jurusan_id', $activeJurusanId))
                 ->get();
 
             $attendedCount = $attendances->count();
@@ -444,7 +450,7 @@ class WeeklyPerformance extends Component
             // Task Assignments & Submissions
             $assignments = CashierTaskAssignment::where('assigned_to', $user->id)
                 ->whereBetween('created_at', [$weekStart->format('Y-m-d 00:00:00'), $weekEnd->format('Y-m-d 23:59:59')])
-                ->when($activeJurusanId, fn($q) => $q->where('jurusan_id', $activeJurusanId))
+                ->when($activeJurusanId, fn ($q) => $q->where('jurusan_id', $activeJurusanId))
                 ->get();
 
             $totalAssignedTasks = $assignments->count();
@@ -484,11 +490,11 @@ class WeeklyPerformance extends Component
                 $evaluationNotes[] = "$missed piket tidak hadir";
             }
             if ($totalTx === 0 && $scheduledCount > 0) {
-                $evaluationNotes[] = "0 transaksi saat piket";
+                $evaluationNotes[] = '0 transaksi saat piket';
             }
 
             if (empty($evaluationNotes)) {
-                $evaluationNotes[] = "Kinerja & kepatuhan sempurna";
+                $evaluationNotes[] = 'Kinerja & kepatuhan sempurna';
             }
 
             if ($overallScore >= 150 || ($totalTx >= 15 && $approvedTasksCount >= 2 && empty($evaluationNotes[0] ?? ''))) {
@@ -532,19 +538,19 @@ class WeeklyPerformance extends Component
 
         // Top & Bottom performers
         $topPerformers = $cashierPerformanceList->take(3);
-        $bottomPerformers = $cashierPerformanceList->filter(fn($c) => $c->overall_score < 60 || $c->rejected_tasks > 0 || $c->unsubmitted_tasks > 0 || $c->total_tx === 0)->sortBy('overall_score')->values()->take(3);
+        $bottomPerformers = $cashierPerformanceList->filter(fn ($c) => $c->overall_score < 60 || $c->rejected_tasks > 0 || $c->unsubmitted_tasks > 0 || $c->total_tx === 0)->sortBy('overall_score')->values()->take(3);
 
         // Task & Attendance Totals for Summary Card
         $totalScheduledShifts = CashierSchedule::whereBetween('date', [$weekStart->toDateString(), $weekEnd->toDateString()])
-            ->when($activeJurusanId, fn($q) => $q->where('jurusan_id', $activeJurusanId))
+            ->when($activeJurusanId, fn ($q) => $q->where('jurusan_id', $activeJurusanId))
             ->count();
         $totalAttendedShifts = CashierAttendance::whereBetween('date', [$weekStart->toDateString(), $weekEnd->toDateString()])
-            ->when($activeJurusanId, fn($q) => $q->where('jurusan_id', $activeJurusanId))
+            ->when($activeJurusanId, fn ($q) => $q->where('jurusan_id', $activeJurusanId))
             ->count();
         $shiftFulfillmentRate = $totalScheduledShifts > 0 ? round(($totalAttendedShifts / $totalScheduledShifts) * 100) : 100;
 
         $totalWeeklyTasksAssigned = CashierTaskAssignment::whereBetween('created_at', [$weekStart->format('Y-m-d 00:00:00'), $weekEnd->format('Y-m-d 23:59:59')])
-            ->when($activeJurusanId, fn($q) => $q->where('jurusan_id', $activeJurusanId))
+            ->when($activeJurusanId, fn ($q) => $q->where('jurusan_id', $activeJurusanId))
             ->count();
 
         $totalWeeklyTasksApproved = CashierTaskSubmission::whereBetween('created_at', [$weekStart->format('Y-m-d 00:00:00'), $weekEnd->format('Y-m-d 23:59:59')])
@@ -556,7 +562,7 @@ class WeeklyPerformance extends Component
         $productSalesCurrent = Transaction::forReporting()
             ->select('product_id', DB::raw('SUM(quantity) as total_qty'), DB::raw('SUM(total_price) as total_omset'), DB::raw('SUM(unit_profit * quantity) as total_profit'))
             ->whereBetween('transacted_at', [$weekStart->format('Y-m-d 00:00:00'), $weekEnd->format('Y-m-d 23:59:59')])
-            ->when($activeJurusanId, fn($q) => $q->where('jurusan_id', $activeJurusanId))
+            ->when($activeJurusanId, fn ($q) => $q->where('jurusan_id', $activeJurusanId))
             ->whereIn('status', ['uang_diterima', 'belum_kembalian'])
             ->groupBy('product_id')
             ->get()
@@ -565,7 +571,7 @@ class WeeklyPerformance extends Component
         $productSalesPrev = Transaction::forReporting()
             ->select('product_id', DB::raw('SUM(quantity) as total_qty'), DB::raw('SUM(total_price) as total_omset'))
             ->whereBetween('transacted_at', [$prevWeekStart->format('Y-m-d 00:00:00'), $prevWeekEnd->format('Y-m-d 23:59:59')])
-            ->when($activeJurusanId, fn($q) => $q->where('jurusan_id', $activeJurusanId))
+            ->when($activeJurusanId, fn ($q) => $q->where('jurusan_id', $activeJurusanId))
             ->whereIn('status', ['uang_diterima', 'belum_kembalian'])
             ->groupBy('product_id')
             ->get()
@@ -574,7 +580,7 @@ class WeeklyPerformance extends Component
         $periodStartDate = $weekStart->toDateString();
         $periodEndDate = $weekEnd->toDateString();
 
-        $allProducts = Product::when($activeJurusanId, fn($q) => $q->where('jurusan_id', $activeJurusanId))
+        $allProducts = Product::when($activeJurusanId, fn ($q) => $q->where('jurusan_id', $activeJurusanId))
             ->where('is_active', true)
             ->whereHas('stockEntries', function ($stq) use ($periodStartDate, $periodEndDate) {
                 $stq->whereBetween('date', [$periodStartDate, $periodEndDate])
@@ -590,13 +596,13 @@ class WeeklyPerformance extends Component
             $curr = $productSalesCurrent->get($product->id);
             $prev = $productSalesPrev->get($product->id);
 
-            $qtySold = $curr ? (int)$curr->total_qty : 0;
-            $omset = $curr ? (float)$curr->total_omset : 0;
-            $profit = $curr ? (float)$curr->total_profit : 0;
+            $qtySold = $curr ? (int) $curr->total_qty : 0;
+            $omset = $curr ? (float) $curr->total_omset : 0;
+            $profit = $curr ? (float) $curr->total_profit : 0;
             $contrib = $totalRevenue > 0 ? round(($omset / $totalRevenue) * 100, 1) : 0;
 
-            $prevQty = $prev ? (int)$prev->total_qty : 0;
-            $prevOmset = $prev ? (float)$prev->total_omset : 0;
+            $prevQty = $prev ? (int) $prev->total_qty : 0;
+            $prevOmset = $prev ? (float) $prev->total_omset : 0;
             $qtyDiff = $qtySold - $prevQty;
             $qtyGrowth = $prevQty > 0 ? round((($qtySold - $prevQty) / $prevQty) * 100, 1) : ($qtySold > 0 ? 100 : 0);
 
@@ -622,14 +628,14 @@ class WeeklyPerformance extends Component
 
         // Top 5 Most Sold Products
         $topSellingProducts = $productPerformanceCollection
-            ->filter(fn($p) => $p->qty_sold > 0)
-            ->sortByDesc(fn($p) => $p->qty_sold * 10000000 + $p->omset)
+            ->filter(fn ($p) => $p->qty_sold > 0)
+            ->sortByDesc(fn ($p) => $p->qty_sold * 10000000 + $p->omset)
             ->values()
             ->take(5);
 
         // Top 10 Least Sold / Stagnant Products (Slow-moving)
         $leastSellingProducts = $productPerformanceCollection
-            ->sortBy(fn($p) => $p->qty_sold * 10000000 + $p->omset)
+            ->sortBy(fn ($p) => $p->qty_sold * 10000000 + $p->omset)
             ->values()
             ->take(10);
 
@@ -650,7 +656,7 @@ class WeeklyPerformance extends Component
                     $asgs = CashierTaskAssignment::where('assigned_to', $cUser->id)
                         ->where(function ($q) use ($dStr) {
                             $q->whereDate('created_at', $dStr)
-                                ->orWhereHas('taskDefinition', fn($sq) => $sq->whereDate('date', $dStr));
+                                ->orWhereHas('taskDefinition', fn ($sq) => $sq->whereDate('date', $dStr));
                         })
                         ->with(['taskDefinition', 'latestSubmission'])
                         ->get();

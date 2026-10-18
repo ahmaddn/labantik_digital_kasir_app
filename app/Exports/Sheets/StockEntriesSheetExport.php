@@ -34,7 +34,7 @@ class StockEntriesSheetExport implements FromCollection, WithHeadings, WithMappi
     }
 
     /**
-     * @param StockEntry $entry
+     * @param  StockEntry  $entry
      */
     public function map($entry): array
     {

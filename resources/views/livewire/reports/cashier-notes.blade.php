@@ -1,24 +1,21 @@
-<div class="p-6 max-w-7xl mx-auto">
-    <!-- Header -->
-    <div class="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-6">
-        <div>
-            <h1 class="text-4xl font-bold uppercase tracking-tight text-primary-blue dark:text-primary-blue-light">Catatan Kasir & Pengelola</h1>
-            <p class="text-gray-400 font-bold text-xs uppercase tracking-[0.2em] italic">Komunikasi Internal & Diskusi Shift Kasir</p>
-        </div>
+<div class="p-4 sm:p-6 max-w-7xl mx-auto">
+    <x-hub-tabs hub="operasional" :title="session('active_role_name') === 'kasir' ? 'Catatan & Serah Terima' : 'Catatan & Briefing Kasir'" subtitle="Papan komunikasi internal, serah terima shift, catatan penting harian, dan diskusi operasional." />
 
-        <div class="flex flex-col sm:flex-row items-center gap-4">
+    <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 mb-6">
+        <div></div>
+        <div class="flex items-center gap-2 flex-wrap sm:flex-nowrap">
             <!-- Search -->
-            <div class="w-full sm:w-72">
-                <div class="flex items-center bg-white dark:bg-gray-800 px-5 py-3.5 rounded-2xl shadow-lg shadow-blue-900/5 border border-gray-100 dark:border-gray-700/60">
-                    <svg class="w-4 h-4 text-gray-400 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
-                    <input type="text" wire:model.live.debounce.300ms="search" placeholder="Cari catatan..." class="w-full border-none p-0 focus:ring-0 text-sm bg-transparent dark:text-white placeholder-gray-400 font-bold">
+            <div class="relative w-full sm:w-64">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                    <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
                 </div>
+                <input type="text" wire:model.live.debounce.300ms="search" placeholder="Cari catatan..." class="w-full pl-9 pr-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-medium text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500">
             </div>
 
             <!-- Create Note Button -->
-            <button wire:click="openCreateModal" class="w-full sm:w-auto px-4 py-2.5 bg-primary-blue text-white rounded-2xl shadow-xl shadow-blue-500/20 hover:scale-105 active:scale-95 transition-all font-black italic uppercase text-xs tracking-widest flex items-center justify-center gap-2">
-                <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" /></svg>
-                Catatan Baru
+            <button wire:click="openCreateModal" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl shadow-sm transition-all text-xs font-bold flex items-center justify-center gap-1.5 shrink-0">
+                <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" /></svg>
+                <span>Catatan Baru</span>
             </button>
         </div>
     </div>
@@ -454,7 +451,7 @@
             </button>
         </div>
     </div>
-</div>
+
 <script src="{{ asset('js/html2canvas-pro.min.js') }}"></script>
 <script>
 document.addEventListener('click', function(e) {
@@ -686,3 +683,5 @@ function shareToWhatsApp(noteId, title, creator, date, content) {
     }
 }
 </script>
+</div>
+

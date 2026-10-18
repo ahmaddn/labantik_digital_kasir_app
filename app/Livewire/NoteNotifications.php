@@ -2,8 +2,7 @@
 
 namespace App\Livewire;
 
-use App\Models\CashierNote;
-use App\Models\NoteReply;
+use App\Models\Notification;
 use Livewire\Component;
 
 class NoteNotifications extends Component
@@ -12,7 +11,7 @@ class NoteNotifications extends Component
     {
         $user = auth()->user();
         if ($user) {
-            \App\Models\Notification::where('user_id', $user->id)
+            Notification::where('user_id', $user->id)
                 ->where('is_read', false)
                 ->update(['is_read' => true]);
         }
@@ -21,19 +20,19 @@ class NoteNotifications extends Component
     public function render()
     {
         $user = auth()->user();
-        if (!$user) {
+        if (! $user) {
             return view('livewire.note-notifications', [
                 'notifications' => collect(),
                 'unreadCount' => 0,
             ]);
         }
 
-        $notifications = \App\Models\Notification::where('user_id', $user->id)
+        $notifications = Notification::where('user_id', $user->id)
             ->orderBy('created_at', 'desc')
             ->limit(10)
             ->get();
 
-        $unreadCount = \App\Models\Notification::where('user_id', $user->id)
+        $unreadCount = Notification::where('user_id', $user->id)
             ->where('is_read', false)
             ->count();
 

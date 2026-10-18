@@ -1,656 +1,589 @@
-<div class="p-10 space-y-10">
-    <!-- Header Section -->
-    <div class="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-6">
-        <div class="w-full lg:w-auto">
-            <h1 class="text-5xl lg:text-6xl font-bold uppercase tracking-tight text-primary-blue leading-none">Bagi Hasil</h1>
-            <div class="flex flex-wrap sm:flex-nowrap items-center gap-3 mt-6 w-full">
-                <button wire:click="$set('viewMode', 'weekly')"
-                    class="flex-1 sm:flex-initial px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all {{ $viewMode === 'weekly' ? 'bg-primary-blue text-white shadow-lg' : 'bg-gray-100 text-gray-400 dark:bg-gray-800' }}">Laporan
-                    Mingguan</button>
-                <button wire:click="$set('viewMode', 'monthly')"
-                    class="flex-1 sm:flex-initial px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all {{ $viewMode === 'monthly' ? 'bg-primary-blue text-white shadow-lg' : 'bg-gray-100 text-gray-400 dark:bg-gray-800' }}">Rekap
-                    Bulanan</button>
-                <button wire:click="$set('viewMode', 'yearly')"
-                    class="flex-1 sm:flex-initial px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all {{ $viewMode === 'yearly' ? 'bg-primary-blue text-white shadow-lg' : 'bg-gray-100 text-gray-400 dark:bg-gray-800' }}">Rekap
-                    Tahunan</button>
-            </div>
+<div class="p-4 sm:p-6 space-y-6">
+    <x-hub-tabs hub="laporan" title="Bagi Hasil Mingguan TEFA" subtitle="Perhitungan pembagian keuntungan bersih operasional, laba jurusan, kas kasir, dan pengelola." />
+
+    <!-- View Mode Tabs & Filter Controls -->
+    <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+        <div class="flex items-center gap-1.5 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl w-fit overflow-x-auto no-scrollbar">
+            <button wire:click="$set('viewMode', 'weekly')"
+                class="px-4 py-2 rounded-lg text-xs font-bold transition-all {{ $viewMode === 'weekly' ? 'bg-white dark:bg-slate-900 text-blue-600 dark:text-blue-400 shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white' }}">
+                Laporan Mingguan
+            </button>
+            <button wire:click="$set('viewMode', 'monthly')"
+                class="px-4 py-2 rounded-lg text-xs font-bold transition-all {{ $viewMode === 'monthly' ? 'bg-white dark:bg-slate-900 text-blue-600 dark:text-blue-400 shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white' }}">
+                Rekap Bulanan
+            </button>
+            <button wire:click="$set('viewMode', 'yearly')"
+                class="px-4 py-2 rounded-lg text-xs font-bold transition-all {{ $viewMode === 'yearly' ? 'bg-white dark:bg-slate-900 text-blue-600 dark:text-blue-400 shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white' }}">
+                Rekap Tahunan
+            </button>
         </div>
-        
-        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full lg:w-auto">
+
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
             @if ($viewMode === 'weekly')
                 <div wire:ignore x-data="{ start: @entangle('startDate').live, end: @entangle('endDate').live, startInstance: null, endInstance: null }"
                     x-init="startInstance = flatpickr($refs.startDate, { dateFormat: 'Y-m-d', defaultDate: start, onChange: (s, d) => start = d }); $watch('start', v => startInstance.setDate(v, false)); endInstance = flatpickr($refs.endDate, { dateFormat: 'Y-m-d', defaultDate: end, onChange: (s, d) => end = d }); $watch('end', v => endInstance.setDate(v, false))"
-                    class="flex items-center justify-between bg-white dark:bg-gray-900 p-2 rounded-[2rem] shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-800 cursor-pointer w-full sm:w-auto">
-                    <div class="px-5 py-2 flex-1 sm:flex-initial">
-                        <p class="text-[8px] font-black text-primary-blue uppercase tracking-widest mb-1">DARI TANGGAL</p>
+                    class="flex items-center justify-between bg-white dark:bg-gray-800 px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 shadow-xs gap-3">
+                    <div class="flex flex-col">
+                        <span class="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Dari</span>
                         <input x-ref="startDate" type="text" readonly
-                            class="bg-transparent border-none p-0 text-[11px] font-black text-gray-800 dark:text-white focus:ring-0 cursor-pointer w-20">
+                            class="bg-transparent border-none p-0 text-xs font-bold text-gray-800 dark:text-white focus:ring-0 cursor-pointer w-24">
                     </div>
 
-                    <div class="w-8 h-8 flex items-center justify-center shrink-0">
-                        <svg class="w-4 h-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
-                                d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                    <div class="text-gray-400 dark:text-gray-500">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
                         </svg>
                     </div>
 
-                    <div class="px-5 py-2 flex-1 sm:flex-initial">
-                        <p class="text-[8px] font-black text-primary-red uppercase tracking-widest mb-1">SAMPAI TANGGAL</p>
+                    <div class="flex flex-col">
+                        <span class="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Sampai</span>
                         <input x-ref="endDate" type="text" readonly
-                            class="bg-transparent border-none p-0 text-[11px] font-black text-gray-800 dark:text-white focus:ring-0 cursor-pointer w-20">
+                            class="bg-transparent border-none p-0 text-xs font-bold text-gray-800 dark:text-white focus:ring-0 cursor-pointer w-24">
                     </div>
                 </div>
 
                 @if ($canProcess)
                     <button wire:click="generateReport"
-                        class="px-10 py-5 bg-primary-blue text-white rounded-[2rem] shadow-2xl shadow-blue-500/20 font-black italic uppercase text-xs tracking-widest hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-4 w-full sm:w-auto">
-                        <svg class="w-5 h-5 shrink-0" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
-                            stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M5 12h14" />
-                            <path d="m12 5 7 7-7 7" />
+                        class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white rounded-xl shadow-xs font-bold text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
                         </svg>
-                        PROSES BAGI HASIL
+                        Proses Bagi Hasil
                     </button>
                 @else
-                    <div class="flex flex-col gap-2 w-full sm:w-auto">
+                    <div class="flex items-center gap-2">
                         <button disabled
-                            class="px-10 py-5 bg-gray-200 dark:bg-gray-800 text-gray-405 rounded-[2rem] font-black italic uppercase text-xs tracking-widest cursor-not-allowed flex items-center justify-center gap-4 opacity-50 w-full sm:w-auto">
-                            <svg class="w-5 h-5 shrink-0" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
-                                stroke-linecap="round" stroke-linejoin="round">
+                            class="px-4 py-2.5 bg-gray-100 dark:bg-gray-800 text-gray-400 rounded-xl font-bold text-xs uppercase tracking-wider cursor-not-allowed flex items-center gap-2 border border-gray-200 dark:border-gray-700">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                                 <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
                                 <path d="M7 11V7a5 5 0 0 1 10 0v4" />
                             </svg>
-                            JUMAT - MINGGU
+                            Jumat - Minggu
                         </button>
-                        {{-- Toggle pengecualian minggu tidak penuh --}}
                         <button wire:click="$toggle('overrideCanProcess')"
-                            class="flex items-center justify-center gap-2 px-4 py-2 rounded-2xl text-[9px] font-black uppercase tracking-widest transition-all
-                                {{ $overrideCanProcess ? 'bg-amber-500/20 text-amber-500 border border-amber-500/40' : 'bg-gray-100 dark:bg-gray-800 text-gray-400 border border-gray-200 dark:border-gray-700' }}">
-                            <svg class="w-3.5 h-3.5 shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/>
+                            class="px-3 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all border flex items-center gap-1.5
+                                {{ $overrideCanProcess ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/30' : 'bg-gray-50 dark:bg-gray-800 text-gray-500 dark:text-gray-400 border-gray-200 dark:border-gray-700 hover:bg-gray-100' }}"
+                            title="Aktifkan bila minggu tidak penuh karena libur/ujian">
+                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
                             </svg>
-                            {{ $overrideCanProcess ? 'Mode Pengecualian Aktif' : 'Minggu Tidak Penuh?' }}
+                            {{ $overrideCanProcess ? 'Mode Pengecualian Aktif' : 'Minggu Pendek?' }}
                         </button>
                     </div>
                 @endif
             @elseif($viewMode === 'monthly')
-                <div
-                    class="flex items-center bg-white dark:bg-gray-900 p-2 rounded-[2rem] shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-800 w-full sm:w-auto">
-                    <div class="px-6 py-2 w-full">
-                        <p class="text-[8px] font-black text-primary-blue uppercase tracking-widest mb-1">PILIH BULAN</p>
-                        <select wire:model.live="selectedMonth"
-                            class="bg-transparent border-none p-0 text-[11px] font-black text-gray-800 dark:text-white focus:ring-0 cursor-pointer w-full">
-                            <option value="1">Januari</option>
-                            <option value="2">Februari</option>
-                            <option value="3">Maret</option>
-                            <option value="4">April</option>
-                            <option value="5">Mei</option>
-                            <option value="6">Juni</option>
-                            <option value="7">Juli</option>
-                            <option value="8">Agustus</option>
-                            <option value="9">September</option>
-                            <option value="10">Oktober</option>
-                            <option value="11">November</option>
-                            <option value="12">Desember</option>
-                        </select>
-                    </div>
+                <div class="flex items-center bg-white dark:bg-gray-800 px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 shadow-xs">
+                    <span class="text-xs font-bold text-gray-500 dark:text-gray-400 mr-2">Bulan:</span>
+                    <select wire:model.live="selectedMonth"
+                        class="bg-transparent border-none p-0 text-xs font-bold text-gray-800 dark:text-white focus:ring-0 cursor-pointer">
+                        <option value="1">Januari</option>
+                        <option value="2">Februari</option>
+                        <option value="3">Maret</option>
+                        <option value="4">April</option>
+                        <option value="5">Mei</option>
+                        <option value="6">Juni</option>
+                        <option value="7">Juli</option>
+                        <option value="8">Agustus</option>
+                        <option value="9">September</option>
+                        <option value="10">Oktober</option>
+                        <option value="11">November</option>
+                        <option value="12">Desember</option>
+                    </select>
                 </div>
             @endif
         </div>
     </div>
 
     @if ($viewMode === 'weekly')
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
-            <!-- Left: Current Week Live Preview -->
-            <div class="lg:col-span-2 space-y-10">
-                <div
-                    class="bg-white dark:bg-gray-900 rounded-[4rem] p-12 shadow-2xl shadow-blue-900/5 border border-gray-50 dark:border-gray-800 relative overflow-hidden group">
-                    <div
-                        class="absolute top-0 right-0 p-20 opacity-[0.03] group-hover:scale-110 transition-transform duration-700 pointer-events-none">
-                        <svg class="w-64 h-64 text-primary-blue" xmlns="http://www.w3.org/2000/svg" width="24"
-                            height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                            stroke-linecap="round" stroke-linejoin="round">
-                            <circle cx="12" cy="12" r="10" />
-                            <path d="M12 6v6l4 2" />
+        <!-- SECTION 1: Estimasi Minggu Berjalan (Settlement Saat Ini) -->
+        <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 border border-gray-200/80 dark:border-gray-700 shadow-xs space-y-6">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-gray-100 dark:border-gray-700/80">
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="px-2.5 py-0.5 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-md text-[11px] font-bold uppercase tracking-wider">
+                            Periode Aktif
+                        </span>
+                        <span class="text-xs text-gray-400 dark:text-gray-500">Live Preview</span>
+                    </div>
+                    <h2 class="text-lg font-bold text-gray-900 dark:text-white mt-1">
+                        Estimasi Keuntungan Berjalan ({{ $currentWeek['start']->translatedFormat('d M') }} — {{ $currentWeek['end']->translatedFormat('d M Y') }})
+                    </h2>
+                </div>
+
+                <div class="flex items-center gap-3">
+                    <span class="text-xs font-semibold text-gray-500 dark:text-gray-400">Status Settlement:</span>
+                    @if ($canProcess)
+                        <span class="px-3 py-1 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-lg text-xs font-bold flex items-center gap-1.5 border border-emerald-200 dark:border-emerald-800">
+                            <span class="w-2 h-2 rounded-full bg-emerald-500"></span> Siap Diproses
+                        </span>
+                    @else
+                        <span class="px-3 py-1 bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 rounded-lg text-xs font-bold flex items-center gap-1.5 border border-amber-200 dark:border-amber-800">
+                            <span class="w-2 h-2 rounded-full bg-amber-500"></span> Menunggu Akhir Pekan
+                        </span>
+                    @endif
+                </div>
+            </div>
+
+            <!-- 3 Spacious KPI Metric Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                <!-- Total Keuntungan -->
+                <div class="bg-slate-50 dark:bg-slate-900/60 rounded-xl p-5 border border-slate-200/80 dark:border-slate-700/80">
+                    <p class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Total Estimasi Keuntungan</p>
+                    <p class="text-2xl font-black text-blue-600 dark:text-blue-400 tracking-tight mt-1" :class="censorMode ? 'privacy-blur' : ''">
+                        Rp{{ number_format($currentWeek['profit'], 0, ',', '.') }}
+                    </p>
+                    <div class="flex items-center gap-2 mt-3 pt-3 border-t border-slate-200 dark:border-slate-700/80 text-xs font-semibold">
+                        <span class="text-emerald-600 dark:text-emerald-400">Tunai: Rp{{ number_format($currentWeek['cash_profit'] ?? 0, 0, ',', '.') }}</span>
+                        <span class="text-gray-300 dark:text-gray-600">•</span>
+                        <span class="text-indigo-600 dark:text-indigo-400">Virtual: Rp{{ number_format($currentWeek['non_cash_profit'] ?? 0, 0, ',', '.') }}</span>
+                    </div>
+                </div>
+
+                <!-- Kas Jurusan 40% -->
+                <div class="bg-slate-50 dark:bg-slate-900/60 rounded-xl p-5 border border-slate-200/80 dark:border-slate-700/80">
+                    <div class="flex items-center justify-between">
+                        <p class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Kas Jurusan (40%)</p>
+                        <span class="px-2 py-0.5 bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 rounded text-[10px] font-bold">Laba Lembaga</span>
+                    </div>
+                    <p class="text-2xl font-black text-gray-900 dark:text-white tracking-tight mt-1" :class="censorMode ? 'privacy-blur' : ''">
+                        Rp{{ number_format($currentWeek['profit'] * 0.4, 0, ',', '.') }}
+                    </p>
+                    <div class="flex items-center gap-2 mt-3 pt-3 border-t border-slate-200 dark:border-slate-700/80 text-xs font-semibold text-gray-500 dark:text-gray-400">
+                        <span>Tunai: Rp{{ number_format(($currentWeek['cash_profit'] ?? 0) * 0.4, 0, ',', '.') }}</span>
+                        <span class="text-gray-300 dark:text-gray-600">•</span>
+                        <span>Virtual: Rp{{ number_format(($currentWeek['non_cash_profit'] ?? 0) * 0.4, 0, ',', '.') }}</span>
+                    </div>
+                </div>
+
+                <!-- Bagi Hasil Eksternal 60% -->
+                <div class="bg-slate-50 dark:bg-slate-900/60 rounded-xl p-5 border border-slate-200/80 dark:border-slate-700/80">
+                    <div class="flex items-center justify-between">
+                        <p class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Bagi Hasil Eksternal (60%)</p>
+                        <span class="px-2 py-0.5 bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 rounded text-[10px] font-bold">Pengelola</span>
+                    </div>
+                    <p class="text-2xl font-black text-emerald-600 dark:text-emerald-400 tracking-tight mt-1" :class="censorMode ? 'privacy-blur' : ''">
+                        Rp{{ number_format($currentWeek['profit'] * 0.6, 0, ',', '.') }}
+                    </p>
+                    <div class="flex items-center gap-2 mt-3 pt-3 border-t border-slate-200 dark:border-slate-700/80 text-xs font-semibold text-gray-500 dark:text-gray-400">
+                        <span>Najmy (30%) &amp; Labantik (30%)</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Collapsible: Rincian Keuntungan Harian & Estimasi Pengelola -->
+            <div x-data="{ openPreview: false }" class="border-t border-gray-100 dark:border-gray-700 pt-4">
+                <button @click="openPreview = !openPreview"
+                    class="flex items-center justify-between w-full text-left py-2 text-xs font-bold text-gray-700 dark:text-gray-300 hover:text-blue-600 transition-colors">
+                    <span class="flex items-center gap-2">
+                        <svg class="w-4 h-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                         </svg>
+                        Lihat Rincian Harian &amp; Rincian Porsi Pengelola
+                    </span>
+                    <span class="text-xs text-blue-600 font-semibold flex items-center gap-1">
+                        <span x-text="openPreview ? 'Sembunyikan' : 'Buka Rincian'"></span>
+                        <svg class="w-3.5 h-3.5 transition-transform" :class="openPreview ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </span>
+                </button>
+
+                <div x-show="openPreview" x-collapse x-cloak class="mt-4 space-y-5">
+                    <!-- Daily breakdown list -->
+                    <div class="space-y-2">
+                        <h4 class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Keuntungan Per Hari &amp; Rekonsiliasi Kas:</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                            @foreach($currentWeek['dailyBreakdown'] as $day)
+                                <div class="bg-gray-50 dark:bg-gray-900/50 rounded-xl p-3.5 border border-gray-200/70 dark:border-gray-700/60">
+                                    <div class="flex items-center justify-between">
+                                        <p class="text-xs font-bold text-gray-800 dark:text-gray-200">{{ $day['date']->translatedFormat('l, d M') }}</p>
+                                        <p class="text-xs font-black text-blue-600 dark:text-blue-400">Rp{{ number_format($day['net_profit'], 0, ',', '.') }}</p>
+                                    </div>
+                                    <div class="flex items-center justify-between text-[11px] text-gray-400 mt-1.5 pt-1.5 border-t border-gray-200/60 dark:border-gray-800">
+                                        <span>Sistem: Rp{{ number_format($day['system_profit'], 0, ',', '.') }}</span>
+                                        @if($day['has_audit'])
+                                            @if($day['diff'] < 0)
+                                                <span class="text-red-500 font-semibold">Selisih: -Rp{{ number_format(abs($day['diff']), 0, ',', '.') }}</span>
+                                            @elseif($day['diff'] > 0)
+                                                <span class="text-amber-500 font-semibold">Lebih: +Rp{{ number_format($day['diff'], 0, ',', '.') }}</span>
+                                            @else
+                                                <span class="text-emerald-500 font-semibold">Kas Match</span>
+                                            @endif
+                                        @else
+                                            <span class="text-gray-400">Belum Audit</span>
+                                        @endif
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
                     </div>
 
-                    <div class="relative z-10">
-                        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-12 gap-6">
-                            <div>
-                                <span
-                                    class="px-5 py-2 bg-blue-50 dark:bg-blue-900/20 text-primary-blue rounded-full text-[10px] font-black uppercase tracking-widest">Periode
-                                    Terpilih</span>
-                                <h2
-                                    class="text-3xl sm:text-4xl font-bold uppercase tracking-tight text-gray-800 dark:text-white mt-4">
-                                    Estimasi Keuntungan</h2>
-                                <p class="text-sm font-bold text-gray-400 mt-2 italic uppercase">
-                                    {{ $currentWeek['start']->translatedFormat('d M') }} —
-                                    {{ $currentWeek['end']->translatedFormat('d M Y') }}
-                                </p>
-                            </div>
-                            <div class="text-left sm:text-right">
-                                <p class="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-2">Omzet
-                                    Internal</p>
-                                <p class="text-4xl sm:text-5xl font-black text-primary-blue italic tracking-tighter" :class="censorMode ? 'privacy-blur' : ''">
-                                    Rp{{ number_format($currentWeek['profit'], 0, ',', '.') }}</p>
-                                <div class="flex flex-wrap items-center gap-2 mt-2 justify-start sm:justify-end">
-                                    <span class="px-2.5 py-1 bg-green-500/10 text-green-500 rounded-lg text-[9px] font-black uppercase">
-                                        Tunai: Rp{{ number_format($currentWeek['cash_profit'] ?? 0, 0, ',', '.') }}
-                                    </span>
-                                    <span class="px-2.5 py-1 bg-indigo-500/10 text-indigo-500 rounded-lg text-[9px] font-black uppercase">
-                                        Virtual: Rp{{ number_format($currentWeek['non_cash_profit'] ?? 0, 0, ',', '.') }}
-                                    </span>
+                    <!-- Admin Contributions -->
+                    <div class="space-y-2 pt-2">
+                        <h4 class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Alokasi Penerima Bagi Hasil (60%):</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            @foreach($currentWeek['adminContributions'] as $contrib)
+                                <div class="bg-gray-50 dark:bg-gray-900/50 rounded-xl p-4 border border-gray-200/70 dark:border-gray-700/60 flex items-center justify-between">
+                                    <div>
+                                        <p class="text-xs font-bold text-gray-800 dark:text-white">{{ $contrib->user->name ?? 'Admin' }}</p>
+                                        <p class="text-[11px] text-gray-400 mt-0.5">{{ $contrib->portion_name }} ({{ $contrib->percentage }})</p>
+                                    </div>
+                                    <div class="text-right">
+                                        <p class="text-sm font-black text-emerald-600 dark:text-emerald-400">Rp{{ number_format($contrib->user_profit, 0, ',', '.') }}</p>
+                                        <p class="text-[10px] text-gray-400 mt-0.5">Tunai: Rp{{ number_format($contrib->cash_profit, 0, ',', '.') }} • Virtual: Rp{{ number_format($contrib->non_cash_profit, 0, ',', '.') }}</p>
+                                    </div>
                                 </div>
+                            @endforeach
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION 2: Riwayat Pengambilan Keuntungan Setiap Minggu (Full Width, Clear & Spacious) -->
+        <div class="space-y-4">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div>
+                    <h3 class="text-base font-bold text-gray-900 dark:text-white uppercase tracking-wider">
+                        Riwayat Pengambilan Keuntungan &amp; Bagi Hasil Mingguan
+                    </h3>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                        Daftar lengkap pembagian keuntungan yang telah ditarik dan dibukukan ke kas tunai serta kas virtual.
+                    </p>
+                </div>
+                <span class="px-3 py-1 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 rounded-lg text-xs font-bold border border-gray-200 dark:border-gray-700 w-fit">
+                    Total: {{ $reports->total() }} Laporan
+                </span>
+            </div>
+
+            <div class="space-y-4">
+                @forelse($reports as $report)
+                    <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6 shadow-xs hover:border-blue-500/40 transition-all space-y-4">
+                        <!-- Card Header -->
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-gray-100 dark:border-gray-700/80">
+                            <div class="flex flex-wrap items-center gap-2.5">
+                                <span class="px-3 py-1 bg-blue-50 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 rounded-lg text-xs font-black uppercase tracking-wider">
+                                    Minggu ke-{{ $report->week_number }}
+                                </span>
+                                <span class="text-sm font-bold text-gray-900 dark:text-white">
+                                    {{ \Carbon\Carbon::parse($report->week_start)->translatedFormat('d F Y') }} — {{ \Carbon\Carbon::parse($report->week_end)->translatedFormat('d F Y') }}
+                                </span>
+                                <span class="text-xs text-gray-400 dark:text-gray-500">
+                                    ({{ $report->month_name }})
+                                </span>
+                            </div>
+
+                            <div class="flex items-center gap-3">
+                                <div class="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400">
+                                    <svg class="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                    </svg>
+                                    <span>Diproses oleh <strong class="text-gray-700 dark:text-gray-200">{{ $report->creator->name ?? 'Sistem' }}</strong></span>
+                                    <span>•</span>
+                                    <span>{{ $report->created_at->translatedFormat('d M Y, H:i') }} WIB</span>
+                                </div>
+
+                                <button wire:click.stop="confirmDelete('{{ $report->id }}')"
+                                    class="p-1.5 text-gray-400 hover:text-red-600 dark:hover:text-red-400 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                                    title="Hapus Laporan Bagi Hasil">
+                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                </button>
                             </div>
                         </div>
 
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                            <div
-                                class="bg-gray-50 dark:bg-gray-800/50 rounded-[3rem] p-10 border border-gray-100 dark:border-gray-700/50">
-                                <div class="flex items-center gap-4 mb-4">
-                                    <div
-                                        class="w-12 h-12 bg-primary-red/10 rounded-2xl flex items-center justify-center text-primary-red">
-                                        <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" width="24"
-                                            height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                            <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-                                            <polyline points="9 22 9 12 15 12 15 22" />
-                                        </svg>
-                                    </div>
-                                    <div>
-                                        <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Kas
-                                            Jurusan (40%)</p>
-                                        <p
-                                            class="text-2xl font-black text-gray-800 dark:text-white italic tracking-tighter mt-1" :class="censorMode ? 'privacy-blur' : ''">
-                                            Rp{{ number_format($currentWeek['profit'] * 0.4, 0, ',', '.') }}</p>
-                                    </div>
-                                </div>
-                                <div class="flex items-center gap-2 pt-3 border-t border-gray-200 dark:border-gray-700 text-[9px] font-bold">
-                                    <span class="text-green-500">Tunai: Rp{{ number_format(($currentWeek['cash_profit'] ?? 0) * 0.4, 0, ',', '.') }}</span>
-                                    <span class="text-gray-300">•</span>
-                                    <span class="text-indigo-400">Virtual: Rp{{ number_format(($currentWeek['non_cash_profit'] ?? 0) * 0.4, 0, ',', '.') }}</span>
-                                </div>
+                        <!-- 3 Clear Metric Columns (Prominent, High Legibility) -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <!-- Total Profit -->
+                            <div class="bg-gray-50/80 dark:bg-gray-900/40 rounded-xl p-4 border border-gray-100 dark:border-gray-800">
+                                <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Total Laba Ditarik</span>
+                                <p class="text-xl font-black text-blue-600 dark:text-blue-400 mt-1 tracking-tight" :class="censorMode ? 'privacy-blur' : ''">
+                                    Rp{{ number_format($report->total_profit, 0, ',', '.') }}
+                                </p>
+                                <span class="text-[11px] text-gray-400 dark:text-gray-500 mt-1 block">100% Total Keuntungan Bersih</span>
                             </div>
 
-                            <div
-                                class="bg-primary-blue rounded-[3rem] p-10 text-white shadow-2xl shadow-blue-500/20 relative overflow-hidden">
-                                <div class="flex items-center gap-4 mb-4 relative z-10">
-                                    <div class="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center">
-                                        <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" width="24"
-                                            height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-                                            <circle cx="9" cy="7" r="4" />
-                                        </svg>
-                                    </div>
-                                    <div>
-                                        <p class="text-[10px] font-black text-white/60 uppercase tracking-widest">Bagi
-                                            Hasil Eksternal (60%)</p>
-                                        <p class="text-2xl font-black italic tracking-tighter mt-1" :class="censorMode ? 'privacy-blur' : ''">
-                                            Rp{{ number_format($currentWeek['profit'] * 0.6, 0, ',', '.') }}</p>
-                                    </div>
+                            <!-- Kas Jurusan 40% -->
+                            <div class="bg-gray-50/80 dark:bg-gray-900/40 rounded-xl p-4 border border-gray-100 dark:border-gray-800">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Kas Jurusan (40%)</span>
+                                    <span class="px-2 py-0.5 bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 rounded text-[10px] font-bold">Lembaga</span>
                                 </div>
-                                <div class="flex items-center gap-2 pt-3 border-t border-white/10 text-[9px] font-bold text-white/80 relative z-10">
-                                    <span>Tunai: Rp{{ number_format(($currentWeek['cash_profit'] ?? 0) * 0.6, 0, ',', '.') }}</span>
-                                    <span>•</span>
-                                    <span>Virtual: Rp{{ number_format(($currentWeek['non_cash_profit'] ?? 0) * 0.6, 0, ',', '.') }}</span>
-                                </div>
+                                <p class="text-xl font-black text-gray-900 dark:text-white mt-1 tracking-tight" :class="censorMode ? 'privacy-blur' : ''">
+                                    Rp{{ number_format($report->kas_amount ?? ($report->total_profit * 0.4), 0, ',', '.') }}
+                                </p>
+                                <span class="text-[11px] text-gray-400 dark:text-gray-500 mt-1 block">Masuk ke Buku Kas Jurusan</span>
                             </div>
+
+                            <!-- Pengelola 60% -->
+                            <div class="bg-gray-50/80 dark:bg-gray-900/40 rounded-xl p-4 border border-gray-100 dark:border-gray-800">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Bagi Hasil Pengelola (60%)</span>
+                                    <span class="px-2 py-0.5 bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 rounded text-[10px] font-bold">Terbagi</span>
+                                </div>
+                                <p class="text-xl font-black text-emerald-600 dark:text-emerald-400 mt-1 tracking-tight" :class="censorMode ? 'privacy-blur' : ''">
+                                    Rp{{ number_format($report->shared_amount ?? ($report->total_profit * 0.6), 0, ',', '.') }}
+                                </p>
+                                <span class="text-[11px] text-gray-400 dark:text-gray-500 mt-1 block">Najmy (30%) &amp; Labantik (30%)</span>
+                            </div>
+                        </div>
+
+                        <!-- Toggle Button to view detail breakdown -->
+                        <div class="pt-2">
+                            <button wire:click="toggleBreakdown('{{ $report->id }}')"
+                                class="w-full flex items-center justify-between px-4 py-3 rounded-xl text-xs font-bold uppercase tracking-wider transition-all border
+                                    {{ $expandedReportId === $report->id ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-300 border-blue-200 dark:border-blue-800' : 'bg-gray-50 dark:bg-gray-900/30 text-gray-600 dark:text-gray-300 border-gray-200/80 dark:border-gray-700/80 hover:bg-gray-100 dark:hover:bg-gray-800' }}">
+                                <span class="flex items-center gap-2">
+                                    <svg class="w-4 h-4 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                                    </svg>
+                                    {{ $expandedReportId === $report->id ? 'Sembunyikan Rincian Penarikan & Kategori' : 'Lihat Rincian Penarikan & Pembagian Kategori Produk' }}
+                                </span>
+                                <svg class="w-4 h-4 transition-transform {{ $expandedReportId === $report->id ? 'rotate-180' : '' }}"
+                                    fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+                                </svg>
+                            </button>
+
+                            <!-- Expanded Breakdown Container -->
+                            @if($expandedReportId === $report->id)
+                                <div class="mt-4 p-5 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-slate-700/80 space-y-4">
+                                    <div class="flex items-center justify-between">
+                                        <h4 class="text-xs font-bold text-gray-700 dark:text-gray-200 uppercase tracking-wider">
+                                            Rincian Pembagian Per Penerima &amp; Kategori Transaksi
+                                        </h4>
+                                        <span class="text-[11px] text-gray-400">Tercatat di Kas Tunai &amp; Kas Virtual</span>
+                                    </div>
+
+                                    @if(empty($reportBreakdown))
+                                        <div class="py-8 text-center text-xs font-semibold text-gray-400">
+                                            Tidak ditemukan detail rincian transaksi pembagian untuk periode ini.
+                                        </div>
+                                    @else
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            @foreach($reportBreakdown as $recipient)
+                                                <div class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700 shadow-xs space-y-3">
+                                                    <!-- Recipient Title & Total -->
+                                                    <div class="flex items-center justify-between pb-2.5 border-b border-gray-100 dark:border-gray-700">
+                                                        <div>
+                                                            <p class="text-sm font-bold text-gray-900 dark:text-white">{{ $recipient['name'] }}</p>
+                                                            <span class="px-2 py-0.5 bg-blue-50 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 rounded text-[10px] font-bold">
+                                                                Porsi: {{ $recipient['percentage'] }}
+                                                            </span>
+                                                        </div>
+                                                        <div class="text-right">
+                                                            <p class="text-xs text-gray-400">Total Diterima</p>
+                                                            <p class="text-base font-black text-blue-600 dark:text-blue-400" :class="censorMode ? 'privacy-blur' : ''">
+                                                                Rp{{ number_format($recipient['total'], 0, ',', '.') }}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+
+                                                    <!-- Sub-categories breakdown list -->
+                                                    <div class="space-y-2">
+                                                        <p class="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Rincian Per Kategori Produk:</p>
+                                                        <div class="space-y-1.5">
+                                                            @foreach($recipient['categories'] as $cat)
+                                                                <div class="flex items-center justify-between text-xs py-1 px-2 rounded-lg bg-gray-50 dark:bg-gray-900/40">
+                                                                    <span class="font-medium text-gray-700 dark:text-gray-300">{{ $cat['name'] }}</span>
+                                                                    <span class="font-bold text-red-500 dark:text-red-400">-Rp{{ number_format($cat['amount'], 0, ',', '.') }}</span>
+                                                                </div>
+                                                            @endforeach
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    @endif
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+                @empty
+                    <div class="bg-white dark:bg-gray-800 rounded-2xl border border-dashed border-gray-300 dark:border-gray-700 p-12 text-center">
+                        <svg class="w-12 h-12 text-gray-400 mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        <p class="text-sm font-bold text-gray-700 dark:text-gray-300">Belum Ada Riwayat Laporan Bagi Hasil</p>
+                        <p class="text-xs text-gray-400 mt-1">Laporan bagi hasil mingguan yang diproses akan tersimpan rapi di sini.</p>
+                    </div>
+                @endforelse
+            </div>
+
+            <!-- Pagination -->
+            <div class="pt-2">
+                {{ $reports->links('livewire.partials.custom-pagination') }}
+            </div>
+        </div>
+
+    @elseif ($viewMode === 'monthly')
+        <!-- MONTHLY RECAP MODE -->
+        <div class="space-y-4">
+            <div>
+                <h3 class="text-base font-bold text-gray-900 dark:text-white uppercase tracking-wider">
+                    Rekap Keuntungan Bulanan
+                </h3>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                    Ringkasan pembagian laba yang diakumulasikan per bulan kalender.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                @forelse($monthlyReports as $mReport)
+                    <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 border border-gray-200 dark:border-gray-700 shadow-xs space-y-5">
+                        <div class="flex items-center justify-between pb-3 border-b border-gray-100 dark:border-gray-700">
+                            <div>
+                                <h4 class="text-base font-bold text-gray-900 dark:text-white">{{ $mReport->month_name }}</h4>
+                                <p class="text-xs text-gray-400 mt-0.5">{{ $mReport->weeks_count }} Laporan Mingguan</p>
+                            </div>
+                            <span class="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold">
+                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                            </span>
+                        </div>
+
+                        <div class="bg-gray-50 dark:bg-gray-900/40 rounded-xl p-4 border border-gray-100 dark:border-gray-800">
+                            <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">Total Keuntungan</span>
+                            <p class="text-xl font-black text-gray-900 dark:text-white mt-1" :class="censorMode ? 'privacy-blur' : ''">
+                                Rp{{ number_format($mReport->total_profit, 0, ',', '.') }}
+                            </p>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3">
+                            <div class="p-3.5 bg-blue-50/60 dark:bg-blue-900/20 rounded-xl border border-blue-100 dark:border-blue-800/40">
+                                <p class="text-[11px] font-bold text-blue-600 dark:text-blue-400 uppercase">Kas Jurusan (40%)</p>
+                                <p class="text-sm font-black text-blue-700 dark:text-blue-300 mt-1" :class="censorMode ? 'privacy-blur' : ''">
+                                    Rp{{ number_format($mReport->total_kas, 0, ',', '.') }}
+                                </p>
+                            </div>
+                            <div class="p-3.5 bg-emerald-50/60 dark:bg-emerald-900/20 rounded-xl border border-emerald-100 dark:border-emerald-800/40">
+                                <p class="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 uppercase">Bagi Hasil (60%)</p>
+                                <p class="text-sm font-black text-emerald-700 dark:text-emerald-300 mt-1" :class="censorMode ? 'privacy-blur' : ''">
+                                    Rp{{ number_format($mReport->total_shared, 0, ',', '.') }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                @empty
+                    <div class="col-span-full py-16 bg-white dark:bg-gray-800 rounded-2xl text-center border border-dashed border-gray-300 dark:border-gray-700">
+                        <p class="text-sm font-bold text-gray-600 dark:text-gray-400">Belum ada rekap data untuk bulan ini</p>
+                    </div>
+                @endforelse
+            </div>
+        </div>
+
+    @elseif($viewMode === 'yearly')
+        <!-- YEARLY RECAP MODE -->
+        @if ($yearlyData && $yearlyData->total_profit > 0)
+            <div class="space-y-6">
+                <!-- Main Yearly Summary Card -->
+                <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 md:p-8 border border-gray-200 dark:border-gray-700 shadow-xs space-y-6">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-gray-100 dark:border-gray-700">
+                        <div>
+                            <span class="px-3 py-1 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-md text-xs font-bold uppercase tracking-wider">
+                                Rekap Tahunan
+                            </span>
+                            <h2 class="text-2xl font-black text-gray-900 dark:text-white mt-2">
+                                Tahun {{ $currentYear }}
+                            </h2>
+                            <p class="text-xs text-gray-400 mt-1">
+                                Akumulasi dari {{ $yearlyData->total_months }} Bulan • {{ $yearlyData->total_weeks }} Periode Mingguan
+                            </p>
+                        </div>
+
+                        <div class="text-left sm:text-right">
+                            <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">Total Keuntungan Tahunan</span>
+                            <p class="text-3xl font-black text-blue-600 dark:text-blue-400 tracking-tight mt-1" :class="censorMode ? 'privacy-blur' : ''">
+                                Rp{{ number_format($yearlyData->total_profit, 0, ',', '.') }}
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <div class="p-5 bg-blue-50/60 dark:bg-blue-900/20 rounded-xl border border-blue-100 dark:border-blue-800/40">
+                            <span class="text-xs font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider">Total Kas Jurusan (40%)</span>
+                            <p class="text-2xl font-black text-blue-700 dark:text-blue-300 mt-1" :class="censorMode ? 'privacy-blur' : ''">
+                                Rp{{ number_format($yearlyData->total_kas, 0, ',', '.') }}
+                            </p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Alokasi kas pengembangan jurusan</p>
+                        </div>
+
+                        <div class="p-5 bg-emerald-50/60 dark:bg-emerald-900/20 rounded-xl border border-emerald-100 dark:border-emerald-800/40">
+                            <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">Total Bagi Hasil Eksternal (60%)</span>
+                            <p class="text-2xl font-black text-emerald-700 dark:text-emerald-300 mt-1" :class="censorMode ? 'privacy-blur' : ''">
+                                Rp{{ number_format($yearlyData->total_shared, 0, ',', '.') }}
+                            </p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Alokasi pengelola eksternal</p>
                         </div>
                     </div>
                 </div>
 
-                <!-- Daily Profit Breakdown -->
-                <div x-data="{ open: false }" class="bg-gray-50 dark:bg-gray-900/50 rounded-[4rem] p-12 border border-gray-100 dark:border-gray-800/50 mb-10 transition-all duration-300">
-                    <button @click="open = !open" class="flex justify-between items-center w-full text-left focus:outline-none cursor-pointer">
-                        <div>
-                            <h3 class="text-2xl font-bold uppercase tracking-tight text-gray-800 dark:text-white">
-                                Rincian Keuntungan Harian</h3>
-                            <p class="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mt-1">Detail keuntungan sistem dan penyesuaian selisih kas per hari</p>
-                        </div>
-                        <div class="w-12 h-12 bg-white dark:bg-gray-900 rounded-[1.5rem] flex items-center justify-center border border-gray-100 dark:border-gray-800 transition-transform duration-300 shadow-sm" :class="open ? 'rotate-180' : ''">
-                            <svg class="w-5 h-5 text-primary-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
-                            </svg>
-                        </div>
-                    </button>
-
-                    <div x-show="open" x-collapse x-cloak class="grid grid-cols-1 gap-6 mt-10">
-                        @foreach($currentWeek['dailyBreakdown'] as $day)
-                            <div class="bg-white dark:bg-gray-900 rounded-2xl p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border border-gray-100 dark:border-gray-800 shadow-sm hover:shadow-xl transition-all">
-                                <div>
-                                    <p class="text-sm font-black text-gray-800 dark:text-white uppercase tracking-tight">
-                                        {{ $day['date']->translatedFormat('l, d F Y') }}
-                                    </p>
-                                    <div class="flex flex-wrap items-center gap-3 mt-2 text-[10px] font-bold text-gray-400 uppercase tracking-wider">
-                                        <span>Sistem: <strong class="text-gray-700 dark:text-gray-200">Rp{{ number_format($day['system_profit'], 0, ',', '.') }}</strong></span>
-                                        @if($day['has_audit'])
-                                            <span>•</span>
-                                            @if($day['diff'] < 0)
-                                                <span class="text-primary-red font-black">Selisih Kurang: -Rp{{ number_format(abs($day['diff']), 0, ',', '.') }}</span>
-                                            @elseif($day['diff'] > 0)
-                                                <span class="text-amber-500 font-black">Selisih Lebih: +Rp{{ number_format($day['diff'], 0, ',', '.') }}</span>
-                                            @else
-                                                <span class="text-green-500 font-black">Uang Kas Match</span>
-                                            @endif
-                                        @else
-                                            <span>•</span>
-                                            <span class="text-gray-300 dark:text-gray-600">Belum Audit Fisik</span>
-                                        @endif
+                <!-- Monthly breakdown in yearly mode -->
+                <div class="space-y-3">
+                    <h3 class="text-sm font-bold text-gray-800 dark:text-white uppercase tracking-wider">
+                        Rincian Per Bulan di Tahun {{ $currentYear }}
+                    </h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        @foreach ($allMonthlyData as $mData)
+                            <div class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700 shadow-xs space-y-3">
+                                <h4 class="text-xs font-bold text-gray-800 dark:text-white uppercase">{{ $mData->month_name }}</h4>
+                                <div class="space-y-1.5 text-xs pt-2 border-t border-gray-100 dark:border-gray-700">
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-400">Profit:</span>
+                                        <span class="font-bold text-blue-600 dark:text-blue-400">Rp{{ number_format($mData->total_profit, 0, ',', '.') }}</span>
                                     </div>
-                                </div>
-                                <div class="text-left sm:text-right">
-                                    <p class="text-[9px] font-black text-gray-400 uppercase tracking-widest">Keuntungan Riil</p>
-                                    <p class="text-xl font-black text-primary-blue italic mt-1">
-                                        Rp{{ number_format($day['net_profit'], 0, ',', '.') }}
-                                    </p>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-400">Kas (40%):</span>
+                                        <span class="font-semibold text-gray-700 dark:text-gray-300">Rp{{ number_format($mData->total_kas, 0, ',', '.') }}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-400">Bagian (60%):</span>
+                                        <span class="font-semibold text-emerald-600 dark:text-emerald-400">Rp{{ number_format($mData->total_shared, 0, ',', '.') }}</span>
+                                    </div>
                                 </div>
                             </div>
                         @endforeach
                     </div>
                 </div>
-
-                <!-- Admin Contribution Breakdown -->
-                <div
-                    class="bg-gray-50 dark:bg-gray-900/50 rounded-[4rem] p-12 border border-gray-100 dark:border-gray-800/50">
-                    <div class="flex justify-between items-center mb-10">
-                        <div>
-                            <h3
-                                class="text-2xl font-bold uppercase tracking-tight text-gray-800 dark:text-white">
-                                Rincian Pembagian Eksternal</h3>
-                            <p class="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mt-1">Porsi pembagian bagi hasil mingguan (Najmy 30% & Labantik 30%)</p>
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        @forelse($currentWeek['adminContributions'] as $contrib)
-                            <div
-                                class="bg-white dark:bg-gray-900 rounded-2xl p-5 flex items-center justify-between border border-gray-100 dark:border-gray-800 shadow-sm hover:shadow-xl transition-all group">
-                                <div class="flex items-center gap-5">
-                                    <div
-                                        class="w-14 h-14 rounded-2xl bg-gray-50 dark:bg-gray-800 flex items-center justify-center text-lg font-black text-primary-blue border border-gray-100 dark:border-gray-700 group-hover:scale-110 transition-transform">
-                                        {{ substr($contrib->user->name ?? '?', 0, 1) }}
-                                    </div>
-                                    <div>
-                                        <p
-                                            class="text-sm font-black text-gray-800 dark:text-white uppercase tracking-tight">
-                                            {{ $contrib->user->name ?? 'Unknown Admin' }}</p>
-                                        <p class="text-[9px] font-black text-gray-400 uppercase tracking-widest mt-1">
-                                            {{ $contrib->portion_name }}</p>
-                                    </div>
-                                </div>
-                                <div class="text-right">
-                                    <p class="text-base font-black text-primary-blue italic">
-                                        Rp{{ number_format($contrib->user_profit, 0, ',', '.') }}</p>
-                                    <div class="flex items-center gap-1.5 justify-end text-[8px] font-bold text-gray-400 mt-1">
-                                        <span class="text-green-500">Tunai: Rp{{ number_format($contrib->cash_profit ?? 0, 0, ',', '.') }}</span>
-                                        <span>•</span>
-                                        <span class="text-indigo-400">Virtual: Rp{{ number_format($contrib->non_cash_profit ?? 0, 0, ',', '.') }}</span>
-                                    </div>
-                                    <p class="text-[9px] font-bold text-green-500 uppercase tracking-widest mt-1">
-                                        Persentase: {{ $contrib->percentage }}</p>
-                                </div>
-                            </div>
-                        @empty
-                            <div class="col-span-2 py-20 text-center opacity-20">
-                                <p class="text-xs font-black uppercase tracking-widest italic">Belum ada rincian pembagian</p>
-                            </div>
-                        @endforelse
-                    </div>
-                </div>
-            </div>
-
-            <!-- Right: Historical Reports -->
-            <div class="space-y-10">
-                <div
-                    class="bg-white dark:bg-gray-900 rounded-[4rem] p-10 shadow-2xl shadow-blue-900/5 border border-gray-50 dark:border-gray-800 h-full">
-                    <h3
-                        class="text-2xl font-bold uppercase tracking-tight text-gray-800 dark:text-white mb-8">
-                        Riwayat Laporan</h3>
-
-                    <div class="space-y-6">
-                        @forelse($reports as $report)
-                            <div
-                                class="p-5 bg-gray-50 dark:bg-gray-800/50 rounded-2xl border border-gray-100 dark:border-gray-700/50 hover:border-primary-blue/30 transition-all group relative">
-                                <button wire:click.stop="confirmDelete('{{ $report->id }}')"
-                                    class="absolute top-6 right-6 p-2 text-gray-300 hover:text-primary-red opacity-0 group-hover:opacity-100 transition-all z-30 cursor-pointer pointer-events-auto">
-                                    <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" width="24"
-                                        height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                        stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="M3 6h18" />
-                                        <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
-                                        <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
-                                    </svg>
-                                </button>
-                                <div class="flex justify-between items-start mb-4">
-                                    <div>
-                                        <span
-                                            class="px-4 py-1.5 bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400 rounded-full text-[8px] font-black uppercase tracking-widest">Minggu
-                                            {{ $report->week_number }}</span>
-                                        <h4
-                                            class="text-sm font-black text-gray-800 dark:text-white uppercase tracking-tight mt-3">
-                                            {{ $report->month_name }}</h4>
-                                        <div class="flex flex-wrap items-center gap-2 mt-2">
-                                            <div class="flex items-center gap-1.5 bg-gray-100 dark:bg-gray-700/60 px-2.5 py-1 rounded-full border border-gray-200 dark:border-gray-600/50" title="Pembuat Laporan">
-                                                <svg class="w-3 h-3 text-primary-blue dark:text-primary-blue-light" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
-                                                </svg>
-                                                <span class="text-[9px] font-black text-gray-700 dark:text-gray-200 uppercase tracking-wider">
-                                                    {{ $report->creator->name ?? 'Sistem' }}
-                                                </span>
-                                            </div>
-                                            <span class="text-[8px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">
-                                                {{ $report->created_at->translatedFormat('d M Y H:i') }}
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="h-px bg-gray-100 dark:bg-gray-700 mb-6"></div>
-                                <div class="flex justify-between items-center mb-4">
-                                    <div class="text-left">
-                                        <p class="text-[8px] font-black text-gray-400 uppercase tracking-widest">Profit</p>
-                                        <p class="text-xs font-black text-primary-blue">
-                                            Rp{{ number_format($report->total_profit, 0, ',', '.') }}</p>
-                                    </div>
-                                    <div class="text-right">
-                                        <p class="text-[8px] font-black text-gray-400 uppercase tracking-widest">Share</p>
-                                        <p class="text-xs font-black text-green-500">
-                                            Rp{{ number_format($report->shared_amount, 0, ',', '.') }}</p>
-                                    </div>
-                                </div>
-
-                                {{-- Tombol lihat breakdown --}}
-                                <button wire:click="toggleBreakdown('{{ $report->id }}')"
-                                    class="w-full flex items-center justify-between px-4 py-2.5 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all
-                                        {{ $expandedReportId === $report->id ? 'bg-primary-blue/10 text-primary-blue' : 'bg-gray-100 dark:bg-gray-700/50 text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700' }}">
-                                    <span>{{ $expandedReportId === $report->id ? 'Sembunyikan Detail' : 'Lihat Rincian Pembagian' }}</span>
-                                    <svg class="w-3.5 h-3.5 transition-transform {{ $expandedReportId === $report->id ? 'rotate-180' : '' }}"
-                                        xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
-                                    </svg>
-                                </button>
-
-                                {{-- Accordion breakdown --}}
-                                @if($expandedReportId === $report->id)
-                                    <div class="mt-3 space-y-3">
-                                        @if(empty($reportBreakdown))
-                                            <p class="text-[9px] font-black uppercase tracking-widest text-center text-gray-400 py-3">
-                                                Tidak ada data rincian
-                                            </p>
-                                        @else
-                                            @foreach($reportBreakdown as $recipient)
-                                                <div class="bg-gray-50 dark:bg-gray-800 rounded-2xl p-3">
-                                                    {{-- Header penerima --}}
-                                                    <div class="flex justify-between items-center mb-2">
-                                                        <div>
-                                                            <p class="text-[9px] font-black uppercase tracking-widest text-gray-800 dark:text-white">
-                                                                {{ $recipient['name'] }}
-                                                            </p>
-                                                            <p class="text-[8px] font-bold text-gray-400">{{ $recipient['percentage'] }}</p>
-                                                        </div>
-                                                        <p class="text-sm font-black text-primary-blue">
-                                                            Rp{{ number_format($recipient['total'], 0, ',', '.') }}
-                                                        </p>
-                                                    </div>
-                                                    {{-- Detail per kategori --}}
-                                                    <div class="space-y-1 border-t border-gray-200 dark:border-gray-700 pt-2">
-                                                        @foreach($recipient['categories'] as $cat)
-                                                            <div class="flex justify-between items-center">
-                                                                <span class="text-[8px] font-bold text-gray-400 uppercase tracking-wider">{{ $cat['name'] }}</span>
-                                                                <span class="text-[9px] font-black text-red-400">-Rp{{ number_format($cat['amount'], 0, ',', '.') }}</span>
-                                                            </div>
-                                                        @endforeach
-                                                    </div>
-                                                </div>
-                                            @endforeach
-                                        @endif
-                                    </div>
-                                @endif
-                            </div>
-                        @empty
-                            <div class="py-32 text-center opacity-20">
-                                <p class="text-xs font-black uppercase tracking-widest italic">Belum ada riwayat</p>
-                            </div>
-                        @endforelse
-                    </div>
-
-                    <div class="mt-8">
-                        {{ $reports->links('livewire.partials.custom-pagination') }}
-                    </div>
-                </div>
-            </div>
-        </div>
-    @elseif ($viewMode === 'monthly')
-        <!-- Monthly Rekap Mode -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-            @forelse($monthlyReports as $mReport)
-                <div
-                    class="bg-white dark:bg-gray-900 rounded-[3rem] p-10 border border-gray-100 dark:border-gray-800 shadow-xl shadow-blue-900/5 relative overflow-hidden group">
-                    <div class="relative z-10">
-                        <div class="flex justify-between items-start mb-10">
-                            <div>
-                                <h3
-                                    class="text-2xl font-bold uppercase tracking-tight text-gray-800 dark:text-white">
-                                    {{ $mReport->month_name }}</h3>
-                                <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1">
-                                    {{ $mReport->weeks_count }} Laporan Mingguan</p>
-                                <p
-                                    class="text-[8px] font-bold text-gray-300 dark:text-gray-600 uppercase tracking-widest mt-2">
-                                    {{ $mReport->created_at->translatedFormat('d M Y H:i') }}</p>
-                            </div>
-                            <div
-                                class="w-12 h-12 bg-primary-blue/10 rounded-2xl flex items-center justify-center text-primary-blue">
-                                <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" width="24"
-                                    height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                    stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M8 2v4" />
-                                    <path d="M16 2v4" />
-                                    <rect width="18" height="18" x="3" y="4" rx="2" />
-                                    <path d="M3 10h18" />
-                                </svg>
-                            </div>
-                        </div>
-
-                        <div class="space-y-6">
-                            <div class="flex justify-between items-center p-6 bg-gray-50 dark:bg-gray-800 rounded-2xl">
-                                <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Total
-                                    Keuntungan</span>
-                                <span
-                                    class="text-lg font-black text-gray-800 dark:text-white" :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($mReport->total_profit, 0, ',', '.') }}</span>
-                            </div>
-                            <div class="grid grid-cols-2 gap-4">
-                                <div
-                                    class="p-6 bg-blue-50 dark:bg-blue-900/20 rounded-2xl border border-primary-blue/10">
-                                    <p class="text-[9px] font-black text-primary-blue uppercase tracking-widest mb-2">
-                                        Kas Jurusan</p>
-                                    <p class="text-sm font-black text-primary-blue italic" :class="censorMode ? 'privacy-blur' : ''">
-                                        Rp{{ number_format($mReport->total_kas, 0, ',', '.') }}</p>
-                                </div>
-                                <div
-                                    class="p-6 bg-green-50 dark:bg-green-900/20 rounded-2xl border border-green-500/10">
-                                    <p class="text-[9px] font-black text-green-500 uppercase tracking-widest mb-2">Bagi
-                                        Hasil</p>
-                                    <p class="text-sm font-black text-green-500 italic" :class="censorMode ? 'privacy-blur' : ''">
-                                        Rp{{ number_format($mReport->total_shared, 0, ',', '.') }}</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            @empty
-                <div
-                    class="col-span-3 py-32 bg-white dark:bg-gray-900 rounded-[4rem] text-center opacity-20 border border-dashed border-gray-300">
-                    <p class="text-xs font-black uppercase tracking-widest italic">Belum ada data untuk bulan ini</p>
-                </div>
-            @endforelse
-        </div>
-    @elseif($viewMode === 'yearly')
-        <!-- Yearly Recap Mode -->
-        @if ($yearlyData && $yearlyData->total_profit > 0)
-            <div class="grid grid-cols-1 gap-10">
-                <!-- Main Yearly Summary Card -->
-                <div
-                    class="bg-white dark:bg-gray-900 rounded-[4rem] p-16 shadow-2xl shadow-blue-900/5 border border-gray-50 dark:border-gray-800 relative overflow-hidden group">
-                    <div
-                        class="absolute top-0 right-0 p-20 opacity-[0.03] group-hover:scale-110 transition-transform duration-700 pointer-events-none">
-                        <svg class="w-64 h-64 text-primary-blue" xmlns="http://www.w3.org/2000/svg" width="24"
-                            height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M12 3v18" />
-                            <path d="M3 9h18" />
-                        </svg>
-                    </div>
-
-                    <div class="relative z-10">
-                        <div class="flex justify-between items-start mb-16">
-                            <div>
-                                <span
-                                    class="px-5 py-2 bg-blue-50 dark:bg-blue-900/20 text-primary-blue rounded-full text-[10px] font-black uppercase tracking-widest">Rekap
-                                    Tahunan</span>
-                                <h2
-                                    class="text-5xl font-bold uppercase tracking-tight text-gray-800 dark:text-white mt-6">
-                                    Tahun {{ $currentYear }}</h2>
-                                <p class="text-sm font-bold text-gray-400 mt-3 italic uppercase">
-                                    {{ $yearlyData->total_months }} Bulan • {{ $yearlyData->total_weeks }} Minggu</p>
-                            </div>
-                            <div class="text-right">
-                                <p class="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-3">Total
-                                    Keuntungan Tahunan</p>
-                                <p class="text-6xl font-black text-primary-blue italic tracking-tighter" :class="censorMode ? 'privacy-blur' : ''">
-                                    Rp{{ number_format($yearlyData->total_profit, 0, ',', '.') }}</p>
-                            </div>
-                        </div>
-
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                            <div
-                                class="bg-gray-50 dark:bg-gray-800/50 rounded-[3rem] p-12 border border-gray-100 dark:border-gray-700/50">
-                                <div class="flex items-center gap-4 mb-8">
-                                    <div
-                                        class="w-14 h-14 bg-primary-red/10 rounded-2xl flex items-center justify-center text-primary-red">
-                                        <svg class="w-7 h-7" xmlns="http://www.w3.org/2000/svg" width="24"
-                                            height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                            <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-                                            <polyline points="9 22 9 12 15 12 15 22" />
-                                        </svg>
-                                    </div>
-                                    <div>
-                                        <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Kas
-                                            Jurusan (50%)</p>
-                                        <p
-                                            class="text-3xl font-black text-gray-800 dark:text-white italic tracking-tighter mt-2" :class="censorMode ? 'privacy-blur' : ''">
-                                            Rp{{ number_format($yearlyData->total_kas, 0, ',', '.') }}</p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div
-                                class="bg-primary-blue rounded-[3rem] p-12 text-white shadow-2xl shadow-blue-500/20 relative overflow-hidden">
-                                <div class="flex items-center gap-4 mb-8 relative z-10">
-                                    <div class="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center">
-                                        <svg class="w-7 h-7" xmlns="http://www.w3.org/2000/svg" width="24"
-                                            height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-                                            <circle cx="9" cy="7" r="4" />
-                                        </svg>
-                                    </div>
-                                    <div>
-                                        <p class="text-[10px] font-black text-white/60 uppercase tracking-widest">Bagi
-                                            Hasil Admin (50%)</p>
-                                        <p class="text-3xl font-black italic tracking-tighter mt-2" :class="censorMode ? 'privacy-blur' : ''">
-                                            Rp{{ number_format($yearlyData->total_shared, 0, ',', '.') }}</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Monthly Breakdown -->
-                        <div class="mt-16 pt-16 border-t border-gray-100 dark:border-gray-800">
-                            <h3
-                                class="text-2xl font-bold uppercase tracking-tight text-gray-800 dark:text-white mb-10">
-                                Rincian Per Bulan</h3>
-                            <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                                @forelse($allMonthlyData as $mData)
-                                    <div
-                                        class="bg-gray-50 dark:bg-gray-800/50 rounded-[2rem] p-5 border border-gray-100 dark:border-gray-700/50 hover:border-primary-blue/30 transition-all">
-                                        <h4
-                                            class="text-sm font-black text-gray-800 dark:text-white uppercase tracking-tight mb-6">
-                                            {{ $mData->month_name }}</h4>
-                                        <div class="space-y-4">
-                                            <div class="flex justify-between items-center">
-                                                <p
-                                                    class="text-[9px] font-bold text-gray-400 uppercase tracking-widest">
-                                                    Profit</p>
-                                                <p class="text-sm font-black text-primary-blue italic">
-                                                    Rp{{ number_format($mData->total_profit, 0, ',', '.') }}</p>
-                                            </div>
-                                            <div class="h-px bg-gray-200 dark:bg-gray-700"></div>
-                                            <div class="flex justify-between items-center">
-                                                <p
-                                                    class="text-[9px] font-bold text-gray-400 uppercase tracking-widest">
-                                                    Kas</p>
-                                                <p class="text-sm font-black text-gray-800 dark:text-white italic">
-                                                    Rp{{ number_format($mData->total_kas, 0, ',', '.') }}</p>
-                                            </div>
-                                            <div class="flex justify-between items-center">
-                                                <p
-                                                    class="text-[9px] font-bold text-gray-400 uppercase tracking-widest">
-                                                    Bagian</p>
-                                                <p class="text-sm font-black text-green-500 italic">
-                                                    Rp{{ number_format($mData->total_shared, 0, ',', '.') }}</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                @empty
-                                @endforelse
-                            </div>
-                        </div>
-                    </div>
-                </div>
             </div>
         @else
-            <div
-                class="py-32 bg-white dark:bg-gray-900 rounded-[4rem] text-center opacity-20 border border-dashed border-gray-300">
-                <p class="text-xs font-black uppercase tracking-widest italic">Belum ada data untuk tahun ini</p>
+            <div class="py-20 bg-white dark:bg-gray-800 rounded-2xl text-center border border-dashed border-gray-300 dark:border-gray-700">
+                <p class="text-sm font-bold text-gray-600 dark:text-gray-400">Belum ada data untuk tahun {{ $currentYear }}</p>
             </div>
         @endif
     @endif
 
     <!-- Delete Confirmation Modal -->
     <div x-data="{ show: @entangle('showDeleteModal').live }" x-show="show" x-cloak
-        class="fixed inset-0 z-[300] flex items-center justify-center p-6 bg-gray-900/60 backdrop-blur-sm"
-        x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0"
-        x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-200"
+        class="fixed inset-0 z-[300] flex items-center justify-center p-4 bg-gray-900/60 backdrop-blur-xs"
+        x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0"
+        x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-150"
         x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">
         <div @click.away="show = false"
-            class="bg-white dark:bg-gray-900 w-full max-w-sm rounded-[3rem] shadow-2xl flex flex-col p-10 gap-5">
+            class="bg-white dark:bg-gray-800 w-full max-w-md rounded-2xl shadow-xl flex flex-col p-6 gap-5 border border-gray-200 dark:border-gray-700">
             <div class="text-center">
-                <div
-                    class="w-20 h-20 bg-primary-red/10 text-primary-red rounded-[2rem] flex items-center justify-center mx-auto mb-6">
-                    <svg class="w-10 h-10" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M3 6h18" />
-                        <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
-                        <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                <div class="w-12 h-12 bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-xl flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                     </svg>
                 </div>
-                <h3 class="text-2xl font-bold uppercase tracking-tight text-gray-800 dark:text-white">Hapus
-                    Laporan?</h3>
-                <p class="text-xs font-bold text-gray-400 mt-4 uppercase tracking-widest leading-loose">Tindakan ini
-                    tidak dapat dibatalkan. Laporan bagi hasil akan dihapus permanen.</p>
+                <h3 class="text-base font-bold text-gray-900 dark:text-white">Hapus Laporan Bagi Hasil?</h3>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-2 leading-relaxed">
+                    Tindakan ini akan membatalkan pembukuan bagi hasil pada periode ini dari buku kas tunai dan kas virtual. Tindakan tidak dapat diurungkan.
+                </p>
             </div>
 
-            <div class="flex gap-4 mt-2">
+            <div class="flex gap-3">
                 <button @click="show = false"
-                    class="flex-1 py-4 bg-gray-50 dark:bg-gray-800 text-gray-400 rounded-2xl font-black uppercase text-[10px] tracking-widest hover:bg-gray-100 transition-all">Batal</button>
+                    class="flex-1 py-2.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl font-bold text-xs uppercase tracking-wider hover:bg-gray-200 transition-colors">
+                    Batal
+                </button>
                 <button wire:click="delete"
-                    class="flex-1 py-4 bg-primary-red text-white rounded-2xl font-black uppercase text-[10px] tracking-widest shadow-xl shadow-red-500/20 hover:scale-105 active:scale-95 transition-all">Ya,
-                    Hapus</button>
+                    class="flex-1 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold text-xs uppercase tracking-wider shadow-xs transition-colors">
+                    Ya, Hapus
+                </button>
             </div>
         </div>
     </div>

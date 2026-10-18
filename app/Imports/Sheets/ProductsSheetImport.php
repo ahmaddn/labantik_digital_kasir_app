@@ -14,20 +14,20 @@ class ProductsSheetImport implements ToCollection, WithHeadingRow
     public function collection(Collection $rows)
     {
         foreach ($rows as $row) {
-            if (!isset($row['nama']) || empty($row['nama'])) {
+            if (! isset($row['nama']) || empty($row['nama'])) {
                 continue;
             }
 
             // Get or create category
             $categoryId = null;
-            if (!empty($row['kategori'])) {
+            if (! empty($row['kategori'])) {
                 $category = ProductCategory::firstOrCreate(['name' => $row['kategori']]);
                 $categoryId = $category->id;
             }
 
             // Get or create supplier
             $supplierId = null;
-            if (!empty($row['supplier'])) {
+            if (! empty($row['supplier'])) {
                 $supplier = Supplier::firstOrCreate(['name' => $row['supplier']]);
                 $supplierId = $supplier->id;
             }
@@ -40,7 +40,7 @@ class ProductsSheetImport implements ToCollection, WithHeadingRow
                     'supplier_id' => $supplierId,
                     'price' => $row['harga'] ?? 0,
                     'modal_price' => $row['harga_modal'] ?? 0,
-                    'is_active' => isset($row['is_active']) ? (bool)$row['is_active'] : true,
+                    'is_active' => isset($row['is_active']) ? (bool) $row['is_active'] : true,
                 ]
             );
         }

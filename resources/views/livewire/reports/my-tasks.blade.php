@@ -1,11 +1,5 @@
-<div class="space-y-8 pt-6">
-    <!-- Header -->
-    <div>
-        <h1 class="text-2xl font-bold uppercase tracking-tight text-primary-blue dark:text-primary-yellow">
-            Tugas Saya</h1>
-        <p class="text-gray-400 text-sm font-semibold uppercase tracking-widest mt-1">Kelola dan laporkan tugas harian
-            yang ditugaskan</p>
-    </div>
+<div class="p-4 sm:p-6 space-y-6">
+    <x-hub-tabs hub="operasional" title="Tugas Saya" subtitle="Daftar instruksi tugas harian yang ditugaskan kepada Anda, batas deadline, dan upload bukti pengerjaan." />
 
     <!-- Tabs -->
     <div class="flex items-center gap-2 border-b border-gray-200 dark:border-gray-700 overflow-x-auto flex-nowrap [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">

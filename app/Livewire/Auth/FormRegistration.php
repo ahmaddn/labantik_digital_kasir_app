@@ -8,15 +8,23 @@ use Livewire\Component;
 class FormRegistration extends Component
 {
     public string $fullName = '';
+
     public string $className = '';
+
     public string $address = '';
+
     public string $phoneNumber = '';
+
     public string $parentPhoneNumber = '';
+
     public string $reason = '';
+
     public string $illnessHistory = '';
 
     public bool $isOpen = false;
+
     public bool $isSubmitted = false;
+
     public string $waGroupLink = '';
 
     public function mount()

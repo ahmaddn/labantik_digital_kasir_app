@@ -5,17 +5,21 @@ namespace App\Exports;
 use App\Models\CashierSchedule;
 use Carbon\Carbon;
 use Maatwebsite\Excel\Concerns\FromCollection;
+use Maatwebsite\Excel\Concerns\ShouldAutoSize;
+use Maatwebsite\Excel\Concerns\WithCustomStartCell;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
-use Maatwebsite\Excel\Concerns\WithTitle;
-use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithStyles;
-use Maatwebsite\Excel\Concerns\WithCustomStartCell;
+use Maatwebsite\Excel\Concerns\WithTitle;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Style\Border;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class CashierScheduleExport implements FromCollection, WithHeadings, WithMapping, WithTitle, ShouldAutoSize, WithStyles, WithCustomStartCell
+class CashierScheduleExport implements FromCollection, ShouldAutoSize, WithCustomStartCell, WithHeadings, WithMapping, WithStyles, WithTitle
 {
     protected $weekStart;
+
     protected $jurusanId;
 
     public function __construct($weekStart, $jurusanId)
@@ -31,7 +35,7 @@ class CashierScheduleExport implements FromCollection, WithHeadings, WithMapping
 
         return CashierSchedule::with(['user', 'jurusan'])
             ->whereBetween('date', [$start, $end])
-            ->when($this->jurusanId, function($q) {
+            ->when($this->jurusanId, function ($q) {
                 $q->where('jurusan_id', $this->jurusanId);
             })
             ->orderBy('date')
@@ -82,16 +86,16 @@ class CashierScheduleExport implements FromCollection, WithHeadings, WithMapping
 
         // Document Subtitle
         $sheet->mergeCells('A2:C2');
-        $sheet->setCellValue('A2', 'Periode: ' . $start . ' - ' . $end);
+        $sheet->setCellValue('A2', 'Periode: '.$start.' - '.$end);
         $sheet->getStyle('A2')->getFont()->setItalic(true)->setSize(11)->getColor()->setARGB('FF475569');
 
         $sheet->mergeCells('A3:C3');
-        $sheet->setCellValue('A3', 'Dicetak Pada: ' . now()->translatedFormat('d F Y H:i:s'));
+        $sheet->setCellValue('A3', 'Dicetak Pada: '.now()->translatedFormat('d F Y H:i:s'));
         $sheet->getStyle('A3')->getFont()->setSize(9)->getColor()->setARGB('FF64748B');
 
         // Header style (Row 5)
         $sheet->getStyle('A5:E5')->getFont()->setBold(true)->getColor()->setARGB('FFFFFFFF');
-        $sheet->getStyle('A5:E5')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+        $sheet->getStyle('A5:E5')->getFill()->setFillType(Fill::FILL_SOLID)
             ->getStartColor()->setARGB('FF2563EB'); // Primary Blue
 
         $sheet->getColumnDimension('A')->setWidth(15);
@@ -101,17 +105,17 @@ class CashierScheduleExport implements FromCollection, WithHeadings, WithMapping
         $sheet->getColumnDimension('E')->setWidth(30);
 
         // Center align day and date columns
-        $sheet->getStyle('A5:B100')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('A5:B100')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
         // Grid Borders and Alternate Zebra Stripe Colors
         $lastRow = $sheet->getHighestRow();
         if ($lastRow >= 5) {
-            $sheet->getStyle('A5:E' . $lastRow)->getBorders()->getAllBorders()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
-            $sheet->getStyle('A5:E' . $lastRow)->getBorders()->getAllBorders()->getColor()->setARGB('FFCBD5E1'); // Slate 300 border
+            $sheet->getStyle('A5:E'.$lastRow)->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+            $sheet->getStyle('A5:E'.$lastRow)->getBorders()->getAllBorders()->getColor()->setARGB('FFCBD5E1'); // Slate 300 border
 
             for ($row = 6; $row <= $lastRow; $row++) {
                 if ($row % 2 === 0) {
-                    $sheet->getStyle('A' . $row . ':E' . $row)->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+                    $sheet->getStyle('A'.$row.':E'.$row)->getFill()->setFillType(Fill::FILL_SOLID)
                         ->getStartColor()->setARGB('FFF8FAFC'); // slate-50 background for alternate rows
                 }
             }

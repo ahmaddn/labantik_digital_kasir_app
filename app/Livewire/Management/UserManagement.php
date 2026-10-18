@@ -9,40 +9,56 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Livewire\Component;
+use Livewire\WithFileUploads;
 use Livewire\WithPagination;
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class UserManagement extends Component
 {
+    use WithFileUploads;
     use WithPagination;
-    use \Livewire\WithFileUploads;
 
     public $search = '';
 
     // Form State
     public $userId;
+
     public $name = '';
+
     public $email = '';
+
     public $password = '';
+
     public $grade_level = '';
+
     public $assignedAccesses = []; // Array of ['role_id' => ..., 'role_label' => ..., 'jurusan_id' => ..., 'jurusan_name' => ...]
 
     // Temp inputs for adding access
     public $selectedRoleId = '';
+
     public $selectedJurusanId = '';
 
     // UI state
     public $showModal = false;
+
     public $showDeleteModal = false;
+
     public $deleteId = null;
 
     // Excel import state
     public $excelFile;
+
     public $showImportModal = false;
 
     // Bulk selection & update state
     public $selectedUsers = [];
+
     public $selectAll = false;
+
     public $bulkGradeLevel = '';
+
     public $showBulkGradeModal = false;
 
     protected $rules = [
@@ -60,16 +76,16 @@ class UserManagement extends Component
             $q->where('name', 'like', '%'.$this->search.'%')
                 ->orWhere('email', 'like', '%'.$this->search.'%');
         })
-        ->when($activeRole === 'pengelola_jurusan', function ($q) use ($activeJurusanId) {
-            return $q->whereHas('roles', function($sq) use ($activeJurusanId) {
-                $sq->where('roles.name', 'kasir')
-                  ->where('role_user.jurusan_id', $activeJurusanId);
-            });
-        })
-        ->latest()
-        ->paginate(10, ['*'], 'page', $this->getPage());
+            ->when($activeRole === 'pengelola_jurusan', function ($q) use ($activeJurusanId) {
+                return $q->whereHas('roles', function ($sq) use ($activeJurusanId) {
+                    $sq->where('roles.name', 'kasir')
+                        ->where('role_user.jurusan_id', $activeJurusanId);
+                });
+            })
+            ->latest()
+            ->paginate(10, ['*'], 'page', $this->getPage());
 
-        $currentPageIds = $currentPageUsers->pluck('id')->map(fn($id) => (string) $id)->toArray();
+        $currentPageIds = $currentPageUsers->pluck('id')->map(fn ($id) => (string) $id)->toArray();
 
         if ($value) {
             $this->selectedUsers = array_values(array_unique(array_merge($this->selectedUsers, $currentPageIds)));
@@ -82,6 +98,7 @@ class UserManagement extends Component
     {
         if (empty($this->selectedUsers)) {
             $this->dispatch('toast', message: 'Pilih minimal satu user terlebih dahulu.', type: 'danger');
+
             return;
         }
         $this->bulkGradeLevel = '';
@@ -92,6 +109,7 @@ class UserManagement extends Component
     {
         if (empty($this->selectedUsers)) {
             $this->dispatch('toast', message: 'Tidak ada user yang dipilih.', type: 'danger');
+
             return;
         }
 
@@ -261,10 +279,11 @@ class UserManagement extends Component
                     }
                 }
             }
+
             return false;
         });
 
-        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+        $spreadsheet = new Spreadsheet;
         $sheet = $spreadsheet->getActiveSheet();
 
         // Set Headers
@@ -288,22 +307,22 @@ class UserManagement extends Component
             foreach ($accesses as $acc) {
                 $str = $acc->role_label;
                 if ($acc->jurusan_name) {
-                    $str .= ' • ' . $acc->jurusan_name;
+                    $str .= ' • '.$acc->jurusan_name;
                 }
                 $accessStrings[] = $str;
             }
             $accessText = implode(', ', $accessStrings);
 
-            $sheet->setCellValue('A' . $row, $no++);
-            $sheet->setCellValue('B' . $row, $user->name);
-            $sheet->setCellValue('C' . $row, $user->email);
-            $sheet->setCellValue('D' . $row, $user->grade_level ? 'Tingkat ' . $user->grade_level : '-');
-            $sheet->setCellValue('E' . $row, $accessText);
+            $sheet->setCellValue('A'.$row, $no++);
+            $sheet->setCellValue('B'.$row, $user->name);
+            $sheet->setCellValue('C'.$row, $user->email);
+            $sheet->setCellValue('D'.$row, $user->grade_level ? 'Tingkat '.$user->grade_level : '-');
+            $sheet->setCellValue('E'.$row, $accessText);
             $row++;
         }
 
-        $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
-        $filename = 'Export-User-' . ($filterType === 'kasir' ? 'Kasir' : 'Semua') . '-' . date('Y-m-d') . '.xlsx';
+        $writer = new Xlsx($spreadsheet);
+        $filename = 'Export-User-'.($filterType === 'kasir' ? 'Kasir' : 'Semua').'-'.date('Y-m-d').'.xlsx';
 
         return response()->streamDownload(function () use ($writer) {
             $writer->save('php://output');
@@ -336,7 +355,7 @@ class UserManagement extends Component
 
     public function downloadTemplate()
     {
-        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+        $spreadsheet = new Spreadsheet;
         $sheet = $spreadsheet->getActiveSheet();
 
         // Set Headers (Tanpa Password)
@@ -348,7 +367,7 @@ class UserManagement extends Component
 
         // Style header
         $sheet->getStyle('A1:E1')->getFont()->setBold(true);
-        foreach(range('A','E') as $col) {
+        foreach (range('A', 'E') as $col) {
             $sheet->getColumnDimension($col)->setAutoSize(true);
         }
 
@@ -370,9 +389,9 @@ class UserManagement extends Component
             $sheet->setCellValue('E2', '11');
         }
 
-        $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
-        
-        return response()->streamDownload(function() use ($writer) {
+        $writer = new Xlsx($spreadsheet);
+
+        return response()->streamDownload(function () use ($writer) {
             $writer->save('php://output');
         }, 'template_import_user.xlsx', [
             'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
@@ -386,7 +405,7 @@ class UserManagement extends Component
         ]);
 
         $filePath = $this->excelFile->getRealPath();
-        $reader = \PhpOffice\PhpSpreadsheet\IOFactory::createReaderForFile($filePath);
+        $reader = IOFactory::createReaderForFile($filePath);
         $reader->setReadDataOnly(true);
         $spreadsheet = $reader->load($filePath);
         $sheet = $spreadsheet->getActiveSheet();
@@ -401,7 +420,7 @@ class UserManagement extends Component
         $imported = 0;
         $errors = [];
 
-        DB::transaction(function() use ($rows, $activeRole, $activeJurusanId, &$imported, &$errors) {
+        DB::transaction(function () use ($rows, $activeRole, $activeJurusanId, &$imported, &$errors) {
             foreach ($rows as $index => $row) {
                 if (empty($row[0]) || empty($row[1])) {
                     continue; // Skip empty rows
@@ -415,7 +434,8 @@ class UserManagement extends Component
 
                 // Validation: Check duplicate email
                 if (User::where('email', $email)->exists()) {
-                    $errors[] = "Baris " . ($index + 2) . ": Email {$email} sudah digunakan.";
+                    $errors[] = 'Baris '.($index + 2).": Email {$email} sudah digunakan.";
+
                     continue;
                 }
 
@@ -425,8 +445,9 @@ class UserManagement extends Component
                 }
 
                 $role = Role::where('name', $roleName)->first();
-                if (!$role) {
-                    $errors[] = "Baris " . ($index + 2) . ": Role '{$roleName}' tidak valid.";
+                if (! $role) {
+                    $errors[] = 'Baris '.($index + 2).": Role '{$roleName}' tidak valid.";
+
                     continue;
                 }
 
@@ -434,11 +455,12 @@ class UserManagement extends Component
                 $jurusan = null;
                 if ($activeRole === 'pengelola_jurusan') {
                     $jurusan = Jurusan::find($activeJurusanId);
-                } elseif (!empty($jurusanName)) {
+                } elseif (! empty($jurusanName)) {
                     $jurusan = Jurusan::where('name', $jurusanName)->first();
-                    
-                    if (!$jurusan && strtolower($jurusanName) !== 'global') {
-                        $errors[] = "Baris " . ($index + 2) . ": Jurusan '{$jurusanName}' tidak ditemukan.";
+
+                    if (! $jurusan && strtolower($jurusanName) !== 'global') {
+                        $errors[] = 'Baris '.($index + 2).": Jurusan '{$jurusanName}' tidak ditemukan.";
+
                         continue;
                     }
                 }
@@ -447,7 +469,7 @@ class UserManagement extends Component
                 $user = User::create([
                     'name' => $name,
                     'email' => $email,
-                    'grade_level' => !empty($gradeLevel) ? $gradeLevel : null,
+                    'grade_level' => ! empty($gradeLevel) ? $gradeLevel : null,
                     'password' => Hash::make('00000000'),
                 ]);
 
@@ -469,7 +491,7 @@ class UserManagement extends Component
         $this->excelFile = null;
 
         if (count($errors) > 0) {
-            $msg = "Berhasil mengimpor {$imported} user. Beberapa baris gagal:\n" . implode("\n", $errors);
+            $msg = "Berhasil mengimpor {$imported} user. Beberapa baris gagal:\n".implode("\n", $errors);
             $this->dispatch('toast', message: $msg);
         } else {
             $this->dispatch('toast', message: "Berhasil mengimpor {$imported} user.");
@@ -482,7 +504,7 @@ class UserManagement extends Component
         $activeJurusanId = session('active_jurusan_id');
 
         // Superadmin & Pengelola Jurusan can access this page
-        if (!in_array($activeRole, ['superadmin', 'pengelola_jurusan'])) {
+        if (! in_array($activeRole, ['superadmin', 'pengelola_jurusan'])) {
             abort(403, 'Unauthorized action.');
         }
 
@@ -491,15 +513,15 @@ class UserManagement extends Component
             $q->where('name', 'like', '%'.$this->search.'%')
                 ->orWhere('email', 'like', '%'.$this->search.'%');
         })
-        ->when($activeRole === 'pengelola_jurusan', function ($q) use ($activeJurusanId) {
-            // Pengelola Jurusan only sees users that have cashier role in their jurusan
-            return $q->whereHas('roles', function($sq) use ($activeJurusanId) {
-                $sq->where('roles.name', 'kasir')
-                  ->where('role_user.jurusan_id', $activeJurusanId);
-            });
-        })
-        ->latest()
-        ->paginate(10);
+            ->when($activeRole === 'pengelola_jurusan', function ($q) use ($activeJurusanId) {
+                // Pengelola Jurusan only sees users that have cashier role in their jurusan
+                return $q->whereHas('roles', function ($sq) use ($activeJurusanId) {
+                    $sq->where('roles.name', 'kasir')
+                        ->where('role_user.jurusan_id', $activeJurusanId);
+                });
+            })
+            ->latest()
+            ->paginate(10);
 
         // Eager-load accesses to prevent N+1 query in loops
         $userIds = $users->pluck('id');
@@ -520,7 +542,7 @@ class UserManagement extends Component
             ->groupBy('user_id');
 
         // Sync selectAll status for current page items
-        $currentPageIds = $users->pluck('id')->map(fn($id) => (string) $id)->toArray();
+        $currentPageIds = $users->pluck('id')->map(fn ($id) => (string) $id)->toArray();
         $this->selectAll = count($currentPageIds) > 0 && count(array_diff($currentPageIds, $this->selectedUsers)) === 0;
 
         foreach ($users as $user) {

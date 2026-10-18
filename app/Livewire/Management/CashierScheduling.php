@@ -2,39 +2,57 @@
 
 namespace App\Livewire\Management;
 
+use App\Exports\CashierScheduleExport;
 use App\Models\CashierSchedule;
 use App\Models\Jurusan;
+use App\Models\Notification;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Maatwebsite\Excel\Facades\Excel;
 
 class CashierScheduling extends Component
 {
     use WithPagination;
 
     public $currentWeekStart;
+
     public $schedules = [];
+
     public $notes = '';
+
     public $date = '';
+
     public $selectedUserId = '';
+
     public $selectedJurusanId = '';
+
     public $maxCashiersPerDay = 1; // Default 1 person per day
+
     public $maxShiftsPerWeek = 1; // Default max 1 shift per week
+
     public $randomizeStartDate = '';
+
     public $randomizeEndDate = '';
 
     // Grade quotas state for randomizer
     public $useGradeQuotas = true;
+
     public $gradeQuotas = ['12' => 1, '11' => 1, '10' => 0];
+
     public $availableGrades = ['12', '11', '10'];
 
     // Modal UI states
     public $showCreateModal = false;
+
     public $showDeleteModal = false;
+
     public $showDeleteAllModal = false;
+
     public $showRandomModal = false; // Modal to input randomizer settings
+
     public $deletingScheduleId = null;
 
     protected $rules = [
@@ -60,32 +78,36 @@ class CashierScheduling extends Component
 
         $activeJurusanId = session('active_jurusan_id') ?: $this->selectedJurusanId;
 
-        $dbGrades = User::whereHas('roles', function($q) use ($activeJurusanId) {
+        $dbGrades = User::whereHas('roles', function ($q) use ($activeJurusanId) {
             $q->where('roles.name', 'kasir')
-              ->when($activeJurusanId, function($sq) use ($activeJurusanId) {
-                  $sq->where('role_user.jurusan_id', $activeJurusanId);
-              });
+                ->when($activeJurusanId, function ($sq) use ($activeJurusanId) {
+                    $sq->where('role_user.jurusan_id', $activeJurusanId);
+                });
         })
-        ->whereNotNull('grade_level')
-        ->where('grade_level', '!=', '')
-        ->pluck('grade_level')
-        ->unique()
-        ->values()
-        ->toArray();
+            ->whereNotNull('grade_level')
+            ->where('grade_level', '!=', '')
+            ->pluck('grade_level')
+            ->unique()
+            ->values()
+            ->toArray();
 
         $mergedGrades = array_unique(array_merge(['12', '11', '10'], $dbGrades));
         rsort($mergedGrades);
         $this->availableGrades = array_values($mergedGrades);
 
         foreach ($this->availableGrades as $g) {
-            if (!isset($this->gradeQuotas[(string)$g])) {
-                $this->gradeQuotas[(string)$g] = 0;
+            if (! isset($this->gradeQuotas[(string) $g])) {
+                $this->gradeQuotas[(string) $g] = 0;
             }
         }
 
         if (array_sum($this->gradeQuotas) === 0) {
-            if (in_array('12', $this->availableGrades)) $this->gradeQuotas['12'] = 1;
-            if (in_array('11', $this->availableGrades)) $this->gradeQuotas['11'] = 1;
+            if (in_array('12', $this->availableGrades)) {
+                $this->gradeQuotas['12'] = 1;
+            }
+            if (in_array('11', $this->availableGrades)) {
+                $this->gradeQuotas['11'] = 1;
+            }
         }
 
         $this->showRandomModal = true;
@@ -121,8 +143,9 @@ class CashierScheduling extends Component
         $this->validate();
 
         $activeJurusanId = session('active_jurusan_id') ?: $this->selectedJurusanId;
-        if (!$activeJurusanId) {
+        if (! $activeJurusanId) {
             $this->dispatch('toast', message: 'Silakan pilih jurusan terlebih dahulu.', type: 'danger');
+
             return;
         }
 
@@ -134,8 +157,9 @@ class CashierScheduling extends Component
             ->where('roles.name', 'kasir')
             ->exists();
 
-        if (!$isCashier && session('active_role_name') !== 'superadmin') {
+        if (! $isCashier && session('active_role_name') !== 'superadmin') {
             $this->dispatch('toast', message: 'User tersebut bukan kasir di jurusan ini.', type: 'danger');
+
             return;
         }
 
@@ -150,6 +174,7 @@ class CashierScheduling extends Component
 
         if ($weeklyCount >= 2) {
             $this->dispatch('toast', message: 'Kasir tersebut sudah memiliki 2 jadwal di minggu yang sama.', type: 'danger');
+
             return;
         }
 
@@ -160,6 +185,7 @@ class CashierScheduling extends Component
 
         if ($alreadyScheduled) {
             $this->dispatch('toast', message: 'Kasir sudah dijadwalkan pada tanggal tersebut.', type: 'danger');
+
             return;
         }
 
@@ -171,12 +197,12 @@ class CashierScheduling extends Component
             'created_by' => auth()->id(),
         ]);
 
-        \App\Models\Notification::create([
+        Notification::create([
             'user_id' => $this->selectedUserId,
             'title' => 'Jadwal Jaga Baru',
-            'body' => 'Anda dijadwalkan jaga kasir pada tanggal ' . Carbon::parse($this->date)->translatedFormat('d M Y') . ($this->notes ? ' (' . $this->notes . ')' : ''),
+            'body' => 'Anda dijadwalkan jaga kasir pada tanggal '.Carbon::parse($this->date)->translatedFormat('d M Y').($this->notes ? ' ('.$this->notes.')' : ''),
             'type' => 'system',
-            'action_url' => '/management/schedules'
+            'action_url' => '/management/schedules',
         ]);
 
         $this->showCreateModal = false;
@@ -187,8 +213,9 @@ class CashierScheduling extends Component
     public function randomizeSchedules()
     {
         $activeJurusanId = session('active_jurusan_id') ?: $this->selectedJurusanId;
-        if (!$activeJurusanId) {
+        if (! $activeJurusanId) {
             $this->dispatch('toast', message: 'Jurusan tidak terdeteksi.', type: 'danger');
+
             return;
         }
 
@@ -208,19 +235,20 @@ class CashierScheduling extends Component
             ->toArray();
 
         // Filter out users who have more than 1 role (e.g. kasir + admin)
-        $cashierUsers = User::whereIn('id', $allJurusanCashierIds)->get()->filter(function($u) {
+        $cashierUsers = User::whereIn('id', $allJurusanCashierIds)->get()->filter(function ($u) {
             return DB::table('role_user')->where('user_id', $u->id)->count() === 1;
         });
 
         if ($cashierUsers->isEmpty()) {
             $this->dispatch('toast', message: 'Tidak ada kasir murni (tanpa role lain) yang terdaftar di jurusan ini.', type: 'danger');
+
             return;
         }
 
         // Calculate custom date range days
         $startDate = Carbon::parse($this->randomizeStartDate);
         $endDate = Carbon::parse($this->randomizeEndDate);
-        
+
         $days = [];
         $tempDate = $startDate->copy();
         while ($tempDate->lte($endDate)) {
@@ -234,24 +262,25 @@ class CashierScheduling extends Component
         $activeGradeQuotas = [];
         if ($this->useGradeQuotas) {
             foreach ($this->gradeQuotas as $g => $q) {
-                $qInt = (int)$q;
+                $qInt = (int) $q;
                 if ($qInt > 0) {
-                    $activeGradeQuotas[(string)$g] = $qInt;
+                    $activeGradeQuotas[(string) $g] = $qInt;
                 }
             }
         }
 
-        if (!empty($activeGradeQuotas)) {
+        if (! empty($activeGradeQuotas)) {
             $this->maxCashiersPerDay = array_sum($activeGradeQuotas);
 
             // Validate capacity per grade
             foreach ($activeGradeQuotas as $g => $quota) {
-                $gradeCashierCount = $cashierUsers->where('grade_level', (string)$g)->count();
+                $gradeCashierCount = $cashierUsers->where('grade_level', (string) $g)->count();
                 $neededGradeSlots = $totalDays * $quota;
                 $maxGradeCapacity = $gradeCashierCount * $this->maxShiftsPerWeek;
 
                 if ($neededGradeSlots > $maxGradeCapacity) {
                     $this->dispatch('toast', message: "Jumlah kasir tingkat {$g} tidak cukup ({$gradeCashierCount} orang) untuk memenuhi kuota {$quota} orang/hari selama {$totalDays} hari (kapasitas max: {$maxGradeCapacity} shift, dibutuhkan: {$neededGradeSlots} shift).", type: 'danger');
+
                     return;
                 }
             }
@@ -261,6 +290,7 @@ class CashierScheduling extends Component
 
             if ($neededSlots > $maxCapacity) {
                 $this->dispatch('toast', message: 'Jumlah kasir tidak cukup untuk slot harian dengan batas maksimal shift mingguan saat ini.', type: 'danger');
+
                 return;
             }
         }
@@ -271,7 +301,7 @@ class CashierScheduling extends Component
                 CashierSchedule::where('jurusan_id', $activeJurusanId)
                     ->whereBetween('date', [
                         $startDate->toDateString(),
-                        $endDate->toDateString()
+                        $endDate->toDateString(),
                     ])
                     ->delete();
 
@@ -287,16 +317,19 @@ class CashierScheduling extends Component
                 $assignedSchedules = [];
                 $success = false;
 
-                if (!empty($activeGradeQuotas)) {
+                if (! empty($activeGradeQuotas)) {
                     // Build pool per grade
                     $gradePools = [];
                     foreach ($activeGradeQuotas as $g => $quota) {
-                        $cInGrade = $cashierUsers->where('grade_level', (string)$g)->pluck('id')->toArray();
-                        
-                        usort($cInGrade, function($a, $b) use ($globalSchedulesCount) {
+                        $cInGrade = $cashierUsers->where('grade_level', (string) $g)->pluck('id')->toArray();
+
+                        usort($cInGrade, function ($a, $b) use ($globalSchedulesCount) {
                             $cA = $globalSchedulesCount[$a] ?? 0;
                             $cB = $globalSchedulesCount[$b] ?? 0;
-                            if ($cA === $cB) return rand(-1, 1);
+                            if ($cA === $cB) {
+                                return rand(-1, 1);
+                            }
+
                             return $cA <=> $cB;
                         });
 
@@ -312,7 +345,7 @@ class CashierScheduling extends Component
                                 $pool[] = $uid;
                             }
                         }
-                        $gradePools[(string)$g] = $pool;
+                        $gradePools[(string) $g] = $pool;
                     }
 
                     for ($attempt = 0; $attempt < 150; $attempt++) {
@@ -331,7 +364,7 @@ class CashierScheduling extends Component
                                 for ($slot = 0; $slot < $quota; $slot++) {
                                     $candIdx = null;
                                     foreach ($tempGradePools[$g] as $idx => $uid) {
-                                        if (!in_array($uid, $dayAssigned)) {
+                                        if (! in_array($uid, $dayAssigned)) {
                                             $candIdx = $idx;
                                             break;
                                         }
@@ -350,24 +383,27 @@ class CashierScheduling extends Component
                                         'jurusan_id' => $activeJurusanId,
                                         'user_id' => $selectedUser,
                                         'date' => $day,
-                                        'notes' => 'Acak Otomatis (Tingkat ' . $g . ')',
+                                        'notes' => 'Acak Otomatis (Tingkat '.$g.')',
                                         'created_by' => auth()->id(),
                                     ];
                                 }
                             }
                         }
 
-                        if ($success) break;
+                        if ($success) {
+                            break;
+                        }
                     }
                 } else {
                     // Standard randomization pool
                     $cashierIds = $cashierUsers->pluck('id')->toArray();
-                    usort($cashierIds, function($a, $b) use ($globalSchedulesCount) {
+                    usort($cashierIds, function ($a, $b) use ($globalSchedulesCount) {
                         $countA = $globalSchedulesCount[$a] ?? 0;
                         $countB = $globalSchedulesCount[$b] ?? 0;
                         if ($countA === $countB) {
                             return rand(-1, 1);
                         }
+
                         return $countA <=> $countB;
                     });
 
@@ -395,7 +431,7 @@ class CashierScheduling extends Component
                             for ($slot = 0; $slot < $this->maxCashiersPerDay; $slot++) {
                                 $candidateIndex = null;
                                 foreach ($tempPool as $idx => $uid) {
-                                    if (!in_array($uid, $dayAssigned)) {
+                                    if (! in_array($uid, $dayAssigned)) {
                                         $candidateIndex = $idx;
                                         break;
                                     }
@@ -426,24 +462,25 @@ class CashierScheduling extends Component
                     }
                 }
 
-                if (!$success) {
+                if (! $success) {
                     throw new \Exception('Gagal mendistribusikan jadwal secara merata tanpa bentrok hari. Silakan coba lagi.');
                 }
 
                 foreach ($assignedSchedules as $sched) {
                     $createdSched = CashierSchedule::create($sched);
 
-                    \App\Models\Notification::create([
+                    Notification::create([
                         'user_id' => $createdSched->user_id,
                         'title' => 'Jadwal Jaga Baru (Acak Otomatis)',
-                        'body' => 'Anda dijadwalkan jaga kasir pada tanggal ' . Carbon::parse($createdSched->date)->translatedFormat('d M Y'),
+                        'body' => 'Anda dijadwalkan jaga kasir pada tanggal '.Carbon::parse($createdSched->date)->translatedFormat('d M Y'),
                         'type' => 'system',
-                        'action_url' => '/management/schedules'
+                        'action_url' => '/management/schedules',
                     ]);
                 }
             });
         } catch (\Exception $e) {
             $this->dispatch('toast', message: $e->getMessage(), type: 'danger');
+
             return;
         }
 
@@ -475,8 +512,9 @@ class CashierScheduling extends Component
     public function deleteAllSchedules()
     {
         $activeJurusanId = session('active_jurusan_id') ?: $this->selectedJurusanId;
-        if (!$activeJurusanId) {
+        if (! $activeJurusanId) {
             $this->dispatch('toast', message: 'Jurusan tidak terdeteksi.', type: 'danger');
+
             return;
         }
 
@@ -494,16 +532,16 @@ class CashierScheduling extends Component
     public function exportExcel()
     {
         $activeRole = session('active_role_name');
-        if (!in_array($activeRole, ['superadmin', 'pengelola_jurusan'])) {
+        if (! in_array($activeRole, ['superadmin', 'pengelola_jurusan'])) {
             abort(403, 'Unauthorized.');
         }
 
         $activeJurusanId = session('active_jurusan_id') ?: $this->selectedJurusanId;
         $start = Carbon::parse($this->currentWeekStart);
-        $filename = 'Jadwal_Kasir_' . $start->format('Y-m-d') . '.xlsx';
+        $filename = 'Jadwal_Kasir_'.$start->format('Y-m-d').'.xlsx';
 
-        return \Maatwebsite\Excel\Facades\Excel::download(
-            new \App\Exports\CashierScheduleExport($this->currentWeekStart, $activeJurusanId),
+        return Excel::download(
+            new CashierScheduleExport($this->currentWeekStart, $activeJurusanId),
             $filename
         );
     }
@@ -511,18 +549,18 @@ class CashierScheduling extends Component
     public function render()
     {
         $activeRole = session('active_role_name');
-        if (!in_array($activeRole, ['superadmin', 'pengelola_jurusan', 'kasir'])) {
+        if (! in_array($activeRole, ['superadmin', 'pengelola_jurusan', 'kasir'])) {
             abort(403, 'Unauthorized.');
         }
 
         $activeJurusanId = session('active_jurusan_id') ?: $this->selectedJurusanId;
 
         // Fetch Cashiers
-        $cashiers = User::whereHas('roles', function($q) use ($activeJurusanId) {
+        $cashiers = User::whereHas('roles', function ($q) use ($activeJurusanId) {
             $q->where('roles.name', 'kasir')
-              ->when($activeJurusanId, function($sq) use ($activeJurusanId) {
-                  $sq->where('role_user.jurusan_id', $activeJurusanId);
-              });
+                ->when($activeJurusanId, function ($sq) use ($activeJurusanId) {
+                    $sq->where('role_user.jurusan_id', $activeJurusanId);
+                });
         })->get();
 
         // Get start and end of week
@@ -532,20 +570,21 @@ class CashierScheduling extends Component
         // Query schedules
         $weekSchedules = CashierSchedule::with('user')
             ->whereBetween('date', [$startOfWeek->toDateString(), $endOfWeek->toDateString()])
-            ->when($activeJurusanId, function($q) use ($activeJurusanId) {
+            ->when($activeJurusanId, function ($q) use ($activeJurusanId) {
                 $q->where('jurusan_id', $activeJurusanId);
             })
             ->orderBy('date')
             ->get();
 
         // Hitung total shift per kasir untuk seluruh periode (akumulasi global)
-        $allSchedules = CashierSchedule::when($activeJurusanId, function($q) use ($activeJurusanId) {
-                $q->where('jurusan_id', $activeJurusanId);
-            })
+        $allSchedules = CashierSchedule::when($activeJurusanId, function ($q) use ($activeJurusanId) {
+            $q->where('jurusan_id', $activeJurusanId);
+        })
             ->get();
 
-        $cashierStats = $cashiers->map(function($cashier) use ($allSchedules) {
+        $cashierStats = $cashiers->map(function ($cashier) use ($allSchedules) {
             $shiftCount = $allSchedules->where('user_id', $cashier->id)->count();
+
             return [
                 'id' => $cashier->id,
                 'name' => $cashier->name,
@@ -560,7 +599,7 @@ class CashierScheduling extends Component
             'weekSchedules' => $weekSchedules,
             'cashierStats' => $cashierStats,
             'jurusans' => Jurusan::all(),
-            'weekRange' => $startOfWeek->translatedFormat('d M Y') . ' - ' . $endOfWeek->translatedFormat('d M Y'),
+            'weekRange' => $startOfWeek->translatedFormat('d M Y').' - '.$endOfWeek->translatedFormat('d M Y'),
         ])->layout('layouts.app', ['title' => 'Penjadwalan Kasir']);
     }
 }

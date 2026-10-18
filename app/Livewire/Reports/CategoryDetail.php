@@ -14,6 +14,7 @@ class CategoryDetail extends Component
     use WithPagination;
 
     public string $categoryId;
+
     public ?string $categoryName = '';
 
     #[Url]
@@ -40,7 +41,7 @@ class CategoryDetail extends Component
     public function mount(string $categoryId): void
     {
         $this->categoryId = $categoryId;
-        
+
         if ($categoryId === 'null' || $categoryId === 'none') {
             $this->categoryName = 'Tanpa Kategori';
         } else {
@@ -119,14 +120,14 @@ class CategoryDetail extends Component
             $query->whereDate('transactions.transacted_at', $this->date);
         } elseif ($this->type === 'monthly') {
             $query->whereMonth('transactions.transacted_at', $this->month)
-                  ->whereYear('transactions.transacted_at', $this->year);
+                ->whereYear('transactions.transacted_at', $this->year);
         } elseif ($this->type === 'yearly') {
             $query->whereYear('transactions.transacted_at', $this->year);
         }
 
         // Apply search filter
         if ($this->search) {
-            $query->where('products.name', 'like', '%' . $this->search . '%');
+            $query->where('products.name', 'like', '%'.$this->search.'%');
         }
 
         // Select aggregate data grouped by product ID
@@ -141,7 +142,7 @@ class CategoryDetail extends Component
             SUM(transactions.unit_profit * transactions.quantity) as total_profit,
             SUM((transactions.unit_price - transactions.unit_profit) * transactions.quantity) as total_modal
         ')
-        ->groupBy('products.id', 'products.name', 'suppliers.name');
+            ->groupBy('products.id', 'products.name', 'suppliers.name');
 
         // Apply sorting
         if (in_array($this->sortBy, ['total_revenue', 'total_qty', 'total_profit', 'total_modal', 'product_name'])) {
@@ -168,7 +169,7 @@ class CategoryDetail extends Component
             $summaryQuery->whereDate('transactions.transacted_at', $this->date);
         } elseif ($this->type === 'monthly') {
             $summaryQuery->whereMonth('transactions.transacted_at', $this->month)
-                         ->whereYear('transactions.transacted_at', $this->year);
+                ->whereYear('transactions.transacted_at', $this->year);
         } elseif ($this->type === 'yearly') {
             $summaryQuery->whereYear('transactions.transacted_at', $this->year);
         }

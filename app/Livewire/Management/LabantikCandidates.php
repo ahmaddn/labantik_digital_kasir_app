@@ -2,18 +2,22 @@
 
 namespace App\Livewire\Management;
 
+use App\Exports\LabantikCandidatesExport;
 use App\Models\Jurusan;
-use App\Models\LabantikRegistration;
-use App\Models\LabantikCandidateScore;
 use App\Models\LabantikCandidateAttendance;
+use App\Models\LabantikCandidateScore;
+use App\Models\LabantikRegistration;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Maatwebsite\Excel\Facades\Excel;
 
 class LabantikCandidates extends Component
 {
     use WithPagination;
 
     public string $search = '';
+
     public string $selectedJurusanId = '';
 
     // Tab control
@@ -21,52 +25,81 @@ class LabantikCandidates extends Component
 
     // Scoring & Attendance parameters
     public int $selectedWeek = 1;
+
     public array $scores = [];
+
     public array $attendances = [];
 
     // WhatsApp Group Link Settings
     public string $waGroupLink = '';
+
     public bool $showWaLinkModal = false;
+
     public bool $isRegistrationOpen = false;
 
     // Delete properties
     public string $deleteId = '';
+
     public bool $showDeleteModal = false;
 
     // Detail modal properties
     public bool $showDetailModal = false;
+
     public ?LabantikRegistration $detailCandidate = null;
+
     public string $detailAttendancesJson = '[]';
 
     // Create candidate properties
     public bool $showCreateModal = false;
+
     public string $new_full_name = '';
+
     public string $new_class_name = '';
+
     public string $new_jurusan_id = '';
+
     public string $new_phone_number = '';
+
     public string $new_parent_phone_number = '';
+
     public string $new_address = '';
+
     public string $new_reason = '';
+
     public string $new_illness_history = '';
 
     // Edit candidate properties
     public bool $showEditModal = false;
+
     public string $editId = '';
+
     public string $edit_full_name = '';
+
     public string $edit_class_name = '';
+
     public string $edit_jurusan_id = '';
+
     public string $edit_phone_number = '';
+
     public string $edit_parent_phone_number = '';
+
     public string $edit_address = '';
+
     public string $edit_reason = '';
+
     public string $edit_illness_history = '';
 
     // Finish selection & Single scoring properties
     public bool $showFinishConfirmModal = false;
+
     public bool $showResetWeekConfirmModal = false;
+
     public bool $showSingleScoringModal = false;
+
     public ?LabantikRegistration $scoringCandidate = null;
+
     public array $singleScores = [];
+
     public array $singleAttendances = [];
 
     protected $queryString = [
@@ -121,7 +154,7 @@ class LabantikCandidates extends Component
     public function loadScoringData(): void
     {
         $activeJurusanId = session('active_jurusan_id') ?: $this->selectedJurusanId;
-        $candidates = LabantikRegistration::when($activeJurusanId, function($q) use ($activeJurusanId) {
+        $candidates = LabantikRegistration::when($activeJurusanId, function ($q) use ($activeJurusanId) {
             $q->where('jurusan_id', $activeJurusanId)->orWhereNull('jurusan_id');
         })->get();
 
@@ -131,11 +164,11 @@ class LabantikCandidates extends Component
         foreach ($candidates as $candidate) {
             $scoreModel = LabantikCandidateScore::where('registration_id', $candidate->id)
                 ->where('week_number', $this->selectedWeek)
-                ->where(function($q) {
+                ->where(function ($q) {
                     $q->where('user_id', auth()->id())->orWhereNull('user_id');
                 })
                 ->first();
-            
+
             $attendanceModel = LabantikCandidateAttendance::where('registration_id', $candidate->id)
                 ->where('week_number', $this->selectedWeek)
                 ->first();
@@ -155,8 +188,9 @@ class LabantikCandidates extends Component
 
     public function saveScoring(): void
     {
-        if (!$this->checkPermission()) {
+        if (! $this->checkPermission()) {
             $this->dispatch('toast', message: 'Hanya superadmin/pengelola atau kasir jurusan RPL yang dapat menginput nilai.');
+
             return;
         }
 
@@ -179,14 +213,14 @@ class LabantikCandidates extends Component
                 if ($scoreVal !== '' || $attitudeVal !== '') {
                     LabantikCandidateScore::updateOrCreate(
                         [
-                            'registration_id' => $candidateId, 
+                            'registration_id' => $candidateId,
                             'week_number' => $this->selectedWeek,
-                            'user_id' => auth()->id()
+                            'user_id' => auth()->id(),
                         ],
                         [
                             'score' => $scoreVal !== '' ? intval($scoreVal) : 0,
                             'attitude_score' => $attitudeVal !== '' ? intval($attitudeVal) : 0,
-                            'notes' => $notesVal
+                            'notes' => $notesVal,
                         ]
                     );
                 }
@@ -194,6 +228,7 @@ class LabantikCandidates extends Component
 
             if (in_array($statusVal, ['sakit', 'izin']) && empty(trim($reasonVal))) {
                 $this->dispatch('toast', message: 'Alasan sakit/izin wajib diisi untuk masing-masing peserta.');
+
                 return;
             }
 
@@ -209,19 +244,20 @@ class LabantikCandidates extends Component
 
     public function resetWeekScoring(): void
     {
-        if (!$this->checkPermission()) {
+        if (! $this->checkPermission()) {
             $this->dispatch('toast', message: 'Hanya superadmin/pengelola yang dapat mereset nilai.');
+
             return;
         }
 
         $activeJurusanId = session('active_jurusan_id') ?: $this->selectedJurusanId;
-        $candidateIds = LabantikRegistration::when($activeJurusanId, function($q) use ($activeJurusanId) {
+        $candidateIds = LabantikRegistration::when($activeJurusanId, function ($q) use ($activeJurusanId) {
             $q->where('jurusan_id', $activeJurusanId)->orWhereNull('jurusan_id');
         })->pluck('id');
 
         LabantikCandidateScore::whereIn('registration_id', $candidateIds)
             ->where('week_number', $this->selectedWeek)
-            ->where(function($q) {
+            ->where(function ($q) {
                 $q->where('user_id', auth()->id())->orWhereNull('user_id');
             })
             ->delete();
@@ -233,19 +269,20 @@ class LabantikCandidates extends Component
 
     public function finishSelection(): void
     {
-        if (!$this->checkPermission()) {
+        if (! $this->checkPermission()) {
             abort(403, 'Unauthorized.');
         }
 
         $activeJurusanId = session('active_jurusan_id') ?: $this->selectedJurusanId;
         $candidates = LabantikRegistration::with(['scores', 'attendances'])
-            ->when($activeJurusanId, function($q) use ($activeJurusanId) {
+            ->when($activeJurusanId, function ($q) use ($activeJurusanId) {
                 $q->where('jurusan_id', $activeJurusanId)->orWhereNull('jurusan_id');
             })
             ->get();
 
         if ($candidates->isEmpty()) {
             $this->dispatch('toast', message: 'Tidak ada peserta untuk diseleksi.');
+
             return;
         }
 
@@ -266,17 +303,17 @@ class LabantikCandidates extends Component
             $hadirCount = $candidate->attendances->where('status', 'hadir')->count();
             $alfaCount = $candidate->attendances->where('status', 'alfa')->count();
             $izinCount = $candidate->attendances->where('status', 'izin')->count();
-            
+
             $finalScore = $avgScore + $avgAttitude + ($hadirCount * 5) - ($alfaCount * 10) - ($izinCount * 2);
 
             $calculated[] = [
                 'candidate' => $candidate,
-                'final_score' => $finalScore
+                'final_score' => $finalScore,
             ];
         }
 
         // Sort by final_score descending
-        usort($calculated, function($a, $b) {
+        usort($calculated, function ($a, $b) {
             return $b['final_score'] <=> $a['final_score'];
         });
 
@@ -294,12 +331,13 @@ class LabantikCandidates extends Component
 
     public function updateFinalStatus(string $candidateId, string $status): void
     {
-        if (!$this->checkPermission()) {
+        if (! $this->checkPermission()) {
             $this->dispatch('toast', message: 'Hanya pengelola / superadmin yang dapat merubah status seleksi.');
+
             return;
         }
 
-        if (!in_array($status, ['passed', 'rejected', 'pending'])) {
+        if (! in_array($status, ['passed', 'rejected', 'pending'])) {
             return;
         }
 
@@ -318,20 +356,25 @@ class LabantikCandidates extends Component
         // Map weeks to dates in 2026-08 for FullCalendar display
         $events = [];
         foreach ($this->detailCandidate->attendances as $att) {
-            $date = date('Y-m-d', strtotime("2026-08-01 + " . ($att->week_number - 1) . " weeks"));
-            
+            $date = date('Y-m-d', strtotime('2026-08-01 + '.($att->week_number - 1).' weeks'));
+
             $color = '#6b7280';
-            if ($att->status === 'hadir') $color = '#10b981';
-            elseif ($att->status === 'sakit') $color = '#3b82f6';
-            elseif ($att->status === 'izin') $color = '#f59e0b';
-            elseif ($att->status === 'alfa') $color = '#ef4444';
+            if ($att->status === 'hadir') {
+                $color = '#10b981';
+            } elseif ($att->status === 'sakit') {
+                $color = '#3b82f6';
+            } elseif ($att->status === 'izin') {
+                $color = '#f59e0b';
+            } elseif ($att->status === 'alfa') {
+                $color = '#ef4444';
+            }
 
             $events[] = [
-                'title' => 'Pekan ' . $att->week_number . ': ' . strtoupper($att->status) . ($att->reason ? ' - ' . $att->reason : ''),
+                'title' => 'Pekan '.$att->week_number.': '.strtoupper($att->status).($att->reason ? ' - '.$att->reason : ''),
                 'start' => $date,
                 'backgroundColor' => $color,
                 'borderColor' => $color,
-                'allDay' => true
+                'allDay' => true,
             ];
         }
 
@@ -348,11 +391,11 @@ class LabantikCandidates extends Component
         for ($w = 1; $w <= 12; $w++) {
             $scoreModel = LabantikCandidateScore::where('registration_id', $candidateId)
                 ->where('week_number', $w)
-                ->where(function($q) {
+                ->where(function ($q) {
                     $q->where('user_id', auth()->id())->orWhereNull('user_id');
                 })
                 ->first();
-            
+
             $attendanceModel = LabantikCandidateAttendance::where('registration_id', $candidateId)
                 ->where('week_number', $w)
                 ->first();
@@ -374,8 +417,9 @@ class LabantikCandidates extends Component
 
     public function saveSingleScoring(): void
     {
-        if (!$this->checkPermission()) {
+        if (! $this->checkPermission()) {
             $this->dispatch('toast', message: 'Hanya superadmin/pengelola atau kasir jurusan RPL yang dapat menginput nilai.');
+
             return;
         }
 
@@ -398,14 +442,14 @@ class LabantikCandidates extends Component
                 if ($scoreVal !== '' || $attitudeVal !== '') {
                     LabantikCandidateScore::updateOrCreate(
                         [
-                            'registration_id' => $this->scoringCandidate->id, 
+                            'registration_id' => $this->scoringCandidate->id,
                             'week_number' => $w,
-                            'user_id' => auth()->id()
+                            'user_id' => auth()->id(),
                         ],
                         [
                             'score' => $scoreVal !== '' ? intval($scoreVal) : 0,
                             'attitude_score' => $attitudeVal !== '' ? intval($attitudeVal) : 0,
-                            'notes' => $notesVal
+                            'notes' => $notesVal,
                         ]
                     );
                 }
@@ -413,6 +457,7 @@ class LabantikCandidates extends Component
 
             if (in_array($statusVal, ['sakit', 'izin']) && empty(trim($reasonVal))) {
                 $this->dispatch('toast', message: "Alasan sakit/izin pada pekan {$w} wajib diisi.");
+
                 return;
             }
 
@@ -429,8 +474,9 @@ class LabantikCandidates extends Component
 
     public function openCreateModal(): void
     {
-        if (!$this->checkPermission()) {
+        if (! $this->checkPermission()) {
             $this->dispatch('toast', message: 'Hanya superadmin/pengelola yang dapat menambah calon anggota.');
+
             return;
         }
 
@@ -448,8 +494,9 @@ class LabantikCandidates extends Component
 
     public function storeCandidate(): void
     {
-        if (!$this->checkPermission()) {
+        if (! $this->checkPermission()) {
             $this->dispatch('toast', message: 'Hanya superadmin/pengelola yang dapat menambah calon anggota.');
+
             return;
         }
 
@@ -491,8 +538,9 @@ class LabantikCandidates extends Component
 
     public function openEditModal(string $id): void
     {
-        if (!$this->checkPermission()) {
+        if (! $this->checkPermission()) {
             $this->dispatch('toast', message: 'Hanya superadmin/pengelola yang dapat mengubah data calon anggota.');
+
             return;
         }
 
@@ -512,8 +560,9 @@ class LabantikCandidates extends Component
 
     public function updateCandidate(): void
     {
-        if (!$this->checkPermission()) {
+        if (! $this->checkPermission()) {
             $this->dispatch('toast', message: 'Hanya superadmin/pengelola yang dapat mengubah data calon anggota.');
+
             return;
         }
 
@@ -557,16 +606,16 @@ class LabantikCandidates extends Component
         $this->validate([
             'waGroupLink' => 'nullable|url|max:500',
         ], [], [
-            'waGroupLink' => 'Link Grup WhatsApp'
+            'waGroupLink' => 'Link Grup WhatsApp',
         ]);
 
         $settings = json_decode(@file_get_contents(storage_path('app/settings.json')), true) ?: [];
         $settings['wa_group_link'] = trim($this->waGroupLink);
-        
-        if (!file_exists(storage_path('app'))) {
+
+        if (! file_exists(storage_path('app'))) {
             mkdir(storage_path('app'), 0755, true);
         }
-        
+
         file_put_contents(storage_path('app/settings.json'), json_encode($settings));
 
         $this->showWaLinkModal = false;
@@ -582,30 +631,30 @@ class LabantikCandidates extends Component
         if ($activeJurusanId) {
             $query->where(function ($q) use ($activeJurusanId) {
                 $q->where('jurusan_id', $activeJurusanId)
-                  ->orWhereNull('jurusan_id');
+                    ->orWhereNull('jurusan_id');
             });
         }
 
         if ($this->search) {
             $query->where(function ($q) {
-                $q->where('full_name', 'like', '%' . $this->search . '%')
-                  ->orWhere('class_name', 'like', '%' . $this->search . '%')
-                  ->orWhere('address', 'like', '%' . $this->search . '%');
+                $q->where('full_name', 'like', '%'.$this->search.'%')
+                    ->orWhere('class_name', 'like', '%'.$this->search.'%')
+                    ->orWhere('address', 'like', '%'.$this->search.'%');
             });
         }
 
         $candidates = $query->orderBy('created_at', 'desc')->get();
-        $filename = 'calon_labantik_export_' . now()->format('Y_m_d_His') . '.xlsx';
+        $filename = 'calon_labantik_export_'.now()->format('Y_m_d_His').'.xlsx';
 
-        return \Maatwebsite\Excel\Facades\Excel::download(
-            new \App\Exports\LabantikCandidatesExport($candidates), 
+        return Excel::download(
+            new LabantikCandidatesExport($candidates),
             $filename
         );
     }
 
     public function confirmDelete(string $id): void
     {
-        if (!$this->checkPermission()) {
+        if (! $this->checkPermission()) {
             abort(403, 'Unauthorized.');
         }
 
@@ -615,7 +664,7 @@ class LabantikCandidates extends Component
 
     public function deleteCandidate(): void
     {
-        if (!$this->checkPermission()) {
+        if (! $this->checkPermission()) {
             abort(403, 'Unauthorized.');
         }
 
@@ -629,12 +678,12 @@ class LabantikCandidates extends Component
 
     public function toggleJoinedGroup(string $id): void
     {
-        if (!$this->checkPermission()) {
+        if (! $this->checkPermission()) {
             abort(403, 'Unauthorized.');
         }
 
         $candidate = LabantikRegistration::findOrFail($id);
-        $candidate->is_joined_group = !$candidate->is_joined_group;
+        $candidate->is_joined_group = ! $candidate->is_joined_group;
         $candidate->save();
 
         $this->dispatch('toast', message: 'Status grup WhatsApp berhasil diperbarui.');
@@ -642,20 +691,20 @@ class LabantikCandidates extends Component
 
     public function toggleRegistration(): void
     {
-        if (!$this->checkPermission()) {
+        if (! $this->checkPermission()) {
             abort(403, 'Unauthorized.');
         }
 
         $settings = json_decode(@file_get_contents(storage_path('app/settings.json')), true) ?: [];
-        $this->isRegistrationOpen = !$this->isRegistrationOpen;
+        $this->isRegistrationOpen = ! $this->isRegistrationOpen;
         $settings['is_registration_open'] = $this->isRegistrationOpen;
 
-        if (!file_exists(storage_path('app'))) {
+        if (! file_exists(storage_path('app'))) {
             mkdir(storage_path('app'), 0755, true);
         }
 
         file_put_contents(storage_path('app/settings.json'), json_encode($settings));
-        
+
         $status = $this->isRegistrationOpen ? 'dibuka' : 'ditutup';
         $this->dispatch('toast', message: "Pendaftaran calon anggota Labantik berhasil {$status}!");
     }
@@ -663,7 +712,7 @@ class LabantikCandidates extends Component
     public function render()
     {
         $activeRole = session('active_role_name');
-        if (!in_array($activeRole, ['superadmin', 'pengelola_jurusan', 'kasir'])) {
+        if (! in_array($activeRole, ['superadmin', 'pengelola_jurusan', 'kasir'])) {
             abort(403, 'Unauthorized.');
         }
 
@@ -680,8 +729,8 @@ class LabantikCandidates extends Component
         }
         if ($this->search) {
             $query->where(function ($q) {
-                $q->where('full_name', 'like', '%' . $this->search . '%')
-                  ->orWhere('class_name', 'like', '%' . $this->search . '%');
+                $q->where('full_name', 'like', '%'.$this->search.'%')
+                    ->orWhere('class_name', 'like', '%'.$this->search.'%');
             });
         }
         $candidates = $query->orderBy('created_at', 'desc')->paginate(10, ['*'], 'candidatesPage');
@@ -702,20 +751,21 @@ class LabantikCandidates extends Component
                 $q->where('jurusan_id', $activeJurusanId)->orWhereNull('jurusan_id');
             });
         }
-        $acceptedCandidates = $acceptedQuery->get()->map(function($c) {
+        $acceptedCandidates = $acceptedQuery->get()->map(function ($c) {
             $avg = $c->scores->avg('score') ?: 0;
             $avgAttitude = $c->scores->avg('attitude_score') ?: 0;
             $hadir = $c->attendances->where('status', 'hadir')->count();
             $alfa = $c->attendances->where('status', 'alfa')->count();
             $izin = $c->attendances->where('status', 'izin')->count();
             $c->final_score = max(0, $avg + $avgAttitude + ($hadir * 5) - ($alfa * 10) - ($izin * 2));
+
             return $c;
         })->sortByDesc('final_score');
 
         $acceptedPage = $this->paginators['acceptedPage'] ?? 1;
         $acceptedPerPage = 10;
         $acceptedSliced = $acceptedCandidates->slice(($acceptedPage - 1) * $acceptedPerPage, $acceptedPerPage)->all();
-        $paginatedAccepted = new \Illuminate\Pagination\LengthAwarePaginator(
+        $paginatedAccepted = new LengthAwarePaginator(
             $acceptedSliced,
             $acceptedCandidates->count(),
             $acceptedPerPage,

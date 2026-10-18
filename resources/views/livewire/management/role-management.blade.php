@@ -1,14 +1,14 @@
-<div class="space-y-8">
+<div class="p-4 sm:p-6 space-y-6">
     <!-- Header -->
     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-            <h1 class="text-2xl font-bold uppercase tracking-tight text-primary-blue dark:text-primary-yellow">Manajemen Role</h1>
-            <p class="text-gray-400 text-sm font-semibold uppercase tracking-widest mt-1">Kelola Tingkatan Hak Akses Sistem TEFA</p>
+            <h1 class="text-xl sm:text-2xl font-black uppercase tracking-tight text-slate-900 dark:text-white font-outfit">Manajemen Role</h1>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Kelola tingkatan hak akses pengguna dan permission sistem TEFA.</p>
         </div>
         <div>
-            <button wire:click="openCreateModal" class="inline-flex items-center px-6 py-4 bg-primary-blue hover:bg-blue-900 text-primary-yellow rounded-2xl font-black text-sm uppercase italic tracking-wider transition-all duration-300 shadow-xl shadow-blue-900/10 active:scale-95">
-                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
-                Tambah Role Baru
+            <button wire:click="openCreateModal" class="px-3.5 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-bold text-xs shadow-sm transition-all flex items-center gap-1.5">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                <span>Tambah Role</span>
             </button>
         </div>
     </div>

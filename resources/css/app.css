@@ -3,132 +3,111 @@
 @variant dark (&:where(.dark, .dark *));
 
 @theme {
-    --color-primary-blue: #3b82f6; /* Soft Royal Blue */
+    --color-primary-blue: #3b82f6;
     --color-primary-blue-dark: #2563eb;
-    --color-primary-red: #f43f5e; /* Soft Rose Red */
+    --color-primary-red: #f43f5e;
     --color-primary-red-dark: #e11d48;
-    --color-primary-yellow: #fbbf24; /* Soft Amber Yellow */
+    --color-primary-yellow: #f59e0b;
     --color-accent-yellow: #fde047;
-    --color-bone-white: #f8f6f0; /* Off-White / Putih Tulang */
-    --color-dark-bg: #020617; /* Deep Slate Blue */
-    --color-dark-soft: #1e293b;
-    --color-neutral-bg: #f8f6f0;
+    --color-bone-white: #f8fafc;
+    --color-dark-bg: #020617;
+    --color-dark-soft: #0f172a;
+    --color-neutral-bg: #f8fafc;
     --color-dark-neutral: #0f172a;
-    
-    /* Soft Modern UI Tokens */
-    --nb-border: 1px;
-    --nb-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.03);
-    --nb-shadow-sm: 0 4px 12px 0 rgba(0, 0, 0, 0.04);
-    --nb-shadow-hover: 0 15px 30px -5px rgba(0, 0, 0, 0.08);
-    --nb-shadow-active: 0 2px 4px 0 rgba(0, 0, 0, 0.03);
-    
-    --font-outfit: "Outfit", sans-serif;
-}
 
-@keyframes brutal-spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
-@keyframes brutal-bounce {
-    0%, 100% { transform: translateY(0) scale(1); }
-    50% { transform: translateY(-10px) scale(1.05); }
-}
-
-@keyframes brutal-shake {
-    0%, 100% { transform: translateX(0); }
-    25% { transform: translateX(-5px); }
-    75% { transform: translateX(5px); }
-}
-
-@keyframes success-pop {
-    0% { transform: scale(0.5); opacity: 0; }
-    50% { transform: scale(1.1); }
-    100% { transform: scale(1); opacity: 1; }
-}
-
-@keyframes success-check {
-    0% { stroke-dashoffset: 50; }
-    100% { stroke-dashoffset: 0; }
-}
-
-.animate-brutal-spin {
-    animation: brutal-spin 0.6s steps(8) infinite;
-}
-
-.animate-brutal-bounce {
-    animation: brutal-bounce 0.4s ease-in-out infinite;
-}
-
-.animate-success-pop {
-    animation: success-pop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-}
-
-.animate-success-check {
-    stroke-dasharray: 50;
-    stroke-dashoffset: 50;
-    animation: success-check 0.4s 0.3s ease-in-out forwards;
+    --font-outfit: "Outfit", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
 @layer base {
-    body {
-        @apply bg-[#e0e0e0] text-black font-outfit;
+    html {
+        font-family: var(--font-outfit);
+        scroll-behavior: smooth;
+        -webkit-tap-highlight-color: transparent;
     }
 
-    button, 
-    a, 
-    select, 
+    body {
+        @apply bg-slate-50 dark:bg-[#020617] text-slate-900 dark:text-slate-100 antialiased selection:bg-blue-500/20 selection:text-blue-600;
+        touch-action: manipulation;
+    }
+
+    button,
+    a,
+    select,
     option,
-    input[type="submit"], 
+    input[type="submit"],
     input[type="button"],
     input[type="checkbox"],
     input[type="radio"],
     [role="button"] {
-        cursor: pointer !important;
+        cursor: pointer;
     }
 
-    button, a {
-        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    button:hover, a:hover {
-        filter: brightness(1.08);
-    }
-
-    button:active, a:active {
-        transform: scale(0.97);
+    /* Accessibility focus indicator (R-32) */
+    :focus-visible {
+        outline: 2px solid var(--color-primary-blue, #3b82f6);
+        outline-offset: 2px;
     }
 }
 
 @layer components {
+    /* Standard Modern Cards */
+    .app-card,
     .nb-card {
-        @apply bg-white border border-gray-200/80 dark:border-slate-800 shadow-[var(--nb-shadow)] rounded-2xl md:rounded-3xl transition-all duration-300;
+        @apply bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 shadow-sm rounded-2xl transition-all duration-200;
     }
-    
+
+    .app-card-hover,
     .nb-card-hover {
-        @apply hover:-translate-y-1 hover:shadow-[var(--nb-shadow-hover)] hover:border-gray-300 dark:hover:border-slate-700 active:translate-y-0 active:shadow-[var(--nb-shadow-sm)];
+        @apply hover:border-slate-300 dark:hover:border-slate-700 hover:shadow-md active:scale-[0.99];
     }
 
-    .nb-btn {
-        @apply border border-gray-200/90 dark:border-slate-700/80 shadow-[var(--nb-shadow-sm)] font-black uppercase tracking-wider px-5 py-2.5 rounded-xl md:rounded-2xl transition-all duration-200 active:scale-[0.98];
-    }
-
-    .nb-btn-blue {
-        @apply bg-primary-blue text-white hover:bg-primary-blue-dark shadow-md shadow-blue-500/15 border-transparent;
-    }
-
-    .nb-btn-red {
-        @apply bg-primary-red text-white hover:bg-primary-red-dark shadow-md shadow-rose-500/15 border-transparent;
-    }
-
-    .nb-input {
-        @apply border border-gray-200 dark:border-slate-800 p-3.5 focus:ring-4 focus:ring-primary-blue/10 focus:border-primary-blue focus:outline-none font-bold text-black dark:text-white bg-white dark:bg-slate-900 rounded-xl md:rounded-2xl shadow-sm transition-all;
-    }
-
+    .app-card-flat,
     .nb-card-flat {
-        @apply bg-white dark:bg-slate-900 border border-gray-200/80 dark:border-slate-800 rounded-2xl md:rounded-3xl;
+        @apply bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl;
     }
 
+    /* Standard Interactive Buttons */
+    .app-btn,
+    .nb-btn {
+        @apply inline-flex items-center justify-center font-bold text-xs uppercase tracking-wider px-4 py-2.5 rounded-xl transition-all duration-150 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed border border-transparent;
+        min-height: 44px; /* Minimum mobile touch target (R-03) */
+    }
+
+    .app-btn-primary,
+    .nb-btn-blue {
+        @apply bg-blue-600 hover:bg-blue-700 text-white shadow-sm border-transparent focus:ring-2 focus:ring-blue-500/30;
+    }
+
+    .app-btn-accent,
+    .nb-btn-red {
+        @apply bg-rose-600 hover:bg-rose-700 text-white shadow-sm border-transparent focus:ring-2 focus:ring-rose-500/30;
+    }
+
+    .app-btn-secondary {
+        @apply bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-700;
+    }
+
+    /* Standard Form Inputs */
+    .app-input,
+    .nb-input {
+        @apply w-full px-3.5 py-2.5 text-sm font-medium bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all;
+        min-height: 44px;
+    }
+
+    /* Censor Mode for Financial Figures */
+    .privacy-blur {
+        filter: blur(8px) !important;
+        user-select: none !important;
+        pointer-events: none !important;
+        transition: filter 0.2s ease-in-out !important;
+    }
+
+    /* Safe Area Padding for Mobile Bottom Bar */
+    .pb-mobile-nav {
+        padding-bottom: calc(5rem + env(safe-area-inset-bottom, 0px));
+    }
+
+    /* Utility: Hide scrollbar */
     .no-scrollbar::-webkit-scrollbar {
         display: none;
     }
@@ -136,191 +115,12 @@
         -ms-overflow-style: none;
         scrollbar-width: none;
     }
-
-    /* Dark Mode Modern Soft Aesthetics */
-    .dark .nb-card {
-        @apply bg-slate-950 border-slate-800/80 shadow-[0_10px_30px_rgba(0,0,0,0.4)];
-    }
-    .dark .nb-card-hover:hover {
-        @apply border-slate-700 shadow-[0_15px_35px_rgba(0,0,0,0.6)];
-    }
-    .dark .nb-card-flat {
-        @apply bg-slate-950 border-slate-800/80;
-    }
-    .dark .nb-btn {
-        @apply border-slate-800 bg-slate-900/90 text-slate-200 shadow-[0_4px_12px_rgba(0,0,0,0.3)];
-    }
-    .dark .nb-btn:not([class*="text-"]) {
-        @apply text-slate-300;
-    }
-    .dark .nb-btn:hover:not([class*="text-"]) {
-        @apply border-slate-700 text-white bg-slate-800;
-    }
-    .dark .nb-btn-blue {
-        @apply bg-primary-blue/20 text-primary-blue border-primary-blue/40 hover:bg-primary-blue hover:text-white hover:border-transparent;
-    }
-    .dark .nb-input {
-        @apply border-slate-800 bg-slate-900 text-white shadow-none focus:border-primary-blue focus:ring-4 focus:ring-primary-blue/20;
-    }
-    .dark .nb-input::placeholder {
-        @apply text-slate-600;
-    }
-
-    /* Theme Styles Support */
-    /* Glassmorphism Theme Style */
-    html:not(.dark) .theme-glassmorphism .bg-white:not(img):not(.theme-no-card), 
-    html:not(.dark) .theme-glassmorphism .bg-gray-50:not(.theme-no-card) {
-        background-color: rgba(251, 246, 246, 0.75) !important;
-        backdrop-filter: blur(24px) saturate(180%) !important;
-        -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
-        border: 1px solid rgba(255, 255, 255, 0.6) !important;
-        box-shadow: 0 6px 16px 0 rgba(31, 38, 135, 0.04) !important;
-        border-radius: 0.875rem !important;
-    }
-    .dark .theme-glassmorphism .bg-white:not(img):not(.theme-no-card),
-    .dark .theme-glassmorphism .bg-gray-800:not(.theme-no-card), 
-    .dark .theme-glassmorphism .bg-gray-850:not(.theme-no-card), 
-    .dark .theme-glassmorphism .bg-gray-900:not(.theme-no-card) {
-        background-color: rgba(15, 23, 42, 0.65) !important;
-        backdrop-filter: blur(24px) saturate(160%) !important;
-        -webkit-backdrop-filter: blur(24px) saturate(160%) !important;
-        border: 1px solid rgba(255, 255, 255, 0.08) !important;
-        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3) !important;
-        border-radius: 0.875rem !important;
-    }
-
-    /* Classic Premium Theme Style */
-    html:not(.dark) .theme-classic-premium .bg-white:not(img):not(.theme-no-card),
-    html:not(.dark) .theme-classic-premium .bg-gray-50:not(.theme-no-card) {
-        background-color: #FBF6F6 !important;
-        border: 1px solid rgba(0, 0, 0, 0.05) !important;
-        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.03), 0 4px 6px -2px rgba(0, 0, 0, 0.02) !important;
-        backdrop-filter: none !important;
-        border-radius: 0.875rem !important;
-    }
-    .dark .theme-classic-premium .bg-white:not(img):not(.theme-no-card),
-    .dark .theme-classic-premium .bg-gray-800:not(.theme-no-card),
-    .dark .theme-classic-premium .bg-gray-850:not(.theme-no-card),
-    .dark .theme-classic-premium .bg-gray-900:not(.theme-no-card) {
-        background-color: #1e293b !important;
-        border: 1px solid rgba(255, 255, 255, 0.05) !important;
-        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.35), 0 10px 10px -5px rgba(0, 0, 0, 0.2) !important;
-        backdrop-filter: none !important;
-        border-radius: 0.875rem !important;
-    }
-
-    /* Neon Cyberpunk Theme Style */
-    html:not(.dark) .theme-neon-cyberpunk .bg-white:not(img):not(.theme-no-card),
-    html:not(.dark) .theme-neon-cyberpunk .bg-gray-50:not(.theme-no-card) {
-        background-color: #030712 !important;
-        border: 2px solid var(--color-primary-blue) !important;
-        box-shadow: 0 0 15px rgba(37, 99, 235, 0.15) !important;
-        border-radius: 0.125rem !important;
-    }
-    .dark .theme-neon-cyberpunk .bg-white:not(img):not(.theme-no-card),
-    .dark .theme-neon-cyberpunk .bg-gray-800:not(.theme-no-card),
-    .dark .theme-neon-cyberpunk .bg-gray-850:not(.theme-no-card),
-    .dark .theme-neon-cyberpunk .bg-gray-900:not(.theme-no-card) {
-        background-color: #000000 !important;
-        border: 2px solid var(--color-primary-blue) !important;
-        box-shadow: 0 0 25px rgba(37, 99, 235, 0.25) !important;
-        border-radius: 0.125rem !important;
-    }
-
-    /* Restoran & Warung Theme Style (Warm Culinary) */
-    html:not(.dark) .theme-restaurant-aesthetic .bg-white:not(img):not(.theme-no-card),
-    html:not(.dark) .theme-restaurant-aesthetic .bg-gray-50:not(.theme-no-card) {
-        background-color: #FBF6F6 !important;
-        border: 1.5px dashed rgba(249, 115, 22, 0.25) !important;
-        box-shadow: 0 6px 10px -3px rgba(249, 115, 22, 0.02) !important;
-        border-radius: 1rem !important;
-    }
-    .dark .theme-restaurant-aesthetic .bg-white:not(img):not(.theme-no-card),
-    .dark .theme-restaurant-aesthetic .bg-gray-800:not(.theme-no-card),
-    .dark .theme-restaurant-aesthetic .bg-gray-850:not(.theme-no-card),
-    .dark .theme-restaurant-aesthetic .bg-gray-900:not(.theme-no-card) {
-        background-color: #1c1917 !important;
-        border: 1.5px dashed rgba(255, 255, 255, 0.08) !important;
-        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.4) !important;
-        border-radius: 1rem !important;
-    }
-
-    /* Retail Minimarket Theme Style (Clean Grid) */
-    html:not(.dark) .theme-retail-aesthetic .bg-white:not(img):not(.theme-no-card),
-    html:not(.dark) .theme-retail-aesthetic .bg-gray-50:not(.theme-no-card) {
-        background-color: #FBF6F6 !important;
-        border: 1px solid #cbd5e1 !important;
-        border-radius: 0.5rem !important;
-        box-shadow: none !important;
-    }
-    .dark .theme-retail-aesthetic .bg-white:not(img):not(.theme-no-card),
-    .dark .theme-retail-aesthetic .bg-gray-800:not(.theme-no-card),
-    .dark .theme-retail-aesthetic .bg-gray-850:not(.theme-no-card),
-    .dark .theme-retail-aesthetic .bg-gray-900:not(.theme-no-card) {
-        background-color: #0f172a !important;
-        border: 1px solid #334155 !important;
-        border-radius: 0.5rem !important;
-        box-shadow: none !important;
-    }
-
-    /* Bank Mini Theme Style (Corporate FinTech) */
-    html:not(.dark) .theme-bank-aesthetic .bg-white:not(img):not(.theme-no-card),
-    html:not(.dark) .theme-bank-aesthetic .bg-gray-50:not(.theme-no-card) {
-        background-color: #FBF6F6 !important;
-        border: 1px solid rgba(14, 165, 233, 0.18) !important;
-        box-shadow: 0 4px 12px -2px rgba(14, 165, 233, 0.04) !important;
-        border-radius: 0.875rem !important;
-    }
-    .dark .theme-bank-aesthetic .bg-white:not(img):not(.theme-no-card),
-    .dark .theme-bank-aesthetic .bg-gray-800:not(.theme-no-card),
-    .dark .theme-bank-aesthetic .bg-gray-850:not(.theme-no-card),
-    .dark .theme-bank-aesthetic .bg-gray-900:not(.theme-no-card) {
-        background-color: #0b1329 !important;
-        border: 1px solid rgba(14, 165, 233, 0.12) !important;
-        box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.5) !important;
-        border-radius: 0.875rem !important;
-    }
-
-    /* Generic Card Rounding Overrides for Page Layouts */
-    .theme-restaurant-aesthetic [class*="rounded-\[3rem\]"],
-    .theme-restaurant-aesthetic [class*="rounded-\[2\.5rem\]"],
-    .theme-restaurant-aesthetic [class*="rounded-3xl"] {
-        border-radius: 1rem !important;
-    }
-    .theme-retail-aesthetic [class*="rounded-\[3rem\]"],
-    .theme-retail-aesthetic [class*="rounded-3xl"] {
-        border-radius: 0.5rem !important;
-    }
-    .theme-bank-aesthetic [class*="rounded-\[3rem\]"],
-    .theme-bank-aesthetic [class*="rounded-3xl"] {
-        border-radius: 0.875rem !important;
-    }
-    .theme-neon-cyberpunk [class*="rounded-\[3rem\]"],
-    .theme-neon-cyberpunk [class*="rounded-3xl"] {
-        border-radius: 0.125rem !important;
-    }
-    .theme-glassmorphism [class*="rounded-\[3rem\]"],
-    .theme-glassmorphism [class*="rounded-3xl"] {
-        border-radius: 0.875rem !important;
-    }
-    .theme-classic-premium [class*="rounded-\[3rem\]"],
-    .theme-classic-premium [class*="rounded-3xl"] {
-        border-radius: 0.875rem !important;
-    }
 }
 
-.privacy-blur {
-    filter: blur(8px) !important;
-    user-select: none !important;
-    pointer-events: none !important;
-    transition: filter 0.2s ease-in-out !important;
-}
-
-/* Custom premium styling for browser date inputs */
+/* Browser Date Inputs */
 input[type="date"] {
     position: relative;
     color-scheme: light;
-    transition: all 0.2s ease;
 }
 
 .dark input[type="date"] {
@@ -329,577 +129,10 @@ input[type="date"] {
 
 input[type="date"]::-webkit-calendar-picker-indicator {
     cursor: pointer;
-    opacity: 0.6;
-    transition: all 0.2s ease;
-    padding: 4px;
+    opacity: 0.7;
+    transition: transform 0.15s ease;
 }
 
 input[type="date"]::-webkit-calendar-picker-indicator:hover {
-    opacity: 1;
     transform: scale(1.1);
-}
-
-.dark input[type="date"]::-webkit-calendar-picker-indicator {
-    filter: invert(1) brightness(1.5);
-    opacity: 0.8;
-}
-
-.dark input[type="date"]::-webkit-calendar-picker-indicator:hover {
-    opacity: 1;
-    filter: invert(1) brightness(2);
-}
-
-/* Custom premium Flatpickr theme matching theme styling */
-.flatpickr-calendar {
-    background: #ffffff !important;
-    border: 1px solid rgba(0, 0, 0, 0.05) !important;
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.02) !important;
-    border-radius: 1rem !important;
-    font-family: var(--font-outfit) !important;
-    box-sizing: content-box !important;
-    padding: 6px !important;
-}
-
-.dark .flatpickr-calendar {
-    background: #0f172a !important; /* Slate 900 */
-    border: 1px solid rgba(255, 255, 255, 0.08) !important;
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5) !important;
-}
-
-/* Explicit style for month dropdown and inputs in dark mode */
-.dark .flatpickr-current-month select.flatpickr-monthDropdown-months,
-.dark .flatpickr-current-month input.numInput {
-    background: #0f172a !important;
-    color: #f8fafc !important;
-}
-
-.dark .flatpickr-current-month select.flatpickr-monthDropdown-months option {
-    background: #0f172a !important;
-    color: #f8fafc !important;
-}
-
-.flatpickr-day.selected, 
-.flatpickr-day.startRange, 
-.flatpickr-day.endRange, 
-.flatpickr-day.selected.inRange, 
-.flatpickr-day.startRange.inRange, 
-.flatpickr-day.endRange.inRange, 
-.flatpickr-day.selected:focus, 
-.flatpickr-day.startRange:focus, 
-.flatpickr-day.endRange:focus, 
-.flatpickr-day.selected:hover, 
-.flatpickr-day.startRange:hover, 
-.flatpickr-day.endRange:hover, 
-.flatpickr-day.prevMonthDay.selected, 
-.flatpickr-day.nextMonthDay.selected {
-    background: var(--color-primary-blue) !important;
-    border-color: var(--color-primary-blue) !important;
-    color: #ffffff !important;
-    border-radius: 0.75rem !important;
-    font-weight: 800 !important;
-}
-
-.flatpickr-day:hover {
-    background: rgba(37, 99, 235, 0.1) !important;
-    border-radius: 0.75rem !important;
-}
-
-.dark .flatpickr-day {
-    color: #f8fafc !important;
-}
-
-.dark .flatpickr-day:hover {
-    background: rgba(255, 255, 255, 0.05) !important;
-}
-
-.dark .flatpickr-day.flatpickr-disabled {
-    color: rgba(255, 255, 255, 0.15) !important;
-}
-
-.dark .flatpickr-months .flatpickr-month,
-.dark .flatpickr-months .flatpickr-prev-month,
-.dark .flatpickr-months .flatpickr-next-month {
-    color: #f8fafc !important;
-    fill: #f8fafc !important;
-}
-
-.dark .flatpickr-current-month .numInputWrapper span.arrowUp:after {
-    border-bottom-color: #f8fafc !important;
-}
-.dark .flatpickr-current-month .numInputWrapper span.arrowDown:after {
-    border-top-color: #f8fafc !important;
-}
-.dark .flatpickr-weekday {
-    color: #64748b !important;
-}
-
-/* Glassmorphism theme style for Flatpickr */
-.theme-glassmorphism .flatpickr-calendar {
-    background: rgba(255, 255, 255, 0.75) !important;
-    backdrop-filter: blur(20px) saturate(180%) !important;
-    -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
-    border: 1px solid rgba(255, 255, 255, 0.4) !important;
-}
-
-.theme-glassmorphism.dark .flatpickr-calendar {
-    background: rgba(15, 23, 42, 0.75) !important;
-    backdrop-filter: blur(20px) saturate(160%) !important;
-    -webkit-backdrop-filter: blur(20px) saturate(160%) !important;
-    border: 1px solid rgba(255, 255, 255, 0.08) !important;
-}
-
-/* Custom premium scrollbar styling aligned with light/dark theme */
-::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-}
-
-::-webkit-scrollbar-track {
-    background: transparent;
-}
-
-/* Light mode styling */
-html:not(.dark) ::-webkit-scrollbar-thumb {
-    background: rgba(0, 0, 0, 0.18);
-    border-radius: 9999px;
-    border: 2px solid transparent;
-    background-clip: padding-box;
-}
-
-html:not(.dark) ::-webkit-scrollbar-thumb:hover {
-    background: rgba(0, 0, 0, 0.3);
-    border-radius: 9999px;
-    border: 2px solid transparent;
-    background-clip: padding-box;
-}
-
-/* Dark mode styling */
-.dark ::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.18);
-    border-radius: 9999px;
-    border: 2px solid transparent;
-    background-clip: padding-box;
-}
-
-.dark ::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.35);
-    border-radius: 9999px;
-    border: 2px solid transparent;
-    background-clip: padding-box;
-}
-
-/* Firefox scrollbar support */
-* {
-    scrollbar-width: thin;
-    scrollbar-color: rgba(0, 0, 0, 0.18) transparent;
-}
-
-.dark * {
-    scrollbar-color: rgba(255, 255, 255, 0.18) transparent;
-}
-
-
-/* ==========================================================================
-   Theme Aesthetics Overrides for Cards, Buttons, and Inputs (POS & Cashier)
-   ========================================================================== */
-
-/* --- Global Theme Exclusions (Flat layouts, full-width headers/navs) --- */
-html .theme-no-card,
-body .theme-no-card,
-[class*="theme-"] .theme-no-card,
-[class*="theme-"] .theme-no-card.bg-white,
-[class*="theme-"] .theme-no-card.bg-gray-50,
-[class*="theme-"] .theme-no-card.bg-gray-800,
-[class*="theme-"] .theme-no-card.bg-gray-850,
-[class*="theme-"] .theme-no-card.bg-gray-900,
-.theme-classic-premium .theme-no-card,
-.theme-glassmorphism .theme-no-card,
-.theme-restaurant-aesthetic .theme-no-card,
-.theme-retail-aesthetic .theme-no-card,
-.theme-bank-aesthetic .theme-no-card,
-.theme-neon-cyberpunk .theme-no-card {
-    border-radius: 0px !important;
-    box-shadow: none !important;
-    border-left: none !important;
-    border-right: none !important;
-    border-top: none !important;
-}
-html:not(.dark) [class*="theme-"] .theme-no-card,
-html:not(.dark) [class*="theme-"] .theme-no-card.bg-white,
-html:not(.dark) [class*="theme-"] .theme-no-card.bg-gray-50 {
-    background-color: #ffffff !important;
-    border-bottom: 1px solid #e2e8f0 !important;
-}
-.dark [class*="theme-"] .theme-no-card,
-.dark [class*="theme-"] .theme-no-card.bg-white,
-.dark [class*="theme-"] .theme-no-card.bg-gray-800,
-.dark [class*="theme-"] .theme-no-card.bg-gray-850,
-.dark [class*="theme-"] .theme-no-card.bg-gray-900 {
-    background-color: #020617 !important;
-    border-bottom: 1px solid #1e293b !important;
-}
-
-/* --- 1. Classic Premium --- */
-.theme-classic-premium .nb-card,
-.theme-classic-premium .nb-card-flat {
-    border-radius: 0.875rem !important;
-    border: 1px solid rgba(0, 0, 0, 0.06) !important;
-    box-shadow: 0 8px 20px -6px rgba(0, 0, 0, 0.03) !important;
-}
-.theme-classic-premium .nb-btn {
-    border-radius: 9999px !important;
-    border: 1px solid rgba(0, 0, 0, 0.06) !important;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04) !important;
-    text-shadow: none !important;
-    font-weight: 700 !important;
-    letter-spacing: 0.03em !important;
-    font-size: 11px !important;
-    padding: 0.5rem 1.25rem !important;
-    transition: all 0.2s ease-in-out !important;
-}
-.theme-classic-premium .nb-btn:hover {
-    transform: translateY(-1px) !important;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
-}
-.theme-classic-premium .nb-input {
-    border-radius: 0.875rem !important;
-    border: 1px solid rgba(0, 0, 0, 0.1) !important;
-    box-shadow: none !important;
-}
-/* Classic Premium Dark Mode Overrides */
-.dark .theme-classic-premium .nb-card,
-.dark .theme-classic-premium .nb-card-flat {
-    border: 1px solid rgba(255, 255, 255, 0.08) !important;
-    box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.5) !important;
-}
-.dark .theme-classic-premium .nb-btn {
-    border: 1px solid rgba(255, 255, 255, 0.08) !important;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2) !important;
-    color: rgba(255, 255, 255, 0.8) !important;
-}
-.dark .theme-classic-premium .nb-btn:hover {
-    border-color: rgba(255, 255, 255, 0.2) !important;
-    color: #ffffff !important;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) !important;
-}
-.dark .theme-classic-premium .nb-input {
-    border: 1px solid rgba(255, 255, 255, 0.15) !important;
-}
-
-/* --- 2. Glassmorphism --- */
-.theme-glassmorphism .nb-card,
-.theme-glassmorphism .nb-card-flat {
-    border-radius: 0.875rem !important;
-    background-color: rgba(255, 255, 255, 0.45) !important;
-    backdrop-filter: blur(24px) saturate(180%) !important;
-    -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
-    border: 1px solid rgba(255, 255, 255, 0.4) !important;
-    box-shadow: 0 6px 16px 0 rgba(31, 38, 135, 0.02) !important;
-}
-.theme-glassmorphism .nb-btn {
-    border-radius: 1rem !important;
-    backdrop-filter: blur(12px) !important;
-    border: 1px solid rgba(255, 255, 255, 0.3) !important;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03) !important;
-}
-.theme-glassmorphism .nb-input {
-    border-radius: 1rem !important;
-    background-color: rgba(255, 255, 255, 0.3) !important;
-    backdrop-filter: blur(12px) !important;
-    border: 1px solid rgba(255, 255, 255, 0.25) !important;
-    box-shadow: none !important;
-}
-/* Glassmorphism Dark Mode Overrides */
-.dark .theme-glassmorphism .nb-card,
-.dark .theme-glassmorphism .nb-card-flat {
-    background-color: rgba(15, 23, 42, 0.45) !important;
-    border: 1px solid rgba(255, 255, 255, 0.08) !important;
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3) !important;
-}
-.dark .theme-glassmorphism .nb-btn {
-    border: 1px solid rgba(255, 255, 255, 0.1) !important;
-}
-.dark .theme-glassmorphism .nb-input {
-    background-color: rgba(15, 23, 42, 0.3) !important;
-    border: 1px solid rgba(255, 255, 255, 0.08) !important;
-}
-
-/* --- 3. Restoran & Warung (Warm Culinary) --- */
-.theme-restaurant-aesthetic .nb-card,
-.theme-restaurant-aesthetic .nb-card-flat {
-    border-radius: 1rem !important;
-    background-color: #fffaf0 !important;
-    border: 1.5px dashed rgba(249, 115, 22, 0.25) !important;
-    box-shadow: 0 8px 20px -8px rgba(249, 115, 22, 0.05) !important;
-}
-.theme-restaurant-aesthetic .nb-btn {
-    border-radius: 9999px !important; /* Pill shaped buttons */
-    border: 1.5px solid rgba(249, 115, 22, 0.3) !important;
-    box-shadow: 0 4px 15px -3px rgba(249, 115, 22, 0.1) !important;
-}
-.theme-restaurant-aesthetic .nb-input {
-    border-radius: 0.875rem !important;
-    border: 1.5px solid rgba(249, 115, 22, 0.2) !important;
-    box-shadow: inset 0 2px 4px rgba(249, 115, 22, 0.03) !important;
-}
-/* Restoran Dark Mode Overrides */
-.dark .theme-restaurant-aesthetic .nb-card,
-.dark .theme-restaurant-aesthetic .nb-card-flat {
-    background-color: #1c1917 !important; /* Warm dark stone */
-    border: 1.5px dashed rgba(255, 255, 255, 0.08) !important;
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.45) !important;
-}
-.dark .theme-restaurant-aesthetic .nb-btn {
-    border: 1.5px solid rgba(255, 255, 255, 0.15) !important;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3) !important;
-}
-.dark .theme-restaurant-aesthetic .nb-input {
-    border: 1.5px solid rgba(255, 255, 255, 0.12) !important;
-}
-
-/* --- 4. Retail Minimarket (Clean Grid) --- */
-.theme-retail-aesthetic .nb-card,
-.theme-retail-aesthetic .nb-card-flat {
-    border-radius: 0.5rem !important; /* Sharp neat box */
-    border: 1px solid #cbd5e1 !important;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.02) !important;
-}
-.theme-retail-aesthetic .nb-btn {
-    border-radius: 0.375rem !important;
-    border: 1px solid #94a3b8 !important;
-    box-shadow: none !important;
-}
-.theme-retail-aesthetic .nb-input {
-    border-radius: 0.375rem !important;
-    border: 1px solid #cbd5e1 !important;
-    box-shadow: none !important;
-}
-/* Retail Dark Mode Overrides */
-.dark .theme-retail-aesthetic .nb-card,
-.dark .theme-retail-aesthetic .nb-card-flat {
-    background-color: #0f172a !important;
-    border: 1px solid #334155 !important;
-    box-shadow: none !important;
-}
-.dark .theme-retail-aesthetic .nb-btn {
-    border: 1px solid #475569 !important;
-}
-.dark .theme-retail-aesthetic .nb-input {
-    border: 1px solid #334155 !important;
-}
-
-/* --- 5. Bank Mini (Corporate FinTech) --- */
-.theme-bank-aesthetic .nb-card,
-.theme-bank-aesthetic .nb-card-flat {
-    border-radius: 0.875rem !important;
-    border: 1px solid rgba(14, 165, 233, 0.18) !important;
-    box-shadow: 0 6px 16px -5px rgba(14, 165, 233, 0.03) !important;
-}
-.theme-bank-aesthetic .nb-btn {
-    border-radius: 0.75rem !important;
-    border: 1px solid rgba(14, 165, 233, 0.25) !important;
-    box-shadow: 0 2px 10px rgba(14, 165, 233, 0.08) !important;
-}
-.theme-bank-aesthetic .nb-input {
-    border-radius: 0.75rem !important;
-    border: 1.5px solid rgba(14, 165, 233, 0.2) !important;
-    box-shadow: none !important;
-}
-/* Bank Dark Mode Overrides */
-.dark .theme-bank-aesthetic .nb-card,
-.dark .theme-bank-aesthetic .nb-card-flat {
-    background-color: #0b1329 !important;
-    border: 1px solid rgba(14, 165, 233, 0.12) !important;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5) !important;
-}
-.dark .theme-bank-aesthetic .nb-btn {
-    border: 1px solid rgba(14, 165, 233, 0.2) !important;
-}
-.dark .theme-bank-aesthetic .nb-input {
-    border: 1.5px solid rgba(14, 165, 233, 0.15) !important;
-}
-
-/* --- 6. Neon Cyberpunk --- */
-.theme-neon-cyberpunk .nb-card,
-.theme-neon-cyberpunk .nb-card-flat {
-    border-radius: 0.125rem !important;
-    border: 2px solid #00f0ff !important;
-    box-shadow: 0 0 10px rgba(0, 240, 255, 0.25) !important;
-}
-.theme-neon-cyberpunk .nb-btn {
-    border-radius: 0.125rem !important;
-    border: 2px solid #ff007f !important;
-    box-shadow: 0 0 8px rgba(255, 0, 127, 0.2) !important;
-}
-.theme-neon-cyberpunk .nb-input {
-    border-radius: 0.125rem !important;
-    border: 2px solid #00f0ff !important;
-    box-shadow: inset 0 0 4px rgba(0, 240, 255, 0.1) !important;
-}
-/* Neon Cyberpunk Dark Mode Overrides */
-.dark .theme-neon-cyberpunk .nb-card,
-.dark .theme-neon-cyberpunk .nb-card-flat {
-    background-color: #000000 !important;
-    border: 2px solid #00f0ff !important;
-    box-shadow: 0 0 18px rgba(0, 240, 255, 0.35) !important;
-}
-.dark .theme-neon-cyberpunk .nb-btn {
-    border: 2px solid #ff007f !important;
-    box-shadow: 0 0 12px rgba(255, 0, 127, 0.3) !important;
-}
-.dark .theme-neon-cyberpunk .nb-input {
-    border: 2px solid #00f0ff !important;
-}
-
-/* Global Mobile View Font Size Scaling for Enhanced Readability */
-@media (max-width: 767px) {
-    .text-xs {
-        font-size: 0.8125rem !important; /* Scale 12px -> 13px */
-        line-height: 1.25rem !important;
-    }
-    .text-sm {
-        font-size: 0.9375rem !important; /* Scale 14px -> 15px */
-        line-height: 1.375rem !important;
-    }
-    .text-base {
-        font-size: 1.0625rem !important; /* Scale 16px -> 17px */
-        line-height: 1.5rem !important;
-    }
-    .text-\[10px\] {
-        font-size: 0.75rem !important; /* Scale 10px -> 12px */
-        line-height: 1.125rem !important;
-    }
-    .text-\[8px\] {
-        font-size: 0.6875rem !important; /* Scale 8px -> 11px */
-    }
-}
-
-/* Security: Blank out screen when printing is attempted */
-@media print {
-    body {
-        display: none !important;
-    }
-}
-
-/* Ensure hover actions are always visible on mobile viewports */
-@media (max-width: 767px) {
-    .opacity-0.group-hover\:opacity-100 {
-        opacity: 1 !important;
-        pointer-events: auto !important;
-        visibility: visible !important;
-    }
-    .opacity-0 {
-        opacity: 1 !important;
-        pointer-events: auto !important;
-        visibility: visible !important;
-    }
-}
-
-/* Custom premium Quill Text Editor overrides with Dark Mode support */
-.ql-toolbar.ql-snow {
-    border: 1px solid rgba(0, 0, 0, 0.1) !important;
-    border-bottom: none !important;
-    background-color: #f8fafc !important;
-    border-top-left-radius: 1rem !important;
-    border-top-right-radius: 1rem !important;
-    padding: 10px 15px !important;
-    transition: all 0.3s ease;
-}
-
-.ql-container.ql-snow {
-    border: 1px solid rgba(0, 0, 0, 0.1) !important;
-    background-color: #ffffff !important;
-    border-bottom-left-radius: 1rem !important;
-    border-bottom-right-radius: 1rem !important;
-    font-family: var(--font-outfit) !important;
-    transition: all 0.3s ease;
-}
-
-.ql-editor {
-    min-height: 120px;
-    font-size: 0.875rem !important;
-    color: #1e293b !important;
-    line-height: 1.6 !important;
-}
-
-.ql-editor.ql-blank::before {
-    color: #94a3b8 !important;
-    font-style: normal !important;
-    font-weight: 500 !important;
-}
-
-/* Quill dark mode overrides */
-.dark .ql-toolbar.ql-snow {
-    border-color: rgba(255, 255, 255, 0.12) !important;
-    background-color: #0f172a !important;
-}
-
-.dark .ql-container.ql-snow {
-    border-color: rgba(255, 255, 255, 0.12) !important;
-    background-color: #020617 !important;
-}
-
-.dark .ql-editor {
-    color: #f1f5f9 !important;
-}
-
-.dark .ql-editor.ql-blank::before {
-    color: #64748b !important;
-}
-
-/* Toolbar button icons color overrides in dark mode */
-.dark .ql-snow .ql-stroke {
-    stroke: #cbd5e1 !important;
-}
-
-.dark .ql-snow .ql-fill {
-    fill: #cbd5e1 !important;
-}
-
-.dark .ql-snow .ql-picker {
-    color: #cbd5e1 !important;
-}
-
-.dark .ql-snow.ql-toolbar button:hover .ql-stroke,
-.dark .ql-snow.ql-toolbar button.ql-active .ql-stroke {
-    stroke: #3b82f6 !important;
-}
-
-.dark .ql-snow.ql-toolbar button:hover .ql-fill,
-.dark .ql-snow.ql-toolbar button.ql-active .ql-fill {
-    fill: #3b82f6 !important;
-}
-
-/* Global Forms Dark Theme Integration (Native Dropdowns & Autofills) */
-select,
-select option,
-input,
-textarea {
-    color-scheme: light;
-}
-
-.dark select,
-.dark select option,
-.dark input,
-.dark textarea {
-    color-scheme: dark !important;
-}
-
-.dark select option {
-    background-color: #0f172a !important;
-    color: #f8fafc !important;
-}
-
-/* Fresh Mobile Additions - Clean typography and spacing */
-@media (max-width: 767px) {
-    h1, h2, h3, h4, h5, h6, .heading-title {
-        font-style: normal !important;
-        letter-spacing: -0.02em !important;
-    }
-}
-
-@media (max-width: 640px) {
-    .nb-card, .nb-card-flat {
-        padding: 1rem !important; /* Balanced mobile card spacing */
-    }
 }

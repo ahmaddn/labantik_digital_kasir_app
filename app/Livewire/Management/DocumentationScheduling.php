@@ -2,50 +2,76 @@
 
 namespace App\Livewire\Management;
 
+use App\Exports\DocumentationScheduleExport;
 use App\Models\DocumentationActivity;
 use App\Models\DocumentationSchedule;
 use App\Models\Jurusan;
+use App\Models\Notification;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Livewire\Component;
+use Maatwebsite\Excel\Facades\Excel;
 
 class DocumentationScheduling extends Component
 {
     // Activity State
     public $selectedActivityId = '';
+
     public $selectedJurusanId = '';
+
     public $activityTitle = '';
+
     public $activityStartDate = '';
+
     public $activityEndDate = '';
+
     public $activityDescription = '';
 
     // Schedule Form State
     public $date = '';
+
     public $shift = 1;
+
     public $selectedUserId = '';
+
     public $notes = '';
 
     // Randomize State
     public $shiftsPerDay = 1;
+
     public $maxCashiersPerDay = 1;
+
     public $maxShiftsPerWeek = 2;
+
     public $randomizeStartDate = '';
+
     public $randomizeEndDate = '';
+
     public $useGradeQuotas = true;
+
     public $gradeQuotas = ['12' => 1, '11' => 1, '10' => 0];
+
     public $availableGrades = ['12', '11', '10'];
+
     public $selectedNoGradeUserIds = [];
 
     // UI Modals
     public $showActivityModal = false;
+
     public $showScheduleModal = false;
+
     public $showRandomModal = false;
+
     public $showDeleteScheduleModal = false;
+
     public $showDeleteActivityModal = false;
 
     public $editingActivityId = null;
+
     public $deletingScheduleId = null;
+
     public $deletingActivityId = null;
 
     public function mount()
@@ -97,8 +123,9 @@ class DocumentationScheduling extends Component
 
         $activeJurusanId = session('active_jurusan_id') ?: ($this->selectedJurusanId ?: null);
 
-        if (!$activeJurusanId && session('active_role_name') !== 'superadmin') {
+        if (! $activeJurusanId && session('active_role_name') !== 'superadmin') {
             $this->dispatch('toast', message: 'Silakan pilih jurusan terlebih dahulu.', type: 'danger');
+
             return;
         }
 
@@ -127,7 +154,7 @@ class DocumentationScheduling extends Component
 
             $this->showActivityModal = false;
         } catch (\Exception $e) {
-            $this->dispatch('toast', message: 'Gagal menyimpan kegiatan: ' . $e->getMessage(), type: 'danger');
+            $this->dispatch('toast', message: 'Gagal menyimpan kegiatan: '.$e->getMessage(), type: 'danger');
         }
     }
 
@@ -152,8 +179,9 @@ class DocumentationScheduling extends Component
 
     public function openCreateScheduleModal()
     {
-        if (!$this->selectedActivityId) {
+        if (! $this->selectedActivityId) {
             $this->dispatch('toast', message: 'Pilih kegiatan dokumentasi terlebih dahulu.', type: 'danger');
+
             return;
         }
         $this->selectedUserId = '';
@@ -179,8 +207,9 @@ class DocumentationScheduling extends Component
             'notes' => 'nullable|string|max:255',
         ]);
 
-        if (!$this->selectedActivityId) {
+        if (! $this->selectedActivityId) {
             $this->dispatch('toast', message: 'Pilih kegiatan dokumentasi terlebih dahulu.', type: 'danger');
+
             return;
         }
 
@@ -189,6 +218,7 @@ class DocumentationScheduling extends Component
 
         if ($targetDate->lt($activity->start_date) || $targetDate->gt($activity->end_date)) {
             $this->dispatch('toast', message: 'Tanggal penugasan berada di luar rentang tanggal kegiatan.', type: 'danger');
+
             return;
         }
 
@@ -200,6 +230,7 @@ class DocumentationScheduling extends Component
 
         if ($alreadyScheduled) {
             $this->dispatch('toast', message: 'Kasir sudah ditugaskan dokumentasi pada tanggal dan shift tersebut.', type: 'danger');
+
             return;
         }
 
@@ -210,6 +241,7 @@ class DocumentationScheduling extends Component
 
         if ($hasCashierShift) {
             $this->dispatch('toast', message: 'Kasir ini sudah memiliki jadwal piket kasir pada tanggal tersebut. Pilihlah kasir/tanggal lain agar tidak bentrok.', type: 'danger');
+
             return;
         }
 
@@ -220,29 +252,30 @@ class DocumentationScheduling extends Component
                 'user_id' => $this->selectedUserId,
                 'date' => $this->date,
                 'shift' => $this->shift,
-                'notes' => $this->notes ?: 'Tugas Dokumentasi (Shift ' . $this->shift . ')',
+                'notes' => $this->notes ?: 'Tugas Dokumentasi (Shift '.$this->shift.')',
                 'created_by' => auth()->id(),
             ]);
 
-            \App\Models\Notification::create([
+            Notification::create([
                 'user_id' => $this->selectedUserId,
                 'title' => 'Tugas Dokumentasi Baru',
-                'body' => 'Anda ditugaskan dokumentasi ' . $activity->title . ' (Shift ' . $this->shift . ') pada ' . Carbon::parse($this->date)->translatedFormat('d M Y'),
+                'body' => 'Anda ditugaskan dokumentasi '.$activity->title.' (Shift '.$this->shift.') pada '.Carbon::parse($this->date)->translatedFormat('d M Y'),
                 'type' => 'system',
-                'action_url' => '/management/documentation-schedules'
+                'action_url' => '/management/documentation-schedules',
             ]);
 
             $this->showScheduleModal = false;
             $this->dispatch('toast', message: 'Penugasan dokumentasi berhasil ditambahkan!');
         } catch (\Exception $e) {
-            $this->dispatch('toast', message: 'Gagal menambah penugasan: ' . $e->getMessage(), type: 'danger');
+            $this->dispatch('toast', message: 'Gagal menambah penugasan: '.$e->getMessage(), type: 'danger');
         }
     }
 
     public function openRandomModal()
     {
-        if (!$this->selectedActivityId) {
+        if (! $this->selectedActivityId) {
             $this->dispatch('toast', message: 'Pilih kegiatan dokumentasi terlebih dahulu.', type: 'danger');
+
             return;
         }
 
@@ -259,30 +292,39 @@ class DocumentationScheduling extends Component
                     $sq->where('role_user.jurusan_id', $activeJurusanId);
                 });
         })
-        ->pluck('grade_level')
-        ->map(fn($g) => ($g === null || trim((string)$g) === '') ? 'none' : (string)$g)
-        ->unique()
-        ->values()
-        ->toArray();
+            ->pluck('grade_level')
+            ->map(fn ($g) => ($g === null || trim((string) $g) === '') ? 'none' : (string) $g)
+            ->unique()
+            ->values()
+            ->toArray();
 
         $mergedGrades = array_unique(array_merge(['12', '11', '10'], $dbGrades));
         usort($mergedGrades, function ($a, $b) {
-            if ($a === 'none') return 1;
-            if ($b === 'none') return -1;
-            return (int)$b <=> (int)$a;
+            if ($a === 'none') {
+                return 1;
+            }
+            if ($b === 'none') {
+                return -1;
+            }
+
+            return (int) $b <=> (int) $a;
         });
 
         $this->availableGrades = array_values($mergedGrades);
 
         foreach ($this->availableGrades as $g) {
-            if (!isset($this->gradeQuotas[(string)$g])) {
-                $this->gradeQuotas[(string)$g] = 0;
+            if (! isset($this->gradeQuotas[(string) $g])) {
+                $this->gradeQuotas[(string) $g] = 0;
             }
         }
 
         if (array_sum($this->gradeQuotas) === 0) {
-            if (in_array('12', $this->availableGrades)) $this->gradeQuotas['12'] = 1;
-            if (in_array('11', $this->availableGrades)) $this->gradeQuotas['11'] = 1;
+            if (in_array('12', $this->availableGrades)) {
+                $this->gradeQuotas['12'] = 1;
+            }
+            if (in_array('11', $this->availableGrades)) {
+                $this->gradeQuotas['11'] = 1;
+            }
         }
 
         $this->selectedNoGradeUserIds = User::whereHas('roles', function ($q) use ($activeJurusanId) {
@@ -291,20 +333,21 @@ class DocumentationScheduling extends Component
                     $sq->where('role_user.jurusan_id', $activeJurusanId);
                 });
         })
-        ->where(function ($q) {
-            $q->whereNull('grade_level')->orWhere('grade_level', '');
-        })
-        ->pluck('id')
-        ->map(fn($id) => (string)$id)
-        ->toArray();
+            ->where(function ($q) {
+                $q->whereNull('grade_level')->orWhere('grade_level', '');
+            })
+            ->pluck('id')
+            ->map(fn ($id) => (string) $id)
+            ->toArray();
 
         $this->showRandomModal = true;
     }
 
     public function randomizeSchedules()
     {
-        if (!$this->selectedActivityId) {
+        if (! $this->selectedActivityId) {
             $this->dispatch('toast', message: 'Kegiatan dokumentasi tidak terdeteksi.', type: 'danger');
+
             return;
         }
 
@@ -328,6 +371,7 @@ class DocumentationScheduling extends Component
 
         if ($cashierUsers->isEmpty()) {
             $this->dispatch('toast', message: 'Tidak ada kasir yang terdaftar di jurusan ini.', type: 'danger');
+
             return;
         }
 
@@ -348,9 +392,9 @@ class DocumentationScheduling extends Component
         $activeGradeQuotas = [];
         if ($this->useGradeQuotas) {
             foreach ($this->gradeQuotas as $g => $q) {
-                $qInt = (int)$q;
+                $qInt = (int) $q;
                 if ($qInt > 0) {
-                    $activeGradeQuotas[(string)$g] = $qInt;
+                    $activeGradeQuotas[(string) $g] = $qInt;
                 }
             }
         }
@@ -368,7 +412,7 @@ class DocumentationScheduling extends Component
                     ->whereBetween('date', [$startDate->toDateString(), $endDate->toDateString()])
                     ->get()
                     ->groupBy(function ($item) {
-                        return $item->user_id . '_' . $item->date;
+                        return $item->user_id.'_'.$item->date;
                     });
 
                 // Ambil total akumulasi riwayat penugasan dokumentasi global masing-masing kasir
@@ -384,11 +428,11 @@ class DocumentationScheduling extends Component
                 $userShiftCounts = [];
                 $lastShiftAssigned = [];
                 $assignedSchedules = [];
-                $numShifts = max(1, (int)$this->shiftsPerDay);
+                $numShifts = max(1, (int) $this->shiftsPerDay);
 
                 // Identify Sheren & Meta
-                $sherenUser = $cashierUsers->first(fn($u) => stripos($u->name, 'sheren') !== false);
-                $metaUser = $cashierUsers->first(fn($u) => stripos($u->name, 'meta') !== false);
+                $sherenUser = $cashierUsers->first(fn ($u) => stripos($u->name, 'sheren') !== false);
+                $metaUser = $cashierUsers->first(fn ($u) => stripos($u->name, 'meta') !== false);
                 $sherenId = $sherenUser?->id;
                 $metaId = $metaUser?->id;
 
@@ -396,28 +440,35 @@ class DocumentationScheduling extends Component
                     $dailySelectedCashiers = [];
 
                     // STEP 1: Select the exact list of cashiers for today based on grade quotas or daily max
-                    if (!empty($activeGradeQuotas)) {
+                    if (! empty($activeGradeQuotas)) {
                         foreach ($activeGradeQuotas as $g => $totalGradeQuota) {
-                            $targetQuotaForGrade = (int)$totalGradeQuota;
-                            if ($targetQuotaForGrade < 1) continue;
+                            $targetQuotaForGrade = (int) $totalGradeQuota;
+                            if ($targetQuotaForGrade < 1) {
+                                continue;
+                            }
 
                             if ($g === 'none' || $g === '') {
                                 $selectedIdsStr = array_map('strval', $this->selectedNoGradeUserIds);
                                 $gradeCashiers = $cashierUsers->filter(function ($u) use ($selectedIdsStr) {
-                                    $isNoGrade = empty($u->grade_level) || trim((string)$u->grade_level) === '';
-                                    return $isNoGrade && in_array((string)$u->id, $selectedIdsStr);
+                                    $isNoGrade = empty($u->grade_level) || trim((string) $u->grade_level) === '';
+
+                                    return $isNoGrade && in_array((string) $u->id, $selectedIdsStr);
                                 })->pluck('id')->toArray();
                             } else {
                                 $gradeCashiers = $cashierUsers->filter(function ($u) use ($g) {
-                                    return (string)$u->grade_level === (string)$g;
+                                    return (string) $u->grade_level === (string) $g;
                                 })->pluck('id')->toArray();
                             }
 
-                            if (empty($gradeCashiers)) continue;
+                            if (empty($gradeCashiers)) {
+                                continue;
+                            }
 
                             // Filter out cashiers with piket clash on this date or who have reached max 2 for BOTH shifts
                             $eligible = array_values(array_filter($gradeCashiers, function ($uid) use ($cashierShiftMap, $day, $userShiftCounts, $sherenId, $metaId) {
-                                if (isset($cashierShiftMap[$uid . '_' . $day])) return false;
+                                if (isset($cashierShiftMap[$uid.'_'.$day])) {
+                                    return false;
+                                }
 
                                 $s1Count = $userShiftCounts[$uid][1] ?? 0;
                                 $s2Count = $userShiftCounts[$uid][2] ?? 0;
@@ -427,10 +478,12 @@ class DocumentationScheduling extends Component
                                     return $s1Count < 2;
                                 }
 
-                                return ($s1Count < 2 || $s2Count < 2);
+                                return $s1Count < 2 || $s2Count < 2;
                             }));
 
-                            if (empty($eligible)) continue;
+                            if (empty($eligible)) {
+                                continue;
+                            }
 
                             // Group eligible candidates by fairness score and shuffle ties truly randomly
                             $grouped = [];
@@ -460,15 +513,18 @@ class DocumentationScheduling extends Component
                     } else {
                         $selectedIdsStr = array_map('strval', $this->selectedNoGradeUserIds);
                         $allCashiers = $cashierUsers->filter(function ($u) use ($selectedIdsStr) {
-                            $isNoGrade = empty($u->grade_level) || trim((string)$u->grade_level) === '';
+                            $isNoGrade = empty($u->grade_level) || trim((string) $u->grade_level) === '';
                             if ($isNoGrade) {
-                                return in_array((string)$u->id, $selectedIdsStr);
+                                return in_array((string) $u->id, $selectedIdsStr);
                             }
+
                             return true;
                         })->pluck('id')->toArray();
 
                         $eligible = array_values(array_filter($allCashiers, function ($uid) use ($cashierShiftMap, $day, $userShiftCounts, $sherenId, $metaId) {
-                            if (isset($cashierShiftMap[$uid . '_' . $day])) return false;
+                            if (isset($cashierShiftMap[$uid.'_'.$day])) {
+                                return false;
+                            }
 
                             $s1Count = $userShiftCounts[$uid][1] ?? 0;
                             $s2Count = $userShiftCounts[$uid][2] ?? 0;
@@ -477,7 +533,7 @@ class DocumentationScheduling extends Component
                                 return $s1Count < 2;
                             }
 
-                            return ($s1Count < 2 || $s2Count < 2);
+                            return $s1Count < 2 || $s2Count < 2;
                         }));
 
                         $grouped = [];
@@ -488,7 +544,7 @@ class DocumentationScheduling extends Component
                         ksort($grouped);
 
                         $pickedDaily = [];
-                        $totalDailyQuota = (int)$this->maxCashiersPerDay;
+                        $totalDailyQuota = (int) $this->maxCashiersPerDay;
                         foreach ($grouped as $score => $uids) {
                             shuffle($uids);
                             foreach ($uids as $uid) {
@@ -511,27 +567,33 @@ class DocumentationScheduling extends Component
                         $hasSheren = false;
                         $hasMeta = false;
                         foreach ($dailySelectedCashiers as $item) {
-                            if ($item['user_id'] === $sherenId) $hasSheren = true;
-                            if ($item['user_id'] === $metaId) $hasMeta = true;
+                            if ($item['user_id'] === $sherenId) {
+                                $hasSheren = true;
+                            }
+                            if ($item['user_id'] === $metaId) {
+                                $hasMeta = true;
+                            }
                         }
 
                         // If either Sheren or Meta is selected today, force pair both together if eligible
                         if ($hasSheren || $hasMeta) {
-                            $sherenCan = !isset($cashierShiftMap[$sherenId . '_' . $day]) && (($userShiftCounts[$sherenId][1] ?? 0) < 2);
-                            $metaCan = !isset($cashierShiftMap[$metaId . '_' . $day]) && (($userShiftCounts[$metaId][1] ?? 0) < 2);
+                            $sherenCan = ! isset($cashierShiftMap[$sherenId.'_'.$day]) && (($userShiftCounts[$sherenId][1] ?? 0) < 2);
+                            $metaCan = ! isset($cashierShiftMap[$metaId.'_'.$day]) && (($userShiftCounts[$metaId][1] ?? 0) < 2);
 
                             if ($sherenCan && $metaCan) {
-                                if (!$hasSheren) {
-                                    $dailySelectedCashiers[] = ['user_id' => $sherenId, 'grade' => (string)($sherenUser->grade_level ?: '12')];
+                                if (! $hasSheren) {
+                                    $dailySelectedCashiers[] = ['user_id' => $sherenId, 'grade' => (string) ($sherenUser->grade_level ?: '12')];
                                 }
-                                if (!$hasMeta) {
-                                    $dailySelectedCashiers[] = ['user_id' => $metaId, 'grade' => (string)($metaUser->grade_level ?: '12')];
+                                if (! $hasMeta) {
+                                    $dailySelectedCashiers[] = ['user_id' => $metaId, 'grade' => (string) ($metaUser->grade_level ?: '12')];
                                 }
                             }
                         }
                     }
 
-                    if (empty($dailySelectedCashiers)) continue;
+                    if (empty($dailySelectedCashiers)) {
+                        continue;
+                    }
 
                     // STEP 2: Distribute selected daily cashiers into shifts while respecting constraints:
                     // 1. Sheren & Meta NEVER get Shift 2, MUST get Shift 1!
@@ -630,7 +692,7 @@ class DocumentationScheduling extends Component
                                 'user_id' => $uid,
                                 'date' => $day,
                                 'shift' => $actualShift,
-                                'notes' => 'Acak Dokumentasi (Shift ' . $actualShift . ($g === 'none' ? ' - Tanpa Tingkat' : ($g !== 'all' ? ' - Tingkat ' . $g : '')) . ')',
+                                'notes' => 'Acak Dokumentasi (Shift '.$actualShift.($g === 'none' ? ' - Tanpa Tingkat' : ($g !== 'all' ? ' - Tingkat '.$g : '')).')',
                                 'created_by' => auth()->id(),
                             ];
                         }
@@ -667,7 +729,7 @@ class DocumentationScheduling extends Component
                                 'user_id' => $uid,
                                 'date' => $day,
                                 'shift' => $actualShift,
-                                'notes' => 'Acak Dokumentasi (Shift ' . $actualShift . ($g === 'none' ? ' - Tanpa Tingkat' : ($g !== 'all' ? ' - Tingkat ' . $g : '')) . ')',
+                                'notes' => 'Acak Dokumentasi (Shift '.$actualShift.($g === 'none' ? ' - Tanpa Tingkat' : ($g !== 'all' ? ' - Tingkat '.$g : '')).')',
                                 'created_by' => auth()->id(),
                             ];
 
@@ -696,7 +758,7 @@ class DocumentationScheduling extends Component
                                 'user_id' => $uid,
                                 'date' => $day,
                                 'shift' => $actualShift,
-                                'notes' => 'Acak Dokumentasi (Shift ' . $actualShift . ($g === 'none' ? ' - Tanpa Tingkat' : ($g !== 'all' ? ' - Tingkat ' . $g : '')) . ')',
+                                'notes' => 'Acak Dokumentasi (Shift '.$actualShift.($g === 'none' ? ' - Tanpa Tingkat' : ($g !== 'all' ? ' - Tingkat '.$g : '')).')',
                                 'created_by' => auth()->id(),
                             ];
                         }
@@ -710,17 +772,18 @@ class DocumentationScheduling extends Component
                 foreach ($assignedSchedules as $sched) {
                     $createdSched = DocumentationSchedule::create($sched);
 
-                    \App\Models\Notification::create([
+                    Notification::create([
                         'user_id' => $createdSched->user_id,
                         'title' => 'Tugas Dokumentasi Baru (Acak Otomatis)',
-                        'body' => 'Anda ditugaskan dokumentasi ' . $activity->title . ' (Shift ' . $createdSched->shift . ') pada ' . Carbon::parse($createdSched->date)->translatedFormat('d M Y'),
+                        'body' => 'Anda ditugaskan dokumentasi '.$activity->title.' (Shift '.$createdSched->shift.') pada '.Carbon::parse($createdSched->date)->translatedFormat('d M Y'),
                         'type' => 'system',
-                        'action_url' => '/management/documentation-schedules'
+                        'action_url' => '/management/documentation-schedules',
                     ]);
                 }
             });
         } catch (\Exception $e) {
             $this->dispatch('toast', message: $e->getMessage(), type: 'danger');
+
             return;
         }
 
@@ -746,19 +809,22 @@ class DocumentationScheduling extends Component
 
     public function exportExcel()
     {
-        if (!$this->selectedActivityId) {
+        if (! $this->selectedActivityId) {
             $this->dispatch('toast', message: 'Pilih kegiatan dokumentasi terlebih dahulu.', type: 'danger');
+
             return;
         }
 
         $activity = DocumentationActivity::find($this->selectedActivityId);
-        if (!$activity) return;
+        if (! $activity) {
+            return;
+        }
 
-        $slugTitle = \Illuminate\Support\Str::slug($activity->title);
-        $fileName = 'Jadwal_Dokumentasi_' . $slugTitle . '.xlsx';
+        $slugTitle = Str::slug($activity->title);
+        $fileName = 'Jadwal_Dokumentasi_'.$slugTitle.'.xlsx';
 
-        return \Maatwebsite\Excel\Facades\Excel::download(
-            new \App\Exports\DocumentationScheduleExport($this->selectedActivityId),
+        return Excel::download(
+            new DocumentationScheduleExport($this->selectedActivityId),
             $fileName
         );
     }
@@ -782,8 +848,8 @@ class DocumentationScheduling extends Component
             $activities = DocumentationActivity::when($activeJurusanId, function ($q) use ($activeJurusanId) {
                 $q->where('jurusan_id', $activeJurusanId);
             })
-            ->latest('start_date')
-            ->get();
+                ->latest('start_date')
+                ->get();
 
             // Selected Activity Details & Schedules
             if ($this->selectedActivityId) {
@@ -828,6 +894,7 @@ class DocumentationScheduling extends Component
 
             $cashierStats = $cashiers->map(function ($cashier) use ($allDocSchedules) {
                 $count = $allDocSchedules->where('user_id', $cashier->id)->count();
+
                 return [
                     'id' => $cashier->id,
                     'name' => $cashier->name,
@@ -842,10 +909,10 @@ class DocumentationScheduling extends Component
                 ->orderBy('date', 'desc')
                 ->get();
             $noGradeCashiers = $cashiers->filter(function ($u) {
-                return empty($u->grade_level) || trim((string)$u->grade_level) === '';
+                return empty($u->grade_level) || trim((string) $u->grade_level) === '';
             })->values();
         } catch (\Exception $e) {
-            $dbError = 'Database Error / Tabel belum dimigrasi di server production: ' . $e->getMessage();
+            $dbError = 'Database Error / Tabel belum dimigrasi di server production: '.$e->getMessage();
         }
 
         return view('livewire.management.documentation-scheduling', [

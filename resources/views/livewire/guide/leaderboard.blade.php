@@ -1,4 +1,6 @@
 <div class="py-6 w-full space-y-6">
+    <x-hub-tabs hub="operasional" title="Papan Skor & Poin" subtitle="Sistem peringkat, gamifikasi performa kasir, dan audit perolehan poin." />
+
     <!-- Active Leaderboard Card -->
     <div class="bg-white dark:bg-gray-800 rounded-3xl md:rounded-2xl p-6 md:p-8 shadow-2xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 w-full space-y-6">
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -37,106 +39,269 @@
             </div>
         </div>
 
-        <!-- Dynamic Motivation Banner (Only show for active cashier candidates on leaderboard) -->
-        @if($currentUserRank !== null)
-            @php
-                $bannerStyle = match ($motivation['type']) {
-                    'gold' => 'bg-amber-500/10 border-amber-500/30 text-amber-600 dark:text-amber-400',
-                    'silver' => 'bg-gray-500/10 border-gray-400/30 text-gray-700 dark:text-gray-300',
-                    'bronze' => 'bg-amber-700/10 border-amber-700/30 text-amber-700 dark:text-amber-500',
-                    'purple' => 'bg-purple-500/10 border-purple-500/30 text-purple-600 dark:text-purple-400',
-                    default => 'bg-red-500/10 border-red-500/30 text-red-600 dark:text-red-400',
-                };
-            @endphp
-            <div class="{{ $bannerStyle }} border p-6 rounded-3xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-sm">
-                <div class="flex items-center gap-3">
-                    <div class="p-3 bg-white/20 dark:bg-gray-800/40 rounded-2xl shrink-0">
-                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+        @if(!$hasActiveScores)
+            <!-- Penjelasan Saat Belum Ada Data Skor Terekap -->
+            <div class="bg-gray-50/80 dark:bg-gray-900/60 border border-gray-200/80 dark:border-gray-800 rounded-2xl p-6 md:p-7 flex flex-col md:flex-row items-start md:items-center justify-between gap-5">
+                <div class="flex items-start gap-4">
+                    <div class="p-3 bg-blue-50 dark:bg-blue-900/30 text-primary-blue rounded-xl shrink-0 mt-0.5">
+                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
                         </svg>
                     </div>
                     <div>
                         <div class="flex items-center gap-2">
-                            <h4 class="font-black uppercase tracking-wider text-sm">{{ $motivation['title'] }}</h4>
-                            <span class="px-2.5 py-0.5 text-[9px] font-black uppercase tracking-widest rounded-full bg-white/30 dark:bg-gray-800/50 border border-current">
-                                {{ $motivation['badge'] }}
+                            <h3 class="text-sm font-bold text-gray-900 dark:text-white">Belum Ada Aktivitas Skor Kasir pada Periode {{ $period === 'monthly' ? 'Bulan Ini' : 'Minggu Ini' }}</h3>
+                            <span class="px-2 py-0.5 text-[10px] font-bold rounded-md bg-gray-200/60 dark:bg-gray-700/60 text-gray-600 dark:text-gray-300">
+                                Data Masih Kosong
                             </span>
                         </div>
-                        <p class="text-xs font-semibold mt-1 opacity-90 leading-relaxed">{{ $motivation['message'] }}</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1.5 max-w-2xl leading-relaxed">
+                            Belum ada transaksi penjualan POS, penyelesaian tugas harian, atau presensi shift yang tercatat pada periode ini. Papan peringkat juara, podium 3 besar, dan grafik perbandingan performa kasir akan otomatis tampil begitu kasir mulai beraktivitas.
+                        </p>
                     </div>
                 </div>
                 <button wire:click="viewUserDetail('{{ auth()->id() }}')"
-                    class="px-5 py-2.5 bg-white dark:bg-gray-800 font-black text-xs uppercase tracking-widest rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 hover:scale-105 active:scale-95 transition-all text-gray-800 dark:text-white shrink-0 flex items-center gap-2">
-                    <svg class="w-4 h-4 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    class="px-4 py-2.5 bg-white dark:bg-gray-800 text-xs font-bold rounded-xl border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-750 text-gray-700 dark:text-gray-200 transition-colors shrink-0 flex items-center gap-2">
+                    <svg class="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
                     Detail Poin Saya
                 </button>
             </div>
-        @endif
-
-        <!-- Podium Layout (Rank 1, 2, 3) -->
-        @php
-            $top3 = $leaderboard->take(3);
-        @endphp
-        <div class="grid grid-cols-3 gap-4 items-end justify-center pt-8 pb-10 border-b border-gray-150 dark:border-gray-800">
-            <!-- Rank 2 -->
-            @if ($top3->count() > 1)
-                @php $u2 = $top3->values()->get(1); @endphp
-                <div class="flex flex-col items-center">
-                    <div class="w-14 h-14 bg-gray-200 dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-700 rounded-full flex items-center justify-center font-black text-gray-700 dark:text-gray-300 uppercase text-xs">
-                        {{ substr($u2->name, 0, 2) }}
-                    </div>
-                    <div class="text-center mt-2 min-w-0 w-full">
-                        <p class="text-xs font-black text-gray-800 dark:text-white truncate">{{ $u2->name }}</p>
-                        <p class="text-[10px] font-bold text-gray-400 mt-0.5">{{ $u2->total_score }} Pts</p>
-                    </div>
-                    <div class="w-full h-16 bg-gray-100 dark:bg-gray-800 rounded-t-xl mt-3 flex items-center justify-center font-black text-gray-500 dark:text-gray-400 text-lg">
-                        2
-                    </div>
-                </div>
-            @endif
-
-            <!-- Rank 1 -->
-            @if ($top3->count() > 0)
-                @php $u1 = $top3->values()->get(0); @endphp
-                <div class="flex flex-col items-center">
-                    <div class="relative">
-                        <svg class="w-6 h-6 text-amber-500 absolute -top-5 left-1/2 transform -translate-x-1/2"
-                            fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                        </svg>
-                        <div class="w-18 h-18 bg-amber-500/20 border-4 border-amber-500 rounded-full flex items-center justify-center font-black text-amber-600 dark:text-amber-400 uppercase text-sm">
-                            {{ substr($u1->name, 0, 2) }}
+        @else
+            <!-- Dynamic Motivation Banner (Hanya jika ada skor aktif) -->
+            @if($currentUserRank !== null)
+                @php
+                    $bannerStyle = match ($motivation['type']) {
+                        'gold' => 'bg-amber-500/10 border-amber-500/30 text-amber-600 dark:text-amber-400',
+                        'silver' => 'bg-gray-500/10 border-gray-400/30 text-gray-700 dark:text-gray-300',
+                        'bronze' => 'bg-amber-700/10 border-amber-700/30 text-amber-700 dark:text-amber-500',
+                        'purple' => 'bg-purple-500/10 border-purple-500/30 text-purple-600 dark:text-purple-400',
+                        default => 'bg-blue-500/10 border-blue-500/30 text-blue-600 dark:text-blue-400',
+                    };
+                @endphp
+                <div class="{{ $bannerStyle }} border p-6 rounded-3xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-sm">
+                    <div class="flex items-center gap-3">
+                        <div class="p-3 bg-white/20 dark:bg-gray-800/40 rounded-2xl shrink-0">
+                            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <h4 class="font-black uppercase tracking-wider text-sm">{{ $motivation['title'] }}</h4>
+                                <span class="px-2.5 py-0.5 text-[9px] font-black uppercase tracking-widest rounded-full bg-white/30 dark:bg-gray-800/50 border border-current">
+                                    {{ $motivation['badge'] }}
+                                </span>
+                            </div>
+                            <p class="text-xs font-semibold mt-1 opacity-90 leading-relaxed">{{ $motivation['message'] }}</p>
                         </div>
                     </div>
-                    <div class="text-center mt-2 min-w-0 w-full">
-                        <p class="text-sm font-black text-gray-900 dark:text-white truncate">{{ $u1->name }}</p>
-                        <p class="text-xs font-black text-amber-500 mt-0.5">{{ $u1->total_score }} Pts</p>
-                    </div>
-                    <div class="w-full h-24 bg-amber-500/10 dark:bg-amber-500/20 border-t-2 border-amber-500 rounded-t-xl mt-3 flex items-center justify-center font-black text-amber-600 dark:text-amber-400 text-2xl">
-                        1
-                    </div>
+                    <button wire:click="viewUserDetail('{{ auth()->id() }}')"
+                        class="px-5 py-2.5 bg-white dark:bg-gray-800 font-black text-xs uppercase tracking-widest rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 hover:scale-105 active:scale-95 transition-all text-gray-800 dark:text-white shrink-0 flex items-center gap-2">
+                        <svg class="w-4 h-4 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        Detail Poin Saya
+                    </button>
                 </div>
             @endif
 
-            <!-- Rank 3 -->
-            @if ($top3->count() > 2)
-                @php $u3 = $top3->values()->get(2); @endphp
-                <div class="flex flex-col items-center">
-                    <div class="w-12 h-12 bg-amber-900/10 dark:bg-amber-955/20 border-2 border-amber-800/30 rounded-full flex items-center justify-center font-black text-amber-800 dark:text-amber-600 uppercase text-[10px]">
-                        {{ substr($u3->name, 0, 2) }}
+            <!-- Podium Layout (Rank 1, 2, 3 - Hanya jika ada skor aktif) -->
+            @php
+                $top3 = $leaderboard->take(3);
+            @endphp
+            <div class="grid grid-cols-3 gap-4 items-end justify-center pt-8 pb-10 border-b border-gray-150 dark:border-gray-800">
+                <!-- Rank 2 -->
+                @if ($top3->count() > 1)
+                    @php $u2 = $top3->values()->get(1); @endphp
+                    <div class="flex flex-col items-center">
+                        <div class="w-14 h-14 bg-gray-200 dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-700 rounded-full flex items-center justify-center font-black text-gray-700 dark:text-gray-300 uppercase text-xs">
+                            {{ substr($u2->name, 0, 2) }}
+                        </div>
+                        <div class="text-center mt-2 min-w-0 w-full">
+                            <p class="text-xs font-black text-gray-800 dark:text-white truncate">{{ $u2->name }}</p>
+                            <p class="text-[10px] font-bold text-gray-400 mt-0.5">{{ $u2->total_score }} Pts</p>
+                        </div>
+                        <div class="w-full h-16 bg-gray-100 dark:bg-gray-800 rounded-t-xl mt-3 flex items-center justify-center font-black text-gray-500 dark:text-gray-400 text-lg">
+                            2
+                        </div>
                     </div>
-                    <div class="text-center mt-2 min-w-0 w-full">
-                        <p class="text-xs font-black text-gray-800 dark:text-white truncate">{{ $u3->name }}</p>
-                        <p class="text-[10px] font-bold text-gray-455 mt-0.5">{{ $u3->total_score }} Pts</p>
+                @endif
+
+                <!-- Rank 1 -->
+                @if ($top3->count() > 0)
+                    @php $u1 = $top3->values()->get(0); @endphp
+                    <div class="flex flex-col items-center">
+                        <div class="relative">
+                            <svg class="w-6 h-6 text-amber-500 absolute -top-5 left-1/2 transform -translate-x-1/2"
+                                fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                            </svg>
+                            <div class="w-18 h-18 bg-amber-500/20 border-4 border-amber-500 rounded-full flex items-center justify-center font-black text-amber-600 dark:text-amber-400 uppercase text-sm">
+                                {{ substr($u1->name, 0, 2) }}
+                            </div>
+                        </div>
+                        <div class="text-center mt-2 min-w-0 w-full">
+                            <p class="text-sm font-black text-gray-900 dark:text-white truncate">{{ $u1->name }}</p>
+                            <p class="text-xs font-black text-amber-500 mt-0.5">{{ $u1->total_score }} Pts</p>
+                        </div>
+                        <div class="w-full h-24 bg-amber-500/10 dark:bg-amber-500/20 border-t-2 border-amber-500 rounded-t-xl mt-3 flex items-center justify-center font-black text-amber-600 dark:text-amber-400 text-2xl">
+                            1
+                        </div>
                     </div>
-                    <div class="w-full h-12 bg-gray-50 dark:bg-gray-900 rounded-t-xl mt-3 flex items-center justify-center font-black text-gray-455 text-base">
-                        3
+                @endif
+
+                <!-- Rank 3 -->
+                @if ($top3->count() > 2)
+                    @php $u3 = $top3->values()->get(2); @endphp
+                    <div class="flex flex-col items-center">
+                        <div class="w-12 h-12 bg-amber-900/10 dark:bg-amber-955/20 border-2 border-amber-800/30 rounded-full flex items-center justify-center font-black text-amber-800 dark:text-amber-600 uppercase text-[10px]">
+                            {{ substr($u3->name, 0, 2) }}
+                        </div>
+                        <div class="text-center mt-2 min-w-0 w-full">
+                            <p class="text-xs font-black text-gray-800 dark:text-white truncate">{{ $u3->name }}</p>
+                            <p class="text-[10px] font-bold text-gray-455 mt-0.5">{{ $u3->total_score }} Pts</p>
+                        </div>
+                        <div class="w-full h-12 bg-gray-50 dark:bg-gray-900 rounded-t-xl mt-3 flex items-center justify-center font-black text-gray-455 text-base">
+                            3
+                        </div>
+                    </div>
+                @endif
+            </div>
+
+            <!-- Leaderboard Performance Comparison Chart (Hanya jika ada skor aktif) -->
+            @php
+                $hasChartData = !empty($chartData) && collect($chartData)->sum('total') > 0;
+            @endphp
+            @if($hasChartData)
+                <div class="bg-gray-50/70 dark:bg-gray-900/60 rounded-2xl p-5 border border-gray-100 dark:border-gray-800"
+                    x-data="{
+                        chart: null,
+                        init() {
+                            this.$nextTick(() => { this.draw(); });
+                            $watch('$wire.period', () => {
+                                setTimeout(() => { this.draw(); }, 250);
+                            });
+                        },
+                        draw() {
+                            const canvas = this.$refs.leaderboardCanvas;
+                            if (!canvas) return;
+                            if (typeof Chart === 'undefined') {
+                                setTimeout(() => this.draw(), 300);
+                                return;
+                            }
+                            if (this.chart) {
+                                this.chart.destroy();
+                            }
+                            const data = @js($chartData);
+                            if (!data || data.length === 0) return;
+
+                            const isDark = document.documentElement.classList.contains('dark');
+                            const gridColor = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)';
+                            const textColor = isDark ? '#94A3B8' : '#64748B';
+
+                            this.chart = new Chart(canvas.getContext('2d'), {
+                                type: 'bar',
+                                data: {
+                                    labels: data.map(d => d.name),
+                                    datasets: [
+                                        {
+                                            label: 'Transaksi POS',
+                                            data: data.map(d => d.pos),
+                                            backgroundColor: '#2563EB',
+                                            borderRadius: 4,
+                                            stack: 'points'
+                                        },
+                                        {
+                                            label: 'Tugas Harian',
+                                            data: data.map(d => d.task),
+                                            backgroundColor: '#059669',
+                                            borderRadius: 4,
+                                            stack: 'points'
+                                        },
+                                        {
+                                            label: 'Presensi Shift',
+                                            data: data.map(d => d.attendance),
+                                            backgroundColor: '#D97706',
+                                            borderRadius: 4,
+                                            stack: 'points'
+                                        }
+                                    ]
+                                },
+                                options: {
+                                    responsive: true,
+                                    maintainAspectRatio: false,
+                                    interaction: {
+                                        mode: 'index',
+                                        intersect: false
+                                    },
+                                    plugins: {
+                                        legend: {
+                                            position: 'top',
+                                            align: 'end',
+                                            labels: {
+                                                color: textColor,
+                                                boxWidth: 10,
+                                                boxHeight: 10,
+                                                usePointStyle: true,
+                                                pointStyle: 'circle',
+                                                font: {
+                                                    size: 11,
+                                                    weight: '600'
+                                                }
+                                            }
+                                        },
+                                        tooltip: {
+                                            callbacks: {
+                                                afterBody: (context) => {
+                                                    const total = context.reduce((acc, curr) => acc + curr.parsed.y, 0);
+                                                    return `Total: ${total} Pts`;
+                                                }
+                                            }
+                                        }
+                                    },
+                                    scales: {
+                                        x: {
+                                            stacked: true,
+                                            grid: { display: false },
+                                            ticks: {
+                                                color: textColor,
+                                                font: { size: 11, weight: '600' }
+                                            }
+                                        },
+                                        y: {
+                                            stacked: true,
+                                            beginAtZero: true,
+                                            grid: { color: gridColor },
+                                            ticks: {
+                                                color: textColor,
+                                                font: { size: 10 }
+                                            }
+                                        }
+                                    }
+                                }
+                            });
+                        }
+                    }"
+                >
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+                        <div>
+                            <h3 class="text-xs font-black uppercase tracking-wider text-gray-800 dark:text-white">Grafik Komposisi Skor Kasir</h3>
+                            <p class="text-[11px] font-semibold text-gray-400 mt-0.5">Perbandingan poin kasir dari transaksi POS, tugas harian, dan presensi kerja.</p>
+                        </div>
+                        <div class="flex items-center gap-3 text-[11px] font-bold text-gray-500 dark:text-gray-400">
+                            <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-blue-600 inline-block"></span> Transaksi POS</span>
+                            <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-emerald-600 inline-block"></span> Tugas Harian</span>
+                            <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-amber-600 inline-block"></span> Presensi</span>
+                        </div>
+                    </div>
+                    <div class="h-64 sm:h-72 w-full relative">
+                        <canvas x-ref="leaderboardCanvas"></canvas>
                     </div>
                 </div>
             @endif
-        </div>
+        @endif
 
         <!-- Leaderboard Table -->
         <div class="overflow-x-auto w-full rounded-2xl border border-gray-100 dark:border-gray-800">
@@ -154,7 +319,11 @@
                     @foreach ($leaderboard as $index => $u)
                         <tr class="hover:bg-gray-50/50 dark:hover:bg-gray-800/30 transition-colors {{ $u->id === auth()->id() ? 'bg-primary-blue/5 dark:bg-primary-blue/10 font-bold' : '' }}">
                             <td class="px-6 py-4 text-center text-xs font-black text-gray-500 dark:text-gray-400">
-                                {{ $index + 1 }}
+                                @if($hasActiveScores)
+                                    {{ $index + 1 }}
+                                @else
+                                    -
+                                @endif
                             </td>
                             <td class="px-6 py-4">
                                 <div class="flex items-center gap-3">
@@ -541,6 +710,4 @@
         </div>
     </div>
 </div>
-        </div>
-    </div>
-</div>
+

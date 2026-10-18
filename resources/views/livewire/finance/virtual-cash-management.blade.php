@@ -1,15 +1,12 @@
-<div class="p-6">
-    <!-- Header -->
-    <div class="flex flex-col md:flex-row md:items-center justify-between mb-10 gap-6">
-        <div>
-            <h1 class="text-4xl font-bold uppercase tracking-tight text-primary-blue dark:text-primary-blue-light">Buku Kas Virtual</h1>
-            <p class="text-gray-400 font-bold text-xs uppercase tracking-[0.2em] italic">Pencatatan Rekening Transfer & QRIS</p>
-        </div>
-        
-        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
-            <button wire:click="openModal" class="px-5 sm:px-5 py-2.5 sm:py-4 bg-primary-blue text-white rounded-2xl shadow-xl shadow-blue-500/20 font-black italic uppercase text-xs tracking-widest transform hover:-translate-y-1 transition-all flex items-center justify-center">
-                <svg class="w-4 h-4 mr-3" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
-                Catat Kas Virtual
+<div class="p-4 sm:p-6">
+    <x-hub-tabs hub="keuangan" title="Kas Virtual (QRIS / Bank)" subtitle="Pencatatan mutasi transaksi non-tunai (Transfer Bank & QRIS) serta transfer saldo." />
+
+    <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 mb-6">
+        <div></div>
+        <div class="flex items-center gap-2">
+            <button wire:click="openModal" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold shadow-sm transition-all flex items-center justify-center gap-2">
+                <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+                <span>Catat Mutasi Virtual</span>
             </button>
         </div>
     </div>

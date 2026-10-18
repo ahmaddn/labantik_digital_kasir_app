@@ -19,9 +19,9 @@ class ValidateTefaApiKey
 
         if (empty($apiKey)) {
             return response()->json([
-                'status'  => 'error',
+                'status' => 'error',
                 'message' => 'API key tidak disertakan pada header X-API-Key.',
-                'data'    => null,
+                'data' => null,
             ], 401);
         }
 
@@ -32,6 +32,7 @@ class ValidateTefaApiKey
 
         if ($dbKey) {
             $dbKey->update(['last_used_at' => now()]);
+
             return $next($request);
         }
 
@@ -42,9 +43,9 @@ class ValidateTefaApiKey
         }
 
         return response()->json([
-            'status'  => 'error',
+            'status' => 'error',
             'message' => 'API key tidak valid atau sudah tidak aktif.',
-            'data'    => null,
+            'data' => null,
         ], 401);
     }
 }

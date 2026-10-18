@@ -1,35 +1,29 @@
-<div class="p-4 sm:p-5 bg-[#f8fafc] dark:bg-gray-950 min-h-screen font-outfit">
+<div class="p-4 sm:p-5 bg-slate-50 dark:bg-slate-950 min-h-screen font-outfit">
     <div class="max-w-7xl mx-auto">
-        <!-- Header Section -->
-        <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
-            <div>
-                <h1 class="text-4xl font-bold uppercase tracking-tight text-gray-800 dark:text-white">
-                    Laporan <span class="text-primary-blue">Selisih Stok</span>
-                </h1>
-                <p class="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] mt-2">Inventory Audit & Discrepancy Analysis</p>
+        <x-hub-tabs hub="inventaris" title="Laporan Selisih Stok" subtitle="Audit stok fisik harian, perbandingan barang keluar, dan analisis selisih stok." />
+
+        @if (session()->has('success'))
+            <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 3000)" class="mb-4 bg-emerald-600 text-white px-4 py-2.5 rounded-xl font-bold text-xs shadow-sm">
+                {{ session('success') }}
+            </div>
+        @endif
+
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 mb-6">
+            <div class="flex items-center gap-2">
+                <input type="date" wire:model.live="selectedDate" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500">
             </div>
 
-            @if (session()->has('success'))
-                <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 3000)" class="bg-green-500 text-white px-8 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-green-500/20 animate-in fade-in slide-in-from-top-4 duration-500">
-                    {{ session('success') }}
-                </div>
-            @endif
-            
-            <div class="flex items-center gap-4">
-                <div class="relative">
-                    <input type="date" wire:model.live="selectedDate" class="bg-white dark:bg-gray-900 border-none rounded-2xl px-6 py-3 text-sm font-black text-gray-700 dark:text-gray-200 shadow-xl shadow-blue-900/5 focus:ring-4 focus:ring-primary-blue/10">
-                </div>
-                
-                <button wire:click="exportExcel" wire:loading.attr="disabled" class="bg-primary-red text-white px-6 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-red-500/20 hover:scale-105 transition-all flex items-center">
-                    <svg class="w-4 h-4 mr-3" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
-                    <span wire:loading.remove wire:target="exportExcel">Export XLSX</span>
+            <div class="flex items-center gap-2">
+                <button wire:click="exportExcel" wire:loading.attr="disabled" class="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-xl font-bold text-xs shadow-sm transition-all flex items-center gap-2">
+                    <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+                    <span wire:loading.remove wire:target="exportExcel">Export Excel</span>
                     <span wire:loading wire:target="exportExcel">Mengekspor...</span>
                 </button>
 
                 @php
                     $isSessionFinished = \App\Models\DailyRecap::whereDate('date', now())->where('actual_cash', '>', 0)->exists();
                 @endphp
-                <a href="{{ $isSessionFinished ? route('dashboard') : route('kasir') }}" class="bg-gray-800 text-white px-6 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-gray-900/20 hover:scale-105 transition-all">
+                <a href="{{ $isSessionFinished ? route('dashboard') : route('kasir') }}" class="bg-slate-800 hover:bg-slate-700 text-white px-4 py-2 rounded-xl font-bold text-xs transition-colors">
                     Kembali
                 </a>
             </div>
@@ -227,4 +221,6 @@
                 <span class="text-[9px] font-black text-gray-400 uppercase tracking-widest">All Data Synced</span>
             </div>
         </div>
+    </div>
 </div>
+

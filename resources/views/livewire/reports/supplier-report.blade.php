@@ -1,12 +1,8 @@
 <div class="p-6">
-    <!-- Header -->
-    <div class="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-6">
-        <div>
-            <h1 class="text-4xl font-bold uppercase tracking-tight text-primary-blue dark:text-primary-blue-light">Laporan Bagi Hasil Supplier</h1>
-            <p class="text-gray-400 font-bold text-xs uppercase tracking-[0.2em] italic">Rekap Penjualan & Pelunasan Barang Titipan</p>
-        </div>
-        
-        <div class="flex items-center gap-4">
+    <x-hub-tabs hub="laporan" title="Bagi Hasil Supplier" subtitle="Rekap Penjualan & Pelunasan Barang Titipan Mitra Konsinyasi." />
+
+    <!-- Actions -->
+    <div class="flex justify-end mb-6">
             @if(($activeTab === 'unsettled' ? $unsettledReports->count() : $settlementHistory->count()) > 0)
             <button wire:click="exportExcel" wire:loading.attr="disabled" class="bg-primary-red text-white px-8 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-red-500/20 hover:scale-105 transition-all flex items-center">
                 <flux:icon.arrow-down-tray class="w-4 h-4 mr-3" />
@@ -22,7 +18,6 @@
                 Kembali
             </a>
         </div>
-    </div>
 
     <!-- Navigation Tabs -->
     <div class="flex items-center gap-3 mb-6">
@@ -227,12 +222,13 @@
         </div>
     </div>
     @endif
+
+    <script>
+        document.addEventListener('livewire:init', () => {
+            Livewire.on('open-link', (event) => {
+                window.open(event.url, '_blank');
+            });
+        });
+    </script>
 </div>
 
-<script>
-    document.addEventListener('livewire:init', () => {
-        Livewire.on('open-link', (event) => {
-            window.open(event.url, '_blank');
-        });
-    });
-</script>

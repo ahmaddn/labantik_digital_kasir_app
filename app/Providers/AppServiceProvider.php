@@ -2,9 +2,14 @@
 
 namespace App\Providers;
 
+use App\Models\CashierAttendance;
+use App\Models\Jurusan;
+use Carbon\Carbon;
 use Carbon\CarbonImmutable;
+use Illuminate\Auth\Events\Logout;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
 
@@ -26,20 +31,20 @@ class AppServiceProvider extends ServiceProvider
         $this->configureDefaults();
 
         // Listen for Logout event to auto-clock out kasir if not already done
-        \Illuminate\Support\Facades\Event::listen(
-            \Illuminate\Auth\Events\Logout::class,
-            function (\Illuminate\Auth\Events\Logout $event) {
+        Event::listen(
+            Logout::class,
+            function (Logout $event) {
                 $user = $event->user;
                 if ($user) {
                     try {
-                        $attendance = \App\Models\CashierAttendance::where('user_id', $user->id)
+                        $attendance = CashierAttendance::where('user_id', $user->id)
                             ->whereDate('date', now()->toDateString())
                             ->whereNull('clock_out')
                             ->first();
 
                         if ($attendance) {
                             $currentTime = now();
-                            $jurusan = \App\Models\Jurusan::find($attendance->jurusan_id);
+                            $jurusan = Jurusan::find($attendance->jurusan_id);
                             $settings = $jurusan ? ($jurusan->theme_settings ?: []) : [];
                             $targetClockOut = $settings['clock_out_time'] ?? '15:00';
                             $penaltyClockOut = (int) ($settings['late_clock_out_penalty'] ?? 0);
@@ -54,7 +59,7 @@ class AppServiceProvider extends ServiceProvider
                             $clockOutStatus = 'overtime';
                             if ($targetClockOut) {
                                 try {
-                                    $targetTime = \Carbon\Carbon::createFromFormat('H:i', $targetClockOut);
+                                    $targetTime = Carbon::createFromFormat('H:i', $targetClockOut);
                                     $targetTime->setDate($currentTime->year, $currentTime->month, $currentTime->day);
 
                                     if ($currentTime->lt($targetTime)) {
@@ -75,7 +80,7 @@ class AppServiceProvider extends ServiceProvider
                                 }
                             }
 
-                            $status = $clockInStatus . '_' . $clockOutStatus;
+                            $status = $clockInStatus.'_'.$clockOutStatus;
 
                             $attendance->update([
                                 'clock_out' => $currentTime,

@@ -12,6 +12,7 @@ use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
@@ -47,10 +48,10 @@ class AuthController extends Controller
         $token = $user->createToken('tefa-token')->plainTextToken;
 
         return response()->json([
-            'status'  => 'success',
+            'status' => 'success',
             'message' => 'Login berhasil',
-            'data'    => [
-                'token'    => $token,
+            'data' => [
+                'token' => $token,
                 'merchant' => $merchant ? new MerchantResource($merchant) : null,
             ],
         ]);
@@ -69,18 +70,18 @@ class AuthController extends Controller
         $jurusan = DB::transaction(function () use ($request) {
             // Buat akun user
             $user = User::create([
-                'name'     => $request->pic_name,
-                'email'    => $request->username,
+                'name' => $request->pic_name,
+                'email' => $request->username,
                 'password' => Hash::make($request->password),
             ]);
 
             // Buat jurusan/merchant baru
             $jurusan = Jurusan::create([
-                'name'           => $request->store_name,
-                'pic_name'       => $request->pic_name,
-                'phone'          => $request->phone,
+                'name' => $request->store_name,
+                'pic_name' => $request->pic_name,
+                'phone' => $request->phone,
                 'stand_location' => $request->stand_location,
-                'is_active'      => true,
+                'is_active' => true,
             ]);
 
             // Cari atau buat role 'pengelola_jurusan'
@@ -91,9 +92,9 @@ class AuthController extends Controller
 
             // Assign role ke user di jurusan ini
             DB::table('role_user')->insert([
-                'id'         => \Illuminate\Support\Str::uuid(),
-                'user_id'    => $user->id,
-                'role_id'    => $role->id,
+                'id' => Str::uuid(),
+                'user_id' => $user->id,
+                'role_id' => $role->id,
                 'jurusan_id' => $jurusan->id,
                 'created_at' => now(),
                 'updated_at' => now(),
@@ -103,13 +104,13 @@ class AuthController extends Controller
         });
 
         return response()->json([
-            'status'  => 'success',
+            'status' => 'success',
             'message' => 'Pendaftaran kantin TEFA berhasil',
-            'data'    => [
+            'data' => [
                 'tefa_merchant_id' => $jurusan->id,
-                'store_name'       => $jurusan->name,
-                'pic_name'         => $jurusan->pic_name,
-                'stand_location'   => $jurusan->stand_location,
+                'store_name' => $jurusan->name,
+                'pic_name' => $jurusan->pic_name,
+                'stand_location' => $jurusan->stand_location,
             ],
         ], 201);
     }
@@ -136,21 +137,21 @@ class AuthController extends Controller
 
         if (! $merchant) {
             return response()->json([
-                'status'  => 'error',
+                'status' => 'error',
                 'message' => 'Merchant tidak ditemukan untuk akun ini.',
-                'data'    => null,
+                'data' => null,
             ], 404);
         }
 
         // Tambah field username & is_active langsung di sini (tidak perlu Resource berbeda)
         $data = (new MerchantResource($merchant))->toArray(request());
-        $data['username']  = $user->email;
+        $data['username'] = $user->email;
         $data['is_active'] = $merchant->is_active;
 
         return response()->json([
-            'status'  => 'success',
+            'status' => 'success',
             'message' => 'Profil kantin TEFA dimuat',
-            'data'    => $data,
+            'data' => $data,
         ]);
     }
 }

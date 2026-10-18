@@ -4,9 +4,9 @@ namespace App\Livewire\Management;
 
 use App\Models\Modifier;
 use App\Models\ModifierGroup;
+use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 use Livewire\WithPagination;
-use Illuminate\Support\Facades\DB;
 
 class ModifierManagement extends Component
 {
@@ -14,16 +14,24 @@ class ModifierManagement extends Component
 
     // State untuk Modifiers (Topping)
     public $modifierName = '';
+
     public $modifierPrice = '';
+
     public $editingModifierId = null;
+
     public bool $showModifierModal = false;
 
     // State untuk Modifier Groups (Kelompok Topping)
     public $groupName = '';
+
     public $minSelection = 0;
+
     public $maxSelection = 1;
+
     public $editingGroupId = null;
+
     public $selectedModifiers = []; // Topping yang diikat ke kelompok ini
+
     public bool $showGroupModal = false;
 
     public $activeTab = 'modifiers'; // 'modifiers' | 'groups'
@@ -36,6 +44,7 @@ class ModifierManagement extends Component
                 'modifierPrice' => 'required|numeric|min:0',
             ];
         }
+
         return [
             'groupName' => 'required|string|max:255',
             'minSelection' => 'required|integer|min:0',
@@ -47,7 +56,7 @@ class ModifierManagement extends Component
     public function mount()
     {
         $activeRole = session('active_role_name');
-        if (!in_array($activeRole, ['superadmin', 'pengelola_jurusan'])) {
+        if (! in_array($activeRole, ['superadmin', 'pengelola_jurusan'])) {
             abort(403, 'Unauthorized.');
         }
     }

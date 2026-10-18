@@ -32,6 +32,7 @@ class CustomerDebtService
                         'debt_amount' => 0,
                         'transacted_at' => now(),
                     ]);
+
                     continue;
                 }
 
@@ -45,7 +46,7 @@ class CustomerDebtService
                 $newAmount = $currentAmount - $deduct;
                 $updates = [
                     $currentField => $newAmount,
-                    'note' => $trx->note . " (Pelunasan {$settleMethod} Rp" . number_format($deduct, 0, ',', '.') . ' pd ' . now()->format('d/m/Y H:i') . ')',
+                    'note' => $trx->note." (Pelunasan {$settleMethod} Rp".number_format($deduct, 0, ',', '.').' pd '.now()->format('d/m/Y H:i').')',
                 ];
 
                 if ($newAmount <= 0) {
@@ -72,7 +73,7 @@ class CustomerDebtService
             }
 
             if ($settleMethod === 'dijajankan' && ! empty($spentItems)) {
-                $newRef = 'SPNT-' . now()->format('Ymd') . '-' . strtoupper(bin2hex(random_bytes(2)));
+                $newRef = 'SPNT-'.now()->format('Ymd').'-'.strtoupper(bin2hex(random_bytes(2)));
                 foreach ($spentItems as $item) {
                     Transaction::create([
                         'reference' => $newRef,
@@ -86,7 +87,7 @@ class CustomerDebtService
                         'unit_profit' => $item['profit'],
                         'total_price' => $item['total'],
                         'status' => 'uang_diterima',
-                        'note' => 'Pembelian dari tukar kembalian nota ' . $reference,
+                        'note' => 'Pembelian dari tukar kembalian nota '.$reference,
                     ]);
                 }
             }
@@ -116,7 +117,7 @@ class CustomerDebtService
                     $trx->update([
                         'status' => 'belum_kembalian',
                         'change_due' => $originalAmount,
-                        'note' => $originalAmount > 0 ? 'Kembalian: Rp' . number_format($originalAmount, 0, ',', '.') : null,
+                        'note' => $originalAmount > 0 ? 'Kembalian: Rp'.number_format($originalAmount, 0, ',', '.') : null,
                         'transacted_at' => $trx->created_at,
                     ]);
                 } else {
@@ -187,7 +188,7 @@ class CustomerDebtService
             });
 
         if ($search) {
-            $query->where('buyer_name', 'like', '%' . $search . '%');
+            $query->where('buyer_name', 'like', '%'.$search.'%');
         }
 
         if ($startDate) {

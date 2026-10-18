@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Product extends Model
@@ -58,7 +59,7 @@ class Product extends Model
         return $this->belongsTo(Supplier::class);
     }
 
-    public function modifierGroups(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    public function modifierGroups(): BelongsToMany
     {
         return $this->belongsToMany(ModifierGroup::class, 'product_modifier_group');
     }

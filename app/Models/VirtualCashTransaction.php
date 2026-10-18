@@ -24,7 +24,7 @@ class VirtualCashTransaction extends Model
     ];
 
     protected $casts = [
-        'date'   => 'date',
+        'date' => 'date',
         'amount' => 'decimal:2',
     ];
 

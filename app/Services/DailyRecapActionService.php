@@ -6,7 +6,9 @@ use App\Imports\DailyDataImport;
 use App\Models\CashCategory;
 use App\Models\CashTransaction;
 use App\Models\DailyRecap as DailyRecapModel;
+use App\Models\Jurusan;
 use App\Models\Transaction;
+use App\Models\VirtualCashTransaction;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -74,9 +76,9 @@ class DailyRecapActionService
         $diff = ((float) $recap->actual_cash - (float) $startingChangeCash) - (float) $totalRevenueReal;
 
         $grouped = $allTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])
-            ->groupBy(fn($tx) => ($tx->product->supplier_id ?? $tx->supplier_id) ? 'supplier_' . ($tx->product->supplier_id ?? $tx->supplier_id) : 'category_' . ($tx->product->category_id ?? 'other'));
+            ->groupBy(fn ($tx) => ($tx->product->supplier_id ?? $tx->supplier_id) ? 'supplier_'.($tx->product->supplier_id ?? $tx->supplier_id) : 'category_'.($tx->product->category_id ?? 'other'));
 
-        DB::transaction(function () use ($grouped, $totalSupplierHak, $diff, $activeJurusanId, $date, $recap, $totalProfit, $allTransactions) {
+        DB::transaction(function () use ($grouped, $diff, $activeJurusanId, $date, $recap, $totalProfit, $allTransactions) {
             CashTransaction::where('date', $date)
                 ->where('jurusan_id', $activeJurusanId)
                 ->where(function ($q) {
@@ -97,7 +99,7 @@ class DailyRecapActionService
 
                     $categoryNameLower = strtolower($categoryNameClean);
                     if ($categoryNameLower === 'makanan' || $categoryNameLower === 'minuman' || $categoryNameLower === 'makanan & minuman' || $categoryNameLower === 'makanan dan minuman' || $categoryNameLower === 'snack') {
-                        $activeJurusan = \App\Models\Jurusan::find($activeJurusanId);
+                        $activeJurusan = Jurusan::find($activeJurusanId);
                         $activeJurusanNameLower = $activeJurusan ? strtolower($activeJurusan->name) : '';
                         $cashCategoryName = str_contains($activeJurusanNameLower, 'doku') ? 'Kas Doku' : 'Jurusan Snack & Minuman';
                     } elseif ($categoryNameLower === 'umum' || $categoryNameLower === 'lainnya' || $categoryNameLower === 'lain-lain') {
@@ -196,7 +198,7 @@ class DailyRecapActionService
 
             if ($nonCashTransactions->isNotEmpty()) {
                 // Remove previous automated system postings for virtual cash on this date
-                \App\Models\VirtualCashTransaction::where('date', $date)
+                VirtualCashTransaction::where('date', $date)
                     ->where('jurusan_id', $activeJurusanId)
                     ->where('description', 'like', '%(Sistem)%')
                     ->delete();
@@ -204,7 +206,8 @@ class DailyRecapActionService
                 $nonCashGrouped = $nonCashTransactions->groupBy(function ($tx) {
                     $supplierId = $tx->product->supplier_id ?? $tx->supplier_id;
                     $catId = $tx->product->category_id ?? null;
-                    return $tx->payment_method . '_' . ($supplierId ? 'supp_' . $supplierId : 'cat_' . ($catId ?: 'other'));
+
+                    return $tx->payment_method.'_'.($supplierId ? 'supp_'.$supplierId : 'cat_'.($catId ?: 'other'));
                 });
 
                 foreach ($nonCashGrouped as $groupKey => $txs) {
@@ -214,19 +217,19 @@ class DailyRecapActionService
 
                     if ($supplierName) {
                         $catNameClean = trim($supplierName);
-                        $cashCatName = 'Penjualan ' . $catNameClean;
+                        $cashCatName = 'Penjualan '.$catNameClean;
                     } else {
                         $categoryName = $firstTx->product->category->name ?? 'Lainnya';
                         $catNameClean = trim($categoryName);
                         $categoryNameLower = strtolower($catNameClean);
                         if (in_array($categoryNameLower, ['makanan', 'minuman', 'makanan & minuman', 'makanan dan minuman', 'snack'])) {
-                            $activeJurusan = \App\Models\Jurusan::find($activeJurusanId);
+                            $activeJurusan = Jurusan::find($activeJurusanId);
                             $activeJurusanNameLower = $activeJurusan ? strtolower($activeJurusan->name) : '';
                             $cashCatName = str_contains($activeJurusanNameLower, 'doku') ? 'Kas Doku' : 'Jurusan Snack & Minuman';
                         } elseif (in_array($categoryNameLower, ['umum', 'lainnya', 'lain-lain'])) {
                             $cashCatName = 'Keuntungan Jurusan';
                         } else {
-                            $cashCatName = 'Penjualan ' . $catNameClean;
+                            $cashCatName = 'Penjualan '.$catNameClean;
                         }
                     }
 
@@ -238,14 +241,14 @@ class DailyRecapActionService
 
                     if ($totalNonCashAmount > 0) {
                         $methodLabel = strtoupper($method);
-                        \App\Models\VirtualCashTransaction::create([
-                            'jurusan_id'       => $activeJurusanId,
-                            'date'             => $date,
-                            'source_method'    => $method,
-                            'type'             => 'income',
-                            'amount'           => $totalNonCashAmount,
+                        VirtualCashTransaction::create([
+                            'jurusan_id' => $activeJurusanId,
+                            'date' => $date,
+                            'source_method' => $method,
+                            'type' => 'income',
+                            'amount' => $totalNonCashAmount,
                             'cash_category_id' => $catCategory->id,
-                            'description'      => "Pemasukan Non-Cash {$methodLabel} {$cashCatName} (Sistem)",
+                            'description' => "Pemasukan Non-Cash {$methodLabel} {$cashCatName} (Sistem)",
                         ]);
                     }
                 }
