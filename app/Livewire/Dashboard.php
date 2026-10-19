@@ -145,12 +145,29 @@ class Dashboard extends Component
         $isCashier = session('active_role_name') === 'kasir';
 
         // Check if session is finished (Daily Recap exists with actual cash)
-        $isSessionFinished = DailyRecap::whereDate('date', now())
+        $isSessionFinished = DailyRecap::withoutGlobalScope('active')
+            ->whereDate('date', now())
             ->when($activeJurusanId, function ($q) use ($activeJurusanId) {
-                return $q->where('jurusan_id', $activeJurusanId);
+                return $q->where(function ($query) use ($activeJurusanId) {
+                    $query->where('jurusan_id', $activeJurusanId)
+                        ->orWhereNull('jurusan_id');
+                });
             })
             ->where('actual_cash', '>', 0)
             ->exists();
+
+        $hasClockedOut = CashierAttendance::where('user_id', auth()->id())
+            ->whereDate('date', now()->toDateString())
+            ->when($activeJurusanId, function ($q) use ($activeJurusanId) {
+                return $q->where(function ($query) use ($activeJurusanId) {
+                    $query->where('jurusan_id', $activeJurusanId)
+                        ->orWhereNull('jurusan_id');
+                });
+            })
+            ->whereNotNull('clock_out')
+            ->exists();
+
+        $isSessionClosed = $isSessionFinished || ($isCashier && $hasClockedOut);
 
         // 1. DATA KHUSUS KASIR
         if ($isCashier) {
@@ -546,6 +563,8 @@ class Dashboard extends Component
             'categoryData' => $categoryData,
             'monthlyData' => $monthlyData,
             'isSessionFinished' => $isSessionFinished,
+            'hasClockedOut' => $hasClockedOut,
+            'isSessionClosed' => $isSessionClosed,
             'orphanCarryForwardAmount' => $orphanCarryForwardAmount,
             'jurusans' => Jurusan::all(),
         ])->layout('layouts.app', ['title' => 'Dashboard Overview']);
@@ -553,13 +572,14 @@ class Dashboard extends Component
 
     public function emergencyReactivateSession()
     {
-        // Only cashiers with a higher role may force-reactivate a finished session
         $hasHigherRole = auth()->user()->roles()
             ->whereIn('roles.name', ['superadmin', 'pengelola_jurusan'])
             ->exists();
 
-        if (! $hasHigherRole) {
-            abort(403);
+        $isCashier = session('active_role_name') === 'kasir';
+
+        if (! $hasHigherRole && ! $isCashier) {
+            abort(403, 'Anda tidak memiliki hak akses untuk mengaktifkan mode darurat.');
         }
 
         $activeJurusanId = session('active_jurusan_id');
@@ -587,8 +607,22 @@ class Dashboard extends Component
                 'clock_out' => null,
             ]);
 
-        session()->flash('success', 'Sesi kasir berhasil diaktifkan kembali. Tombol Buka Kasir kini dapat diakses kembali.');
+        // Catat ke security logs jika model tersedia
+        try {
+            \App\Models\SecurityLog::create([
+                'user_id' => auth()->id(),
+                'jurusan_id' => $activeJurusanId,
+                'action' => 'emergency_reactivate_session',
+                'description' => auth()->user()->name . ' mengaktifkan Mode Kasir Darurat / membuka kembali sesi kasir setelah penutupan.',
+                'ip_address' => request()->ip(),
+                'user_agent' => request()->userAgent(),
+            ]);
+        } catch (\Exception $e) {
+            // ignore
+        }
 
-        $this->redirect(route('dashboard'), navigate: true);
+        session()->flash('success', 'Mode kasir darurat berhasil diaktifkan. Sesi kasir terbuka kembali untuk transaksi.');
+
+        $this->redirect(route('kasir'), navigate: true);
     }
 }

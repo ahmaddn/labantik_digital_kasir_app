@@ -102,10 +102,10 @@
                         }
                     @endphp
 
-                    @if ($hasHigherRole && ($isSessionFinished || $hasClockedOut))
+                    @if ($isSessionFinished || $hasClockedOut)
                         <a href="{{ route('kasir') }}"
                             class="flex items-center gap-3 px-3 py-2 text-xs font-bold rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/30 hover:bg-amber-500/20 transition-colors">
-                            <svg class="w-4.5 h-4.5 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
                             </svg>
                             <span>Kasir (Pasca-Closing)</span>
@@ -116,13 +116,6 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
                             </svg>
                             <span>Kasir: Tidak Terjadwal</span>
-                        </div>
-                    @elseif ($hasClockedOut || $isSessionFinished)
-                        <div class="flex items-center gap-3 px-3 py-2 text-xs font-medium rounded-xl bg-slate-100 dark:bg-slate-800/50 text-slate-400 dark:text-slate-500 cursor-not-allowed">
-                            <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-                            </svg>
-                            <span>Kasir: Sesi Selesai</span>
                         </div>
                     @else
                         <a href="{{ route('kasir') }}"

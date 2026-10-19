@@ -13,12 +13,54 @@
         <span class="bg-rose-950 text-rose-200 px-2.5 py-0.5 rounded-full text-[10px] font-black tracking-widest uppercase border border-rose-400">Terkunci</span>
     </div>
     @elseif ($isPostClosingMode)
-    <div class="fixed top-0 left-0 right-0 z-[999] bg-amber-500 text-slate-950 px-4 py-2 text-xs font-bold uppercase tracking-wider flex items-center justify-between shadow-md">
+    <div class="fixed top-0 left-0 right-0 z-[999] bg-amber-500 text-slate-950 px-4 py-2 text-xs font-bold uppercase tracking-wider flex items-center justify-between shadow-md"
+        x-data="{ showEmergencyModal: false }">
         <div class="flex items-center gap-2">
-            <flux:icon.clock class="w-4 h-4 text-slate-950 shrink-0 animate-pulse" />
-            <span>Mode Pasca-Closing (Khusus Pengelola): Sesi hari ini ditutup. Transaksi baru ini otomatis dicatat untuk besok.</span>
+            <svg class="w-4 h-4 text-slate-950 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+            </svg>
+            <span>Mode Pasca-Closing: Sesi hari ini telah ditutup. Transaksi baru otomatis dicatat untuk rekap besok.</span>
         </div>
-        <span class="bg-amber-950 text-amber-200 px-2.5 py-0.5 rounded-full text-[10px] font-black tracking-widest uppercase border border-amber-400">Rekap Besok</span>
+        <div class="flex items-center gap-2">
+            <button type="button" @click="showEmergencyModal = true"
+                class="px-2.5 py-1 bg-rose-700 hover:bg-rose-800 text-white rounded-lg text-[10px] font-bold uppercase tracking-wider transition-colors flex items-center gap-1 shadow-xs cursor-pointer"
+                title="Buka Mode Kasir Darurat jika ada transaksi mendesak">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+                </svg>
+                <span>Buka Mode Darurat</span>
+            </button>
+            <span class="bg-amber-950 text-amber-200 px-2.5 py-0.5 rounded-full text-[10px] font-black tracking-widest uppercase border border-amber-400">Rekap Besok</span>
+        </div>
+
+        <!-- Emergency Reactivation Modal -->
+        <div x-show="showEmergencyModal" x-cloak
+            class="fixed inset-0 z-[1000] flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm normal-case font-normal">
+            <div @click.outside="showEmergencyModal = false"
+                class="bg-white dark:bg-slate-900 w-full max-w-md rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 p-6 space-y-4 text-left">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 flex items-center justify-center shrink-0">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="text-base font-bold text-slate-900 dark:text-white">Buka Mode Kasir Darurat?</h3>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">Sesi kasir hari ini akan diaktifkan kembali sehingga transaksi dapat dibukukan pada sesi hari ini.</p>
+                    </div>
+                </div>
+                <div class="flex justify-end gap-2.5 pt-2">
+                    <button type="button" @click="showEmergencyModal = false"
+                        class="px-4 py-2 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors">
+                        Batal
+                    </button>
+                    <button type="button" wire:click="emergencyReactivateSession" @click="showEmergencyModal = false"
+                        class="px-4 py-2 text-xs font-semibold bg-rose-600 hover:bg-rose-700 text-white rounded-xl shadow-xs transition-colors">
+                        Ya, Aktifkan Sesi Darurat
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
     @endif
 

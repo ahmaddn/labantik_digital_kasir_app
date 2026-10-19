@@ -43,6 +43,7 @@
             @if (session('active_role_name') !== 'superadmin')
                 @php
                     $hasHigherRole = auth()->user()->roles()->whereIn('roles.name', ['superadmin', 'pengelola_jurusan'])->exists();
+                    $isSessionClosed = $isSessionClosed ?? ($isSessionFinished || (session('active_role_name') === 'kasir' && ($hasClockedOut ?? false)));
                     $isScheduled = true;
                     if (session('active_role_name') === 'kasir' && !$hasHigherRole) {
                         $activeJurusanId = session('active_jurusan_id');
@@ -58,57 +59,53 @@
                     }
                 @endphp
 
-                @if ($isSessionFinished)
+                @if ($isSessionClosed)
                     <div class="flex items-center gap-2" x-data="{ showEmergencyConfirm: false }">
-                        @if ($hasHigherRole)
-                            <a href="{{ route('kasir') }}"
-                                class="inline-flex items-center gap-2 px-4 py-2 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs uppercase tracking-wider rounded-xl shadow-xs transition-colors">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-                                </svg>
-                                <span>Pasca-Closing</span>
-                            </a>
-                        @else
-                            <button disabled class="inline-flex items-center gap-2 px-4 py-2 bg-slate-200 dark:bg-slate-800 text-slate-400 font-bold text-xs uppercase tracking-wider rounded-xl cursor-not-allowed">
-                                <span>Sesi Selesai</span>
-                            </button>
-                        @endif
+                        <a href="{{ route('kasir') }}"
+                            class="inline-flex items-center gap-2 px-3.5 py-2 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs uppercase tracking-wider rounded-xl shadow-xs transition-colors">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                            </svg>
+                            <span>Pasca-Closing</span>
+                        </a>
 
-                        @if ($hasHigherRole)
-                            <button type="button" @click="showEmergencyConfirm = true"
-                                class="px-3 py-2 bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/40 dark:hover:bg-rose-900/40 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-800 rounded-xl text-xs font-bold transition-colors">
-                                Aktifkan Sesi
-                            </button>
+                        <button type="button" @click="showEmergencyConfirm = true"
+                            class="px-3 py-2 bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/40 dark:hover:bg-rose-900/40 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-800 rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5"
+                            title="Buka Mode Kasir Darurat">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+                            </svg>
+                            <span>Buka Darurat</span>
+                        </button>
 
-                            <!-- Emergency Modal -->
-                            <div x-show="showEmergencyConfirm" x-cloak
-                                class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm">
-                                <div @click.outside="showEmergencyConfirm = false"
-                                    class="bg-white dark:bg-slate-900 w-full max-w-md rounded-2xl shadow-xl border border-slate-200 dark:border-slate-800 p-6 space-y-4">
-                                    <div class="flex items-center gap-3">
-                                        <div class="w-10 h-10 rounded-xl bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 flex items-center justify-center shrink-0">
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
-                                            </svg>
-                                        </div>
-                                        <div>
-                                            <h3 class="text-base font-bold text-slate-900 dark:text-white">Aktifkan Kembali Sesi Kasir?</h3>
-                                            <p class="text-xs text-slate-500 dark:text-slate-400">Data penutupan rekap harian hari ini akan direset.</p>
-                                        </div>
+                        <!-- Emergency Modal -->
+                        <div x-show="showEmergencyConfirm" x-cloak
+                            class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm">
+                            <div @click.outside="showEmergencyConfirm = false"
+                                class="bg-white dark:bg-slate-900 w-full max-w-md rounded-2xl shadow-xl border border-slate-200 dark:border-slate-800 p-6 space-y-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-xl bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 flex items-center justify-center shrink-0">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+                                        </svg>
                                     </div>
-                                    <div class="flex justify-end gap-2.5 pt-2">
-                                        <button type="button" @click="showEmergencyConfirm = false"
-                                            class="px-4 py-2 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors">
-                                            Batal
-                                        </button>
-                                        <button type="button" wire:click="emergencyReactivateSession" @click="showEmergencyConfirm = false"
-                                            class="px-4 py-2 text-xs font-semibold bg-rose-600 hover:bg-rose-700 text-white rounded-xl shadow-xs transition-colors">
-                                            Ya, Aktifkan Sesi
-                                        </button>
+                                    <div>
+                                        <h3 class="text-base font-bold text-slate-900 dark:text-white">Buka Mode Kasir Darurat?</h3>
+                                        <p class="text-xs text-slate-500 dark:text-slate-400">Sesi kasir hari ini akan diaktifkan kembali untuk melayani transaksi kasir darurat.</p>
                                     </div>
                                 </div>
+                                <div class="flex justify-end gap-2.5 pt-2">
+                                    <button type="button" @click="showEmergencyConfirm = false"
+                                        class="px-4 py-2 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors">
+                                        Batal
+                                    </button>
+                                    <button type="button" wire:click="emergencyReactivateSession" @click="showEmergencyConfirm = false"
+                                        class="px-4 py-2 text-xs font-semibold bg-rose-600 hover:bg-rose-700 text-white rounded-xl shadow-xs transition-colors">
+                                        Ya, Aktifkan Sesi Darurat
+                                    </button>
+                                </div>
                             </div>
-                        @endif
+                        </div>
                     </div>
                 @elseif (!$isScheduled)
                     <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 text-xs font-semibold border border-amber-500/20">
@@ -131,7 +128,9 @@
         <!-- CASHIER SPECIALIZED DASHBOARD -->
         <div class="space-y-6" x-data="{
             loginTime: '{{ $todayAttendance && $todayAttendance->clock_in ? \Carbon\Carbon::parse($todayAttendance->clock_in)->format('Y-m-d H:i:s') : '' }}',
+            clockOutTime: '{{ $todayAttendance && $todayAttendance->clock_out ? \Carbon\Carbon::parse($todayAttendance->clock_out)->format('Y-m-d H:i:s') : '' }}',
             targetClosingStr: '{{ $targetClockOutCarbon ? $targetClockOutCarbon->format('Y-m-d H:i:s') : '' }}',
+            isFinished: {{ ($hasClockedOut || $isSessionFinished) ? 'true' : 'false' }},
             elapsedHours: '00',
             elapsedMinutes: '00',
             elapsedSeconds: '00',
@@ -140,13 +139,16 @@
             init() {
                 if (this.loginTime) {
                     this.updateTimer();
-                    setInterval(() => { this.updateTimer(); }, 1000);
+                    if (!this.isFinished) {
+                        setInterval(() => { this.updateTimer(); }, 1000);
+                    }
                 }
             },
             updateTimer() {
                 const now = new Date();
                 const start = new Date(this.loginTime.replace(/-/g, '/'));
-                const diffMs = Math.max(0, now - start);
+                const end = (this.isFinished && this.clockOutTime) ? new Date(this.clockOutTime.replace(/-/g, '/')) : now;
+                const diffMs = Math.max(0, end - start);
                 const totalSec = Math.floor(diffMs / 1000);
                 this.elapsedHours = String(Math.floor(totalSec / 3600)).padStart(2, '0');
                 this.elapsedMinutes = String(Math.floor((totalSec % 3600) / 60)).padStart(2, '0');
@@ -191,13 +193,17 @@
                 <div class="app-card p-5 flex flex-col justify-between">
                     <div class="flex items-center justify-between mb-3">
                         <span class="text-xs font-semibold text-slate-500 dark:text-slate-400">Durasi Jaga Kasir</span>
-                        <span class="px-2 py-0.5 bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 rounded-md text-[10px] font-bold">Aktif</span>
+                        @if ($hasClockedOut || $isSessionFinished)
+                            <span class="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 rounded-md text-[10px] font-bold">Shift Selesai</span>
+                        @else
+                            <span class="px-2 py-0.5 bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 rounded-md text-[10px] font-bold">Aktif</span>
+                        @endif
                     </div>
                     <div>
                         <div class="text-2xl font-bold font-mono text-slate-900 dark:text-white tracking-tight" x-text="`${elapsedHours}:${elapsedMinutes}:${elapsedSeconds}`">
                             00:00:00
                         </div>
-                        <p class="text-xs text-slate-400 mt-1">Waktu berjalan di perangkat</p>
+                        <p class="text-xs text-slate-400 mt-1">{{ ($hasClockedOut || $isSessionFinished) ? 'Total durasi shift hari ini' : 'Waktu berjalan di perangkat' }}</p>
                     </div>
                 </div>
 
@@ -205,50 +211,128 @@
                 <div class="app-card p-5 flex flex-col justify-between">
                     <div class="flex items-center justify-between mb-3">
                         <span class="text-xs font-semibold text-slate-500 dark:text-slate-400">Batas Minimal Closing</span>
-                        <span class="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-md text-[10px] font-bold">
-                            {{ $targetClockOut }} WIB
-                        </span>
+                        @if ($hasClockedOut || $isSessionFinished)
+                            <span class="px-2 py-0.5 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 rounded-md text-[10px] font-bold">
+                                Sesi Ditutup
+                            </span>
+                        @else
+                            <span class="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-md text-[10px] font-bold">
+                                {{ $targetClockOut }} WIB
+                            </span>
+                        @endif
                     </div>
                     <div>
-                        <div class="text-sm font-bold" :class="isPastClosing ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-700 dark:text-slate-300'">
-                            <span x-show="isPastClosing">Target Terpenuhi (+10 Poin)</span>
-                            <span x-show="!isPastClosing" x-text="remainingText || 'Bertugaslah hingga batas closing'"></span>
-                        </div>
-                        <p class="text-xs text-slate-400 mt-1">Klaim bonus poin saat rekap harian ditutup.</p>
+                        @if ($hasClockedOut || $isSessionFinished)
+                            <div class="text-sm font-bold text-slate-700 dark:text-slate-300">
+                                <span>Rekap Sesi Telah Ditutup</span>
+                            </div>
+                            <p class="text-xs text-slate-400 mt-1">Gunakan Mode Pasca-Closing untuk transaksi lanjutan.</p>
+                        @else
+                            <div class="text-sm font-bold" :class="isPastClosing ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-700 dark:text-slate-300'">
+                                <span x-show="isPastClosing">Target Terpenuhi (+10 Poin)</span>
+                                <span x-show="!isPastClosing" x-text="remainingText || 'Bertugaslah hingga batas closing'"></span>
+                            </div>
+                            <p class="text-xs text-slate-400 mt-1">Klaim bonus poin saat rekap harian ditutup.</p>
+                        @endif
                     </div>
                 </div>
             </div>
 
             <!-- Primary POS Launch Banner -->
-            <div class="app-card p-5 sm:p-6 flex flex-col sm:flex-row items-center justify-between gap-4 bg-gradient-to-r from-blue-600/5 to-transparent border-blue-600/20">
-                <div class="flex items-center gap-4">
-                    <div class="w-12 h-12 rounded-xl bg-blue-600 text-white flex items-center justify-center shrink-0">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25 5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z" />
-                        </svg>
+            @if ($isSessionClosed)
+                <div class="app-card p-5 sm:p-6 flex flex-col sm:flex-row items-center justify-between gap-4 bg-amber-500/5 border border-amber-500/30" x-data="{ showEmergencyModal: false }">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0 border border-amber-500/20">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <h3 class="text-base font-bold text-slate-900 dark:text-white">Sesi Kasir Hari Ini Telah Ditutup</h3>
+                                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-300 dark:border-amber-800">Tutup</span>
+                            </div>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Sesi reguler telah ditutup. Anda dapat melayani transaksi susulan lewat Mode Pasca-Closing atau mengaktifkan Mode Darurat.</p>
+                        </div>
                     </div>
-                    <div>
-                        <h3 class="text-base font-bold text-slate-900 dark:text-white">Akses Mesin Kasir (POS)</h3>
-                        <p class="text-xs text-slate-500 dark:text-slate-400">Layani transaksi penjualan, input topping, cetak nota, dan catat pembayaran.</p>
-                    </div>
-                </div>
-                <div class="flex items-center gap-2.5 w-full sm:w-auto">
-                    <form method="POST" action="{{ route('logout') }}" class="w-full sm:w-auto">
-                        @csrf
-                        <button type="submit"
-                            class="w-full sm:w-auto px-4 py-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-semibold transition-colors">
-                            Selesai & Keluar
+                    <div class="flex flex-wrap items-center gap-2.5 w-full sm:w-auto">
+                        <button type="button" @click="showEmergencyModal = true"
+                            class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/40 dark:hover:bg-rose-900/40 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-800 rounded-xl text-xs font-bold transition-colors">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+                            </svg>
+                            <span>Buka Mode Darurat</span>
                         </button>
-                    </form>
-                    <a href="{{ route('kasir') }}"
-                        class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold shadow-sm transition-colors">
-                        <span>Buka Kasir Sekarang</span>
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
-                        </svg>
-                    </a>
+
+                        <a href="{{ route('kasir') }}"
+                            class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-amber-500 hover:bg-amber-600 text-slate-950 rounded-xl text-xs font-bold shadow-sm transition-colors">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                            </svg>
+                            <span>Kasir (Pasca-Closing)</span>
+                        </a>
+
+                        <!-- Emergency Reactivation Modal -->
+                        <div x-show="showEmergencyModal" x-cloak
+                            class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm">
+                            <div @click.outside="showEmergencyModal = false"
+                                class="bg-white dark:bg-slate-900 w-full max-w-md rounded-2xl shadow-xl border border-slate-200 dark:border-slate-800 p-6 space-y-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-xl bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 flex items-center justify-center shrink-0">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-base font-bold text-slate-900 dark:text-white">Buka Mode Kasir Darurat?</h3>
+                                        <p class="text-xs text-slate-500 dark:text-slate-400">Sesi kasir hari ini akan diaktifkan kembali sehingga Anda dapat melayani transaksi kasir darurat.</p>
+                                    </div>
+                                </div>
+                                <div class="flex justify-end gap-2.5 pt-2">
+                                    <button type="button" @click="showEmergencyModal = false"
+                                        class="px-4 py-2 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors">
+                                        Batal
+                                    </button>
+                                    <button type="button" wire:click="emergencyReactivateSession" @click="showEmergencyModal = false"
+                                        class="px-4 py-2 text-xs font-semibold bg-rose-600 hover:bg-rose-700 text-white rounded-xl shadow-xs transition-colors">
+                                        Ya, Buka Kasir Darurat
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            </div>
+            @else
+                <div class="app-card p-5 sm:p-6 flex flex-col sm:flex-row items-center justify-between gap-4 bg-gradient-to-r from-blue-600/5 to-transparent border-blue-600/20">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-xl bg-blue-600 text-white flex items-center justify-center shrink-0">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25 5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="text-base font-bold text-slate-900 dark:text-white">Akses Mesin Kasir (POS)</h3>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">Layani transaksi penjualan, input topping, cetak nota, dan catat pembayaran.</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2.5 w-full sm:w-auto">
+                        <form method="POST" action="{{ route('logout') }}" class="w-full sm:w-auto">
+                            @csrf
+                            <button type="submit"
+                                class="w-full sm:w-auto px-4 py-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-semibold transition-colors">
+                                Selesai & Keluar
+                            </button>
+                        </form>
+                        <a href="{{ route('kasir') }}"
+                            class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold shadow-sm transition-colors">
+                            <span>Buka Kasir Sekarang</span>
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+            @endif
 
             <!-- Cashier Daily Tasks List -->
             <div class="space-y-3">

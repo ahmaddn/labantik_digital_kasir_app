@@ -120,10 +120,7 @@ class Kasir extends Component
                     ->first();
 
                 if ($attendance && $attendance->clock_out) {
-                    session()->flash('error', 'Anda sudah melakukan clock-out untuk hari ini.');
-                    $this->redirectRoute('dashboard', navigate: true);
-
-                    return;
+                    // Kasir yang telah clock-out diizinkan masuk dalam Mode Pasca-Closing (transaksi dialihkan ke besok)
                 }
 
                 if (! $attendance) {
@@ -197,30 +194,8 @@ class Kasir extends Component
             ->where('actual_cash', '>', 0)
             ->exists();
 
-        if ($isTodayFinished) {
-            $hasHigherRole = auth()->user()->roles()
-                ->whereIn('roles.name', ['superadmin', 'pengelola_jurusan'])
-                ->exists();
-
-            if (! $hasHigherRole) {
-                // If they haven't clocked out yet, allow them to continue
-                $attendance = CashierAttendance::where('user_id', auth()->id())
-                    ->where('jurusan_id', $activeJurusanId)
-                    ->where('date', now()->toDateString())
-                    ->first();
-
-                if ($attendance && ! $attendance->clock_out) {
-                    // Do not block or redirect, allow them to check stock and do transactions
-                } else {
-                    session()->flash('error', 'Sesi kasir hari ini telah berakhir. Anda tidak dapat melakukan transaksi lagi.');
-                    $this->redirectRoute('dashboard', navigate: true);
-
-                    return;
-                }
-            } else {
-                // Higher-role (Pengelola/Admin): Izinkan masuk ke layar Kasir dalam Mode Pasca-Closing (Transaksi Besok)
-            }
-        }
+        // Jika sesi telah ditutup atau kasir telah clock-out, kasir dan pengelola tetap diizinkan
+        // beroperasi dalam Mode Pasca-Closing (transaksi otomatis dicatat untuk hari esok)
 
         // Detect if there's an unfinished session from a previous day
         $this->detectUnfinishedSession($posSessionService);
@@ -726,32 +701,97 @@ class Kasir extends Component
         $this->dispatch('toast', message: 'Pengeluaran berhasil dicatat!');
     }
 
+    public function emergencyReactivateSession(): void
+    {
+        $hasHigherRole = auth()->user()->roles()
+            ->whereIn('roles.name', ['superadmin', 'pengelola_jurusan'])
+            ->exists();
+
+        $isCashier = session('active_role_name') === 'kasir';
+
+        if (! $hasHigherRole && ! $isCashier) {
+            abort(403, 'Anda tidak memiliki hak akses untuk mengaktifkan mode darurat.');
+        }
+
+        $activeJurusanId = session('active_jurusan_id');
+
+        // 1. Reset DailyRecap for today
+        DailyRecap::withoutGlobalScope('active')
+            ->whereDate('date', now())
+            ->when($activeJurusanId, function ($q) use ($activeJurusanId) {
+                return $q->where(function ($query) use ($activeJurusanId) {
+                    $query->where('jurusan_id', $activeJurusanId)
+                        ->orWhereNull('jurusan_id');
+                });
+            })
+            ->delete();
+
+        // 2. Reset clock_out for cashier attendance today
+        CashierAttendance::whereDate('date', now())
+            ->when($activeJurusanId, function ($q) use ($activeJurusanId) {
+                return $q->where(function ($query) use ($activeJurusanId) {
+                    $query->where('jurusan_id', $activeJurusanId)
+                        ->orWhereNull('jurusan_id');
+                });
+            })
+            ->update([
+                'clock_out' => null,
+            ]);
+
+        // Security / audit log
+        try {
+            \App\Models\SecurityLog::create([
+                'user_id' => auth()->id(),
+                'jurusan_id' => $activeJurusanId,
+                'action' => 'emergency_reactivate_session',
+                'description' => auth()->user()->name.' mengaktifkan Mode Kasir Darurat dari layar Kasir.',
+                'ip_address' => request()->ip(),
+                'user_agent' => request()->userAgent(),
+            ]);
+        } catch (\Exception $e) {
+            // ignore
+        }
+
+        $this->transactionDate = now()->toDateString();
+        $this->refreshProducts();
+        $this->dispatch('toast', message: 'Mode kasir darurat diaktifkan. Sesi kasir kembali terbuka untuk transaksi.', type: 'success');
+    }
+
     public function render(PosQueryService $posQueryService)
     {
-        $today = now()->toDateString();
+        $today = $this->transactionDate ?: now()->toDateString();
         $activeJurusanId = session('active_jurusan_id');
         $userId = auth()->id();
 
         // Auto-assign routine tasks to kasir jika mereka terjadwal hari ini
-        $service = app(CashierTaskService::class);
-        $service->autoAssignRoutineTasksForCashier($userId, $activeJurusanId);
+        try {
+            $service = app(CashierTaskService::class);
+            $service->autoAssignRoutineTasksForCashier($userId, $activeJurusanId);
+        } catch (\Exception $e) {
+            // ignore
+        }
 
         $allProducts = $this->getProductsForAlpine($posQueryService);
         $this->products = $allProducts->toArray();
 
-        $isSessionFinished = false;
+        $isSessionFinished = DailyRecap::withoutGlobalScope('active')
+            ->whereDate('date', $today)
+            ->when($activeJurusanId, fn ($q) => $q->where(fn ($sub) => $sub->where('jurusan_id', $activeJurusanId)->orWhereNull('jurusan_id')))
+            ->where('actual_cash', '>', 0)
+            ->exists();
+
+        $hasClockedOut = false;
         if (session('active_role_name') === 'kasir') {
             $attendance = CashierAttendance::where('user_id', auth()->id())
                 ->where('jurusan_id', $activeJurusanId)
                 ->where('date', $today)
                 ->first();
-            $isSessionFinished = $attendance && $attendance->clock_out;
-        } else {
-            $isSessionFinished = DailyRecap::where('date', $today)
-                ->where('jurusan_id', $activeJurusanId)
-                ->where('actual_cash', '>', 0)
-                ->exists();
+            $hasClockedOut = $attendance && $attendance->clock_out;
         }
+
+        $isClosed = $isSessionFinished || $hasClockedOut;
+        $isPostClosingMode = $isClosed;
+        $isLockedForUser = false;
 
         $categories = CashCategory::where('jurusan_id', $activeJurusanId)->get();
 
@@ -799,10 +839,6 @@ class Kasir extends Component
             ->where('user_id', auth()->id())
             ->where('date', $today)
             ->first();
-
-        $isKasirRole = session('active_role_name') === 'kasir';
-        $isLockedForUser = $isSessionFinished && $isKasirRole;
-        $isPostClosingMode = $isSessionFinished && ! $isKasirRole;
 
         return view('livewire.pos.kasir', [
             'products' => $this->products,
