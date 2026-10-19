@@ -92,9 +92,28 @@ class Kasir extends Component
         if (session('active_role_name') === 'kasir') {
             $hasHigherRole = auth()->user()->roles()
                 ->whereIn('roles.name', ['superadmin', 'pengelola_jurusan'])
-                ->exists();
+                ->exists() || in_array(session('active_role_name'), ['superadmin', 'pengelola_jurusan']);
 
             if (! $hasHigherRole) {
+                // Check if session for today is already finished
+                $isTodayFinished = DailyRecap::withoutGlobalScope('active')
+                    ->whereDate('date', now())
+                    ->when($activeJurusanId, fn ($q) => $q->where(fn ($sub) => $sub->where('jurusan_id', $activeJurusanId)->orWhereNull('jurusan_id')))
+                    ->where('actual_cash', '>', 0)
+                    ->exists();
+
+                $attendance = CashierAttendance::where('user_id', auth()->id())
+                    ->where('jurusan_id', $activeJurusanId)
+                    ->where('date', now()->toDateString())
+                    ->first();
+
+                if ($isTodayFinished || ($attendance && $attendance->clock_out)) {
+                    session()->flash('error', 'Sesi kasir hari ini telah selesai ditutup. Mode pasca-closing dan mode darurat hanya dapat diakses oleh Pengelola atau Superadmin.');
+                    $this->redirectRoute('dashboard', navigate: true);
+
+                    return;
+                }
+
                 $activeJurusan = Jurusan::find($activeJurusanId);
                 $allowedJurusanIds = [$activeJurusanId];
                 if ($activeJurusan && $activeJurusan->parent_id) {
@@ -111,16 +130,6 @@ class Kasir extends Component
                     $this->redirectRoute('dashboard', navigate: true);
 
                     return;
-                }
-
-                // 2. Check if already clocked in/out for today
-                $attendance = CashierAttendance::where('user_id', auth()->id())
-                    ->where('jurusan_id', $activeJurusanId)
-                    ->where('date', now()->toDateString())
-                    ->first();
-
-                if ($attendance && $attendance->clock_out) {
-                    // Kasir yang telah clock-out diizinkan masuk dalam Mode Pasca-Closing (transaksi dialihkan ke besok)
                 }
 
                 if (! $attendance) {
@@ -556,7 +565,20 @@ class Kasir extends Component
             return;
         }
 
-        $activeJurusanId = session('active_jurusan_id');
+        $hasHigherRole = auth()->user()->roles()->whereIn('roles.name', ['superadmin', 'pengelola_jurusan'])->exists()
+            || in_array(session('active_role_name'), ['superadmin', 'pengelola_jurusan']);
+
+        $isSessionFinished = DailyRecap::withoutGlobalScope('active')
+            ->whereDate('date', now())
+            ->when($activeJurusanId, fn ($q) => $q->where(fn ($sub) => $sub->where('jurusan_id', $activeJurusanId)->orWhereNull('jurusan_id')))
+            ->where('actual_cash', '>', 0)
+            ->exists();
+
+        if (! $hasHigherRole && $isSessionFinished) {
+            $this->dispatch('toast', message: 'Gagal Checkout: Sesi kasir hari ini telah selesai ditutup.', type: 'error');
+
+            return;
+        }
 
         // Validate that all products in the cart belong to the active TEFA
         if ($activeJurusanId) {
@@ -705,12 +727,10 @@ class Kasir extends Component
     {
         $hasHigherRole = auth()->user()->roles()
             ->whereIn('roles.name', ['superadmin', 'pengelola_jurusan'])
-            ->exists();
+            ->exists() || in_array(session('active_role_name'), ['superadmin', 'pengelola_jurusan']);
 
-        $isCashier = session('active_role_name') === 'kasir';
-
-        if (! $hasHigherRole && ! $isCashier) {
-            abort(403, 'Anda tidak memiliki hak akses untuk mengaktifkan mode darurat.');
+        if (! $hasHigherRole) {
+            abort(403, 'Hanya Pengelola atau Superadmin yang berhak mengaktifkan mode kasir darurat.');
         }
 
         $activeJurusanId = session('active_jurusan_id');
@@ -792,10 +812,10 @@ class Kasir extends Component
             $hasClockedOut = $attendance && $attendance->clock_out;
         }
 
-        // Pengelola dan superadmin tidak terkena pasca-closing atau mode darurat (kasir normal selalu aktif)
-        $isClosed = ! $hasHigherRole && ($isSessionFinished || $hasClockedOut);
-        $isPostClosingMode = $isClosed;
-        $isLockedForUser = false;
+        // Mode pasca-closing hanya untuk superadmin dan pengelola saat sesi kasir hari ini telah selesai
+        $isPostClosingMode = $hasHigherRole && $isSessionFinished;
+        // Kasir murni dikunci jika sesi telah selesai atau sudah clock-out
+        $isLockedForUser = ! $hasHigherRole && ($isSessionFinished || $hasClockedOut);
 
         $categories = CashCategory::where('jurusan_id', $activeJurusanId)->get();
 

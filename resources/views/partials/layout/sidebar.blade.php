@@ -103,24 +103,35 @@
                 @endphp
 
                 @if ($hasHigherRole)
-                    {{-- Superadmin & Pengelola: Mode kasir selalu aktif normal tanpa pembatasan pasca-closing --}}
-                    <a href="{{ route('kasir') }}"
-                        class="flex items-center gap-3 px-3 py-2 text-xs font-bold rounded-xl bg-rose-600 hover:bg-rose-700 text-white shadow-sm transition-colors">
-                        <svg class="w-4.5 h-4.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25 5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z" />
-                        </svg>
-                        <span>Buka Mesin Kasir</span>
-                    </a>
-                @elseif (session('active_role_name') === 'kasir')
-                    {{-- Kasir Murni: Terikat jadwal dan status closing/clock-out --}}
-                    @if ($isSessionFinished || $hasClockedOut)
+                    {{-- Superadmin & Pengelola: Jika sesi tutup, tampil Kasir (Pasca-Closing), jika buka tampil Buka Mesin Kasir --}}
+                    @if ($isSessionFinished)
                         <a href="{{ route('kasir') }}"
-                            class="flex items-center gap-3 px-3 py-2 text-xs font-bold rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/30 hover:bg-amber-500/20 transition-colors">
+                            class="flex items-center gap-3 px-3 py-2 text-xs font-bold rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/30 hover:bg-amber-500/20 transition-colors"
+                            title="Buka Kasir Mode Pasca-Closing (Transaksi Masuk Besok H+1)">
                             <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
                             </svg>
                             <span>Kasir (Pasca-Closing)</span>
                         </a>
+                    @else
+                        <a href="{{ route('kasir') }}"
+                            class="flex items-center gap-3 px-3 py-2 text-xs font-bold rounded-xl bg-rose-600 hover:bg-rose-700 text-white shadow-sm transition-colors">
+                            <svg class="w-4.5 h-4.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25 5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z" />
+                            </svg>
+                            <span>Buka Mesin Kasir</span>
+                        </a>
+                    @endif
+                @elseif (session('active_role_name') === 'kasir')
+                    {{-- Kasir Murni: Tidak ada pasca-closing atau darurat. Terkunci jika shift/sesi tutup --}}
+                    @if ($isSessionFinished || $hasClockedOut)
+                        <div class="flex items-center gap-3 px-3 py-2 text-xs font-medium rounded-xl bg-slate-100 dark:bg-slate-800/50 text-slate-400 dark:text-slate-500 cursor-not-allowed"
+                            title="Sesi kasir hari ini telah selesai ditutup">
+                            <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
+                            </svg>
+                            <span>Kasir: Sesi Ditutup</span>
+                        </div>
                     @elseif (!$isScheduled)
                         <div class="flex items-center gap-3 px-3 py-2 text-xs font-medium rounded-xl bg-slate-100 dark:bg-slate-800/50 text-slate-400 dark:text-slate-500 cursor-not-allowed">
                             <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

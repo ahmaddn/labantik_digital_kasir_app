@@ -568,12 +568,10 @@ class Dashboard extends Component
     {
         $hasHigherRole = auth()->user()->roles()
             ->whereIn('roles.name', ['superadmin', 'pengelola_jurusan'])
-            ->exists();
+            ->exists() || in_array(session('active_role_name'), ['superadmin', 'pengelola_jurusan']);
 
-        $isCashier = session('active_role_name') === 'kasir';
-
-        if (! $hasHigherRole && ! $isCashier) {
-            abort(403, 'Anda tidak memiliki hak akses untuk mengaktifkan mode darurat.');
+        if (! $hasHigherRole) {
+            abort(403, 'Hanya Pengelola atau Superadmin yang berhak mengaktifkan mode kasir darurat.');
         }
 
         $activeJurusanId = session('active_jurusan_id');
