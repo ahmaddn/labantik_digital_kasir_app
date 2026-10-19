@@ -2,10 +2,10 @@
     <x-hub-tabs hub="laporan" title="Riwayat Transaksi" subtitle="Log aktivitas penjualan kasir, rincian pembayaran, dan status transaksi belanja." />
 
         <!-- Filter Toolbar -->
-        <div class="flex flex-col lg:flex-row items-stretch lg:items-center gap-4 w-full lg:w-auto">
+        <div class="flex flex-col lg:flex-row items-stretch lg:items-center gap-4 w-full lg:w-auto mb-6">
             <!-- Search bar -->
             <div
-                class="flex items-center bg-white dark:bg-gray-800 px-4 py-2.5 rounded-2xl shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-805 w-full lg:w-64">
+                class="flex items-center bg-white dark:bg-gray-800 px-4 py-2.5 rounded-2xl shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-800 w-full lg:w-64">
                 <svg class="w-4 h-4 text-gray-400 mr-3 shrink-0" xmlns="http://www.w3.org/2000/svg" width="24"
                     height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                     stroke-linecap="round" stroke-linejoin="round">
