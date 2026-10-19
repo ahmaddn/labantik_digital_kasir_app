@@ -565,6 +565,8 @@ class Kasir extends Component
             return;
         }
 
+        $activeJurusanId = session('active_jurusan_id');
+
         $hasHigherRole = auth()->user()->roles()->whereIn('roles.name', ['superadmin', 'pengelola_jurusan'])->exists()
             || in_array(session('active_role_name'), ['superadmin', 'pengelola_jurusan']);
 
