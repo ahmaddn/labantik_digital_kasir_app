@@ -40,23 +40,76 @@
             </a>
 
             <!-- Cashier Action Button -->
-            @if (session('active_role_name') !== 'superadmin')
+            @php
+                $hasHigherRole = auth()->user()->roles()->whereIn('roles.name', ['superadmin', 'pengelola_jurusan'])->exists()
+                    || in_array(session('active_role_name'), ['superadmin', 'pengelola_jurusan']);
+                $isSessionClosed = $isSessionClosed ?? (($isSessionFinished ?? false) || (session('active_role_name') === 'kasir' && ($hasClockedOut ?? false)));
+            @endphp
+
+            @if ($hasHigherRole)
+                {{-- Pengelola & Superadmin: Mode kasir selalu aktif normal tanpa pembatasan pasca-closing / darurat --}}
+                <div class="flex items-center gap-2" x-data="{ showEmergencyConfirm: false }">
+                    <a href="{{ route('kasir') }}"
+                        class="inline-flex items-center gap-2 px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs uppercase tracking-wider rounded-xl shadow-sm transition-colors">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25 5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z" />
+                        </svg>
+                        <span>Buka Kasir</span>
+                    </a>
+
+                    @if ($isSessionFinished ?? false)
+                        <button type="button" @click="showEmergencyConfirm = true"
+                            class="px-3 py-2 bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/40 dark:hover:bg-rose-900/40 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-800 rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5"
+                            title="Aktifkan Kembali Sesi Kasir untuk Hari Ini">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+                            </svg>
+                            <span>Aktifkan Sesi Kasir</span>
+                        </button>
+
+                        <!-- Emergency Modal -->
+                        <div x-show="showEmergencyConfirm" x-cloak
+                            class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm">
+                            <div @click.outside="showEmergencyConfirm = false"
+                                class="bg-white dark:bg-slate-900 w-full max-w-md rounded-2xl shadow-xl border border-slate-200 dark:border-slate-800 p-6 space-y-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-xl bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 flex items-center justify-center shrink-0">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-base font-bold text-slate-900 dark:text-white">Aktifkan Kembali Sesi Kasir?</h3>
+                                        <p class="text-xs text-slate-500 dark:text-slate-400">Data penutupan rekap harian hari ini akan direset sehingga sesi kasir aktif kembali.</p>
+                                    </div>
+                                </div>
+                                <div class="flex justify-end gap-2.5 pt-2">
+                                    <button type="button" @click="showEmergencyConfirm = false"
+                                        class="px-4 py-2 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors">
+                                        Batal
+                                    </button>
+                                    <button type="button" wire:click="emergencyReactivateSession" @click="showEmergencyConfirm = false"
+                                        class="px-4 py-2 text-xs font-semibold bg-rose-600 hover:bg-rose-700 text-white rounded-xl shadow-xs transition-colors">
+                                        Ya, Aktifkan Sesi
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
+                </div>
+            @else
+                {{-- Kasir Murni --}}
                 @php
-                    $hasHigherRole = auth()->user()->roles()->whereIn('roles.name', ['superadmin', 'pengelola_jurusan'])->exists();
-                    $isSessionClosed = $isSessionClosed ?? ($isSessionFinished || (session('active_role_name') === 'kasir' && ($hasClockedOut ?? false)));
-                    $isScheduled = true;
-                    if (session('active_role_name') === 'kasir' && !$hasHigherRole) {
-                        $activeJurusanId = session('active_jurusan_id');
-                        $activeJurusan = \App\Models\Jurusan::find($activeJurusanId);
-                        $allowedJurusanIds = [$activeJurusanId];
-                        if ($activeJurusan && $activeJurusan->parent_id) {
-                            $allowedJurusanIds[] = $activeJurusan->parent_id;
-                        }
-                        $isScheduled = \App\Models\CashierSchedule::where('user_id', auth()->id())
-                            ->whereIn('jurusan_id', $allowedJurusanIds)
-                            ->where('date', now()->toDateString())
-                            ->exists();
+                    $activeJurusanId = session('active_jurusan_id');
+                    $activeJurusan = \App\Models\Jurusan::find($activeJurusanId);
+                    $allowedJurusanIds = [$activeJurusanId];
+                    if ($activeJurusan && $activeJurusan->parent_id) {
+                        $allowedJurusanIds[] = $activeJurusan->parent_id;
                     }
+                    $isScheduled = \App\Models\CashierSchedule::where('user_id', auth()->id())
+                        ->whereIn('jurusan_id', $allowedJurusanIds)
+                        ->where('date', now()->toDateString())
+                        ->exists();
                 @endphp
 
                 @if ($isSessionClosed)
@@ -130,7 +183,7 @@
             loginTime: '{{ $todayAttendance && $todayAttendance->clock_in ? \Carbon\Carbon::parse($todayAttendance->clock_in)->format('Y-m-d H:i:s') : '' }}',
             clockOutTime: '{{ $todayAttendance && $todayAttendance->clock_out ? \Carbon\Carbon::parse($todayAttendance->clock_out)->format('Y-m-d H:i:s') : '' }}',
             targetClosingStr: '{{ $targetClockOutCarbon ? $targetClockOutCarbon->format('Y-m-d H:i:s') : '' }}',
-            isFinished: {{ ($hasClockedOut || $isSessionFinished) ? 'true' : 'false' }},
+            isFinished: {{ (($hasClockedOut ?? false) || ($isSessionFinished ?? false)) ? 'true' : 'false' }},
             elapsedHours: '00',
             elapsedMinutes: '00',
             elapsedSeconds: '00',
@@ -193,7 +246,7 @@
                 <div class="app-card p-5 flex flex-col justify-between">
                     <div class="flex items-center justify-between mb-3">
                         <span class="text-xs font-semibold text-slate-500 dark:text-slate-400">Durasi Jaga Kasir</span>
-                        @if ($hasClockedOut || $isSessionFinished)
+                        @if (($hasClockedOut ?? false) || ($isSessionFinished ?? false))
                             <span class="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 rounded-md text-[10px] font-bold">Shift Selesai</span>
                         @else
                             <span class="px-2 py-0.5 bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 rounded-md text-[10px] font-bold">Aktif</span>
@@ -203,7 +256,7 @@
                         <div class="text-2xl font-bold font-mono text-slate-900 dark:text-white tracking-tight" x-text="`${elapsedHours}:${elapsedMinutes}:${elapsedSeconds}`">
                             00:00:00
                         </div>
-                        <p class="text-xs text-slate-400 mt-1">{{ ($hasClockedOut || $isSessionFinished) ? 'Total durasi shift hari ini' : 'Waktu berjalan di perangkat' }}</p>
+                        <p class="text-xs text-slate-400 mt-1">{{ (($hasClockedOut ?? false) || ($isSessionFinished ?? false)) ? 'Total durasi shift hari ini' : 'Waktu berjalan di perangkat' }}</p>
                     </div>
                 </div>
 
@@ -211,7 +264,7 @@
                 <div class="app-card p-5 flex flex-col justify-between">
                     <div class="flex items-center justify-between mb-3">
                         <span class="text-xs font-semibold text-slate-500 dark:text-slate-400">Batas Minimal Closing</span>
-                        @if ($hasClockedOut || $isSessionFinished)
+                        @if (($hasClockedOut ?? false) || ($isSessionFinished ?? false))
                             <span class="px-2 py-0.5 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 rounded-md text-[10px] font-bold">
                                 Sesi Ditutup
                             </span>
@@ -222,7 +275,7 @@
                         @endif
                     </div>
                     <div>
-                        @if ($hasClockedOut || $isSessionFinished)
+                        @if (($hasClockedOut ?? false) || ($isSessionFinished ?? false))
                             <div class="text-sm font-bold text-slate-700 dark:text-slate-300">
                                 <span>Rekap Sesi Telah Ditutup</span>
                             </div>

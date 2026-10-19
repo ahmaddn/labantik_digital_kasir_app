@@ -71,37 +71,48 @@
                     <span>Dashboard</span>
                 </a>
 
-                @if (session('active_role_name') !== 'superadmin')
-                    @php
-                        $activeJurusanId = session('active_jurusan_id');
-                        $isSessionFinished = \App\Models\DailyRecap::withoutGlobalScope('active')
-                            ->whereDate('date', now())
-                            ->when($activeJurusanId, fn($q) => $q->where(fn($sub) => $sub->where('jurusan_id', $activeJurusanId)->orWhereNull('jurusan_id')))
-                            ->where('actual_cash', '>', 0)
-                            ->exists();
+                @php
+                    $activeJurusanId = session('active_jurusan_id');
+                    $isSessionFinished = \App\Models\DailyRecap::withoutGlobalScope('active')
+                        ->whereDate('date', now())
+                        ->when($activeJurusanId, fn($q) => $q->where(fn($sub) => $sub->where('jurusan_id', $activeJurusanId)->orWhereNull('jurusan_id')))
+                        ->where('actual_cash', '>', 0)
+                        ->exists();
 
-                        $hasClockedOut = \App\Models\CashierAttendance::where('user_id', auth()->id())
-                            ->whereDate('date', now()->toDateString())
-                            ->when($activeJurusanId, fn($q) => $q->where(fn($sub) => $sub->where('jurusan_id', $activeJurusanId)->orWhereNull('jurusan_id')))
-                            ->whereNotNull('clock_out')
-                            ->exists();
+                    $hasClockedOut = \App\Models\CashierAttendance::where('user_id', auth()->id())
+                        ->whereDate('date', now()->toDateString())
+                        ->when($activeJurusanId, fn($q) => $q->where(fn($sub) => $sub->where('jurusan_id', $activeJurusanId)->orWhereNull('jurusan_id')))
+                        ->whereNotNull('clock_out')
+                        ->exists();
 
-                        $hasHigherRole = auth()->user()->roles()->whereIn('roles.name', ['superadmin', 'pengelola_jurusan'])->exists();
+                    $hasHigherRole = auth()->user()->roles()->whereIn('roles.name', ['superadmin', 'pengelola_jurusan'])->exists()
+                        || in_array(session('active_role_name'), ['superadmin', 'pengelola_jurusan']);
 
-                        $isScheduled = true;
-                        if (session('active_role_name') === 'kasir' && !$hasHigherRole) {
-                            $activeJurusan = \App\Models\Jurusan::find($activeJurusanId);
-                            $allowedJurusanIds = [$activeJurusanId];
-                            if ($activeJurusan && $activeJurusan->parent_id) {
-                                $allowedJurusanIds[] = $activeJurusan->parent_id;
-                            }
-                            $isScheduled = \App\Models\CashierSchedule::where('user_id', auth()->id())
-                                ->whereIn('jurusan_id', $allowedJurusanIds)
-                                ->where('date', now()->toDateString())
-                                ->exists();
+                    $isScheduled = true;
+                    if (session('active_role_name') === 'kasir' && !$hasHigherRole) {
+                        $activeJurusan = \App\Models\Jurusan::find($activeJurusanId);
+                        $allowedJurusanIds = [$activeJurusanId];
+                        if ($activeJurusan && $activeJurusan->parent_id) {
+                            $allowedJurusanIds[] = $activeJurusan->parent_id;
                         }
-                    @endphp
+                        $isScheduled = \App\Models\CashierSchedule::where('user_id', auth()->id())
+                            ->whereIn('jurusan_id', $allowedJurusanIds)
+                            ->where('date', now()->toDateString())
+                            ->exists();
+                    }
+                @endphp
 
+                @if ($hasHigherRole)
+                    {{-- Superadmin & Pengelola: Mode kasir selalu aktif normal tanpa pembatasan pasca-closing --}}
+                    <a href="{{ route('kasir') }}"
+                        class="flex items-center gap-3 px-3 py-2 text-xs font-bold rounded-xl bg-rose-600 hover:bg-rose-700 text-white shadow-sm transition-colors">
+                        <svg class="w-4.5 h-4.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25 5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z" />
+                        </svg>
+                        <span>Buka Mesin Kasir</span>
+                    </a>
+                @elseif (session('active_role_name') === 'kasir')
+                    {{-- Kasir Murni: Terikat jadwal dan status closing/clock-out --}}
                     @if ($isSessionFinished || $hasClockedOut)
                         <a href="{{ route('kasir') }}"
                             class="flex items-center gap-3 px-3 py-2 text-xs font-bold rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/30 hover:bg-amber-500/20 transition-colors">

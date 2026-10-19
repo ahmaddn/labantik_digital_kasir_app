@@ -780,6 +780,9 @@ class Kasir extends Component
             ->where('actual_cash', '>', 0)
             ->exists();
 
+        $hasHigherRole = auth()->user()->roles()->whereIn('roles.name', ['superadmin', 'pengelola_jurusan'])->exists()
+            || in_array(session('active_role_name'), ['superadmin', 'pengelola_jurusan']);
+
         $hasClockedOut = false;
         if (session('active_role_name') === 'kasir') {
             $attendance = CashierAttendance::where('user_id', auth()->id())
@@ -789,7 +792,8 @@ class Kasir extends Component
             $hasClockedOut = $attendance && $attendance->clock_out;
         }
 
-        $isClosed = $isSessionFinished || $hasClockedOut;
+        // Pengelola dan superadmin tidak terkena pasca-closing atau mode darurat (kasir normal selalu aktif)
+        $isClosed = ! $hasHigherRole && ($isSessionFinished || $hasClockedOut);
         $isPostClosingMode = $isClosed;
         $isLockedForUser = false;
 

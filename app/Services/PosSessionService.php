@@ -210,6 +210,17 @@ class PosSessionService
 
     public function isSessionClosed(string $date, ?string $jurusanId, ?string $userId = null): bool
     {
+        // Pengelola dan superadmin tidak dibatasi closing / pasca-closing (sesi selalu aktif bagi mereka)
+        if ($userId) {
+            $user = User::find($userId);
+            if ($user && ($user->roles()->whereIn('roles.name', ['superadmin', 'pengelola_jurusan'])->exists()
+                || in_array(session('active_role_name'), ['superadmin', 'pengelola_jurusan']))) {
+                return false;
+            }
+        } elseif (in_array(session('active_role_name'), ['superadmin', 'pengelola_jurusan'])) {
+            return false;
+        }
+
         if (DailyRecap::isSessionFinished($date, $jurusanId)) {
             return true;
         }

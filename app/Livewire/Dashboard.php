@@ -236,6 +236,8 @@ class Dashboard extends Component
                 'isCashier' => true,
                 'hasHigherRole' => $hasHigherRole,
                 'isSessionFinished' => $isSessionFinished,
+                'hasClockedOut' => $hasClockedOut,
+                'isSessionClosed' => $isSessionClosed,
                 'todayAttendance' => $todayAttendance,
                 'targetClockOut' => $targetClockOut,
                 'targetClockIn' => $targetClockIn,
@@ -524,14 +526,6 @@ class Dashboard extends Component
                 'revenue' => (float) $monthTxs->sum('total_price'),
             ];
         }
-
-        // Check if session is finished (Daily Recap exists with actual cash)
-        $isSessionFinished = DailyRecap::whereDate('date', now())
-            ->when($activeJurusanId, function ($q) use ($activeJurusanId) {
-                return $q->where('jurusan_id', $activeJurusanId);
-            })
-            ->where('actual_cash', '>', 0)
-            ->exists();
 
         $orphanCarryForwardAmount = 0;
         if ($activeJurusanId) {
