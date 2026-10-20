@@ -599,19 +599,8 @@ class Dashboard extends Component
                 'clock_out' => null,
             ]);
 
-        // Catat ke security logs jika model tersedia
-        try {
-            \App\Models\SecurityLog::create([
-                'user_id' => auth()->id(),
-                'jurusan_id' => $activeJurusanId,
-                'action' => 'emergency_reactivate_session',
-                'description' => auth()->user()->name . ' mengaktifkan Mode Kasir Darurat / membuka kembali sesi kasir setelah penutupan.',
-                'ip_address' => request()->ip(),
-                'user_agent' => request()->userAgent(),
-            ]);
-        } catch (\Exception $e) {
-            // ignore
-        }
+        // Catat ke log keamanan sistem
+        \Illuminate\Support\Facades\Log::warning("SECURITY ALERT: User '" . (auth()->user()?->name ?? 'Unknown') . "' (" . (auth()->user()?->email ?? 'N/A') . ") mengaktifkan Mode Kasir Darurat dari Dashboard untuk Jurusan ID: " . ($activeJurusanId ?? 'Semua'));
 
         session()->flash('success', 'Mode kasir darurat berhasil diaktifkan. Sesi kasir terbuka kembali untuk transaksi.');
 

@@ -1,68 +1,83 @@
+@php
+    $pageName = $paginator->getPageName();
+    $lastPage = $paginator->lastPage();
+    $currentPage = $paginator->currentPage();
+@endphp
+
 <div>
     @if ($paginator->hasPages())
-        <nav role="navigation" aria-label="Pagination Navigation" class="flex items-center justify-center">
-            <div class="inline-flex items-center bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl overflow-hidden shadow-sm">
+        <nav role="navigation" aria-label="Pagination Navigation" class="flex flex-col sm:flex-row items-center justify-between gap-3 my-2 w-full">
+            {{-- Info Count --}}
+            <div class="text-xs text-slate-500 dark:text-slate-400 order-2 sm:order-1 text-center sm:text-left">
+                Menampilkan <span class="font-bold text-slate-700 dark:text-slate-200">{{ $paginator->firstItem() ?? 0 }}</span>
+                sampai <span class="font-bold text-slate-700 dark:text-slate-200">{{ $paginator->lastItem() ?? 0 }}</span>
+                dari <span class="font-bold text-slate-700 dark:text-slate-200">{{ $paginator->total() }}</span> data
+            </div>
+
+            {{-- Pagination Controls --}}
+            <div class="inline-flex items-center bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-xs order-1 sm:order-2">
                 {{-- Previous Page Link --}}
                 @if ($paginator->onFirstPage())
-                    <span class="px-6 py-3 text-[10px] font-black uppercase tracking-widest text-gray-300 flex items-center border-r border-gray-100 dark:border-gray-700 cursor-not-allowed">
-                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M11 15l-3-3m0 0l3-3m-3 3h8M12 21a9 9 0 110-18 9 9 0 010 18z"/></svg>
-                        Previous
+                    <span class="px-3 sm:px-4 py-2 sm:py-2.5 text-[11px] font-bold text-slate-300 dark:text-slate-600 flex items-center border-r border-slate-200 dark:border-slate-800 cursor-not-allowed select-none">
+                        <svg class="w-4 h-4 sm:mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                        <span class="hidden sm:inline">Sebelumnya</span>
                     </span>
                 @else
-                    <button wire:click="previousPage" wire:loading.attr="disabled" rel="prev" class="px-6 py-3 text-[10px] font-black uppercase tracking-widest text-primary-blue hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors flex items-center border-r border-gray-100 dark:border-gray-700">
-                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M11 15l-3-3m0 0l3-3m-3 3h8M12 21a9 9 0 110-18 9 9 0 010 18z"/></svg>
-                        Previous
+                    <button type="button" wire:click="previousPage('{{ $pageName }}')" wire:loading.attr="disabled" rel="prev"
+                        class="px-3 sm:px-4 py-2 sm:py-2.5 text-[11px] font-bold text-slate-700 dark:text-slate-200 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors flex items-center border-r border-slate-200 dark:border-slate-800">
+                        <svg class="w-4 h-4 sm:mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                        <span class="hidden sm:inline">Sebelumnya</span>
                     </button>
                 @endif
 
-                {{-- Pagination Elements Logic --}}
+                {{-- Page Numbers Logic --}}
                 @php
-                    $lastPage = $paginator->lastPage();
-                    $currentPage = $paginator->currentPage();
-                    $customElements = [];
+                    $elements = [];
+                    $formatRange = fn($range) => array_combine($range, array_fill(0, count($range), '#'));
 
-                    $formatRange = function($range) {
-                        $arr = [];
-                        foreach($range as $p) {
-                            $arr[$p] = '#';
-                        }
-                        return $arr;
-                    };
-
-                    if ($lastPage <= 10) {
-                        $customElements[] = $formatRange(range(1, $lastPage));
+                    if ($lastPage <= 7) {
+                        $elements[] = $formatRange(range(1, $lastPage));
                     } else {
-                        if ($currentPage <= 5) {
-                            $customElements[] = $formatRange(range(1, 7));
-                            $customElements[] = '...';
-                            $customElements[] = $formatRange([$lastPage]);
-                        } elseif ($currentPage > $lastPage - 4) {
-                            $customElements[] = $formatRange([1]);
-                            $customElements[] = '...';
-                            $customElements[] = $formatRange(range($lastPage - 6, $lastPage));
+                        if ($currentPage <= 4) {
+                            $elements[] = $formatRange(range(1, 5));
+                            $elements[] = '...';
+                            $elements[] = $formatRange([$lastPage]);
+                        } elseif ($currentPage >= $lastPage - 3) {
+                            $elements[] = $formatRange([1]);
+                            $elements[] = '...';
+                            $elements[] = $formatRange(range($lastPage - 4, $lastPage));
                         } else {
-                            $customElements[] = $formatRange([1]);
-                            $customElements[] = '...';
-                            $customElements[] = $formatRange(range($currentPage - 2, $currentPage + 2));
-                            $customElements[] = '...';
-                            $customElements[] = $formatRange([$lastPage]);
+                            $elements[] = $formatRange([1]);
+                            $elements[] = '...';
+                            $elements[] = $formatRange(range($currentPage - 1, $currentPage + 1));
+                            $elements[] = '...';
+                            $elements[] = $formatRange([$lastPage]);
                         }
                     }
                 @endphp
 
-                @foreach ($customElements as $element)
-                    {{-- "Three Dots" Separator --}}
+                @foreach ($elements as $element)
+                    {{-- Separator --}}
                     @if (is_string($element))
-                        <span class="px-4 py-3 text-[10px] font-black text-gray-300 border-r border-gray-100 dark:border-gray-700">{{ $element }}</span>
+                        <span class="px-3 py-2 sm:py-2.5 text-xs text-slate-400 dark:text-slate-600 border-r border-slate-200 dark:border-slate-800 select-none">
+                            {{ $element }}
+                        </span>
                     @endif
 
-                    {{-- Array Of Links --}}
+                    {{-- Page Links --}}
                     @if (is_array($element))
                         @foreach ($element as $page => $url)
-                            @if ($page == $paginator->currentPage())
-                                <span class="px-5 py-3 bg-primary-blue/5 dark:bg-primary-blue/10 text-primary-blue text-[10px] font-black border-r border-gray-100 dark:border-gray-700">{{ $page }}</span>
+                            @if ($page == $currentPage)
+                                <span wire:key="paginator-{{ $pageName }}-page-{{ $page }}"
+                                    class="min-w-[36px] sm:min-w-[40px] px-2.5 py-2 sm:py-2.5 bg-blue-600 text-white text-xs font-bold flex items-center justify-center border-r border-slate-200 dark:border-slate-800 shadow-xs">
+                                    {{ $page }}
+                                </span>
                             @else
-                                <button wire:click="gotoPage({{ $page }})" class="px-5 py-3 text-[10px] font-black text-gray-400 hover:text-primary-blue hover:bg-gray-50 dark:hover:bg-gray-900 border-r border-gray-100 dark:border-gray-700 transition-all">{{ $page }}</button>
+                                <button type="button" wire:key="paginator-{{ $pageName }}-page-{{ $page }}"
+                                    wire:click="gotoPage({{ $page }}, '{{ $pageName }}')"
+                                    class="min-w-[36px] sm:min-w-[40px] px-2.5 py-2 sm:py-2.5 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-slate-50 dark:hover:bg-slate-800 border-r border-slate-200 dark:border-slate-800 transition-colors flex items-center justify-center">
+                                    {{ $page }}
+                                </button>
                             @endif
                         @endforeach
                     @endif
@@ -70,14 +85,15 @@
 
                 {{-- Next Page Link --}}
                 @if ($paginator->hasMorePages())
-                    <button wire:click="nextPage" wire:loading.attr="disabled" rel="next" class="px-6 py-3 text-[10px] font-black uppercase tracking-widest text-primary-blue hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors flex items-center">
-                        Next
-                        <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 9l3 3m0 0l-3 3m3-3H8m13 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    <button type="button" wire:click="nextPage('{{ $pageName }}')" wire:loading.attr="disabled" rel="next"
+                        class="px-3 sm:px-4 py-2 sm:py-2.5 text-[11px] font-bold text-slate-700 dark:text-slate-200 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors flex items-center">
+                        <span class="hidden sm:inline">Berikutnya</span>
+                        <svg class="w-4 h-4 sm:ml-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                     </button>
                 @else
-                    <span class="px-6 py-3 text-[10px] font-black uppercase tracking-widest text-gray-300 flex items-center cursor-not-allowed">
-                        Next
-                        <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 9l3 3m0 0l-3 3m3-3H8m13 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    <span class="px-3 sm:px-4 py-2 sm:py-2.5 text-[11px] font-bold text-slate-300 dark:text-slate-600 flex items-center cursor-not-allowed select-none">
+                        <span class="hidden sm:inline">Berikutnya</span>
+                        <svg class="w-4 h-4 sm:ml-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                     </span>
                 @endif
             </div>

@@ -774,19 +774,8 @@ class Kasir extends Component
                 'clock_out' => null,
             ]);
 
-        // Security / audit log
-        try {
-            \App\Models\SecurityLog::create([
-                'user_id' => auth()->id(),
-                'jurusan_id' => $activeJurusanId,
-                'action' => 'emergency_reactivate_session',
-                'description' => auth()->user()->name.' mengaktifkan Mode Kasir Darurat dari layar Kasir.',
-                'ip_address' => request()->ip(),
-                'user_agent' => request()->userAgent(),
-            ]);
-        } catch (\Exception $e) {
-            // ignore
-        }
+        // Catat ke log keamanan sistem
+        \Illuminate\Support\Facades\Log::warning("SECURITY ALERT: User '" . (auth()->user()?->name ?? 'Unknown') . "' (" . (auth()->user()?->email ?? 'N/A') . ") mengaktifkan Mode Kasir Darurat dari layar Kasir untuk Jurusan ID: " . ($activeJurusanId ?? 'Semua'));
 
         $this->transactionDate = now()->toDateString();
         $this->refreshProducts();

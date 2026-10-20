@@ -30,6 +30,9 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->configureDefaults();
 
+        \Illuminate\Pagination\Paginator::defaultView('vendor.livewire.tailwind');
+        \Illuminate\Pagination\Paginator::defaultSimpleView('vendor.livewire.simple-tailwind');
+
         // Listen for Logout event to auto-clock out kasir if not already done
         Event::listen(
             Logout::class,
