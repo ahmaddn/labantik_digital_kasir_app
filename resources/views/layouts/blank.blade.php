@@ -28,6 +28,7 @@
             <flux:toast />
         </flux:toast.group>
     @endpersist
+    @include('partials.global-loading')
     @fluxScripts
     @livewireScripts
 </body>

@@ -306,9 +306,13 @@ class Kasir extends Component
         $this->lastClosingDetails = $posSessionService->getLastSessionDetails($today, $activeJurusanId);
 
         $allProducts = $this->getActiveProducts();
+        $existingEntries = StockEntry::whereIn('product_id', $allProducts->pluck('id'))
+            ->where('date', $today)
+            ->get()
+            ->keyBy('product_id');
 
         foreach ($allProducts as $p) {
-            $entry = StockEntry::where('product_id', $p->id)->where('date', $today)->first();
+            $entry = $existingEntries->get($p->id);
             if ($entry) {
                 $this->stockItems[$p->id] = $entry->opening_stock;
             } else {
@@ -390,12 +394,22 @@ class Kasir extends Component
             })
             ->get();
 
+        $productIds = $allProducts->pluck('id');
+        $entries = StockEntry::whereIn('product_id', $productIds)
+            ->where('date', $today)
+            ->get()
+            ->keyBy('product_id');
+
+        $soldMap = Transaction::whereIn('product_id', $productIds)
+            ->whereDate('transacted_at', $today)
+            ->groupBy('product_id')
+            ->selectRaw('product_id, SUM(quantity) as total_sold')
+            ->pluck('total_sold', 'product_id');
+
         $this->stockItems = [];
         foreach ($allProducts as $p) {
-            $entry = StockEntry::where('product_id', $p->id)->where('date', $today)->first();
-            $sold = Transaction::where('product_id', $p->id)
-                ->whereDate('transacted_at', $today)
-                ->sum('quantity');
+            $entry = $entries->get($p->id);
+            $sold = (int) ($soldMap[$p->id] ?? 0);
 
             $this->stockItems[$p->id] = $entry ? ($entry->opening_stock - $sold) : 0;
         }
@@ -843,14 +857,20 @@ class Kasir extends Component
             }, '<', 3)
             ->get();
 
-        // Compute computed_deadline for routine tasks
+        // Compute computed_deadline for routine tasks without N+1 queries
+        $userAttendanceDates = $dailyAssignments->pluck('created_at')->map(fn ($d) => $d->toDateString())->unique();
+        $attendances = $userAttendanceDates->isNotEmpty()
+            ? CashierAttendance::where('user_id', auth()->id())
+                ->whereIn('date', $userAttendanceDates)
+                ->orderBy('clock_in', 'asc')
+                ->get()
+                ->keyBy('date')
+            : collect();
+
         foreach ($dailyAssignments as $assignment) {
             $taskDef = $assignment->taskDefinition;
             if ($taskDef->is_routine && ! $taskDef->deadline_at) {
-                $attendance = CashierAttendance::where('user_id', auth()->id())
-                    ->where('date', $assignment->created_at->toDateString())
-                    ->orderBy('clock_in', 'asc')
-                    ->first();
+                $attendance = $attendances->get($assignment->created_at->toDateString());
 
                 if ($attendance && $attendance->clock_in) {
                     $taskDef->computed_deadline = Carbon::parse($attendance->clock_in)->addHours(8);
@@ -866,6 +886,14 @@ class Kasir extends Component
             ->where('date', $today)
             ->first();
 
+        // Single query for revenue by payment method
+        $revenueByMethod = Transaction::whereDate('transacted_at', $today)
+            ->where('jurusan_id', $activeJurusanId)
+            ->whereIn('status', ['uang_diterima', 'belum_kembalian'])
+            ->groupBy('payment_method')
+            ->selectRaw('payment_method, SUM(total_price) as total')
+            ->pluck('total', 'payment_method');
+
         return view('livewire.pos.kasir', [
             'products' => $this->products,
             'allProductsJson' => $allProducts,
@@ -876,21 +904,9 @@ class Kasir extends Component
             'dailyTasks' => $dailyAssignments,
             'todayDocSchedule' => $todayDocSchedule,
             // Revenue per metode hari ini — untuk audit di closing modal
-            'todayRevenueCash' => Transaction::whereDate('transacted_at', $today)
-                ->where('jurusan_id', $activeJurusanId)
-                ->where('payment_method', 'cash')
-                ->whereIn('status', ['uang_diterima', 'belum_kembalian'])
-                ->sum('total_price'),
-            'todayRevenueTransfer' => Transaction::whereDate('transacted_at', $today)
-                ->where('jurusan_id', $activeJurusanId)
-                ->where('payment_method', 'transfer')
-                ->whereIn('status', ['uang_diterima', 'belum_kembalian'])
-                ->sum('total_price'),
-            'todayRevenueQris' => Transaction::whereDate('transacted_at', $today)
-                ->where('jurusan_id', $activeJurusanId)
-                ->where('payment_method', 'qris')
-                ->whereIn('status', ['uang_diterima', 'belum_kembalian'])
-                ->sum('total_price'),
+            'todayRevenueCash' => (float) ($revenueByMethod['cash'] ?? 0),
+            'todayRevenueTransfer' => (float) ($revenueByMethod['transfer'] ?? 0),
+            'todayRevenueQris' => (float) ($revenueByMethod['qris'] ?? 0),
         ])->layout('layouts.kasir');
     }
 }

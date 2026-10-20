@@ -1,4 +1,4 @@
-<div wire:poll.5s="checkNewTasks" x-data="kasirApp"
+<div wire:poll.30s="checkNewTasks" x-data="kasirApp"
     class="flex flex-col lg:flex-row h-screen w-full bg-slate-50 dark:bg-slate-950 overflow-hidden font-outfit relative"
     x-on:stock-saved.window="products = $event.detail.products"
     x-on:keydown.window.escape="search = ''; $nextTick(() => { const el = document.getElementById('pos-search-input'); if (el) el.focus(); })"
@@ -65,8 +65,8 @@
     @endif
 
     <!-- Global Loading Overlay -->
-    <div wire:loading.flex.delay
-        wire:target="checkout, saveQuickExpense, saveOpeningStock, saveClosingStockAndNext, submitClosingReport"
+    <div wire:loading.flex.delay.shorter
+        wire:target="checkout, saveQuickExpense, saveOpeningStock, saveClosingStockAndNext, submitClosingReport, finishSession, editOpeningStock, syncOpeningStockWithLast, emergencyReactivateSession, fixUnfinishedSession"
         style="display: none;"
         class="fixed inset-0 z-[9999] bg-slate-950/60 backdrop-blur-sm items-center justify-center flex-col gap-4">
         <div class="p-8 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl flex flex-col items-center gap-4 max-w-xs text-center">

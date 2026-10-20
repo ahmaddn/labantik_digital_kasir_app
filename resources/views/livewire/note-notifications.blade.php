@@ -1,4 +1,4 @@
-<div class="relative" wire:poll.5s id="global-notifications-container" x-data="{ open: false }" @click.outside="open = false" @keydown.window.escape="open = false">
+<div class="relative" wire:poll.30s id="global-notifications-container" x-data="{ open: false }" @click.outside="open = false" @keydown.window.escape="open = false">
     <!-- Bell Icon Trigger Button (Alpine: buka instan tanpa round-trip server) -->
     <button @click="open = !open; if (open) $wire.markAllAsRead()" class="relative p-3.5 bg-gray-50 dark:bg-gray-800 text-gray-400 rounded-xl hover:text-primary-blue hover:bg-primary-blue/5 transition-all shadow-sm">
         <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
