@@ -66,7 +66,7 @@
 
     <!-- Global Loading Overlay -->
     <div wire:loading.flex.delay.shorter
-        wire:target="checkout, saveQuickExpense, saveOpeningStock, saveClosingStockAndNext, submitClosingReport, finishSession, editOpeningStock, syncOpeningStockWithLast, emergencyReactivateSession, fixUnfinishedSession"
+        wire:target="checkout, saveQuickExpense, saveOpeningStock, saveClosingStockAndNext, submitClosingReport, fixUnfinishedSession"
         style="display: none;"
         class="fixed inset-0 z-[9999] bg-slate-950/60 backdrop-blur-sm items-center justify-center flex-col gap-4">
         <div class="p-8 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl flex flex-col items-center gap-4 max-w-xs text-center">
@@ -733,8 +733,21 @@
 
     <!-- Opening Stock Modal -->
     <div x-data="{ show: @entangle('showOpeningStockModal'), modalSearch: '' }" x-show="show" x-cloak @keydown.window.escape="show = false"
+        x-transition:enter="transition ease-out duration-200"
+        x-transition:enter-start="opacity-0"
+        x-transition:enter-end="opacity-100"
+        x-transition:leave="transition ease-in duration-150"
+        x-transition:leave-start="opacity-100"
+        x-transition:leave-end="opacity-0"
         class="fixed inset-0 z-[400] flex items-center justify-center p-3 sm:p-6 bg-slate-950/60 backdrop-blur-sm">
-        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl w-full max-w-4xl max-h-[85vh] flex flex-col overflow-hidden shadow-2xl">
+        <div x-show="show"
+            x-transition:enter="transition ease-out duration-200"
+            x-transition:enter-start="opacity-0 scale-95"
+            x-transition:enter-end="opacity-100 scale-100"
+            x-transition:leave="transition ease-in duration-150"
+            x-transition:leave-start="opacity-100 scale-100"
+            x-transition:leave-end="opacity-0 scale-95"
+            class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl w-full max-w-4xl max-h-[85vh] flex flex-col overflow-hidden shadow-2xl">
             <!-- Modal Header -->
             <div class="p-4 sm:p-5 bg-slate-900 text-white flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 shrink-0">
                 <div>
@@ -815,8 +828,21 @@
 
     <!-- Closing Stock Modal -->
     <div x-data="{ show: @entangle('showClosingStockModal'), modalSearch: '' }" x-show="show" x-cloak @keydown.window.escape="show = false"
+        x-transition:enter="transition ease-out duration-200"
+        x-transition:enter-start="opacity-0"
+        x-transition:enter-end="opacity-100"
+        x-transition:leave="transition ease-in duration-150"
+        x-transition:leave-start="opacity-100"
+        x-transition:leave-end="opacity-0"
         class="fixed inset-0 z-[400] flex items-center justify-center p-3 sm:p-6 bg-slate-950/60 backdrop-blur-sm">
-        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl w-full max-w-4xl max-h-[85vh] flex flex-col overflow-hidden shadow-2xl">
+        <div x-show="show"
+            x-transition:enter="transition ease-out duration-200"
+            x-transition:enter-start="opacity-0 scale-95"
+            x-transition:enter-end="opacity-100 scale-100"
+            x-transition:leave="transition ease-in duration-150"
+            x-transition:leave-start="opacity-100 scale-100"
+            x-transition:leave-end="opacity-0 scale-95"
+            class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl w-full max-w-4xl max-h-[85vh] flex flex-col overflow-hidden shadow-2xl">
             <!-- Modal Header -->
             <div class="p-4 sm:p-5 bg-slate-900 text-white flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 shrink-0">
                 <div>
@@ -881,8 +907,21 @@
 
     <!-- Closing Report & Audit Modal -->
     <div x-data="{ show: @entangle('showClosingReportModal') }" x-show="show" x-cloak
+        x-transition:enter="transition ease-out duration-200"
+        x-transition:enter-start="opacity-0"
+        x-transition:enter-end="opacity-100"
+        x-transition:leave="transition ease-in duration-150"
+        x-transition:leave-start="opacity-100"
+        x-transition:leave-end="opacity-0"
         class="fixed inset-0 z-[500] flex items-center justify-center p-3 sm:p-6 bg-slate-950/60 backdrop-blur-sm">
-        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl w-full max-w-md p-5 sm:p-6 shadow-2xl max-h-[90vh] overflow-y-auto no-scrollbar">
+        <div x-show="show"
+            x-transition:enter="transition ease-out duration-200"
+            x-transition:enter-start="opacity-0 scale-95"
+            x-transition:enter-end="opacity-100 scale-100"
+            x-transition:leave="transition ease-in duration-150"
+            x-transition:leave-start="opacity-100 scale-100"
+            x-transition:leave-end="opacity-0 scale-95"
+            class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl w-full max-w-md p-5 sm:p-6 shadow-2xl max-h-[90vh] overflow-y-auto no-scrollbar">
             <div class="text-center mb-4">
                 <span class="text-[10px] font-bold text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/50 px-2.5 py-0.5 rounded-full border border-rose-200 dark:border-rose-900/50 uppercase">
                     Laporan Akhir Shift
@@ -943,8 +982,20 @@
 
     <!-- Transaction Detail Modal -->
     <div x-data="{ show: @entangle('showDetailsModal') }" x-show="show" x-cloak @keydown.window.escape="show = false"
+        x-transition:enter="transition ease-out duration-200"
+        x-transition:enter-start="opacity-0"
+        x-transition:enter-end="opacity-100"
+        x-transition:leave="transition ease-in duration-150"
+        x-transition:leave-start="opacity-100"
+        x-transition:leave-end="opacity-0"
         class="fixed inset-0 z-[600] flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm">
-        <div @click.away="show = false"
+        <div @click.away="show = false" x-show="show"
+            x-transition:enter="transition ease-out duration-200"
+            x-transition:enter-start="opacity-0 scale-95"
+            x-transition:enter-end="opacity-100 scale-100"
+            x-transition:leave="transition ease-in duration-150"
+            x-transition:leave-start="opacity-100 scale-100"
+            x-transition:leave-end="opacity-0 scale-95"
             class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl w-full max-w-md shadow-2xl flex flex-col overflow-hidden">
             <div class="p-4 bg-slate-900 text-white flex justify-between items-center">
                 <div>
