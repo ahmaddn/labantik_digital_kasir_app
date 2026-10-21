@@ -23,6 +23,7 @@ class Logout
             try {
                 $attendance = CashierAttendance::where('user_id', $user->id)
                     ->whereDate('date', now()->toDateString())
+                    ->when($activeJurusanId, fn ($q) => $q->where('jurusan_id', $activeJurusanId))
                     ->whereNull('clock_out')
                     ->first();
 

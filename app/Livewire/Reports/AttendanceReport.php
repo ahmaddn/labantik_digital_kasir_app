@@ -89,14 +89,15 @@ class AttendanceReport extends Component
     {
         $attendance = CashierAttendance::findOrFail($id);
 
-        // Ensure cashier can only edit their own, and only if edit_count < 1
-        if ($attendance->user_id !== auth()->id() && session('active_role_name') !== 'superadmin') {
+        // Ensure cashier can only edit their own, and only if edit_count < 1. Pengelola & superadmin have administrative access.
+        $hasAdminAccess = in_array(session('active_role_name'), ['superadmin', 'pengelola_jurusan']);
+        if ($attendance->user_id !== auth()->id() && ! $hasAdminAccess) {
             $this->dispatch('toast', message: 'Anda tidak diizinkan mengedit laporan ini.');
 
             return;
         }
 
-        if ($attendance->edit_count >= 1 && session('active_role_name') !== 'superadmin') {
+        if ($attendance->edit_count >= 1 && ! $hasAdminAccess) {
             $this->dispatch('toast', message: 'Laporan ini sudah diedit 1 kali dan tidak bisa diubah lagi.');
 
             return;
@@ -112,13 +113,14 @@ class AttendanceReport extends Component
         $attendance = CashierAttendance::findOrFail($this->editingAttendanceId);
 
         // Final authorization check
-        if ($attendance->user_id !== auth()->id() && session('active_role_name') !== 'superadmin') {
+        $hasAdminAccess = in_array(session('active_role_name'), ['superadmin', 'pengelola_jurusan']);
+        if ($attendance->user_id !== auth()->id() && ! $hasAdminAccess) {
             $this->dispatch('toast', message: 'Anda tidak diizinkan mengedit laporan ini.');
 
             return;
         }
 
-        if ($attendance->edit_count >= 1 && session('active_role_name') !== 'superadmin') {
+        if ($attendance->edit_count >= 1 && ! $hasAdminAccess) {
             $this->dispatch('toast', message: 'Laporan ini sudah pernah diedit.');
 
             return;
@@ -138,6 +140,29 @@ class AttendanceReport extends Component
         $this->dispatch('toast', message: 'Laporan shift berhasil diperbarui.');
 
         // Refresh details modal
+        if ($this->detailUserId) {
+            $this->showDetails($this->detailUserId);
+        }
+    }
+
+    public function reopenShift($attendanceId)
+    {
+        $hasAdminAccess = in_array(session('active_role_name'), ['superadmin', 'pengelola_jurusan']);
+        if (! $hasAdminAccess) {
+            $this->dispatch('toast', message: 'Hanya Pengelola atau Superadmin yang dapat membuka kembali shift kasir.', type: 'danger');
+
+            return;
+        }
+
+        $attendance = CashierAttendance::findOrFail($attendanceId);
+        $attendance->update([
+            'clock_out' => null,
+            'closing_cash' => 0,
+            'status' => $attendance->clock_in_status ?? 'present',
+        ]);
+
+        $this->dispatch('toast', message: 'Shift kasir atas nama ' . ($attendance->user?->name ?? 'Kasir') . ' berhasil dibuka kembali.', type: 'success');
+
         if ($this->detailUserId) {
             $this->showDetails($this->detailUserId);
         }

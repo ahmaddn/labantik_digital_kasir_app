@@ -40,8 +40,10 @@ class AppServiceProvider extends ServiceProvider
                 $user = $event->user;
                 if ($user) {
                     try {
+                        $activeJurusanId = session('active_jurusan_id');
                         $attendance = CashierAttendance::where('user_id', $user->id)
                             ->whereDate('date', now()->toDateString())
+                            ->when($activeJurusanId, fn ($q) => $q->where('jurusan_id', $activeJurusanId))
                             ->whereNull('clock_out')
                             ->first();
 

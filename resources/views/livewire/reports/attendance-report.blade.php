@@ -174,9 +174,14 @@
                                             <button wire:click="viewReport('{{ $att->id }}')" class="px-3 py-1.5 bg-primary-blue hover:bg-blue-900 text-primary-yellow rounded-lg font-black text-[10px] uppercase italic tracking-wider transition-all">
                                                 Lihat
                                             </button>
-                                            @if(($att->user_id === auth()->id() && $att->edit_count < 1) || session('active_role_name') === 'superadmin')
+                                            @if(($att->user_id === auth()->id() && $att->edit_count < 1) || in_array(session('active_role_name'), ['superadmin', 'pengelola_jurusan']))
                                                 <button wire:click="openEditReport('{{ $att->id }}')" class="px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white rounded-lg font-black text-[10px] uppercase italic tracking-wider transition-all">
                                                     Edit
+                                                </button>
+                                            @endif
+                                            @if(in_array(session('active_role_name'), ['superadmin', 'pengelola_jurusan']))
+                                                <button wire:click="reopenShift('{{ $att->id }}')" onclick="return confirm('Buka kembali shift kasir ini agar kasir dapat kembali bertransaksi?') || event.stopImmediatePropagation()" class="px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-lg font-black text-[10px] uppercase italic tracking-wider transition-all" title="Buka kembali shift kasir">
+                                                    Buka Shift
                                                 </button>
                                             @endif
                                         </div>
