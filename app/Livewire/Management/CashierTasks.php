@@ -506,7 +506,7 @@ class CashierTasks extends Component
                     $q2->where('approval_status', 'pending');
                 });
             });
-            $tasks = $query->orderBy('date', 'desc')->orderBy('created_at', 'desc')->simplePaginate(15);
+            $tasks = $query->orderBy('date', 'desc')->orderBy('created_at', 'desc')->paginate(15);
         } elseif ($this->activeTab === 'history') {
             $query = CashierTaskDefinition::with($with);
             if ($activeJurusanId) {
@@ -519,7 +519,7 @@ class CashierTasks extends Component
                 });
             }
             $query->where('date', '<', $today);
-            $tasks = $query->orderBy('date', 'desc')->orderBy('created_at', 'desc')->simplePaginate(15);
+            $tasks = $query->orderBy('date', 'desc')->orderBy('created_at', 'desc')->paginate(15);
 
         } else {
             $query = CashierTaskDefinition::with($with);
@@ -536,7 +536,7 @@ class CashierTasks extends Component
                 $q->where('is_routine', true)
                     ->orWhere('date', '>=', $today);
             });
-            $tasks = $query->orderBy('is_routine', 'desc')->orderBy('date', 'asc')->orderBy('created_at', 'desc')->simplePaginate(15);
+            $tasks = $query->orderBy('is_routine', 'desc')->orderBy('date', 'asc')->orderBy('created_at', 'desc')->paginate(15);
         }
 
         $jurusans = session('active_role_name') === 'superadmin'

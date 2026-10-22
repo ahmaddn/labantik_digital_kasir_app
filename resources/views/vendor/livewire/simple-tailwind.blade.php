@@ -1,7 +1,9 @@
 @php
     $pageName = $paginator->getPageName();
-    $lastPage = $paginator->lastPage();
+    $hasLastPage = method_exists($paginator, 'lastPage');
+    $lastPage = $hasLastPage ? $paginator->lastPage() : null;
     $currentPage = $paginator->currentPage();
+    $hasTotal = method_exists($paginator, 'total');
 @endphp
 
 <div>
@@ -11,7 +13,9 @@
             <div class="text-xs text-slate-500 dark:text-slate-400 order-2 sm:order-1 text-center sm:text-left">
                 Menampilkan <span class="font-bold text-slate-700 dark:text-slate-200">{{ $paginator->firstItem() ?? 0 }}</span>
                 sampai <span class="font-bold text-slate-700 dark:text-slate-200">{{ $paginator->lastItem() ?? 0 }}</span>
-                dari <span class="font-bold text-slate-700 dark:text-slate-200">{{ $paginator->total() }}</span> data
+                @if ($hasTotal)
+                    dari <span class="font-bold text-slate-700 dark:text-slate-200">{{ $paginator->total() }}</span> data
+                @endif
             </div>
 
             {{-- Pagination Controls --}}
@@ -35,7 +39,9 @@
                     $elements = [];
                     $formatRange = fn($range) => array_combine($range, array_fill(0, count($range), '#'));
 
-                    if ($lastPage <= 7) {
+                    if (! $lastPage) {
+                        $elements[] = $formatRange([$currentPage]);
+                    } elseif ($lastPage <= 7) {
                         $elements[] = $formatRange(range(1, $lastPage));
                     } else {
                         if ($currentPage <= 4) {
