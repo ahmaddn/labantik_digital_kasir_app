@@ -182,8 +182,11 @@
                                 </div>
  
                                 <!-- Options -->
-                                <div class="col-span-1 px-4 flex justify-end gap-2">
-                                    <button wire:click="editProduct('{{ $product->id }}')" class="p-2 bg-white dark:bg-gray-700 text-primary-blue rounded-lg shadow-sm hover:scale-110 transition-transform border border-gray-100 dark:border-gray-600">
+                                <div class="col-span-1 px-4 flex justify-end gap-1.5">
+                                    <button wire:click="openStockHistory('{{ $product->id }}')" title="Riwayat Stok Awal" class="p-2 bg-white dark:bg-gray-700 text-amber-600 dark:text-amber-400 rounded-lg shadow-sm hover:scale-110 transition-transform border border-gray-100 dark:border-gray-600">
+                                        <svg class="w-3.5 h-3.5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="9"/></svg>
+                                    </button>
+                                    <button wire:click="editProduct('{{ $product->id }}')" title="Edit Produk" class="p-2 bg-white dark:bg-gray-700 text-primary-blue rounded-lg shadow-sm hover:scale-110 transition-transform border border-gray-100 dark:border-gray-600">
                                         <svg class="w-3.5 h-3.5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
                                     </button>
                                     <button wire:click="confirmDelete('{{ $product->id }}')" class="p-2 bg-white dark:bg-gray-700 text-primary-red rounded-lg shadow-sm hover:scale-110 transition-transform border border-gray-100 dark:border-gray-600">
@@ -218,6 +221,10 @@
                                     
                                     <!-- Aksi -->
                                     <div class="flex gap-1.5">
+                                        <!-- Stock History Button -->
+                                        <button wire:click="openStockHistory('{{ $product->id }}')" title="Riwayat Stok Awal" class="p-2.5 bg-white dark:bg-gray-700 text-amber-600 dark:text-amber-400 rounded-xl shadow-sm border border-gray-150 dark:border-gray-650">
+                                            <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                        </button>
                                         <!-- Detail Eye Button -->
                                         <button @click="showProductDetail = true; detailProduct = { name: '{{ addslashes($product->name) }}', category: '{{ addslashes($product->category->name) }}', price: 'Rp{{ number_format($product->price, 0, ',', '.') }}', modal: 'Rp{{ number_format($product->modal_price, 0, ',', '.') }}', profit: 'Rp{{ number_format($product->price - $product->modal_price, 0, ',', '.') }}', supplier: '{{ $product->supplier_id ? addslashes($product->supplier->name) : 'Internal' }}', status: '{{ $product->is_active ? 'Aktif' : 'Nonaktif' }}' }" class="p-2.5 bg-white dark:bg-gray-700 text-primary-blue rounded-xl shadow-sm border border-gray-150 dark:border-gray-650">
                                             <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
@@ -682,4 +689,173 @@
             </form>
         </div>
     </div>
+
+    <!-- Stock History Modal -->
+    <div 
+        x-data="{ show: @entangle('showStockHistoryModal') }" 
+        x-show="show" 
+        x-cloak 
+        class="fixed inset-0 z-[100] flex items-center justify-center sm:p-6 p-3 bg-black/60 backdrop-blur-sm"
+        x-transition:enter="transition ease-out duration-300"
+        x-transition:enter-start="opacity-0"
+        x-transition:enter-end="opacity-100"
+        x-transition:leave="transition ease-in duration-200"
+        x-transition:leave-start="opacity-100"
+        x-transition:leave-end="opacity-0"
+    >
+        <div 
+            @click.away="$wire.closeStockHistory()" 
+            class="bg-white dark:bg-gray-800 rounded-3xl sm:rounded-[2.5rem] p-6 sm:p-8 max-w-4xl w-full max-h-[92vh] flex flex-col shadow-2xl border border-gray-100 dark:border-gray-700 relative"
+            x-transition:enter="transition cubic-bezier(0.34, 1.56, 0.64, 1) duration-300 transform"
+            x-transition:enter-start="opacity-0 scale-90 translate-y-6"
+            x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+            x-transition:leave="transition ease-in duration-200 transform"
+            x-transition:leave-start="opacity-100 scale-100 translate-y-0"
+            x-transition:leave-end="opacity-0 scale-95 translate-y-4"
+        >
+            <!-- Header Modal -->
+            <div class="flex items-start justify-between pb-4 border-b border-gray-100 dark:border-gray-700">
+                <div class="flex items-center gap-3">
+                    <div class="w-12 h-12 bg-amber-500/10 text-amber-600 dark:text-amber-400 rounded-2xl flex items-center justify-center shrink-0">
+                        <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <h3 class="text-lg sm:text-xl font-black uppercase tracking-tight text-gray-800 dark:text-white italic">
+                                {{ $historyProduct?->name ?? 'Riwayat Stok Produk' }}
+                            </h3>
+                            @if($historyProduct?->category)
+                                <span class="px-2 py-0.5 bg-blue-50 dark:bg-blue-950/30 text-primary-blue text-[9px] font-black uppercase tracking-widest rounded-md border border-blue-100 dark:border-blue-900/30">
+                                    {{ $historyProduct->category->name }}
+                                </span>
+                            @endif
+                        </div>
+                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-0.5">
+                            Semua rekaman tanggal & input stok awal fisik produk
+                        </p>
+                    </div>
+                </div>
+
+                <button type="button" wire:click="closeStockHistory" class="text-gray-400 hover:text-gray-600 dark:hover:text-white p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors">
+                    <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+
+            <!-- Filter Tanggal -->
+            <div class="py-3 px-1 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 border-b border-gray-100 dark:border-gray-700/60 bg-gray-50/50 dark:bg-gray-900/20 -mx-6 sm:-mx-8 px-6 sm:px-8">
+                <div class="text-[10px] font-black uppercase tracking-wider text-gray-400 flex items-center gap-1.5">
+                    <svg class="w-3.5 h-3.5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/></svg>
+                    Filter Rentang Tanggal
+                </div>
+                <div class="flex items-center gap-2">
+                    <div class="flex items-center gap-1.5 bg-white dark:bg-gray-900 px-3 py-1.5 rounded-xl border border-gray-200 dark:border-gray-700">
+                        <span class="text-[9px] font-bold text-gray-400 uppercase">Dari</span>
+                        <input type="date" wire:model.live="historyStartDate" class="bg-transparent border-none p-0 text-[11px] font-bold text-gray-800 dark:text-gray-200 focus:ring-0">
+                    </div>
+                    <span class="text-gray-400 font-bold text-xs">-</span>
+                    <div class="flex items-center gap-1.5 bg-white dark:bg-gray-900 px-3 py-1.5 rounded-xl border border-gray-200 dark:border-gray-700">
+                        <span class="text-[9px] font-bold text-gray-400 uppercase">Sampai</span>
+                        <input type="date" wire:model.live="historyEndDate" class="bg-transparent border-none p-0 text-[11px] font-bold text-gray-800 dark:text-gray-200 focus:ring-0">
+                    </div>
+                    @if($historyStartDate || $historyEndDate)
+                        <button type="button" wire:click="$set('historyStartDate', ''); $set('historyEndDate', '');" title="Reset Filter" class="p-1.5 text-xs text-primary-red hover:bg-red-50 dark:hover:bg-red-950/20 rounded-lg transition-colors">
+                            <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                        </button>
+                    @endif
+                </div>
+            </div>
+
+            <!-- Tabel Riwayat Content (Scrollable) -->
+            <div class="flex-1 overflow-y-auto my-3 -mx-2 px-2 no-scrollbar">
+                @if($stockHistoryEntries && $stockHistoryEntries->count() > 0)
+                    <div class="overflow-x-auto rounded-2xl border border-gray-100 dark:border-gray-700/80">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-gray-50/80 dark:bg-gray-900/60 border-b border-gray-100 dark:border-gray-700 text-[9px] font-black text-gray-400 uppercase tracking-widest">
+                                    <th class="py-3 px-4">Tanggal Stok</th>
+                                    <th class="py-3 px-4 text-center">Stok Awal</th>
+                                    <th class="py-3 px-4 text-center">Sisa Stok</th>
+                                    <th class="py-3 px-4">Dicatat Oleh</th>
+                                    <th class="py-3 px-4 text-right">Waktu Input</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-100 dark:divide-gray-800 text-xs">
+                                @foreach($stockHistoryEntries as $entry)
+                                    @php
+                                        $carbonDate = \Carbon\Carbon::parse($entry->date);
+                                    @endphp
+                                    <tr class="hover:bg-gray-50/50 dark:hover:bg-gray-900/30 transition-colors">
+                                        <td class="py-3.5 px-4 whitespace-nowrap">
+                                            <div class="font-black text-gray-800 dark:text-gray-100 uppercase tracking-tight">
+                                                {{ $carbonDate->locale('id')->isoFormat('dddd, D MMMM Y') }}
+                                            </div>
+                                            <div class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mt-0.5">
+                                                {{ $carbonDate->format('Y-m-d') }}
+                                            </div>
+                                        </td>
+                                        <td class="py-3.5 px-4 text-center whitespace-nowrap">
+                                            <span class="inline-flex items-center px-3 py-1 bg-amber-500/10 text-amber-600 dark:text-amber-400 font-black text-sm rounded-xl border border-amber-500/20">
+                                                {{ number_format($entry->opening_stock, 0, ',', '.') }}
+                                            </span>
+                                        </td>
+                                        <td class="py-3.5 px-4 text-center whitespace-nowrap">
+                                            <span class="inline-flex items-center px-2.5 py-1 bg-gray-100 dark:bg-gray-800 font-bold text-xs text-gray-650 dark:text-gray-300 rounded-lg">
+                                                {{ number_format($entry->closing_stock, 0, ',', '.') }}
+                                            </span>
+                                        </td>
+                                        <td class="py-3.5 px-4 whitespace-nowrap">
+                                            @if($entry->user)
+                                                <div class="flex items-center gap-1.5">
+                                                    <div class="w-6 h-6 rounded-full bg-blue-500/10 text-primary-blue text-[9px] font-black flex items-center justify-center shrink-0">
+                                                        {{ strtoupper(substr($entry->user->name, 0, 1)) }}
+                                                    </div>
+                                                    <span class="font-bold text-gray-700 dark:text-gray-300 uppercase text-[11px]">
+                                                        {{ $entry->user->name }}
+                                                    </span>
+                                                </div>
+                                            @else
+                                                <span class="text-[10px] font-bold text-gray-400 uppercase italic">Sistem / Default</span>
+                                            @endif
+                                        </td>
+                                        <td class="py-3.5 px-4 text-right whitespace-nowrap">
+                                            <span class="text-[10px] font-bold text-gray-400">
+                                                {{ $entry->created_at ? $entry->created_at->format('H:i:s') : '-' }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                @else
+                    <div class="py-12 text-center">
+                        <div class="w-14 h-14 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-3 text-gray-400">
+                            <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/></svg>
+                        </div>
+                        <h4 class="text-sm font-black uppercase tracking-tight text-gray-700 dark:text-gray-300 mb-1">Belum Ada Riwayat Stok Awal</h4>
+                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                            Produk ini belum memiliki pencatatan stok awal pada rentang tanggal yang dipilih.
+                        </p>
+                    </div>
+                @endif
+            </div>
+
+            <!-- Footer & Pagination -->
+            <div class="pt-3 border-t border-gray-100 dark:border-gray-700 flex flex-col sm:flex-row items-center justify-between gap-3">
+                <div class="w-full sm:w-auto">
+                    @if($stockHistoryEntries && $stockHistoryEntries->hasPages())
+                        {{ $stockHistoryEntries->links('livewire.partials.custom-pagination') }}
+                    @endif
+                </div>
+                <div class="flex justify-end w-full sm:w-auto">
+                    <button type="button" wire:click="closeStockHistory" class="w-full sm:w-auto px-6 py-2.5 bg-gray-100 dark:bg-gray-900 text-gray-600 dark:text-gray-300 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors">
+                        Tutup
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </div>

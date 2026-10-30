@@ -54,6 +54,13 @@ class Product extends Component
 
     public string $stock_date = '';
 
+    // Riwayat Stok Awal Modal
+    public bool $showStockHistoryModal = false;
+    public ?string $historyProductId = null;
+    public ?ProductModel $historyProduct = null;
+    public string $historyStartDate = '';
+    public string $historyEndDate = '';
+
     // State
     public $categories = [];
 
@@ -377,6 +384,61 @@ class Product extends Component
         }
     }
 
+    public function openStockHistory(string $productId): void
+    {
+        $this->historyProductId = $productId;
+        $this->historyProduct = ProductModel::with(['category', 'supplier', 'jurusan'])->find($productId);
+
+        if (! $this->historyProduct) {
+            $this->dispatch('toast', message: 'Produk tidak ditemukan.', type: 'danger');
+            return;
+        }
+
+        $this->resetPage('historyPage');
+        $this->historyStartDate = '';
+        $this->historyEndDate = '';
+        $this->showStockHistoryModal = true;
+    }
+
+    public function closeStockHistory(): void
+    {
+        $this->showStockHistoryModal = false;
+        $this->historyProductId = null;
+        $this->historyProduct = null;
+        $this->historyStartDate = '';
+        $this->historyEndDate = '';
+        $this->resetPage('historyPage');
+    }
+
+    public function updatedHistoryStartDate(): void
+    {
+        $this->resetPage('historyPage');
+    }
+
+    public function updatedHistoryEndDate(): void
+    {
+        $this->resetPage('historyPage');
+    }
+
+    public function getStockHistoryProperty()
+    {
+        if (! $this->historyProductId) {
+            return null;
+        }
+
+        return \App\Models\StockEntry::with('user')
+            ->where('product_id', $this->historyProductId)
+            ->when($this->historyStartDate, function ($q) {
+                $q->whereDate('date', '>=', $this->historyStartDate);
+            })
+            ->when($this->historyEndDate, function ($q) {
+                $q->whereDate('date', '<=', $this->historyEndDate);
+            })
+            ->orderBy('date', 'desc')
+            ->orderBy('created_at', 'desc')
+            ->paginate(8, ['*'], 'historyPage');
+    }
+
     public function getCashGroupedProducts()
     {
         $activeJurusanId = session('active_jurusan_id');
@@ -508,6 +570,7 @@ class Product extends Component
             'products' => $query->paginate(10),
             'cashGroupedProducts' => $this->activeTab === 'grouping' ? $this->getCashGroupedProducts() : [],
             'modifierGroupsList' => $modifierGroups,
+            'stockHistoryEntries' => $this->stockHistory,
         ])->layout('layouts.app', ['title' => 'Katalog Produk']);
     }
 }
