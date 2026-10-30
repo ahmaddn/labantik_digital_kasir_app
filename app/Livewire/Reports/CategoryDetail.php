@@ -107,6 +107,11 @@ class CategoryDetail extends Component
             ->join('products', 'transactions.product_id', '=', 'products.id')
             ->leftJoin('suppliers', 'products.supplier_id', '=', 'suppliers.id')
             ->whereIn('transactions.status', ['uang_diterima', 'belum_kembalian'])
+            ->where(function ($q) {
+                $q->whereNull('transactions.payment_method')
+                    ->orWhere('transactions.payment_method', '')
+                    ->orWhere('transactions.payment_method', 'cash');
+            })
             ->where('transactions.jurusan_id', $activeJurusanId);
 
         if ($this->categoryId === 'null' || $this->categoryId === 'none') {
@@ -157,6 +162,11 @@ class CategoryDetail extends Component
         $summaryQuery = Transaction::query()
             ->join('products', 'transactions.product_id', '=', 'products.id')
             ->whereIn('transactions.status', ['uang_diterima', 'belum_kembalian'])
+            ->where(function ($q) {
+                $q->whereNull('transactions.payment_method')
+                    ->orWhere('transactions.payment_method', '')
+                    ->orWhere('transactions.payment_method', 'cash');
+            })
             ->where('transactions.jurusan_id', $activeJurusanId);
 
         if ($this->categoryId === 'null' || $this->categoryId === 'none') {

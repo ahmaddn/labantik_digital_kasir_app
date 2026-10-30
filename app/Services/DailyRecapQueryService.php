@@ -51,7 +51,9 @@ class DailyRecapQueryService
             'generated_at' => now(),
         ];
 
-        $categoryRecap = $allTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])->groupBy(fn ($tx) => $tx->product->category_id ?? 'null')
+        $categoryRecap = $allTransactions->whereIn('status', ['uang_diterima', 'belum_kembalian'])
+            ->filter(fn ($tx) => in_array($tx->payment_method ?? 'cash', ['cash', '', null]))
+            ->groupBy(fn ($tx) => $tx->product->category_id ?? 'null')
             ->map(function ($group) {
                 $first = $group->first();
 

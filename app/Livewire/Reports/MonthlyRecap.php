@@ -149,6 +149,11 @@ class MonthlyRecap extends Component
                 return $q->where('transactions.jurusan_id', $activeJurusanId);
             })
             ->whereIn('status', ['uang_diterima', 'belum_kembalian'])
+            ->where(function ($q) {
+                $q->whereNull('payment_method')
+                    ->orWhere('payment_method', '')
+                    ->orWhere('payment_method', 'cash');
+            })
             ->join('products', 'transactions.product_id', '=', 'products.id')
             ->leftJoin('product_categories', 'products.category_id', '=', 'product_categories.id')
             ->selectRaw("
