@@ -168,82 +168,72 @@
             </table>
         </div>
 
-        <!-- Mobile View (Cards) -->
-        <div class="block md:hidden space-y-4">
+        <!-- Mobile View (Clean Modern Cards) -->
+        <div class="block md:hidden space-y-2.5">
             @forelse($users as $user)
-                <div wire:key="user-card-{{ $user->id }}" class="p-6 bg-gray-50 dark:bg-gray-900 rounded-3xl border border-gray-100 dark:border-gray-800 space-y-4">
-                    <div class="flex items-center gap-3">
-                        <input type="checkbox" wire:key="chk-mobile-{{ $user->id }}" wire:model.live="selectedUsers" value="{{ $user->id }}" class="w-4 h-4 rounded border-gray-300 text-primary-blue focus:ring-primary-blue cursor-pointer">
-                        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-black text-sm shadow-md">
-                            {{ $user->initials() }}
-                        </div>
-                        <div>
-                            <div class="flex items-center gap-2">
-                                <h3 class="font-bold text-gray-800 dark:text-white">{{ $user->name }}</h3>
-                                @if($user->grade_level)
-                                    @php
-                                        $gLevel = (string) $user->grade_level;
-                                        $gColor = match($gLevel) {
-                                            '12' => 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20',
-                                            '11' => 'bg-sky-500/10 text-sky-600 dark:text-sky-400 border-sky-500/20',
-                                            '10' => 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20',
-                                            default => 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-500/20',
-                                        };
-                                    @endphp
-                                    <span class="inline-flex items-center text-[10px] font-black px-2 py-0.5 rounded-full border {{ $gColor }} uppercase tracking-wider">
-                                        Tingkat {{ $gLevel }}
-                                    </span>
-                                @endif
+                <div wire:key="user-card-{{ $user->id }}" class="p-3.5 bg-white dark:bg-gray-800/80 rounded-xl border border-gray-150 dark:border-gray-700/60 shadow-xs flex flex-col gap-2.5">
+                    <!-- Row 1: Checkbox + Avatar + Info + Actions -->
+                    <div class="flex items-center justify-between gap-2">
+                        <div class="flex items-center gap-2.5 min-w-0">
+                            <input type="checkbox" wire:key="chk-mobile-{{ $user->id }}" wire:model.live="selectedUsers" value="{{ $user->id }}" class="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500 cursor-pointer shrink-0">
+                            <div class="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-900/40 flex items-center justify-center font-bold text-xs shrink-0">
+                                {{ $user->initials() }}
                             </div>
-                            <p class="text-xs text-gray-500 dark:text-gray-400">{{ $user->email }}</p>
-                        </div>
-                    </div>
-
-                    <!-- User Access Tags on Mobile -->
-                    <div class="space-y-1">
-                        <p class="text-[10px] font-black uppercase text-gray-400 tracking-wider">Akses Unit / Role:</p>
-                        <div class="flex flex-wrap gap-2">
-                            @php
-                                $userAccesses = $user->getAvailableAccesses();
-                            @endphp
-                            @forelse($userAccesses as $acc)
-                                @php
-                                    $color = 'bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400';
-                                    if ($acc->role_name === 'superadmin') {
-                                        $color = 'bg-purple-50 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400';
-                                    } elseif ($acc->role_name === 'pengelola_jurusan') {
-                                        $color = 'bg-amber-50 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400';
-                                    } elseif ($acc->role_name === 'kasir') {
-                                        $color = 'bg-emerald-50 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400';
-                                    }
-                                @endphp
-                                <span class="inline-flex items-center px-3 py-1 text-[10px] font-black rounded-full uppercase tracking-wider {{ $color }}">
-                                    {{ $acc->role_label }} 
-                                    @if($acc->jurusan_name)
-                                        <span class="mx-1 text-gray-400">•</span> {{ $acc->jurusan_name }}
+                            <div class="min-w-0">
+                                <div class="flex items-center gap-1.5 flex-wrap">
+                                    <h3 class="font-bold text-xs text-gray-900 dark:text-white truncate max-w-[140px]">{{ $user->name }}</h3>
+                                    @if($user->grade_level)
+                                        <span class="inline-flex items-center text-[9px] font-semibold px-1.5 py-0.2 rounded bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 border border-emerald-200/60 dark:border-emerald-800/40 shrink-0">
+                                            Tk. {{ $user->grade_level }}
+                                        </span>
                                     @endif
-                                </span>
-                            @empty
-                                <span class="text-xs text-gray-400 italic">Belum ada hak akses</span>
-                            @endforelse
+                                </div>
+                                <p class="text-[11px] text-gray-400 dark:text-gray-500 truncate mt-0.5">{{ $user->email }}</p>
+                            </div>
+                        </div>
+
+                        <!-- Compact Quick Actions -->
+                        <div class="flex items-center gap-1 shrink-0">
+                            <button wire:click="openEditModal('{{ $user->id }}')" class="p-1.5 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors" title="Edit">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                            </button>
+                            @if($user->id !== auth()->id())
+                                <button wire:click="confirmDelete('{{ $user->id }}')" class="p-1.5 text-gray-400 hover:text-rose-600 dark:hover:text-rose-400 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors" title="Hapus">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                </button>
+                            @endif
                         </div>
                     </div>
 
-                    <!-- Actions -->
-                    <div class="flex justify-end gap-2 pt-3 border-t border-gray-200 dark:border-gray-800">
-
-                        <button wire:click="openEditModal('{{ $user->id }}')" class="inline-flex items-center px-4 py-2.5 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 border border-gray-250 dark:border-gray-700 rounded-xl font-bold text-xs gap-2 transition-all">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
-                            Edit
-                        </button>
-                        <button wire:click="confirmDelete('{{ $user->id }}')" class="inline-flex items-center px-4 py-2.5 bg-red-50 hover:bg-red-100 text-primary-red border border-red-200 dark:bg-red-950/30 dark:border-red-900 rounded-xl font-bold text-xs gap-2 transition-all" @if($user->id === auth()->id()) disabled style="opacity: 0.3;" @endif>
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                            Hapus
-                        </button>
+                    <!-- Row 2: Role / Jurusan Badges -->
+                    <div class="flex items-center gap-1.5 flex-wrap pt-1.5 border-t border-gray-50 dark:border-gray-700/50">
+                        @php
+                            $userAccesses = $user->getAvailableAccesses();
+                        @endphp
+                        @forelse($userAccesses as $acc)
+                            @php
+                                $roleBadge = 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-800/40';
+                                if ($acc->role_name === 'superadmin') {
+                                    $roleBadge = 'bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-950/40 dark:text-purple-300 dark:border-purple-800/40';
+                                } elseif ($acc->role_name === 'pengelola_jurusan') {
+                                    $roleBadge = 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800/40';
+                                } elseif ($acc->role_name === 'kasir') {
+                                    $roleBadge = 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800/40';
+                                }
+                            @endphp
+                            <span class="inline-flex items-center px-2 py-0.5 text-[10px] font-medium rounded-md border {{ $roleBadge }}">
+                                {{ $acc->role_label }}
+                                @if($acc->jurusan_name)
+                                    <span class="mx-1 text-gray-300 dark:text-gray-600">&bull;</span> {{ $acc->jurusan_name }}
+                                @endif
+                            </span>
+                        @empty
+                            <span class="text-[10px] text-gray-400 italic">Belum ada hak akses</span>
+                        @endforelse
                     </div>
                 </div>
             @empty
-                <div class="py-10 text-center text-gray-400 font-semibold italic">
+                <div class="py-8 text-center text-gray-400 bg-white dark:bg-gray-800 rounded-xl border border-dashed border-gray-200 dark:border-gray-700 text-xs">
                     Tidak ada data pengguna yang ditemukan.
                 </div>
             @endforelse
