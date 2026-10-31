@@ -10,7 +10,7 @@
     <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
         <!-- Input Form Card -->
         <div
-            class="md:col-span-2 bg-white dark:bg-gray-800 rounded-[3rem] p-5 shadow-2xl border border-gray-150 dark:border-gray-700">
+            class="md:col-span-2 bg-white dark:bg-gray-800 rounded-2xl p-5 shadow-2xl border border-gray-150 dark:border-gray-700">
             <div class="space-y-6">
                 <!-- Select Month -->
                 <div>
@@ -99,7 +99,7 @@
 
         <!-- Month Summary Stats Card -->
         <div
-            class="bg-gray-900 text-white rounded-[3rem] p-5 shadow-2xl flex flex-col justify-between relative overflow-hidden border-b-8 border-primary-blue">
+            class="bg-gray-900 text-white rounded-2xl p-5 shadow-2xl flex flex-col justify-between relative overflow-hidden border-b-8 border-primary-blue">
             <div>
                 <h3 class="text-[10px] font-black uppercase tracking-[0.2em] text-blue-400 mb-1">RINGKASAN AKHIR</h3>
                 <h2 class="text-lg font-black uppercase italic text-white">

@@ -356,7 +356,7 @@
          x-init="initCharts(); $watch('inflowData', () => initCharts()); $watch('outflowData', () => initCharts());"
     >
         <!-- Inflow Chart Card -->
-        <div class="bg-white dark:bg-gray-800 rounded-[3rem] p-5 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 flex flex-col" wire:ignore>
+        <div class="bg-white dark:bg-gray-800 rounded-2xl p-5 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 flex flex-col" wire:ignore>
             <div class="flex justify-between items-center mb-6">
                 <div>
                     <h3 class="text-sm font-black uppercase tracking-wider text-gray-800 dark:text-white italic">Sumber Kas Masuk</h3>
@@ -377,7 +377,7 @@
         </div>
 
         <!-- Outflow Chart Card -->
-        <div class="bg-white dark:bg-gray-800 rounded-[3rem] p-5 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 flex flex-col" wire:ignore>
+        <div class="bg-white dark:bg-gray-800 rounded-2xl p-5 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 flex flex-col" wire:ignore>
             <div class="flex justify-between items-center mb-6">
                 <div>
                     <h3 class="text-sm font-black uppercase tracking-wider text-gray-800 dark:text-white italic">Tujuan Kas Keluar</h3>
@@ -466,74 +466,119 @@
     </div>
 
     <!-- Table -->
-    <div class="bg-white dark:bg-gray-800 rounded-[3.5rem] shadow-2xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 overflow-hidden mb-12">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 overflow-hidden mb-12">
         <div class="p-10 border-b border-gray-100 dark:border-gray-700">
             <h2 class="text-2xl font-bold uppercase tracking-tight text-gray-800 dark:text-white">Riwayat Transaksi Kas</h2>
         </div>
         
-        <div class="overflow-x-auto">
+        <!-- 1. Desktop Table View -->
+        <div class="hidden md:block overflow-x-auto">
             <table class="w-full text-left">
                 <thead class="bg-gray-50 dark:bg-gray-900/50">
                     <tr>
-                        <th class="px-10 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">Tanggal</th>
-                        <th class="px-10 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">Kategori Kas</th>
-                        <th class="px-10 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">Keterangan</th>
-                        <th class="px-10 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">Jenis</th>
-                        <th class="px-10 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right">Nominal</th>
-                        <th class="px-10 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right">Aksi</th>
+                        <th class="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Tanggal</th>
+                        <th class="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Kategori Kas</th>
+                        <th class="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Keterangan</th>
+                        <th class="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Jenis</th>
+                        <th class="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right">Nominal</th>
+                        <th class="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-50 dark:divide-gray-700">
                     @forelse($transactions as $tx)
                     <tr class="hover:bg-gray-50 dark:hover:bg-gray-900/30 transition-colors">
-                        <td class="px-10 py-8">
-                            <span class="text-sm font-black text-gray-800 dark:text-white uppercase">{{ \Carbon\Carbon::parse($tx->date)->translatedFormat('d M Y') }}</span>
+                        <td class="px-8 py-5">
+                            <span class="text-xs font-bold text-gray-800 dark:text-white uppercase">{{ \Carbon\Carbon::parse($tx->date)->translatedFormat('d M Y') }}</span>
                         </td>
-                        <td class="px-10 py-8">
-                            <div class="text-sm font-black text-gray-800 dark:text-white uppercase tracking-tight mb-2">{{ $tx->cashCategory->name ?? '-' }}</div>
-                            <span class="px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest {{ $tx->cash_type === 'modal' ? 'bg-primary-blue/10 text-primary-blue' : 'bg-green-500/10 text-green-500' }}">
+                        <td class="px-8 py-5">
+                            <div class="text-xs font-bold text-gray-800 dark:text-white uppercase tracking-tight">{{ $tx->cashCategory->name ?? '-' }}</div>
+                            <span class="inline-block mt-1 px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-widest {{ $tx->cash_type === 'modal' ? 'bg-primary-blue/10 text-primary-blue' : 'bg-green-500/10 text-green-500' }}">
                                 {{ $tx->cash_type === 'modal' ? 'Kas Modal' : 'Kas Keuntungan' }}
                             </span>
                         </td>
-                        <td class="px-10 py-8">
-                            <div class="text-sm font-black text-gray-800 dark:text-white tracking-tight">{{ $tx->description }}</div>
+                        <td class="px-8 py-5">
+                            <div class="text-xs font-medium text-gray-700 dark:text-gray-300">{{ $tx->description }}</div>
                         </td>
-                        <td class="px-10 py-8">
+                        <td class="px-8 py-5">
                             @if($tx->type === 'income')
-                                <span class="px-4 py-1.5 bg-green-100 text-green-700 rounded-full text-[9px] font-black uppercase tracking-widest">Masuk</span>
+                                <span class="px-3 py-1 bg-green-100 text-green-700 dark:bg-green-950/40 dark:text-green-300 rounded-full text-[9px] font-bold uppercase tracking-widest">Masuk</span>
                             @else
-                                <span class="px-4 py-1.5 bg-red-100 text-red-700 rounded-full text-[9px] font-black uppercase tracking-widest">Keluar</span>
+                                <span class="px-3 py-1 bg-red-100 text-red-700 dark:bg-red-950/40 dark:text-red-300 rounded-full text-[9px] font-bold uppercase tracking-widest">Keluar</span>
                             @endif
                         </td>
-                        <td class="px-10 py-8 text-right">
-                            <span class="text-lg font-black italic {{ $tx->type === 'income' ? 'text-green-500' : 'text-primary-red' }}">
+                        <td class="px-8 py-5 text-right whitespace-nowrap">
+                            <span class="text-sm font-bold {{ $tx->type === 'income' ? 'text-green-600 dark:text-green-400' : 'text-primary-red' }}">
                                 {{ $tx->type === 'income' ? '+' : '-' }}Rp{{ number_format($tx->amount, 0, ',', '.') }}
                             </span>
                         </td>
-                        <td class="px-10 py-8 text-right flex justify-end gap-2">
-                            <button 
-                                wire:click="editTransaction('{{ $tx->id }}')"
-                                class="p-3 bg-white dark:bg-gray-700 text-primary-blue rounded-xl shadow-sm hover:scale-110 transition-transform border border-gray-100 dark:border-gray-600"
-                            >
-                                <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
-                            </button>
-                            <button 
-                                wire:click="confirmDelete('{{ $tx->id }}')"
-                                class="p-3 bg-red-50 dark:bg-red-900/20 text-red-400 hover:text-red-600 rounded-xl hover:scale-110 transition-transform"
-                            >
-                                <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
-                            </button>
+                        <td class="px-8 py-5 text-right">
+                            <div class="flex justify-end gap-1.5">
+                                <button wire:click="editTransaction('{{ $tx->id }}')" title="Edit" class="p-2 text-slate-500 hover:text-blue-600 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors">
+                                    <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
+                                </button>
+                                <button wire:click="deleteTransaction('{{ $tx->id }}')" wire:confirm="Apakah Anda yakin ingin menghapus mutasi kas ini?" title="Hapus" class="p-2 text-slate-400 hover:text-rose-600 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors">
+                                    <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                                </button>
+                            </div>
                         </td>
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="6" class="px-10 py-32 text-center opacity-20">
-                            <p class="text-xs font-black uppercase tracking-widest italic">Tidak ada catatan kas bulan ini</p>
+                        <td colspan="6" class="px-8 py-20 text-center opacity-30">
+                            <p class="text-xs font-bold uppercase tracking-widest italic">Belum ada transaksi kas</p>
                         </td>
                     </tr>
                     @endforelse
                 </tbody>
             </table>
+        </div>
+
+        <!-- 2. Mobile Adaptive Cards (No Horizontal Scroll) -->
+        <div class="block md:hidden p-3.5 space-y-2.5">
+            @forelse($transactions as $tx)
+            <div class="p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-2xs">
+                <!-- Baris Atas: Tanggal & Badge Status -->
+                <div class="flex items-center justify-between text-xs pb-2 border-b border-slate-100 dark:border-slate-800">
+                    <span class="text-xs font-semibold text-slate-600 dark:text-slate-400">{{ \Carbon\Carbon::parse($tx->date)->translatedFormat('d M Y') }}</span>
+                    <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider {{ $tx->type === 'income' ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' : 'bg-rose-500/10 text-rose-600 dark:text-rose-400' }}">
+                        {{ $tx->type === 'income' ? 'Masuk' : 'Keluar' }}
+                    </span>
+                </div>
+
+                <!-- Konten Tengah: Keterangan & Kategori -->
+                <div class="py-2.5">
+                    <h4 class="text-sm font-bold text-slate-900 dark:text-white leading-snug">{{ $tx->description }}</h4>
+                    <div class="flex items-center gap-1.5 mt-1.5 flex-wrap">
+                        <span class="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-[10px] font-medium">
+                            {{ $tx->cashCategory->name ?? '-' }}
+                        </span>
+                        <span class="px-2 py-0.5 rounded text-[10px] font-medium {{ $tx->cash_type === 'modal' ? 'bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400' : 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400' }}">
+                            {{ $tx->cash_type === 'modal' ? 'Modal' : 'Keuntungan' }}
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Baris Bawah: Nominal & Aksi -->
+                <div class="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-800">
+                    <div>
+                        <span class="text-[10px] text-slate-400 block">Nominal</span>
+                        <span class="text-base font-bold {{ $tx->type === 'income' ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400' }}">
+                            {{ $tx->type === 'income' ? '+' : '-' }}Rp{{ number_format($tx->amount, 0, ',', '.') }}
+                        </span>
+                    </div>
+                    <div class="flex items-center gap-1">
+                        <button wire:click="editTransaction('{{ $tx->id }}')" title="Edit" class="p-2 rounded-lg text-slate-500 hover:text-blue-600 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                            <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
+                        </button>
+                        <button wire:click="deleteTransaction('{{ $tx->id }}')" wire:confirm="Apakah Anda yakin ingin menghapus mutasi kas ini?" title="Hapus" class="p-2 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                            <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            @empty
+            <div class="py-12 text-center text-xs text-slate-400 italic">Belum ada transaksi kas</div>
+            @endforelse
         </div>
         <div class="px-10 py-8 bg-gray-50 dark:bg-gray-900/50">
             {{ $transactions->links('livewire.partials.custom-pagination') }}
@@ -555,7 +600,7 @@
     >
         <div 
             @click.away="show = false"
-            class="bg-white dark:bg-gray-900 w-full max-w-lg rounded-[3rem] shadow-2xl flex flex-col max-h-[90vh] overflow-y-auto no-scrollbar animate-in zoom-in-95 duration-300"
+            class="bg-white dark:bg-gray-900 w-full max-w-lg rounded-2xl shadow-2xl flex flex-col max-h-[90vh] overflow-y-auto no-scrollbar animate-in zoom-in-95 duration-300"
         >
             <div class="p-10 bg-primary-blue text-white relative">
                 <div class="absolute right-10 top-10">
@@ -863,7 +908,7 @@
     >
         <div
             @click.away="show = false"
-            class="bg-white dark:bg-gray-900 w-full sm:max-w-xl rounded-t-[2.5rem] sm:rounded-[2.5rem] shadow-2xl flex flex-col overflow-hidden"
+            class="bg-white dark:bg-gray-900 w-full sm:max-w-xl rounded-t-[2.5rem] sm:rounded-2xl shadow-2xl flex flex-col overflow-hidden"
             style="max-height: 85vh;"
         >
             {{-- Header --}}

@@ -37,13 +37,13 @@
                         <input type="text" wire:model="note" class="w-full px-6 py-4 bg-gray-50 dark:bg-gray-900 border-none rounded-2xl focus:ring-4 focus:ring-primary-blue/10 font-black text-xs text-gray-800 dark:text-white">
                     </div>
 
-                    <div class="flex items-center gap-4 pt-4">
-                        <button type="submit" class="flex-1 py-5 bg-primary-blue text-white rounded-[2rem] shadow-2xl shadow-blue-900/20 font-bold uppercase tracking-wide text-xs transform hover:-translate-y-1 transition-all">
+                    <div class="flex items-center gap-3 pt-2">
+                        <button type="submit" class="flex-1 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-semibold shadow-sm transition-colors">
                             {{ $editingId ? 'Simpan Perubahan' : 'Tambah Supplier' }}
                         </button>
                         @if($editingId)
-                        <button type="button" wire:click="cancelEdit" class="p-5 bg-gray-100 dark:bg-gray-900 text-gray-400 rounded-[2rem] hover:text-primary-red transition-all">
-                            <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                        <button type="button" wire:click="cancelEdit" title="Batal Edit" class="p-3 bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-rose-600 rounded-xl transition-colors">
+                            <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
                         </button>
                         @endif
                     </div>
@@ -53,7 +53,7 @@
 
         <!-- List Section -->
         <div class="lg:col-span-2">
-            <div class="bg-white dark:bg-gray-800 rounded-[3.5rem] shadow-2xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 overflow-hidden">
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 overflow-hidden">
                 <div class="p-5 border-b border-gray-100 dark:border-gray-700 flex flex-col md:flex-row justify-between items-center gap-4">
                     <div class="relative group w-full md:w-64">
                         <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -109,34 +109,42 @@
                         </tbody>
                     </table>
 
-                    <!-- Mobile List View -->
-                    <div class="block md:hidden p-4 space-y-4">
+                    <!-- Mobile List View: Clean, Minimalist, Thumb-friendly Lucide Icons -->
+                    <div class="block md:hidden p-3.5 space-y-2.5">
                         @forelse($suppliers as $supplier)
-                            <div class="p-5 rounded-[2rem] border bg-white dark:bg-gray-900/40 transition-all duration-300 {{ $highlight == $supplier->id ? 'border-amber-400 bg-amber-400/5 animate-highlight-breath' : 'border-gray-100 dark:border-gray-800' }} mb-4">
+                            <div class="p-3.5 sm:p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 transition-colors {{ $highlight == $supplier->id ? 'border-amber-400 bg-amber-400/5' : '' }} shadow-2xs">
                                 <div class="flex items-start justify-between gap-3">
-                                    <div>
-                                        <h3 class="text-base font-black text-gray-850 dark:text-white uppercase tracking-tight italic">{{ $supplier->name }}</h3>
-                                        <p class="text-[10px] font-bold text-gray-400 mt-1 uppercase tracking-widest">{{ $supplier->address ?: 'Tidak ada alamat' }}</p>
+                                    <div class="min-w-0 flex-1">
+                                        <h3 class="text-sm font-bold text-slate-900 dark:text-white truncate">{{ $supplier->name }}</h3>
+                                        @if($supplier->address)
+                                            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-1">{{ $supplier->address }}</p>
+                                        @endif
+                                        <div class="flex items-center gap-2 mt-2">
+                                            @if($supplier->contact)
+                                                <span class="px-2 py-0.5 bg-blue-50 dark:bg-blue-950/30 text-blue-600 dark:text-blue-400 rounded text-[10px] font-medium">
+                                                    {{ $supplier->contact }}
+                                                </span>
+                                            @endif
+                                            <span class="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded text-[10px] font-medium">
+                                                {{ $supplier->products_count ?? $supplier->products()->count() }} Item
+                                            </span>
+                                        </div>
                                     </div>
-                                    <span class="px-3 py-1.5 bg-gray-100 dark:bg-gray-900 rounded-lg text-[9px] font-black text-gray-500 uppercase tracking-widest shrink-0">
-                                        {{ $supplier->products_count ?? $supplier->products()->count() }} Item
-                                    </span>
-                                </div>
-                                <div class="mt-3 p-3 bg-gray-50 dark:bg-gray-900/50 rounded-2xl border border-gray-100 dark:border-gray-800 text-xs font-black text-primary-blue tracking-widest">
-                                    Kontak: {{ $supplier->contact ?: '-' }}
-                                </div>
-                                <div class="flex justify-end gap-2 mt-4 pt-3 border-t border-gray-100 dark:border-gray-800">
-                                    <button wire:click="editSupplier('{{ $supplier->id }}')" class="p-2.5 bg-white dark:bg-gray-700 text-primary-blue rounded-xl shadow-sm border border-gray-150 dark:border-gray-600">
-                                        <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
-                                    </button>
-                                    <button @click="$dispatch('open-delete-supplier', { id: '{{ $supplier->id }}' })" class="p-2.5 bg-white dark:bg-gray-700 text-primary-red rounded-xl shadow-sm border border-gray-150 dark:border-gray-600">
-                                        <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                                    </button>
+                                    
+                                    <!-- Aksi: Lucide Icons -->
+                                    <div class="flex items-center gap-1 shrink-0">
+                                        <button wire:click="editSupplier('{{ $supplier->id }}')" title="Edit" class="p-2 rounded-lg text-slate-500 hover:text-blue-600 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                                            <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
+                                        </button>
+                                        <button @click="$dispatch('open-delete-supplier', { id: '{{ $supplier->id }}' })" title="Hapus" class="p-2 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                                            <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         @empty
-                            <div class="py-16 text-center opacity-20">
-                                <p class="text-xs font-black uppercase tracking-widest italic">Belum ada supplier</p>
+                            <div class="py-12 text-center">
+                                <p class="text-xs text-slate-400 italic">Belum ada supplier</p>
                             </div>
                         @endforelse
                     </div>
@@ -146,7 +154,7 @@
                 </div>
             </div>
         </div>
-    <!-- Delete Modal -->
+    <!-- Delete Modal (Clean & Compact) -->
     <div 
         x-data="{ 
             show: false, 
@@ -167,32 +175,32 @@
         @open-delete-supplier.window="open($event)"
         x-show="show" 
         x-cloak
-        class="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/60 backdrop-blur-sm"
-        x-transition:enter="transition ease-out duration-300"
+        class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs"
+        x-transition:enter="transition ease-out duration-200"
         x-transition:enter-start="opacity-0"
         x-transition:enter-end="opacity-100"
-        x-transition:leave="transition ease-in duration-200"
+        x-transition:leave="transition ease-in duration-150"
         x-transition:leave-start="opacity-100"
         x-transition:leave-end="opacity-0"
     >
         <div 
             @click.away="close()"
-            class="bg-white dark:bg-gray-800 rounded-[3rem] p-12 max-w-md w-full shadow-2xl text-center"
-            x-transition:enter="transition ease-out duration-500"
-            x-transition:enter-start="opacity-0 scale-90 translate-y-10"
-            x-transition:enter-end="opacity-100 scale-100 translate-y-0"
-            x-transition:leave="transition ease-in duration-300"
-            x-transition:leave-start="opacity-100 scale-100 translate-y-0"
-            x-transition:leave-end="opacity-0 scale-95 translate-y-10"
+            class="bg-white dark:bg-slate-900 rounded-2xl p-6 max-w-sm w-full shadow-2xl text-center border border-slate-200 dark:border-slate-800"
+            x-transition:enter="transition cubic-bezier(0.16, 1, 0.3, 1) duration-200 transform"
+            x-transition:enter-start="opacity-0 scale-95"
+            x-transition:enter-end="opacity-100 scale-100"
+            x-transition:leave="transition ease-in duration-150 transform"
+            x-transition:leave-start="opacity-100 scale-100"
+            x-transition:leave-end="opacity-0 scale-95"
         >
-            <div class="w-20 h-20 bg-primary-red/10 text-primary-red rounded-full flex items-center justify-center mx-auto mb-8">
-                <svg class="w-10 h-10" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
+            <div class="w-12 h-12 bg-rose-500/10 text-rose-600 rounded-xl flex items-center justify-center mx-auto mb-4">
+                <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
             </div>
-            <h3 class="text-2xl font-bold uppercase tracking-tight text-gray-800 dark:text-white mb-4">Hapus Supplier?</h3>
-            <p class="text-gray-400 font-bold text-xs uppercase tracking-widest mb-10 leading-relaxed">Tindakan ini tidak dapat dibatalkan. Seluruh data terkait supplier ini akan dihapus permanen.</p>
-            <div class="flex gap-4">
-                <button @click="close()" class="flex-1 py-4 bg-gray-100 dark:bg-gray-900 text-gray-400 rounded-2xl font-black uppercase text-[10px] tracking-widest hover:text-gray-600 transition-all">Batal</button>
-                <button @click="confirm()" class="flex-1 py-4 bg-primary-red text-white rounded-2xl font-black uppercase text-[10px] tracking-widest shadow-lg shadow-red-500/30 hover:scale-105 transition-all">Ya, Hapus</button>
+            <h3 class="text-base font-bold text-slate-900 dark:text-white mb-1.5">Hapus Supplier?</h3>
+            <p class="text-slate-500 dark:text-slate-400 text-xs mb-6">Tindakan ini tidak dapat dibatalkan. Seluruh data terkait supplier ini akan dihapus permanen.</p>
+            <div class="flex gap-2.5">
+                <button type="button" @click="close()" class="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-semibold transition-colors">Batal</button>
+                <button type="button" @click="confirm()" class="flex-1 py-2.5 bg-rose-600 hover:bg-rose-500 text-white rounded-xl text-xs font-semibold shadow-sm transition-colors">Hapus</button>
             </div>
         </div>
     </div>

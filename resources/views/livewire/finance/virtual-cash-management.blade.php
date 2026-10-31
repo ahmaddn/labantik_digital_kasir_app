@@ -185,83 +185,122 @@
 
 
     <!-- Table -->
-    <div class="bg-white dark:bg-gray-800 rounded-[3.5rem] shadow-2xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 overflow-hidden mb-12">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 overflow-hidden mb-12">
         <div class="p-10 border-b border-gray-100 dark:border-gray-700">
             <h2 class="text-2xl font-bold uppercase tracking-tight text-gray-800 dark:text-white">Riwayat Transaksi Kas Virtual</h2>
         </div>
         
-        <div class="overflow-x-auto">
+                <!-- Desktop Table View (>= md) -->
+        <div class="hidden md:block overflow-x-auto">
             <table class="w-full text-left">
-                <thead class="bg-gray-50 dark:bg-gray-900/50">
+                <thead class="bg-gray-50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-800">
                     <tr>
-                        <th class="px-10 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">Tanggal</th>
-                        <th class="px-10 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">Metode</th>
-                        <th class="px-10 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">Kategori Kas</th>
-                        <th class="px-10 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">Keterangan</th>
-                        <th class="px-10 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">Jenis</th>
-                        <th class="px-10 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right">Nominal</th>
-                        <th class="px-10 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right">Aksi</th>
+                        <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Tanggal</th>
+                        <th class="px-4 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Metode</th>
+                        <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Kategori Kas</th>
+                        <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Keterangan</th>
+                        <th class="px-4 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">Jenis</th>
+                        <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-right">Nominal</th>
+                        <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-right">Aksi</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-50 dark:divide-gray-700">
+                <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
                     @forelse($transactions as $tx)
-                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-900/30 transition-colors">
-                        <td class="px-10 py-8">
-                            <span class="text-sm font-black text-gray-800 dark:text-white uppercase">{{ $tx->date ? $tx->date->translatedFormat('d M Y') : '-' }}</span>
+                    <tr class="hover:bg-gray-50/60 dark:hover:bg-gray-800/40 transition-colors">
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="text-xs font-semibold text-gray-700 dark:text-gray-300">{{ $tx->date ? $tx->date->translatedFormat('d M Y') : '-' }}</span>
                         </td>
-                        <td class="px-10 py-8">
+                        <td class="px-4 py-4 whitespace-nowrap">
                             @if($tx->source_method === 'transfer')
-                                <span class="px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest bg-blue-500/10 text-blue-500">
+                                <span class="px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
                                     Transfer
                                 </span>
                             @else
-                                <span class="px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest bg-purple-500/10 text-purple-500">
+                                <span class="px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20">
                                     QRIS
                                 </span>
                             @endif
                         </td>
-                        <td class="px-10 py-8">
-                            <div class="text-sm font-black text-gray-800 dark:text-white uppercase tracking-tight">{{ $tx->cashCategory->name ?? '-' }}</div>
+                        <td class="px-6 py-4">
+                            <div class="text-xs font-bold text-gray-900 dark:text-white uppercase">{{ $tx->cashCategory->name ?? '-' }}</div>
                         </td>
-                        <td class="px-10 py-8">
-                            <div class="text-sm font-black text-gray-800 dark:text-white tracking-tight">{{ $tx->description }}</div>
+                        <td class="px-6 py-4">
+                            <div class="text-xs text-gray-600 dark:text-gray-300 max-w-xs truncate">{{ $tx->description }}</div>
                         </td>
-                        <td class="px-10 py-8">
+                        <td class="px-4 py-4 text-center whitespace-nowrap">
                             @if($tx->type === 'income')
-                                <span class="px-4 py-1.5 bg-green-100 text-green-700 rounded-full text-[9px] font-black uppercase tracking-widest">Masuk</span>
+                                <span class="px-2.5 py-1 bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300 rounded-full text-[10px] font-bold uppercase border border-emerald-500/20">Masuk</span>
                             @else
-                                <span class="px-4 py-1.5 bg-red-100 text-red-700 rounded-full text-[9px] font-black uppercase tracking-widest">Keluar</span>
+                                <span class="px-2.5 py-1 bg-rose-50 text-rose-700 dark:bg-rose-950/50 dark:text-rose-300 rounded-full text-[10px] font-bold uppercase border border-rose-500/20">Keluar</span>
                             @endif
                         </td>
-                        <td class="px-10 py-8 text-right">
-                            <span class="text-lg font-black italic {{ $tx->type === 'income' ? 'text-green-500' : 'text-primary-red' }}">
+                        <td class="px-6 py-4 text-right whitespace-nowrap">
+                            <span class="text-xs font-bold font-mono {{ $tx->type === 'income' ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400' }}">
                                 {{ $tx->type === 'income' ? '+' : '-' }}Rp{{ number_format($tx->amount, 0, ',', '.') }}
                             </span>
                         </td>
-                        <td class="px-10 py-8 text-right flex justify-end gap-2">
-                            <button 
-                                wire:click="editTransaction('{{ $tx->id }}')"
-                                class="p-3 bg-white dark:bg-gray-700 text-primary-blue rounded-xl shadow-sm hover:scale-110 transition-transform border border-gray-100 dark:border-gray-600"
-                            >
-                                <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
-                            </button>
-                            <button 
-                                wire:click="confirmDelete('{{ $tx->id }}')"
-                                class="p-3 bg-red-50 dark:bg-red-900/20 text-red-400 hover:text-red-600 rounded-xl hover:scale-110 transition-transform"
-                            >
-                                <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
-                            </button>
+                        <td class="px-6 py-4 text-right whitespace-nowrap">
+                            <div class="flex items-center justify-end gap-1.5">
+                                <button wire:click="editTransaction('{{ $tx->id }}')" class="p-1.5 text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors" title="Edit Transaksi">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                </button>
+                                <button wire:click="confirmDelete('{{ $tx->id }}')" class="p-1.5 text-gray-400 hover:text-rose-600 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors" title="Hapus Transaksi">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                </button>
+                            </div>
                         </td>
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="7" class="px-10 py-32 text-center opacity-20">
-                            <p class="text-xs font-black uppercase tracking-widest italic">Tidak ada catatan kas virtual pada periode ini</p>
+                        <td colspan="7" class="px-6 py-12 text-center text-gray-400">
+                            <p class="text-xs font-semibold">Tidak ada riwayat transaksi kas virtual</p>
                         </td>
                     </tr>
                     @endforelse
                 </tbody>
             </table>
+        </div>
+
+        <!-- Mobile Adaptive Cards View (< md) -->
+        <div class="block md:hidden p-3.5 space-y-2.5">
+            @forelse($transactions as $tx)
+            <div class="p-3 bg-white dark:bg-gray-800/80 rounded-xl border border-gray-100 dark:border-gray-700/60 shadow-sm flex flex-col gap-2">
+                <div class="flex items-center justify-between gap-2">
+                    <div class="flex items-center gap-1.5">
+                        <span class="text-xs font-semibold text-gray-600 dark:text-gray-300">{{ $tx->date ? $tx->date->translatedFormat('d M Y') : '-' }}</span>
+                        <span class="text-[9px] font-bold uppercase px-2 py-0.5 rounded {{ $tx->source_method === 'transfer' ? 'bg-blue-50 text-blue-600 dark:bg-blue-950/40 dark:text-blue-400 border border-blue-200 dark:border-blue-800' : 'bg-purple-50 text-purple-600 dark:bg-purple-950/40 dark:text-purple-400 border border-purple-200 dark:border-purple-800' }}">
+                            {{ $tx->source_method }}
+                        </span>
+                    </div>
+                    @if($tx->type === 'income')
+                        <span class="px-2 py-0.5 bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300 rounded-full text-[9px] font-bold uppercase border border-emerald-500/20">Masuk</span>
+                    @else
+                        <span class="px-2 py-0.5 bg-rose-50 text-rose-700 dark:bg-rose-950/50 dark:text-rose-300 rounded-full text-[9px] font-bold uppercase border border-rose-500/20">Keluar</span>
+                    @endif
+                </div>
+                <div>
+                    <h4 class="text-xs font-bold text-gray-900 dark:text-white uppercase">{{ $tx->cashCategory->name ?? '-' }}</h4>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{{ $tx->description }}</p>
+                </div>
+                <div class="flex items-center justify-between pt-1 border-t border-gray-50 dark:border-gray-700/50 mt-0.5">
+                    <span class="text-xs font-bold font-mono {{ $tx->type === 'income' ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400' }}">
+                        {{ $tx->type === 'income' ? '+' : '-' }}Rp{{ number_format($tx->amount, 0, ',', '.') }}
+                    </span>
+                    <div class="flex items-center gap-1">
+                        <button wire:click="editTransaction('{{ $tx->id }}')" class="p-1.5 text-gray-500 hover:text-blue-600 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors" title="Edit">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                        </button>
+                        <button wire:click="confirmDelete('{{ $tx->id }}')" class="p-1.5 text-rose-500 hover:text-rose-700 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors" title="Hapus">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            @empty
+            <div class="p-8 text-center text-gray-400 bg-white dark:bg-gray-800 rounded-xl border border-dashed border-gray-200 dark:border-gray-700">
+                <p class="text-xs font-semibold">Tidak ada riwayat transaksi kas virtual</p>
+            </div>
+            @endforelse
         </div>
         <div class="px-10 py-8 bg-gray-50 dark:bg-gray-900/50">
             {{ $transactions->links('livewire.partials.custom-pagination') }}
@@ -283,7 +322,7 @@
     >
         <div 
             @click.away="show = false"
-            class="bg-white dark:bg-gray-900 w-full max-w-lg rounded-[3rem] shadow-2xl flex flex-col max-h-[90vh] overflow-y-auto no-scrollbar animate-in zoom-in-95 duration-300"
+            class="bg-white dark:bg-gray-900 w-full max-w-lg rounded-2xl shadow-2xl flex flex-col max-h-[90vh] overflow-y-auto no-scrollbar animate-in zoom-in-95 duration-300"
         >
             <div class="p-10 bg-primary-blue text-white relative">
                 <div class="absolute right-10 top-10">
@@ -384,7 +423,7 @@
         x-cloak
         class="fixed inset-0 z-[350] flex items-center justify-center p-6 bg-gray-900/60 backdrop-blur-sm"
     >
-        <div class="bg-white dark:bg-gray-900 w-full max-w-sm rounded-[3rem] shadow-2xl p-8 text-center space-y-6">
+        <div class="bg-white dark:bg-gray-900 w-full max-w-sm rounded-2xl shadow-2xl p-8 text-center space-y-6">
             <div class="w-16 h-16 bg-red-500/10 text-primary-red rounded-2xl flex items-center justify-center mx-auto">
                 <svg class="w-8 h-8" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
             </div>
@@ -406,7 +445,7 @@
         x-cloak
         class="fixed inset-0 z-[360] flex items-center justify-center p-6 bg-gray-900/60 backdrop-blur-sm"
     >
-        <div class="bg-white dark:bg-gray-900 w-full max-w-md rounded-[3rem] shadow-2xl p-8 text-center space-y-6">
+        <div class="bg-white dark:bg-gray-900 w-full max-w-md rounded-2xl shadow-2xl p-8 text-center space-y-6">
             <div class="w-16 h-16 bg-red-500/10 text-primary-red rounded-2xl flex items-center justify-center mx-auto">
                 <svg class="w-8 h-8" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
             </div>

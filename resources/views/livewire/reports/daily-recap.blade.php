@@ -48,7 +48,7 @@
         </div>
 
         <!-- Profit Card -->
-        <div class="bg-white dark:bg-gray-800 rounded-[3rem] p-10 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 relative overflow-hidden group">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl p-10 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 relative overflow-hidden group">
             <div class="absolute -right-6 -bottom-6 opacity-5 group-hover:scale-110 transition-transform duration-700">
                 <svg class="w-40 h-40 text-primary-red" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 7-8.5 8.5-5-5L2 17"/><polyline points="18 7 22 7 22 11"/></svg>
             </div>
@@ -61,7 +61,7 @@
         </div>
 
         <!-- Stats Card -->
-        <div class="bg-white dark:bg-gray-800 rounded-[3rem] p-10 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl p-10 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700">
             <h3 class="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 mb-6">Status Pembayaran</h3>
             <div class="space-y-4">
                 <div class="flex justify-between items-center">
@@ -89,7 +89,7 @@
         </div>
 
         <!-- Date Info Card -->
-        <div class="bg-gray-50 dark:bg-gray-900/50 rounded-[3rem] p-10 border border-gray-100 dark:border-gray-800 flex flex-col justify-center text-center">
+        <div class="bg-gray-50 dark:bg-gray-900/50 rounded-2xl p-10 border border-gray-100 dark:border-gray-800 flex flex-col justify-center text-center">
             <p class="text-[10px] font-black text-primary-blue uppercase tracking-widest mb-1">{{ $recap->month_name }}</p>
             <p class="text-3xl font-black italic text-gray-800 dark:text-white">Minggu ke-{{ $recap->month_week }}</p>
             <div class="mt-6 flex items-center justify-center text-[9px] font-bold text-gray-400 uppercase tracking-[0.2em]">
@@ -101,7 +101,7 @@
 
     <!-- Cash Reconciliation (Audit Uang Kas) -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
-        <div class="lg:col-span-2 bg-white dark:bg-gray-800 rounded-[3rem] p-10 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700">
+        <div class="lg:col-span-2 bg-white dark:bg-gray-800 rounded-2xl p-10 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700">
             <div class="flex items-center justify-between mb-8">
                 <div>
                     <h2 class="text-2xl font-bold uppercase tracking-tight text-gray-800 dark:text-white leading-none">Audit Uang Kas</h2>
@@ -224,7 +224,7 @@
             </div>
         </div>
 
-        <div class="bg-gray-900 rounded-[3rem] p-10 text-white shadow-2xl shadow-gray-900/20 relative overflow-hidden flex flex-col justify-center border-t-8 border-primary-blue">
+        <div class="bg-gray-900 rounded-2xl p-10 text-white shadow-2xl shadow-gray-900/20 relative overflow-hidden flex flex-col justify-center border-t-8 border-primary-blue">
             <h3 class="text-[10px] font-black uppercase tracking-[0.3em] opacity-40 mb-2">Selisih Uang Kas</h3>
             @php
                 $diff = ((float)$actualCash - (float)$startingChangeCash) - (float)$recap->total_revenue_real;
@@ -271,7 +271,7 @@
     </div>
 
     <!-- Category Performance Section -->
-    <div class="bg-white dark:bg-gray-800 rounded-[3.5rem] p-10 mb-12 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-200">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl p-10 mb-12 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-200">
         <div class="flex items-center justify-between mb-10">
             <div>
                 <h2 class="text-2xl font-bold uppercase tracking-tight text-gray-800 dark:text-white leading-none">Performa Per Kategori</h2>
@@ -325,7 +325,7 @@
     </div>
 
     <!-- Detail Table -->
-    <div class="bg-white dark:bg-gray-800 rounded-[3.5rem] shadow-2xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 overflow-hidden">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 overflow-hidden">
         <div class="p-10 border-b border-gray-100 dark:border-gray-700 flex flex-col md:flex-row justify-between items-center gap-4">
             <h2 class="text-2xl font-bold uppercase tracking-tight text-gray-800 dark:text-white">Detail Transaksi Harian</h2>
             <div class="flex flex-wrap items-center gap-4 w-full md:w-auto">
@@ -359,59 +359,95 @@
             </div>
 
         </div>
-        <div class="overflow-x-auto">
+        <!-- Desktop Table View (>= md) -->
+        <div class="hidden md:block overflow-x-auto">
             <table class="w-full text-left">
-                <thead class="bg-gray-50 dark:bg-gray-900/50">
+                <thead class="bg-gray-50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-800">
                     <tr>
-                        <th class="px-10 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">Jam</th>
-                        <th class="px-10 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">No. Ref</th>
-                        <th class="px-10 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">Pembeli</th>
-                        <th class="px-10 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Items</th>
-                        <th class="px-10 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">Total Bayar</th>
-                        <th class="px-10 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right">Status</th>
-                        <th class="px-10 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right">Aksi</th>
+                        <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Jam</th>
+                        <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">No. Ref</th>
+                        <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Pembeli</th>
+                        <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">Items</th>
+                        <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Total Bayar</th>
+                        <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-right">Status</th>
+                        <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-right">Aksi</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-50 dark:divide-gray-700">
+                <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
                     @forelse($transactions as $tx)
-                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-900/30 transition-colors">
-                        <td class="px-10 py-8">
-                            <span class="text-xs font-black text-gray-400 uppercase">{{ \Carbon\Carbon::parse($tx->transacted_at)->format('H:i') }}</span>
+                    <tr class="hover:bg-gray-50/80 dark:hover:bg-gray-800/40 transition-colors">
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="text-xs font-semibold text-gray-500 dark:text-gray-400 font-mono">{{ \Carbon\Carbon::parse($tx->transacted_at)->format('H:i') }}</span>
                         </td>
-                        <td class="px-10 py-8">
-                            <div class="text-sm font-black text-primary-blue uppercase tracking-tight">{{ $tx->reference }}</div>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-xs font-bold text-blue-600 dark:text-blue-400 uppercase font-mono">{{ $tx->reference }}</div>
                         </td>
-                        <td class="px-10 py-8">
-                            <div class="text-sm font-black text-gray-800 dark:text-white uppercase tracking-tight">{{ $tx->buyer_name ?? 'GUEST' }}</div>
+                        <td class="px-6 py-4">
+                            <div class="text-xs font-semibold text-gray-900 dark:text-white uppercase">{{ $tx->buyer_name ?? 'GUEST' }}</div>
                         </td>
-                        <td class="px-10 py-8 text-center">
-                            <span class="px-4 py-2 bg-gray-100 dark:bg-gray-900 rounded-xl text-xs font-black text-gray-600 dark:text-gray-400">
-                                {{ $tx->total_qty }} <span class="text-[9px] uppercase ml-1 opacity-50">Unit</span>
+                        <td class="px-6 py-4 text-center whitespace-nowrap">
+                            <span class="px-2.5 py-1 bg-gray-100 dark:bg-gray-800 rounded-lg text-xs font-semibold text-gray-700 dark:text-gray-300">
+                                {{ $tx->total_qty }} unit
                             </span>
                         </td>
-                        <td class="px-10 py-8">
-                            <span class="text-lg font-black text-primary-red">Rp{{ number_format($tx->total_amount, 0, ',', '.') }}</span>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="text-xs font-bold text-gray-900 dark:text-white font-mono">Rp{{ number_format($tx->total_amount, 0, ',', '.') }}</span>
                         </td>
-                        <td class="px-10 py-8 text-right">
-                            <span class="text-[9px] font-black uppercase px-4 py-1.5 rounded-full {{ $tx->status === 'uang_diterima' ? 'bg-emerald-500/15 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300 border border-emerald-500/20' : 'bg-primary-red/10 text-primary-red' }}">
+                        <td class="px-6 py-4 text-right whitespace-nowrap">
+                            <span class="text-[10px] font-semibold uppercase px-2.5 py-1 rounded-full {{ $tx->status === 'uang_diterima' ? 'bg-emerald-500/15 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300 border border-emerald-500/20' : 'bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-400 border border-rose-200 dark:border-rose-800' }}">
                                 {{ str_replace('_', ' ', $tx->status) }}
                             </span>
                         </td>
-                        <td class="px-10 py-8 text-right">
-                            <button wire:click="viewDetails('{{ $tx->reference }}')" class="p-3 bg-gray-50 dark:bg-gray-900 text-gray-400 hover:text-primary-blue rounded-xl transition-all">
-                                <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                        <td class="px-6 py-4 text-right whitespace-nowrap">
+                            <button wire:click="viewDetails('{{ $tx->reference }}')" class="p-2 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 rounded-xl transition-all" title="Lihat Detail">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                             </button>
                         </td>
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="7" class="px-10 py-32 text-center opacity-20">
-                            <p class="text-xs font-black uppercase tracking-widest italic">Tidak ada transaksi ditemukan</p>
+                        <td colspan="7" class="px-6 py-12 text-center text-gray-400">
+                            <p class="text-xs font-semibold">Tidak ada transaksi ditemukan</p>
                         </td>
                     </tr>
                     @endforelse
                 </tbody>
             </table>
+        </div>
+
+        <!-- Mobile Adaptive Cards View (< md) -->
+        <div class="block md:hidden p-3.5 space-y-2.5">
+            @forelse($transactions as $tx)
+            <div class="p-3 bg-white dark:bg-gray-800/80 rounded-xl border border-gray-100 dark:border-gray-700/60 shadow-sm flex flex-col gap-2">
+                <div class="flex items-center justify-between gap-2">
+                    <div class="flex items-center gap-1.5 min-w-0">
+                        <span class="text-[11px] font-mono font-bold text-blue-600 dark:text-blue-400 truncate">#{{ $tx->reference }}</span>
+                        <span class="text-gray-300 dark:text-gray-600">&bull;</span>
+                        <span class="text-[10px] font-mono text-gray-500 dark:text-gray-400">{{ \Carbon\Carbon::parse($tx->transacted_at)->format('H:i') }}</span>
+                    </div>
+                    <span class="text-[9px] font-semibold uppercase px-2 py-0.5 rounded-full shrink-0 {{ $tx->status === 'uang_diterima' ? 'bg-emerald-500/15 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300 border border-emerald-500/20' : 'bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-400 border border-rose-200 dark:border-rose-800' }}">
+                        {{ str_replace('_', ' ', $tx->status) }}
+                    </span>
+                </div>
+                <div class="flex items-center justify-between gap-2">
+                    <div class="min-w-0">
+                        <p class="text-xs font-bold text-gray-900 dark:text-white uppercase truncate">{{ $tx->buyer_name ?? 'GUEST' }}</p>
+                        <p class="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5">{{ $tx->total_qty }} Unit dibeli</p>
+                    </div>
+                    <div class="text-right shrink-0">
+                        <p class="text-xs font-bold text-gray-900 dark:text-white font-mono">Rp{{ number_format($tx->total_amount, 0, ',', '.') }}</p>
+                        <button wire:click="viewDetails('{{ $tx->reference }}')" class="mt-1 inline-flex items-center gap-1 text-[11px] font-semibold text-blue-600 dark:text-blue-400 hover:underline">
+                            <span>Detail</span>
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            @empty
+            <div class="p-8 text-center text-gray-400 bg-white dark:bg-gray-800 rounded-xl border border-dashed border-gray-200 dark:border-gray-700">
+                <p class="text-xs font-semibold">Tidak ada transaksi ditemukan</p>
+            </div>
+            @endforelse
         </div>
         <div class="px-10 py-8 bg-gray-50 dark:bg-gray-900/50">
             {{ $transactions->links('livewire.partials.custom-pagination') }}
@@ -433,7 +469,7 @@
     >
         <div 
             @click.away="show = false"
-            class="bg-white dark:bg-gray-900 w-full max-w-2xl rounded-[3rem] shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-300"
+            class="bg-white dark:bg-gray-900 w-full max-w-2xl rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-300"
         >
             <div class="p-10 bg-primary-blue text-white relative">
                 <div class="absolute right-10 top-10">

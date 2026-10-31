@@ -42,7 +42,7 @@
 
     {{-- INTERACTIVE FORM WIZARD STEPPER BAR (MATCHING THE 3.5rem / 2rem THEME DESIGN) --}}
     <div
-        class="bg-white dark:bg-gray-800 rounded-[2.5rem] p-4 mb-10 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700">
+        class="bg-white dark:bg-gray-800 rounded-2xl p-4 mb-10 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700">
         <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
             {{-- Step 1 Tab --}}
             <button wire:click="setStep(1)"
@@ -135,11 +135,11 @@
 
         {{-- ==================== STEP 1: RINGKASAN OMSET & TREN HARIAN ==================== --}}
         @if ($currentStep === 1)
-            {{-- KPI Executive Cards matching Daily & Monthly Recaps rounded-[3rem] --}}
+            {{-- KPI Executive Cards matching Daily & Monthly Recaps rounded-2xl --}}
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-5 mb-12">
                 {{-- Card 1: Total Omset (Signature Primary Blue Card) --}}
                 <div
-                    class="bg-primary-blue rounded-[3rem] p-8 sm:p-10 text-white shadow-2xl shadow-blue-900/30 relative overflow-hidden group">
+                    class="bg-primary-blue rounded-2xl p-8 sm:p-10 text-white shadow-2xl shadow-blue-900/30 relative overflow-hidden group">
                     <div
                         class="absolute -right-6 -bottom-6 opacity-10 group-hover:scale-110 transition-transform duration-700">
                         <svg class="w-40 h-40 text-white" xmlns="http://www.w3.org/2000/svg" width="24"
@@ -163,7 +163,7 @@
 
                 {{-- Card 2: Keuntungan Bersih (Signature Profit Card) --}}
                 <div
-                    class="bg-white dark:bg-gray-800 rounded-[3rem] p-8 sm:p-10 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 relative overflow-hidden group">
+                    class="bg-white dark:bg-gray-800 rounded-2xl p-8 sm:p-10 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 relative overflow-hidden group">
                     <div
                         class="absolute -right-6 -bottom-6 opacity-5 group-hover:scale-110 transition-transform duration-700">
                         <svg class="w-40 h-40 text-primary-red" xmlns="http://www.w3.org/2000/svg" width="24"
@@ -190,7 +190,7 @@
 
                 {{-- Card 3: Total Pengeluaran Kas (Manual Input dari Kas) --}}
                 <div
-                    class="bg-white dark:bg-gray-800 rounded-[3rem] p-8 sm:p-10 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 relative overflow-hidden group">
+                    class="bg-white dark:bg-gray-800 rounded-2xl p-8 sm:p-10 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 relative overflow-hidden group">
                     <div
                         class="absolute -right-6 -bottom-6 opacity-5 group-hover:scale-110 transition-transform duration-700">
                         <svg class="w-40 h-40 text-rose-500" xmlns="http://www.w3.org/2000/svg" width="24"
@@ -216,7 +216,7 @@
 
                 {{-- Card 4: Total Transaksi & Basket --}}
                 <div
-                    class="bg-white dark:bg-gray-800 rounded-[3rem] p-8 sm:p-10 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 relative overflow-hidden group">
+                    class="bg-white dark:bg-gray-800 rounded-2xl p-8 sm:p-10 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 relative overflow-hidden group">
                     <div
                         class="absolute -right-6 -bottom-6 opacity-5 group-hover:scale-110 transition-transform duration-700">
                         <svg class="w-40 h-40 text-primary-blue" xmlns="http://www.w3.org/2000/svg" width="24"
@@ -240,7 +240,7 @@
 
                 {{-- Card 5: Kepatuhan Piket --}}
                 <div
-                    class="bg-white dark:bg-gray-800 rounded-[3rem] p-8 sm:p-10 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 relative overflow-hidden group">
+                    class="bg-white dark:bg-gray-800 rounded-2xl p-8 sm:p-10 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 relative overflow-hidden group">
                     <div
                         class="absolute -right-6 -bottom-6 opacity-5 group-hover:scale-110 transition-transform duration-700">
                         <svg class="w-40 h-40 text-amber-500" xmlns="http://www.w3.org/2000/svg" width="24"
@@ -263,9 +263,9 @@
                 </div>
             </div>
 
-            {{-- Daily Sales Bar Chart matching rounded-[3.5rem] in monthly recap --}}
+            {{-- Daily Sales Bar Chart matching rounded-2xl in monthly recap --}}
             <div
-                class="bg-white dark:bg-gray-800 rounded-[2.5rem] sm:rounded-[3.5rem] p-6 sm:p-10 shadow-2xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 overflow-hidden">
+                class="bg-white dark:bg-gray-800 rounded-2xl sm:rounded-2xl p-6 sm:p-10 shadow-2xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 overflow-hidden">
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 sm:mb-10">
                     <div>
                         <h2
@@ -386,7 +386,7 @@
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-10 items-stretch">
                     {{-- Top 3 Kasir Berkinerja Terbaik --}}
                     <div
-                        class="bg-white dark:bg-gray-800 rounded-[2.5rem] sm:rounded-[3rem] p-6 sm:p-10 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 flex flex-col justify-between space-y-6">
+                        class="bg-white dark:bg-gray-800 rounded-2xl sm:rounded-2xl p-6 sm:p-10 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 flex flex-col justify-between space-y-6">
                         <div>
                             <div class="flex items-center justify-between gap-4">
                                 <h2
@@ -439,7 +439,7 @@
 
                     {{-- Kasir Perlu Evaluasi --}}
                     <div
-                        class="bg-white dark:bg-gray-800 rounded-[2.5rem] sm:rounded-[3rem] p-6 sm:p-10 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 flex flex-col justify-between space-y-6">
+                        class="bg-white dark:bg-gray-800 rounded-2xl sm:rounded-2xl p-6 sm:p-10 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 flex flex-col justify-between space-y-6">
                         <div>
                             <div class="flex items-center justify-between gap-4">
                                 <h2
@@ -499,7 +499,7 @@
 
                 {{-- Tabel Seluruh Kinerja Kasir matching category-recap-table styling --}}
                 <div
-                    class="bg-white dark:bg-gray-800 rounded-[2.5rem] sm:rounded-[3.5rem] shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700/80 overflow-hidden">
+                    class="bg-white dark:bg-gray-800 rounded-2xl sm:rounded-2xl shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700/80 overflow-hidden">
                     <div class="p-10 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
                         <div>
                             <h2
@@ -612,7 +612,7 @@
             <div class="space-y-10">
                 {{-- Product Comparison Chart --}}
                 <div
-                    class="bg-white dark:bg-gray-800 rounded-[2.5rem] sm:rounded-[3.5rem] p-6 sm:p-10 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700/80 space-y-6">
+                    class="bg-white dark:bg-gray-800 rounded-2xl sm:rounded-2xl p-6 sm:p-10 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700/80 space-y-6">
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         <div>
                             <h2
@@ -711,7 +711,7 @@
 
                 {{-- 10 Slow-Moving Products matching grid --}}
                 <div
-                    class="bg-white dark:bg-gray-800 rounded-[2.5rem] sm:rounded-[3.5rem] p-6 sm:p-10 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700/80 space-y-6">
+                    class="bg-white dark:bg-gray-800 rounded-2xl sm:rounded-2xl p-6 sm:p-10 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700/80 space-y-6">
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                         <div>
                             <h2
@@ -760,7 +760,7 @@
             <div class="space-y-12">
                 {{-- Kesimpulan Eksekutif --}}
                 <div
-                    class="bg-white dark:bg-gray-800 rounded-[3.5rem] p-10 shadow-2xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 space-y-6">
+                    class="bg-white dark:bg-gray-800 rounded-2xl p-10 shadow-2xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 space-y-6">
                     <div>
                         <h2
                             class="text-2xl font-bold uppercase tracking-tight text-gray-800 dark:text-white leading-none">
@@ -810,7 +810,7 @@
                 </div>
 
                 {{-- Audit Piket & Tugas per Hari (Accordion Interaktif Fokus Performa Harian & Nested Kasir) --}}
-                <div class="bg-white dark:bg-gray-800 rounded-[2.5rem] sm:rounded-[3.5rem] p-6 sm:p-10 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700/80 space-y-6">
+                <div class="bg-white dark:bg-gray-800 rounded-2xl sm:rounded-2xl p-6 sm:p-10 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700/80 space-y-6">
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                         <div>
                             <h2
@@ -1059,7 +1059,7 @@
             @elseif($currentStep === 5)
                 <div class="space-y-10">
                     {{-- Header / Context Banner --}}
-                    <div class="bg-gradient-to-r from-blue-600 via-indigo-600 to-primary-blue rounded-[3rem] p-8 sm:p-12 text-white shadow-2xl shadow-blue-900/30 relative overflow-hidden">
+                    <div class="bg-gradient-to-r from-blue-600 via-indigo-600 to-primary-blue rounded-2xl p-8 sm:p-12 text-white shadow-2xl shadow-blue-900/30 relative overflow-hidden">
                         <div class="absolute -right-8 -bottom-8 opacity-10 pointer-events-none">
                             <svg class="w-56 h-56 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
@@ -1081,7 +1081,7 @@
                     {{-- 3 Kartu Panduan Diskusi Interaktif --}}
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                         {{-- Card 1: Sistem & Aplikasi POS --}}
-                        <div class="bg-white dark:bg-gray-800 rounded-[2.5rem] p-8 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 flex flex-col justify-between space-y-6 group hover:border-primary-blue/40 transition-all">
+                        <div class="bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 flex flex-col justify-between space-y-6 group hover:border-primary-blue/40 transition-all">
                             <div class="space-y-4">
                                 <div class="w-14 h-14 rounded-2xl bg-blue-500/10 text-primary-blue dark:text-blue-400 flex items-center justify-center border border-blue-500/20 group-hover:scale-110 transition-transform">
                                     <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -1103,7 +1103,7 @@
                         </div>
 
                         {{-- Card 2: Pengelola & Admin --}}
-                        <div class="bg-white dark:bg-gray-800 rounded-[2.5rem] p-8 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 flex flex-col justify-between space-y-6 group hover:border-emerald-500/40 transition-all">
+                        <div class="bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 flex flex-col justify-between space-y-6 group hover:border-emerald-500/40 transition-all">
                             <div class="space-y-4">
                                 <div class="w-14 h-14 rounded-2xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center border border-emerald-500/20 group-hover:scale-110 transition-transform">
                                     <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -1125,7 +1125,7 @@
                         </div>
 
                         {{-- Card 3: Piket & Operasional Harian --}}
-                        <div class="bg-white dark:bg-gray-800 rounded-[2.5rem] p-8 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 flex flex-col justify-between space-y-6 group hover:border-amber-500/40 transition-all">
+                        <div class="bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 flex flex-col justify-between space-y-6 group hover:border-amber-500/40 transition-all">
                             <div class="space-y-4">
                                 <div class="w-14 h-14 rounded-2xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center border border-amber-500/20 group-hover:scale-110 transition-transform">
                                     <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -1152,7 +1152,7 @@
             @elseif($currentStep === 6)
                 <div class="space-y-10">
                     {{-- Hero Banner Penutup --}}
-                    <div class="bg-primary-blue rounded-[3rem] p-8 sm:p-14 text-white shadow-2xl shadow-blue-900/30 relative overflow-hidden text-center space-y-6">
+                    <div class="bg-primary-blue rounded-2xl p-8 sm:p-14 text-white shadow-2xl shadow-blue-900/30 relative overflow-hidden text-center space-y-6">
                         <div class="absolute -right-10 -bottom-10 opacity-10 pointer-events-none">
                             <svg class="w-64 h-64 text-white" fill="currentColor" viewBox="0 0 24 24">
                                 <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
@@ -1173,7 +1173,7 @@
                     {{-- Agenda Sesi Evaluasi Tatap Muka --}}
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                         {{-- Checklist Agenda Tatap Muka --}}
-                        <div class="bg-white dark:bg-gray-800 rounded-[2.5rem] sm:rounded-[3rem] p-8 sm:p-10 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700/80 space-y-6">
+                        <div class="bg-white dark:bg-gray-800 rounded-2xl sm:rounded-2xl p-8 sm:p-10 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700/80 space-y-6">
                             <div class="flex items-center gap-3">
                                 <div class="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-black">
                                     <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
@@ -1216,7 +1216,7 @@
                         </div>
 
                         {{-- Ringkasan Komitmen & Tindak Lanjut --}}
-                        <div class="bg-white dark:bg-gray-800 rounded-[2.5rem] sm:rounded-[3rem] p-8 sm:p-10 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700/80 flex flex-col justify-between space-y-6">
+                        <div class="bg-white dark:bg-gray-800 rounded-2xl sm:rounded-2xl p-8 sm:p-10 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700/80 flex flex-col justify-between space-y-6">
                             <div class="space-y-4">
                                 <div class="flex items-center gap-3">
                                     <div class="w-10 h-10 rounded-xl bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center font-black">
@@ -1259,7 +1259,7 @@
 
         {{-- BOTTOM WIZARD NAVIGATION BAR MATCHING 2.5rem CORNERS --}}
         <div
-            class="bg-white dark:bg-gray-800 rounded-[2.5rem] p-6 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 flex items-center justify-between gap-4 mt-12">
+            class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 flex items-center justify-between gap-4 mt-12">
             {{-- Tombol Sebelumnya --}}
             <div>
                 @if ($currentStep > 1)
@@ -1325,7 +1325,7 @@
                     x-transition:leave="transition ease-in duration-200 transform"
                     x-transition:leave-start="opacity-100 scale-100 translate-y-0"
                     x-transition:leave-end="opacity-0 scale-95 translate-y-4"
-                    class="bg-white dark:bg-gray-800 w-full max-w-xl rounded-[2.5rem] shadow-2xl border border-gray-100 dark:border-gray-700 overflow-hidden flex flex-col max-h-[85vh]">
+                    class="bg-white dark:bg-gray-800 w-full max-w-xl rounded-2xl shadow-2xl border border-gray-100 dark:border-gray-700 overflow-hidden flex flex-col max-h-[85vh]">
 
                     {{-- Modal Header --}}
                     <div

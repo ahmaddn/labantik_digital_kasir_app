@@ -82,11 +82,12 @@
     <div class="flex-1 flex flex-col min-w-0 z-10 overflow-hidden lg:border-r border-slate-200 dark:border-slate-800">
 
         <!-- Header Section -->
-        <header class="px-4 lg:px-6 py-3 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 relative z-20 shrink-0">
-            <div class="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
-                <!-- Branding & Date/Time -->
-                <div class="flex items-center justify-between md:justify-start gap-3 shrink-0">
-                    <div class="flex items-center gap-2.5 min-w-0">
+        <header class="px-3.5 lg:px-6 py-2.5 lg:py-3 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 relative z-20 shrink-0">
+            <!-- Mobile Layout (Compact 2 rows) -->
+            <div class="block lg:hidden" x-data="{ mobileMenuOpen: false }">
+                <!-- Baris 1: Logo & Info, Quick Actions, Cart -->
+                <div class="flex items-center justify-between gap-2">
+                    <div class="flex items-center gap-2 min-w-0">
                         @php
                             $activeJurusanId = session('active_jurusan_id');
                             $themeSettings = null;
@@ -100,13 +101,142 @@
                             $tefaLogo = $themeSettings['tefa_logo'] ?? '';
                         @endphp
                         <a href="{{ route('dashboard') }}"
+                            class="w-9 h-9 rounded-xl bg-blue-50 dark:bg-slate-800 border border-blue-100 dark:border-slate-700 p-1 flex items-center justify-center shrink-0 hover:border-blue-500 transition-colors"
+                            title="Kembali ke Dashboard">
+                            <img src="{{ $tefaLogo ? asset('storage/' . $tefaLogo) : asset('favicon.png') }}"
+                                class="w-full h-full object-contain" alt="Logo">
+                        </a>
+                        <div class="min-w-0">
+                            <h1 class="text-xs font-bold uppercase tracking-tight text-slate-900 dark:text-white truncate max-w-[120px] sm:max-w-[180px]">
+                                {{ $tefaName }}
+                            </h1>
+                            <div class="flex items-center gap-1 mt-0.5">
+                                <span class="text-[9px] font-semibold text-slate-500 dark:text-slate-400">
+                                    {{ now()->translatedFormat('d M') }}
+                                </span>
+                                <span class="text-slate-300 dark:text-slate-700">&bull;</span>
+                                <span x-data="{ time: '' }" x-init="setInterval(() => time = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }), 1000)" x-text="time"
+                                    class="text-[9px] font-mono font-bold text-blue-600 dark:text-blue-400">
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Mobile Actions: Notifications, More Menu, Cart Button -->
+                    <div class="flex items-center gap-1.5 shrink-0">
+                        @livewire('note-notifications')
+
+                        <!-- Mobile Menu Button (Dropdown for admin/settings) -->
+                        <div class="relative">
+                            <button @click="mobileMenuOpen = !mobileMenuOpen" type="button"
+                                class="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 transition-colors shrink-0"
+                                title="Menu Aksi Kasir">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+                                </svg>
+                            </button>
+
+                            <!-- Mobile Dropdown Menu -->
+                            <div x-show="mobileMenuOpen" @click.outside="mobileMenuOpen = false" x-cloak
+                                class="absolute right-0 mt-2 w-52 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl py-2 z-50 divide-y divide-slate-100 dark:divide-slate-800">
+                                <div class="px-3 py-1.5">
+                                    @livewire('layout.tefa-switcher')
+                                </div>
+                                <div class="py-1">
+                                    <button @click="toggleTheme(); mobileMenuOpen = false" type="button"
+                                        class="w-full px-3 py-2 text-left text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/60 flex items-center gap-2">
+                                        <svg x-show="!darkMode" class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                                        </svg>
+                                        <svg x-show="darkMode" x-cloak class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707M16.95 17.95l.707.707M7.05 7.05l.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z" />
+                                        </svg>
+                                        <span x-text="darkMode ? 'Mode Terang' : 'Mode Gelap'"></span>
+                                    </button>
+
+                                    @if (session('active_role_name') !== 'kasir')
+                                    <a href="{{ route('inventory-report') }}" wire:navigate @click="mobileMenuOpen = false"
+                                        class="w-full px-3 py-2 text-left text-xs font-semibold text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/40 flex items-center gap-2">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                        </svg>
+                                        <span>Laporan Selisih Stok</span>
+                                    </a>
+                                    @endif
+
+                                    <button wire:click="editOpeningStock" @click="mobileMenuOpen = false" type="button"
+                                        class="w-full px-3 py-2 text-left text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/60 flex items-center gap-2">
+                                        <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                                        </svg>
+                                        <span>Kelola Stok Awal</span>
+                                    </button>
+
+                                    <button wire:click="finishSession" @click="mobileMenuOpen = false" {{ $isSessionFinished ? 'disabled' : '' }} type="button"
+                                        class="w-full px-3 py-2 text-left text-xs font-semibold {{ $isSessionFinished ? 'text-slate-400 dark:text-slate-600' : 'text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/40' }} flex items-center gap-2">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                        <span>{{ $isSessionFinished ? 'Shift Selesai' : 'Selesaikan Shift' }}</span>
+                                    </button>
+                                </div>
+                                <div class="py-1">
+                                    <form method="POST" action="{{ route('logout') }}" class="w-full">
+                                        @csrf
+                                        <button type="submit"
+                                            class="w-full px-3 py-2 text-left text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 flex items-center gap-2">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                                            </svg>
+                                            <span>Keluar</span>
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Mobile Cart Trigger Button -->
+                        <button @click="showCart = true" type="button"
+                            class="px-3 py-2 bg-blue-600 text-white text-xs font-bold rounded-xl flex items-center gap-1.5 shadow-sm active:scale-95 transition-transform shrink-0">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
+                            </svg>
+                            <span x-show="cart.length > 0" x-text="cart.reduce((sum, i) => sum + i.quantity, 0)"
+                                class="px-1.5 py-0.5 text-[10px] bg-white text-blue-700 rounded-full font-black leading-none"></span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Baris 2: Search Input Full Width di Mobile -->
+                <div class="mt-2.5 relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                    </div>
+                    <input type="text" x-model="search"
+                        placeholder="Cari produk menu kasir..."
+                        class="w-full pl-9 pr-8 py-2 text-xs bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white placeholder:text-slate-400 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white dark:focus:bg-slate-900 transition-all">
+                    <button x-show="search" @click="search = ''" type="button"
+                        class="absolute inset-y-0 right-0 pr-2.5 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Desktop Layout (Single Row Clean Header) -->
+            <div class="hidden lg:flex items-center justify-between gap-4">
+                <!-- Branding & Date/Time -->
+                <div class="flex items-center gap-3 shrink-0">
+                    <div class="flex items-center gap-2.5 min-w-0">
+                        <a href="{{ route('dashboard') }}"
                             class="w-10 h-10 rounded-xl bg-blue-50 dark:bg-slate-800 border border-blue-100 dark:border-slate-700 p-1.5 flex items-center justify-center shrink-0 hover:border-blue-500 transition-colors"
                             title="Kembali ke Dashboard">
                             <img src="{{ $tefaLogo ? asset('storage/' . $tefaLogo) : asset('favicon.png') }}"
                                 class="w-full h-full object-contain" alt="Logo">
                         </a>
                         <div class="min-w-0">
-                            <h1 class="text-sm font-bold uppercase tracking-tight text-slate-900 dark:text-white truncate max-w-[160px] sm:max-w-[220px]">
+                            <h1 class="text-sm font-bold uppercase tracking-tight text-slate-900 dark:text-white truncate max-w-[200px]">
                                 {{ $tefaName }}
                             </h1>
                             <div class="flex items-center gap-1.5 mt-0.5">
@@ -119,80 +249,67 @@
                             </div>
                         </div>
                     </div>
+                </div>
 
-                    <!-- Mobile Cart Trigger Button -->
-                    <button @click="showCart = true" type="button"
-                        class="lg:hidden px-3.5 py-2 bg-blue-600 text-white text-xs font-bold rounded-xl flex items-center gap-2 shadow-sm active:scale-95 transition-transform shrink-0">
+                <!-- Instant Search -->
+                <div class="relative flex-1 max-w-md mx-4">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                         </svg>
-                        <span>Keranjang</span>
-                        <span x-show="cart.length > 0" x-text="cart.reduce((sum, i) => sum + i.quantity, 0)"
-                            class="px-2 py-0.5 text-[10px] bg-white text-blue-700 rounded-full font-black leading-none"></span>
+                    </div>
+                    <input type="text" id="pos-search-input" x-ref="searchInput" x-model="search"
+                        placeholder="Cari menu produk (tekan /)..."
+                        class="w-full pl-9 pr-8 py-2 text-xs bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white placeholder:text-slate-400 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white dark:focus:bg-slate-900 transition-all">
+                    <button x-show="search" @click="search = ''; $nextTick(() => $refs.searchInput.focus())" type="button"
+                        class="absolute inset-y-0 right-0 pr-2.5 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                     </button>
                 </div>
 
-                <!-- Instant Search & Quick Action Controls -->
-                <div class="flex flex-col sm:flex-row flex-1 items-stretch sm:items-center gap-2 justify-end min-w-0">
-                    <div class="relative flex-1 sm:max-w-md">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                <!-- Desktop Controls -->
+                <div class="flex items-center gap-1.5 shrink-0">
+                    @livewire('note-notifications')
+                    @livewire('layout.tefa-switcher')
+
+                    <button @click="toggleTheme()" type="button"
+                        class="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 transition-colors shrink-0"
+                        title="Toggle Mode Gelap/Terang">
+                        <svg x-show="!darkMode" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                        </svg>
+                        <svg x-show="darkMode" x-cloak class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707M16.95 17.95l.707.707M7.05 7.05l.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z" />
+                        </svg>
+                    </button>
+
+                    @if (session('active_role_name') !== 'kasir')
+                    <a href="{{ route('inventory-report') }}" wire:navigate
+                        class="px-2.5 py-1.5 bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 text-xs font-bold rounded-xl border border-amber-200 dark:border-amber-800/50 hover:bg-amber-100 transition-colors whitespace-nowrap shrink-0">
+                        Selisih
+                    </a>
+                    @endif
+
+                    <button wire:click="editOpeningStock" type="button"
+                        class="px-2.5 py-1.5 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-bold rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors whitespace-nowrap shrink-0">
+                        Stok
+                    </button>
+
+                    <button wire:click="finishSession" {{ $isSessionFinished ? 'disabled' : '' }} type="button"
+                        class="px-3 py-1.5 {{ $isSessionFinished ? 'bg-slate-200 text-slate-400 dark:bg-slate-800 dark:text-slate-500 cursor-not-allowed' : 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 hover:bg-blue-600 dark:hover:bg-blue-400' }} text-xs font-bold rounded-xl transition-colors whitespace-nowrap shrink-0">
+                        {{ $isSessionFinished ? 'Shift Selesai' : 'Selesai Shift' }}
+                    </button>
+
+                    <form method="POST" action="{{ route('logout') }}" class="inline-block shrink-0">
+                        @csrf
+                        <button type="submit"
+                            class="p-2 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-xl transition-colors"
+                            title="Keluar / Logout">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                            </svg>
-                        </div>
-                        <input type="text" id="pos-search-input" x-ref="searchInput" x-model="search"
-                            placeholder="Cari menu produk (tekan /)..."
-                            class="w-full pl-9 pr-8 py-2 text-xs bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white placeholder:text-slate-400 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white dark:focus:bg-slate-900 transition-all">
-                        <button x-show="search" @click="search = ''; $nextTick(() => $refs.searchInput.focus())" type="button"
-                            class="absolute inset-y-0 right-0 pr-2.5 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                        </button>
-                    </div>
-
-                    <div class="flex items-center gap-1.5 shrink-0 flex-wrap sm:flex-nowrap">
-                        <!-- Notifications & TEFA Switcher -->
-                        @livewire('note-notifications')
-                        @livewire('layout.tefa-switcher')
-
-                        <button @click="toggleTheme()" type="button"
-                            class="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 transition-colors shrink-0"
-                            title="Toggle Mode Gelap/Terang">
-                            <svg x-show="!darkMode" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-                            </svg>
-                            <svg x-show="darkMode" x-cloak class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707M16.95 17.95l.707.707M7.05 7.05l.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                             </svg>
                         </button>
-
-                        @if (session('active_role_name') !== 'kasir')
-                        <a href="{{ route('inventory-report') }}" wire:navigate
-                            class="px-2.5 py-1.5 bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 text-xs font-bold rounded-xl border border-amber-200 dark:border-amber-800/50 hover:bg-amber-100 transition-colors whitespace-nowrap shrink-0">
-                            Selisih
-                        </a>
-                        @endif
-
-                        <button wire:click="editOpeningStock" type="button"
-                            class="px-2.5 py-1.5 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-bold rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors whitespace-nowrap shrink-0">
-                            Stok
-                        </button>
-
-                        <button wire:click="finishSession" {{ $isSessionFinished ? 'disabled' : '' }} type="button"
-                            class="px-3 py-1.5 {{ $isSessionFinished ? 'bg-slate-200 text-slate-400 dark:bg-slate-800 dark:text-slate-500 cursor-not-allowed' : 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 hover:bg-blue-600 dark:hover:bg-blue-400' }} text-xs font-bold rounded-xl transition-colors whitespace-nowrap shrink-0">
-                            {{ $isSessionFinished ? 'Shift Selesai' : 'Selesai Shift' }}
-                        </button>
-
-                        <form method="POST" action="{{ route('logout') }}" class="inline-block shrink-0">
-                            @csrf
-                            <button type="submit"
-                                class="p-2 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-xl transition-colors"
-                                title="Keluar / Logout">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                                </svg>
-                            </button>
-                        </form>
-                    </div>
+                    </form>
                 </div>
             </div>
         </header>

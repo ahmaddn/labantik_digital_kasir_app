@@ -195,45 +195,67 @@
                                 </div>
                             </div>
 
-                            <!-- Mobile Card View -->
-                            <div class="block lg:hidden p-5 rounded-[2rem] border bg-white dark:bg-gray-900/40 transition-all duration-300 {{ $highlight == $product->id ? 'border-amber-400 bg-amber-400/5 animate-highlight-breath' : 'border-gray-100 dark:border-gray-800' }} {{ in_array($product->id, $selectedProducts) ? 'border-primary-blue bg-primary-blue/5' : '' }} mb-4">
+                            <!-- Mobile Card View: Clean, Minimalist, Thumb-friendly Lucide Icons -->
+                            <div class="block lg:hidden p-3.5 sm:p-4 rounded-xl border bg-white dark:bg-slate-900 transition-colors {{ $highlight == $product->id ? 'border-amber-400 bg-amber-400/5' : 'border-slate-200 dark:border-slate-800' }} {{ in_array($product->id, $selectedProducts) ? 'border-blue-500 bg-blue-50/50 dark:bg-blue-950/20' : '' }} mb-2.5 shadow-2xs">
                                 <div class="flex items-start justify-between gap-3">
-                                    <div class="flex items-start gap-3">
+                                    <div class="flex items-start gap-3 min-w-0 flex-1">
                                         <!-- Checkbox -->
-                                        <input type="checkbox" wire:model.live="selectedProducts" value="{{ $product->id }}" class="mt-1.5 w-5 h-5 rounded-lg border-gray-200 text-primary-blue focus:ring-primary-blue dark:bg-gray-900 dark:border-gray-700">
+                                        <input type="checkbox" wire:model.live="selectedProducts" value="{{ $product->id }}" class="mt-1 w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 dark:bg-slate-800 dark:border-slate-700">
                                         
-                                        <div>
-                                            <!-- Product Title -->
+                                        <div class="min-w-0 flex-1">
+                                            <!-- Product Title & Badge -->
                                             <div class="flex items-center gap-1.5 flex-wrap">
-                                                <h3 class="text-base font-black text-gray-800 dark:text-white uppercase tracking-tight italic leading-snug">{{ $product->name }}</h3>
+                                                <h3 class="text-sm font-bold text-slate-900 dark:text-white truncate">{{ $product->name }}</h3>
                                                 @if($product->modifierGroups->count() > 0)
-                                                    <span class="px-1.5 py-0.5 text-[8px] font-black rounded uppercase tracking-wider bg-amber-500/10 text-amber-600 border border-amber-500/20">
-                                                        TOPPING
+                                                    <span class="px-1.5 py-0.2 text-[9px] font-semibold rounded bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/20">
+                                                        Topping
+                                                    </span>
+                                                @endif
+                                                @if(!$product->is_active)
+                                                    <span class="px-1.5 py-0.2 text-[9px] font-semibold rounded bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400">
+                                                        Nonaktif
                                                     </span>
                                                 @endif
                                             </div>
-                                            <span class="px-2 py-0.5 bg-blue-50 dark:bg-blue-950/20 text-primary-blue border border-blue-100 dark:border-blue-900/30 rounded text-[8px] font-black uppercase tracking-wider inline-block mt-1">
-                                                {{ $product->category->name }}
-                                            </span>
-                                            <span class="block text-[11px] font-black text-primary-red mt-1">Rp{{ number_format($product->price, 0, ',', '.') }}</span>
+
+                                            <!-- Metadata: Kategori & Supplier -->
+                                            <div class="flex items-center gap-2 mt-1 text-[11px] text-slate-500 dark:text-slate-400 flex-wrap">
+                                                <span class="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 font-medium text-slate-700 dark:text-slate-300 text-[10px]">
+                                                    {{ $product->category->name }}
+                                                </span>
+                                                @if($product->supplier_id)
+                                                    <span class="text-[10px] text-slate-400 truncate max-w-[120px]">
+                                                        {{ $product->supplier->name }}
+                                                    </span>
+                                                @endif
+                                            </div>
+
+                                            <!-- Financials: Jual & Modal -->
+                                            <div class="flex items-baseline gap-2 mt-2">
+                                                <span class="text-sm font-bold text-rose-600 dark:text-rose-400">Rp{{ number_format($product->price, 0, ',', '.') }}</span>
+                                                <span class="text-[11px] text-slate-400">Modal: Rp{{ number_format($product->modal_price, 0, ',', '.') }}</span>
+                                                <span class="text-[11px] font-medium text-emerald-600 dark:text-emerald-400">+Rp{{ number_format($product->price - $product->modal_price, 0, ',', '.') }}</span>
+                                            </div>
                                         </div>
                                     </div>
                                     
-                                    <!-- Aksi -->
-                                    <div class="flex gap-1.5">
+                                    <!-- Aksi: Lucide SVG Icons -->
+                                    <div class="flex items-center gap-1 shrink-0 pt-0.5">
                                         <!-- Stock History Button -->
-                                        <button wire:click="openStockHistory('{{ $product->id }}')" title="Riwayat Stok Awal" class="p-2.5 bg-white dark:bg-gray-700 text-amber-600 dark:text-amber-400 rounded-xl shadow-sm border border-gray-150 dark:border-gray-650">
-                                            <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                        <button wire:click="openStockHistory('{{ $product->id }}')" title="Riwayat Stok" class="p-2 rounded-lg text-slate-500 hover:text-amber-600 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                                            <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                                         </button>
                                         <!-- Detail Eye Button -->
-                                        <button @click="showProductDetail = true; detailProduct = { name: '{{ addslashes($product->name) }}', category: '{{ addslashes($product->category->name) }}', price: 'Rp{{ number_format($product->price, 0, ',', '.') }}', modal: 'Rp{{ number_format($product->modal_price, 0, ',', '.') }}', profit: 'Rp{{ number_format($product->price - $product->modal_price, 0, ',', '.') }}', supplier: '{{ $product->supplier_id ? addslashes($product->supplier->name) : 'Internal' }}', status: '{{ $product->is_active ? 'Aktif' : 'Nonaktif' }}' }" class="p-2.5 bg-white dark:bg-gray-700 text-primary-blue rounded-xl shadow-sm border border-gray-150 dark:border-gray-650">
-                                            <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                        <button @click="showProductDetail = true; detailProduct = { name: '{{ addslashes($product->name) }}', category: '{{ addslashes($product->category->name) }}', price: 'Rp{{ number_format($product->price, 0, ',', '.') }}', modal: 'Rp{{ number_format($product->modal_price, 0, ',', '.') }}', profit: 'Rp{{ number_format($product->price - $product->modal_price, 0, ',', '.') }}', supplier: '{{ $product->supplier_id ? addslashes($product->supplier->name) : 'Internal' }}', status: '{{ $product->is_active ? 'Aktif' : 'Nonaktif' }}' }" title="Detail" class="p-2 rounded-lg text-slate-500 hover:text-blue-600 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                                            <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
                                         </button>
-                                        <button wire:click="editProduct('{{ $product->id }}')" class="p-2.5 bg-white dark:bg-gray-700 text-primary-blue rounded-xl shadow-sm border border-gray-150 dark:border-gray-600">
-                                            <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+                                        <!-- Edit Button -->
+                                        <button wire:click="editProduct('{{ $product->id }}')" title="Edit" class="p-2 rounded-lg text-slate-500 hover:text-blue-600 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                                            <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
                                         </button>
-                                        <button wire:click="confirmDelete('{{ $product->id }}')" class="p-2.5 bg-white dark:bg-gray-700 text-primary-red rounded-xl shadow-sm border border-gray-150 dark:border-gray-600">
-                                            <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                        <!-- Delete Button -->
+                                        <button wire:click="confirmDelete('{{ $product->id }}')" title="Hapus" class="p-2 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                                            <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
                                         </button>
                                     </div>
                                 </div>
@@ -364,48 +386,58 @@
     </div>
     @endif
 
-    <!-- Product Form Modal -->
+    <!-- Product Form Modal (Mobile-First Bottom Sheet / Desktop Center Modal) -->
     <div 
         x-data="{ show: @entangle('showFormModal') }" 
         x-show="show" 
         x-cloak
-        class="fixed inset-0 z-[100] flex items-center justify-center sm:p-6 p-3 bg-black/60 backdrop-blur-sm"
-        x-transition:enter="transition ease-out duration-300"
+        class="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-6 bg-black/60 backdrop-blur-xs"
+        x-transition:enter="transition ease-out duration-200"
         x-transition:enter-start="opacity-0"
         x-transition:enter-end="opacity-100"
-        x-transition:leave="transition ease-in duration-300"
+        x-transition:leave="transition ease-in duration-150"
         x-transition:leave-start="opacity-100"
         x-transition:leave-end="opacity-0"
     >
         <div 
             x-show="show"
             @click.away="show = false"
-            class="bg-white dark:bg-gray-800 rounded-2xl sm:rounded-[3rem] sm:p-10 p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto no-scrollbar shadow-2xl border border-gray-100 dark:border-gray-700 relative"
-            x-transition:enter="transition cubic-bezier(0.34, 1.56, 0.64, 1) duration-300 transform"
-            x-transition:enter-start="opacity-0 scale-75 translate-y-20"
-            x-transition:enter-end="opacity-100 scale-100 translate-y-0"
-            x-transition:leave="transition ease-in duration-300 transform"
-            x-transition:leave-start="opacity-100 scale-100 translate-y-0"
-            x-transition:leave-end="opacity-0 scale-75 translate-y-20"
+            class="bg-white dark:bg-slate-900 rounded-t-3xl sm:rounded-2xl max-w-2xl w-full max-h-[90vh] flex flex-col shadow-2xl border border-slate-200 dark:border-slate-800 relative overflow-hidden"
+            x-transition:enter="transition cubic-bezier(0.16, 1, 0.3, 1) duration-300 transform"
+            x-transition:enter-start="opacity-0 translate-y-full sm:translate-y-4 sm:scale-95"
+            x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+            x-transition:leave="transition ease-in duration-200 transform"
+            x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+            x-transition:leave-end="opacity-0 translate-y-full sm:translate-y-4 sm:scale-95"
         >
-            <!-- Close Button -->
-            <button type="button" wire:click="cancelEdit" class="absolute top-5 right-8 text-gray-400 hover:text-gray-600 dark:hover:text-white transition-colors">
-                <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
-            </button>
-
-            <div class="flex items-center mb-8">
-                <div class="w-14 h-14 bg-primary-red rounded-2xl flex items-center justify-center text-white mr-4 shadow-lg shadow-red-900/20">
-                    <svg class="w-7 h-7" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.27 6.96 8.73 5.04 8.73-5.04"/><path d="M12 22.08V12"/></svg>
-                </div>
-                <div>
-                    <h2 class="text-2xl font-bold uppercase tracking-tight text-gray-800 dark:text-white">
-                        {{ $editingId ? 'Edit Informasi Produk' : 'Tambah Produk Baru' }}
-                    </h2>
-                    <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">Lengkapi data katalog produk di bawah ini</p>
-                </div>
+            <!-- Drag handle on mobile -->
+            <div class="sm:hidden flex justify-center pt-3 pb-1">
+                <div class="w-10 h-1 rounded-full bg-slate-300 dark:bg-slate-700"></div>
             </div>
 
-            <form wire:submit.prevent="saveProduct" class="space-y-6">
+            <!-- Sticky Modal Header -->
+            <div class="px-5 sm:px-8 py-4 sm:py-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-white dark:bg-slate-900 shrink-0">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
+                        <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.27 6.96 8.73 5.04 8.73-5.04"/><path d="M12 22.08V12"/></svg>
+                    </div>
+                    <div>
+                        <h2 class="text-base sm:text-lg font-bold text-slate-900 dark:text-white leading-tight">
+                            {{ $editingId ? 'Edit Informasi Produk' : 'Tambah Produk Baru' }}
+                        </h2>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Lengkapi data katalog produk</p>
+                    </div>
+                </div>
+
+                <!-- Close Button -->
+                <button type="button" wire:click="cancelEdit" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                    <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+
+            <form wire:submit.prevent="saveProduct" class="flex flex-col flex-1 overflow-hidden">
+                <!-- Scrollable Form Body -->
+                <div class="p-5 sm:p-8 space-y-5 overflow-y-auto flex-1 no-scrollbar">
                 <!-- Name -->
                 <div>
                     <label class="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-3 ml-2 italic">Nama Produk</label>
@@ -522,138 +554,141 @@
                     </div>
                 </div>
 
-                <div class="flex items-center gap-4 pt-4">
-                    <button type="submit" class="flex-1 py-5 bg-primary-red text-white rounded-[2rem] shadow-2xl shadow-red-500/20 font-bold uppercase tracking-wide text-xs transform hover:-translate-y-1 transition-all">
-                        {{ $editingId ? 'Simpan Perubahan' : 'Tambah Produk' }}
-                    </button>
-                    <button type="button" wire:click="cancelEdit" class="px-8 py-5 bg-gray-100 dark:bg-gray-900 text-gray-400 rounded-[2rem] font-black uppercase text-[10px] tracking-widest hover:text-gray-600 dark:hover:text-white transition-all">
+                </div>
+
+                <!-- Sticky Modal Actions Footer -->
+                <div class="px-5 sm:px-8 py-3.5 sm:py-4 bg-slate-50 dark:bg-slate-900/90 border-t border-slate-200 dark:border-slate-800 flex items-center justify-end gap-3 shrink-0">
+                    <button type="button" wire:click="cancelEdit" class="px-5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 text-xs font-semibold transition-colors">
                         Batal
+                    </button>
+                    <button type="submit" class="px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs shadow-sm transition-colors flex items-center justify-center min-w-[120px]">
+                        {{ $editingId ? 'Simpan Perubahan' : 'Tambah Produk' }}
                     </button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- Delete Modal -->
+    <!-- Delete Modal (Clean & Compact) -->
     <div 
         x-data="{ show: @entangle('showDeleteModal') }" 
         x-show="show" 
         x-cloak
-        class="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/60 backdrop-blur-sm"
-        x-transition:enter="transition ease-out duration-300"
+        class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs"
+        x-transition:enter="transition ease-out duration-200"
         x-transition:enter-start="opacity-0"
         x-transition:enter-end="opacity-100"
-        x-transition:leave="transition ease-in duration-200"
+        x-transition:leave="transition ease-in duration-150"
         x-transition:leave-start="opacity-100"
         x-transition:leave-end="opacity-0"
     >
         <div 
             @click.away="show = false"
-            class="bg-white dark:bg-gray-800 rounded-[3rem] p-12 max-w-md w-full shadow-2xl text-center"
-            x-transition:enter="transition ease-out duration-500"
-            x-transition:enter-start="opacity-0 scale-90 translate-y-10"
-            x-transition:enter-end="opacity-100 scale-100 translate-y-0"
-            x-transition:leave="transition ease-in duration-300"
-            x-transition:leave-start="opacity-100 scale-100 translate-y-0"
-            x-transition:leave-end="opacity-0 scale-95 translate-y-10"
+            class="bg-white dark:bg-slate-900 rounded-2xl p-6 max-w-sm w-full shadow-2xl text-center border border-slate-200 dark:border-slate-800"
+            x-transition:enter="transition cubic-bezier(0.16, 1, 0.3, 1) duration-200 transform"
+            x-transition:enter-start="opacity-0 scale-95"
+            x-transition:enter-end="opacity-100 scale-100"
+            x-transition:leave="transition ease-in duration-150 transform"
+            x-transition:leave-start="opacity-100 scale-100"
+            x-transition:leave-end="opacity-0 scale-95"
         >
-            <div class="w-20 h-20 bg-primary-red/10 text-primary-red rounded-full flex items-center justify-center mx-auto mb-8">
-                <svg class="w-10 h-10" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
+            <div class="w-12 h-12 bg-rose-500/10 text-rose-600 rounded-xl flex items-center justify-center mx-auto mb-4">
+                <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
             </div>
-            <h3 class="text-2xl font-bold uppercase tracking-tight text-gray-800 dark:text-white mb-4">Hapus Produk?</h3>
-            <p class="text-gray-400 font-bold text-xs uppercase tracking-widest mb-10 leading-relaxed">Tindakan ini tidak dapat dibatalkan. Seluruh data terkait produk ini akan dihapus permanen.</p>
-            <div class="flex gap-4">
-                <button wire:click="cancelDelete" class="flex-1 py-4 bg-gray-100 dark:bg-gray-900 text-gray-400 rounded-2xl font-black uppercase text-[10px] tracking-widest hover:text-gray-600 transition-all">Batal</button>
-                <button wire:click="deleteProduct" class="flex-1 py-4 bg-primary-red text-white rounded-2xl font-black uppercase text-[10px] tracking-widest shadow-lg shadow-red-500/30 hover:scale-105 transition-all">Ya, Hapus</button>
+            <h3 class="text-base font-bold text-slate-900 dark:text-white mb-1.5">Hapus Produk?</h3>
+            <p class="text-slate-500 dark:text-slate-400 text-xs mb-6">Tindakan ini tidak dapat dibatalkan. Seluruh data terkait produk ini akan dihapus permanen.</p>
+            <div class="flex gap-2.5">
+                <button type="button" wire:click="cancelDelete" class="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-semibold transition-colors">Batal</button>
+                <button type="button" wire:click="deleteProduct" class="flex-1 py-2.5 bg-rose-600 hover:bg-rose-500 text-white rounded-xl text-xs font-semibold shadow-sm transition-colors">Hapus</button>
             </div>
         </div>
     </div>
 
-    <!-- Bulk Delete Modal -->
+    <!-- Bulk Delete Modal (Clean & Compact) -->
     <div 
         x-data="{ show: @entangle('showBulkDeleteModal') }" 
         x-show="show" 
         x-cloak
-        class="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/60 backdrop-blur-sm"
-        x-transition:enter="transition ease-out duration-300"
+        class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs"
+        x-transition:enter="transition ease-out duration-200"
         x-transition:enter-start="opacity-0"
         x-transition:enter-end="opacity-100"
-        x-transition:leave="transition ease-in duration-200"
+        x-transition:leave="transition ease-in duration-150"
         x-transition:leave-start="opacity-100"
         x-transition:leave-end="opacity-0"
     >
         <div 
             @click.away="show = false"
-            class="bg-white dark:bg-gray-800 rounded-[3rem] p-12 max-w-md w-full shadow-2xl text-center"
-            x-transition:enter="transition ease-out duration-500"
-            x-transition:enter-start="opacity-0 scale-90 translate-y-10"
-            x-transition:enter-end="opacity-100 scale-100 translate-y-0"
-            x-transition:leave="transition ease-in duration-300"
-            x-transition:leave-start="opacity-100 scale-100 translate-y-0"
-            x-transition:leave-end="opacity-0 scale-95 translate-y-10"
+            class="bg-white dark:bg-slate-900 rounded-2xl p-6 max-w-sm w-full shadow-2xl text-center border border-slate-200 dark:border-slate-800"
+            x-transition:enter="transition cubic-bezier(0.16, 1, 0.3, 1) duration-200 transform"
+            x-transition:enter-start="opacity-0 scale-95"
+            x-transition:enter-end="opacity-100 scale-100"
+            x-transition:leave="transition ease-in duration-150 transform"
+            x-transition:leave-start="opacity-100 scale-100"
+            x-transition:leave-end="opacity-0 scale-95"
         >
-            <div class="w-20 h-20 bg-primary-red/10 text-primary-red rounded-full flex items-center justify-center mx-auto mb-8">
-                <svg class="w-10 h-10" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
+            <div class="w-12 h-12 bg-rose-500/10 text-rose-600 rounded-xl flex items-center justify-center mx-auto mb-4">
+                <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
             </div>
-            <h3 class="text-2xl font-bold uppercase tracking-tight text-gray-800 dark:text-white mb-4">Hapus Banyak Produk?</h3>
-            <p class="text-gray-400 font-bold text-xs uppercase tracking-widest mb-10 leading-relaxed">Tindakan ini tidak dapat dibatalkan. Seluruh produk yang dipilih ({{ count($selectedProducts) }} produk) akan dihapus permanen.</p>
-            <div class="flex gap-4">
-                <button wire:click="cancelBulkDelete" class="flex-1 py-4 bg-gray-100 dark:bg-gray-900 text-gray-400 rounded-2xl font-black uppercase text-[10px] tracking-widest hover:text-gray-600 transition-all">Batal</button>
-                <button wire:click="bulkDelete" class="flex-1 py-4 bg-primary-red text-white rounded-2xl font-black uppercase text-[10px] tracking-widest shadow-lg shadow-red-500/30 hover:scale-105 transition-all">Ya, Hapus Semua</button>
+            <h3 class="text-base font-bold text-slate-900 dark:text-white mb-1.5">Hapus Banyak Produk?</h3>
+            <p class="text-slate-500 dark:text-slate-400 text-xs mb-6">Tindakan ini tidak dapat dibatalkan. Seluruh produk yang dipilih ({{ count($selectedProducts) }} produk) akan dihapus permanen.</p>
+            <div class="flex gap-2.5">
+                <button type="button" wire:click="cancelBulkDelete" class="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-semibold transition-colors">Batal</button>
+                <button type="button" wire:click="bulkDelete" class="flex-1 py-2.5 bg-rose-600 hover:bg-rose-500 text-white rounded-xl text-xs font-semibold shadow-sm transition-colors">Hapus Semua</button>
             </div>
         </div>
     </div>
 
-    <!-- Product Detail Modal (Alpine.js) -->
-    <div x-show="showProductDetail" x-cloak class="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/60 backdrop-blur-sm" style="display: none;" x-transition>
-        <div @click.away="showProductDetail = false" class="bg-white dark:bg-gray-800 rounded-[3rem] p-10 max-w-md w-full shadow-2xl border border-gray-100 dark:border-gray-700">
-            <div class="flex items-center justify-between pb-4 border-b border-gray-100 dark:border-gray-700">
-                <h3 class="text-xl font-black italic uppercase tracking-tight text-primary-blue dark:text-primary-yellow">Detail Produk</h3>
-                <button @click="showProductDetail = false" class="text-gray-400 hover:text-gray-650 dark:hover:text-white text-2xl font-black">&times;</button>
+    <!-- Product Detail Modal (Clean & Modern) -->
+    <div x-show="showProductDetail" x-cloak class="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-xs" style="display: none;" x-transition>
+        <div @click.away="showProductDetail = false" class="bg-white dark:bg-slate-900 rounded-t-2xl sm:rounded-2xl p-6 max-w-md w-full shadow-2xl border border-slate-200 dark:border-slate-800">
+            <div class="flex items-center justify-between pb-3.5 border-b border-slate-100 dark:border-slate-800">
+                <h3 class="text-base font-bold text-slate-900 dark:text-white">Detail Produk</h3>
+                <button @click="showProductDetail = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1.5 rounded-lg transition-colors">
+                    <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
             </div>
             
-            <div class="py-6 space-y-4 text-left">
+            <div class="py-4 space-y-3.5 text-left">
                 <div>
-                     <span class="text-[8px] font-black text-gray-400 uppercase tracking-widest block">Nama Produk</span>
-                     <span class="text-base font-black text-gray-800 dark:text-white uppercase italic tracking-tight" x-text="detailProduct.name"></span>
+                     <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block">Nama Produk</span>
+                     <span class="text-base font-bold text-slate-800 dark:text-slate-100" x-text="detailProduct.name"></span>
                 </div>
                 
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <span class="text-[8px] font-black text-gray-400 uppercase tracking-widest block">Kategori</span>
-                        <span class="text-xs font-bold text-gray-650 dark:text-gray-300" x-text="detailProduct.category"></span>
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800">
+                        <span class="text-[10px] text-slate-400 block">Kategori</span>
+                        <span class="text-xs font-semibold text-slate-700 dark:text-slate-200" x-text="detailProduct.category"></span>
                     </div>
-                    <div>
-                        <span class="text-[8px] font-black text-gray-400 uppercase tracking-widest block">Status</span>
-                        <span class="text-xs font-bold text-gray-650 dark:text-gray-300" x-text="detailProduct.status"></span>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <span class="text-[8px] font-black text-gray-400 uppercase tracking-widest block">Harga Jual</span>
-                        <span class="text-sm font-black text-primary-red" x-text="detailProduct.price"></span>
-                    </div>
-                    <div>
-                        <span class="text-[8px] font-black text-gray-400 uppercase tracking-widest block">Harga Modal</span>
-                        <span class="text-sm font-black text-gray-500 dark:text-gray-405" x-text="detailProduct.modal"></span>
+                    <div class="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800">
+                        <span class="text-[10px] text-slate-400 block">Status</span>
+                        <span class="text-xs font-semibold text-slate-700 dark:text-slate-200" x-text="detailProduct.status"></span>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <span class="text-[8px] font-black text-gray-400 uppercase tracking-widest block">Profit</span>
-                        <span class="text-sm font-black text-green-500" x-text="detailProduct.profit"></span>
+                <div class="grid grid-cols-3 gap-2.5">
+                    <div class="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800">
+                        <span class="text-[10px] text-slate-400 block">Harga Jual</span>
+                        <span class="text-xs font-bold text-rose-600 dark:text-rose-400" x-text="detailProduct.price"></span>
                     </div>
-                    <div>
-                        <span class="text-[8px] font-black text-gray-400 uppercase tracking-widest block">Supplier</span>
-                        <span class="text-xs font-bold text-gray-650 dark:text-gray-300" x-text="detailProduct.supplier"></span>
+                    <div class="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800">
+                        <span class="text-[10px] text-slate-400 block">Modal</span>
+                        <span class="text-xs font-medium text-slate-600 dark:text-slate-300" x-text="detailProduct.modal"></span>
                     </div>
+                    <div class="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800">
+                        <span class="text-[10px] text-slate-400 block">Profit</span>
+                        <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400" x-text="detailProduct.profit"></span>
+                    </div>
+                </div>
+
+                <div class="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800">
+                    <span class="text-[10px] text-slate-400 block">Supplier</span>
+                    <span class="text-xs font-medium text-slate-700 dark:text-slate-300" x-text="detailProduct.supplier"></span>
                 </div>
             </div>
 
-            <div class="pt-4 border-t border-gray-100 dark:border-gray-700 flex justify-end">
-                <button @click="showProductDetail = false" class="px-6 py-3 bg-gray-100 dark:bg-gray-900 text-gray-500 dark:text-gray-300 text-[10px] font-black uppercase tracking-widest rounded-2xl hover:bg-gray-250 transition-all">Tutup</button>
+            <div class="pt-3 border-t border-slate-100 dark:border-slate-800 flex justify-end">
+                <button @click="showProductDetail = false" class="w-full sm:w-auto px-5 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-semibold rounded-xl transition-colors">Tutup</button>
             </div>
         </div>
     </div>

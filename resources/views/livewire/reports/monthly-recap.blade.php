@@ -48,7 +48,7 @@
             </div>
         </div>
 
-        <div class="bg-white dark:bg-gray-800 rounded-[3rem] p-10 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 relative overflow-hidden group" id="card-profit">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl p-10 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 relative overflow-hidden group" id="card-profit">
             <div class="absolute -right-6 -bottom-6 opacity-5 group-hover:scale-110 transition-transform duration-700">
                 <svg class="w-48 h-48 text-primary-red" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m22 7-8.5 8.5-5-5L2 17"/><polyline points="18 7 22 7 22 11"/></svg>
             </div>
@@ -57,7 +57,7 @@
             <p class="mt-4 text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em]">Modal Terputar <span :class="censorMode ? 'privacy-blur' : ''">Rp{{ number_format($recap->total_modal, 0, ',', '.') }}</span></p>
         </div>
 
-        <div class="bg-white dark:bg-gray-800 rounded-[3rem] p-10 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 flex flex-col justify-between" id="card-volume">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl p-10 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 flex flex-col justify-between" id="card-volume">
             <div>
                 <h3 class="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 mb-6">Volume Transaksi</h3>
                 <div class="flex items-baseline gap-4">
@@ -75,7 +75,7 @@
     </div>
 
     <!-- Trend Chart -->
-    <div class="bg-white dark:bg-gray-800 rounded-[3.5rem] p-10 mb-12 shadow-2xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl p-10 mb-12 shadow-2xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-700">
         <div class="flex justify-between items-center mb-10">
             <div>
                 <h2 class="text-2xl font-bold uppercase tracking-tight text-gray-800 dark:text-white leading-none">Tren Profit Bulanan</h2>
@@ -92,7 +92,7 @@
     </div>
 
     <!-- Category Performance Section -->
-    <div class="bg-white dark:bg-gray-800 rounded-[3.5rem] p-10 mb-12 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-200">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl p-10 mb-12 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-200">
         <div class="flex items-center justify-between mb-10">
             <div>
                 <h2 class="text-2xl font-bold uppercase tracking-tight text-gray-800 dark:text-white leading-none">Performa Per Kategori</h2>
@@ -224,7 +224,7 @@
     </div>
 
     <!-- Monthly Breakdown -->
-    <div class="bg-white dark:bg-gray-800 rounded-[3.5rem] shadow-2xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 overflow-hidden">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 overflow-hidden">
         <div class="p-10 border-b border-gray-100 dark:border-gray-700">
             <h2 class="text-2xl font-bold uppercase tracking-tight text-gray-800 dark:text-white">Breakdown Harian ({{ \Carbon\Carbon::create(null, $selectedMonth)->translatedFormat('F') }})</h2>
         </div>

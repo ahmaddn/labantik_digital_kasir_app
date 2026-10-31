@@ -135,96 +135,143 @@
                         </h3>
                     </div>
                     <div class="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden">
-                        <div class="overflow-x-auto">
+                        <!-- Desktop Table View (>= md) -->
+                        <div class="hidden md:block overflow-x-auto">
                             <table class="w-full text-left border-collapse">
                                 <thead>
-                                    <tr class="border-b border-gray-50 dark:border-gray-800">
-                                        <th class="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-gray-400">Tanggal / Jatuh Tempo</th>
-                                        <th class="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-gray-400">Kreditor / Supplier</th>
-                                        <th class="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-gray-400">Catatan</th>
-                                        <th class="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-gray-400">Total Hutang</th>
-                                        <th class="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-gray-400">Sisa Hutang</th>
-                                        <th class="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-gray-400">Status</th>
-                                        <th class="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-gray-400">Aksi</th>
+                                    <tr class="border-b border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/50">
+                                        <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Tanggal / Jatuh Tempo</th>
+                                        <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Kreditor / Supplier</th>
+                                        <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Catatan</th>
+                                        <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Total Hutang</th>
+                                        <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Sisa Hutang</th>
+                                        <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
+                                        <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-right">Aksi</th>
                                     </tr>
                                 </thead>
-                                <tbody class="divide-y divide-gray-50 dark:divide-gray-800">
+                                <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
                                     @forelse($activeStoreDebts as $debt)
-                                        <tr class="hover:bg-gray-50/50 dark:hover:bg-gray-800/30 transition-colors group text-gray-700 dark:text-gray-300">
-                                            <td class="px-8 py-6">
+                                        <tr class="hover:bg-gray-50/60 dark:hover:bg-gray-800/40 transition-colors group text-gray-700 dark:text-gray-300">
+                                            <td class="px-6 py-4 whitespace-nowrap">
                                                 <div class="flex flex-col">
-                                                    <span class="text-xs font-black text-amber-500 uppercase italic tracking-tighter">{{ $debt->date->format('d/m/Y') }}</span>
+                                                    <span class="text-xs font-bold text-amber-600 dark:text-amber-400 font-mono">{{ $debt->date->format('d/m/Y') }}</span>
                                                     @if($debt->due_date)
-                                                        <span class="text-[9px] font-bold text-red-500 uppercase mt-1">Jatuh Tempo: {{ $debt->due_date->format('d/m/Y') }}</span>
+                                                        <span class="text-[10px] font-semibold text-rose-500 mt-0.5">Jatuh Tempo: {{ $debt->due_date->format('d/m/Y') }}</span>
                                                     @else
-                                                        <span class="text-[9px] font-bold text-gray-400 uppercase mt-1">Tanpa Jatuh Tempo</span>
+                                                        <span class="text-[10px] text-gray-400 mt-0.5">Tanpa Jatuh Tempo</span>
                                                     @endif
                                                 </div>
                                             </td>
-                                            <td class="px-8 py-6">
+                                            <td class="px-6 py-4">
                                                 <div class="flex items-center">
-                                                    <div class="w-10 h-10 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-amber-500 font-black text-xs mr-4">
+                                                    <div class="w-8 h-8 rounded-lg bg-amber-50 dark:bg-amber-950/40 text-amber-600 border border-amber-200 dark:border-amber-800/50 flex items-center justify-center font-bold text-xs mr-3 shrink-0">
                                                         {{ substr($debt->creditor_name ?? 'S', 0, 1) }}
                                                     </div>
-                                                    <span class="text-sm font-bold uppercase tracking-tight text-gray-700 dark:text-gray-300">
+                                                    <span class="text-xs font-bold uppercase tracking-tight text-gray-800 dark:text-gray-200">
                                                         {{ $debt->creditor_name }}
                                                     </span>
                                                 </div>
                                             </td>
-                                            <td class="px-8 py-6">
-                                                <span class="text-xs font-bold text-gray-600 dark:text-gray-400">
+                                            <td class="px-6 py-4">
+                                                <span class="text-xs text-gray-600 dark:text-gray-400">
                                                     {{ $debt->note ?: '-' }}
                                                 </span>
                                             </td>
-                                            <td class="px-8 py-6">
-                                                <span class="text-sm font-black text-gray-400 tracking-tighter">
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <span class="text-xs text-gray-500 dark:text-gray-400 font-mono">
                                                     Rp{{ number_format($debt->amount, 0, ',', '.') }}
                                                 </span>
                                             </td>
-                                            <td class="px-8 py-6">
-                                                <span class="text-base font-black italic text-amber-500 dark:text-white tracking-tighter">
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <span class="text-xs font-bold text-amber-600 dark:text-amber-400 font-mono">
                                                     Rp{{ number_format($debt->remaining_amount, 0, ',', '.') }}
                                                 </span>
                                             </td>
-                                            <td class="px-8 py-6">
-                                                <span class="px-3 py-1 text-[9px] font-black uppercase rounded-full tracking-widest border bg-amber-500/10 text-amber-500 border-amber-500/20">
-                                                    BELUM LUNAS
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <span class="px-2.5 py-1 text-[10px] font-bold uppercase rounded-full border bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800">
+                                                    Belum Lunas
                                                 </span>
                                             </td>
-                                            <td class="px-8 py-6">
-                                                <div class="flex items-center gap-2">
+                                            <td class="px-6 py-4 text-right whitespace-nowrap">
+                                                <div class="flex items-center justify-end gap-1.5">
                                                     <button 
                                                         wire:click="openSettleStoreDebtModal('{{ $debt->id }}')"
-                                                        class="flex items-center px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all bg-emerald-500 text-white shadow-lg shadow-emerald-500/20 hover:scale-105 active:scale-95"
+                                                        class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold transition-all bg-emerald-600 text-white hover:bg-emerald-700 shadow-sm"
                                                     >
-                                                        <svg class="w-4 h-4 mr-2" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
                                                         Lunaskan
                                                     </button>
                                                     <button 
                                                         wire:click="openDeleteStoreDebtModal('{{ $debt->id }}')"
-                                                        class="flex items-center justify-center w-10 h-10 rounded-xl bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white transition-all active:scale-95 shadow-sm"
+                                                        class="p-1.5 text-gray-400 hover:text-rose-600 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors"
                                                         title="Hapus Catatan Hutang"
                                                     >
-                                                        <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                                                     </button>
                                                 </div>
                                             </td>
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="7" class="px-8 py-20 text-center">
-                                                <div class="flex flex-col items-center">
-                                                    <div class="w-16 h-16 bg-gray-50 dark:bg-gray-800 rounded-full flex items-center justify-center text-gray-300 mb-4">
-                                                        <svg class="w-8 h-8" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>
-                                                    </div>
-                                                    <h4 class="text-sm font-bold uppercase tracking-tight text-gray-400">Tidak Ada Hutang Aktif</h4>
-                                                    <p class="text-[10px] font-bold text-gray-300 uppercase tracking-widest mt-1">Semua hutang toko telah diselesaikan!</p>
-                                                </div>
+                                            <td colspan="7" class="px-6 py-12 text-center text-gray-400">
+                                                <p class="text-xs font-semibold">Tidak Ada Hutang Aktif</p>
                                             </td>
                                         </tr>
                                     @endforelse
                                 </tbody>
                             </table>
+                        </div>
+
+                        <!-- Mobile Adaptive Cards View (< md) -->
+                        <div class="block md:hidden p-3.5 space-y-2.5">
+                            @forelse($activeStoreDebts as $debt)
+                            <div class="p-3 bg-white dark:bg-gray-800/80 rounded-xl border border-gray-100 dark:border-gray-700/60 shadow-sm flex flex-col gap-2">
+                                <div class="flex items-start justify-between gap-2">
+                                    <div class="min-w-0">
+                                        <h4 class="text-xs font-bold text-gray-900 dark:text-white uppercase truncate">{{ $debt->creditor_name }}</h4>
+                                        <div class="flex items-center gap-1.5 mt-0.5 text-[10px]">
+                                            <span class="text-amber-600 dark:text-amber-400 font-mono">{{ $debt->date->format('d/m/Y') }}</span>
+                                            @if($debt->due_date)
+                                                <span class="text-gray-300 dark:text-gray-600">&bull;</span>
+                                                <span class="text-rose-500 font-medium">Jatuh tempo: {{ $debt->due_date->format('d/m/Y') }}</span>
+                                            @endif
+                                        </div>
+                                    </div>
+                                    <span class="px-2 py-0.5 text-[9px] font-bold uppercase rounded-full border bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800 shrink-0">
+                                        Belum Lunas
+                                    </span>
+                                </div>
+                                @if($debt->note)
+                                    <p class="text-xs text-gray-500 dark:text-gray-400">{{ $debt->note }}</p>
+                                @endif
+                                <div class="flex items-center justify-between pt-2 border-t border-gray-50 dark:border-gray-700/50">
+                                    <div>
+                                        <span class="text-[9px] text-gray-400 block">Sisa Hutang</span>
+                                        <span class="text-xs font-bold font-mono text-amber-600 dark:text-amber-400">Rp{{ number_format($debt->remaining_amount, 0, ',', '.') }}</span>
+                                    </div>
+                                    <div class="flex items-center gap-1.5">
+                                        <button 
+                                            wire:click="openDeleteStoreDebtModal('{{ $debt->id }}')"
+                                            class="p-1.5 text-gray-400 hover:text-rose-600 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors"
+                                            title="Hapus"
+                                        >
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                        </button>
+                                        <button 
+                                            wire:click="openSettleStoreDebtModal('{{ $debt->id }}')"
+                                            class="px-3 py-1.5 rounded-lg text-xs font-bold bg-emerald-600 text-white hover:bg-emerald-700 transition-colors inline-flex items-center gap-1"
+                                        >
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                                            Lunaskan
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            @empty
+                            <div class="p-8 text-center text-gray-400 bg-white dark:bg-gray-800 rounded-xl border border-dashed border-gray-200 dark:border-gray-700">
+                                <p class="text-xs font-semibold">Tidak Ada Hutang Aktif</p>
+                            </div>
+                            @endforelse
                         </div>
                         @if($activeStoreDebts->hasPages())
                             <div class="px-8 py-6 border-t border-gray-50 dark:border-gray-800">
@@ -243,94 +290,115 @@
                         </h3>
                     </div>
                     <div class="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden">
-                        <div class="overflow-x-auto">
+                        <!-- Desktop Table View (>= md) -->
+                        <div class="hidden md:block overflow-x-auto">
                             <table class="w-full text-left border-collapse">
                                 <thead>
-                                    <tr class="border-b border-gray-50 dark:border-gray-800">
-                                        <th class="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-gray-400">Tanggal</th>
-                                        <th class="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-gray-400">Kreditor / Supplier</th>
-                                        <th class="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-gray-400">Catatan</th>
-                                        <th class="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-gray-400">Nominal Hutang</th>
-                                        <th class="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-gray-400">Status</th>
-                                        <th class="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-gray-400">Aksi</th>
+                                    <tr class="border-b border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/50">
+                                        <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Tanggal</th>
+                                        <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Kreditor / Supplier</th>
+                                        <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Catatan</th>
+                                        <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Nominal Hutang</th>
+                                        <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
+                                        <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-right">Aksi</th>
                                     </tr>
                                 </thead>
-                                <tbody class="divide-y divide-gray-50 dark:divide-gray-800">
+                                <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
                                     @forelse($historyStoreDebts as $debt)
-                                        <tr class="hover:bg-gray-50/50 dark:hover:bg-gray-800/30 transition-colors group text-gray-700 dark:text-gray-300">
-                                            <td class="px-8 py-6">
-                                                <div class="flex flex-col">
-                                                    <span class="text-xs font-black text-gray-500 uppercase italic tracking-tighter">{{ $debt->date->format('d/m/Y') }}</span>
-                                                </div>
+                                        <tr class="hover:bg-gray-50/60 dark:hover:bg-gray-800/40 transition-colors group text-gray-700 dark:text-gray-300">
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <span class="text-xs font-semibold text-gray-500 font-mono">{{ $debt->date->format('d/m/Y') }}</span>
                                             </td>
-                                            <td class="px-8 py-6">
+                                            <td class="px-6 py-4">
                                                 <div class="flex items-center">
-                                                    <div class="w-10 h-10 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-400 font-black text-xs mr-4">
+                                                    <div class="w-8 h-8 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-400 flex items-center justify-center font-bold text-xs mr-3 shrink-0">
                                                         {{ substr($debt->creditor_name ?? 'S', 0, 1) }}
                                                     </div>
-                                                    <span class="text-sm font-bold uppercase tracking-tight text-gray-500 dark:text-gray-400">
+                                                    <span class="text-xs font-bold uppercase tracking-tight text-gray-700 dark:text-gray-300">
                                                         {{ $debt->creditor_name }}
                                                     </span>
                                                 </div>
                                             </td>
-                                            <td class="px-8 py-6">
-                                                <span class="text-xs font-bold text-gray-600 dark:text-gray-400">
+                                            <td class="px-6 py-4">
+                                                <span class="text-xs text-gray-500 dark:text-gray-400">
                                                     {{ $debt->note ?: '-' }}
                                                 </span>
                                             </td>
-                                            <td class="px-8 py-6">
-                                                <span class="text-sm font-black text-gray-400 tracking-tighter">
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <span class="text-xs font-bold text-gray-700 dark:text-gray-300 font-mono">
                                                     Rp{{ number_format($debt->amount, 0, ',', '.') }}
                                                 </span>
                                             </td>
-                                            <td class="px-8 py-6">
-                                                @if($debt->status === 'lunas')
-                                                    <span class="px-3 py-1 text-[9px] font-black uppercase rounded-full tracking-widest border bg-emerald-500/10 text-emerald-500 border-emerald-500/20">
-                                                        LUNAS
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                @if($debt->status === 'paid')
+                                                    <span class="px-2.5 py-1 text-[10px] font-bold uppercase rounded-full border bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800">
+                                                        Lunas
                                                     </span>
                                                 @else
-                                                    <span class="px-3 py-1 text-[9px] font-black uppercase rounded-full tracking-widest border bg-red-500/10 text-red-500 border-red-500/20">
-                                                        DIHAPUS
+                                                    <span class="px-2.5 py-1 text-[10px] font-bold uppercase rounded-full border bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-800">
+                                                        Dihapus
                                                     </span>
                                                 @endif
                                             </td>
-                                            <td class="px-8 py-6">
-                                                <div class="flex items-center gap-2">
-                                                    @if($debt->status === 'lunas')
-                                                        <span class="text-xs text-gray-400 font-bold uppercase mr-2">Selesai</span>
-                                                    @else
-                                                        @if(session('active_role_name') !== 'superadmin')
-                                                            <a 
-                                                                href="{{ route('debts.print-deletion', $debt->id) }}"
-                                                                target="_blank"
-                                                                class="flex items-center px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all bg-gray-100 dark:bg-gray-800 text-red-500 hover:bg-gray-200 dark:hover:bg-gray-700 active:scale-95 shadow-sm"
-                                                                title="Cetak Bukti Pertanggungjawaban"
-                                                            >
-                                                                <svg class="w-4 h-4 mr-2" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect width="12" height="8" x="6" y="14"/></svg>
-                                                                Cetak Bukti
-                                                            </a>
-                                                        @else
-                                                            <span class="text-xs text-red-500 font-bold uppercase mr-2">Dihapus</span>
-                                                        @endif
-                                                    @endif
-                                                </div>
+                                            <td class="px-6 py-4 text-right whitespace-nowrap">
+                                                <button 
+                                                    wire:click="openDeleteStoreDebtModal('{{ $debt->id }}')"
+                                                    class="p-1.5 text-gray-400 hover:text-rose-600 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors"
+                                                    title="Hapus Permanen"
+                                                >
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                                </button>
                                             </td>
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="6" class="px-8 py-20 text-center">
-                                                <div class="flex flex-col items-center">
-                                                    <div class="w-16 h-16 bg-gray-50 dark:bg-gray-800 rounded-full flex items-center justify-center text-gray-300 mb-4">
-                                                        <svg class="w-8 h-8" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>
-                                                    </div>
-                                                    <h4 class="text-sm font-bold uppercase tracking-tight text-gray-400">Belum Ada Riwayat</h4>
-                                                    <p class="text-[10px] font-bold text-gray-300 uppercase tracking-widest mt-1">Belum ada transaksi hutang toko yang diselesaikan.</p>
-                                                </div>
+                                            <td colspan="6" class="px-6 py-12 text-center text-gray-400">
+                                                <p class="text-xs font-semibold">Belum Ada Riwayat Hutang</p>
                                             </td>
                                         </tr>
                                     @endforelse
                                 </tbody>
                             </table>
+                        </div>
+
+                        <!-- Mobile Adaptive Cards View (< md) -->
+                        <div class="block md:hidden p-3.5 space-y-2.5">
+                            @forelse($historyStoreDebts as $debt)
+                            <div class="p-3 bg-white dark:bg-gray-800/80 rounded-xl border border-gray-100 dark:border-gray-700/60 shadow-sm flex flex-col gap-2">
+                                <div class="flex items-start justify-between gap-2">
+                                    <div class="min-w-0">
+                                        <h4 class="text-xs font-bold text-gray-900 dark:text-white uppercase truncate">{{ $debt->creditor_name }}</h4>
+                                        <span class="text-[10px] text-gray-400 font-mono">{{ $debt->date->format('d/m/Y') }}</span>
+                                    </div>
+                                    @if($debt->status === 'paid')
+                                        <span class="px-2 py-0.5 text-[9px] font-bold uppercase rounded-full border bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800 shrink-0">
+                                            Lunas
+                                        </span>
+                                    @else
+                                        <span class="px-2 py-0.5 text-[9px] font-bold uppercase rounded-full border bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-800 shrink-0">
+                                            Dihapus
+                                        </span>
+                                    @endif
+                                </div>
+                                @if($debt->note)
+                                    <p class="text-xs text-gray-500 dark:text-gray-400">{{ $debt->note }}</p>
+                                @endif
+                                <div class="flex items-center justify-between pt-2 border-t border-gray-50 dark:border-gray-700/50">
+                                    <span class="text-xs font-bold font-mono text-gray-700 dark:text-gray-300">Rp{{ number_format($debt->amount, 0, ',', '.') }}</span>
+                                    <button 
+                                        wire:click="openDeleteStoreDebtModal('{{ $debt->id }}')"
+                                        class="p-1.5 text-gray-400 hover:text-rose-600 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors"
+                                        title="Hapus"
+                                    >
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                    </button>
+                                </div>
+                            </div>
+                            @empty
+                            <div class="p-8 text-center text-gray-400 bg-white dark:bg-gray-800 rounded-xl border border-dashed border-gray-200 dark:border-gray-700">
+                                <p class="text-xs font-semibold">Belum Ada Riwayat Hutang</p>
+                            </div>
+                            @endforelse
                         </div>
                         @if($historyStoreDebts->hasPages())
                             <div class="px-8 py-6 border-t border-gray-50 dark:border-gray-800">
@@ -514,7 +582,7 @@
         x-transition:leave-end="opacity-0"
     >
         <div 
-            class="bg-white dark:bg-gray-900 w-full max-w-2xl rounded-[3rem] shadow-2xl overflow-hidden flex flex-col relative max-h-[90vh]"
+            class="bg-white dark:bg-gray-900 w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden flex flex-col relative max-h-[90vh]"
             x-transition:enter="transition ease-out duration-500"
             x-transition:enter-start="opacity-0 scale-90 translate-y-10"
             x-transition:enter-end="opacity-100 scale-100 translate-y-0"
@@ -703,7 +771,7 @@
                                 </div>
                             </div>
                         @else
-                            <div class="h-full flex flex-col items-center justify-center p-12 bg-gray-50 dark:bg-gray-800/50 rounded-[3rem] border border-dashed border-gray-200 dark:border-gray-700 opacity-60">
+                            <div class="h-full flex flex-col items-center justify-center p-12 bg-gray-50 dark:bg-gray-800/50 rounded-2xl border border-dashed border-gray-200 dark:border-gray-700 opacity-60">
                                 <svg class="w-16 h-16 text-gray-300 mb-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
                                 <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Pilih metode pelunasan di kolom kiri untuk melanjutkan</p>
                             </div>
@@ -739,7 +807,7 @@
         x-transition:leave-end="opacity-0"
     >
         <div 
-            class="bg-white dark:bg-gray-900 w-full max-w-2xl rounded-[3rem] shadow-2xl overflow-hidden flex flex-col relative max-h-[85vh]"
+            class="bg-white dark:bg-gray-900 w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden flex flex-col relative max-h-[85vh]"
             x-transition:enter="transition ease-out duration-500"
             x-transition:enter-start="opacity-0 scale-90 translate-y-10"
             x-transition:enter-end="opacity-100 scale-100 translate-y-0"
@@ -812,7 +880,7 @@
         x-transition:leave-end="opacity-0"
     >
         <div 
-            class="bg-white dark:bg-gray-900 w-full max-w-xl rounded-[3rem] shadow-2xl overflow-hidden flex flex-col relative max-h-[90vh]"
+            class="bg-white dark:bg-gray-900 w-full max-w-xl rounded-2xl shadow-2xl overflow-hidden flex flex-col relative max-h-[90vh]"
             x-transition:enter="transition ease-out duration-500"
             x-transition:enter-start="opacity-0 scale-90 translate-y-10"
             x-transition:enter-end="opacity-100 scale-100 translate-y-0"
@@ -939,7 +1007,7 @@
         x-transition:leave-end="opacity-0"
     >
         <div 
-            class="bg-white dark:bg-gray-900 w-full max-w-xl rounded-[3rem] shadow-2xl overflow-hidden flex flex-col relative max-h-[90vh]"
+            class="bg-white dark:bg-gray-900 w-full max-w-xl rounded-2xl shadow-2xl overflow-hidden flex flex-col relative max-h-[90vh]"
             x-transition:enter="transition ease-out duration-500"
             x-transition:enter-start="opacity-0 scale-90 translate-y-10"
             x-transition:enter-end="opacity-100 scale-100 translate-y-0"
@@ -1053,7 +1121,7 @@
         x-transition:leave-end="opacity-0"
     >
         <div 
-            class="bg-white dark:bg-gray-900 w-full max-w-xl rounded-[3rem] shadow-2xl overflow-hidden flex flex-col relative max-h-[90vh]"
+            class="bg-white dark:bg-gray-900 w-full max-w-xl rounded-2xl shadow-2xl overflow-hidden flex flex-col relative max-h-[90vh]"
             x-transition:enter="transition ease-out duration-500"
             x-transition:enter-start="opacity-0 scale-90 translate-y-10"
             x-transition:enter-end="opacity-100 scale-100 translate-y-0"
@@ -1150,7 +1218,7 @@
     >
         <div 
             @click.away="show = false"
-            class="bg-white dark:bg-gray-800 rounded-[3rem] p-12 max-w-md w-full shadow-2xl text-center"
+            class="bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-md w-full shadow-2xl text-center"
             x-transition:enter="transition ease-out duration-500"
             x-transition:enter-start="opacity-0 scale-90 translate-y-10"
             x-transition:enter-end="opacity-100 scale-100 translate-y-0"
