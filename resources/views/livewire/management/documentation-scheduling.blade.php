@@ -255,19 +255,20 @@
             </div>
         </div>
 
-        <div class="overflow-x-auto">
+        <!-- Desktop Table View (>= md) -->
+        <div class="hidden md:block overflow-x-auto">
             <table class="w-full text-left border-collapse">
                 <thead>
-                    <tr class="border-b border-gray-100 dark:border-gray-800 text-[11px] font-black uppercase text-gray-400 tracking-wider">
+                    <tr class="border-b border-gray-100 dark:border-gray-800 text-xs font-bold uppercase text-gray-500 dark:text-gray-400 tracking-wider">
                         <th class="py-3 px-4">Nama Anggota Kasir</th>
                         <th class="py-3 px-4">Tingkatan</th>
                         <th class="py-3 px-4">Email</th>
                         <th class="py-3 px-4 text-center">Total Riwayat Tugas</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-100 dark:divide-gray-800 text-xs font-semibold">
+                <tbody class="divide-y divide-gray-100 dark:divide-gray-800 text-xs">
                     @forelse($cashierStats as $stat)
-                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-800/40 transition-colors">
+                        <tr class="hover:bg-gray-50/50 dark:hover:bg-gray-800/40 transition-colors">
                             <td class="py-3 px-4 text-gray-800 dark:text-white font-bold">{{ $stat['name'] }}</td>
                             <td class="py-3 px-4">
                                 @if($stat['grade_level'])
@@ -279,7 +280,7 @@
                                             default => 'bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20',
                                         };
                                     @endphp
-                                    <span class="px-2.5 py-1 text-[10px] font-black rounded-lg border {{ $gBadge }}">
+                                    <span class="px-2 py-0.5 text-[10px] font-bold rounded border {{ $gBadge }}">
                                         Tingkat {{ $stat['grade_level'] }}
                                     </span>
                                 @else
@@ -288,18 +289,53 @@
                             </td>
                             <td class="py-3 px-4 text-gray-500 dark:text-gray-400">{{ $stat['email'] }}</td>
                             <td class="py-3 px-4 text-center">
-                                <span class="px-3 py-1 bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-full font-black text-xs">
+                                <span class="px-2.5 py-1 bg-blue-50 text-blue-600 dark:bg-blue-950/40 dark:text-blue-400 rounded-full font-bold text-xs border border-blue-200 dark:border-blue-800">
                                     {{ $stat['doc_count'] }} Shift
                                 </span>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="4" class="py-6 text-center text-gray-400 italic">Belum ada kasir murni yang terdaftar.</td>
+                            <td colspan="4" class="py-6 text-center text-gray-400 text-xs">Belum ada kasir murni yang terdaftar.</td>
                         </tr>
                     @endforelse
                 </tbody>
             </table>
+        </div>
+
+        <!-- Mobile Adaptive Cards View (< md) -->
+        <div class="block md:hidden space-y-2.5">
+            @forelse($cashierStats as $stat)
+            <div class="p-3 bg-white dark:bg-gray-800/80 rounded-xl border border-gray-100 dark:border-gray-700/60 shadow-sm flex flex-col gap-2">
+                <div class="flex items-start justify-between gap-2">
+                    <div class="min-w-0">
+                        <span class="text-xs font-bold text-gray-900 dark:text-white uppercase">{{ $stat['name'] }}</span>
+                        <p class="text-[10px] text-gray-400 truncate mt-0.5">{{ $stat['email'] }}</p>
+                    </div>
+                    @if($stat['grade_level'])
+                        @php
+                            $gBadge = match((string)$stat['grade_level']) {
+                                '12' => 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20',
+                                '11' => 'bg-sky-500/10 text-sky-600 dark:text-sky-400 border-sky-500/20',
+                                '10' => 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20',
+                                default => 'bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20',
+                            };
+                        @endphp
+                        <span class="inline-flex items-center text-[9px] font-bold px-2 py-0.5 rounded-full border {{ $gBadge }} uppercase tracking-wider shrink-0">
+                            Tingkat {{ $stat['grade_level'] }}
+                        </span>
+                    @endif
+                </div>
+                <div class="flex items-center justify-between pt-1.5 border-t border-gray-50 dark:border-gray-700/50">
+                    <span class="text-[10px] text-gray-400">Total Tugas</span>
+                    <span class="text-xs font-bold text-blue-600 dark:text-blue-400">{{ $stat['doc_count'] }} Shift</span>
+                </div>
+            </div>
+            @empty
+            <div class="p-8 text-center text-gray-400 bg-white dark:bg-gray-800 rounded-xl border border-dashed border-gray-200 dark:border-gray-700">
+                <p class="text-xs font-semibold">Belum ada kasir murni yang terdaftar.</p>
+            </div>
+            @endforelse
         </div>
     </div>
 

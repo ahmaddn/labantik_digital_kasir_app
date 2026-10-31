@@ -282,45 +282,76 @@
             </div>
         </div>
 
-        <div class="overflow-x-auto no-scrollbar">
+        <!-- Desktop Table View (>= md) -->
+        <div class="hidden md:block overflow-x-auto no-scrollbar">
             <table class="w-full text-left">
                 <thead>
-                    <tr class="border-b border-gray-50 dark:border-gray-700">
-                        <th class="pb-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">Kategori</th>
-                        <th class="pb-6 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Volume</th>
-                        <th class="pb-6 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right">Total Modal (HPP)</th>
-                        <th class="pb-6 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right">Keuntungan</th>
-                        <th class="pb-6 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right">Omzet</th>
+                    <tr class="border-b border-gray-100 dark:border-gray-800">
+                        <th class="pb-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Kategori</th>
+                        <th class="pb-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">Volume</th>
+                        <th class="pb-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-right">Total Modal (HPP)</th>
+                        <th class="pb-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-right">Keuntungan</th>
+                        <th class="pb-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-right">Omzet</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-50 dark:divide-gray-700">
+                <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
                     @foreach($categoryRecap as $stats)
-                    <tr class="group hover:bg-gray-50/50 dark:hover:bg-gray-900/50 transition-all">
-                        <td class="py-8">
-                            <div class="flex items-center gap-3">
-                                <span class="text-base font-black text-gray-800 dark:text-white uppercase tracking-tight">{{ $stats->name }}</span>
-                                <a href="{{ route('category-detail', ['categoryId' => $stats->id, 'type' => 'daily', 'date' => $selectedDate]) }}" wire:navigate class="px-3 py-1.5 bg-primary-blue/10 hover:bg-primary-blue text-primary-blue hover:text-white text-[9px] font-black uppercase tracking-widest rounded-xl transition-all flex items-center gap-1.5 shadow-sm">
-                                    <svg class="w-3 h-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                    <tr class="group hover:bg-gray-50/60 dark:hover:bg-gray-800/40 transition-colors">
+                        <td class="py-4">
+                            <div class="flex items-center gap-2.5">
+                                <span class="text-sm font-bold text-gray-900 dark:text-white uppercase">{{ $stats->name }}</span>
+                                <a href="{{ route('category-detail', ['categoryId' => $stats->id, 'type' => 'daily', 'date' => $selectedDate]) }}" wire:navigate class="px-2.5 py-1 bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 hover:bg-blue-600 hover:text-white text-[10px] font-bold uppercase rounded-lg transition-all flex items-center gap-1 border border-blue-200 dark:border-blue-800">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                                     Detail
                                 </a>
                             </div>
                         </td>
-                        <td class="py-8 text-center">
-                            <span class="text-sm font-black text-gray-800 dark:text-white">{{ $stats->qty }} <span class="text-[9px] text-gray-400 uppercase ml-1">Unit</span></span>
+                        <td class="py-4 text-center whitespace-nowrap">
+                            <span class="text-xs font-bold text-gray-700 dark:text-gray-300">{{ $stats->qty }} <span class="text-[10px] text-gray-400 uppercase font-normal">Unit</span></span>
                         </td>
-                        <td class="py-8 text-right">
-                            <span class="text-sm font-bold text-gray-400">Rp{{ number_format($stats->modal, 0, ',', '.') }}</span>
+                        <td class="py-4 text-right whitespace-nowrap">
+                            <span class="text-xs font-semibold text-gray-500 dark:text-gray-400 font-mono">Rp{{ number_format($stats->modal, 0, ',', '.') }}</span>
                         </td>
-                        <td class="py-8 text-right">
-                            <span class="text-lg font-black text-primary-red tracking-tighter">Rp{{ number_format($stats->profit, 0, ',', '.') }}</span>
+                        <td class="py-4 text-right whitespace-nowrap">
+                            <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400 font-mono">Rp{{ number_format($stats->profit, 0, ',', '.') }}</span>
                         </td>
-                        <td class="py-8 text-right">
-                            <span class="text-lg font-black text-primary-blue tracking-tighter">Rp{{ number_format($stats->revenue, 0, ',', '.') }}</span>
+                        <td class="py-4 text-right whitespace-nowrap">
+                            <span class="text-xs font-bold text-blue-600 dark:text-blue-400 font-mono">Rp{{ number_format($stats->revenue, 0, ',', '.') }}</span>
                         </td>
                     </tr>
                     @endforeach
                 </tbody>
             </table>
+        </div>
+
+        <!-- Mobile Adaptive Cards View (< md) -->
+        <div class="block md:hidden space-y-2.5">
+            @foreach($categoryRecap as $stats)
+            <div class="p-3 bg-white dark:bg-gray-800/80 rounded-xl border border-gray-100 dark:border-gray-700/60 shadow-sm flex flex-col gap-2">
+                <div class="flex items-center justify-between gap-2">
+                    <span class="text-xs font-bold text-gray-900 dark:text-white uppercase">{{ $stats->name }}</span>
+                    <a href="{{ route('category-detail', ['categoryId' => $stats->id, 'type' => 'daily', 'date' => $selectedDate]) }}" wire:navigate class="px-2.5 py-1 bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 text-[10px] font-bold uppercase rounded-lg border border-blue-200 dark:border-blue-800 flex items-center gap-1">
+                        <span>Detail</span>
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                    </a>
+                </div>
+
+                <div class="grid grid-cols-3 gap-2 py-2 px-2.5 bg-gray-50 dark:bg-gray-900/50 rounded-lg text-center">
+                    <div>
+                        <span class="text-[9px] text-gray-400 block font-medium">Volume</span>
+                        <span class="text-xs font-bold text-gray-800 dark:text-gray-200 mt-0.5">{{ $stats->qty }} Unit</span>
+                    </div>
+                    <div>
+                        <span class="text-[9px] text-gray-400 block font-medium">Keuntungan</span>
+                        <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400 font-mono mt-0.5">Rp{{ number_format($stats->profit, 0, ',', '.') }}</span>
+                    </div>
+                    <div>
+                        <span class="text-[9px] text-gray-400 block font-medium">Omzet</span>
+                        <span class="text-xs font-bold text-blue-600 dark:text-blue-400 font-mono mt-0.5">Rp{{ number_format($stats->revenue, 0, ',', '.') }}</span>
+                    </div>
+                </div>
+            </div>
+            @endforeach
         </div>
     </div>
 

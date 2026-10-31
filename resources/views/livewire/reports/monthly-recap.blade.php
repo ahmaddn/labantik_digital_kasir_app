@@ -103,45 +103,76 @@
             </div>
         </div>
 
-        <div class="overflow-x-auto no-scrollbar">
+        <!-- Desktop Table View (>= md) -->
+        <div class="hidden md:block overflow-x-auto no-scrollbar">
             <table class="w-full text-left" id="category-recap-table">
                 <thead>
-                    <tr class="border-b border-gray-50 dark:border-gray-700">
-                        <th class="pb-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">Kategori</th>
-                        <th class="pb-6 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Volume</th>
-                        <th class="pb-6 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right">Total Modal (HPP)</th>
-                        <th class="pb-6 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right">Keuntungan</th>
-                        <th class="pb-6 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right">Omzet</th>
+                    <tr class="border-b border-gray-100 dark:border-gray-800">
+                        <th class="pb-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Kategori</th>
+                        <th class="pb-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">Volume</th>
+                        <th class="pb-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-right">Total Modal (HPP)</th>
+                        <th class="pb-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-right">Keuntungan</th>
+                        <th class="pb-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-right">Omzet</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-50 dark:divide-gray-700">
+                <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
                     @foreach($categoryRecap as $stats)
-                    <tr class="group hover:bg-gray-50/50 dark:hover:bg-gray-900/50 transition-all">
-                        <td class="py-8">
-                            <div class="flex items-center gap-3">
-                                <span class="text-base font-black text-gray-800 dark:text-white uppercase tracking-tight">{{ $stats->name }}</span>
-                                <a href="{{ route('category-detail', ['categoryId' => $stats->id, 'type' => 'monthly', 'month' => $selectedMonth, 'year' => $selectedYear]) }}" wire:navigate class="px-3 py-1.5 bg-primary-blue/10 hover:bg-primary-blue text-primary-blue hover:text-white text-[9px] font-black uppercase tracking-widest rounded-xl transition-all flex items-center gap-1.5 shadow-sm">
-                                    <svg class="w-3 h-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                    <tr class="group hover:bg-gray-50/60 dark:hover:bg-gray-800/40 transition-colors">
+                        <td class="py-4">
+                            <div class="flex items-center gap-2.5">
+                                <span class="text-sm font-bold text-gray-900 dark:text-white uppercase">{{ $stats->name }}</span>
+                                <a href="{{ route('category-detail', ['categoryId' => $stats->id, 'type' => 'monthly', 'month' => $selectedMonth, 'year' => $selectedYear]) }}" wire:navigate class="px-2.5 py-1 bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 hover:bg-blue-600 hover:text-white text-[10px] font-bold uppercase rounded-lg transition-all flex items-center gap-1 border border-blue-200 dark:border-blue-800">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                                     Detail
                                 </a>
                             </div>
                         </td>
-                        <td class="py-8 text-center">
-                            <span class="text-sm font-black text-gray-800 dark:text-white">{{ $stats->qty }} <span class="text-[9px] text-gray-400 uppercase ml-1">Unit</span></span>
+                        <td class="py-4 text-center whitespace-nowrap">
+                            <span class="text-xs font-bold text-gray-800 dark:text-gray-200">{{ $stats->qty }} <span class="text-[10px] text-gray-400 uppercase font-normal">Unit</span></span>
                         </td>
-                        <td class="py-8 text-right">
-                            <span class="text-sm font-bold text-gray-400">Rp{{ number_format($stats->modal, 0, ',', '.') }}</span>
+                        <td class="py-4 text-right whitespace-nowrap">
+                            <span class="text-xs font-semibold text-gray-500 dark:text-gray-400 font-mono">Rp{{ number_format($stats->modal, 0, ',', '.') }}</span>
                         </td>
-                        <td class="py-8 text-right">
-                            <span class="text-lg font-black text-primary-red tracking-tighter">Rp{{ number_format($stats->profit, 0, ',', '.') }}</span>
+                        <td class="py-4 text-right whitespace-nowrap">
+                            <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400 font-mono">Rp{{ number_format($stats->profit, 0, ',', '.') }}</span>
                         </td>
-                        <td class="py-8 text-right">
-                            <span class="text-lg font-black text-primary-blue tracking-tighter">Rp{{ number_format($stats->revenue, 0, ',', '.') }}</span>
+                        <td class="py-4 text-right whitespace-nowrap">
+                            <span class="text-xs font-bold text-blue-600 dark:text-blue-400 font-mono">Rp{{ number_format($stats->revenue, 0, ',', '.') }}</span>
                         </td>
                     </tr>
                     @endforeach
                 </tbody>
             </table>
+        </div>
+
+        <!-- Mobile Adaptive Cards View (< md) -->
+        <div class="block md:hidden space-y-2.5">
+            @foreach($categoryRecap as $stats)
+            <div class="p-3 bg-white dark:bg-gray-800/80 rounded-xl border border-gray-100 dark:border-gray-700/60 shadow-sm flex flex-col gap-2">
+                <div class="flex items-center justify-between gap-2">
+                    <span class="text-xs font-bold text-gray-900 dark:text-white uppercase">{{ $stats->name }}</span>
+                    <a href="{{ route('category-detail', ['categoryId' => $stats->id, 'type' => 'monthly', 'month' => $selectedMonth, 'year' => $selectedYear]) }}" wire:navigate class="px-2.5 py-1 bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 text-[10px] font-bold uppercase rounded-lg border border-blue-200 dark:border-blue-800 flex items-center gap-1">
+                        <span>Detail</span>
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                    </a>
+                </div>
+
+                <div class="grid grid-cols-3 gap-2 py-2 px-2.5 bg-gray-50 dark:bg-gray-900/50 rounded-lg text-center">
+                    <div>
+                        <span class="text-[9px] text-gray-400 block font-medium">Volume</span>
+                        <span class="text-xs font-bold text-gray-800 dark:text-gray-200 mt-0.5">{{ $stats->qty }} Unit</span>
+                    </div>
+                    <div>
+                        <span class="text-[9px] text-gray-400 block font-medium">Keuntungan</span>
+                        <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400 font-mono mt-0.5">Rp{{ number_format($stats->profit, 0, ',', '.') }}</span>
+                    </div>
+                    <div>
+                        <span class="text-[9px] text-gray-400 block font-medium">Omzet</span>
+                        <span class="text-xs font-bold text-blue-600 dark:text-blue-400 font-mono mt-0.5">Rp{{ number_format($stats->revenue, 0, ',', '.') }}</span>
+                    </div>
+                </div>
+            </div>
+            @endforeach
         </div>
 
 
@@ -228,59 +259,61 @@
         <div class="p-10 border-b border-gray-100 dark:border-gray-700">
             <h2 class="text-2xl font-bold uppercase tracking-tight text-gray-800 dark:text-white">Breakdown Harian ({{ \Carbon\Carbon::create(null, $selectedMonth)->translatedFormat('F') }})</h2>
         </div>
-        <div class="overflow-x-auto">
+        <!-- Desktop Table View (>= md) -->
+        <div class="hidden md:block overflow-x-auto">
             <table class="w-full text-left">
                 <thead class="bg-gray-50 dark:bg-gray-900/50">
                     <tr>
-                        <th class="px-10 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">Tanggal</th>
-                        <th class="px-10 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">Total Transaksi</th>
-                        <th class="px-10 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">Pendapatan (Sistem)</th>
-                        <th class="px-10 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">Kas Fisik (Riil)</th>
-                        <th class="px-10 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">Selisih</th>
-                        <th class="px-10 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">Profit</th>
-                        <th class="px-10 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right">Opsi</th>
+                        <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Tanggal</th>
+                        <th class="px-4 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">Transaksi</th>
+                        <th class="px-4 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-right">Pendapatan</th>
+                        <th class="px-4 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-right">Kas Fisik</th>
+                        <th class="px-4 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">Selisih</th>
+                        <th class="px-4 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-right">Profit</th>
+                        <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-right">Opsi</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-50 dark:divide-gray-700">
+                <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
                     @foreach($dailyBreakdown as $day)
-                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-900/30 transition-colors group">
-                        <td class="px-10 py-8">
-                            <div class="text-sm font-black text-gray-800 dark:text-white uppercase tracking-tight">{{ \Carbon\Carbon::parse($day->date)->translatedFormat('d F Y') }}</div>
-                            <div class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mt-1">Minggu ke-{{ $day->month_week }}</div>
+                    <tr class="hover:bg-gray-50/60 dark:hover:bg-gray-800/40 transition-colors group">
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-xs font-bold text-gray-900 dark:text-white uppercase">{{ \Carbon\Carbon::parse($day->date)->translatedFormat('d F Y') }}</div>
+                            <div class="text-[10px] text-gray-400 mt-0.5">Minggu ke-{{ $day->month_week }}</div>
                         </td>
-                        <td class="px-10 py-8">
-                            <span class="px-4 py-1 bg-gray-100 dark:bg-gray-900 rounded-full text-xs font-black text-gray-500 uppercase tracking-widest">{{ $day->total_transactions }} Transaksi</span>
+                        <td class="px-4 py-4 text-center whitespace-nowrap">
+                            <span class="px-2.5 py-1 bg-gray-100 dark:bg-gray-800 rounded-lg text-xs font-semibold text-gray-600 dark:text-gray-400">{{ $day->total_transactions }} trx</span>
                         </td>
-                        <td class="px-10 py-8 text-sm font-black text-primary-blue">Rp{{ number_format($day->total_revenue_real, 0, ',', '.') }}</td>
-                        <td class="px-10 py-8 text-sm font-black text-gray-800 dark:text-white">
+                        <td class="px-4 py-4 text-right whitespace-nowrap text-xs font-bold text-blue-600 dark:text-blue-400 font-mono">
+                            Rp{{ number_format($day->total_revenue_real, 0, ',', '.') }}
+                        </td>
+                        <td class="px-4 py-4 text-right whitespace-nowrap text-xs font-semibold text-gray-800 dark:text-white font-mono">
                             @if($day->actual_cash !== null)
-                                <div class="">Rp{{ number_format((float)$day->actual_cash - (float)$day->starting_change_cash, 0, ',', '.') }}</div>
-                                @if($day->retained_change_cash > 0)
-                                    <div class="text-[9px] font-bold text-primary-blue uppercase tracking-wider mt-1">Kembalian: <span>Rp{{ number_format($day->retained_change_cash, 0, ',', '.') }}</span></div>
-                                @endif
+                                <div>Rp{{ number_format((float)$day->actual_cash - (float)$day->starting_change_cash, 0, ',', '.') }}</div>
                             @else
-                                <span class="px-3 py-1 bg-gray-100 dark:bg-gray-900 rounded-lg text-[9px] font-black text-gray-400 uppercase tracking-widest">Belum Audit</span>
+                                <span class="px-2 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-[10px] text-gray-400 font-normal">Belum Audit</span>
                             @endif
                         </td>
-                        <td class="px-10 py-8 text-sm font-black">
+                        <td class="px-4 py-4 text-center whitespace-nowrap text-xs font-bold font-mono">
                             @if($day->actual_cash !== null)
                                 @php
                                     $diff = ((float)$day->actual_cash - (float)$day->starting_change_cash) - (float)$day->total_revenue_real;
                                 @endphp
                                 @if($diff == 0)
-                                    <span class="text-green-500 uppercase text-xs font-black">Cocok</span>
+                                    <span class="text-emerald-600 dark:text-emerald-400 uppercase text-[10px]">Cocok</span>
                                 @elseif($diff < 0)
-                                    <span class="text-primary-red">-Rp{{ number_format(abs($diff), 0, ',', '.') }}</span>
+                                    <span class="text-rose-600 dark:text-rose-400">-Rp{{ number_format(abs($diff), 0, ',', '.') }}</span>
                                 @else
-                                    <span class="text-amber-500">+Rp{{ number_format($diff, 0, ',', '.') }}</span>
+                                    <span class="text-amber-600 dark:text-amber-400">+Rp{{ number_format($diff, 0, ',', '.') }}</span>
                                 @endif
                             @else
                                 <span class="text-gray-300 dark:text-gray-600">-</span>
                             @endif
                         </td>
-                        <td class="px-10 py-8 text-sm font-black text-primary-red">Rp{{ number_format($day->total_profit, 0, ',', '.') }}</td>
-                        <td class="px-10 py-8 text-right">
-                            <a href="{{ route('daily-recap', ['date' => $day->date]) }}" class="px-6 py-2.5 bg-gray-100 dark:bg-gray-900 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-primary-blue hover:text-white transition-all opacity-0 group-hover:opacity-100">
+                        <td class="px-4 py-4 text-right whitespace-nowrap text-xs font-bold text-emerald-600 dark:text-emerald-400 font-mono">
+                            Rp{{ number_format($day->total_profit, 0, ',', '.') }}
+                        </td>
+                        <td class="px-6 py-4 text-right whitespace-nowrap">
+                            <a href="{{ route('daily-recap', ['date' => $day->date]) }}" class="px-3 py-1.5 bg-gray-100 dark:bg-gray-800 hover:bg-blue-600 hover:text-white text-xs font-bold rounded-lg transition-all inline-block">
                                 Detail
                             </a>
                         </td>
@@ -288,6 +321,51 @@
                     @endforeach
                 </tbody>
             </table>
+        </div>
+
+        <!-- Mobile Adaptive Cards View (< md) -->
+        <div class="block md:hidden p-3.5 space-y-2.5">
+            @foreach($dailyBreakdown as $day)
+            <div class="p-3 bg-white dark:bg-gray-800/80 rounded-xl border border-gray-100 dark:border-gray-700/60 shadow-sm flex flex-col gap-2">
+                <div class="flex items-start justify-between gap-2">
+                    <div class="min-w-0">
+                        <span class="text-xs font-bold text-gray-900 dark:text-white uppercase">{{ \Carbon\Carbon::parse($day->date)->translatedFormat('d M Y') }}</span>
+                        <div class="text-[10px] text-gray-400 mt-0.5">Minggu ke-{{ $day->month_week }} &bull; {{ $day->total_transactions }} Transaksi</div>
+                    </div>
+                    <a href="{{ route('daily-recap', ['date' => $day->date]) }}" class="px-2.5 py-1 bg-blue-50 text-blue-600 dark:bg-blue-950/40 dark:text-blue-400 text-xs font-bold rounded-lg border border-blue-200 dark:border-blue-800 shrink-0">
+                        Detail
+                    </a>
+                </div>
+
+                <div class="grid grid-cols-3 gap-2 py-2 px-2.5 bg-gray-50 dark:bg-gray-900/50 rounded-lg text-center text-xs">
+                    <div>
+                        <span class="text-[9px] text-gray-400 block font-medium">Omzet</span>
+                        <span class="font-bold font-mono text-blue-600 dark:text-blue-400 mt-0.5">Rp{{ number_format($day->total_revenue_real, 0, ',', '.') }}</span>
+                    </div>
+                    <div>
+                        <span class="text-[9px] text-gray-400 block font-medium">Profit</span>
+                        <span class="font-bold font-mono text-emerald-600 dark:text-emerald-400 mt-0.5">Rp{{ number_format($day->total_profit, 0, ',', '.') }}</span>
+                    </div>
+                    <div>
+                        <span class="text-[9px] text-gray-400 block font-medium">Selisih</span>
+                        @if($day->actual_cash !== null)
+                            @php
+                                $diff = ((float)$day->actual_cash - (float)$day->starting_change_cash) - (float)$day->total_revenue_real;
+                            @endphp
+                            @if($diff == 0)
+                                <span class="text-emerald-600 dark:text-emerald-400 font-bold text-[10px] mt-0.5 block">Cocok</span>
+                            @elseif($diff < 0)
+                                <span class="text-rose-600 dark:text-rose-400 font-bold font-mono text-[10px] mt-0.5 block">-Rp{{ number_format(abs($diff), 0, ',', '.') }}</span>
+                            @else
+                                <span class="text-amber-600 dark:text-amber-400 font-bold font-mono text-[10px] mt-0.5 block">+Rp{{ number_format($diff, 0, ',', '.') }}</span>
+                            @endif
+                        @else
+                            <span class="text-gray-400 text-[10px] mt-0.5 block">Belum Audit</span>
+                        @endif
+                    </div>
+                </div>
+            </div>
+            @endforeach
         </div>
     </div>
     @else

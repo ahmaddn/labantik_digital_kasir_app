@@ -76,38 +76,39 @@
             </div>
         </div>
 
-        <div class="overflow-x-auto">
+        <!-- Desktop Table View (>= md) -->
+        <div class="hidden md:block overflow-x-auto">
             <table class="w-full text-left">
                 <thead>
-                    <tr class="border-b border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/20">
-                        <th class="py-6 px-10 text-[10px] font-black text-gray-400 uppercase tracking-widest cursor-pointer hover:text-primary-blue transition-colors" wire:click="sort('product_name')">
+                    <tr class="border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-900/20">
+                        <th class="py-4 px-6 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:text-blue-600 transition-colors" wire:click="sort('product_name')">
                             Produk
                             @if($sortBy === 'product_name')
                                 <span>{!! $sortDirection === 'asc' ? '▲' : '▼' !!}</span>
                             @endif
                         </th>
-                        <th class="py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center cursor-pointer hover:text-primary-blue transition-colors" wire:click="sort('total_qty')">
+                        <th class="py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center cursor-pointer hover:text-blue-600 transition-colors" wire:click="sort('total_qty')">
                             Volume
                             @if($sortBy === 'total_qty')
                                 <span>{!! $sortDirection === 'asc' ? '▲' : '▼' !!}</span>
                             @endif
                         </th>
-                        <th class="py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right">
+                        <th class="py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-right">
                             Harga Satuan
                         </th>
-                        <th class="py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right cursor-pointer hover:text-primary-blue transition-colors" wire:click="sort('total_modal')">
+                        <th class="py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-right cursor-pointer hover:text-blue-600 transition-colors" wire:click="sort('total_modal')">
                             Total Modal (HPP)
                             @if($sortBy === 'total_modal')
                                 <span>{!! $sortDirection === 'asc' ? '▲' : '▼' !!}</span>
                             @endif
                         </th>
-                        <th class="py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right cursor-pointer hover:text-primary-blue transition-colors" wire:click="sort('total_profit')">
+                        <th class="py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-right cursor-pointer hover:text-blue-600 transition-colors" wire:click="sort('total_profit')">
                             Keuntungan
                             @if($sortBy === 'total_profit')
                                 <span>{!! $sortDirection === 'asc' ? '▲' : '▼' !!}</span>
                             @endif
                         </th>
-                        <th class="py-6 px-10 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right cursor-pointer hover:text-primary-blue transition-colors" wire:click="sort('total_revenue')">
+                        <th class="py-4 px-6 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-right cursor-pointer hover:text-blue-600 transition-colors" wire:click="sort('total_revenue')">
                             Omzet
                             @if($sortBy === 'total_revenue')
                                 <span>{!! $sortDirection === 'asc' ? '▲' : '▼' !!}</span>
@@ -115,52 +116,85 @@
                         </th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-50 dark:divide-gray-700">
+                <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
                     @forelse($products as $product)
-                        <tr class="group hover:bg-gray-50/50 dark:hover:bg-gray-900/50 transition-all">
-                            <td class="py-6 px-10">
+                        <tr class="group hover:bg-gray-50/60 dark:hover:bg-gray-800/40 transition-colors">
+                            <td class="py-4 px-6">
                                 <div>
-                                    <p class="text-sm font-black text-gray-800 dark:text-white uppercase tracking-tight">{{ $product->product_name }}</p>
+                                    <p class="text-xs font-bold text-gray-900 dark:text-white uppercase">{{ $product->product_name }}</p>
                                     @if($product->supplier_name)
-                                        <span class="text-[9px] px-2 py-0.5 bg-gray-100 dark:bg-gray-800 rounded font-bold text-gray-500 uppercase mt-1 inline-block">Supplier: {{ $product->supplier_name }}</span>
+                                        <span class="text-[9px] px-2 py-0.5 bg-gray-100 dark:bg-gray-800 rounded font-bold text-gray-500 uppercase mt-0.5 inline-block">Supplier: {{ $product->supplier_name }}</span>
                                     @else
-                                        <span class="text-[9px] px-2 py-0.5 bg-blue-50 dark:bg-blue-900/20 rounded font-bold text-primary-blue uppercase mt-1 inline-block">Internal</span>
+                                        <span class="text-[9px] px-2 py-0.5 bg-blue-50 dark:bg-blue-900/30 rounded font-bold text-blue-600 dark:text-blue-400 uppercase mt-0.5 inline-block">Internal</span>
                                     @endif
                                 </div>
                             </td>
-                            <td class="py-6 text-center">
-                                <span class="text-sm font-black text-gray-800 dark:text-white">{{ $product->total_qty }} <span class="text-[9px] text-gray-400 uppercase ml-1">Unit</span></span>
+                            <td class="py-4 text-center whitespace-nowrap">
+                                <span class="text-xs font-bold text-gray-800 dark:text-gray-200">{{ $product->total_qty }} unit</span>
                             </td>
-                            <td class="py-6 text-right">
-                                <div class="text-xs">
-                                    <p class="text-gray-800 dark:text-white font-bold">Rp{{ number_format($product->unit_price, 0, ',', '.') }}</p>
-                                    <p class="text-[9px] text-gray-400">Margin: Rp{{ number_format($product->unit_profit, 0, ',', '.') }}</p>
+                            <td class="py-4 text-right whitespace-nowrap">
+                                <div class="text-xs font-mono">
+                                    <p class="text-gray-900 dark:text-white font-bold">Rp{{ number_format($product->unit_price, 0, ',', '.') }}</p>
+                                    <p class="text-[10px] text-gray-400 font-normal">Margin: Rp{{ number_format($product->unit_profit, 0, ',', '.') }}</p>
                                 </div>
                             </td>
-                            <td class="py-6 text-right">
-                                <span class="text-sm font-bold text-gray-400">Rp{{ number_format($product->total_modal, 0, ',', '.') }}</span>
+                            <td class="py-4 text-right whitespace-nowrap">
+                                <span class="text-xs font-semibold text-gray-500 dark:text-gray-400 font-mono">Rp{{ number_format($product->total_modal, 0, ',', '.') }}</span>
                             </td>
-                            <td class="py-6 text-right">
-                                <span class="text-base font-black text-primary-red tracking-tighter">Rp{{ number_format($product->total_profit, 0, ',', '.') }}</span>
+                            <td class="py-4 text-right whitespace-nowrap">
+                                <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400 font-mono">Rp{{ number_format($product->total_profit, 0, ',', '.') }}</span>
                             </td>
-                            <td class="py-6 px-10 text-right">
-                                <span class="text-base font-black text-primary-blue tracking-tighter">Rp{{ number_format($product->total_revenue, 0, ',', '.') }}</span>
+                            <td class="py-4 px-6 text-right whitespace-nowrap">
+                                <span class="text-xs font-bold text-blue-600 dark:text-blue-400 font-mono">Rp{{ number_format($product->total_revenue, 0, ',', '.') }}</span>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="py-12 text-center">
-                                <div class="flex flex-col items-center justify-center text-gray-400">
-                                    <svg class="w-12 h-12 mb-3 opacity-50" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                                    </svg>
-                                    <p class="text-sm font-black uppercase tracking-wider">Tidak ada produk terjual</p>
-                                </div>
-                            </td>
+                            <td colspan="6" class="py-8 text-center text-gray-400 text-xs">Tidak ada data produk</td>
                         </tr>
                     @endforelse
                 </tbody>
             </table>
+        </div>
+
+        <!-- Mobile Adaptive Cards View (< md) -->
+        <div class="block md:hidden p-3.5 space-y-2.5">
+            @forelse($products as $product)
+            <div class="p-3 bg-white dark:bg-gray-800/80 rounded-xl border border-gray-100 dark:border-gray-700/60 shadow-sm flex flex-col gap-2">
+                <div class="flex items-start justify-between gap-2">
+                    <div class="min-w-0">
+                        <h4 class="text-xs font-bold text-gray-900 dark:text-white uppercase truncate">{{ $product->product_name }}</h4>
+                        @if($product->supplier_name)
+                            <span class="text-[9px] px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded font-semibold text-gray-500 uppercase mt-0.5 inline-block">Supplier: {{ $product->supplier_name }}</span>
+                        @else
+                            <span class="text-[9px] px-1.5 py-0.5 bg-blue-50 dark:bg-blue-900/30 rounded font-semibold text-blue-600 dark:text-blue-400 uppercase mt-0.5 inline-block">Internal</span>
+                        @endif
+                    </div>
+                    <span class="text-xs font-bold font-mono text-blue-600 dark:text-blue-400 shrink-0">
+                        Rp{{ number_format($product->total_revenue, 0, ',', '.') }}
+                    </span>
+                </div>
+
+                <div class="grid grid-cols-3 gap-1.5 py-2 px-2.5 bg-gray-50 dark:bg-gray-900/50 rounded-lg text-center text-xs">
+                    <div>
+                        <span class="text-[9px] text-gray-400 block font-medium">Terjual</span>
+                        <span class="font-bold text-gray-800 dark:text-gray-200 mt-0.5">{{ $product->total_qty }} unit</span>
+                    </div>
+                    <div>
+                        <span class="text-[9px] text-gray-400 block font-medium">Harga Satuan</span>
+                        <span class="font-bold font-mono text-gray-700 dark:text-gray-300 mt-0.5">Rp{{ number_format($product->unit_price, 0, ',', '.') }}</span>
+                    </div>
+                    <div>
+                        <span class="text-[9px] text-gray-400 block font-medium">Keuntungan</span>
+                        <span class="font-bold font-mono text-emerald-600 dark:text-emerald-400 mt-0.5">Rp{{ number_format($product->total_profit, 0, ',', '.') }}</span>
+                    </div>
+                </div>
+            </div>
+            @empty
+            <div class="p-8 text-center text-gray-400 bg-white dark:bg-gray-800 rounded-xl border border-dashed border-gray-200 dark:border-gray-700">
+                <p class="text-xs font-semibold">Tidak ada data produk</p>
+            </div>
+            @endforelse
         </div>
         
         @if($products->hasPages())

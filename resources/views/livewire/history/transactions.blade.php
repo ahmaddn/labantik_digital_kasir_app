@@ -642,44 +642,58 @@
                     {{ $detailReference }}</p>
             </div>
 
-            <div class="p-10 max-h-[60vh] overflow-y-auto no-scrollbar">
-                <table class="w-full text-left">
-                    <thead>
-                        <tr class="border-b border-gray-100 dark:border-gray-800">
-                            <th class="pb-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">Item</th>
-                            <th
-                                class="pb-6 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">
-                                Qty</th>
-                            <th class="pb-6 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right">
-                                Harga</th>
-                            <th class="pb-6 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right">
-                                Subtotal</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-50 dark:divide-gray-800">
-                        @foreach ($this->detailItems as $item)
-                            <tr>
-                                <td class="py-6">
-                                    <div
-                                        class="text-sm font-black text-gray-800 dark:text-white uppercase tracking-tight">
-                                        {{ $item->product->name }}</div>
-                                    <div class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mt-0.5">
-                                        {{ $item->product->category->name ?? 'Uncategorized' }}</div>
-                                </td>
-                                <td class="py-6 text-center">
-                                    <span
-                                        class="text-sm font-black text-gray-800 dark:text-white">{{ $item->quantity }}</span>
-                                </td>
-                                <td class="py-6 text-right text-xs font-bold text-gray-400 italic">
-                                    Rp{{ number_format($item->unit_price, 0, ',', '.') }}
-                                </td>
-                                <td class="py-6 text-right text-sm font-black text-primary-red italic">
-                                    Rp{{ number_format($item->total_price, 0, ',', '.') }}
-                                </td>
+            <div class="p-4 sm:p-6 lg:p-10 max-h-[60vh] overflow-y-auto no-scrollbar">
+                <!-- Desktop Table View (>= md) -->
+                <div class="hidden md:block">
+                    <table class="w-full text-left">
+                        <thead>
+                            <tr class="border-b border-gray-100 dark:border-gray-800">
+                                <th class="pb-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Item</th>
+                                <th class="pb-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">Qty</th>
+                                <th class="pb-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-right">Harga</th>
+                                <th class="pb-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-right">Subtotal</th>
                             </tr>
-                        @endforeach
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
+                            @foreach ($this->detailItems as $item)
+                                <tr>
+                                    <td class="py-4">
+                                        <div class="text-xs font-bold text-gray-900 dark:text-white uppercase">{{ $item->product->name }}</div>
+                                        <div class="text-[10px] text-gray-400 mt-0.5">{{ $item->product->category->name ?? 'Uncategorized' }}</div>
+                                    </td>
+                                    <td class="py-4 text-center">
+                                        <span class="text-xs font-bold text-gray-800 dark:text-white">{{ $item->quantity }}</span>
+                                    </td>
+                                    <td class="py-4 text-right text-xs text-gray-500 dark:text-gray-400 font-mono">
+                                        Rp{{ number_format($item->unit_price, 0, ',', '.') }}
+                                    </td>
+                                    <td class="py-4 text-right text-xs font-bold text-blue-600 dark:text-blue-400 font-mono">
+                                        Rp{{ number_format($item->total_price, 0, ',', '.') }}
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Mobile Adaptive Cards View (< md) -->
+                <div class="block md:hidden space-y-2">
+                    @foreach ($this->detailItems as $item)
+                        <div class="p-3 bg-gray-50 dark:bg-gray-800/60 rounded-xl border border-gray-100 dark:border-gray-700/50 flex items-center justify-between gap-2">
+                            <div class="min-w-0">
+                                <h4 class="text-xs font-bold text-gray-900 dark:text-white uppercase truncate">{{ $item->product->name }}</h4>
+                                <div class="flex items-center gap-1.5 mt-0.5 text-[10px] text-gray-400 font-mono">
+                                    <span>{{ $item->quantity }}x</span>
+                                    <span>&bull;</span>
+                                    <span>@ Rp{{ number_format($item->unit_price, 0, ',', '.') }}</span>
+                                </div>
+                            </div>
+                            <span class="text-xs font-bold text-blue-600 dark:text-blue-400 font-mono shrink-0">
+                                Rp{{ number_format($item->total_price, 0, ',', '.') }}
+                            </span>
+                        </div>
+                    @endforeach
+                </div>
             </div>
 
             <div

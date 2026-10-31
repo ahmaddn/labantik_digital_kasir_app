@@ -446,116 +446,185 @@
 
             <!-- Table Section -->
             <div class="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden">
-                <div class="overflow-x-auto">
+                <!-- Desktop Table View (>= md) -->
+                <div class="hidden md:block overflow-x-auto">
                     <table class="w-full text-left border-collapse">
                         <thead>
-                            <tr class="border-b border-gray-50 dark:border-gray-800">
-                                <th class="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-gray-400">Nota / Referensi</th>
-                                <th class="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-gray-400">Pembeli / Jurusan</th>
-                                <th class="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-gray-400">Ringkasan</th>
-                                <th class="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-gray-400">Total Tagihan</th>
-                                <th class="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-gray-400">Status</th>
-                                <th class="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-gray-400">Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-50 dark:divide-gray-800">
-                        @forelse($transactions as $trx)
-                            <tr class="hover:bg-gray-50/50 dark:hover:bg-gray-800/30 transition-colors group">
-                                <td class="px-8 py-6">
-                                    <div class="flex flex-col">
-                                        <span class="text-xs font-black text-primary-blue uppercase italic tracking-tighter">{{ $trx->reference }}</span>
-                                        <span class="text-[9px] font-bold text-gray-400 uppercase mt-1">{{ $trx->transacted_at->format('d/m/Y H:i') }}</span>
-                                        @if($trx->note)
-                                            <span class="text-[10px] font-bold text-amber-500 dark:text-amber-400 mt-2 max-w-[200px] break-words">{{ $trx->note }}</span>
-                                        @endif
-                                    </div>
-                                </td>
-                                <td class="px-8 py-6">
-                                    <div class="flex items-center">
-                                        <div class="w-10 h-10 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-primary-blue font-black text-xs mr-4">
-                                            {{ substr($trx->buyer_name ?? 'A', 0, 1) }}
+                            <tr class="border-b border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/50">
+                                <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Nota / Referensi</th>
+                                <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Pembeli / Jurusan</th>
+                                <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Ringkasan</th>
+                                <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Total Tagihan</th>
+                                <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
+                                <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-right">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
+                            @forelse($transactions as $trx)
+                                <tr class="hover:bg-gray-50/60 dark:hover:bg-gray-800/40 transition-colors group">
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex flex-col">
+                                            <span class="text-xs font-bold text-blue-600 dark:text-blue-400 font-mono">{{ $trx->reference }}</span>
+                                            <span class="text-[10px] text-gray-400 mt-0.5">{{ $trx->transacted_at->format('d/m/Y H:i') }}</span>
+                                            @if($trx->note)
+                                                <span class="text-[10px] font-medium text-amber-600 dark:text-amber-400 mt-1 max-w-[200px] truncate">{{ $trx->note }}</span>
+                                            @endif
                                         </div>
-                                        <span class="text-sm font-bold uppercase tracking-tight text-gray-700 dark:text-gray-300">
-                                            {{ $trx->buyer_name ?? 'Anonim' }}
-                                        </span>
-                                    </div>
-                                </td>
-                                <td class="px-8 py-6">
-                                    <div class="flex flex-col">
-                                        <span class="text-xs font-bold text-gray-800 dark:text-white">{{ $trx->items_count }} Jenis Produk</span>
-                                        <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Klik Detail untuk rincian</span>
-                                    </div>
-                                </td>
-                                <td class="px-8 py-6">
-                                    @if(($activeTab === 'change' && $changeSubTab === 'history') || ($activeTab === 'debt' && $debtSubTab === 'history'))
-                                        <span class="text-sm font-black italic text-emerald-500 tracking-tighter">
-                                            Selesai
-                                        </span>
-                                    @else
-                                        <span class="text-base font-black italic {{ $activeTab === 'change' ? 'text-primary-red' : 'text-primary-blue' }} dark:text-white tracking-tighter">
-                                            Rp{{ number_format($activeTab === 'change' ? $trx->change_due : $trx->debt_amount, 0, ',', '.') }}
-                                        </span>
-                                    @endif
-                                </td>
-                                <td class="px-8 py-6">
-                                    @if(($activeTab === 'change' && $changeSubTab === 'history') || ($activeTab === 'debt' && $debtSubTab === 'history'))
-                                        <span class="px-3 py-1 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[9px] font-black uppercase rounded-full tracking-widest border border-emerald-500/20">
-                                            UANG DITERIMA
-                                        </span>
-                                    @else
-                                        <span class="px-3 py-1 bg-gray-100 dark:bg-gray-800 text-[9px] font-black uppercase text-gray-400 rounded-full tracking-widest border border-gray-200 dark:border-gray-700">
-                                            {{ str_replace('_', ' ', $trx->status) }}
-                                        </span>
-                                    @endif
-                                </td>
-                                 <td class="px-8 py-6">
-                                    <div class="flex items-center gap-2">
-                                        <button 
-                                            wire:click="viewDetails('{{ $trx->reference }}')"
-                                            wire:loading.attr="disabled"
-                                            class="flex items-center px-4 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 active:scale-95 disabled:opacity-50"
-                                        >
-                                            <span wire:loading.remove wire:target="viewDetails('{{ $trx->reference }}')">Detail</span>
-                                            <span wire:loading wire:target="viewDetails('{{ $trx->reference }}')" class="animate-spin">
-                                                <svg class="w-3 h-3" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <div class="flex items-center">
+                                            <div class="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-950/40 text-blue-600 border border-blue-200 dark:border-blue-800/50 flex items-center justify-center font-bold text-xs mr-3 shrink-0">
+                                                {{ substr($trx->buyer_name ?? 'A', 0, 1) }}
+                                            </div>
+                                            <span class="text-xs font-bold uppercase tracking-tight text-gray-800 dark:text-gray-200">
+                                                {{ $trx->buyer_name ?? 'Anonim' }}
                                             </span>
-                                        </button>
-                                        
-                                        @if(($activeTab === 'debt' && $debtSubTab === 'active') || ($activeTab === 'change' && $changeSubTab === 'active'))
-                                            <button 
-                                                wire:click="openSettleModal('{{ $trx->reference }}')"
-                                                class="flex items-center px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all bg-emerald-500 text-white shadow-lg shadow-emerald-500/20 hover:scale-105 active:scale-95"
-                                            >
-                                                <svg class="w-4 h-4 mr-2" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
-                                                Lunaskan
-                                            </button>
-                                        @else
-                                            <button 
-                                                wire:click="confirmCancelSettle('{{ $trx->reference }}')"
-                                                class="flex items-center px-4 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white active:scale-95"
-                                            >
-                                                Batalkan
-                                            </button>
-                                        @endif
-                                    </div>
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="6" class="px-8 py-20 text-center">
-                                    <div class="flex flex-col items-center">
-                                        <div class="w-20 h-20 bg-gray-50 dark:bg-gray-800 rounded-full flex items-center justify-center text-gray-300 mb-6">
-                                            <svg class="w-10 h-10" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>
                                         </div>
-                                        <h4 class="text-lg font-bold uppercase tracking-tight text-gray-400">Tidak Ada Data</h4>
-                                        <p class="text-xs font-bold text-gray-300 uppercase tracking-widest mt-1">Semua transaksi telah diselesaikan!</p>
-                                    </div>
-                                </td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <div class="flex flex-col">
+                                            <span class="text-xs font-semibold text-gray-800 dark:text-white">{{ $trx->items_count }} Jenis Produk</span>
+                                            <span class="text-[10px] text-gray-400">Klik Detail untuk rincian</span>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        @if(($activeTab === 'change' && $changeSubTab === 'history') || ($activeTab === 'debt' && $debtSubTab === 'history'))
+                                            <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400">
+                                                Selesai
+                                            </span>
+                                        @else
+                                            <span class="text-xs font-bold font-mono {{ $activeTab === 'change' ? 'text-rose-600 dark:text-rose-400' : 'text-blue-600 dark:text-blue-400' }}">
+                                                Rp{{ number_format($activeTab === 'change' ? $trx->change_due : $trx->debt_amount, 0, ',', '.') }}
+                                            </span>
+                                        @endif
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        @if(($activeTab === 'change' && $changeSubTab === 'history') || ($activeTab === 'debt' && $debtSubTab === 'history'))
+                                            <span class="px-2.5 py-1 bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300 text-[10px] font-bold uppercase rounded-full border border-emerald-500/20">
+                                                Uang Diterima
+                                            </span>
+                                        @else
+                                            <span class="px-2.5 py-1 bg-gray-100 dark:bg-gray-800 text-[10px] font-bold uppercase text-gray-600 dark:text-gray-400 rounded-full border border-gray-200 dark:border-gray-700">
+                                                {{ str_replace('_', ' ', $trx->status) }}
+                                            </span>
+                                        @endif
+                                    </td>
+                                    <td class="px-6 py-4 text-right whitespace-nowrap">
+                                        <div class="flex items-center justify-end gap-1.5">
+                                            <button 
+                                                wire:click="viewDetails('{{ $trx->reference }}')"
+                                                wire:loading.attr="disabled"
+                                                class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                                            >
+                                                <span wire:loading.remove wire:target="viewDetails('{{ $trx->reference }}')">Detail</span>
+                                                <span wire:loading wire:target="viewDetails('{{ $trx->reference }}')" class="animate-spin">
+                                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v2m0 12v2m8-8h-2M6 12H4"/></svg>
+                                                </span>
+                                            </button>
+                                            
+                                            @if(($activeTab === 'debt' && $debtSubTab === 'active') || ($activeTab === 'change' && $changeSubTab === 'active'))
+                                                <button 
+                                                    wire:click="openSettleModal('{{ $trx->reference }}')"
+                                                    class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold transition-all bg-emerald-600 text-white hover:bg-emerald-700 shadow-sm"
+                                                >
+                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                                                    Lunaskan
+                                                </button>
+                                            @else
+                                                <button 
+                                                    wire:click="confirmCancelSettle('{{ $trx->reference }}')"
+                                                    class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-rose-50 text-rose-600 hover:bg-rose-100 dark:bg-rose-950/40 dark:text-rose-400 transition-colors"
+                                                >
+                                                    Batalkan
+                                                </button>
+                                            @endif
+                                        </div>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="6" class="px-6 py-12 text-center text-gray-400">
+                                        <p class="text-xs font-semibold">Tidak Ada Transaksi Ditemukan</p>
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Mobile Adaptive Cards View (< md) -->
+                <div class="block md:hidden p-3.5 space-y-2.5">
+                    @forelse($transactions as $trx)
+                    <div class="p-3 bg-white dark:bg-gray-800/80 rounded-xl border border-gray-100 dark:border-gray-700/60 shadow-sm flex flex-col gap-2">
+                        <div class="flex items-start justify-between gap-2">
+                            <div class="min-w-0">
+                                <span class="text-xs font-bold text-blue-600 dark:text-blue-400 font-mono">#{{ $trx->reference }}</span>
+                                <div class="flex items-center gap-1.5 mt-0.5 text-[10px]">
+                                    <span class="text-gray-500 font-semibold uppercase">{{ $trx->buyer_name ?? 'Anonim' }}</span>
+                                    <span class="text-gray-300 dark:text-gray-600">&bull;</span>
+                                    <span class="text-gray-400">{{ $trx->transacted_at->format('d/m/Y H:i') }}</span>
+                                </div>
+                            </div>
+                            @if(($activeTab === 'change' && $changeSubTab === 'history') || ($activeTab === 'debt' && $debtSubTab === 'history'))
+                                <span class="px-2 py-0.5 bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300 text-[9px] font-bold uppercase rounded-full border border-emerald-500/20 shrink-0">
+                                    Selesai
+                                </span>
+                            @else
+                                <span class="px-2 py-0.5 bg-gray-100 dark:bg-gray-800 text-[9px] font-bold uppercase text-gray-600 dark:text-gray-400 rounded-full border border-gray-200 dark:border-gray-700 shrink-0">
+                                    {{ str_replace('_', ' ', $trx->status) }}
+                                </span>
+                            @endif
+                        </div>
+
+                        @if($trx->note)
+                            <div class="text-[11px] text-amber-600 dark:text-amber-400 bg-amber-50/50 dark:bg-amber-950/20 px-2.5 py-1 rounded-lg border border-amber-200/50 dark:border-amber-900/30">
+                                {{ $trx->note }}
+                            </div>
+                        @endif
+
+                        <div class="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+                            <span>{{ $trx->items_count }} Jenis Produk</span>
+                            @if(! (($activeTab === 'change' && $changeSubTab === 'history') || ($activeTab === 'debt' && $debtSubTab === 'history')))
+                                <span class="font-bold font-mono text-sm {{ $activeTab === 'change' ? 'text-rose-600 dark:text-rose-400' : 'text-blue-600 dark:text-blue-400' }}">
+                                    Rp{{ number_format($activeTab === 'change' ? $trx->change_due : $trx->debt_amount, 0, ',', '.') }}
+                                </span>
+                            @endif
+                        </div>
+
+                        <div class="flex items-center justify-end gap-2 pt-2 border-t border-gray-50 dark:border-gray-700/50">
+                            <button 
+                                wire:click="viewDetails('{{ $trx->reference }}')"
+                                wire:loading.attr="disabled"
+                                class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 transition-colors"
+                            >
+                                <span wire:loading.remove wire:target="viewDetails('{{ $trx->reference }}')">Detail</span>
+                                <span wire:loading wire:target="viewDetails('{{ $trx->reference }}')">...</span>
+                            </button>
+
+                            @if(($activeTab === 'debt' && $debtSubTab === 'active') || ($activeTab === 'change' && $changeSubTab === 'active'))
+                                <button 
+                                    wire:click="openSettleModal('{{ $trx->reference }}')"
+                                    class="inline-flex items-center gap-1 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all bg-emerald-600 text-white hover:bg-emerald-700 shadow-sm"
+                                >
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                                    Lunaskan
+                                </button>
+                            @else
+                                <button 
+                                    wire:click="confirmCancelSettle('{{ $trx->reference }}')"
+                                    class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-rose-50 text-rose-600 hover:bg-rose-100 dark:bg-rose-950/40 dark:text-rose-400 transition-colors"
+                                >
+                                    Batalkan
+                                </button>
+                            @endif
+                        </div>
+                    </div>
+                    @empty
+                    <div class="p-8 text-center text-gray-400 bg-white dark:bg-gray-800 rounded-xl border border-dashed border-gray-200 dark:border-gray-700">
+                        <p class="text-xs font-semibold">Tidak Ada Transaksi Ditemukan</p>
+                    </div>
+                    @endforelse
+                </div>
             @if($transactions->hasPages())
                 <div class="px-8 py-6 border-t border-gray-50 dark:border-gray-800">
                     {{ $transactions->links() }}

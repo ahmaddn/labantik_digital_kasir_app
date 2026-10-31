@@ -82,21 +82,20 @@
 
     <!-- Logs List -->
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-gray-800 p-4 md:p-6">
-        <div class="overflow-x-auto">
+        <!-- Desktop Table View (>= md) -->
+        <div class="hidden md:block overflow-x-auto">
             <table class="w-full text-left border-collapse">
                 <thead>
                     <tr class="border-b border-gray-100 dark:border-gray-700">
-                        <th class="pb-4 text-xs font-black uppercase tracking-widest text-gray-400 pl-4 w-48">Waktu Kejadian</th>
-                        <th class="pb-4 text-xs font-black uppercase tracking-widest text-gray-400 w-56">Pengguna & Akun</th>
-                        <th class="pb-4 text-xs font-black uppercase tracking-widest text-gray-400">Pemicu Keamanan</th>
-                        <th class="pb-4 text-xs font-black uppercase tracking-widest text-gray-400 pr-4">Halaman URL Target</th>
+                        <th class="pb-3 text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 pl-4 w-48">Waktu Kejadian</th>
+                        <th class="pb-3 text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 w-56">Pengguna & Akun</th>
+                        <th class="pb-3 text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">Pemicu Keamanan</th>
+                        <th class="pb-3 text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 pr-4">Halaman URL Target</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-50 dark:divide-gray-700/50">
                     @forelse($logs as $log)
                         @php
-                            // Parse message details
-                            // Format: User 'Najmy Admin' (admin@gmail.com) triggered a possible PrintScreen Key Press action on page: http://...
                             $userName = 'Unknown User';
                             $userEmail = '';
                             $triggerType = 'Screenshot/Print';
@@ -112,33 +111,79 @@
                             }
                         @endphp
                         <tr class="hover:bg-gray-50/50 dark:hover:bg-gray-900/30 transition-colors">
-                            <td class="py-4 pl-4 text-xs font-mono text-gray-500 dark:text-gray-400">
+                            <td class="py-3.5 pl-4 text-xs font-mono text-gray-500 dark:text-gray-400 whitespace-nowrap">
                                 {{ $log['timestamp'] }}
                             </td>
-                            <td class="py-4">
+                            <td class="py-3.5">
                                 <div class="flex flex-col">
-                                    <span class="font-bold text-gray-800 dark:text-white text-sm">{{ $userName }}</span>
-                                    <span class="text-[10px] text-gray-400 font-semibold">{{ $userEmail }}</span>
+                                    <span class="font-bold text-gray-900 dark:text-white text-xs">{{ $userName }}</span>
+                                    <span class="text-[10px] text-gray-400">{{ $userEmail }}</span>
                                 </div>
                             </td>
-                            <td class="py-4">
-                                <span class="inline-flex items-center px-3 py-1 text-[10px] font-black rounded-full uppercase tracking-wider bg-red-50 text-primary-red dark:bg-red-950/30 dark:text-red-400 border border-red-100 dark:border-red-900/30">
+                            <td class="py-3.5">
+                                <span class="inline-flex items-center px-2.5 py-0.5 text-[10px] font-bold rounded-full uppercase tracking-wider bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-400 border border-rose-200 dark:border-rose-900/30">
                                     {{ $triggerType }}
                                 </span>
                             </td>
-                            <td class="py-4 pr-4 max-w-xs truncate text-xs font-medium text-gray-500 dark:text-gray-400" title="{{ $targetUrl }}">
+                            <td class="py-3.5 pr-4 max-w-xs truncate text-xs text-gray-500 dark:text-gray-400" title="{{ $targetUrl }}">
                                 {{ $targetUrl ?: '-' }}
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="4" class="py-10 text-center text-gray-400 font-semibold italic">
+                            <td colspan="4" class="py-8 text-center text-gray-400 text-xs italic">
                                 Belum ada aktivitas ancaman keamanan terdeteksi.
                             </td>
                         </tr>
                     @endforelse
                 </tbody>
             </table>
+        </div>
+
+        <!-- Mobile Adaptive Cards View (< md) -->
+        <div class="block md:hidden space-y-2.5">
+            @forelse($logs as $log)
+                @php
+                    $userName = 'Unknown User';
+                    $userEmail = '';
+                    $triggerType = 'Screenshot/Print';
+                    $targetUrl = '';
+                    
+                    if (preg_match("/User '(.*?)' \((.*?)\) triggered a possible (.*?) action on page: (.*)/i", $log['message'], $matches)) {
+                        $userName = $matches[1];
+                        $userEmail = $matches[2];
+                        $triggerType = $matches[3];
+                        $targetUrl = $matches[4];
+                    } else {
+                        $triggerType = $log['message'];
+                    }
+                @endphp
+                <div class="p-3 bg-white dark:bg-gray-800/80 rounded-xl border border-gray-100 dark:border-gray-700/60 shadow-sm flex flex-col gap-2">
+                    <div class="flex items-start justify-between gap-2">
+                        <div class="min-w-0">
+                            <span class="text-xs font-bold text-gray-900 dark:text-white">{{ $userName }}</span>
+                            <p class="text-[10px] text-gray-400 truncate">{{ $userEmail }}</p>
+                        </div>
+                        <span class="px-2 py-0.5 text-[9px] font-bold rounded-full uppercase tracking-wider bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-400 border border-rose-200 dark:border-rose-900/30 shrink-0">
+                            {{ $triggerType }}
+                        </span>
+                    </div>
+
+                    <div class="text-[10px] text-gray-400 font-mono">
+                        {{ $log['timestamp'] }}
+                    </div>
+
+                    @if($targetUrl)
+                        <div class="text-[11px] text-gray-500 dark:text-gray-400 truncate bg-gray-50 dark:bg-gray-900/50 p-2 rounded-lg font-mono">
+                            {{ $targetUrl }}
+                        </div>
+                    @endif
+                </div>
+            @empty
+                <div class="p-8 text-center text-gray-400 bg-white dark:bg-gray-800 rounded-xl border border-dashed border-gray-200 dark:border-gray-700">
+                    <p class="text-xs font-semibold">Belum ada aktivitas ancaman keamanan terdeteksi.</p>
+                </div>
+            @endforelse
         </div>
 
         <div class="mt-6">

@@ -509,100 +509,118 @@
                                 Absensi, Kepatuhan Tugas, dan Total Omset Tiap Kasir</p>
                         </div>
                     </div>
-                    <div class="overflow-x-auto no-scrollbar">
+                    <!-- Desktop Table View (>= md) -->
+                    <div class="hidden md:block overflow-x-auto no-scrollbar">
                         <table class="w-full text-left">
                             <thead class="bg-gray-50 dark:bg-gray-900/50">
                                 <tr>
-                                    <th
-                                        class="px-10 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">
-                                        Nama Kasir</th>
-                                    <th
-                                        class="px-6 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">
-                                        Shift Terjadwal</th>
-                                    <th
-                                        class="px-6 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">
-                                        Kehadiran</th>
-                                    <th
-                                        class="px-6 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">
-                                        Tugas Selesai</th>
-                                    <th
-                                        class="px-6 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right">
-                                        Omset Kasir</th>
-                                    <th
-                                        class="px-6 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">
-                                        Skor</th>
-                                    <th
-                                        class="px-10 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right">
-                                        Opsi</th>
+                                    <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Nama Kasir</th>
+                                    <th class="px-4 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">Shift Terjadwal</th>
+                                    <th class="px-4 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">Kehadiran</th>
+                                    <th class="px-4 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">Tugas Selesai</th>
+                                    <th class="px-4 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-right">Omset Kasir</th>
+                                    <th class="px-4 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">Skor</th>
+                                    <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-right">Opsi</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-gray-50 dark:divide-gray-700">
+                            <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
                                 @forelse($cashierPerformanceList as $c)
-                                    <tr class="group hover:bg-gray-50/50 dark:hover:bg-gray-900/50 transition-all">
-                                        <td class="px-10 py-8">
-                                            <span
-                                                class="text-base font-black text-gray-800 dark:text-white uppercase tracking-tight">{{ $c->user->name }}</span>
+                                    <tr class="group hover:bg-gray-50/60 dark:hover:bg-gray-800/40 transition-colors">
+                                        <td class="px-6 py-4">
+                                            <span class="text-sm font-bold text-gray-900 dark:text-white uppercase">{{ $c->user->name }}</span>
                                         </td>
-                                        <td
-                                            class="px-6 py-8 text-center text-sm font-bold text-gray-500 dark:text-gray-300">
+                                        <td class="px-4 py-4 text-center text-xs font-semibold text-gray-600 dark:text-gray-300">
                                             {{ $c->scheduled_count }} Shift
                                         </td>
-                                        <td class="px-6 py-8 text-center">
+                                        <td class="px-4 py-4 text-center">
                                             @php
-                                                $attRate =
-                                                    $c->scheduled_count > 0
-                                                        ? round(($c->attended_count / $c->scheduled_count) * 100)
-                                                        : 100;
+                                                $attRate = $c->scheduled_count > 0 ? round(($c->attended_count / $c->scheduled_count) * 100) : 100;
                                                 $missedShift = max(0, $c->scheduled_count - $c->attended_count);
                                             @endphp
-                                            <div class="space-y-1">
-                                                <span
-                                                    class="px-3 py-1 rounded-xl text-xs font-black inline-block {{ $attRate >= 80 ? 'bg-emerald-500/15 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300 border border-emerald-500/20' : 'bg-rose-500/15 text-rose-700 dark:bg-rose-950/50 dark:text-rose-300 border border-rose-500/20' }}">
+                                            <div class="space-y-0.5">
+                                                <span class="px-2.5 py-0.5 rounded-full text-xs font-bold inline-block {{ $attRate >= 80 ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300 border border-emerald-500/20' : 'bg-rose-50 text-rose-700 dark:bg-rose-950/50 dark:text-rose-300 border border-rose-500/20' }}">
                                                     {{ $c->attended_count }} / {{ $c->scheduled_count }} ({{ $attRate }}%)
                                                 </span>
-                                                <div class="flex items-center justify-center gap-1.5 text-[10px] font-black uppercase tracking-tight">
-                                                    <span class="text-emerald-600 dark:text-emerald-400" title="Hadir Tepat Waktu">+{{ $c->on_time_count }} Tepat</span>
+                                                <div class="flex items-center justify-center gap-1.5 text-[10px] font-semibold">
+                                                    <span class="text-emerald-600 dark:text-emerald-400">+{{ $c->on_time_count }} Tepat</span>
                                                     @if($c->late_count > 0)
-                                                        <span class="text-amber-600 dark:text-amber-400" title="Terlambat Piket">-{{ $c->late_count }} Telat</span>
+                                                        <span class="text-amber-600 dark:text-amber-400">-{{ $c->late_count }} Telat</span>
                                                     @endif
                                                     @if($missedShift > 0)
-                                                        <span class="text-rose-600 dark:text-rose-400" title="Tidak Hadir Piket">-{{ $missedShift }} Absen</span>
+                                                        <span class="text-rose-600 dark:text-rose-400">-{{ $missedShift }} Absen</span>
                                                     @endif
                                                 </div>
                                             </div>
                                         </td>
-                                        <td
-                                            class="px-6 py-8 text-center text-xs font-bold text-gray-600 dark:text-gray-300">
+                                        <td class="px-4 py-4 text-center text-xs font-semibold text-gray-700 dark:text-gray-300">
                                             {{ $c->approved_tasks }} / {{ $c->assigned_tasks }}
                                         </td>
-                                        <td class="px-6 py-8 text-right">
-                                            <span
-                                                class="text-base font-black text-primary-blue tracking-tight">Rp{{ number_format($c->total_sales, 0, ',', '.') }}</span>
-                                            <span
-                                                class="block text-[9px] font-bold text-gray-400 uppercase">{{ $c->total_tx }}
-                                                Transaksi</span>
+                                        <td class="px-4 py-4 text-right">
+                                            <span class="text-xs font-bold font-mono text-blue-600 dark:text-blue-400">Rp{{ number_format($c->total_sales, 0, ',', '.') }}</span>
+                                            <span class="block text-[10px] text-gray-400">{{ $c->total_tx }} Transaksi</span>
                                         </td>
-                                        <td class="px-6 py-8 text-center">
-                                            <span
-                                                class="px-3 py-1 rounded-xl font-black text-xs {{ $c->overall_score >= 80 ? 'bg-emerald-500/15 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300 border border-emerald-500/20' : ($c->overall_score >= 60 ? 'bg-amber-500/15 text-amber-700 dark:bg-amber-950/50 dark:text-amber-300 border border-amber-500/20' : 'bg-rose-500/15 text-rose-700 dark:bg-rose-950/50 dark:text-rose-300 border border-rose-500/20') }}">
+                                        <td class="px-4 py-4 text-center">
+                                            <span class="px-2.5 py-1 rounded-full font-bold text-xs {{ $c->overall_score >= 80 ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300 border border-emerald-500/20' : ($c->overall_score >= 60 ? 'bg-amber-50 text-amber-700 dark:bg-amber-950/50 dark:text-amber-300 border border-amber-500/20' : 'bg-rose-50 text-rose-700 dark:bg-rose-950/50 dark:text-rose-300 border border-rose-500/20') }}">
                                                 {{ $c->overall_score }} Pts
                                             </span>
                                         </td>
-                                        <td class="px-10 py-8 text-right">
+                                        <td class="px-6 py-4 text-right whitespace-nowrap">
                                             <button wire:click="viewCashierDetail('{{ $c->user->id }}')"
-                                                class="px-4 py-2 bg-primary-blue/10 hover:bg-primary-blue text-primary-blue hover:text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-all shadow-xs">
+                                                class="px-3 py-1.5 bg-blue-50 hover:bg-blue-600 text-blue-600 hover:text-white dark:bg-blue-950/40 dark:text-blue-400 rounded-lg text-xs font-bold transition-all border border-blue-200 dark:border-blue-800">
                                                 Audit Log
                                             </button>
                                         </td>
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="7" class="px-10 py-8 text-center text-gray-400 italic">Tidak
-                                            ada kasir terdaftar.</td>
+                                        <td colspan="7" class="px-6 py-12 text-center text-gray-400 text-xs">Tidak ada kasir terdaftar.</td>
                                     </tr>
                                 @endforelse
                             </tbody>
                         </table>
+                    </div>
+
+                    <!-- Mobile Adaptive Cards View (< md) -->
+                    <div class="block md:hidden p-3.5 space-y-2.5">
+                        @forelse($cashierPerformanceList as $c)
+                        <div class="p-3 bg-white dark:bg-gray-800/80 rounded-xl border border-gray-100 dark:border-gray-700/60 shadow-sm flex flex-col gap-2">
+                            <div class="flex items-start justify-between gap-2">
+                                <div class="min-w-0">
+                                    <span class="text-xs font-bold text-gray-900 dark:text-white uppercase">{{ $c->user->name }}</span>
+                                    <div class="text-[10px] text-gray-400 mt-0.5">{{ $c->scheduled_count }} Shift dijadwalkan</div>
+                                </div>
+                                <span class="px-2.5 py-0.5 rounded-full font-bold text-xs {{ $c->overall_score >= 80 ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300 border border-emerald-500/20' : ($c->overall_score >= 60 ? 'bg-amber-50 text-amber-700 dark:bg-amber-950/50 dark:text-amber-300 border border-amber-500/20' : 'bg-rose-50 text-rose-700 dark:bg-rose-950/50 dark:text-rose-300 border border-rose-500/20') }}">
+                                    {{ $c->overall_score }} Pts
+                                </span>
+                            </div>
+
+                            <div class="grid grid-cols-3 gap-2 py-2 px-2.5 bg-gray-50 dark:bg-gray-900/50 rounded-lg text-center text-xs">
+                                <div>
+                                    <span class="text-[9px] text-gray-400 block font-medium">Kehadiran</span>
+                                    <span class="font-bold text-gray-800 dark:text-gray-200">{{ $c->attended_count }}/{{ $c->scheduled_count }}</span>
+                                </div>
+                                <div>
+                                    <span class="text-[9px] text-gray-400 block font-medium">Tugas</span>
+                                    <span class="font-bold text-gray-800 dark:text-gray-200">{{ $c->approved_tasks }}/{{ $c->assigned_tasks }}</span>
+                                </div>
+                                <div>
+                                    <span class="text-[9px] text-gray-400 block font-medium">Omset</span>
+                                    <span class="font-bold font-mono text-blue-600 dark:text-blue-400">Rp{{ number_format($c->total_sales, 0, ',', '.') }}</span>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center justify-end pt-1 border-t border-gray-50 dark:border-gray-700/50">
+                                <button wire:click="viewCashierDetail('{{ $c->user->id }}')"
+                                    class="px-3 py-1 bg-blue-50 text-blue-600 dark:bg-blue-950/40 dark:text-blue-400 text-xs font-bold rounded-lg border border-blue-200 dark:border-blue-800">
+                                    Audit Log
+                                </button>
+                            </div>
+                        </div>
+                        @empty
+                        <div class="p-8 text-center text-gray-400 bg-white dark:bg-gray-800 rounded-xl border border-dashed border-gray-200 dark:border-gray-700">
+                            <p class="text-xs font-semibold">Tidak ada kasir terdaftar.</p>
+                        </div>
+                        @endforelse
                     </div>
                 </div>
             </div>

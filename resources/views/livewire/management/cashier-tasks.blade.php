@@ -69,124 +69,110 @@
             </div>
         </div>
 
-        <div class="overflow-x-auto">
+        <!-- Desktop Table View (>= md) -->
+        <div class="hidden md:block overflow-x-auto">
             <table class="w-full text-left border-collapse min-w-[800px]">
                 <thead>
                     <tr class="border-b border-gray-100 dark:border-gray-700">
-                        <th class="pb-4 text-xs font-black uppercase tracking-widest text-gray-400 pl-4">Tanggal</th>
-                        <th class="pb-4 text-xs font-black uppercase tracking-widest text-gray-400">Tugas</th>
-                        <th class="pb-4 text-xs font-black uppercase tracking-widest text-gray-400">Kategori</th>
-                        <th class="pb-4 text-xs font-black uppercase tracking-widest text-gray-400">Prioritas</th>
-                        <th class="pb-4 text-xs font-black uppercase tracking-widest text-gray-400">Ditugaskan Ke</th>
-                        <th class="pb-4 text-xs font-black uppercase tracking-widest text-gray-400">Status Submission</th>
-                        <th class="pb-4 text-xs font-black uppercase tracking-widest text-gray-400">Deadline</th>
-                        <th
-                            class="pb-4 text-xs font-black uppercase tracking-widest text-gray-400 text-right pr-4 w-40">
-                            Aksi</th>
+                        <th class="pb-4 text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 pl-4">Tanggal</th>
+                        <th class="pb-4 text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">Tugas</th>
+                        <th class="pb-4 text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">Kategori</th>
+                        <th class="pb-4 text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">Prioritas</th>
+                        <th class="pb-4 text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">Ditugaskan Ke</th>
+                        <th class="pb-4 text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">Status Submission</th>
+                        <th class="pb-4 text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">Deadline</th>
+                        <th class="pb-4 text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 text-right pr-4 w-40">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-50 dark:divide-gray-700/50">
                     @forelse($tasks as $task)
                         <tr class="group hover:bg-gray-50/50 dark:hover:bg-gray-900/30 transition-colors">
-                            <td class="py-4 pl-4 text-sm font-bold text-gray-800 dark:text-white">
+                            <td class="py-4 pl-4 text-sm font-semibold text-gray-800 dark:text-white whitespace-nowrap">
                                 {{ $task->date?->translatedFormat('d M Y') ?? '-' }}
                             </td>
                             <td class="py-4">
-                                <div class="font-bold text-gray-855 dark:text-gray-200">{{ $task->task_name }}</div>
+                                <div class="font-bold text-gray-900 dark:text-gray-100">{{ $task->task_name }}</div>
                                 @if ($task->description)
                                     <div class="text-xs text-gray-400 mt-0.5">{!! \Str::limit($task->description, 100) !!}</div>
                                 @endif
                             </td>
-                            <td class="py-4 text-sm text-gray-700 dark:text-gray-300 font-semibold">
+                            <td class="py-4 text-sm text-gray-700 dark:text-gray-300 font-medium whitespace-nowrap">
                                 {{ $task->category ?: 'Umum' }}
                                 @if ($task->is_routine)
-                                    <div
-                                        class="text-[10px] font-black uppercase tracking-widest text-primary-blue mt-1">
-                                        Rutin Harian</div>
+                                    <div class="text-[10px] font-bold uppercase text-blue-600 dark:text-blue-400 mt-0.5">
+                                        Rutin Harian
+                                    </div>
                                 @endif
                             </td>
-                            <td class="py-4">
-                                <span
-                                    class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-black uppercase tracking-wider {{ $task->priorityBadgeClass }}">
+                            <td class="py-4 whitespace-nowrap">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider {{ $task->priorityBadgeClass }}">
                                     {{ $task->priority_label }}
                                 </span>
                             </td>
-                            <td class="py-4 text-sm text-gray-700 dark:text-gray-300 font-semibold">
+                            <td class="py-4 text-sm text-gray-700 dark:text-gray-300">
                                 @if ($task->is_routine)
-                                    <span>Semua Kasir</span>
+                                    <span class="text-xs font-semibold">Semua Kasir</span>
                                 @else
                                     @foreach ($task->assignments as $assignment)
-                                        <div class="text-xs">{{ $assignment->assignee->name }}</div>
+                                        <div class="text-xs font-semibold">{{ $assignment->assignee->name }}</div>
                                     @endforeach
                                 @endif
                             </td>
-                            <td class="py-4 text-sm">
+                            <td class="py-4 text-sm whitespace-nowrap">
                                 @php
                                     $submissions = $task->assignments->flatMap(fn($a) => $a->submissions)->countBy('approval_status');
                                 @endphp
                                 <div class="text-xs space-y-1">
                                     @if ($submissions->get('approved', 0) > 0)
-                                        <span class="block text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
-                                            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+                                        <span class="text-emerald-600 dark:text-emerald-400 flex items-center gap-1 font-semibold">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
                                             {{ $submissions->get('approved') }} ACC
                                         </span>
                                     @endif
                                     @if ($submissions->get('pending', 0) > 0)
-                                        <span class="block text-blue-600 dark:text-blue-400 flex items-center gap-1">
-                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                        <span class="text-blue-600 dark:text-blue-400 flex items-center gap-1 font-semibold">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                                             {{ $submissions->get('pending') }} Pending
                                         </span>
                                     @endif
                                     @if ($submissions->get('rejected', 0) > 0)
-                                        <span class="block text-red-600 dark:text-red-400 flex items-center gap-1">
-                                            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path></svg>
+                                        <span class="text-rose-600 dark:text-rose-400 flex items-center gap-1 font-semibold">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                                             {{ $submissions->get('rejected') }} Rejected
                                         </span>
                                     @endif
                                     @if ($submissions->isEmpty() && $task->assignments->count() > 0)
-                                        <span class="block text-gray-500 flex items-center gap-1">
-                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path></svg>
-                                            Belum ada submission
-                                        </span>
+                                        <span class="text-gray-400 text-xs">Belum ada submission</span>
                                     @endif
                                 </div>
                             </td>
-                            <td class="py-4 text-sm text-gray-500 dark:text-gray-400 font-semibold">
+                            <td class="py-4 text-xs text-gray-500 dark:text-gray-400 font-medium whitespace-nowrap">
                                 {{ $task->deadline_at ? $task->deadline_at->setTimezone('Asia/Jakarta')->translatedFormat('d M Y H:i') . ' WIB' : '-' }}
                             </td>
-                            <td class="py-4 text-right pr-4">
+                            <td class="py-4 text-right pr-4 whitespace-nowrap">
                                 <div class="flex items-center justify-end gap-1.5">
                                     @if ($activeTab === 'pending_review')
                                         <button wire:click="openReviewModal('{{ $task->id }}')"
-                                            title="Review Submissions dari Kasir"
-                                            class="px-2.5 py-1.5 bg-primary-blue hover:bg-blue-950 text-primary-yellow rounded-xl text-[10px] font-black uppercase tracking-wider transition-all active:scale-95 shadow-md">
+                                            class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold transition-all shadow-sm">
                                             Review
                                         </button>
                                     @endif
                                     @if ($activeTab === 'history')
                                         <button wire:click="openDetailModal('{{ $task->id }}')"
-                                            title="Lihat Detail Submissions"
-                                            class="px-2.5 py-1.5 bg-primary-blue hover:bg-blue-950 text-primary-yellow rounded-xl text-[10px] font-black uppercase tracking-wider transition-all active:scale-95 shadow-md">
+                                            class="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 text-gray-800 dark:text-gray-200 rounded-lg text-xs font-bold transition-all">
                                             Detail
                                         </button>
                                     @endif
                                     @if ($activeTab === 'active')
                                         <button wire:click="editTask('{{ $task->id }}')"
-                                            class="p-1.5 text-gray-400 hover:text-primary-blue hover:bg-blue-50 dark:hover:bg-blue-950/30 rounded-xl transition-all"
+                                            class="p-1.5 text-gray-400 hover:text-blue-600 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                                             title="Edit tugas">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
-                                                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
-                                                </path>
-                                            </svg>
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                                         </button>
                                         <button wire:click="confirmDelete('{{ $task->id }}')"
-                                            class="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-xl transition-all">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
-                                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
-                                                </path>
-                                            </svg>
+                                            class="p-1.5 text-gray-400 hover:text-rose-600 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors"
+                                            title="Hapus tugas">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                                         </button>
                                     @endif
                                 </div>
@@ -194,11 +180,113 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="8" class="py-8 text-center text-gray-400 italic font-semibold">Belum ada tugas ditambahkan</td>
+                            <td colspan="8" class="py-8 text-center text-gray-400 font-medium">Belum ada tugas ditambahkan</td>
                         </tr>
                     @endforelse
                 </tbody>
             </table>
+        </div>
+
+        <!-- Mobile Adaptive Cards View (< md) -->
+        <div class="block md:hidden space-y-2.5">
+            @forelse($tasks as $task)
+            <div class="p-3.5 bg-white dark:bg-gray-800/80 rounded-xl border border-gray-100 dark:border-gray-700/60 shadow-sm flex flex-col gap-2.5">
+                <div class="flex items-start justify-between gap-2">
+                    <div class="min-w-0">
+                        <div class="flex items-center gap-1.5">
+                            <span class="text-xs font-bold text-gray-900 dark:text-white uppercase">{{ $task->task_name }}</span>
+                            @if ($task->is_routine)
+                                <span class="px-1.5 py-0.5 text-[9px] font-bold uppercase bg-blue-50 text-blue-600 dark:bg-blue-950/40 dark:text-blue-400 rounded border border-blue-200 dark:border-blue-800 shrink-0">Rutin</span>
+                            @endif
+                        </div>
+                        <div class="flex items-center gap-1.5 mt-1 text-[10px] text-gray-500 dark:text-gray-400">
+                            <span>{{ $task->date?->translatedFormat('d M Y') ?? '-' }}</span>
+                            <span>&bull;</span>
+                            <span>{{ $task->category ?: 'Umum' }}</span>
+                        </div>
+                    </div>
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider shrink-0 {{ $task->priorityBadgeClass }}">
+                        {{ $task->priority_label }}
+                    </span>
+                </div>
+
+                @if ($task->description)
+                    <p class="text-xs text-gray-500 dark:text-gray-400 line-clamp-2">{!! \Str::limit($task->description, 120) !!}</p>
+                @endif
+
+                <!-- Assignment & Submission info -->
+                @php
+                    $submissions = $task->assignments->flatMap(fn($a) => $a->submissions)->countBy('approval_status');
+                @endphp
+                <div class="flex items-center justify-between text-[11px] p-2 bg-gray-50 dark:bg-gray-900/50 rounded-lg">
+                    <div>
+                        <span class="text-gray-400 block text-[9px]">Ditugaskan ke</span>
+                        <span class="font-semibold text-gray-700 dark:text-gray-300">
+                            @if ($task->is_routine)
+                                Semua Kasir
+                            @else
+                                {{ $task->assignments->pluck('assignee.name')->filter()->join(', ') ?: '-' }}
+                            @endif
+                        </span>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-gray-400 block text-[9px]">Status Submisi</span>
+                        <div class="flex items-center gap-1.5 font-bold">
+                            @if ($submissions->get('approved', 0) > 0)
+                                <span class="text-emerald-600 text-[10px]">{{ $submissions->get('approved') }} ACC</span>
+                            @endif
+                            @if ($submissions->get('pending', 0) > 0)
+                                <span class="text-blue-600 text-[10px]">{{ $submissions->get('pending') }} Pnd</span>
+                            @endif
+                            @if ($submissions->get('rejected', 0) > 0)
+                                <span class="text-rose-600 text-[10px]">{{ $submissions->get('rejected') }} Rej</span>
+                            @endif
+                            @if ($submissions->isEmpty())
+                                <span class="text-gray-400 text-[10px]">Kosong</span>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+
+                @if ($task->deadline_at)
+                    <div class="text-[10px] text-gray-400">
+                        Deadline: <span class="font-semibold text-gray-600 dark:text-gray-300">{{ $task->deadline_at->setTimezone('Asia/Jakarta')->translatedFormat('d M Y H:i') }} WIB</span>
+                    </div>
+                @endif
+
+                <!-- Card Actions -->
+                <div class="flex items-center justify-end gap-1.5 pt-1.5 border-t border-gray-50 dark:border-gray-700/50">
+                    @if ($activeTab === 'pending_review')
+                        <button wire:click="openReviewModal('{{ $task->id }}')"
+                            class="px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold transition-all shadow-sm">
+                            Review Submisi
+                        </button>
+                    @endif
+                    @if ($activeTab === 'history')
+                        <button wire:click="openDetailModal('{{ $task->id }}')"
+                            class="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 text-gray-800 dark:text-gray-200 rounded-lg text-xs font-bold transition-all">
+                            Lihat Detail
+                        </button>
+                    @endif
+                    @if ($activeTab === 'active')
+                        <button wire:click="editTask('{{ $task->id }}')"
+                            class="p-1.5 text-gray-500 hover:text-blue-600 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                            title="Edit">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                        </button>
+                        <button wire:click="confirmDelete('{{ $task->id }}')"
+                            class="p-1.5 text-rose-500 hover:text-rose-700 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors"
+                            title="Hapus">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                        </button>
+                    @endif
+                </div>
+            </div>
+            @empty
+            <div class="p-8 text-center text-gray-400 bg-white dark:bg-gray-800 rounded-xl border border-dashed border-gray-200 dark:border-gray-700">
+                <p class="text-xs font-semibold">Belum ada tugas ditambahkan</p>
+            </div>
+            @endforelse
         </div>
 
         <div class="mt-4">

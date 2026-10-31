@@ -78,147 +78,211 @@
 
     <!-- TAB 1: TAGIHAN AK TIF / BELUM DILUNASI -->
     @if($activeTab === 'unsettled')
-    <div class="bg-white dark:bg-gray-800 rounded-[2.5rem] shadow-2xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 overflow-hidden">
-        <div class="overflow-x-auto">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 overflow-hidden">
+        <!-- Desktop Table View (>= md) -->
+        <div class="hidden md:block overflow-x-auto">
             <table class="w-full text-left">
                 <thead class="bg-gray-50 dark:bg-gray-900/50">
                     <tr>
-                        <th class="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Supplier</th>
-                        <th class="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Qty Terjual</th>
-                        <th class="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Total Omzet</th>
-                        <th class="px-8 py-5 text-[10px] font-black text-primary-blue uppercase tracking-widest">Hak Supplier (Modal)</th>
-                        <th class="px-8 py-5 text-[10px] font-black text-emerald-500 uppercase tracking-widest text-right">Profit Toko</th>
-                        <th class="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Aksi Pelunasan</th>
+                        <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Supplier</th>
+                        <th class="px-4 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">Qty Terjual</th>
+                        <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Total Omzet</th>
+                        <th class="px-6 py-4 text-xs font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider">Hak Supplier (Modal)</th>
+                        <th class="px-6 py-4 text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider text-right">Profit Toko</th>
+                        <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">Aksi Pelunasan</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-50 dark:divide-gray-700">
+                <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
                     @forelse($unsettledReports as $report)
-                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-900/30 transition-colors">
-                        <td class="px-8 py-6">
-                            <div class="text-base font-black text-gray-800 dark:text-white uppercase tracking-tight italic">{{ $report->supplier_name }}</div>
+                    <tr class="hover:bg-gray-50/60 dark:hover:bg-gray-800/40 transition-colors">
+                        <td class="px-6 py-4">
+                            <div class="text-xs font-bold text-gray-900 dark:text-white uppercase">{{ $report->supplier_name }}</div>
                             @if($report->last_settled_at)
-                                <div class="text-[9px] font-bold text-emerald-500 uppercase tracking-widest mt-1">Terakhir Lunas: {{ \Carbon\Carbon::parse($report->last_settled_at)->translatedFormat('d M Y H:i') }}</div>
+                                <div class="text-[10px] text-emerald-600 dark:text-emerald-400 mt-0.5">Terakhir: {{ \Carbon\Carbon::parse($report->last_settled_at)->translatedFormat('d M Y H:i') }}</div>
                             @else
-                                <div class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mt-1">Belum Pernah Dilunasi</div>
+                                <div class="text-[10px] text-gray-400 mt-0.5">Belum Pernah Dilunasi</div>
                             @endif
                         </td>
-                        <td class="px-8 py-6 text-center font-black text-gray-600 dark:text-gray-400">
+                        <td class="px-4 py-4 text-center text-xs font-semibold text-gray-700 dark:text-gray-300 whitespace-nowrap">
                             {{ number_format($report->total_qty, 0, ',', '.') }} pcs
                         </td>
-                        <td class="px-8 py-6 font-black text-gray-800 dark:text-white">
+                        <td class="px-6 py-4 text-xs font-semibold text-gray-900 dark:text-white font-mono whitespace-nowrap">
                             Rp{{ number_format($report->total_sales, 0, ',', '.') }}
                         </td>
-                        <td class="px-8 py-6 font-black text-primary-blue italic text-base">
+                        <td class="px-6 py-4 text-xs font-bold text-blue-600 dark:text-blue-400 font-mono whitespace-nowrap">
                             Rp{{ number_format($report->total_supplier_share, 0, ',', '.') }}
                         </td>
-                        <td class="px-8 py-6 text-right font-black text-emerald-500 italic">
+                        <td class="px-6 py-4 text-right text-xs font-bold text-emerald-600 dark:text-emerald-400 font-mono whitespace-nowrap">
                             Rp{{ number_format($report->total_shop_profit, 0, ',', '.') }}
                         </td>
-                        <td class="px-8 py-6 text-center flex items-center justify-center gap-2">
-                            <a href="{{ route('supplier-settlement.print', ['supplierId' => $report->supplier_id, 'date_from' => $dateFrom, 'date_to' => $dateTo]) }}" target="_blank" class="px-3 py-2 bg-primary-blue/10 hover:bg-primary-blue text-primary-blue hover:text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-all inline-flex items-center gap-1 shadow-sm">
-                                Struk
-                            </a>
-                            
-                            <button wire:click="settleSupplier('{{ $report->supplier_id }}', '{{ addslashes($report->supplier_name) }}', {{ $report->total_supplier_share }})" class="px-3.5 py-2 bg-emerald-500 hover:bg-emerald-600 text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-all inline-flex items-center gap-1 shadow-md shadow-emerald-500/10">
-                                Bayar Lunas
-                            </button>
-                            <button wire:click="settleSupplier('{{ $report->supplier_id }}', '{{ addslashes($report->supplier_name) }}', {{ $report->total_supplier_share }}, true)" class="px-3.5 py-2 bg-amber-500 hover:bg-amber-600 text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-all inline-flex items-center gap-1 shadow-md shadow-amber-500/10" title="Tandai lunas tanpa memotong kas">
-                                Tandai Lunas
-                            </button>
-                            <button wire:click="settleAndShare('{{ $report->supplier_id }}', '{{ addslashes($report->supplier_name) }}', {{ $report->total_supplier_share }})" class="px-3.5 py-2 bg-green-500 hover:bg-green-600 text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-all inline-flex items-center gap-1 shadow-md shadow-green-500/10" title="Bayar & Kirim Rincian ke WA">
-                                WA & Lunas
-                            </button>
+                        <td class="px-6 py-4 text-center whitespace-nowrap">
+                            <div class="flex items-center justify-center gap-1.5">
+                                <a href="{{ route('supplier-settlement.print', ['supplierId' => $report->supplier_id, 'date_from' => $dateFrom, 'date_to' => $dateTo]) }}" target="_blank" class="px-2.5 py-1.5 bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white text-xs font-bold rounded-lg transition-all border border-blue-200 dark:border-blue-800">
+                                    Struk
+                                </a>
+                                <button wire:click="settleSupplier('{{ $report->supplier_id }}', '{{ addslashes($report->supplier_name) }}', {{ $report->total_supplier_share }})" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg transition-all shadow-sm">
+                                    Bayar
+                                </button>
+                                <button wire:click="settleSupplier('{{ $report->supplier_id }}', '{{ addslashes($report->supplier_name) }}', {{ $report->total_supplier_share }}, true)" class="px-2.5 py-1.5 bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold rounded-lg transition-all" title="Tandai lunas tanpa kas">
+                                    Tandai
+                                </button>
+                                <button wire:click="settleAndShare('{{ $report->supplier_id }}', '{{ addslashes($report->supplier_name) }}', {{ $report->total_supplier_share }})" class="px-2.5 py-1.5 bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold rounded-lg transition-all" title="WA & Lunas">
+                                    WA
+                                </button>
+                            </div>
                         </td>
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="6" class="px-8 py-20 text-center opacity-40">
-                            <flux:icon.check-circle class="w-12 h-12 mx-auto mb-3 text-emerald-500" />
-                            <p class="text-xs font-black uppercase tracking-widest italic">Tidak ada tagihan supplier aktif yang belum dilunasi pada periode ini</p>
+                        <td colspan="6" class="px-6 py-12 text-center text-gray-400 text-xs">
+                            Tidak ada tagihan supplier aktif yang belum dilunasi pada periode ini
                         </td>
                     </tr>
                     @endforelse
                 </tbody>
-                @if($unsettledReports->count() > 0)
-                <tfoot class="bg-gray-50 dark:bg-gray-900/50 border-t border-gray-100 dark:border-gray-700">
-                    <tr>
-                        <td class="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">TOTAL TAGIHAN AKTIF</td>
-                        <td class="px-8 py-5 text-center font-black text-gray-800 dark:text-white">{{ number_format($unsettledReports->sum('total_qty'), 0, ',', '.') }} pcs</td>
-                        <td class="px-8 py-5 font-black text-gray-800 dark:text-white">Rp{{ number_format($unsettledReports->sum('total_sales'), 0, ',', '.') }}</td>
-                        <td class="px-8 py-5 font-black text-primary-blue text-lg">Rp{{ number_format($unsettledReports->sum('total_supplier_share'), 0, ',', '.') }}</td>
-                        <td class="px-8 py-5 text-right font-black text-emerald-500 text-lg">Rp{{ number_format($unsettledReports->sum('total_shop_profit'), 0, ',', '.') }}</td>
-                        <td class="px-8 py-5"></td>
-                    </tr>
-                </tfoot>
-                @endif
             </table>
+        </div>
+
+        <!-- Mobile Adaptive Cards View (< md) -->
+        <div class="block md:hidden p-3.5 space-y-2.5">
+            @forelse($unsettledReports as $report)
+            <div class="p-3 bg-white dark:bg-gray-800/80 rounded-xl border border-gray-100 dark:border-gray-700/60 shadow-sm flex flex-col gap-2">
+                <div class="flex items-start justify-between gap-2">
+                    <div class="min-w-0">
+                        <h4 class="text-xs font-bold text-gray-900 dark:text-white uppercase truncate">{{ $report->supplier_name }}</h4>
+                        <div class="text-[10px] text-gray-400 mt-0.5">
+                            {{ number_format($report->total_qty, 0, ',', '.') }} pcs terjual
+                        </div>
+                    </div>
+                    <div class="text-right shrink-0">
+                        <span class="text-[9px] text-gray-400 block">Hak Supplier</span>
+                        <span class="text-xs font-bold font-mono text-blue-600 dark:text-blue-400">Rp{{ number_format($report->total_supplier_share, 0, ',', '.') }}</span>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between text-xs py-1.5 px-2 bg-gray-50 dark:bg-gray-900/50 rounded-lg">
+                    <div>
+                        <span class="text-[9px] text-gray-400 block">Omzet</span>
+                        <span class="font-semibold text-gray-700 dark:text-gray-300 font-mono">Rp{{ number_format($report->total_sales, 0, ',', '.') }}</span>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-[9px] text-gray-400 block">Profit Toko</span>
+                        <span class="font-bold text-emerald-600 dark:text-emerald-400 font-mono">Rp{{ number_format($report->total_shop_profit, 0, ',', '.') }}</span>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-end gap-1.5 pt-1.5 border-t border-gray-50 dark:border-gray-700/50 flex-wrap">
+                    <a href="{{ route('supplier-settlement.print', ['supplierId' => $report->supplier_id, 'date_from' => $dateFrom, 'date_to' => $dateTo]) }}" target="_blank" class="px-2.5 py-1.5 bg-blue-50 text-blue-600 text-xs font-bold rounded-lg border border-blue-200 dark:border-blue-800">
+                        Struk
+                    </a>
+                    <button wire:click="settleSupplier('{{ $report->supplier_id }}', '{{ addslashes($report->supplier_name) }}', {{ $report->total_supplier_share }}, true)" class="px-2.5 py-1.5 bg-amber-500 text-white text-xs font-bold rounded-lg">
+                        Tandai
+                    </button>
+                    <button wire:click="settleSupplier('{{ $report->supplier_id }}', '{{ addslashes($report->supplier_name) }}', {{ $report->total_supplier_share }})" class="px-3 py-1.5 bg-emerald-600 text-white text-xs font-bold rounded-lg shadow-sm">
+                        Bayar Lunas
+                    </button>
+                </div>
+            </div>
+            @empty
+            <div class="p-8 text-center text-gray-400 bg-white dark:bg-gray-800 rounded-xl border border-dashed border-gray-200 dark:border-gray-700">
+                <p class="text-xs font-semibold">Tidak ada tagihan supplier aktif yang belum dilunasi pada periode ini</p>
+            </div>
+            @endforelse
         </div>
     </div>
     @endif
 
     <!-- TAB 2: RIWAYAT PELUNASAN -->
     @if($activeTab === 'history')
-    <div class="bg-white dark:bg-gray-800 rounded-[2.5rem] shadow-2xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 overflow-hidden">
-        <div class="overflow-x-auto">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl shadow-blue-900/5 border border-gray-100 dark:border-gray-700 overflow-hidden">
+        <!-- Desktop Table View (>= md) -->
+        <div class="hidden md:block overflow-x-auto">
             <table class="w-full text-left">
                 <thead class="bg-gray-50 dark:bg-gray-900/50">
                     <tr>
-                        <th class="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Waktu Pelunasan</th>
-                        <th class="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Supplier</th>
-                        <th class="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Keterangan</th>
-                        <th class="px-8 py-5 text-[10px] font-black text-emerald-500 uppercase tracking-widest">Total Dibayar</th>
-                        <th class="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Aksi</th>
+                        <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Waktu Pelunasan</th>
+                        <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Supplier</th>
+                        <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Keterangan</th>
+                        <th class="px-6 py-4 text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">Total Dibayar</th>
+                        <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">Aksi</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-50 dark:divide-gray-700">
+                <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
                     @forelse($settlementHistory as $history)
-                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-900/30 transition-colors">
-                        <td class="px-8 py-6">
-                            <div class="text-xs font-black text-gray-800 dark:text-white uppercase tracking-tight">{{ \Carbon\Carbon::parse($history->created_at)->translatedFormat('d M Y H:i:s') }}</div>
-                            <div class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mt-0.5">{{ $history->reference }}</div>
+                    <tr class="hover:bg-gray-50/60 dark:hover:bg-gray-800/40 transition-colors">
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-xs font-bold text-gray-900 dark:text-white uppercase">{{ \Carbon\Carbon::parse($history->created_at)->translatedFormat('d M Y H:i') }}</div>
+                            <div class="text-[10px] text-gray-400 font-mono mt-0.5">{{ $history->reference }}</div>
                         </td>
-                        <td class="px-8 py-6">
-                            <div class="text-base font-black text-gray-800 dark:text-white uppercase tracking-tight italic">{{ $history->supplier_name }}</div>
+                        <td class="px-6 py-4">
+                            <div class="text-xs font-bold text-gray-900 dark:text-white uppercase">{{ $history->supplier_name }}</div>
                         </td>
-                        <td class="px-8 py-6">
-                            <div class="text-xs font-bold text-gray-600 dark:text-gray-300 uppercase tracking-tight">{{ $history->description }}</div>
+                        <td class="px-6 py-4">
+                            <div class="text-xs text-gray-500 dark:text-gray-400">{{ $history->description }}</div>
                         </td>
-                        <td class="px-8 py-6 font-black text-emerald-600 dark:text-emerald-400 text-base italic">
+                        <td class="px-6 py-4 whitespace-nowrap text-xs font-bold text-emerald-600 dark:text-emerald-400 font-mono">
                             Rp{{ number_format($history->amount, 0, ',', '.') }}
                         </td>
-                        <td class="px-8 py-6 text-center flex items-center justify-center gap-2">
-                            @if($history->supplier_id)
-                            <a href="{{ route('supplier-settlement.print', ['supplierId' => $history->supplier_id, 'date_from' => $dateFrom, 'date_to' => $dateTo]) }}" target="_blank" class="px-3 py-2 bg-primary-blue/10 hover:bg-primary-blue text-primary-blue hover:text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-all inline-flex items-center gap-1 shadow-sm">
-                                Struk
-                            </a>
-                            @endif
-
-                            <button wire:click="unsettleSupplier('{{ $history->id }}')" 
-                                onclick="return confirm('Apakah Anda yakin ingin membatalkan pelunasan ini? Transaksi bagi hasil akan dikembalikan ke status Belum Dilunasi.')"
-                                class="px-3.5 py-2 bg-rose-500/10 hover:bg-rose-500 text-rose-500 hover:text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-all inline-flex items-center gap-1 shadow-sm"
-                                title="Batalkan pelunasan ini & kembalikan transaksi ke Tagihan Aktif">
-                                Batalkan Pelunasan
-                            </button>
+                        <td class="px-6 py-4 text-center whitespace-nowrap">
+                            <div class="flex items-center justify-center gap-1.5">
+                                @if($history->supplier_id)
+                                <a href="{{ route('supplier-settlement.print', ['supplierId' => $history->supplier_id, 'date_from' => $dateFrom, 'date_to' => $dateTo]) }}" target="_blank" class="px-2.5 py-1.5 bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white text-xs font-bold rounded-lg transition-all border border-blue-200 dark:border-blue-800">
+                                    Struk
+                                </a>
+                                @endif
+                                <button wire:click="unsettleSupplier('{{ $history->id }}')" 
+                                    onclick="return confirm('Apakah Anda yakin ingin membatalkan pelunasan ini?')"
+                                    class="px-2.5 py-1.5 bg-rose-50 text-rose-600 hover:bg-rose-600 hover:text-white text-xs font-bold rounded-lg transition-all border border-rose-200 dark:border-rose-800">
+                                    Batalkan
+                                </button>
+                            </div>
                         </td>
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="5" class="px-8 py-20 text-center opacity-40">
-                            <p class="text-xs font-black uppercase tracking-widest italic">Belum ada riwayat pelunasan bagi hasil supplier pada periode ini</p>
+                        <td colspan="5" class="px-6 py-12 text-center text-gray-400 text-xs">
+                            Belum ada riwayat pelunasan bagi hasil supplier pada periode ini
                         </td>
                     </tr>
                     @endforelse
                 </tbody>
-                @if($settlementHistory->count() > 0)
-                <tfoot class="bg-gray-50 dark:bg-gray-900/50 border-t border-gray-100 dark:border-gray-700">
-                    <tr>
-                        <td colspan="3" class="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">TOTAL RIWAYAT PELUNASAN</td>
-                        <td class="px-8 py-5 font-black text-emerald-600 dark:text-emerald-400 text-lg">Rp{{ number_format($settlementHistory->sum('amount'), 0, ',', '.') }}</td>
-                        <td class="px-8 py-5"></td>
-                    </tr>
-                </tfoot>
-                @endif
             </table>
+        </div>
+
+        <!-- Mobile Adaptive Cards View (< md) -->
+        <div class="block md:hidden p-3.5 space-y-2.5">
+            @forelse($settlementHistory as $history)
+            <div class="p-3 bg-white dark:bg-gray-800/80 rounded-xl border border-gray-100 dark:border-gray-700/60 shadow-sm flex flex-col gap-2">
+                <div class="flex items-start justify-between gap-2">
+                    <div class="min-w-0">
+                        <h4 class="text-xs font-bold text-gray-900 dark:text-white uppercase truncate">{{ $history->supplier_name }}</h4>
+                        <span class="text-[10px] text-gray-400 font-mono">{{ \Carbon\Carbon::parse($history->created_at)->translatedFormat('d M Y H:i') }}</span>
+                    </div>
+                    <span class="text-xs font-bold font-mono text-emerald-600 dark:text-emerald-400 shrink-0">
+                        Rp{{ number_format($history->amount, 0, ',', '.') }}
+                    </span>
+                </div>
+                @if($history->description)
+                    <p class="text-xs text-gray-500 dark:text-gray-400">{{ $history->description }}</p>
+                @endif
+                <div class="flex items-center justify-end gap-1.5 pt-1.5 border-t border-gray-50 dark:border-gray-700/50">
+                    @if($history->supplier_id)
+                    <a href="{{ route('supplier-settlement.print', ['supplierId' => $history->supplier_id, 'date_from' => $dateFrom, 'date_to' => $dateTo]) }}" target="_blank" class="px-2.5 py-1 bg-blue-50 text-blue-600 text-xs font-bold rounded-lg border border-blue-200 dark:border-blue-800">
+                        Struk
+                    </a>
+                    @endif
+                    <button wire:click="unsettleSupplier('{{ $history->id }}')" 
+                        onclick="return confirm('Apakah Anda yakin ingin membatalkan pelunasan ini?')"
+                        class="px-2.5 py-1 bg-rose-50 text-rose-600 text-xs font-bold rounded-lg border border-rose-200 dark:border-rose-800">
+                        Batalkan
+                    </button>
+                </div>
+            </div>
+            @empty
+            <div class="p-8 text-center text-gray-400 bg-white dark:bg-gray-800 rounded-xl border border-dashed border-gray-200 dark:border-gray-700">
+                <p class="text-xs font-semibold">Belum ada riwayat pelunasan bagi hasil supplier pada periode ini</p>
+            </div>
+            @endforelse
         </div>
     </div>
     @endif

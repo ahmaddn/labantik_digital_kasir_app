@@ -34,50 +34,90 @@
             </div>
         </div>
 
-        <div class="overflow-x-auto">
+        <!-- Desktop Table View (>= md) -->
+        <div class="hidden md:block overflow-x-auto">
             <table class="w-full min-w-[800px] text-left border-collapse">
                 <thead>
                     <tr class="border-b border-gray-100 dark:border-gray-700">
-                        <th class="pb-4 text-xs font-black uppercase tracking-widest text-gray-400 pl-4">Kasir</th>
-                        <th class="pb-4 text-xs font-black uppercase tracking-widest text-gray-400 text-center">Total Kehadiran</th>
-                        <th class="pb-4 text-xs font-black uppercase tracking-widest text-emerald-500 text-center">Tepat Waktu</th>
-                        <th class="pb-4 text-xs font-black uppercase tracking-widest text-rose-500 text-center">Terlambat</th>
-                        <th class="pb-4 text-xs font-black uppercase tracking-widest text-amber-500 text-center">Pulang Cepat</th>
-                        <th class="pb-4 text-xs font-black uppercase tracking-widest text-gray-400 text-right pr-4">Aksi</th>
+                        <th class="pb-3 text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 pl-4">Kasir</th>
+                        <th class="pb-3 text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 text-center">Total Kehadiran</th>
+                        <th class="pb-3 text-xs font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 text-center">Tepat Waktu</th>
+                        <th class="pb-3 text-xs font-bold uppercase tracking-wider text-rose-600 dark:text-rose-400 text-center">Terlambat</th>
+                        <th class="pb-3 text-xs font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400 text-center">Pulang Cepat</th>
+                        <th class="pb-3 text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 text-right pr-4">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-50 dark:divide-gray-700/50">
                     @forelse($cashiers as $cashier)
                         <tr class="group hover:bg-gray-50/50 dark:hover:bg-gray-900/30 transition-colors">
-                            <td class="py-4 pl-4">
+                            <td class="py-3.5 pl-4">
                                 <div class="text-sm font-bold text-gray-800 dark:text-white">{{ $cashier->name }}</div>
                                 <div class="text-[10px] text-gray-400 font-semibold mt-0.5">{{ $cashier->email }}</div>
                             </td>
-                            <td class="py-4 text-center text-sm font-bold text-gray-800 dark:text-white">
+                            <td class="py-3.5 text-center text-xs font-bold text-gray-800 dark:text-white">
                                 {{ $cashier->total_attendances }} Kali
                             </td>
-                            <td class="py-4 text-center text-sm font-bold text-emerald-500">
+                            <td class="py-3.5 text-center text-xs font-bold text-emerald-600 dark:text-emerald-400">
                                 {{ $cashier->present_count }} Kali
                             </td>
-                            <td class="py-4 text-center text-sm font-bold text-rose-500">
+                            <td class="py-3.5 text-center text-xs font-bold text-rose-600 dark:text-rose-400">
                                 {{ $cashier->late_count }} Kali
                             </td>
-                            <td class="py-4 text-center text-sm font-bold text-amber-500">
+                            <td class="py-3.5 text-center text-xs font-bold text-amber-600 dark:text-amber-400">
                                 {{ $cashier->early_checkout_count }} Kali
                             </td>
-                            <td class="py-4 text-right pr-4">
-                                <button wire:click="showDetails('{{ $cashier->id }}')" class="px-4 py-2 bg-primary-blue hover:bg-blue-900 text-primary-yellow rounded-xl font-black text-xs uppercase italic tracking-wider transition-all">
-                                    Detail Absen
+                            <td class="py-3.5 text-right pr-4 whitespace-nowrap">
+                                <button wire:click="viewDetails('{{ $cashier->id }}')" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold transition-all shadow-sm">
+                                    Riwayat
                                 </button>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="py-8 text-center text-gray-400 italic font-semibold">Tidak ada data kasir ditemukan</td>
+                            <td colspan="6" class="py-8 text-center text-gray-400 text-xs">Tidak ada data kehadiran kasir</td>
                         </tr>
                     @endforelse
                 </tbody>
             </table>
+        </div>
+
+        <!-- Mobile Adaptive Cards View (< md) -->
+        <div class="block md:hidden space-y-2.5">
+            @forelse($cashiers as $cashier)
+            <div class="p-3 bg-white dark:bg-gray-800/80 rounded-xl border border-gray-100 dark:border-gray-700/60 shadow-sm flex flex-col gap-2">
+                <div class="flex items-start justify-between gap-2">
+                    <div class="min-w-0">
+                        <span class="text-xs font-bold text-gray-900 dark:text-white uppercase">{{ $cashier->name }}</span>
+                        <p class="text-[10px] text-gray-400 truncate mt-0.5">{{ $cashier->email }}</p>
+                    </div>
+                    <button wire:click="viewDetails('{{ $cashier->id }}')" class="px-2.5 py-1 bg-blue-600 text-white text-xs font-bold rounded-lg shrink-0">
+                        Riwayat
+                    </button>
+                </div>
+                <div class="grid grid-cols-4 gap-1.5 py-2 px-2 bg-gray-50 dark:bg-gray-900/50 rounded-lg text-center">
+                    <div>
+                        <span class="text-[9px] text-gray-400 block font-medium">Hadir</span>
+                        <span class="text-xs font-bold text-gray-800 dark:text-gray-200 mt-0.5">{{ $cashier->total_attendances }}x</span>
+                    </div>
+                    <div>
+                        <span class="text-[9px] text-emerald-500 block font-medium">Tepat</span>
+                        <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400 mt-0.5">{{ $cashier->present_count }}x</span>
+                    </div>
+                    <div>
+                        <span class="text-[9px] text-rose-500 block font-medium">Telat</span>
+                        <span class="text-xs font-bold text-rose-600 dark:text-rose-400 mt-0.5">{{ $cashier->late_count }}x</span>
+                    </div>
+                    <div>
+                        <span class="text-[9px] text-amber-500 block font-medium">Cepat</span>
+                        <span class="text-xs font-bold text-amber-600 dark:text-amber-400 mt-0.5">{{ $cashier->early_checkout_count }}x</span>
+                    </div>
+                </div>
+            </div>
+            @empty
+            <div class="p-8 text-center text-gray-400 bg-white dark:bg-gray-800 rounded-xl border border-dashed border-gray-200 dark:border-gray-700">
+                <p class="text-xs font-semibold">Tidak ada data kehadiran kasir</p>
+            </div>
+            @endforelse
         </div>
 
         <div class="mt-4">
@@ -100,103 +140,180 @@
             </div>
             
             <div class="overflow-y-auto flex-grow pr-2">
-                <table class="w-full text-left border-collapse">
-                    <thead>
-                        <tr class="border-b border-gray-100 dark:border-gray-700">
-                            <th class="pb-3 text-xs font-black uppercase text-gray-400">Tanggal</th>
-                            <th class="pb-3 text-xs font-black uppercase text-gray-400">Buka (Opening)</th>
-                            <th class="pb-3 text-xs font-black uppercase text-gray-400">Tutup (Closing)</th>
-                            <th class="pb-3 text-xs font-black uppercase text-gray-400">Status</th>
-                            <th class="pb-3 text-xs font-black uppercase text-gray-400 text-right">Laporan Shift</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-50 dark:divide-gray-700/50">
-                        @forelse($detailAttendances as $att)
-                            <tr class="hover:bg-gray-50/50 dark:hover:bg-gray-900/10">
-                                <td class="py-4 text-sm font-bold text-gray-800 dark:text-white">
-                                    {{ $att->date->translatedFormat('d M Y') }}
-                                </td>
-                                <td class="py-4">
-                                    <div class="text-sm font-bold text-gray-800 dark:text-white">
-                                        {{ $att->clock_in ? $att->clock_in->format('H:i') . ' WIB' : '-' }}
-                                    </div>
-                                    <div class="text-[9px] text-gray-400 font-bold mt-0.5">Uang Awal: Rp{{ number_format($att->opening_cash, 0, ',', '.') }}</div>
-                                </td>
-                                <td class="py-4">
-                                    <div class="text-sm font-bold text-gray-800 dark:text-white">
-                                        {{ $att->clock_out ? $att->clock_out->format('H:i') . ' WIB' : '-' }}
-                                    </div>
-                                    <div class="text-[9px] text-gray-400 font-bold mt-0.5">Uang Akhir: Rp{{ number_format($att->closing_cash, 0, ',', '.') }}</div>
-                                </td>
-                                <td class="py-4">
-                                    @php
-                                        $statusText = $att->status;
-                                        $color = 'bg-gray-50 text-gray-500';
-
-                                        if (str_contains($att->status, '_')) {
-                                            $parts = explode('_', $att->status);
-                                            $in = $parts[0];
-                                            $out = $parts[1];
-
-                                            $inText = $in === 'late' ? 'Terlambat' : 'Tepat Waktu';
-                                            $outText = $out === 'early_checkout' ? 'Pulang Cepat' : ($out === 'overtime' ? 'Lembur' : 'Tepat Waktu');
-                                            $statusText = "In: {$inText} | Out: {$outText}";
-
-                                            if ($in === 'late' && $out === 'early_checkout') {
-                                                $color = 'bg-rose-50 text-rose-600 dark:bg-rose-950/30 dark:text-rose-450';
-                                            } elseif ($in === 'late' || $out === 'early_checkout') {
-                                                $color = 'bg-amber-50 text-amber-600 dark:bg-amber-950/30 dark:text-amber-400';
-                                            } else {
-                                                $color = 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/30 dark:text-emerald-400';
-                                            }
-                                        } else {
-                                            if ($att->status === 'present') { 
-                                                $color = 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/30 dark:text-emerald-400'; 
-                                                $statusText = 'Tepat Waktu';
-                                            }
-                                            elseif ($att->status === 'late') { 
-                                                $color = 'bg-rose-50 text-rose-600 dark:bg-rose-950/30 dark:text-rose-450'; 
-                                                $statusText = 'Terlambat';
-                                            }
-                                            elseif ($att->status === 'early_checkout') { 
-                                                $color = 'bg-amber-50 text-amber-600 dark:bg-amber-950/30 dark:text-amber-450'; 
-                                                $statusText = 'Pulang Cepat';
-                                            }
-                                        }
-                                    @endphp
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider {{ $color }}">
-                                        {{ $statusText }}
-                                    </span>
-                                </td>
-                                <td class="py-4 text-right">
-                                    @if($att->clock_out)
-                                        <div class="flex items-center justify-end gap-1.5">
-                                            <button wire:click="viewReport('{{ $att->id }}')" class="px-3 py-1.5 bg-primary-blue hover:bg-blue-900 text-primary-yellow rounded-lg font-black text-[10px] uppercase italic tracking-wider transition-all">
-                                                Lihat
-                                            </button>
-                                            @if(($att->user_id === auth()->id() && $att->edit_count < 1) || in_array(session('active_role_name'), ['superadmin', 'pengelola_jurusan']))
-                                                <button wire:click="openEditReport('{{ $att->id }}')" class="px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white rounded-lg font-black text-[10px] uppercase italic tracking-wider transition-all">
-                                                    Edit
-                                                </button>
-                                            @endif
-                                            @if(in_array(session('active_role_name'), ['superadmin', 'pengelola_jurusan']))
-                                                <button wire:click="reopenShift('{{ $att->id }}')" onclick="return confirm('Buka kembali shift kasir ini agar kasir dapat kembali bertransaksi?') || event.stopImmediatePropagation()" class="px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-lg font-black text-[10px] uppercase italic tracking-wider transition-all" title="Buka kembali shift kasir">
-                                                    Buka Shift
-                                                </button>
-                                            @endif
+                <!-- Desktop Table (>= md) -->
+                <div class="hidden md:block">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="border-b border-gray-100 dark:border-gray-700">
+                                <th class="pb-3 text-xs font-bold uppercase text-gray-400">Tanggal</th>
+                                <th class="pb-3 text-xs font-bold uppercase text-gray-400">Buka (Opening)</th>
+                                <th class="pb-3 text-xs font-bold uppercase text-gray-400">Tutup (Closing)</th>
+                                <th class="pb-3 text-xs font-bold uppercase text-gray-400">Status</th>
+                                <th class="pb-3 text-xs font-bold uppercase text-gray-400 text-right">Laporan Shift</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-50 dark:divide-gray-700/50">
+                            @forelse($detailAttendances as $att)
+                                <tr class="hover:bg-gray-50/50 dark:hover:bg-gray-900/10">
+                                    <td class="py-3 text-xs font-bold text-gray-800 dark:text-white">
+                                        {{ $att->date->translatedFormat('d M Y') }}
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="text-xs font-bold text-gray-800 dark:text-white">
+                                            {{ $att->clock_in ? $att->clock_in->format('H:i') . ' WIB' : '-' }}
                                         </div>
-                                    @else
-                                        <span class="text-xs text-gray-400 italic">Belum Closing</span>
-                                    @endif
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="5" class="py-8 text-center text-gray-400 italic">Tidak ada data rincian absensi</td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
+                                        <div class="text-[9px] text-gray-400 font-semibold mt-0.5">Awal: Rp{{ number_format($att->opening_cash, 0, ',', '.') }}</div>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="text-xs font-bold text-gray-800 dark:text-white">
+                                            {{ $att->clock_out ? $att->clock_out->format('H:i') . ' WIB' : '-' }}
+                                        </div>
+                                        <div class="text-[9px] text-gray-400 font-semibold mt-0.5">Akhir: Rp{{ number_format($att->closing_cash, 0, ',', '.') }}</div>
+                                    </td>
+                                    <td class="py-3">
+                                        @php
+                                            $statusText = $att->status;
+                                            $color = 'bg-gray-50 text-gray-500';
+
+                                            if (str_contains($att->status, '_')) {
+                                                $parts = explode('_', $att->status);
+                                                $in = $parts[0];
+                                                $out = $parts[1];
+
+                                                $inText = $in === 'late' ? 'Terlambat' : 'Tepat Waktu';
+                                                $outText = $out === 'early_checkout' ? 'Pulang Cepat' : ($out === 'overtime' ? 'Lembur' : 'Tepat Waktu');
+                                                $statusText = "In: {$inText} | Out: {$outText}";
+
+                                                if ($in === 'late' && $out === 'early_checkout') {
+                                                    $color = 'bg-rose-50 text-rose-600 dark:bg-rose-950/30 dark:text-rose-400';
+                                                } elseif ($in === 'late' || $out === 'early_checkout') {
+                                                    $color = 'bg-amber-50 text-amber-600 dark:bg-amber-950/30 dark:text-amber-400';
+                                                } else {
+                                                    $color = 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/30 dark:text-emerald-400';
+                                                }
+                                            } else {
+                                                if ($att->status === 'present') { 
+                                                    $color = 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/30 dark:text-emerald-400'; 
+                                                    $statusText = 'Tepat Waktu';
+                                                }
+                                                elseif ($att->status === 'late') { 
+                                                    $color = 'bg-rose-50 text-rose-600 dark:bg-rose-950/30 dark:text-rose-400'; 
+                                                    $statusText = 'Terlambat';
+                                                }
+                                                elseif ($att->status === 'early_checkout') { 
+                                                    $color = 'bg-amber-50 text-amber-600 dark:bg-amber-950/30 dark:text-amber-400'; 
+                                                    $statusText = 'Pulang Cepat';
+                                                }
+                                            }
+                                        @endphp
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider {{ $color }}">
+                                            {{ $statusText }}
+                                        </span>
+                                    </td>
+                                    <td class="py-3 text-right">
+                                        @if($att->clock_out)
+                                            <div class="flex items-center justify-end gap-1.5">
+                                                <button wire:click="viewReport('{{ $att->id }}')" class="px-2.5 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold text-xs transition-all">
+                                                    Lihat
+                                                </button>
+                                                @if(($att->user_id === auth()->id() && $att->edit_count < 1) || in_array(session('active_role_name'), ['superadmin', 'pengelola_jurusan']))
+                                                    <button wire:click="openEditReport('{{ $att->id }}')" class="px-2.5 py-1 bg-amber-500 hover:bg-amber-600 text-white rounded-lg font-bold text-xs transition-all">
+                                                        Edit
+                                                    </button>
+                                                @endif
+                                            </div>
+                                        @else
+                                            <span class="text-xs text-gray-400 italic">Belum Closing</span>
+                                        @endif
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="5" class="py-8 text-center text-gray-400 text-xs">Belum ada riwayat shift</td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Mobile Adaptive Cards (< md) -->
+                <div class="block md:hidden space-y-2.5">
+                    @forelse($detailAttendances as $att)
+                    <div class="p-3 bg-white dark:bg-gray-800/80 rounded-xl border border-gray-100 dark:border-gray-700/60 shadow-sm flex flex-col gap-2">
+                        <div class="flex items-start justify-between gap-2">
+                            <span class="text-xs font-bold text-gray-900 dark:text-white">{{ $att->date->translatedFormat('d M Y') }}</span>
+                            @php
+                                $statusText = $att->status;
+                                $color = 'bg-gray-50 text-gray-500';
+
+                                if (str_contains($att->status, '_')) {
+                                    $parts = explode('_', $att->status);
+                                    $in = $parts[0];
+                                    $out = $parts[1];
+
+                                    $inText = $in === 'late' ? 'Telat' : 'Tepat';
+                                    $outText = $out === 'early_checkout' ? 'Cepat' : ($out === 'overtime' ? 'Lembur' : 'Tepat');
+                                    $statusText = "{$inText} / {$outText}";
+
+                                    if ($in === 'late' && $out === 'early_checkout') {
+                                        $color = 'bg-rose-50 text-rose-600 dark:bg-rose-950/30 dark:text-rose-400';
+                                    } elseif ($in === 'late' || $out === 'early_checkout') {
+                                        $color = 'bg-amber-50 text-amber-600 dark:bg-amber-950/30 dark:text-amber-400';
+                                    } else {
+                                        $color = 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/30 dark:text-emerald-400';
+                                    }
+                                } else {
+                                    if ($att->status === 'present') { 
+                                        $color = 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/30 dark:text-emerald-400'; 
+                                        $statusText = 'Tepat Waktu';
+                                    } elseif ($att->status === 'late') { 
+                                        $color = 'bg-rose-50 text-rose-600 dark:bg-rose-950/30 dark:text-rose-400'; 
+                                        $statusText = 'Terlambat';
+                                    } elseif ($att->status === 'early_checkout') { 
+                                        $color = 'bg-amber-50 text-amber-600 dark:bg-amber-950/30 dark:text-amber-400'; 
+                                        $statusText = 'Pulang Cepat';
+                                    }
+                                }
+                            @endphp
+                            <span class="px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider {{ $color }} shrink-0">
+                                {{ $statusText }}
+                            </span>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-2 text-[11px] p-2 bg-gray-50 dark:bg-gray-900/50 rounded-lg">
+                            <div>
+                                <span class="text-gray-400 block text-[9px]">Masuk</span>
+                                <span class="font-bold text-gray-800 dark:text-white">{{ $att->clock_in ? $att->clock_in->format('H:i') . ' WIB' : '-' }}</span>
+                                <span class="text-[9px] text-gray-400 block">Rp{{ number_format($att->opening_cash, 0, ',', '.') }}</span>
+                            </div>
+                            <div>
+                                <span class="text-gray-400 block text-[9px]">Pulang</span>
+                                <span class="font-bold text-gray-800 dark:text-white">{{ $att->clock_out ? $att->clock_out->format('H:i') . ' WIB' : '-' }}</span>
+                                <span class="text-[9px] text-gray-400 block">Rp{{ number_format($att->closing_cash, 0, ',', '.') }}</span>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-end gap-1.5 pt-1 border-t border-gray-50 dark:border-gray-700/50">
+                            @if($att->clock_out)
+                                <button wire:click="viewReport('{{ $att->id }}')" class="px-2.5 py-1 bg-blue-600 text-white rounded-lg font-bold text-xs">
+                                    Lihat Laporan
+                                </button>
+                                @if(($att->user_id === auth()->id() && $att->edit_count < 1) || in_array(session('active_role_name'), ['superadmin', 'pengelola_jurusan']))
+                                    <button wire:click="openEditReport('{{ $att->id }}')" class="px-2.5 py-1 bg-amber-500 text-white rounded-lg font-bold text-xs">
+                                        Edit
+                                    </button>
+                                @endif
+                            @else
+                                <span class="text-xs text-gray-400 italic">Belum Closing</span>
+                            @endif
+                        </div>
+                    </div>
+                    @empty
+                    <div class="p-8 text-center text-gray-400 bg-white dark:bg-gray-800 rounded-xl border border-dashed border-gray-200 dark:border-gray-700">
+                        <p class="text-xs font-semibold">Belum ada riwayat shift</p>
+                    </div>
+                    @endforelse
+                </div>
             </div>
 
             <div class="flex justify-end pt-6 flex-shrink-0 border-t border-gray-100 dark:border-gray-700/50 mt-4">
