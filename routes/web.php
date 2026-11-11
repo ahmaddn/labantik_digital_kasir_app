@@ -27,6 +27,7 @@ use App\Livewire\Management\TefaApiKeyManagement;
 use App\Livewire\Management\ThemeCustomizer;
 use App\Livewire\Management\UserManagement;
 use App\Livewire\Pos\Kasir;
+use App\Livewire\Pos\SupplierOrderComponent;
 use App\Livewire\Reports\AttendanceReport;
 use App\Livewire\Reports\CashierNotes;
 use App\Livewire\Reports\CategoryDetail;
@@ -67,6 +68,7 @@ Route::middleware(['auth', 'verified', EnsureRoleSelected::class])->group(functi
     Route::get('/products', Product::class)->name('products');
     Route::get('/categories', Category::class)->name('categories');
     Route::get('/suppliers', Supplier::class)->name('suppliers');
+    Route::get('/pos/supplier-order', SupplierOrderComponent::class)->name('pos.supplier-order');
     Route::get('/modifiers', ModifierManagement::class)->name('modifiers');
     Route::get('/cashier', Kasir::class)->name('kasir');
 

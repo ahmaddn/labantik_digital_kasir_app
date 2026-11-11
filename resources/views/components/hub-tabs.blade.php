@@ -7,8 +7,37 @@
 @php
     $activeRole = session('active_role_name');
 
+    // Cek jadwal piket kasir hari ini jika role kasir
+    $isKasirScheduled = true;
+    if ($activeRole === 'kasir') {
+        $activeJurusanId = session('active_jurusan_id');
+        $hasHigherRole = auth()->user()->roles()->whereIn('roles.name', ['superadmin', 'pengelola_jurusan'])->exists();
+        if (!$hasHigherRole) {
+            $activeJurusan = \App\Models\Jurusan::find($activeJurusanId);
+            $allowedJurusanIds = [$activeJurusanId];
+            if ($activeJurusan && $activeJurusan->parent_id) {
+                $allowedJurusanIds[] = $activeJurusan->parent_id;
+            }
+            $isKasirScheduled = \App\Models\CashierSchedule::where('user_id', auth()->id())
+                ->whereIn('jurusan_id', $allowedJurusanIds)
+                ->where('date', now()->toDateString())
+                ->exists();
+        }
+    }
+
     // Pengelompokkan Hub Navigasi disinkronkan 1:1 dengan struktur Sidebar
     if ($activeRole === 'kasir') {
+        $transaksiItems = [
+            ['label' => 'Riwayat Transaksi', 'route' => 'transactions', 'active' => request()->routeIs('transactions*')],
+        ];
+
+        if ($isKasirScheduled) {
+            $transaksiItems[] = ['label' => 'Pesan via WA', 'route' => 'pos.supplier-order', 'active' => request()->routeIs('pos.supplier-order*')];
+        }
+
+        $transaksiItems[] = ['label' => 'Hutang & Kembalian', 'route' => 'debts', 'active' => request()->routeIs('debts*')];
+        $transaksiItems[] = ['label' => 'Rekap Harian & Sesi', 'route' => 'daily-recap', 'active' => request()->routeIs('daily-recap*')];
+
         // === STRUKTUR HUB UNTUK ROLE KASIR ===
         $hubs = [
             'operasional' => [
@@ -25,11 +54,7 @@
             'transaksi' => [
                 'name' => 'Transaksi & Kasir',
                 'desc' => 'Riwayat transaksi penjualan kasir, pencatatan hutang & kembalian, serta rekap harian & sesi.',
-                'items' => [
-                    ['label' => 'Riwayat Transaksi', 'route' => 'transactions', 'active' => request()->routeIs('transactions*')],
-                    ['label' => 'Hutang & Kembalian', 'route' => 'debts', 'active' => request()->routeIs('debts*')],
-                    ['label' => 'Rekap Harian & Sesi', 'route' => 'daily-recap', 'active' => request()->routeIs('daily-recap*')],
-                ],
+                'items' => $transaksiItems,
             ],
         ];
 
@@ -52,6 +77,7 @@
                     ['label' => 'Kategori Produk', 'route' => 'categories', 'active' => request()->routeIs('categories*')],
                     ['label' => 'Topping & Varian', 'route' => 'modifiers', 'active' => request()->routeIs('modifiers*')],
                     ['label' => 'Supplier Rekanan', 'route' => 'suppliers', 'active' => request()->routeIs('suppliers*')],
+                    ['label' => 'Pesan via WA', 'route' => 'pos.supplier-order', 'active' => request()->routeIs('pos.supplier-order*')],
                     ['label' => 'Laporan Stok & Selisih', 'route' => 'inventory-report', 'active' => request()->routeIs('inventory-report*')],
                 ],
             ],

@@ -235,14 +235,14 @@ class CashierTasks extends Component
                         Notification::create([
                             'user_id' => $assigneeId,
                             'title' => 'Tugas Baru Ditugaskan',
-                            'body' => 'Anda mendapatkan tugas: "'.$this->taskName.'" pada tanggal '.Carbon::parse($this->date)->format('d M Y'),
+                            'body' => 'Anda mendapatkan tugas: "' . $this->taskName . '" pada tanggal ' . Carbon::parse($this->date)->format('d M Y'),
                             'type' => 'task',
                             'action_url' => '/my-tasks',
                         ]);
                     }
 
                     $count = count($assignees);
-                    $message = $count > 1 ? $count.' tugas berhasil ditambahkan untuk kasir terpilih.' : 'Tugas harian kasir berhasil ditambahkan!';
+                    $message = $count > 1 ? $count . ' tugas berhasil ditambahkan untuk kasir terpilih.' : 'Tugas harian kasir berhasil ditambahkan!';
                 }
             }
 
@@ -252,7 +252,7 @@ class CashierTasks extends Component
             $this->resetForm();
             $this->dispatch('toast', message: $message);
         } catch (\Exception $e) {
-            $this->dispatch('toast', message: 'Error: '.$e->getMessage(), type: 'danger');
+            $this->dispatch('toast', message: 'Error: ' . $e->getMessage(), type: 'danger');
         }
     }
 
@@ -378,7 +378,7 @@ class CashierTasks extends Component
         Notification::create([
             'user_id' => $submission->submitted_by,
             'title' => 'Tugas Disetujui',
-            'body' => 'Laporan tugas "'.$submission->assignment->taskDefinition->task_name.'" telah di-ACC admin.',
+            'body' => 'Laporan tugas "' . $submission->assignment->taskDefinition->task_name . '" telah di-ACC admin.',
             'type' => 'task',
             'action_url' => '/my-tasks',
         ]);
@@ -415,7 +415,7 @@ class CashierTasks extends Component
         Notification::create([
             'user_id' => $submission->submitted_by,
             'title' => 'Tugas Ditolak — Perlu Revisi',
-            'body' => 'Laporan tugas "'.$submission->assignment->taskDefinition->task_name.'" ditolak: '.$this->rejectionNote.'. Silakan revisi & kirim ulang.',
+            'body' => 'Laporan tugas "' . $submission->assignment->taskDefinition->task_name . '" ditolak: ' . $this->rejectionNote . '. Silakan revisi & kirim ulang.',
             'type' => 'task',
             'action_url' => '/my-tasks',
         ]);
@@ -520,7 +520,6 @@ class CashierTasks extends Component
             }
             $query->where('date', '<', $today);
             $tasks = $query->orderBy('date', 'desc')->orderBy('created_at', 'desc')->paginate(15);
-
         } else {
             $query = CashierTaskDefinition::with($with);
             if ($activeJurusanId) {
