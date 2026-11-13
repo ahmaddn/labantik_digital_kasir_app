@@ -481,7 +481,6 @@
                 </div>
                 @endif
             @endif
-            @endif
 
             <!-- 6. PENGATURAN SISTEM (SUPERADMIN / PENGELOLA) -->
             @if (in_array(session('active_role_name'), ['superadmin', 'pengelola_jurusan']))
