@@ -85,8 +85,16 @@
                         ->whereNotNull('clock_out')
                         ->exists();
 
-                    $hasHigherRole = auth()->user()->roles()->whereIn('roles.name', ['superadmin', 'pengelola_jurusan'])->exists()
-                        || in_array(session('active_role_name'), ['superadmin', 'pengelola_jurusan']);
+                    $hasHigherRole = auth()->user()->roles()->whereIn('roles.name', ['superadmin', 'pengelola_jurusan', 'pengelola_jurusan_keuangan', 'pengelola_jurusan_penugasan', 'pengelola_jurusan_piket'])->exists()
+                        || in_array(session('active_role_name'), ['superadmin', 'pengelola_jurusan', 'pengelola_jurusan_keuangan', 'pengelola_jurusan_penugasan', 'pengelola_jurusan_piket']);
+
+                    $currentRole = session('active_role_name');
+                    $isSuperadmin = $currentRole === 'superadmin';
+                    $isAllPengelola = in_array($currentRole, ['superadmin', 'pengelola_jurusan']);
+                    $canAccessKeuangan = in_array($currentRole, ['superadmin', 'pengelola_jurusan', 'pengelola_jurusan_keuangan']);
+                    $canAccessPenugasan = in_array($currentRole, ['superadmin', 'pengelola_jurusan', 'pengelola_jurusan_penugasan']);
+                    $canAccessPiket = in_array($currentRole, ['superadmin', 'pengelola_jurusan', 'pengelola_jurusan_piket']);
+                    $canAccessInventaris = in_array($currentRole, ['superadmin', 'pengelola_jurusan', 'pengelola_jurusan_keuangan', 'pengelola_jurusan_penugasan', 'pengelola_jurusan_piket']);
 
                     $isScheduled = true;
                     if (session('active_role_name') === 'kasir' && !$hasHigherRole) {
@@ -264,7 +272,8 @@
             @else
                 <!-- === MANAGEMENT & SUPERADMIN WORKFLOW === -->
 
-                <!-- 2. KATALOG & INVENTARIS -->
+                <!-- 2. KATALOG & INVENTARIS (Dapat diakses oleh semua admin pengelola) -->
+                @if ($canAccessInventaris)
                 <div class="space-y-1">
                     <p class="px-3 text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Inventaris & Produk</p>
 
@@ -308,8 +317,10 @@
                         <span>Laporan Stok & Selisih</span>
                     </a>
                 </div>
+                @endif
 
                 <!-- 3. KEUANGAN & KAS -->
+                @if ($canAccessKeuangan)
                 <div class="space-y-1">
                     <p class="px-3 text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Keuangan & Kas</p>
 
@@ -345,11 +356,14 @@
                         <span>Pesan via WA</span>
                     </a>
                 </div>
+                @endif
 
                 <!-- 4. OPERASIONAL KASIR -->
+                @if ($canAccessPenugasan || $canAccessPiket)
                 <div class="space-y-1">
                     <p class="px-3 text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Operasional Kasir</p>
 
+                    @if ($canAccessPenugasan)
                     <a href="{{ route('tasks') }}"
                         class="flex items-center gap-3 px-3 py-2 text-xs font-semibold rounded-xl transition-colors {{ request()->routeIs('tasks') ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800' }}">
                         <svg class="w-4.5 h-4.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
@@ -357,7 +371,9 @@
                         </svg>
                         <span>Penugasan & Verifikasi</span>
                     </a>
+                    @endif
 
+                    @if ($canAccessPiket)
                     <a href="{{ route('schedules') }}"
                         class="flex items-center gap-3 px-3 py-2 text-xs font-semibold rounded-xl transition-colors {{ request()->routeIs('schedules') ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800' }}">
                         <svg class="w-4.5 h-4.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
@@ -381,6 +397,7 @@
                         </svg>
                         <span>Presensi & Shift Kasir</span>
                     </a>
+                    @endif
 
                     <a href="{{ route('cashier-notes') }}"
                         class="flex items-center gap-3 px-3 py-2 text-xs font-semibold rounded-xl transition-colors {{ request()->routeIs('cashier-notes') ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800' }}">
@@ -398,8 +415,10 @@
                         <span>Papan Skor & Poin</span>
                     </a>
                 </div>
+                @endif
 
                 <!-- 5. LAPORAN & BAGI HASIL -->
+                @if ($canAccessKeuangan)
                 <div class="space-y-1">
                     <p class="px-3 text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Laporan & Bagi Hasil</p>
 
@@ -460,6 +479,8 @@
                         <span>Rekap Tahunan</span>
                     </a>
                 </div>
+                @endif
+            @endif
             @endif
 
             <!-- 6. PENGATURAN SISTEM (SUPERADMIN / PENGELOLA) -->

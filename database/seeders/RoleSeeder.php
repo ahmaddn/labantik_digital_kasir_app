@@ -19,6 +19,18 @@ class RoleSeeder extends Seeder
                 'label' => 'Pengelola Jurusan',
             ],
             [
+                'name' => 'pengelola_jurusan_keuangan',
+                'label' => 'Pengelola Jurusan (Keuangan)',
+            ],
+            [
+                'name' => 'pengelola_jurusan_penugasan',
+                'label' => 'Pengelola Jurusan (Penugasan)',
+            ],
+            [
+                'name' => 'pengelola_jurusan_piket',
+                'label' => 'Pengelola Jurusan (Piket)',
+            ],
+            [
                 'name' => 'kasir',
                 'label' => 'Kasir',
             ],

@@ -11,7 +11,7 @@
     $isKasirScheduled = true;
     if ($activeRole === 'kasir') {
         $activeJurusanId = session('active_jurusan_id');
-        $hasHigherRole = auth()->user()->roles()->whereIn('roles.name', ['superadmin', 'pengelola_jurusan'])->exists();
+        $hasHigherRole = auth()->user()->roles()->whereIn('roles.name', ['superadmin', 'pengelola_jurusan', 'pengelola_jurusan_keuangan', 'pengelola_jurusan_penugasan', 'pengelola_jurusan_piket'])->exists();
         if (!$hasHigherRole) {
             $activeJurusan = \App\Models\Jurusan::find($activeJurusanId);
             $allowedJurusanIds = [$activeJurusanId];
@@ -68,6 +68,25 @@
         }
     } else {
         // === STRUKTUR HUB UNTUK PENGELOLA & SUPERADMIN ===
+        $isSuperadmin = $activeRole === 'superadmin';
+        $isAllPengelola = in_array($activeRole, ['superadmin', 'pengelola_jurusan']);
+        $canAccessKeuangan = in_array($activeRole, ['superadmin', 'pengelola_jurusan', 'pengelola_jurusan_keuangan']);
+        $canAccessPenugasan = in_array($activeRole, ['superadmin', 'pengelola_jurusan', 'pengelola_jurusan_penugasan']);
+        $canAccessPiket = in_array($activeRole, ['superadmin', 'pengelola_jurusan', 'pengelola_jurusan_piket']);
+        $canAccessInventaris = in_array($activeRole, ['superadmin', 'pengelola_jurusan', 'pengelola_jurusan_keuangan', 'pengelola_jurusan_penugasan', 'pengelola_jurusan_piket']);
+
+        $operasionalItems = [];
+        if ($canAccessPenugasan) {
+            $operasionalItems[] = ['label' => 'Penugasan & Verifikasi', 'route' => 'tasks', 'active' => request()->routeIs('tasks*')];
+        }
+        if ($canAccessPiket) {
+            $operasionalItems[] = ['label' => 'Jadwal Piket Kasir', 'route' => 'schedules', 'active' => request()->routeIs('schedules*')];
+            $operasionalItems[] = ['label' => 'Jadwal Dokumentasi', 'route' => 'documentation-schedules', 'active' => request()->routeIs('documentation-schedules*')];
+        }
+        $operasionalItems[] = ['label' => 'Presensi & Shift Kasir', 'route' => 'attendances', 'active' => request()->routeIs('attendances*')];
+        $operasionalItems[] = ['label' => 'Catatan & Briefing Kasir', 'route' => 'cashier-notes', 'active' => request()->routeIs('cashier-notes*')];
+        $operasionalItems[] = ['label' => 'Papan Skor & Poin', 'route' => 'leaderboard', 'active' => request()->routeIs('leaderboard*')];
+
         $hubs = [
             'inventaris' => [
                 'name' => 'Inventaris & Produk',
@@ -93,14 +112,7 @@
             'operasional' => [
                 'name' => 'Operasional Kasir',
                 'desc' => 'Penugasan harian, jadwal piket shift, jadwal dokumentasi, presensi kasir, catatan briefing, dan papan skor.',
-                'items' => [
-                    ['label' => 'Penugasan & Verifikasi', 'route' => 'tasks', 'active' => request()->routeIs('tasks*')],
-                    ['label' => 'Jadwal Piket Kasir', 'route' => 'schedules', 'active' => request()->routeIs('schedules*')],
-                    ['label' => 'Jadwal Dokumentasi', 'route' => 'documentation-schedules', 'active' => request()->routeIs('documentation-schedules*')],
-                    ['label' => 'Presensi & Shift Kasir', 'route' => 'attendances', 'active' => request()->routeIs('attendances*')],
-                    ['label' => 'Catatan & Briefing Kasir', 'route' => 'cashier-notes', 'active' => request()->routeIs('cashier-notes*')],
-                    ['label' => 'Papan Skor & Poin', 'route' => 'leaderboard', 'active' => request()->routeIs('leaderboard*')],
-                ],
+                'items' => $operasionalItems,
             ],
             'laporan' => [
                 'name' => 'Laporan & Bagi Hasil',

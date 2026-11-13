@@ -106,7 +106,7 @@
                                 Nama Seller / Toko <span class="text-rose-500">*</span>
                             </label>
                             <input type="text" wire:model.live="seller_name" placeholder="Misal: Bu Siti Grosir / Agen Roti Aoka"
-                                class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:bg-white dark:focus:bg-slate-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all">
+                                class="w-full min-h-[44px] px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all">
                             @error('seller_name') <span class="text-[11px] text-rose-500 mt-1 block">{{ $message }}</span> @enderror
                         </div>
 
@@ -115,7 +115,7 @@
                                 Nomor WhatsApp <span class="text-rose-500">*</span>
                             </label>
                             <input type="text" wire:model.live="seller_phone" placeholder="08... / +62... / 628..."
-                                class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-mono text-slate-900 dark:text-white placeholder:text-slate-400 focus:bg-white dark:focus:bg-slate-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all">
+                                class="w-full min-h-[44px] px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-mono text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all">
                             <span class="text-[10px] text-slate-400 mt-1 block">Bisa diawali 08, 62, atau +62</span>
                             @error('seller_phone') <span class="text-[11px] text-rose-500 mt-1 block">{{ $message }}</span> @enderror
                         </div>
@@ -195,7 +195,7 @@
                                                 @focus="open = true"
                                                 @input="open = true; $wire.setItemProduct({{ $index }}, null, search)"
                                                 placeholder="Cari atau ketik produk baru..."
-                                                class="w-full pl-3.5 pr-8 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:bg-white dark:focus:bg-slate-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all">
+                                                class="w-full min-h-[44px] pl-3.5 pr-8 py-2.5 bg-slate-50 dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all">
                                             
                                             <div class="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
@@ -236,32 +236,33 @@
                                         @error("items.{$index}.name") <span class="text-[10px] text-rose-500 mt-1 block">{{ $message }}</span> @enderror
                                     </div>
 
-                                    <!-- JUMLAH (QTY) -->
-                                    <div class="sm:col-span-3">
-                                        <label class="block text-[11px] font-semibold text-slate-600 dark:text-slate-400 mb-1">
-                                            Jumlah (Qty) <span class="text-rose-500">*</span>
-                                        </label>
-                                        <input type="number" min="1" wire:model.live="items.{{ $index }}.quantity" placeholder="1"
-                                            class="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-bold text-center text-slate-900 dark:text-white focus:bg-white dark:focus:bg-slate-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all">
-                                    </div>
+                                    <!-- JUMLAH (QTY) & SATUAN (Mobile 2 Kolom Berdampingan) -->
+                                    <div class="sm:col-span-6 grid grid-cols-2 gap-2.5">
+                                        <div>
+                                            <label class="block text-[11px] font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                                                Jumlah (Qty) <span class="text-rose-500">*</span>
+                                            </label>
+                                            <input type="number" min="1" wire:model.live="items.{{ $index }}.quantity" placeholder="1"
+                                                class="w-full min-h-[44px] px-3 py-2.5 bg-slate-50 dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-bold text-center text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all">
+                                        </div>
 
-                                    <!-- SATUAN (PCS / PACK / DUS) -->
-                                    <div class="sm:col-span-3">
-                                        <label class="block text-[11px] font-semibold text-slate-600 dark:text-slate-400 mb-1">
-                                            Satuan <span class="text-rose-500">*</span>
-                                        </label>
-                                        <select wire:model.live="items.{{ $index }}.unit"
-                                            class="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-semibold text-slate-900 dark:text-white focus:bg-white dark:focus:bg-slate-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all cursor-pointer">
-                                            <option value="pcs">Pcs</option>
-                                            <option value="pack">Pack</option>
-                                            <option value="dus">Dus / Karton</option>
-                                        </select>
+                                        <div>
+                                            <label class="block text-[11px] font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                                                Satuan <span class="text-rose-500">*</span>
+                                            </label>
+                                            <select wire:model.live="items.{{ $index }}.unit"
+                                                class="w-full min-h-[44px] px-3 py-2.5 bg-slate-50 dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-semibold text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all cursor-pointer">
+                                                <option value="pcs">Pcs</option>
+                                                <option value="pack">Pack</option>
+                                                <option value="dus">Dus / Karton</option>
+                                            </select>
+                                        </div>
                                     </div>
 
                                     <!-- CATATAN KHUSUS ITEM -->
                                     <div class="sm:col-span-12">
                                         <input type="text" wire:model.live="items.{{ $index }}.notes" placeholder="Catatan rasa, kemasan, atau varian (contoh: rasa keju / vanila - opsional)"
-                                            class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-xs text-slate-700 dark:text-slate-200 placeholder:text-slate-400 italic focus:bg-white dark:focus:bg-slate-800 focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+                                            class="w-full min-h-[40px] px-3 py-2 bg-slate-50 dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700 rounded-lg text-xs text-slate-700 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 italic focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
                                     </div>
 
                                 </div>
@@ -275,7 +276,7 @@
                             Catatan Pesanan Tambahan <span class="text-slate-400 font-normal">(opsional)</span>
                         </label>
                         <input type="text" wire:model.live="order_notes" placeholder="Misal: Mohon dikirim besok pagi sebelum jam istirahat ya kak..."
-                            class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:bg-white dark:focus:bg-slate-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all">
+                            class="w-full min-h-[44px] px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all">
                     </div>
                 </div>
 

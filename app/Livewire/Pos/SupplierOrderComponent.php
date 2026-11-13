@@ -35,7 +35,7 @@ class SupplierOrderComponent extends Component
     {
         // Proteksi jadwal untuk role kasir murni
         if (session('active_role_name') === 'kasir') {
-            $hasHigherRole = auth()->user()->roles()->whereIn('roles.name', ['superadmin', 'pengelola_jurusan'])->exists();
+            $hasHigherRole = auth()->user()->roles()->whereIn('roles.name', ['superadmin', 'pengelola_jurusan', 'pengelola_jurusan_keuangan', 'pengelola_jurusan_penugasan', 'pengelola_jurusan_piket'])->exists();
             if (!$hasHigherRole) {
                 $activeJurusanId = session('active_jurusan_id');
                 $activeJurusan = Jurusan::find($activeJurusanId);
