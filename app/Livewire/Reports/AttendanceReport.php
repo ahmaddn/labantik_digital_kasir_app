@@ -77,6 +77,11 @@ class AttendanceReport extends Component
         $this->showDetailModal = true;
     }
 
+    public function viewDetails($userId)
+    {
+        $this->showDetails($userId);
+    }
+
     public function viewReport($id)
     {
         $attendance = CashierAttendance::with('user')->findOrFail($id);
@@ -90,7 +95,7 @@ class AttendanceReport extends Component
         $attendance = CashierAttendance::findOrFail($id);
 
         // Ensure cashier can only edit their own, and only if edit_count < 1. Pengelola & superadmin have administrative access.
-        $hasAdminAccess = in_array(session('active_role_name'), ['superadmin', 'pengelola_jurusan']);
+        $hasAdminAccess = in_array(session('active_role_name'), ['superadmin', 'pengelola_jurusan', 'pengelola_jurusan_keuangan', 'pengelola_jurusan_penugasan', 'pengelola_jurusan_piket']);
         if ($attendance->user_id !== auth()->id() && ! $hasAdminAccess) {
             $this->dispatch('toast', message: 'Anda tidak diizinkan mengedit laporan ini.');
 
@@ -113,7 +118,7 @@ class AttendanceReport extends Component
         $attendance = CashierAttendance::findOrFail($this->editingAttendanceId);
 
         // Final authorization check
-        $hasAdminAccess = in_array(session('active_role_name'), ['superadmin', 'pengelola_jurusan']);
+        $hasAdminAccess = in_array(session('active_role_name'), ['superadmin', 'pengelola_jurusan', 'pengelola_jurusan_keuangan', 'pengelola_jurusan_penugasan', 'pengelola_jurusan_piket']);
         if ($attendance->user_id !== auth()->id() && ! $hasAdminAccess) {
             $this->dispatch('toast', message: 'Anda tidak diizinkan mengedit laporan ini.');
 
