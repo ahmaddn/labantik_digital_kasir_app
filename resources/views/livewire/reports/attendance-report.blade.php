@@ -211,14 +211,27 @@
                                         </span>
                                     </td>
                                     <td class="py-3 text-right">
+                                        @php
+                                            $canManage = in_array(session('active_role_name'), ['superadmin', 'pengelola_jurusan', 'pengelola_jurusan_keuangan', 'pengelola_jurusan_penugasan', 'pengelola_jurusan_piket']);
+                                        @endphp
                                         @if($att->clock_out)
                                             <div class="flex items-center justify-end gap-1.5">
                                                 <button wire:click="viewReport('{{ $att->id }}')" class="px-2.5 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold text-xs transition-all">
                                                     Lihat
                                                 </button>
-                                                @if(($att->user_id === auth()->id() && $att->edit_count < 1) || in_array(session('active_role_name'), ['superadmin', 'pengelola_jurusan']))
+                                                @if(($att->user_id === auth()->id() && $att->edit_count < 1) || $canManage)
                                                     <button wire:click="openEditReport('{{ $att->id }}')" class="px-2.5 py-1 bg-amber-500 hover:bg-amber-600 text-white rounded-lg font-bold text-xs transition-all">
                                                         Edit
+                                                    </button>
+                                                @endif
+                                                @if($canManage)
+                                                    <button type="button"
+                                                        wire:click="reopenShift('{{ $att->id }}')"
+                                                        wire:confirm="Reset jam pulang kasir ini? Mode kasir kasir bersangkutan akan kembali terbuka/aktif."
+                                                        class="px-2.5 py-1 bg-rose-600 hover:bg-rose-700 text-white rounded-lg font-bold text-xs transition-all inline-flex items-center gap-1"
+                                                        title="Reset Jam Pulang agar kasir bisa bertransaksi kembali">
+                                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                                                        <span>Reset Pulang</span>
                                                     </button>
                                                 @endif
                                             </div>
@@ -294,13 +307,26 @@
                         </div>
 
                         <div class="flex items-center justify-end gap-1.5 pt-1 border-t border-gray-50 dark:border-gray-700/50">
+                            @php
+                                $canManage = in_array(session('active_role_name'), ['superadmin', 'pengelola_jurusan', 'pengelola_jurusan_keuangan', 'pengelola_jurusan_penugasan', 'pengelola_jurusan_piket']);
+                            @endphp
                             @if($att->clock_out)
                                 <button wire:click="viewReport('{{ $att->id }}')" class="px-2.5 py-1 bg-blue-600 text-white rounded-lg font-bold text-xs">
                                     Lihat Laporan
                                 </button>
-                                @if(($att->user_id === auth()->id() && $att->edit_count < 1) || in_array(session('active_role_name'), ['superadmin', 'pengelola_jurusan']))
+                                @if(($att->user_id === auth()->id() && $att->edit_count < 1) || $canManage)
                                     <button wire:click="openEditReport('{{ $att->id }}')" class="px-2.5 py-1 bg-amber-500 text-white rounded-lg font-bold text-xs">
                                         Edit
+                                    </button>
+                                @endif
+                                @if($canManage)
+                                    <button type="button"
+                                        wire:click="reopenShift('{{ $att->id }}')"
+                                        wire:confirm="Reset jam pulang kasir ini? Mode kasir kasir bersangkutan akan kembali terbuka/aktif."
+                                        class="px-2.5 py-1 bg-rose-600 hover:bg-rose-700 text-white rounded-lg font-bold text-xs transition-all inline-flex items-center gap-1"
+                                        title="Reset Jam Pulang agar kasir bisa bertransaksi kembali">
+                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                                        <span>Reset Pulang</span>
                                     </button>
                                 @endif
                             @else

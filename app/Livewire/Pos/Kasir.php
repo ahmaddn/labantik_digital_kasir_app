@@ -91,8 +91,8 @@ class Kasir extends Component
         // 1. Validate if user is scheduled for today (mandatory for cashier role, unless they have a higher role)
         if (session('active_role_name') === 'kasir') {
             $hasHigherRole = auth()->user()->roles()
-                ->whereIn('roles.name', ['superadmin', 'pengelola_jurusan'])
-                ->exists() || in_array(session('active_role_name'), ['superadmin', 'pengelola_jurusan']);
+                ->whereIn('roles.name', ['superadmin', 'pengelola_jurusan', 'pengelola_jurusan_keuangan', 'pengelola_jurusan_penugasan', 'pengelola_jurusan_piket'])
+                ->exists() || in_array(session('active_role_name'), ['superadmin', 'pengelola_jurusan', 'pengelola_jurusan_keuangan', 'pengelola_jurusan_penugasan', 'pengelola_jurusan_piket']);
 
             if (! $hasHigherRole) {
                 // Check if session for today is already finished
@@ -435,14 +435,14 @@ class Kasir extends Component
         $filteredStockItems = array_intersect_key($this->stockItems, array_flip($validProductIds));
 
         $hasHigherRole = auth()->user()->roles()
-            ->whereIn('roles.name', ['superadmin', 'pengelola_jurusan'])
+            ->whereIn('roles.name', ['superadmin', 'pengelola_jurusan', 'pengelola_jurusan_keuangan', 'pengelola_jurusan_penugasan', 'pengelola_jurusan_piket'])
             ->exists();
 
         // Save stock
         $posSessionService->saveClosingStock($filteredStockItems, $today, $activeJurusanId);
 
         $hasHigherRole = auth()->user()->roles()
-            ->whereIn('roles.name', ['superadmin', 'pengelola_jurusan'])
+            ->whereIn('roles.name', ['superadmin', 'pengelola_jurusan', 'pengelola_jurusan_keuangan', 'pengelola_jurusan_penugasan', 'pengelola_jurusan_piket'])
             ->exists();
 
         if ($hasHigherRole) {

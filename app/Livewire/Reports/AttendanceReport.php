@@ -152,21 +152,22 @@ class AttendanceReport extends Component
 
     public function reopenShift($attendanceId)
     {
-        $hasAdminAccess = in_array(session('active_role_name'), ['superadmin', 'pengelola_jurusan']);
+        $hasAdminAccess = in_array(session('active_role_name'), ['superadmin', 'pengelola_jurusan', 'pengelola_jurusan_keuangan', 'pengelola_jurusan_penugasan', 'pengelola_jurusan_piket']);
         if (! $hasAdminAccess) {
             $this->dispatch('toast', message: 'Hanya Pengelola atau Superadmin yang dapat membuka kembali shift kasir.', type: 'danger');
 
             return;
         }
 
-        $attendance = CashierAttendance::findOrFail($attendanceId);
+        $attendance = CashierAttendance::with('user')->findOrFail($attendanceId);
         $attendance->update([
             'clock_out' => null,
             'closing_cash' => 0,
             'status' => $attendance->clock_in_status ?? 'present',
+            'clock_out_status' => null,
         ]);
 
-        $this->dispatch('toast', message: 'Shift kasir atas nama ' . ($attendance->user?->name ?? 'Kasir') . ' berhasil dibuka kembali.', type: 'success');
+        $this->dispatch('toast', message: 'Jam pulang kasir ' . ($attendance->user?->name ?? '') . ' berhasil direset. Mode kasir kini kembali aktif/tidak terkunci.', type: 'success');
 
         if ($this->detailUserId) {
             $this->showDetails($this->detailUserId);
@@ -176,7 +177,7 @@ class AttendanceReport extends Component
     public function render()
     {
         $activeRole = session('active_role_name');
-        if (! in_array($activeRole, ['superadmin', 'pengelola_jurusan', 'kasir'])) {
+        if (! in_array($activeRole, ['superadmin', 'pengelola_jurusan', 'pengelola_jurusan_keuangan', 'pengelola_jurusan_penugasan', 'pengelola_jurusan_piket', 'kasir'])) {
             abort(403, 'Unauthorized.');
         }
 
